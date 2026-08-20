@@ -1,49 +1,45 @@
+// HOW-TO: Convert OTG to SVG and Strip Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\sample.svg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
+                // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    // Remove metadata to simplify the resulting SVG
+                    // Remove metadata to reduce unnecessary elements
                     KeepMetadata = false,
-                    // No compression for plain SVG output
-                    Compress = false
+                    // Configure rasterization (page size matches source)
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
                 };
 
-                // Set rasterization options based on the source image size
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the image as SVG
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -56,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy OTG (OpenType Graphics) files into web‑friendly SVG format while stripping metadata to reduce file size for faster page loads.
- * 2. When an application must batch‑process engineering diagrams stored as OTG and generate clean SVG assets for inclusion in responsive UI components.
- * 3. When a C# service integrates Aspose.Imaging to transform scanned vector graphics into scalable SVGs for printing workflows that require precise page dimensions.
- * 4. When a developer wants to automate the creation of SVG icons from OTG source files and ensure the output contains no unnecessary group elements that could complicate downstream editing.
- * 5. When a .NET desktop tool needs to read an OTG image, preserve its original dimensions, and export a plain SVG without compression for compatibility with vector‑editing software.
+ * 1. When you need to embed an OTG diagram into a web page, converting it to lightweight SVG while removing metadata reduces file size and improves load times.
+ * 2. When automating a batch process that extracts vector graphics from legacy OTG files for use in modern design tools, this code generates clean SVG files ready for editing.
+ * 3. When creating printable PDFs from OTG assets, converting to SVG first ensures resolution‑independent graphics and the stripped metadata avoids unnecessary PDF bloat.
+ * 4. When integrating OTG images into a mobile app, converting to SVG with Aspose.Imaging in C# provides scalable icons that consume less memory on the device.
+ * 5. When preparing OTG artwork for SEO‑friendly web publishing, exporting to SVG and removing group elements simplifies the markup, making it easier for search engines to index.
  */

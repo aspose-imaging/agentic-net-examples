@@ -1,9 +1,9 @@
+// HOW-TO: Create 150x150 JPEG Thumbnail From DNG Image In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -12,10 +12,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.dng";
-            string outputPath = "output.jpg";
+            string inputPath = "input/sample.dng";
+            string outputPath = "output/thumbnail.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,18 +23,16 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image, resize, and save as JPEG
-            using (Image image = Image.Load(inputPath))
+            // Load DNG image
+            using (DngImage dng = (DngImage)Image.Load(inputPath))
             {
-                DngImage dng = (DngImage)image;
+                // Resize to thumbnail dimensions
                 dng.Resize(150, 150);
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
+
+                // Save as JPEG with default options
+                JpegOptions jpegOptions = new JpegOptions();
                 dng.Save(outputPath, jpegOptions);
             }
         }
@@ -47,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to create web‑ready preview thumbnails from high‑resolution DNG raw files using C# and Aspose.Imaging.
- * 2. When an e‑commerce platform needs to generate 150×150 pixel JPEG thumbnails for product images stored as DNG to improve page load speed.
- * 3. When a digital asset management system must automatically convert raw camera files to small JPEG previews for quick browsing in a .NET application.
- * 4. When a mobile app backend processes uploaded DNG photos and needs to store low‑size JPEG thumbnails for display in galleries.
- * 5. When a batch processing script has to validate DNG file existence, resize it, and save a high‑quality JPEG thumbnail for archival or reporting purposes.
+ * 1. When you need to display a small preview of raw camera files on a web gallery, you can generate a 150 × 150 JPEG thumbnail from a DNG image using Aspose.Imaging in C#.
+ * 2. When building a digital asset management system that indexes raw photos, you can create uniform JPEG thumbnails for quick browsing without loading the full DNG files.
+ * 3. When optimizing mobile apps that show photo catalogs, you can convert large DNG files to lightweight 150 × 150 JPEG thumbnails to reduce memory usage and network bandwidth.
+ * 4. When preparing raw images for e‑commerce product listings, you can automatically generate small JPEG previews from DNG files to meet platform thumbnail size requirements.
+ * 5. When automating batch processing of raw photography archives, you can use this code to resize each DNG to a 150 × 150 thumbnail and store it as JPEG for faster search and preview.
  */

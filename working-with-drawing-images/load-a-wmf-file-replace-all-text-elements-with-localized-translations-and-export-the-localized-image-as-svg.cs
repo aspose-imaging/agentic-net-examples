@@ -1,5 +1,7 @@
+// HOW-TO: Localize WMF Text and Export as SVG Using C# Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
@@ -12,7 +14,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\source.wmf";
-            string outputPath = @"C:\Images\localized.svg";
+            string outputPath = @"C:\Images\localized_output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,44 +23,52 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WMF image
+            // Define simple localization dictionary (key = original text, value = translated text)
+            var translations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Hello", "Hola" },
+                { "World", "Mundo" },
+                // Add more translations as needed
+            };
+
+            // Load WMF image
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                // -------------------------------------------------
-                // Replace text elements with localized translations
-                // -------------------------------------------------
-                // The actual implementation depends on the specific WMF record types.
-                // Below is a placeholder illustrating where such logic would be placed.
-                foreach (var record in wmfImage.Records)
+                // Prepare SVG save options with text preserved (not converted to shapes)
+                var svgOptions = new SvgOptions
                 {
-                    // Example (commented out because the exact record type may differ):
-                    // if (record is Aspose.Imaging.FileFormats.Wmf.WmfTextRecord textRecord)
-                    // {
-                    //     textRecord.Text = Localize(textRecord.Text);
-                    // }
-                }
-
-                // Set up SVG save options
-                SvgOptions saveOptions = new SvgOptions
-                {
-                    // Keep text as text (not shapes) so that localized strings appear in the SVG
-                    TextAsShapes = false
+                    TextAsShapes = false // keep <text> elements for replacement
                 };
 
-                // Configure rasterization options for WMF
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                // Configure rasterization options (required for vector formats)
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
+                    BackgroundColor = Color.WhiteSmoke,
                     PageSize = wmfImage.Size,
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the localized image as SVG
-                wmfImage.Save(outputPath, saveOptions);
+                // Save to a memory stream first
+                using (var ms = new MemoryStream())
+                {
+                    wmfImage.Save(ms, svgOptions);
+                    ms.Position = 0;
+                    string svgContent = new StreamReader(ms).ReadToEnd();
+
+                    // Replace text based on the translation dictionary
+                    foreach (var kvp in translations)
+                    {
+                        // Simple string replace; for more complex scenarios consider XML parsing
+                        svgContent = svgContent.Replace(kvp.Key, kvp.Value);
+                    }
+
+                    // Write the localized SVG to the output file
+                    File.WriteAllText(outputPath, svgContent);
+                }
             }
         }
         catch (Exception ex)
@@ -66,20 +76,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Simple placeholder for a localization routine
-    static string Localize(string original)
-    {
-        // Replace this with real localization logic (e.g., dictionary lookup)
-        return "Localized_" + original;
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to internationalize legacy WMF icons for a multilingual web portal by swapping embedded text and saving the result as a scalable SVG file.
- * 2. When a software vendor wants to generate localized vector graphics for printed manuals from WMF diagrams, replacing captions with translated strings and exporting to SVG.
- * 3. When an automation script must batch‑process corporate WMF flowcharts, substitute company‑specific terminology, and produce SVG files for responsive UI components.
- * 4. When a C# application has to adapt WMF‑based UI assets to different language regions by editing text records and converting them to SVG for modern browsers.
- * 5. When a developer is building a localization pipeline that reads WMF files, injects locale‑specific labels, and outputs SVG to ensure crisp rendering on high‑DPI displays.
+ * 1. When you need to create multilingual versions of legacy WMF diagrams for web display by replacing embedded text and saving them as scalable SVG files.
+ * 2. When an application must programmatically translate labels in vector icons stored in WMF format without rasterizing them, preserving editability in the output SVG.
+ * 3. When a batch process has to read WMF assets, apply a custom dictionary of translations, and generate localized SVG assets for responsive UI themes.
+ * 4. When you want to integrate Aspose.Imaging into a C# localization pipeline to replace specific words in technical schematics and export them as clean SVG markup.
+ * 5. When a developer must ensure that text elements remain as <text> nodes (not shapes) during conversion so they can be indexed or styled after localization.
  */

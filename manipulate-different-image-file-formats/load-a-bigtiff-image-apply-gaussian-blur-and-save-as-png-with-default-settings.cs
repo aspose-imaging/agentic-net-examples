@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to BigTIFF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +13,6 @@ class Program
         string inputPath = @"C:\Images\biginput.tif";
         string outputPath = @"C:\Images\blurred_output.png";
 
-        // Ensure any runtime exception is reported cleanly
         try
         {
             // Verify input file exists
@@ -22,19 +22,19 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the BigTIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to use filtering capabilities
+                // Cast to RasterImage to apply filters
                 RasterImage raster = (RasterImage)image;
 
                 // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image as PNG with default settings
+                // Save the result as PNG using default options
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution BigTIFF satellite image to a smaller PNG for web preview while softening details with a Gaussian blur.
- * 2. When a medical imaging application must load a large pathology slide in BigTIFF, apply a blur to reduce noise, and export the result as a PNG for reporting.
- * 3. When an archival system processes massive scanned documents stored as BigTIFF, applies a uniform blur to mask sensitive information, and saves the sanitized version as PNG.
- * 4. When a GIS tool requires loading a BigTIFF elevation map, smoothing the terrain data with a Gaussian blur, and generating a PNG thumbnail for a user interface.
- * 5. When a batch‑processing script needs to read a BigTIFF photograph, apply a radius‑5 Gaussian blur for artistic effect, and output a PNG file with default compression settings.
+ * 1. When you need to reduce noise in a large medical scan stored as BigTIFF before converting it to a web‑friendly PNG.
+ * 2. When you want to create a softened preview of a high‑resolution satellite image saved as BigTIFF for quick display in a C# application.
+ * 3. When a GIS workflow requires applying a Gaussian blur to a massive raster map and exporting the result as PNG for use in reports.
+ * 4. When an archival system must process scanned documents in BigTIFF format, blur sensitive details, and store the output as PNG for secure sharing.
+ * 5. When a desktop utility must batch‑process large photography files, apply a blur effect, and save them as PNG without custom compression settings.
  */

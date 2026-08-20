@@ -1,59 +1,82 @@
+// HOW-TO: Apply Sharpen3x3 Filter to Multiple Images and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.PathResources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded collection of input image paths
-            string[] inputPaths = new string[]
+            // Hardcoded input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Images\image1.tif",
-                @"C:\Images\image2.tif",
-                @"C:\Images\image3.tif"
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Collection of image file names to process
+            string[] files = new string[]
+            {
+                "sample1.svg",
+                "sample2.cdr",
+                "sample3.png"
             };
 
-            foreach (var inputPath in inputPaths)
+            foreach (var fileName in files)
             {
-                // Verify input file exists
+                string inputPath = Path.Combine(inputDirectory, fileName);
+
+                // Check input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the image
+                // Load the image (raster or vector)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Preserve vector data if the source is a TIFF with path resources
-                    TiffImage tiff = image as TiffImage;
-                    var pathResources = tiff?.ActiveFrame?.PathResources?.ToArray();
+                    // Prepare PNG save options
+                    PngOptions pngOptions = new PngOptions();
 
-                    // Apply the 3x3 sharpen filter to raster images
-                    RasterImage raster = image as RasterImage;
-                    if (raster != null)
-                    {
-                        raster.Filter(raster.Bounds,
-                            new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
-                    }
+                    // Determine output file path
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(fileName) + ".png");
 
-                    // Determine output path (same name with .png extension)
-                    string outputPath = Path.ChangeExtension(inputPath, ".png");
-
-                    // Ensure the output directory exists
+                    // Ensure output directory exists for the file
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the processed image as PNG, preserving any vector data present
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    if (image is RasterImage raster)
+                    {
+                        // Apply Sharpen3x3 filter
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                        raster.Save(outputPath, pngOptions);
+                    }
+                    else if (image is VectorImage)
+                    {
+                        // Set vector rasterization options
+                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        };
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -66,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a set of multi‑page TIFF drawings, sharpen each raster layer with a 3×3 convolution filter, and export them as PNG files while keeping any embedded vector paths for later editing.
- * 2. When an engineering application must improve the visual clarity of scanned schematics stored as TIFF, apply a Sharpen3x3 filter to each image and save the result as PNG for web preview without losing the original vector data.
- * 3. When a GIS tool converts high‑resolution TIFF maps to lightweight PNG tiles, it can use this code to enhance raster details with a sharpen filter and preserve path resources for scalable rendering.
- * 4. When an automated build pipeline generates product documentation, it can iterate over source TIFF illustrations, sharpen them, and output PNG assets that retain vector outlines for accessibility tools.
- * 5. When a medical imaging system needs to prepare diagnostic TIFF slides for AI analysis, the code can sharpen the raster content, keep vector annotations, and export the images as PNG for downstream processing.
+ * 1. When you need to batch‑process a mix of SVG, CDR and PNG drawings, sharpen them with a 3×3 filter, and output high‑quality PNG files while keeping the original vector information.
+ * 2. When a graphics‑heavy web application must automatically enhance uploaded vector illustrations and raster images before storing them as PNG thumbnails.
+ * 3. When a desktop utility has to convert legacy CorelDRAW files to PNG for cross‑platform compatibility while improving edge clarity through sharpening.
+ * 4. When an automated build pipeline should generate sharpened PNG assets from design sources to ensure consistent visual quality in UI resources.
+ * 5. When a reporting tool requires converting various drawing formats into PNG with preserved vector data for inclusion in PDF or HTML reports.
  */

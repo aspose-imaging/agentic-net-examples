@@ -1,57 +1,55 @@
+// HOW-TO: Draw Multiple Colored Lines on a BMP Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string outputPath = @"C:\temp\lines_output.bmp";
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Define image dimensions
-            int imageWidth = 800;
-            int imageHeight = 600;
-
-            // Configure BMP options with a file create source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
+            // Load the existing BMP image
+            using (Image image = Image.Load(inputPath))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // List of pen configurations (color, width, start point, end point)
-                var penConfigs = new List<(Aspose.Imaging.Color color, float width, Aspose.Imaging.Point start, Aspose.Imaging.Point end)>
+                // Define pen configurations and corresponding line coordinates
+                var lineConfigs = new[]
                 {
-                    (Aspose.Imaging.Color.Red, 5f, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(750, 50)),
-                    (Aspose.Imaging.Color.Green, 3f, new Aspose.Imaging.Point(50, 100), new Aspose.Imaging.Point(750, 200)),
-                    (Aspose.Imaging.Color.Blue, 2f, new Aspose.Imaging.Point(400, 300), new Aspose.Imaging.Point(400, 550)),
-                    (Aspose.Imaging.Color.Black, 1f, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(800, 600))
+                    new { Pen = new Pen(Color.Red, 3f), X1 = 10, Y1 = 10, X2 = 200, Y2 = 10 },
+                    new { Pen = new Pen(Color.Green, 5f), X1 = 10, Y1 = 30, X2 = 200, Y2 = 80 },
+                    new { Pen = new Pen(Color.Blue, 2f), X1 = 50, Y1 = 100, X2 = 250, Y2 = 150 },
+                    new { Pen = new Pen(Color.Orange, 4f), X1 = 0, Y1 = 0, X2 = image.Width, Y2 = image.Height }
                 };
 
                 // Draw each line using its pen configuration
-                foreach (var cfg in penConfigs)
+                foreach (var cfg in lineConfigs)
                 {
-                    Pen pen = new Pen(cfg.color, cfg.width);
-                    graphics.DrawLine(pen, cfg.start, cfg.end);
+                    graphics.DrawLine(cfg.Pen, cfg.X1, cfg.Y1, cfg.X2, cfg.Y2);
                 }
 
-                // Save the image (output path already bound via FileCreateSource)
-                image.Save();
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image to the output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP report chart with custom colored lines to visualize data trends in a .NET desktop application.
- * 2. When an automated testing tool must create baseline images with precise line drawings for visual regression comparison using Aspose.Imaging for C#.
- * 3. When a GIS system has to overlay route paths on a bitmap map by drawing multiple lines with varying widths and colors.
- * 4. When a document generation service wants to embed simple line diagrams, such as flow‑chart connectors, directly into BMP files without using external graphics editors.
- * 5. When a game engine prototype requires programmatically drawing debug lines on a BMP texture to illustrate collision boundaries or movement vectors.
+ * 1. When you need to overlay custom colored lines on an existing BMP file to annotate a report image using Aspose.Imaging in C#.
+ * 2. When generating schematic diagrams that require different pen widths and colors drawn directly onto a bitmap for a desktop application.
+ * 3. When adding guide or measurement lines to a scanned BMP before performing OCR or further image analysis.
+ * 4. When creating simple vector graphics such as arrows, separators, or borders on a BMP for a game UI or dashboard.
+ * 5. When programmatically marking engineering dimensions on BMP drawings by drawing multiple lines with varying thicknesses.
  */

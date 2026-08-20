@@ -1,3 +1,4 @@
+// HOW-TO: Load WMF From URL and Convert To BMP Byte Array In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Net.Http;
@@ -10,26 +11,28 @@ class Program
     {
         try
         {
-            // Hardcoded URL of the WMF image
+            // URL of the WMF image
             string wmfUrl = "https://example.com/sample.wmf";
 
-            // Download WMF into a memory stream
-            using (HttpClient client = new HttpClient())
-            using (Stream wmfStream = client.GetStreamAsync(wmfUrl).Result)
+            // Download WMF data into a memory stream
+            using (HttpClient httpClient = new HttpClient())
+            using (Stream wmfStream = httpClient.GetStreamAsync(wmfUrl).Result)
             {
-                // Load WMF image from the stream
+                // Load the WMF image from the stream
                 using (Image image = Image.Load(wmfStream))
                 {
-                    // BMP save options (default settings)
+                    // Prepare BMP save options (default options are sufficient)
                     BmpOptions bmpOptions = new BmpOptions();
 
                     // Save the image to a memory stream in BMP format
                     using (MemoryStream bmpStream = new MemoryStream())
                     {
                         image.Save(bmpStream, bmpOptions);
+
+                        // Convert the memory stream to a byte array
                         byte[] bmpBytes = bmpStream.ToArray();
 
-                        // Example usage: output the size of the resulting byte array
+                        // Example usage: write the size of the BMP byte array to the console
                         Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
                     }
                 }
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to fetch a vector WMF logo from a remote server and embed it as a BMP thumbnail in an email attachment without writing temporary files.
- * 2. When a cloud‑based document conversion service must download a WMF diagram from a URL, convert it to BMP in memory, and return the byte array to the client API.
- * 3. When a Windows desktop app wants to display a WMF icon from an external source in a legacy control that only accepts BMP byte arrays.
- * 4. When an automated testing framework validates that a WMF image hosted online renders correctly by converting it to BMP bytes and comparing the result against a baseline.
- * 5. When a microservice processes user‑uploaded WMF graphics from a CDN, transforms them to BMP format in memory, and stores the byte array in a database for later retrieval.
+ * 1. When you need to download a WMF vector graphic from a web service and store it as a BMP byte array for embedding in a PDF document.
+ * 2. When you want to convert legacy WMF icons retrieved over HTTP into BMP data to send to a client‑side canvas without writing temporary files.
+ * 3. When an API requires image data in BMP format but the source image is only available as a WMF stream from a remote server.
+ * 4. When you are building a thumbnail generator that fetches WMF files from URLs and needs the BMP bytes to feed into a caching layer.
+ * 5. When you must serialize a WMF image into a byte array for database storage or transmission in a message queue while keeping the conversion entirely in memory.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert TIFF Files to Animated PNG with Loop Count in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,36 +8,35 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
             // Get all TIFF files in the input directory
             string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
-            foreach (string inputPath in tiffFiles)
+            foreach (string tiffFilePath in tiffFiles)
             {
-                // Verify that the input file exists
+                // Build input and output paths
+                string inputPath = tiffFilePath;
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(tiffFilePath) + ".png");
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same name with .png extension)
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
+                // Load the TIFF image and save as APNG with 3 loops
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as APNG with 3 loops
                     var apngOptions = new ApngOptions
                     {
                         NumPlays = 3 // default loop count
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of scanned TIFF documents into animated PNGs for web galleries that require a three‑loop animation, they can use this batch‑processing code.
- * 2. When an e‑learning platform must transform multi‑page TIFF lesson slides into looping APNG assets for interactive tutorials, the script automates the conversion across a folder.
- * 3. When a medical imaging system stores radiology scans as TIFF files and wants to generate lightweight, three‑loop APNG previews for quick review in a browser, this code provides the necessary conversion.
- * 4. When a digital archivist wants to create animated PNG thumbnails that loop three times from a directory of high‑resolution TIFF photographs for a searchable online catalog, the program handles the batch conversion.
- * 5. When a marketing team needs to repurpose multi‑frame TIFF advertisements into looping APNG banners that play three cycles on a website, developers can employ this C# routine to process all files automatically.
+ * 1. When you need to automatically turn a collection of scanned TIFF pages into looping animated PNGs for web galleries.
+ * 2. When a reporting system generates multi‑page TIFF charts and you want to display them as short looping animations in a dashboard.
+ * 3. When migrating legacy TIFF assets to a modern format that supports animation and you require a fixed three‑loop playback for consistency.
+ * 4. When building a batch image‑processing tool that processes all TIFF files in a folder and outputs APNG files ready for mobile apps.
+ * 5. When integrating Aspose.Imaging into a C# service that must convert incoming TIFF uploads to animated PNGs with a predefined loop count.
  */

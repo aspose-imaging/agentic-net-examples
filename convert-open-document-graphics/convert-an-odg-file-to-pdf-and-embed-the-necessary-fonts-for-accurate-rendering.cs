@@ -1,38 +1,53 @@
+// HOW-TO: Convert ODG to PDF with Embedded Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.pdf";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\sample.odg";
+        string outputPath = @"C:\output\sample.pdf";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Optional: set custom fonts folder to embed required fonts
+            // Adjust the path to point to a folder containing the needed TrueType fonts
+            string fontsFolder = @"C:\Fonts";
+            FontSettings.SetFontsFolder(fontsFolder);
+            FontSettings.UpdateFonts();
+
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                // Configure rasterization options for ODG
+                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
                 };
 
+                // Configure PDF save options and attach rasterization options
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the image as PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -45,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a print‑ready PDF from an OpenDocument Graphic (ODG) file in a C# application, they can use Aspose.Imaging to load the ODG and save it as PDF with proper vector rasterization and embedded fonts.
- * 2. When an enterprise workflow requires automatic conversion of designer‑created ODG diagrams into PDF documents for archival or compliance purposes, this code provides a reliable way to perform the conversion in .NET.
- * 3. When a web service must deliver ODG‑based charts or illustrations as downloadable PDFs to end‑users, the sample shows how to load the ODG, set page size and background color, and save the result with Aspose.Imaging.
- * 4. When a reporting engine needs to embed ODG graphics into multi‑page PDF reports while preserving font appearance, the code demonstrates the C# steps to rasterize the vector image and embed necessary fonts.
- * 5. When a batch processing script has to convert a folder of ODG files to PDFs for email attachment or document management, this example illustrates the file‑existence checks, directory creation, and Aspose.Imaging conversion logic.
+ * 1. When you need to generate a PDF from an OpenDocument Graphics (ODG) file in a C# application while preserving the original text appearance by embedding the required fonts.
+ * 2. When a document management system must automatically convert user‑uploaded ODG diagrams to searchable PDFs with all fonts included to avoid missing‑font warnings on client machines.
+ * 3. When creating batch processing scripts that convert multiple ODG files to PDF on a server and ensure consistent rendering by specifying a custom fonts folder.
+ * 4. When integrating Aspose.Imaging into a reporting tool that outputs design assets as PDFs and must embed TrueType fonts to meet corporate branding guidelines.
+ * 5. When developing a Windows service that monitors a folder for new ODG files, converts them to PDF, and embeds fonts to guarantee accurate printing on any printer.
  */

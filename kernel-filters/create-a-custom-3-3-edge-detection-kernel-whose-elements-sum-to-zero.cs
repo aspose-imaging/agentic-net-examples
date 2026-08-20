@@ -1,3 +1,4 @@
+// HOW-TO: Apply Custom 3x3 Edge Detection Kernel to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,18 +8,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\edge_detected.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
             using (Image image = Image.Load(inputPath))
             {
@@ -26,14 +28,16 @@ class Program
 
                 double[,] kernel = new double[,]
                 {
-                    { -1, 0, 1 },
-                    { -2, 0, 2 },
-                    { -1, 0, 1 }
+                    { -1, -1, -1 },
+                    { -1, 8, -1 },
+                    { -1, -1, -1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
                 raster.Filter(raster.Bounds, filterOptions);
-                raster.Save(outputPath, new PngOptions());
+
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a Sobel‑style convolution filter to a PNG photograph to highlight object boundaries for medical imaging analysis.
- * 2. When an automated quality‑control system must run a 3×3 edge‑detection kernel on scanned product label PNG files to detect scratches or defects.
- * 3. When a computer‑vision pipeline processes satellite PNG imagery and uses the custom zero‑sum kernel to extract road edges before classification.
- * 4. When a security application applies the convolution filter to PNG frames from surveillance video to emphasize motion silhouettes for further analysis.
- * 5. When a graphic‑design tool offers an edge‑enhancement feature that runs the custom kernel on user‑uploaded PNG images to create stylized line‑art.
+ * 1. When you need to highlight object boundaries in a PNG image for computer‑vision preprocessing using Aspose.Imaging in C#.
+ * 2. When you want to replace built‑in edge detectors with a custom Laplacian kernel to control the intensity of edge emphasis.
+ * 3. When you must process scanned documents and extract sharp edges before OCR to improve text recognition accuracy.
+ * 4. When you are building a photo‑editing tool that applies real‑time edge‑enhancement filters to user‑uploaded images in a .NET application.
+ * 5. When you need to generate stylized line‑art thumbnails from full‑color PNGs by applying a zero‑sum convolution filter.
  */

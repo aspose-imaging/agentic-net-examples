@@ -1,44 +1,42 @@
+// HOW-TO: Convert SVG to BMP in ASP.NET Core Controller Using Aspose Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Bmp;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "Input/sample.svg";
         string outputPath = "Output/sample.bmp";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure BMP save options with vector rasterization
-                BmpOptions bmpOptions = new BmpOptions
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    var rasterOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    }
-                };
+                    };
 
-                // Save as BMP
-                image.Save(outputPath, bmpOptions);
+                    bmpOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to serve legacy BMP thumbnails generated from user‑uploaded SVG logos via an ASP.NET Core controller.
- * 2. When an e‑commerce platform must convert product vector illustrations (SVG) to BMP format for compatibility with a third‑party printing service.
- * 3. When a document management system requires rasterizing scalable SVG diagrams into BMP images for inclusion in PDF reports generated on the server.
- * 4. When a GIS portal needs to transform SVG map overlays into BMP tiles that can be cached and delivered efficiently to browsers.
- * 5. When an internal dashboard must display SVG charts as BMP files to support older Windows client applications that only read BMP resources.
+ * 1. When a web application needs to serve rasterized BMP versions of user‑uploaded SVG icons for legacy Windows applications.
+ * 2. When an API endpoint must dynamically convert vector graphics to BMP for printing on devices that only accept bitmap files.
+ * 3. When a reporting service generates BMP charts from SVG diagrams to embed in PDF reports that require bitmap images.
+ * 4. When a mobile backend converts scalable SVG logos to BMP thumbnails for faster loading on low‑power clients.
+ * 5. When a document management system stores BMP previews of SVG files to maintain compatibility with older image viewers.
  */

@@ -2,51 +2,65 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded output path
+        string outputPath = "animated_caption.gif";
+
         try
         {
-            string outputPath = "output.gif";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (GifFrameBlock firstBlock = new GifFrameBlock(200, 100))
+            // Create the first frame (required for GifImage constructor)
+            using (GifFrameBlock firstBlock = new GifFrameBlock(200, 200))
             {
-                Graphics graphics = new Graphics(firstBlock);
-                using (SolidBrush brush = new SolidBrush(Color.Yellow))
+                // Fill the first frame with a white background
+                using (SolidBrush bgBrush = new SolidBrush(Color.White))
                 {
-                    Font font = new Font("Arial", 20);
-                    graphics.DrawString("First Frame", font, brush, new PointF(10, 40));
+                    Graphics g = new Graphics(firstBlock);
+                    g.FillRectangle(bgBrush, firstBlock.Bounds);
                 }
 
+                // Initialize the GIF image with the first frame
                 using (GifImage gifImage = new GifImage(firstBlock))
                 {
-                    using (GifFrameBlock secondBlock = new GifFrameBlock(200, 100))
+                    // Add additional frames with captions
+                    for (int i = 0; i < 5; i++)
                     {
-                        Graphics graphics2 = new Graphics(secondBlock);
-                        using (SolidBrush brush2 = new SolidBrush(Color.Cyan))
+                        using (GifFrameBlock frame = new GifFrameBlock(200, 200))
                         {
-                            Font font2 = new Font("Arial", 20);
-                            graphics2.DrawString("Second Frame", font2, brush2, new PointF(10, 40));
+                            Graphics g = new Graphics(frame);
+                            // Improve text legibility
+                            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
+
+                            // Fill frame background
+                            using (SolidBrush bg = new SolidBrush(Color.White))
+                            {
+                                g.FillRectangle(bg, frame.Bounds);
+                            }
+
+                            // Draw caption text
+                            using (SolidBrush textBrush = new SolidBrush(Color.Black))
+                            {
+                                Font font = new Font("Arial", 20);
+                                string caption = $"Frame {i + 1}";
+                                g.DrawString(caption, font, textBrush, new Point(10, 10));
+                            }
+
+                            // Append the frame to the GIF
+                            gifImage.AddBlock(frame);
                         }
-                        gifImage.AddBlock(secondBlock);
                     }
 
-                    GifOptions gifOptions = new GifOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            TextRenderingHint = TextRenderingHint.AntiAliasGridFit
-                        }
-                    };
-
-                    gifImage.Save(outputPath, gifOptions);
+                    // Save the animated GIF
+                    gifImage.Save(outputPath);
                 }
             }
         }
@@ -59,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate an animated GIF with readable text captions using Aspose.Imaging in a C# application.
- * 2. When creating a product‑image slideshow where each GIF frame contains a label and the text must stay sharp on low‑resolution output.
- * 3. When building a reporting tool that exports animated charts as GIFs and requires anti‑aliased text for better visual quality.
- * 4. When adding dynamic watermarks to GIFs for a social‑media sharing feature and want the watermark text to remain clear.
- * 5. When automating instructional GIFs with step‑by‑step instructions and need consistent text rendering across all frames.
+ * 1. When you need to generate an animated GIF with readable text captions for a slideshow or marketing email.
+ * 2. When creating a GIF that displays subtitles or labels on each frame and you want the text to stay sharp on low‑resolution screens.
+ * 3. When building a C# application that adds dynamic captions to product demo GIFs and must ensure the text remains legible after compression.
+ * 4. When automating the production of GIF memes or tutorial animations where caption quality must not degrade due to anti‑aliasing.
+ * 5. When integrating Aspose.Imaging into a reporting tool that outputs animated GIF charts with clear axis labels and titles.
  */

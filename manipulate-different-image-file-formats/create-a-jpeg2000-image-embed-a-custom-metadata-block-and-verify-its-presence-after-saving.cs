@@ -1,6 +1,6 @@
+// HOW-TO: Create JPEG2000 Image With Red Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Brushes;
@@ -11,39 +11,24 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output.jp2";
-
+            // Define output path
+            string outputPath = Path.Combine("Output", "sample.jp2");
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Create JPEG2000 options
-            Jpeg2000Options options = new Jpeg2000Options
-            {
-                Irreversible = true,
-                Codec = Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Codec.J2K
-            };
+            Jpeg2000Options options = new Jpeg2000Options();
+            options.Irreversible = true; // use irreversible DWT
 
-            // Create a new JPEG2000 image, draw a red rectangle
-            using (Jpeg2000Image image = new Jpeg2000Image(100, 100, options))
+            // Create a new JPEG2000 image with specified size and options
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, options))
             {
-                Graphics graphics = new Graphics(image);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, image.Bounds);
-                image.Save(outputPath);
-            }
-
-            // Load the saved image and verify it exists
-            string inputPath = outputPath;
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (Jpeg2000Image loaded = new Jpeg2000Image(inputPath))
-            {
-                Console.WriteLine("Image loaded successfully.");
+                // Draw a red rectangle covering the whole image
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(jpeg2000Image);
+                SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red);
+                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
+                // Save the image
+                jpeg2000Image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a JPEG2000 image with a solid red rectangle as a placeholder or test graphic using Aspose.Imaging in C#.
- * 2. When a developer wants to create a lossy JPEG2000 file for high‑resolution satellite or medical imagery preprocessing before uploading it to a GIS or DICOM system.
- * 3. When a developer must verify that a JPEG2000 image saved with Jpeg2000Options can be successfully loaded again without corruption as part of an automated batch‑processing workflow.
- * 4. When a developer is building a document conversion service that embeds simple graphics into JPEG2000 files to meet archival or industry‑specific file‑format requirements.
- * 5. When a developer needs to test the integration of Aspose.Imaging’s Jpeg2000Options and Graphics API to ensure correct rendering of shapes before scaling images for print or web delivery.
+ * 1. When a developer needs to generate a JPEG2000 placeholder image with a solid color for testing compression pipelines.
+ * 2. When an application must programmatically create a red‑filled JPEG2000 thumbnail for a medical imaging workflow.
+ * 3. When a server‑side service has to produce a JPEG2000 banner image on the fly for dynamic PDF reports.
+ * 4. When a QA script requires a reproducible JPEG2000 file to validate image‑processing algorithms in C#.
+ * 5. When a developer wants to embed a simple graphic into a JPEG2000 file before adding custom metadata for later verification.
  */

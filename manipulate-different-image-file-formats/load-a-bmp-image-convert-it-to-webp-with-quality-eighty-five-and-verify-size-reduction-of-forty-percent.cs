@@ -1,19 +1,21 @@
+// HOW-TO: Convert BMP to WebP with Quality 85 and Verify 40% Size Reduction in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample_converted.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.bmp";
-            string outputPath = "C:\\temp\\output.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,31 +26,32 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Load BMP image
+            using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Configure WebP options: lossy compression with quality 85
+                // Prepare WebP options with lossy compression and quality 85
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
                     Quality = 85f
                 };
 
-                // Save the image as WebP
-                image.Save(outputPath, webpOptions);
+                // Save as WebP
+                bmpImage.Save(outputPath, webpOptions);
             }
 
-            // Verify size reduction (at least 40% smaller)
+            // Verify size reduction of at least 40%
             long inputSize = new FileInfo(inputPath).Length;
             long outputSize = new FileInfo(outputPath).Length;
 
             if (outputSize <= inputSize * 0.6)
             {
-                Console.WriteLine("Size reduction of at least 40% achieved.");
+                Console.WriteLine("Size reduction verification passed.");
             }
             else
             {
-                Console.WriteLine("Size reduction less than 40%.");
+                Console.WriteLine("Size reduction verification failed.");
+                Console.WriteLine($"Input size: {inputSize} bytes, Output size: {outputSize} bytes");
             }
         }
         catch (Exception ex)
@@ -60,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the storage footprint of legacy BMP assets by converting them to lossy WebP with a quality setting of 85 and confirming at least a 40 % size reduction.
- * 2. When an e‑commerce platform wants to optimize product photos originally stored as BMP files for faster page loads by programmatically saving them as WebP using Aspose.Imaging in C#.
- * 3. When a mobile‑app backend must batch‑process user‑uploaded BMP screenshots into WebP format to meet bandwidth constraints while preserving acceptable visual quality.
- * 4. When a content‑management system requires automated verification that each converted image is at least 40 % smaller before publishing, using file‑size checks in .NET.
- * 5. When a game developer wants to convert high‑resolution BMP textures to WebP with a specific quality level to shrink download size without manually inspecting each file.
+ * 1. When you need to shrink large BMP assets for faster web page loading by converting them to WebP with controlled quality.
+ * 2. When you want to automate batch processing of legacy BMP files into modern WebP format while ensuring at least a 40% reduction in file size.
+ * 3. When you must generate WebP thumbnails from BMP sources for mobile apps and need to confirm the compression meets size constraints.
+ * 4. When you are building a CI pipeline that validates image optimization by converting BMP to WebP and checking the size reduction threshold.
+ * 5. When you need to replace BMP icons with smaller WebP equivalents in a desktop application without losing visual fidelity, and you want to programmatically verify the size savings.
  */

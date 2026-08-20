@@ -1,46 +1,42 @@
+// HOW-TO: Apply Ordered Dithering to PSD and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = "input.psd";
+        string outputPath = "output.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.psd";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access Dither method
-                RasterImage rasterImage = image as RasterImage;
-                if (rasterImage == null)
+                // Perform ordered (threshold) dithering on raster images
+                if (image is RasterImage rasterImage)
                 {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                    return;
+                    // Use 4‑bit palette for dithering (adjust as needed)
+                    rasterImage.Dither(DitheringMethod.ThresholdDithering, 4);
                 }
 
-                // Perform ordered (threshold) dithering with a 4‑bit palette
-                rasterImage.Dither(DitheringMethod.ThresholdDithering, 4);
-
-                // Save the dithered image as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Save the result as PDF
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -52,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution Photoshop PSD files into compact PDF documents while preserving visual fidelity by applying ordered (threshold) dithering with a 4‑bit palette.
- * 2. When an automated batch‑processing service must generate printable PDFs from layered PSD assets and reduce file size using Aspose.Imaging’s Dither method before saving.
- * 3. When a web application offers users the ability to download their edited PSD artwork as a PDF and wants to ensure consistent monochrome rendering across different browsers by applying threshold dithering.
- * 4. When a digital archiving system requires converting legacy PSD files to PDF for long‑term storage and needs to apply ordered dithering to maintain detail in low‑color‑depth PDFs.
- * 5. When a C# desktop tool needs to validate that a loaded image is a raster image, apply a 4‑bit ordered dithering effect, and then export the result to PDF for inclusion in reports or invoices.
+ * 1. When a designer needs to convert high‑resolution Photoshop files into printable PDFs with reduced banding by applying ordered dithering.
+ * 2. When an automated workflow must batch‑process PSD assets, apply threshold dithering to limit colors, and generate PDF previews for web catalogs.
+ * 3. When a C# application has to preserve the visual fidelity of a PSD while reducing file size for archival PDFs using a 4‑bit palette.
+ * 4. When a server‑side service converts user‑uploaded PSD files to PDF documents and wants to improve contrast on low‑color‑depth displays via dithering.
+ * 5. When integrating Aspose.Imaging into a .NET project to transform raster PSD layers into PDF format with consistent ordered dithering across all pages.
  */

@@ -1,48 +1,70 @@
+// HOW-TO: Render High Quality PSD From SVG With AntiAliasing And Convert To PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\sample.psd";
-            string outputPath = @"C:\Images\output.pdf";
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.svg";
+            string psdPath = "Output\\result.psd";
+            string pdfPath = "Output\\result.pdf";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-            // Load the source PSD image
+            // Load the source image (vector format assumed for high‑quality rendering)
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Configure high‑quality rasterization options
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                // Configure PSD options with vector rasterization settings
+                PsdOptions psdOptions = new PsdOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size,                     // Preserve original dimensions
-                    SmoothingMode = SmoothingMode.AntiAlias,   // High‑quality smoothing
-                    TextRenderingHint = TextRenderingHint.AntiAlias // High‑quality text rendering
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        TextRenderingHint = TextRenderingHint.AntiAlias
+                    }
                 };
 
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
+                // Save as PSD
+                image.Save(psdPath, psdOptions);
+            }
 
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+            // Load the generated PSD and export to PDF with the same high‑quality settings
+            using (Image psdImage = Image.Load(psdPath))
+            {
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = psdImage.Width,
+                        PageHeight = psdImage.Height,
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        TextRenderingHint = TextRenderingHint.AntiAlias
+                    }
+                };
+
+                // Save as PDF
+                psdImage.Save(pdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a layered Photoshop PSD file to a PDF while preserving the original dimensions and applying anti‑aliased smoothing and text rendering using Aspose.Imaging for .NET.
- * 2. When an application must generate printable PDFs from design assets stored as PSDs, requiring high‑quality rasterization to avoid jagged edges and blurry text.
- * 3. When a batch‑processing service automates the export of marketing visuals from PSD to PDF and must ensure smooth graphics and crisp typography for client review.
- * 4. When a document management system ingests PSD files and needs to store them as searchable PDFs with accurate color, background handling, and high‑quality text rendering.
- * 5. When a C# utility validates the existence of source PSD files, creates the necessary output directories, and performs high‑quality vector rasterization before saving the result as a PDF.
+ * 1. When you need to convert a vector SVG logo into a print‑ready PSD file with smooth edges and crisp text before generating a PDF for client review.
+ * 2. When an automated workflow must preserve anti‑aliased rendering while turning design assets into PDFs for digital distribution.
+ * 3. When a desktop application creates high‑resolution PSD mockups from SVG illustrations and then exports them as PDFs for archiving.
+ * 4. When a batch process has to ensure consistent smoothing and text rendering across multiple SVG files converted to PSD and PDF formats.
+ * 5. When a publishing system requires vector‑to‑raster conversion with anti‑aliasing to maintain visual quality in both PSD and PDF outputs.
  */

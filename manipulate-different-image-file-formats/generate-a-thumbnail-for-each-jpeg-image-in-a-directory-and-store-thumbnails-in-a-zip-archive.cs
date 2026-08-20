@@ -1,90 +1,75 @@
+// HOW-TO: Create JPEG Thumbnails and Save Them to a Zip File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.IO.Compression;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory containing JPEG images
-            string inputDirectory = @"C:\Images\Input";
+            // Hardcoded input and output paths
+            string inputDirectory = "Input";
+            string outputZipPath = "Output/thumbnails.zip";
 
-            // Hardcoded output zip file path for thumbnails
-            string outputZipPath = @"C:\Images\Thumbnails\thumbnails.zip";
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                return;
+            }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists (unconditional as required)
             Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-            // Create (or overwrite) the zip archive
-            using (ZipArchive zip = ZipFile.Open(outputZipPath, ZipArchiveMode.Create))
+            // Create the zip archive
+            using (var zipStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
+            using (var zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, false))
             {
-                // Get all JPEG files (case‑insensitive)
-                string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-                string[] jpegFilesUpper = Directory.GetFiles(inputDirectory, "*.jpeg");
-                string[] allFiles = new string[jpegFiles.Length + jpegFilesUpper.Length];
-                jpegFiles.CopyTo(allFiles, 0);
-                jpegFilesUpper.CopyTo(allFiles, jpegFiles.Length);
-
-                foreach (string filePath in allFiles)
+                // Process each JPEG file in the input directory
+                foreach (var filePath in Directory.GetFiles(inputDirectory, "*.jpg"))
                 {
-                    // Verify the input file exists
+                    // Validate file existence
                     if (!File.Exists(filePath))
                     {
                         Console.Error.WriteLine($"File not found: {filePath}");
                         return;
                     }
 
-                    // Load the JPEG image
-                    using (JpegImage image = (JpegImage)Image.Load(filePath))
+                    // Load the image
+                    using (Image image = Image.Load(filePath))
                     {
-                        // Determine thumbnail size while preserving aspect ratio (max 100x100)
-                        const int maxThumbSize = 100;
-                        int thumbWidth = image.Width;
-                        int thumbHeight = image.Height;
-
-                        if (thumbWidth > thumbHeight)
-                        {
-                            if (thumbWidth > maxThumbSize)
-                            {
-                                thumbHeight = thumbHeight * maxThumbSize / thumbWidth;
-                                thumbWidth = maxThumbSize;
-                            }
-                        }
-                        else
-                        {
-                            if (thumbHeight > maxThumbSize)
-                            {
-                                thumbWidth = thumbWidth * maxThumbSize / thumbHeight;
-                                thumbHeight = maxThumbSize;
-                            }
-                        }
-
-                        // Resize to thumbnail dimensions
+                        // Create a thumbnail (100x100)
+                        int thumbWidth = 100;
+                        int thumbHeight = 100;
                         image.Resize(thumbWidth, thumbHeight);
 
-                        // Save thumbnail to a memory stream (PNG format)
-                        using (MemoryStream thumbStream = new MemoryStream())
+                        // Save thumbnail to a memory stream using JPEG options
+                        using (var ms = new MemoryStream())
                         {
-                            PngOptions pngOptions = new PngOptions();
-                            image.Save(thumbStream, pngOptions);
-                            thumbStream.Position = 0;
-
-                            // Add thumbnail to zip archive
-                            string entryName = Path.GetFileNameWithoutExtension(filePath) + "_thumb.png";
-                            ZipArchiveEntry entry = zip.CreateEntry(entryName);
-                            using (Stream entryStream = entry.Open())
+                            var jpegOptions = new JpegOptions
                             {
-                                thumbStream.CopyTo(entryStream);
+                                Quality = 90
+                            };
+                            image.Save(ms, jpegOptions);
+                            ms.Position = 0;
+
+                            // Add the thumbnail to the zip archive
+                            string entryName = Path.GetFileNameWithoutExtension(filePath) + "_thumb.jpg";
+                            var entry = zip.CreateEntry(entryName);
+                            using (var entryStream = entry.Open())
+                            {
+                                ms.CopyTo(entryStream);
                             }
                         }
                     }
                 }
             }
+
+            Console.WriteLine($"Thumbnails have been saved to {outputZipPath}");
         }
         catch (Exception ex)
         {
@@ -95,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create 100 × 100 pixel JPEG thumbnails for every image in a server directory and deliver them as a single zip file for batch download.
- * 2. When an e‑commerce platform must automatically generate small preview images of product photos stored as JPEGs and archive them for offline catalog generation.
- * 3. When a desktop utility has to compress a collection of user‑uploaded JPEG pictures into a zip bundle of thumbnails to reduce bandwidth before sending them to a mobile client.
- * 4. When a content‑management system requires periodic processing of a folder of JPEG assets to produce uniform thumbnail sizes and store them in a zip for backup or migration.
- * 5. When a photo‑sharing website wants to provide a one‑click “download all thumbnails” feature by resizing each JPEG to a max of 100 px and packaging the results into a zip archive.
+ * 1. When you need to generate small preview images for a large collection of JPEG photos and deliver them as a single downloadable package.
+ * 2. When an e‑commerce site wants to create product thumbnail galleries from high‑resolution JPEGs and bundle them for offline distribution.
+ * 3. When a desktop application must batch‑process user‑uploaded JPEGs, resize them to 100 × 100 pixels, and archive the results for backup.
+ * 4. When a digital asset management system requires automated thumbnail creation and storage in a ZIP file to reduce storage overhead.
+ * 5. When a reporting tool has to embed compact JPEG previews of charts into a compressed archive for email attachment.
  */

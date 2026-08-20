@@ -1,8 +1,7 @@
+// HOW-TO: Load DICOM, Adjust Gamma Based on Resolution, Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -22,19 +21,26 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-
+                // Retrieve resolution metadata
                 double horizontalResolution = dicomImage.HorizontalResolution;
                 double verticalResolution = dicomImage.VerticalResolution;
 
-                float gamma = (float)((horizontalResolution + verticalResolution) / 200.0);
-                if (gamma <= 0) gamma = 1.0f;
+                // Determine gamma based on resolution ratio (example logic)
+                float gamma = 1.0f;
+                if (verticalResolution != 0)
+                {
+                    gamma = (float)(horizontalResolution / verticalResolution);
+                    if (gamma < 0.1f) gamma = 0.1f;
+                    if (gamma > 5.0f) gamma = 5.0f;
+                }
 
+                // Adjust gamma
                 dicomImage.AdjustGamma(gamma);
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Save as TIFF
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
         }
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while preserving resolution‑based gamma correction.
- * 2. When a radiology workflow requires extracting horizontal and vertical resolution metadata from a DICOM file to dynamically adjust image brightness before saving as a TIFF for reporting.
- * 3. When a healthcare data integration service must validate the existence of a DICOM file, read its resolution, apply gamma correction, and output a TIFF compatible with PACS viewers.
- * 4. When a C# developer builds a batch‑processing tool that reads DICOM images, computes gamma from resolution values, and stores the adjusted images as TIFF files for downstream analysis.
- * 5. When a diagnostic imaging platform needs to ensure that converted TIFF images retain proper visual contrast by using resolution‑derived gamma adjustment during the DICOM‑to‑TIFF conversion.
+ * 1. When converting medical DICOM scans to a standard TIFF format while preserving image quality by applying a gamma correction derived from the scan’s pixel resolution.
+ * 2. When extracting horizontal and vertical resolution metadata from a DICOM file to compute a custom gamma value for consistent brightness across different imaging devices.
+ * 3. When automating a workflow that reads DICOM images, adjusts their contrast based on resolution ratios, and stores the results as TIFF files for archival or further analysis.
+ * 4. When integrating Aspose.Imaging into a C# application to programmatically modify DICOM images’ gamma before exporting them for use in non‑medical imaging software.
+ * 5. When needing to validate the existence of a DICOM file, create the output directory, and safely handle errors while converting the image to TIFF with resolution‑aware gamma adjustment.
  */

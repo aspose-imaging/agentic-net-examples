@@ -1,58 +1,45 @@
+// HOW-TO: Create BMP Image with Dashed Ellipse Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\ellipse.bmp";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input path (example, not used for drawing)
-            string inputPath = @"C:\temp\input.bmp";
-
-            // Hardcoded output path
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up BMP creation options
+            // Set BMP options
             BmpOptions bmpOptions = new BmpOptions
             {
-                // Create the file at the specified output path
-                Source = new FileCreateSource(outputPath, false),
-                BitsPerPixel = 24 // 24‑bit true color
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a new 500x500 BMP image
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                // Initialize graphics
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Fill background with a wheat color
-                graphics.Clear(Color.Wheat);
+                // Fill background
+                graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-                // Create a pen with custom dash pattern
-                Pen pen = new Pen(Color.Black, 2);
-                pen.DashStyle = DashStyle.Custom;
-                pen.DashPattern = new float[] { 5f, 2f, 1f, 2f };
+                // Create pen with custom dash pattern
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
+                pen.DashPattern = new float[] { 5, 3 };
 
-                // Draw an ellipse inside the specified rectangle
-                graphics.DrawEllipse(pen, new Rectangle(100, 100, 300, 200));
+                // Draw ellipse
+                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(50, 50, 300, 150));
 
-                // Save the image to the output file
+                // Save image (output file already bound)
                 image.Save();
             }
         }
@@ -65,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP report graphic with a wheat‑colored background and a custom‑dashed ellipse for a printable dashboard.
- * 2. When an application must programmatically create a placeholder image for a UI component, using Aspose.Imaging for .NET to draw an ellipse with a Pen that has a custom dash pattern on a BMP canvas.
- * 3. When a server‑side service creates thumbnail maps where the region of interest is highlighted by a dashed ellipse drawn on a BMP file using C# graphics primitives.
- * 4. When a developer wants to embed a stylized ellipse annotation into a BMP asset for a medical imaging workflow, leveraging Aspose.Imaging’s Pen.DashPattern to convey measurement intervals.
- * 5. When an automated testing tool needs to produce a BMP image with a specific background color and a custom‑dashed ellipse to verify rendering consistency across different devices.
+ * 1. When generating a printable report that requires a blue dashed ellipse drawn on a BMP background using Aspose.Imaging to highlight a region.
+ * 2. When creating custom map markers where a wheat‑colored bitmap contains a dashed ellipse overlay for GIS visualization.
+ * 3. When producing test images for UI components that need a specific dash pattern on an ellipse to verify rendering consistency across platforms.
+ * 4. When automating badge templates that include a stylized dashed ellipse on a 24‑bit BMP canvas for branding purposes.
+ * 5. When developing a diagnostic tool that visualizes sensor coverage areas with a dashed ellipse on a BMP image to aid analysis.
  */

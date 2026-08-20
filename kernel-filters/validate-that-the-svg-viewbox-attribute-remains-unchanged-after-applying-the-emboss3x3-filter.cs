@@ -1,9 +1,12 @@
+// HOW-TO: Check SVG ViewBox Stays Unchanged After Applying Emboss Filter In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -13,6 +16,7 @@ class Program
         {
             string inputPath = "input.svg";
             string outputPath = "output.svg";
+            string tempPngPath = "temp.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,58 +26,64 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Read original SVG content and extract viewBox
-            string svgContentBefore = File.ReadAllText(inputPath);
-            int vbStartBefore = svgContentBefore.IndexOf("viewBox=\"");
-            string viewBoxBefore = "";
-            if (vbStartBefore >= 0)
+            // Read original viewBox
+            string originalContent = File.ReadAllText(inputPath);
+            string originalViewBox = "";
+            int vbIdx = originalContent.IndexOf("viewBox=\"", StringComparison.Ordinal);
+            if (vbIdx >= 0)
             {
-                vbStartBefore += 9;
-                int vbEndBefore = svgContentBefore.IndexOf("\"", vbStartBefore);
-                if (vbEndBefore > vbStartBefore)
-                    viewBoxBefore = svgContentBefore.Substring(vbStartBefore, vbEndBefore - vbStartBefore);
+                int start = vbIdx + "viewBox=\"".Length;
+                int end = originalContent.IndexOf("\"", start, StringComparison.Ordinal);
+                if (end > start)
+                {
+                    originalViewBox = originalContent.Substring(start, end - start);
+                }
             }
 
-            // Rasterize SVG to PNG (temporary file)
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            using (Image svgImage = Image.Load(inputPath))
+            // Load SVG and rasterize to PNG
+            using (Image img = Image.Load(inputPath))
             {
-                var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
-
-                var pngOptions = new Aspose.Imaging.ImageOptions.PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                svgImage.Save(tempPngPath, pngOptions);
+                SvgImage svgImg = (SvgImage)img;
+                SvgRasterizationOptions rasterOpts = new SvgRasterizationOptions();
+                rasterOpts.PageSize = svgImg.Size;
+                PngOptions pngOpts = new PngOptions();
+                pngOpts.VectorRasterizationOptions = rasterOpts;
+                svgImg.Save(tempPngPath, pngOpts);
             }
 
-            // Apply Emboss3x3 filter to the rasterized PNG
+            // Load raster PNG and apply Emboss3x3 filter
             using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
             {
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-                raster.Filter(raster.Bounds, filterOptions);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
                 raster.Save(tempPngPath);
             }
 
-            // Re-read SVG content (should be unchanged)
-            string svgContentAfter = File.ReadAllText(inputPath);
-            int vbStartAfter = svgContentAfter.IndexOf("viewBox=\"");
-            string viewBoxAfter = "";
-            if (vbStartAfter >= 0)
+            // Copy original SVG to output (unchanged)
+            File.Copy(inputPath, outputPath, true);
+
+            // Read viewBox from output SVG
+            string outputContent = File.ReadAllText(outputPath);
+            string outputViewBox = "";
+            int vbIdxOut = outputContent.IndexOf("viewBox=\"", StringComparison.Ordinal);
+            if (vbIdxOut >= 0)
             {
-                vbStartAfter += 9;
-                int vbEndAfter = svgContentAfter.IndexOf("\"", vbStartAfter);
-                if (vbEndAfter > vbStartAfter)
-                    viewBoxAfter = svgContentAfter.Substring(vbStartAfter, vbEndAfter - vbStartAfter);
+                int startOut = vbIdxOut + "viewBox=\"".Length;
+                int endOut = outputContent.IndexOf("\"", startOut, StringComparison.Ordinal);
+                if (endOut > startOut)
+                {
+                    outputViewBox = outputContent.Substring(startOut, endOut - startOut);
+                }
             }
 
-            // Output verification result
-            Console.WriteLine($"Original viewBox: {viewBoxBefore}");
-            Console.WriteLine($"After processing viewBox: {viewBoxAfter}");
-
-            // Copy original SVG to output (since we only processed raster image)
-            File.Copy(inputPath, outputPath, true);
+            // Validate viewBox unchanged
+            if (originalViewBox == outputViewBox)
+            {
+                Console.WriteLine("ViewBox unchanged after applying Emboss3x3 filter.");
+            }
+            else
+            {
+                Console.WriteLine("ViewBox changed after applying Emboss3x3 filter.");
+            }
         }
         catch (Exception ex)
         {
@@ -84,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer wants to apply an emboss effect to an SVG logo but must ensure the original viewBox dimensions stay intact for responsive scaling.
- * 2. When an e‑commerce platform generates product thumbnails by rasterizing SVG icons to PNG, applying a 3×3 emboss filter, and needs to verify that the SVG’s viewBox attribute is preserved for later vector reuse.
- * 3. When a mobile app processes user‑uploaded SVG illustrations, applies a convolution emboss filter via Aspose.Imaging, and must confirm the viewBox remains unchanged to maintain correct aspect ratio on different screen sizes.
- * 4. When a publishing workflow converts SVG artwork to high‑resolution PNGs with an emboss effect and later re‑exports the SVG, requiring validation that the viewBox attribute was not altered during processing.
- * 5. When a CI/CD pipeline runs automated tests on SVG assets that undergo rasterization and emboss filtering, checking that the viewBox attribute stays the same to prevent layout regressions in downstream applications.
+ * 1. When you need to ensure that applying an emboss convolution filter to an SVG‑derived PNG does not alter the original SVG’s viewBox coordinates.
+ * 2. When you want to programmatically verify that vector graphics retain their scaling and positioning metadata after image‑processing operations in a .NET workflow.
+ * 3. When integrating Aspose.Imaging into a pipeline that rasterizes SVG files, applies visual effects, and must preserve the SVG’s viewport for later re‑export or editing.
+ * 4. When testing automated image‑conversion scripts to confirm that decorative filters like Emboss3x3 do not corrupt SVG layout information required for responsive web design.
+ * 5. When building a C# utility that compares pre‑ and post‑filter SVG attributes to guarantee consistent rendering across different devices and browsers.
  */

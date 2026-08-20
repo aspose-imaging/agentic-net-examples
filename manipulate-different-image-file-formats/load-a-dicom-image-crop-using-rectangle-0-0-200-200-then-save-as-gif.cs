@@ -1,19 +1,20 @@
+// HOW-TO: Crop DICOM Image to 200x200 and Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.dcm";
+            string outputPath = @"C:\Images\output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,7 +22,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
@@ -30,19 +31,17 @@ class Program
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Define the cropping rectangle (0,0,200,200)
-                Rectangle cropArea = new Rectangle(0, 0, 200, 200);
-
-                // Perform the crop operation
+                // Crop rectangle (0,0,200,200)
+                var cropArea = new Rectangle(0, 0, 200, 200);
                 dicomImage.Crop(cropArea);
 
-                // Save the cropped image as GIF
-                dicomImage.Save(outputPath, new GifOptions());
+                // Save as GIF
+                var gifOptions = new GifOptions();
+                dicomImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application needs to extract a 200 × 200 pixel region from a DICOM scan and embed it as a GIF thumbnail for a web‑based patient portal.
- * 2. When a healthcare data pipeline must convert a specific area of a DICOM image to a lightweight GIF format for inclusion in electronic health record (EHR) reports.
- * 3. When a medical research tool requires cropping the top‑left corner of a DICOM image to focus on a lesion and then save it as a GIF for quick visual inspection in a C# WinForms UI.
- * 4. When a telemedicine platform wants to generate a small GIF preview of a DICOM X‑ray by cropping a 200‑pixel square and sending it over low‑bandwidth connections.
- * 5. When a diagnostic imaging workflow automates the extraction of a region of interest from DICOM files and stores the result as a GIF for integration with non‑medical image viewers.
+ * 1. When a medical imaging application needs to extract a small region from a DICOM scan and deliver it as a lightweight GIF for web preview.
+ * 2. When a radiology workflow requires converting DICOM slices into static GIFs after cropping to focus on a specific lesion.
+ * 3. When a healthcare portal must generate thumbnail GIFs from large DICOM files to improve page load times.
+ * 4. When a developer wants to automate batch processing of DICOM images, cropping a fixed area and saving in a format compatible with browsers.
+ * 5. When integrating DICOM data into a reporting tool that only supports GIF, requiring cropping and format conversion in C#.
  */

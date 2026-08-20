@@ -1,75 +1,67 @@
+// HOW-TO: Compare JPEG File Sizes Using Different Resize Types in C# (Aspose.Imaging for .NET)
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input image path
-            string inputPath = @"C:\Images\sample.jpg";
+            // Hard‑coded list of input image files (relative paths)
+            string[] inputFiles = { "input1.jpg", "input2.png", "input3.bmp" };
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Define output directory (will be used for all resized images)
-            string outputDir = @"C:\Images\Resized";
-
-            // List of resize types to evaluate
-            ResizeType[] resizeTypes = new ResizeType[]
-            {
+            // Resize types to compare
+            ResizeType[] resizeTypes = {
                 ResizeType.NearestNeighbourResample,
-                ResizeType.BilinearResample,
                 ResizeType.LanczosResample,
-                ResizeType.HighQualityResample,
-                ResizeType.CatmullRom,
-                ResizeType.Mitchell
+                ResizeType.BilinearResample
             };
 
-            // Target dimensions for resizing
-            int targetWidth = 800;
-            int targetHeight = 600;
-
-            // Store file sizes for comparison
-            Dictionary<ResizeType, long> fileSizes = new Dictionary<ResizeType, long>();
-
-            // Process each resize type
-            foreach (ResizeType rtype in resizeTypes)
+            // Process each input file
+            foreach (string inputPath in inputFiles)
             {
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Perform resizing with the specific resize type
-                    image.Resize(targetWidth, targetHeight, rtype);
-
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDir, $"sample_{rtype}.jpg");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as JPEG
-                    image.Save(outputPath, new JpegOptions());
-
-                    // Record file size
-                    long size = new FileInfo(outputPath).Length;
-                    fileSizes[rtype] = size;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-            }
 
-            // Output size comparison
-            Console.WriteLine("Resize Type -> JPEG File Size (bytes)");
-            foreach (var kvp in fileSizes)
-            {
-                Console.WriteLine($"{kvp.Key} -> {kvp.Value}");
+                // Process each resize type for the current image
+                foreach (ResizeType resizeType in resizeTypes)
+                {
+                    // Load the image (wrapped in using for proper disposal)
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        // Example scaling factor: reduce size to 50%
+                        int newWidth = image.Width / 2;
+                        int newHeight = image.Height / 2;
+
+                        // Perform resizing with the selected ResizeType
+                        image.Resize(newWidth, newHeight, resizeType);
+
+                        // Build output file path
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputDir = "Output";
+                        string outputFileName = $"{fileNameWithoutExt}_{resizeType}.jpg";
+                        string outputPath = Path.Combine(outputDir, outputFileName);
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save as JPEG using default options
+                        var jpegOptions = new JpegOptions();
+                        image.Save(outputPath, jpegOptions);
+
+                        // Report file size
+                        long fileSize = new FileInfo(outputPath).Length;
+                        Console.WriteLine($"{outputPath}: {fileSize} bytes");
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -81,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate multiple thumbnail versions of a product photo for an e‑commerce site and wants to evaluate which ResizeType (NearestNeighbour, Bilinear, Lanczos, etc.) yields the smallest JPEG file while preserving acceptable visual quality.
- * 2. When a mobile app team must pre‑process user‑uploaded pictures to a fixed 800×600 resolution and compare the impact of different resampling algorithms on bandwidth consumption for faster image download.
- * 3. When a digital asset management system requires batch conversion of high‑resolution scans to web‑ready JPEGs and the developer wants to benchmark HighQualityResample versus CatmullRom to choose the optimal trade‑off between file size and detail retention.
- * 4. When an automated CI/CD pipeline includes image optimization steps and the build script needs to resize screenshots using Mitchell, Lanczos, and other ResizeType options to verify which algorithm meets the size limit for documentation PDFs.
- * 5. When a content delivery network (CDN) integration needs to store several versions of the same banner image with different resampling methods so that analytics can determine which ResizeType produces the best compression ratio for JPEG delivery across browsers.
+ * 1. When you need to generate smaller thumbnail versions of a batch of photos and want to see which Aspose.Imaging ResizeType (NearestNeighbour, Lanczos, Bilinear) yields the smallest JPEG file size.
+ * 2. When optimizing images for web delivery and you must compare how different resampling algorithms affect visual quality versus compressed JPEG size in a C# application.
+ * 3. When building an automated image processing pipeline that converts various source formats (JPG, PNG, BMP) to JPEG and you need to evaluate the impact of each ResizeType on storage savings.
+ * 4. When performing A/B testing of image resizing strategies to choose the best trade‑off between processing speed and JPEG compression results in a .NET service.
+ * 5. When creating a report of file size differences after resizing images with Aspose.Imaging, to help stakeholders decide which resampling method to adopt for a mobile app.
  */

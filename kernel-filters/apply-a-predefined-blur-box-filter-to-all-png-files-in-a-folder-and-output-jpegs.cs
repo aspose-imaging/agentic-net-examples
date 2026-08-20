@@ -1,6 +1,8 @@
+// HOW-TO: Apply Gaussian Blur to All PNGs and Save as JPEGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -13,13 +15,8 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all PNG files in the input folder
-            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
-
-            foreach (string inputPath in pngFiles)
+            // Process each PNG file in the input folder
+            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.png"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -28,25 +25,24 @@ class Program
                     return;
                 }
 
-                // Determine the output JPEG path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Ensure the output directory exists (covers subfolders if any)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering capabilities
+                    // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply a Gaussian blur filter (used here as a blur box filter)
-                    // Radius = 5, Sigma = 4.0 (adjust as needed)
+                    // Apply a Gaussian blur filter (used as a predefined blur box filter)
                     rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
+                    // Prepare the output JPEG path
+                    string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg");
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                     // Save the processed image as JPEG
-                    rasterImage.Save(outputPath);
+                    rasterImage.Save(outputPath, new JpegOptions());
                 }
             }
         }
@@ -59,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑blur confidential PNG screenshots before archiving them as smaller JPEG files for compliance reporting.
- * 2. When an e‑commerce platform wants to automatically apply a soft blur to product PNG overlays and store the result as JPEG thumbnails for faster page loads.
- * 3. When a photo‑sharing app must convert user‑uploaded PNG avatars to blurred JPEG previews to protect privacy while reducing bandwidth usage.
- * 4. When a digital marketing team requires a C# script that processes a folder of PNG banner images, adds a Gaussian blur effect, and saves them as JPEGs for email campaigns.
- * 5. When a document management system needs to programmatically apply a blur box filter to scanned PNG pages and output JPEGs for OCR preprocessing.
+ * 1. When you need to batch‑blur a collection of PNG screenshots before archiving them as smaller JPEG files.
+ * 2. When you want to automatically obscure sensitive details in product photos stored as PNGs and deliver them as JPEGs for web publishing.
+ * 3. When you are building a C# utility that converts high‑resolution PNG assets to compressed JPEGs while applying a Gaussian blur to reduce visual noise.
+ * 4. When you must preprocess scanned PNG documents with a blur effect to improve OCR performance and then save the results in JPEG format.
+ * 5. When you require a simple script to apply a predefined blur box filter to every PNG in a folder and output JPEGs for a mobile app’s image cache.
  */

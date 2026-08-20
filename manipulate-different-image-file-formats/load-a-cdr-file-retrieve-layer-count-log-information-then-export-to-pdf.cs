@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multi‑Page CDR to Separate PDF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,45 +9,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.cdr";
-        string outputPath = @"C:\Data\sample.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Data\sample.cdr";
+            string outputDirectory = @"C:\Data\PdfOutput";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the CDR image
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Log the number of pages (layers) in the CDR file
-                Console.WriteLine($"Page count: {image.PageCount}");
+                // Log page (layer) count
+                int pageCount = cdrImage.PageCount;
+                Console.WriteLine($"Cdr file contains {pageCount} page(s).");
 
-                // Export the first page to PDF
-                int pageNumber = 0;
-                CdrImagePage page = (CdrImagePage)image.Pages[pageNumber];
-
-                // Configure PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions()
+                // Export each page to a separate PDF file
+                for (int i = 0; i < pageCount; i++)
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-                pdfOptions.VectorRasterizationOptions.PageWidth = page.Width;
-                pdfOptions.VectorRasterizationOptions.PageHeight = page.Height;
+                    // Get the specific page
+                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
 
-                // Save the page as a PDF file
-                page.Save(outputPath, pdfOptions);
+                    // Prepare output PDF path
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.pdf");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Set up PDF export options with rasterization settings
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                    {
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        PageWidth = page.Width,
+                        PageHeight = page.Height
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save the page as PDF
+                    page.Save(outputPath, pdfOptions);
+                    Console.WriteLine($"Exported page {i} to {outputPath}");
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design workflow requires converting CorelDRAW (CDR) files to PDF for client review, a developer can use this code to load the CDR, log the number of pages, and export the first page as a PDF.
- * 2. When an automated document processing system needs to verify the layer count of a CDR file before archiving, this snippet loads the image, prints the page count, and saves a PDF preview.
- * 3. When a batch conversion tool must ensure the output directory exists and safely handle missing CDR files, the example demonstrates file existence checks, directory creation, and exception handling while converting to PDF.
- * 4. When a .NET application has to preserve the exact dimensions and rasterization settings of a CorelDRAW page during PDF generation, the code configures CdrRasterizationOptions and uses Aspose.Imaging to produce a high‑fidelity PDF.
- * 5. When integrating Aspose.Imaging into a CI/CD pipeline to generate PDF documentation from design assets, this code shows how to load a CDR, retrieve its page count, and export a selected page to PDF in a single, reusable block.
+ * 1. When you need to programmatically extract each layer of a CorelDRAW (CDR) document and save them as individual PDF files for printing or archiving.
+ * 2. When an automated workflow must verify the number of pages in a CDR file before converting it to PDFs for downstream processing.
+ * 3. When a .NET application has to generate PDF previews of each CDR page with specific rasterization settings like no smoothing and single‑bit text rendering.
+ * 4. When you want to batch‑convert multiple CDR files into PDFs and store the results in a predefined folder structure.
+ * 5. When integrating Aspose.Imaging into a document management system to preserve the original dimensions of CDR pages while exporting them to PDF format.
  */

@@ -1,55 +1,51 @@
+// HOW-TO: Convert EPS to PDF with Landscape Orientation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample_Landscape.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare PDF conversion options
-                var pdfOptions = new PdfOptions();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Configure rasterization options to enforce landscape orientation
-                var rasterOptions = new EpsRasterizationOptions();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // If the source EPS is portrait, swap width and height to get landscape
-                if (image.Width < image.Height)
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            {
+                float pageWidth = image.Width;
+                float pageHeight = image.Height;
+
+                // Ensure landscape orientation
+                if (pageHeight > pageWidth)
                 {
-                    rasterOptions.PageWidth = image.Height;
-                    rasterOptions.PageHeight = image.Width;
+                    float temp = pageWidth;
+                    pageWidth = pageHeight;
+                    pageHeight = temp;
                 }
-                else
+
+                var pdfOptions = new PdfOptions
                 {
-                    rasterOptions.PageWidth = image.Width;
-                    rasterOptions.PageHeight = image.Height;
-                }
+                    PageSize = new SizeF(pageWidth, pageHeight),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = pageWidth,
+                        PageHeight = pageHeight
+                    }
+                };
 
-                // Assign rasterization options to PDF options
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save as PDF with the specified options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -62,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed wide EPS diagrams such as architectural floor plans into a PDF report and must force landscape orientation to preserve readability.
- * 2. When an automated document generation system converts a batch of EPS logos or banners to PDF and must ensure each output page is oriented horizontally regardless of the source dimensions.
- * 3. When a printing workflow requires EPS artwork to be rasterized into PDF with landscape layout to match printer tray settings for large‑format prints.
- * 4. When a web application allows users to upload EPS charts and needs to deliver downloadable PDFs that automatically switch to landscape for better on‑screen viewing.
- * 5. When a CI/CD pipeline validates EPS assets and generates landscape PDFs for quality‑assurance reviews, using Aspose.Imaging’s rasterization options to swap width and height when necessary.
+ * 1. When you need to generate printable PDFs from wide EPS illustrations while ensuring the pages are set to landscape for optimal layout.
+ * 2. When an automated reporting system must convert vector EPS logos into PDF files that retain the original dimensions without rotating the artwork.
+ * 3. When a web service processes user‑uploaded EPS files and must return PDFs that preserve the original aspect ratio in landscape mode.
+ * 4. When creating batch scripts that convert a folder of EPS graphics to PDFs for large‑format printing that requires landscape pages.
+ * 5. When integrating Aspose.Imaging into a C# application to rasterize EPS artwork into PDFs with custom page size and a white background for archival purposes.
  */

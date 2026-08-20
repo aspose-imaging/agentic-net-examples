@@ -1,55 +1,49 @@
+// HOW-TO: Create BMP Image With Filled And Outlined Ellipse In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded output path
-        string outputPath = @"C:\temp\ellipse.bmp";
+        string outputPath = @"C:\temp\ellipse_output.bmp";
 
         try
         {
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Configure BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
 
-            // Create a BMP image of size 400x300
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            // Create a new BMP image (400x400)
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear background
-                graphics.Clear(Aspose.Imaging.Color.White);
-
-                // Define a solid brush for filling the ellipse
-                SolidBrush fillBrush = new SolidBrush(Aspose.Imaging.Color.LightBlue);
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
 
                 // Define the bounding rectangle for the ellipse
                 Rectangle ellipseRect = new Rectangle(50, 50, 300, 200);
 
-                // Fill the ellipse
+                // Fill the ellipse with a solid brush (light blue)
+                SolidBrush fillBrush = new SolidBrush(Color.LightBlue);
                 graphics.FillEllipse(fillBrush, ellipseRect);
 
-                // Define a pen for outlining the ellipse (contrasting color)
-                Pen outlinePen = new Pen(Aspose.Imaging.Color.DarkBlue, 3);
-
-                // Draw the ellipse outline
+                // Outline the ellipse with a contrasting pen (dark blue, width 3)
+                Pen outlinePen = new Pen(Color.DarkBlue, 3);
                 graphics.DrawEllipse(outlinePen, ellipseRect);
 
-                // Save changes to the file
-                image.Save();
+                // Save the image to the specified path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -61,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Use this code to generate a 24‑bit BMP placeholder image with a light‑blue filled ellipse outlined in dark blue for UI mockups in a C# desktop application.
- * 2. Use the BMP image creation and Graphics.FillEllipse/DrawEllipse methods to add a colored ellipse marker to a chart or report generated in .NET.
- * 3. Create a custom button background BMP where the ellipse indicates a selected state, leveraging SolidBrush and Pen for fill and outline in C#.
- * 4. Automate thumbnail icon generation for a document management system by drawing a blue ellipse overlay on a 400×300 BMP using Aspose.Imaging.
- * 5. Export a simple diagram element as a BMP file for a CAD or engineering tool, using the rectangle bounds to control ellipse size and a contrasting pen for the outline.
+ * 1. When you need to generate a BMP file that contains a colored ellipse for a report or thumbnail in a C# desktop application.
+ * 2. When you want to programmatically create a simple diagram, such as a highlighted area or button background, using Aspose.Imaging’s drawing API.
+ * 3. When an automated process must produce a 24‑bit bitmap with a solid‑filled shape and a contrasting border for printing or legacy system compatibility.
+ * 4. When you are building a game or UI prototype that requires dynamic creation of ellipse graphics without relying on external image assets.
+ * 5. When you need to batch‑create placeholder images with consistent dimensions and styling (filled ellipse with outline) for testing image‑processing pipelines.
  */

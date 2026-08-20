@@ -1,5 +1,7 @@
+// HOW-TO: Invert Colors of PNG and Embed Into PDF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -8,19 +10,46 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = Path.Combine("Input", "sample.png");
+            string outputPath = Path.Combine("Output", "inverted.pdf");
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = Path.Combine("Output", "sample_converted.jpg");
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new JpegOptions());
+                // Cast to RasterImage for pixel manipulation
+                RasterImage raster = (RasterImage)image;
+                raster.CacheData();
+
+                // Load ARGB pixels
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+
+                // Invert colors (preserve alpha)
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    int p = pixels[i];
+                    int a = (p >> 24) & 0xFF;
+                    int rgb = p & 0x00FFFFFF;
+                    int invRgb = (~rgb) & 0x00FFFFFF;
+                    pixels[i] = (a << 24) | invRgb;
+                }
+
+                // Save the modified pixels back to the image
+                raster.SaveArgb32Pixels(raster.Bounds, pixels);
+
+                // Embed the inverted image into a PDF
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -32,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF report that includes a high‑contrast version of a scanned diagram, they can load the PNG, invert its colors with Aspose.Imaging, and embed the result into the PDF.
- * 2. When creating accessibility‑friendly documentation, a developer may invert dark‑on‑light images to light‑on‑dark for better readability on e‑ink devices and then insert the transformed image into a PDF using C#.
- * 3. When automating the preparation of marketing brochures that require a negative‑film effect, a developer can apply a color inversion filter to product photos and embed the altered images into a PDF catalog.
- * 4. When building a forensic analysis tool that highlights hidden details by inverting image colors before archiving them, a developer can load the raster file, invert it with Aspose.Imaging, and store the result in a PDF evidence file.
- * 5. When developing a batch conversion utility that converts user‑uploaded PNG screenshots into PDF manuals with inverted colors for night‑mode viewing, a developer can use the image loading, inversion, and PDF embedding workflow in C#.
+ * 1. When you need to create a negative‑style version of a PNG product photo and deliver it as a PDF using Aspose.Imaging in C#.
+ * 2. When generating printable proof sheets that require the original PNG colors to be inverted and saved as a PDF via Aspose.Imaging.
+ * 3. When building a document automation workflow that converts scanned PNG images into PDF files with a color‑inversion effect using Aspose.Imaging for .NET.
+ * 4. When preparing marketing materials where the original PNG must be shown with reversed colors inside a PDF brochure created with Aspose.Imaging C# API.
+ * 5. When implementing a batch process that reads PNG assets, applies an ARGB inversion, and saves the result directly as PDF for archival purposes with Aspose.Imaging.
  */

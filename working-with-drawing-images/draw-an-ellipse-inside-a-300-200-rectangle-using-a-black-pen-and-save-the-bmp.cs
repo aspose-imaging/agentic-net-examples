@@ -1,7 +1,8 @@
+// HOW-TO: Create a 300x200 BMP with Black Ellipse Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,33 +11,17 @@ class Program
     {
         try
         {
-            // Hardcoded output path
             string outputPath = @"c:\temp\ellipse.bmp";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options with a file source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 300x200 image canvas
-            using (Image image = Image.Create(bmpOptions, 300, 200))
+            var source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, 300, 200))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
-
-                // Create a black pen with width 2
-                Pen pen = new Pen(Color.Black, 2);
-
-                // Draw an ellipse inside the full rectangle (0,0,300,200)
-                graphics.DrawEllipse(pen, new Rectangle(0, 0, 300, 200));
-
-                // Save the image (file is already bound via FileCreateSource)
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.DrawEllipse(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1),
+                    new Aspose.Imaging.Rectangle(0, 0, 300, 200));
                 image.Save();
             }
         }
@@ -49,9 +34,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail that highlights a product’s circular logo inside a fixed‑size 300 × 200 canvas for a legacy Windows application.
- * 2. When an automated reporting tool must embed a black‑outlined ellipse into a BMP chart background to indicate a region of interest in scanned engineering diagrams.
- * 3. When a batch‑processing script creates placeholder images for UI mockups, drawing an ellipse inside a 300 × 200 rectangle to represent a profile picture slot in a BMP asset.
- * 4. When a medical imaging system exports a BMP overlay that marks a region of interest with a black pen ellipse on a white background for compatibility with older DICOM viewers.
- * 5. When a game developer generates BMP sprites at runtime, using Aspose.Imaging to draw an ellipse within a 300 × 200 rectangle as a collision‑boundary visual aid.
+ * 1. When you need to generate a simple placeholder image with an ellipse for a report or UI mockup in BMP format.
+ * 2. When a server‑side application must programmatically create a black‑outlined ellipse inside a fixed‑size bitmap for printing or legacy systems.
+ * 3. When you want to automate the production of diagram assets, such as icons or badges, by drawing vector shapes onto a BMP file using C#.
+ * 4. When integrating with a workflow that requires BMP images, and you must draw geometric shapes without using GDI+.
+ * 5. When creating test images for image‑processing algorithms that expect a 300 × 200 BMP containing a single ellipse.
  */

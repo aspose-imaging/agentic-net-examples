@@ -1,8 +1,11 @@
+// HOW-TO: Draw Precise Arc on BMP Using Float Rectangle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
@@ -11,12 +14,12 @@ class Program
         try
         {
             // Hardcoded output path
-            string outputPath = @"C:\temp\arc_output.bmp";
+            string outputPath = @"C:\Temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP creation options
+            // Set up BMP options with a file create source
             BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
@@ -26,20 +29,22 @@ class Program
             // Create a 500x500 BMP image
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics object for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear background to white
+                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Define a pen and a floating‑point rectangle for precise positioning
-                Pen pen = new Pen(Color.Blue, 3);
-                RectangleF rect = new RectangleF(50.5f, 50.5f, 300.75f, 200.25f);
+                // Define a pen with blue color and 2-pixel width
+                Pen pen = new Pen(Color.Blue, 2);
 
-                // Draw the arc using the floating‑point overload
+                // Define a floating‑point rectangle for precise positioning
+                RectangleF rect = new RectangleF(50.5f, 50.5f, 200.2f, 150.8f);
+
+                // Draw an arc using the floating‑point overload
                 graphics.DrawArc(pen, rect, 45f, 270f);
 
-                // Save the image (writes to the specified output path)
+                // Save the image (writes to the file specified in bmpOptions.Source)
                 image.Save();
             }
         }
@@ -52,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution BMP report that includes precisely positioned curved gauges or dials, they can use Graphics.DrawArc with a RectangleF to draw the arc at sub‑pixel accuracy.
- * 2. When creating custom map overlays in a GIS application where road curves must be rendered on a 24‑bit BMP background, the floating‑point rectangle overload ensures the arcs align correctly with geographic coordinates.
- * 3. When building a medical imaging tool that annotates scanned images with semi‑transparent arc markers to highlight regions of interest, the code demonstrates how to draw those arcs on a BMP canvas using Aspose.Imaging for .NET.
- * 4. When designing a desktop dashboard that visualizes performance metrics as circular progress bars saved as BMP files for printing, the precise positioning provided by RectangleF and DrawArc simplifies the rendering process.
- * 5. When automating the production of printable engineering diagrams that require exact arc dimensions and line thickness on a BMP sheet, this snippet shows how to programmatically draw the arcs with C# and Aspose.Imaging.
+ * 1. When you need to generate a BMP report graphic with an accurately positioned curved line for engineering diagrams.
+ * 2. When creating a thumbnail preview that requires a smooth arc drawn at sub‑pixel coordinates for high‑resolution UI elements.
+ * 3. When programmatically adding a decorative arc to a bitmap logo where exact placement matters for branding consistency.
+ * 4. When exporting scientific data visualizations to BMP and the arc must align precisely with measured data points.
+ * 5. When building a custom map overlay in C# and you must draw arcs with floating‑point precision on a BMP background.
  */

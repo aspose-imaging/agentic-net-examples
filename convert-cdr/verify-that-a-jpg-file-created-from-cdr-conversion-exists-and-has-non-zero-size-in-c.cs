@@ -1,3 +1,4 @@
+// HOW-TO: Check JPEG Output Exists and Has Size After Converting CDR in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,14 +6,14 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.cdr";
-        string outputPath = @"C:\temp\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,30 +25,41 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (Image cdrImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options
-                var jpegOptions = new JpegOptions();
+                // Configure JPEG options with vector rasterization settings
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
+                };
 
-                // Save as JPEG
-                cdrImage.Save(outputPath, jpegOptions);
+                // Save the image as JPEG
+                image.Save(outputPath, jpegOptions);
             }
 
-            // Verify the JPEG file was created and has non‑zero size
-            if (!File.Exists(outputPath))
+            // Verify that the JPEG file was created and has non‑zero size
+            if (File.Exists(outputPath))
             {
-                Console.Error.WriteLine($"Output file not created: {outputPath}");
-                return;
-            }
-
-            var info = new FileInfo(outputPath);
-            if (info.Length == 0)
-            {
-                Console.Error.WriteLine($"Output file is empty: {outputPath}");
+                long size = new FileInfo(outputPath).Length;
+                if (size > 0)
+                {
+                    Console.WriteLine($"JPEG file created successfully. Size: {size} bytes.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("JPEG file size is zero.");
+                }
             }
             else
             {
-                Console.WriteLine($"JPG file created successfully: {outputPath}, size: {info.Length} bytes");
+                Console.Error.WriteLine("JPEG file was not created.");
             }
         }
         catch (Exception ex)
@@ -59,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑convert CorelDRAW (.cdr) files to JPEG for web publishing and must confirm each output file was created and is not empty.
- * 2. When an automated build pipeline generates product catalog images from source CDR assets and requires a C# verification step that the resulting JPG files exist and have a non‑zero byte size before proceeding to the next stage.
- * 3. When a document management system imports legacy CDR graphics and stores them as JPEG thumbnails, the code ensures the conversion succeeded by checking file existence and size in .NET.
- * 4. When a Windows service monitors a folder for new CDR designs, converts them to JPEG using Aspose.Imaging, and needs to log an error if the saved JPG file is missing or zero bytes.
- * 5. When a QA test script validates that a third‑party plugin correctly exports CDR drawings to JPEG, using C# to load the source, save with JpegOptions, and assert the output file is present and contains data.
+ * 1. When an automated workflow converts CorelDRAW (.cdr) files to JPEGs and needs to confirm the output file was generated correctly before proceeding to the next step.
+ * 2. When a batch processing script validates that each converted image is not empty, preventing downstream errors in a publishing pipeline.
+ * 3. When a desktop application saves user‑edited CDR graphics as JPEG and must ensure the saved file exists and contains data before displaying it.
+ * 4. When a CI/CD pipeline checks that image conversion jobs produce valid JPEG files with non‑zero size as part of quality‑gate testing.
+ * 5. When a server‑side service processes uploaded CDR files and needs to verify successful JPEG creation to return a proper download link to the client.
  */

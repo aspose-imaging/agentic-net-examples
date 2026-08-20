@@ -1,19 +1,20 @@
+// HOW-TO: Adjust Gamma of GIF Frames and Save Animated GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.gif";
+        string outputPath = @"C:\Temp\output_adjusted.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.gif";
-            string outputPath = "output/animated.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,15 +25,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load GIF, adjust gamma, and save as animated GIF
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the GIF image (may contain multiple frames)
+            using (Image image = Image.Load(inputPath))
             {
-                // Adjust gamma for balanced luminance (example value)
-                gif.AdjustGamma(2.2f);
+                GifImage gifImage = (GifImage)image;
 
-                // Save with default GIF options
-                GifOptions options = new GifOptions();
-                gif.Save(outputPath, options);
+                // Apply gamma correction to balance luminance (example gamma value)
+                gifImage.AdjustGamma(2.0f);
+
+                // Save the adjusted image as an animated GIF
+                gifImage.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -44,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to correct the brightness of a series of frames from a low‑light camera before exporting them as an animated GIF for a web slideshow, they can use this code to adjust gamma and ensure consistent luminance.
- * 2. When an e‑learning platform wants to generate animated GIF tutorials from screen‑capture sequences that appear too dark on mobile devices, the gamma adjustment step balances the colors before saving the GIF.
- * 3. When a marketing team requires a product showcase GIF where each frame must have uniform brightness across different browsers, a C# routine that loads the GIF, applies AdjustGamma, and saves with GifOptions fulfills the need.
- * 4. When a game developer creates sprite animations from legacy GIF assets that suffer from washed‑out colors, applying a gamma correction of 2.2 before re‑encoding the animation prevents visual degradation.
- * 5. When an automated image‑processing pipeline processes user‑uploaded GIFs and needs to standardize luminance to meet accessibility guidelines, the provided Aspose.Imaging code adjusts gamma and outputs a compliant animated GIF.
+ * 1. When you need to brighten or darken all frames of an existing GIF to achieve consistent visual brightness before publishing it online.
+ * 2. When you want to preprocess a multi‑frame GIF with gamma correction using Aspose.Imaging for .NET to ensure the animated image looks uniform on different devices.
+ * 3. When you are building a C# tool that automatically adjusts the luminance of user‑uploaded GIFs so the animation appears balanced without manually editing each frame.
+ * 4. When you have a batch process that loads GIF sequences, applies a specific gamma value, and saves them as new animated GIFs for use in marketing campaigns.
+ * 5. When you need to programmatically verify a GIF file exists, create the output folder, apply gamma correction, and export the result as an animated GIF in a .NET application.
  */

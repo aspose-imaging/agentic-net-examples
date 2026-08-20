@@ -1,44 +1,36 @@
+// HOW-TO: Draw Diagonal Orange Line on 600x600 BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string outputPath = @"C:\temp\diagonal.bmp";
-
         try
         {
-            // Ensure output directory exists
+            // Output file path (hard‑coded)
+            string outputPath = "output\\diagonal.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a 600x600 24‑bpp BMP image with 96 DPI
-            using (BmpImage bmp = new BmpImage(
-                width: 600,
-                height: 600,
-                bitsPerPixel: 24,
-                palette: null,
-                compression: BitmapCompression.Rgb,
-                horizontalResolution: 96.0,
-                verticalResolution: 96.0))
+            // Create BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 600×600 image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 600, 600))
             {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(bmp);
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Draw a diagonal orange line from top‑left to bottom‑right
-                graphics.DrawLine(
-                    pen: new Pen(Color.Orange, 1),
-                    x1: 0,
-                    y1: 0,
-                    x2: 600,
-                    y2: 600);
+                // Draw a diagonal orange line from (0,0) to (600,600)
+                graphics.DrawLine(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Orange, 2), 0, 0, 600, 600);
 
-                // Save the image to the specified path
-                bmp.Save(outputPath);
+                // Save the image (output is already bound to the file source)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple 600 × 600 BMP placeholder image with a diagonal orange line for testing image‑processing pipelines that accept BMP files.
- * 2. When creating a custom watermark or branding element that consists of a diagonal line on a 600 × 600 BMP used in desktop or web applications.
- * 3. When producing a diagnostic visual aid that highlights coordinate axes by drawing a diagonal orange line across a BMP image to debug graphics rendering code.
- * 4. When generating sample graphics for documentation or tutorials that demonstrate Aspose.Imaging’s Graphics.DrawLine overload with explicit C# coordinate parameters.
- * 5. When building a batch process that programmatically creates BMP icons with a diagonal orange line to indicate a “disabled” or “inactive” UI state.
+ * 1. When you need to generate a simple placeholder image with a visible diagonal marker for testing image pipelines in C#.
+ * 2. When you want to programmatically add a colored guide line to a BMP file for visual debugging of coordinate systems.
+ * 3. When creating custom graphics for a game UI where a diagonal orange line indicates direction or progress on a 600 × 600 bitmap.
+ * 4. When automating the production of sample BMP assets that require a consistent diagonal stroke for documentation or tutorials.
+ * 5. When integrating Aspose.Imaging into a .NET service that must draw basic shapes, such as an orange line, onto newly created bitmap images.
  */

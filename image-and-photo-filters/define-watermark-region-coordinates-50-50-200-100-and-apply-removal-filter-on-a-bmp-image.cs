@@ -1,8 +1,8 @@
+// HOW-TO: Remove Watermark from Specific Region in BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -13,14 +13,14 @@ class Program
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
-        // Input file existence check
+        // Check input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists (null‑safe)
+        // Ensure output directory exists (null-safe)
         string outputDir = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrEmpty(outputDir))
         {
@@ -32,19 +32,20 @@ class Program
             // Load the BMP image
             using (var image = Image.Load(inputPath))
             {
-                var bmpImage = (BmpImage)image;
+                // Cast to RasterImage for watermark removal
+                var raster = (RasterImage)image;
 
-                // Define watermark mask (rectangle at 50,50 with width 200 and height 100)
+                // Define watermark region (x=50, y=50, width=200, height=100)
                 var mask = new GraphicsPath();
                 var figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 100)));
                 mask.AddFigure(figure);
 
-                // Create Telea watermark removal options with the mask
+                // Create Telea algorithm options with the mask
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
                 // Apply watermark removal
-                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(bmpImage, options))
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
                 {
                     // Save the resulting image as BMP
                     result.Save(outputPath, new BmpOptions());
@@ -60,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically clean scanned BMP invoices by removing a logo watermark located at coordinates (50,50,200,100) before archiving them.
- * 2. When a C# application must prepare legacy BMP assets for a game engine by erasing a developer‑added watermark in a fixed rectangle to meet publishing guidelines.
- * 3. When an enterprise document‑management system processes batches of BMP scans and uses Aspose.Imaging’s Telea watermark removal to strip confidential watermarks from a predefined region for internal review.
- * 4. When a .NET photo‑editing tool offers a “Remove Watermark” feature that targets a rectangular area (50,50,200,100) on BMP images without affecting the rest of the picture.
- * 5. When a quality‑control script validates product label BMP images and removes a test‑pattern watermark placed at known coordinates to generate clean samples for machine‑learning training.
+ * 1. When you need to automatically erase a logo or text that appears in a known rectangular area of a BMP file.
+ * 2. When processing scanned documents where a watermark was added during scanning and must be removed before OCR.
+ * 3. When preparing legacy BMP assets for a web gallery and want to clean up embedded watermarks without manual editing.
+ * 4. When building a batch tool that cleans up watermarked screenshots captured from a software demo.
+ * 5. When integrating image cleanup into a C# application that receives BMP images from a third‑party system and requires the watermark region to be removed programmatically.
  */

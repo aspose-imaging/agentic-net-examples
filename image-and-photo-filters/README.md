@@ -40,10 +40,9 @@ Examples and tasks in this folder:
 
 | Example |
 |---------|
-| [remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs](./remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs) |
-| [create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs](./create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs) |
 | [add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs](./add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs) |
 | [adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs](./adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs) |
+| [adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark.cs](./adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark.cs) |
 | [adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs](./adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs) |
 | [allow-users-to-adjust-the-feather-radius-interactively-and-preview-the-refined-mask-in-real-time.cs](./allow-users-to-adjust-the-feather-radius-interactively-and-preview-the-refined-mask-in-real-time.cs) |
 | [apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs](./apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs) |

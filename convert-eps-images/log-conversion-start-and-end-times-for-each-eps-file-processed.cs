@@ -1,8 +1,9 @@
+// HOW-TO: Log Start and End Times While Converting EPS to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -28,31 +29,31 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (var filePath in files)
             {
-                if (!inputPath.EndsWith(".eps", StringComparison.OrdinalIgnoreCase))
+                if (!filePath.EndsWith(".eps", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Console.WriteLine($"Processing {inputPath} started at {DateTime.Now}");
+                Console.WriteLine($"Processing {filePath} started at {DateTime.Now}");
 
-                using (var image = (EpsImage)Image.Load(inputPath))
+                using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(filePath))
                 {
-                    var options = new PngOptions();
-                    image.Save(outputPath, options);
+                    using (var options = new PngOptions())
+                    {
+                        image.Save(outputPath, options);
+                    }
                 }
 
-                Console.WriteLine($"Processing {inputPath} finished at {DateTime.Now}");
+                Console.WriteLine($"Processing {filePath} finished at {DateTime.Now}");
             }
         }
         catch (Exception ex)
@@ -64,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to batch‑convert customer EPS artwork to PNG for web previews and must record how long each file takes to process for performance monitoring.
- * 2. When an automated CI/CD pipeline generates PNG thumbnails from EPS design assets and logs start/end timestamps to detect slow conversions that could delay builds.
- * 3. When a digital asset management system imports EPS logos and stores conversion timestamps in logs to audit processing times and troubleshoot bottlenecks.
- * 4. When a SaaS platform offers on‑the‑fly EPS to PNG conversion and records processing times per request to enforce service‑level agreements.
- * 5. When a developer creates a scheduled Windows service that scans an input folder for EPS files, converts them to PNG, and logs start and finish times to generate daily performance reports.
+ * 1. When you need to batch‑convert a folder of EPS vector files to PNG images while recording the exact processing time for each file for performance monitoring.
+ * 2. When an automated image pipeline must generate an audit log of start and finish timestamps for every EPS conversion to meet compliance or debugging requirements.
+ * 3. When you want to measure and compare the conversion speed of different EPS files using Aspose.Imaging in a C# application.
+ * 4. When a reporting tool requires timestamps of image generation to synchronize graphics with other data sources in a .NET workflow.
+ * 5. When you are building a scheduled service that processes incoming EPS assets and needs to log processing durations for alerting on unusually long conversions.
  */

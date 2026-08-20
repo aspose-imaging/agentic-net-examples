@@ -1,3 +1,4 @@
+// HOW-TO: Batch Adjust Brightness of DICOM Images and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,26 +9,24 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\Input\";
+        string outputDir = @"C:\Images\Output\";
+
+        // List of DICOM files to process
+        string[] files = new string[]
+        {
+            "image1.dcm",
+            "image2.dcm",
+            "image3.dcm"
+        };
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputDicom\";
-            string outputDir = @"C:\OutputPng\";
-
-            // List of DICOM files to process
-            string[] dicomFiles = new[]
+            foreach (string fileName in files)
             {
-                "image1.dcm",
-                "image2.dcm",
-                "image3.dcm"
-            };
-
-            foreach (string fileName in dicomFiles)
-            {
-                // Build full paths
+                // Build full input path
                 string inputPath = Path.Combine(inputDir, fileName);
-                string outputFileName = Path.ChangeExtension(fileName, ".png");
-                string outputPath = Path.Combine(outputDir, outputFileName);
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -36,6 +35,10 @@ class Program
                     return;
                 }
 
+                // Determine output path (same name with .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
@@ -43,7 +46,7 @@ class Program
                 using (Image image = Image.Load(inputPath))
                 {
                     DicomImage dicomImage = (DicomImage)image;
-                    dicomImage.AdjustBrightness(10); // increase brightness by ten units
+                    dicomImage.AdjustBrightness(10);
                     dicomImage.Save(outputPath, new PngOptions());
                 }
             }
@@ -57,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to convert a set of DICOM scans to PNG thumbnails with increased brightness for quick visual review in a web portal.
- * 2. When a medical imaging software vendor wants to preprocess patient CT images by batch‑adjusting brightness before exporting them to PNG for inclusion in printed reports.
- * 3. When a research lab automates the preparation of DICOM MRI datasets for machine‑learning pipelines that require PNG inputs with standardized brightness levels.
- * 4. When a hospital’s IT team creates a nightly job that loads multiple DICOM files, brightens them by ten units, and stores the results as PNG files for archival in a PACS‑compatible format.
- * 5. When a developer builds a C# utility that reads DICOM images from a folder, applies a uniform brightness boost, and saves them as PNGs to be used in a mobile health‑care application.
+ * 1. When a medical imaging application needs to preprocess a set of DICOM scans by brightening them and exporting to PNG for web display.
+ * 2. When a radiology workflow requires automated conversion of multiple DICOM files to a lightweight format while applying a uniform brightness correction.
+ * 3. When a research project must batch‑process DICOM images to improve visibility before feeding them into a machine‑learning model that accepts PNG inputs.
+ * 4. When a hospital IT system wants to generate patient‑friendly PNG snapshots from DICOM studies with a consistent brightness increase.
+ * 5. When a developer builds a command‑line tool to convert and enhance DICOM files in bulk for archival or reporting purposes.
  */

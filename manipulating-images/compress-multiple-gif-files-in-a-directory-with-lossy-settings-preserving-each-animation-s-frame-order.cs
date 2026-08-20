@@ -1,3 +1,4 @@
+// HOW-TO: Batch Compress Animated GIFs with Lossy Settings in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,17 +10,15 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
+            // Hard‑coded input and output directories
             string inputDir = @"C:\InputGifs";
             string outputDir = @"C:\OutputGifs";
 
-            // Ensure the output base directory exists
+            // Ensure the base output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Get all GIF files in the input directory
-            string[] gifFiles = Directory.GetFiles(inputDir, "*.gif");
-
-            foreach (string inputPath in gifFiles)
+            // Process each GIF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.gif"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -28,22 +27,23 @@ class Program
                     return;
                 }
 
-                // Build the output path, preserving the original file name
-                string outputPath = Path.Combine(outputDir, Path.GetFileName(inputPath));
+                // Build the corresponding output file path
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName);
 
                 // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF image
+                // Load the GIF image (preserves animation frames and order)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set lossy compression options
+                    // Configure lossy compression options
                     var saveOptions = new GifOptions
                     {
-                        MaxDiff = 80 // recommended lossy level
+                        MaxDiff = 80 // recommended value for effective lossy compression
                     };
 
-                    // Save the image with lossy compression, preserving animation frames
+                    // Save the compressed GIF to the output path
                     image.Save(outputPath, saveOptions);
                 }
             }
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to batch‑optimize animated GIF advertisements for faster page loads, they can use this C# code with Aspose.Imaging to apply lossy compression while keeping each frame’s order intact.
- * 2. When an e‑mail marketing system must shrink a folder of promotional GIFs to stay under attachment size limits, the program compresses all files in one pass without breaking the animation sequence.
- * 3. When a mobile app prepares user‑generated GIF stickers for upload, the code reduces file size with a configurable MaxDiff value, ensuring the animated stickers remain smooth on low‑bandwidth connections.
- * 4. When a digital asset manager wants to archive legacy animated GIFs on a server while preserving their original playback order, this script processes the entire directory and saves the compressed versions to a separate folder.
- * 5. When a CDN operator needs to pre‑compress a batch of animated GIFs before distribution to improve cache efficiency, the C# solution applies lossy settings across the directory and retains the correct frame ordering for end users.
+ * 1. When you need to reduce the file size of a large collection of animated GIFs for faster web page loading while keeping the original frame sequence intact.
+ * 2. When an e‑commerce platform must automatically optimize product demo GIFs stored in a folder before uploading them to a CDN.
+ * 3. When a social‑media scheduling tool has to batch‑process user‑submitted GIFs to meet size limits without breaking the animation.
+ * 4. When a desktop application generates daily GIF reports and you want to compress them on the fly to save disk space.
+ * 5. When a game developer wants to shrink animated UI icons in bulk while preserving their animation timing using C# and Aspose.Imaging.
  */

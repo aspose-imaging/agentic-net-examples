@@ -1,3 +1,4 @@
+// HOW-TO: Create 800x600 PNG With Red Ellipse Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -15,26 +16,25 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options (no source needed for creating a new image)
-            var pngOptions = new PngOptions();
+            // Create PNG options (no source needed for image creation)
+            PngOptions pngOptions = new PngOptions();
 
-            // Create a new image with the desired canvas size (800x600)
+            // Create a new image with width 800 and height 600
             using (Image image = Image.Create(pngOptions, 800, 600))
             {
                 // Initialize graphics object for drawing
-                var graphics = new Graphics(image);
+                Graphics graphics = new Graphics(image);
 
-                // Optional: clear the canvas with a background color
+                // Optional: clear background to white
                 graphics.Clear(Color.White);
 
-                // Define a red pen with a thickness of 2 pixels
-                var redPen = new Pen(Color.Red, 2);
+                // Create a red pen with thickness 2
+                Pen redPen = new Pen(Color.Red, 2);
 
-                // Draw an ellipse bounded by the specified rectangle
-                // Rectangle(x, y, width, height)
+                // Draw an ellipse bounded by the rectangle (100,100,600,400)
                 graphics.DrawEllipse(redPen, new Rectangle(100, 100, 600, 400));
 
-                // Save the image to the output path
+                // Save the image to the specified path
                 image.Save(outputPath);
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG placeholder image with a red ellipse on an 800 × 600 canvas for web UI mockups.
- * 2. When creating a custom report background in C# that requires an 800 × 600 drawing surface with a red ellipse overlay using Aspose.Imaging.
- * 3. When automating the production of printable marketing flyers that need a white PNG canvas with a centered red ellipse drawn via the graphics API.
- * 4. When developing a game asset pipeline that programmatically draws a red ellipse onto texture files to visualize hit‑area boundaries.
- * 5. When building a diagnostic tool that saves a PNG screenshot with a highlighted red ellipse to indicate a region of interest.
+ * 1. When you need to generate a PNG placeholder image with a red ellipse for UI mockups in a C# web application.
+ * 2. When you want to programmatically create a custom chart background by drawing shapes on an 800x600 canvas using Aspose.Imaging.
+ * 3. When an automated report requires a simple vector illustration, such as a red ellipse, embedded in a PNG file generated on the server.
+ * 4. When you need to produce test images for image‑processing algorithms that expect a known size and a red elliptical shape.
+ * 5. When a desktop tool must export a drawing canvas with a red ellipse to PNG for further editing in graphic design software.
  */

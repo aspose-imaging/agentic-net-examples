@@ -1,45 +1,58 @@
+// HOW-TO: Batch Convert SVG Files To 24‑Bit BMP Images In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputBmps";
 
-            Directory.CreateDirectory(outputDirectory);
+            // Get all SVG files in the input folder
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-            foreach (string inputPath in files)
+            foreach (string inputPath in svgFiles)
             {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+                // Build output BMP path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".bmp");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load SVG image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Set rasterization options for vector image
+                    var rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    };
+
+                    // Configure BMP save options with 24‑bit depth
                     var bmpOptions = new BmpOptions
                     {
                         BitsPerPixel = 24,
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        }
+                        VectorRasterizationOptions = rasterizationOptions
                     };
 
+                    // Save as BMP
                     image.Save(outputPath, bmpOptions);
                 }
             }
@@ -53,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a whole folder of SVG graphics into 24‑bit BMP images for compatibility with legacy Windows software, this C# batch‑processing code using Aspose.Imaging provides a quick solution.
- * 2. When an automated build pipeline must rasterize vector SVG assets into high‑quality BMP files with a white background for printing or documentation, the example demonstrates how to handle the conversion in .NET.
- * 3. When a web service has to generate thumbnail BMP previews of uploaded SVG files on the server side, the code shows how to iterate through a directory, load each SVG, and save it as a 24‑bit bitmap.
- * 4. When a desktop application needs to migrate a legacy image repository from scalable SVG format to fixed‑size BMP files for faster loading in older environments, this snippet illustrates the required file‑system and image‑processing steps.
- * 5. When a data‑migration script must ensure all vector icons are stored as BMP with consistent color depth before archiving, the example provides the necessary C# logic to batch convert and organize the output files.
+ * 1. When you need to generate high‑quality 24‑bit BMP thumbnails from a collection of SVG icons for a Windows desktop application.
+ * 2. When a legacy system only accepts BMP files, and you must programmatically transform a folder of vector SVG assets into compatible raster images.
+ * 3. When automating the preparation of print‑ready bitmap graphics from scalable SVG designs in a build pipeline.
+ * 4. When creating a batch conversion tool to migrate SVG artwork to BMP format for use in older game engines that require 24‑bit bitmaps.
+ * 5. When processing user‑uploaded SVG files on a server and storing them as BMPs with a white background for consistent rendering across browsers.
  */

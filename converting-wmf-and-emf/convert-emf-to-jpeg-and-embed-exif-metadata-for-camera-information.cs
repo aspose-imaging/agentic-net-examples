@@ -1,61 +1,65 @@
+// HOW-TO: Convert EMF to JPEG with Camera EXIF Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.Exif;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the whole process in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.jpg";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample_converted.jpg";
 
-            // Verify that the input EMF file exists
+            // Verify that the source EMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (Image emfImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with EXIF metadata
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure rasterization options for EMF → raster conversion
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    // Set desired JPEG quality (optional)
-                    Quality = 90,
-
-                    // Create and assign EXIF data (camera information)
-                    ExifData = new JpegExifData
-                    {
-                        Make = "Canon",               // Camera manufacturer
-                        Model = "EOS 5D Mark IV",    // Camera model
-                        // Additional optional EXIF fields can be set here
-                        // For example:
-                        // DateTimeOriginal = DateTime.Now,
-                        // FNumber = 2.8,
-                        // ExposureTime = 0.005,
-                        // ISO = 100
-                    }
+                    PageSize = ((EmfImage)image).Size,   // Preserve original size
+                    BackgroundColor = Color.White       // Optional background
                 };
 
-                // Save the image as JPEG with the specified options
-                emfImage.Save(outputPath, jpegOptions);
+                // Create EXIF data to embed in the JPEG
+                var exif = new JpegExifData
+                {
+                    Make = "MyCameraMaker",   // Camera manufacturer
+                    Model = "MyCameraModel",  // Camera model
+                    // Additional EXIF fields can be set here as needed
+                };
+
+                // Set up JPEG save options, including EXIF and rasterization
+                var jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    ExifData = exif,
+                    Quality = 90               // JPEG quality (0‑100)
+                };
+
+                // Save the image as JPEG with embedded EXIF metadata
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any error messages without crashing the program
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -63,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop publishing application needs to export vector EMF diagrams as high‑resolution JPEG thumbnails while preserving camera make and model information for downstream cataloging.
- * 2. When an automated reporting system generates charts in EMF format and must convert them to JPEG for email attachment, embedding EXIF data so the recipient can see the originating device details.
- * 3. When a legacy engineering workflow stores schematics as EMF files and a migration tool must produce JPEG images with EXIF metadata to integrate with modern asset‑management databases that rely on camera metadata fields.
- * 4. When a web service receives user‑uploaded EMF logos and needs to create JPEG previews with embedded EXIF tags so SEO tools can index the image with camera make and model attributes.
- * 5. When a batch processing script runs in C# to convert a folder of EMF drawings to JPEG files and adds EXIF camera information to satisfy compliance requirements that mandate metadata for all exported images.
+ * 1. When you need to display vector EMF drawings on web pages that only support raster JPEG images while preserving the original dimensions.
+ * 2. When a reporting system must generate JPEG thumbnails from EMF charts and include camera make and model information for downstream analytics.
+ * 3. When migrating legacy EMF assets to a photo‑management database that requires EXIF fields for sorting and searching.
+ * 4. When automating batch conversion of engineering diagrams to JPEG for inclusion in PDFs, and you want to tag them with consistent camera metadata.
+ * 5. When creating a digital archive of scanned documents where the source is EMF and you need to embed EXIF data to satisfy metadata standards.
  */

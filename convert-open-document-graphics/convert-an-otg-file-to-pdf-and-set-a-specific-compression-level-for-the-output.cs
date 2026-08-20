@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PDF with Flate Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,44 +15,44 @@ class Program
             string inputPath = @"C:\Images\sample.otg";
             string outputPath = @"C:\Images\sample.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set rasterization options for OTG conversion
-                var otgRasterizationOptions = new OtgRasterizationOptions
+                // Set up OTG rasterization options (preserve original size)
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure PDF options with a specific compression level
-                var pdfOptions = new PdfOptions
+                // Configure PDF compression (e.g., Flate compression)
+                var pdfCoreOptions = new PdfCoreOptions
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        // Choose desired compression (e.g., Flate)
-                        Compression = PdfImageCompressionOptions.Flate
-                    },
-                    // Apply the OTG rasterization settings to the PDF conversion
-                    VectorRasterizationOptions = otgRasterizationOptions
+                    Compression = PdfImageCompressionOptions.Flate
                 };
 
-                // Save the image as PDF using the configured options
+                // Combine PDF options with vector rasterization options
+                var pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = pdfCoreOptions,
+                    VectorRasterizationOptions = otgRasterOptions
+                };
+
+                // Save the image as PDF with the specified options
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy OTG vector graphics to PDF for client distribution while controlling file size with Flate compression.
- * 2. When an automated document generation service must batch‑process OTG files on a server and produce PDF reports with a specific compression level to meet storage quotas.
- * 3. When a Windows desktop application allows users to export edited OTG images to PDF and must preserve the original page size using rasterization options.
- * 4. When integrating Aspose.Imaging into a C# web API that receives OTG uploads and returns PDF streams, requiring explicit PDF core options to enforce consistent compression across all responses.
- * 5. When a scheduled C# job validates the existence of OTG assets, creates missing output directories, and converts them to PDF with Flate compression to comply with archival standards.
+ * 1. When you need to generate a searchable PDF from an OTG vector graphic while preserving its original dimensions.
+ * 2. When you want to reduce the PDF file size by applying Flate compression to the embedded images.
+ * 3. When your application must batch‑convert OTG design files to PDF for archiving or printing workflows.
+ * 4. When you need to ensure the output PDF is created using Aspose.Imaging’s PdfOptions and OtgRasterizationOptions in a .NET environment.
+ * 5. When you have to programmatically verify the source OTG file exists and create the destination folder before saving the compressed PDF.
  */

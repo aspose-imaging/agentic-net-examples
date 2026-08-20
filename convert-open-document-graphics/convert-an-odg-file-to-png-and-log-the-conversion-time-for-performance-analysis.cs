@@ -1,3 +1,4 @@
+// HOW-TO: Convert ODG to PNG and Measure Conversion Time in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "sample.odg";
-            string outputPath = "sample.png";
+            string inputPath = "input.odg";
+            string outputPath = "output\\converted.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,13 +22,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (unconditional call as required)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Start timing the conversion
+            // Measure conversion time
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-            // Load the ODG image
+            // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
                 // Set rasterization options for ODG
@@ -43,13 +44,12 @@ class Program
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the image as PNG
+                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
 
-            // Stop timing and report duration
             stopwatch.Stop();
-            Console.WriteLine($"Conversion completed in {stopwatch.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"Conversion time: {stopwatch.ElapsedMilliseconds} ms");
         }
         catch (Exception ex)
         {
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must generate web‑ready thumbnails from OpenDocument graphics (ODG) files and needs to measure the conversion speed for scaling the service.
- * 2. When an automated document‑processing pipeline converts user‑uploaded ODG diagrams to PNG for previewing in browsers while logging elapsed milliseconds to monitor performance bottlenecks.
- * 3. When a reporting tool extracts vector drawings from ODG files, rasterizes them with a white background, saves them as PNG, and records the time taken to ensure SLA compliance.
- * 4. When a batch job processes large collections of ODG assets, uses Aspose.Imaging in C# to convert each to PNG and stores conversion durations for later optimization analysis.
- * 5. When a desktop utility needs to validate that rasterization options (page size, background color) produce correct PNG output and simultaneously capture the conversion time for debugging.
+ * 1. When you need to generate web‑ready PNG thumbnails from LibreOffice ODG drawings while tracking how long each conversion takes.
+ * 2. When a batch process must convert multiple ODG files to PNG for a reporting system and you want to log the elapsed milliseconds for performance tuning.
+ * 3. When integrating Aspose.Imaging into a C# application to rasterize vector ODG pages into PNG images with a white background and measure the conversion speed.
+ * 4. When optimizing a document‑conversion pipeline and require precise timing data to compare different rasterization settings for ODG to PNG output.
+ * 5. When building a server‑side service that receives ODG uploads, converts them to PNG for preview, and records the processing time for monitoring and SLA compliance.
  */

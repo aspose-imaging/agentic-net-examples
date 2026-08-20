@@ -1,5 +1,7 @@
+// HOW-TO: Batch Convert Multiple PNG Images to PDF Using Shared MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -9,49 +11,60 @@ class Program
     {
         try
         {
-            // Hardcoded input directory containing PNG files
+            // Hardcoded input and output directories
             string inputDirectory = @"C:\InputPngs";
-            // Hardcoded output PDF file path
-            string outputPdfPath = @"C:\Output\combined.pdf";
+            string outputDirectory = @"C:\OutputPdfs";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Shared memory stream that will hold all PDF pages
-            using (MemoryStream sharedStream = new MemoryStream())
+            // Collect individual PDF streams for later processing
+            List<MemoryStream> pdfStreams = new List<MemoryStream>();
+
+            // Get all PNG files in the input directory
+            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string inputPath in pngFiles)
             {
-                // Get all PNG files in the input directory
-                string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-                foreach (string pngPath in pngFiles)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Verify the input file exists
-                    if (!File.Exists(pngPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {pngPath}");
-                        return;
-                    }
-
-                    // Load the PNG image
-                    using (Image image = Image.Load(pngPath))
-                    {
-                        // Prepare PDF export options
-                        PdfOptions pdfOptions = new PdfOptions();
-
-                        // Save the image as a PDF page into the shared stream
-                        // The stream position is advanced automatically, effectively appending pages
-                        image.Save(sharedStream, pdfOptions);
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Write the aggregated PDF data to the final output file
-                // Ensure the output directory exists (already created above)
-                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
                 {
-                    sharedStream.Position = 0;
-                    sharedStream.CopyTo(fileStream);
+                    // Prepare PDF options (default settings)
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image to a shared memory stream as PDF
+                    MemoryStream pdfStream = new MemoryStream();
+                    image.Save(pdfStream, pdfOptions);
+                    pdfStream.Position = 0; // Reset for reading later
+                    pdfStreams.Add(pdfStream);
+
+                    // Determine the output PDF file path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the output directory exists (already created above, but follow rule)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Write the PDF stream to the output file
+                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        pdfStream.CopyTo(fileStream);
+                    }
+
+                    // Reset the memory stream for potential further use
+                    pdfStream.Position = 0;
                 }
             }
+
+            // At this point, pdfStreams contains all PDFs in memory for further compression
+            // (Compression logic would be added here as needed)
         }
         catch (Exception ex)
         {
@@ -62,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge a collection of PNG screenshots from a test suite into a single PDF document for easy distribution, this code can batch‑convert and aggregate the images using a shared MemoryStream.
- * 2. When an application must generate a printable PDF catalog from a folder of product PNG images without creating intermediate files, the code streams each image directly into the combined PDF.
- * 3. When a server‑side service has to prepare a PDF portfolio of uploaded PNG receipts for compliance reporting, the shared MemoryStream approach lets it concatenate pages before applying a final compression step.
- * 4. When a desktop utility is required to archive daily PNG logs into one PDF file to save disk space, the code demonstrates how to load each PNG with Aspose.Imaging and append it to a single PDF stream.
- * 5. When a workflow automates the conversion of PNG design assets into a multi‑page PDF presentation for stakeholders, this snippet shows how to batch process the images and write the aggregated PDF in one operation.
+ * 1. When you need to generate individual PDF files from a folder of PNG scans for archival or distribution.
+ * 2. When you want to collect PDF streams in memory before applying a single compression step to reduce overall file size.
+ * 3. When an automated batch job must convert product‑catalog images to PDFs without writing temporary files to disk.
+ * 4. When a web service receives PNG uploads and must return PDF versions while keeping the conversion process efficient.
+ * 5. When you are preparing printable PDF documents from PNG assets and need to manage the output paths programmatically.
  */

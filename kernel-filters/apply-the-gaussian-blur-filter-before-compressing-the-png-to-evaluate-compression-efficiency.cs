@@ -1,20 +1,21 @@
+// HOW-TO: Apply Gaussian Blur and High Compression to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,29 +23,27 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur (kernel size 5, sigma 4.0) to the whole image
+                // Apply Gaussian blur filter (size = 5, sigma = 4.0)
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Configure PNG compression options (maximum compression)
+                // Prepare PNG save options with high compression
                 PngOptions pngOptions = new PngOptions
                 {
                     CompressionLevel = 9,
-                    // Optional: choose a filter type for better compression
-                    // FilterType = PngFilterType.Adaptive,
-                    // Optional: enable progressive loading
-                    // Progressive = true
+                    FilterType = PngFilterType.Adaptive,
+                    Progressive = true
                 };
 
-                // Save the processed image with compression
+                // Save the processed image as PNG
                 rasterImage.Save(outputPath, pngOptions);
             }
         }
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to test how much a Gaussian‑blurred PNG can be reduced in size before uploading it to a content‑delivery network, they can use this C# code with Aspose.Imaging to apply the blur and save the image with maximum compression.
- * 2. When a mobile app team needs to generate low‑bandwidth preview thumbnails by smoothing the original PNG and then compressing it at level 9, this example shows the exact steps in .NET.
- * 3. When a data‑science pipeline evaluates the trade‑off between visual quality loss from a Gaussian blur and file‑size savings in PNG format, the code demonstrates how to automate the process in C#.
- * 4. When an e‑commerce platform wants to pre‑process product photos with a subtle blur to hide sensitive details and then store them as highly compressed PNGs, this snippet provides the required filter and compression settings.
- * 5. When a QA engineer is benchmarking Aspose.Imaging’s PNG compression efficiency on blurred images to compare against other libraries, the sample illustrates loading, filtering, and saving the image using C#.
+ * 1. When you need to reduce the file size of screenshots while smoothing noise before uploading to a web server.
+ * 2. When preparing product photos for an e‑commerce catalog that require both a soft blur effect and maximum PNG compression to meet bandwidth limits.
+ * 3. When generating thumbnail previews for a mobile app where applying a Gaussian blur improves visual consistency and high compression saves storage space.
+ * 4. When automating a batch process that optimizes scanned documents by blurring artifacts and saving them as progressive PNGs with the smallest possible size.
+ * 5. When implementing a server‑side image pipeline that must apply a blur filter for privacy masking and then compress the PNG for secure archival.
  */

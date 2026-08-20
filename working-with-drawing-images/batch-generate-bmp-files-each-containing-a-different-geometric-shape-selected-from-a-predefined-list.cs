@@ -1,6 +1,7 @@
+// HOW-TO: Generate Multiple BMP Images with Different Shapes Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -10,72 +11,77 @@ class Program
     {
         try
         {
-            // Output directory for generated BMP files
-            string outputDir = @"C:\Temp\Shapes";
-            Directory.CreateDirectory(outputDir);
-
-            // Canvas dimensions
-            int canvasWidth = 500;
-            int canvasHeight = 500;
+            // Define canvas size
+            const int canvasWidth = 500;
+            const int canvasHeight = 500;
 
             // List of shapes to draw
-            string[] shapeNames = new string[] { "Rectangle", "Ellipse", "Line", "Polygon", "Pie", "Arc" };
-
-            foreach (string shape in shapeNames)
+            var shapes = new List<string>
             {
-                // Output file path for the current shape
-                string outputPath = Path.Combine(outputDir, shape + ".bmp");
+                "Rectangle",
+                "Ellipse",
+                "Line",
+                "Polygon",
+                "Arc",
+                "Pie"
+            };
 
-                // Ensure the output directory exists (rule 3)
+            foreach (var shapeName in shapes)
+            {
+                // Output file path (hardcoded)
+                string outputPath = Path.Combine("output", $"shape_{shapeName}.bmp");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure BMP options and bind to the output file
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 24;
-                Source source = new FileCreateSource(outputPath, false);
-                bmpOptions.Source = source;
+                // Create BMP options with file source
+                var bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                // Create the canvas image
-                using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+                // Create image canvas
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, canvasWidth, canvasHeight))
                 {
                     // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                    graphics.Clear(Aspose.Imaging.Color.White);
 
-                    // Common pen for drawing shapes
-                    Pen pen = new Pen(Color.Black, 3);
+                    // Common pen
+                    var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 3);
 
-                    // Draw the selected shape
-                    switch (shape)
+                    // Draw specific shape
+                    switch (shapeName)
                     {
                         case "Rectangle":
-                            graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 300));
+                            graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(100, 100, 300, 200));
                             break;
                         case "Ellipse":
-                            graphics.DrawEllipse(pen, new Rectangle(50, 50, 400, 300));
+                            graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(100, 100, 300, 200));
                             break;
                         case "Line":
-                            graphics.DrawLine(pen, new Point(50, 50), new Point(450, 450));
+                            graphics.DrawLine(pen, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(450, 450));
                             break;
                         case "Polygon":
                             graphics.DrawPolygon(pen, new[]
                             {
-                                new Point(250, 50),
-                                new Point(450, 250),
-                                new Point(250, 450),
-                                new Point(50, 250)
+                                new Aspose.Imaging.Point(250, 50),
+                                new Aspose.Imaging.Point(450, 250),
+                                new Aspose.Imaging.Point(250, 450),
+                                new Aspose.Imaging.Point(50, 250)
                             });
                             break;
-                        case "Pie":
-                            graphics.DrawPie(pen, new Rectangle(100, 100, 300, 300), 0, 120);
-                            break;
                         case "Arc":
-                            graphics.DrawArc(pen, new Rectangle(100, 100, 300, 300), 0, 120);
+                            graphics.DrawArc(pen, new Aspose.Imaging.Rectangle(100, 100, 300, 300), 0, 270);
+                            break;
+                        case "Pie":
+                            graphics.DrawPie(pen, new Aspose.Imaging.Rectangle(100, 100, 300, 300), 0, 90);
                             break;
                     }
 
-                    // Save the canvas (output is already bound to the file)
-                    canvas.Save();
+                    // Save the image (bound to source, so just call Save())
+                    image.Save();
                 }
             }
         }
@@ -88,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically generate a set of BMP icons that each display a different geometric shape for use in a Windows desktop application's toolbar.
- * 2. When a testing team requires a batch of sample BMP images containing predefined shapes to validate image processing algorithms such as shape detection or edge detection in C#.
- * 3. When a documentation generator must create visual examples of drawing primitives (rectangle, ellipse, line, polygon, pie, arc) in BMP format to illustrate Aspose.Imaging graphics capabilities.
- * 4. When an e‑learning platform wants to programmatically produce lesson assets showing basic geometric figures in 24‑bit BMP files for inclusion in interactive quizzes.
- * 5. When a game developer needs to pre‑render simple shape sprites as BMP files to be loaded quickly at runtime without relying on external design tools.
+ * 1. When you need to create a set of BMP files that each show a specific geometric shape for testing image‑processing algorithms or UI components.
+ * 2. When you want to automate the production of sample graphics such as rectangles, ellipses, lines, polygons, arcs, and pies for documentation or training material.
+ * 3. When a game or simulation requires pre‑rendered shape assets in BMP format that can be loaded quickly at runtime.
+ * 4. When you are benchmarking drawing performance in Aspose.Imaging by measuring how fast each shape can be rendered to a 24‑bit BMP canvas.
+ * 5. When you need to generate placeholder images for a web service that expects BMP files containing distinct shapes for validation or mock‑up purposes.
  */

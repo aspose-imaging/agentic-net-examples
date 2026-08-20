@@ -1,8 +1,9 @@
+// HOW-TO: Convert PNG to SVG with 16-Color Palette Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,34 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
+            // Hard‑coded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.svg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to work with palette helper
+                // Cast to RasterImage to work with pixel data
                 RasterImage raster = (RasterImage)image;
 
-                // Generate a palette with 16 colors using histogram mining
+                // Generate a 16‑color palette using the histogram mining method
                 IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(
                     raster,
                     16,
                     PaletteMiningMethod.Histogram);
 
-                // Prepare SVG save options with the generated palette
-                SvgOptions svgOptions = new SvgOptions
+                // Prepare SVG save options and assign the palette
+                var svgOptions = new SvgOptions
                 {
                     Palette = palette
                 };
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution PNG graphics into lightweight SVG files with a limited 16‑color palette for faster web page loading.
- * 2. When an application must generate scalable vector icons from existing PNG assets while preserving color consistency by using histogram‑based palette reduction.
- * 3. When a batch‑processing tool has to ensure that PNG logos are transformed into SVG format that complies with a corporate brand palette of 16 colors.
- * 4. When a mobile app requires vector images with a small color table to reduce memory usage, and the code extracts a 16‑color palette before saving as SVG.
- * 5. When an automated workflow needs to validate that a PNG file exists, create the output directory, and then export the image as SVG with a custom palette for downstream printing pipelines.
+ * 1. When you need to embed a small PNG graphic in a web page as scalable SVG while limiting colors to reduce file size.
+ * 2. When converting legacy PNG icons to SVG for responsive UI designs and you want a fixed 16‑color palette for consistency.
+ * 3. When generating SVG assets for printing or laser cutting and you must ensure the image uses a limited palette to match device constraints.
+ * 4. When optimizing graphics for low‑bandwidth mobile apps by converting PNGs to SVG with a reduced color set using C#.
+ * 5. When automating batch processing of PNG assets to SVG with a specific palette for a design system using Aspose.Imaging.
  */

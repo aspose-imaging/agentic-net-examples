@@ -1,3 +1,4 @@
+// HOW-TO: Rotate a GraphicsPath 45 Degrees Around Center in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,26 +12,41 @@ class Program
     {
         try
         {
+            // Output file path
             string outputPath = "output.png";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Set up PNG options with a file source
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
+            // Create a new image canvas
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Color.Wheat);
 
-                RectangleF rect = new RectangleF(150f, 150f, 200f, 200f);
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(rect));
+                // Build a graphics path with a rectangle and an ellipse
                 GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 300f)));
+                figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
                 path.AddFigure(figure);
 
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawPath(pen, path);
+                // Rotate the path 45 degrees around the image center
+                float centerX = image.Width / 2f;
+                float centerY = image.Height / 2f;
+                graphics.TranslateTransform(centerX, centerY);
+                graphics.RotateTransform(45);
+                graphics.TranslateTransform(-centerX, -centerY);
 
+                // Draw the rotated path
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+                // Save the image (source is already bound to the file)
                 image.Save();
             }
         }
@@ -43,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG badge with a logo that is rotated 45 degrees using Graphics.RotateTransform to create a tilted square for branding.
- * 2. When creating a technical illustration where a rectangular annotation must be rotated 45 degrees around its center with Graphics.RotateTransform to match a slanted axis.
- * 3. When producing a game UI asset such as a compass needle that requires a 45‑degree rotation of a rectangle via Graphics.RotateTransform and saving the result as a transparent PNG.
- * 4. When automating printable label preparation where a rectangle is rotated 45 degrees around its center using Graphics.RotateTransform to fit a diagonal layout on the sheet.
- * 5. When building a data‑visualization report that overlays a rotated rectangle on a chart, applying Graphics.RotateTransform to the GraphicsPath and exporting the image as a high‑resolution PNG.
+ * 1. When you need to generate a PNG thumbnail that shows a rectangle and ellipse rotated for a dynamic UI icon.
+ * 2. When creating a custom watermark that must be tilted at a 45-degree angle around the image center.
+ * 3. When producing printable diagrams where shapes must be rotated to align with design specifications.
+ * 4. When developing a game asset pipeline that requires pre-rotated vector shapes saved as PNG files.
+ * 5. When automating report graphics that need a consistent 45-degree rotation of composite shapes for visual emphasis.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Crop Top Right Quadrant of Image and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.pdf";
 
@@ -27,21 +28,23 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access cropping functionality
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
                 // Define the top‑right quadrant rectangle
-                int halfWidth = rasterImage.Width / 2;
-                int halfHeight = rasterImage.Height / 2;
-                Rectangle topRight = new Rectangle(halfWidth, 0, halfWidth, halfHeight);
+                int rectX = raster.Width / 2;          // start at middle of width
+                int rectY = 0;                         // top edge
+                int rectWidth = raster.Width / 2;      // half the width
+                int rectHeight = raster.Height / 2;    // half the height
+                Rectangle cropArea = new Rectangle(rectX, rectY, rectWidth, rectHeight);
 
                 // Crop the image to the defined rectangle
-                rasterImage.Crop(topRight);
+                raster.Crop(cropArea);
 
                 // Prepare PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
 
                 // Save the cropped image as a PDF document
-                rasterImage.Save(outputPath, pdfOptions);
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PDF report that only needs the top‑right portion of a scanned PNG diagram, a developer can load the raster image, crop the quadrant, and save it as a PDF using Aspose.Imaging for .NET.
- * 2. When creating thumbnails for a web portal that display only the upper‑right corner of product photos, the code can crop the PNG and output a PDF for consistent document rendering.
- * 3. When extracting a specific region from a large satellite PNG image for inclusion in a GIS PDF map, a developer can use this snippet to isolate the top‑right quadrant and save it directly as a PDF.
- * 4. When automating the conversion of user‑uploaded PNG signatures to PDF files that contain only the signature area located in the top‑right corner, the code provides a quick C# solution.
- * 5. When preparing printable PDF handouts that require only the top‑right section of a scanned form to be shown, the developer can employ this routine to crop the raster image and generate the PDF in one step.
+ * 1. When you need to extract the top‑right quarter of a PNG screenshot and embed it in a PDF report.
+ * 2. When generating a PDF preview of a specific region of a scanned raster image for a document management system.
+ * 3. When creating printable PDF handouts that contain only the upper‑right portion of a large product photo.
+ * 4. When automating the conversion of a selected image quadrant into a PDF for use in e‑learning slide decks.
+ * 5. When developing a web service that returns a PDF containing a cropped area of an uploaded raster image for client‑side display.
  */

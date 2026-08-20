@@ -33,9 +33,6 @@ Examples and tasks in this folder:
 
 | Example |
 |---------|
-| [load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs](./load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs) |
-| [batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs](./batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs) |
-| [batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs](./batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs) |
 | [apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs](./apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs) |
 | [batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs](./batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs) |
 | [batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs](./batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs) |

@@ -1,6 +1,6 @@
+// HOW-TO: Create Lossless APNG from PNG with Maximum Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output\\output.apng";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,21 +23,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage sourceImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    PngCompressionLevel = PngCompressionLevel.ZipLevel9
+                    PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apng.RemoveAllFrames();
-                    apng.AddFrame(sourceImage);
-                    apng.Save();
+                    apngImage.RemoveAllFrames();
+                    apngImage.AddFrame(sourceImage);
+                    apngImage.Save();
                 }
             }
         }
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a single PNG asset into an animated PNG (APNG) with lossless compression for high‑quality web animations.
- * 2. When a game developer wants to generate lightweight, losslessly compressed APNG sprites on the fly using C# and Aspose.Imaging to ensure crisp visuals across devices.
- * 3. When an e‑learning platform must embed the original PNG color profile into an APNG tutorial slide to preserve accurate colors while delivering animated content.
- * 4. When a desktop application has to batch‑process user‑uploaded PNGs into APNG files with a fixed frame duration and maximum ZIP compression for archival storage.
- * 5. When a digital publishing workflow requires programmatically creating APNG files from source images in .NET, preserving truecolor with alpha and embedding ICC profile data for print‑ready output.
+ * 1. When you need to generate an animated PNG for a web banner while preserving the original PNG’s color fidelity and using lossless compression.
+ * 2. When a desktop application must convert user‑uploaded PNG assets into APNG files for high‑quality animations without increasing file size.
+ * 3. When an e‑learning platform requires embedding a single‑frame PNG into an APNG container to support browsers that only recognize animated PNGs.
+ * 4. When a game developer wants to batch‑process sprites, saving them as APNGs with maximum zip compression to reduce download time while keeping exact colors.
+ * 5. When a digital publishing workflow needs to add a color‑profile‑aware APNG to a PDF, ensuring the image remains lossless during the conversion.
  */

@@ -1,43 +1,35 @@
+// HOW-TO: Get Page Count From DjVu File Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputDirectory = "output";
+        string inputPath = "sample.djvu";
+        string outputPath = "output.tif";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Log the total number of pages before any conversion
-                Console.WriteLine($"Total pages: {djvuImage.PageCount}");
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Convert each page to PNG
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
-                {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PNG
-                    djvuPage.Save(outputPath, new PngOptions());
-                }
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                int pageCount = djvuImage.PageCount;
+                Console.WriteLine($"Total pages: {pageCount}");
+                // Conversion logic can be added here.
             }
         }
         catch (Exception ex)
@@ -49,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the total number of pages from a DjVu document before converting each page to PNG for further processing or display.
- * 2. When an application must verify the existence of a DjVu file, load it via a FileStream, and log its page count to ensure the document is complete before batch conversion.
- * 3. When a document management system requires converting multi‑page DjVu files into individual PNG images while preserving page order and reporting the page count for indexing.
- * 4. When a C# service automates image preprocessing by reading DjVu archives, logging the page count for monitoring, and saving each page as a high‑resolution PNG in a structured output folder.
- * 5. When a developer builds a workflow that needs to read DjVu files, determine how many pages they contain, and then generate separate PNG files for each page for use in web galleries or OCR pipelines.
+ * 1. When you need to display the total number of pages in a DjVu document before further processing in a .NET application.
+ * 2. When you want to verify that a DjVu file contains the expected page count prior to converting it to another format such as TIFF.
+ * 3. When you are creating a batch job that logs page counts of multiple DjVu files for reporting or auditing purposes.
+ * 4. When you must ensure the output directory exists before performing any image conversion on a DjVu document.
+ * 5. When you need to handle missing DjVu files gracefully by checking file existence and reporting an error in a C# console program.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Parallel Convert Multiple WMF Files to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ class Program
     {
         try
         {
-            // Hard‑coded list of WMF files to convert.
+            // Hardcoded list of WMF input files
             string[] inputFiles = new[]
             {
                 @"C:\Images\sample1.wmf",
@@ -18,29 +19,29 @@ class Program
                 @"C:\Images\sample3.wmf"
             };
 
-            // Process each file in parallel.
+            // Parallel conversion to JPEG
             Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Verify the input file exists.
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output JPEG path.
+                // Determine output path (same folder, .jpg extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".jpg");
 
-                // Ensure the output directory exists.
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WMF image and save it as JPEG.
+                // Load WMF image and save as JPEG
                 using (Image image = Image.Load(inputPath))
                 {
-                    var jpegOptions = new JpegOptions
+                    // Use default JPEG options; customize if needed
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        // Optional: set quality (0‑100). Default is 90.
-                        Quality = 90
+                        Quality = 90 // example quality setting
                     };
 
                     image.Save(outputPath, jpegOptions);
@@ -58,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a large collection of legacy WMF vector drawings into web‑friendly JPEG thumbnails quickly, they can use this parallel conversion code.
- * 2. When an automated build or CI pipeline must generate JPEG previews of WMF assets for documentation or UI mockups, the Parallel.ForEach loop speeds up processing.
- * 3. When a desktop application imports user‑provided WMF files and must store them as compressed JPEGs for faster loading and reduced disk usage, this code handles the conversion in parallel.
- * 4. When a server‑side service processes incoming WMF uploads and needs to deliver JPEG versions to browsers or mobile clients, the parallel approach minimizes response time.
- * 5. When a migration script moves legacy WMF graphics from an old file system to a new media library that only supports JPEG, the code provides a thread‑safe, high‑performance conversion method.
+ * 1. When you need to speed up batch conversion of legacy WMF graphics to JPEG for a web gallery.
+ * 2. When processing a large set of vector drawings on a server and want to generate raster JPEG thumbnails concurrently.
+ * 3. When automating migration of old Windows Metafile assets to a modern image format in a multi‑core environment.
+ * 4. When integrating image conversion into a CI pipeline that must handle many WMF files quickly.
+ * 5. When building a desktop tool that lets users select several WMF files and converts them to JPEG with minimal code.
  */

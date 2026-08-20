@@ -1,58 +1,43 @@
+// HOW-TO: Add Frame Index Labels to APNG and Export as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.apng";
             string outputPath = "output.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG image
-            using (Image apngImage = Image.Load(inputPath))
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Determine the number of frames in the APNG
-                int frameCount = 0;
-                if (apngImage is IMultipageImage multipage)
+                for (int i = 0; i < apng.PageCount; i++)
                 {
-                    frameCount = multipage.PageCount;
+                    ApngFrame frame = (ApngFrame)apng.Pages[i];
+                    Graphics graphics = new Graphics(frame);
+                    Font font = new Font("Arial", 12);
+                    SolidBrush brush = new SolidBrush(Color.Yellow);
+                    graphics.DrawString($"Frame {i}", font, brush, new Point(5, 5));
                 }
 
-                // Log frame indices (these act as comments for each frame)
-                for (int i = 0; i < frameCount; i++)
-                {
-                    Console.WriteLine($"Processing frame index: {i}");
-                    // In a real scenario, you could embed metadata per frame here.
-                }
-
-                // Prepare GIF save options
                 GifOptions gifOptions = new GifOptions();
-
-                // Export APNG to GIF
-                apngImage.Save(outputPath, gifOptions);
+                apng.Save(outputPath, gifOptions);
             }
-
-            Console.WriteLine("APNG successfully exported to GIF.");
         }
         catch (Exception ex)
         {
@@ -63,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert animated PNG (APNG) assets to GIF format for compatibility with older browsers while preserving the original frame order as comments.
- * 2. When a mobile app team wants to generate lightweight GIF previews from high‑resolution APNG files and embed frame‑index metadata for later debugging or analytics.
- * 3. When an e‑learning platform must batch‑process course illustrations stored as APNG and export them to GIF for use in slide decks, while logging each frame’s original index.
- * 4. When a game studio automates the creation of sprite sheets by converting APNG animations to GIF and annotating each frame with its source index for texture atlasing pipelines.
- * 5. When a digital marketing system needs to transform user‑uploaded APNG memes into GIFs for social media sharing and retain frame‑by‑frame comments to track editing history.
+ * 1. When you need to convert an animated PNG to a GIF while showing each original frame number on the animation for debugging or documentation.
+ * 2. When you want to embed frame index watermarks into an APNG before exporting it as a GIF for use in presentations or tutorials.
+ * 3. When a game developer must generate a GIF preview of sprite animations and include the frame order as on‑screen labels.
+ * 4. When a web application needs to display an APNG as a GIF with visible frame numbers to help users understand the animation sequence.
+ * 5. When automating image processing pipelines with Aspose.Imaging in C# to annotate each frame of an APNG and produce a GIF for platforms that only support GIF animation.
  */

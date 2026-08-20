@@ -1,3 +1,4 @@
+// HOW-TO: Generate Multiple Random Line BMP Images for Testing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,46 +11,56 @@ class Program
     {
         try
         {
-            int imageCount = 5;          // Number of BMP files to generate
-            int width = 200;             // Canvas width
-            int height = 200;            // Canvas height
-            Random rand = new Random();
+            // Output directory (relative)
+            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            Directory.CreateDirectory(outputDir);
 
-            for (int i = 1; i <= imageCount; i++)
+            int imageCount = 10;          // Number of BMP files to generate
+            int width = 500;              // Canvas width
+            int height = 500;             // Canvas height
+            Random rnd = new Random();
+
+            for (int i = 0; i < imageCount; i++)
             {
-                // Output file path (hard‑coded)
-                string outputPath = $"Output/image_{i}.bmp";
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDir, $"image_{i}.bmp");
+                // Ensure the directory exists before saving
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create a bound BMP image using FileCreateSource
+                // Create BMP options with file source
                 Source source = new FileCreateSource(outputPath, false);
-                BmpOptions bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
-
-                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    // Draw random lines onto the canvas
+                    Source = source,
+                    BitsPerPixel = 24
+                };
+
+                // Create a new BMP image (bound to the file source)
+                using (Image canvas = Image.Create(bmpOptions, width, height))
+                {
+                    // Draw on the canvas
                     Graphics graphics = new Graphics(canvas);
-                    int lines = 10;
+                    graphics.Clear(Color.White);
+
+                    int lines = rnd.Next(5, 11); // Random number of lines per image
                     for (int l = 0; l < lines; l++)
                     {
-                        // Random color and pen width
-                        Aspose.Imaging.Color lineColor = Aspose.Imaging.Color.FromArgb(
-                            255,
-                            rand.Next(256),
-                            rand.Next(256),
-                            rand.Next(256));
-                        Pen pen = new Pen(lineColor, rand.Next(1, 5));
-
                         // Random start and end points
-                        Point start = new Point(rand.Next(width), rand.Next(height));
-                        Point end = new Point(rand.Next(width), rand.Next(height));
+                        int x1 = rnd.Next(width);
+                        int y1 = rnd.Next(height);
+                        int x2 = rnd.Next(width);
+                        int y2 = rnd.Next(height);
 
-                        graphics.DrawLine(pen, start, end);
+                        // Random color
+                        Color lineColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+
+                        // Random thickness between 1 and 5
+                        float thickness = (float)rnd.NextDouble() * 4f + 1f;
+
+                        Pen pen = new Pen(lineColor, thickness);
+                        graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
                     }
 
-                    // Save the bound image (no path needed)
+                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -63,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a QA engineer needs a set of sample BMP images with unpredictable line patterns to validate image rendering performance in a C# application.
- * 2. When a developer is creating stress‑test data for a graphics pipeline that reads 24‑bit BMP files and must handle varying colors and pen widths.
- * 3. When a machine‑learning researcher wants to generate synthetic training data of random line drawings stored as BMP files for a line‑detection algorithm.
- * 4. When a software vendor needs to demonstrate the Aspose.Imaging API’s ability to create bound images using FileCreateSource and draw graphics with the Graphics class.
- * 5. When an automated build script must produce placeholder BMP assets with random content to ensure downstream tools correctly process image files in a .NET CI/CD workflow.
+ * 1. When you need a set of sample BMP files with varied line drawings to benchmark image processing algorithms.
+ * 2. When creating synthetic test data for computer vision models that detect line patterns in bitmap images.
+ * 3. When populating a UI component with placeholder graphics to evaluate rendering performance in a .NET application.
+ * 4. When automating stress tests for file I/O and memory usage by writing dozens of BMP files with random content.
+ * 5. When generating visual assets for unit tests that require deterministic yet unpredictable line configurations.
  */

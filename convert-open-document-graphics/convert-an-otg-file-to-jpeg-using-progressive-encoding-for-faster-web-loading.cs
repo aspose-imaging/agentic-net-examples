@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to Progressive JPEG in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,33 +7,40 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.otg";
+        string outputPath = "sample_converted.jpg";
+
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.jpg";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Load the OTG image
             using (Image image = Image.Load(inputPath))
-            using (JpegOptions jpegOptions = new JpegOptions())
             {
-                // Set progressive JPEG compression
-                jpegOptions.CompressionType = JpegCompressionMode.Progressive;
+                // Configure JPEG options with progressive compression
+                var jpegOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // optional: set desired quality (1-100)
+                };
 
-                // Configure vector rasterization for OTG
-                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                // Set vector rasterization options for OTG conversion
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-                jpegOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                jpegOptions.VectorRasterizationOptions = otgRasterOptions;
 
                 // Save as JPEG
                 image.Save(outputPath, jpegOptions);
@@ -47,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to display vector‑based OTG diagrams on a website and wants faster page loads by serving progressive JPEG images.
- * 2. When an e‑commerce platform must convert product schematics stored as OTG files into web‑friendly JPEG thumbnails that load incrementally for better user experience.
- * 3. When a mobile app generates OTG charts on the server and requires them to be rasterized and saved as progressive JPEGs to reduce bandwidth consumption on slow networks.
- * 4. When a content management system automates the ingestion of OTG assets and needs to store them as progressive JPEG files for SEO‑optimized image indexing.
- * 5. When a reporting tool exports OTG‑based technical drawings to JPEG with progressive compression so that large images can be previewed instantly in browsers.
+ * 1. When a web application needs to display vector‑based OTG graphics as fast‑loading progressive JPEGs for browsers.
+ * 2. When an e‑commerce platform must batch‑convert product illustrations stored in OTG format to high‑quality JPEGs with progressive compression to improve page load speed.
+ * 3. When a content management system imports OTG files and needs to store them as JPEGs that render progressively on mobile devices.
+ * 4. When a reporting tool generates charts in OTG and requires them to be saved as JPEG images with adjustable quality for email attachments.
+ * 5. When a migration script moves legacy OTG assets to a JPEG format while preserving vector details through rasterization options.
  */

@@ -1,7 +1,9 @@
+// HOW-TO: Apply Gaussian Blur to Multiple PSD Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -9,22 +11,23 @@ class Program
     {
         try
         {
-            // Hard‑coded input PSD files
-            string[] inputPaths = {
-                @"C:\Images\image1.psd",
-                @"C:\Images\image2.psd",
-                @"C:\Images\image3.psd"
+            // Hardcoded input PSD files and corresponding sigma values
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\Input\image1.psd",
+                @"C:\Images\Input\image2.psd",
+                @"C:\Images\Input\image3.psd"
             };
 
-            // Corresponding sigma values for each image
-            double[] sigmas = { 2.0, 4.5, 3.2 };
+            double[] sigmaValues = new double[] { 2.0, 4.5, 6.0 };
 
-            // Fixed blur radius (same for all images)
-            int radius = 5;
+            // Ensure the arrays have the same length
+            int count = Math.Min(inputPaths.Length, sigmaValues.Length);
 
-            for (int i = 0; i < inputPaths.Length; i++)
+            for (int i = 0; i < count; i++)
             {
                 string inputPath = inputPaths[i];
+                double sigma = sigmaValues[i];
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -33,23 +36,30 @@ class Program
                     return;
                 }
 
-                // Determine output PNG path (same folder, same name, .png extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".png");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load PSD image
+                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to apply filters
-                    RasterImage raster = (RasterImage)image;
+                    RasterImage rasterImage = image as RasterImage;
+                    if (rasterImage == null)
+                    {
+                        Console.Error.WriteLine($"Unable to process non-raster image: {inputPath}");
+                        continue;
+                    }
 
-                    // Apply Gaussian blur with specified radius and sigma
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(radius, sigmas[i]));
+                    // Apply Gaussian blur with radius 5 and the specified sigma
+                    int radius = 5;
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(radius, sigma));
 
-                    // Save the blurred image as PNG
-                    raster.Save(outputPath);
+                    // Prepare output PNG path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_blurred.png";
+                    string outputPath = Path.Combine(@"C:\Images\Output", outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PNG using default options
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -62,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team needs to batch‑process a set of Photoshop PSD files to create soft‑focused preview PNGs for a web gallery, a developer can use this code to apply custom Gaussian blur sigma values per image and save the results as PNG.
- * 2. When an e‑learning platform must generate blurred background images from layered PSD assets for slide templates, the code lets a C# developer load each PSD, apply a radius‑based Gaussian blur with image‑specific sigma, and output PNG files.
- * 3. When a digital asset management system requires automated conversion of high‑resolution PSD artwork into low‑resolution PNG thumbnails with varying blur intensity for privacy compliance, this snippet provides the necessary file‑format conversion and per‑image blur control.
- * 4. When a game developer wants to pre‑process character portrait PSDs by applying different levels of Gaussian blur before packaging them as PNG textures for performance‑optimized loading, the code handles the batch processing in .NET.
- * 5. When a publishing workflow needs to create print‑ready PNG proofs from source PSD files while softening each page with a custom sigma to reduce visual noise, a developer can employ this Aspose.Imaging example to automate the task.
+ * 1. When you need to batch‑process Photoshop PSD layers by applying a custom Gaussian blur to each file before publishing them as web‑ready PNGs.
+ * 2. When an automated pipeline must soften product mockups with different blur intensities (sigma values) and output PNG thumbnails for a catalog.
+ * 3. When you want to prepare PSD assets for machine‑learning training by reducing detail with varying blur levels and saving them in a lossless format.
+ * 4. When a desktop application requires converting multiple PSD designs into blurred PNG previews with specific sigma settings for UI display.
+ * 5. When a server‑side service generates blurred background images from PSD sources, using Aspose.Imaging to apply per‑image sigma values and store the results as PNG files.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS to 16‑Bit PSD for High Quality Editing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,36 +9,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\output.psd";
-
         try
         {
-            // Verify that the input EPS file exists
+            // Hardcoded input and output file paths
+            string inputPath = "input.eps";
+            string outputPath = "output.psd";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the EPS image
+            // Load EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD saving options for 16‑bit per channel depth
+                // Configure PSD saving options for 16‑bit per channel
                 var psdOptions = new PsdOptions
                 {
                     ChannelBitsCount = 16,                     // 16 bits per channel
                     ChannelsCount = 4,                         // RGBA
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-                    Version = 6                                 // Default PSD version
+                    ColorMode = ColorModes.Rgb,                // RGB color mode
+                    CompressionMethod = CompressionMethod.Raw, // No compression
+                    Version = 6                                // PSD version 6
                 };
 
-                // Save the image as PSD using the configured options
+                // Save as PSD
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert vector EPS artwork to a 16‑bit per channel PSD file for high‑quality raster editing in Photoshop, a developer can use this C# code to automate the conversion.
- * 2. When a printing workflow requires preserving color depth while transforming EPS logos into PSD layers for further retouching, the code provides a reliable .NET solution.
- * 3. When a digital asset management system must batch‑process EPS files into PSD format with 16‑bit depth to maintain image fidelity before archiving, this snippet handles the conversion programmatically.
- * 4. When an e‑learning platform wants to render EPS illustrations as editable PSD files for instructors to customize, the code enables seamless conversion using Aspose.Imaging for .NET.
- * 5. When a web service offers on‑the‑fly conversion of uploaded EPS files to high‑resolution PSD files for designers to download, the example demonstrates the necessary C# implementation.
+ * 1. When you need to import vector EPS artwork into Photoshop for detailed retouching while preserving 16‑bit color depth.
+ * 2. When an automated .NET pipeline must transform EPS logos into PSD files for further layer‑based editing.
+ * 3. When a print‑ready workflow requires converting EPS designs to PSD with RGBA channels and raw compression to maintain image fidelity.
+ * 4. When a digital asset management system stores EPS files but needs to generate PSD previews with 16‑bit per channel for high‑resolution displays.
+ * 5. When a batch conversion tool in C# must ensure the output PSD uses version 6 and no compression for compatibility with legacy Photoshop versions.
  */

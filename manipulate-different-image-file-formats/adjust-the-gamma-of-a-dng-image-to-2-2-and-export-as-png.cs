@@ -1,3 +1,4 @@
+// HOW-TO: Adjust Gamma of DNG Image to 2.2 and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,25 +11,29 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "c:\\temp\\input.dng";
-            string outputPath = "c:\\temp\\output.png";
+            // Hard‑coded input and output file paths
+            string inputPath = @"c:\temp\sample.dng";
+            string outputPath = @"c:\temp\sample.adjusted.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DNG image, adjust gamma, and save as PNG
+            // Load the DNG image
             using (Image image = Image.Load(inputPath))
             {
                 DngImage dngImage = (DngImage)image;
+
+                // Apply gamma correction (2.2) to all colour channels
                 dngImage.AdjustGamma(2.2f);
+
+                // Save the result as PNG
                 dngImage.Save(outputPath, new PngOptions());
             }
         }
@@ -41,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to convert raw DNG files to web‑ready PNGs with a standard 2.2 gamma for accurate color display on browsers, they can use this C# code with Aspose.Imaging.
- * 2. When a digital asset management system must batch‑process raw camera images to apply gamma correction and store them as lossless PNGs for archival, the code provides a straightforward solution.
- * 3. When a mobile app backend receives raw DNG uploads and must generate display‑ready PNG thumbnails with proper gamma for consistent visual quality, developers can employ this snippet.
- * 4. When an e‑commerce platform wants to showcase product photos captured in raw format by adjusting gamma to 2.2 and converting them to PNG for fast loading, the code handles the transformation.
- * 5. When a scientific imaging workflow requires correcting the gamma of raw DNG microscope images before exporting them as PNGs for analysis and reporting, this C# example fulfills the need.
+ * 1. When a photographer needs to correct the exposure of a raw DNG file for web display by applying a 2.2 gamma curve and converting it to a lightweight PNG format using C#.
+ * 2. When a scientific imaging application must standardize the gamma of raw sensor data (DNG) before archiving it as lossless PNG files for downstream analysis.
+ * 3. When an e‑commerce platform wants to generate product thumbnails from raw camera shots, adjusting gamma to match typical monitor settings and saving them as PNGs via Aspose.Imaging in .NET.
+ * 4. When a mobile app backend processes user‑uploaded DNG photos, applying gamma correction to improve visual consistency and exporting the result as PNG for fast delivery.
+ * 5. When a batch‑processing tool automates the conversion of a collection of DNG images to PNG while ensuring a consistent 2.2 gamma for accurate color reproduction in C# projects.
  */

@@ -1,63 +1,56 @@
+// HOW-TO: Resize JPEG and Add Password Protected Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths and password
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_signed.jpg";
-        string password = "SecurePassword123";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output/resized_signed.jpg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Ensure we are working with a raster image
-                if (image is RasterImage rasterImage)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            {
+                // Define maximum width while preserving aspect ratio
+                int maxWidth = 800;
+                int newWidth = image.Width;
+                int newHeight = image.Height;
+
+                if (image.Width > maxWidth)
                 {
-                    // Desired maximum width (maintain aspect ratio)
-                    const int maxWidth = 800;
-
-                    // Calculate new dimensions while preserving aspect ratio
-                    int originalWidth = rasterImage.Width;
-                    int originalHeight = rasterImage.Height;
-
-                    if (originalWidth > maxWidth)
-                    {
-                        double aspectRatio = (double)originalHeight / originalWidth;
-                        int newWidth = maxWidth;
-                        int newHeight = (int)Math.Round(maxWidth * aspectRatio);
-
-                        // Resize the image
-                        rasterImage.Resize(newWidth, newHeight);
-                    }
-
-                    // Embed digital signature using the provided password
-                    rasterImage.EmbedDigitalSignature(password);
-
-                    // Save the processed image
-                    rasterImage.Save(outputPath);
+                    newWidth = maxWidth;
+                    newHeight = (int)((double)image.Height * maxWidth / image.Width);
                 }
-                else
+
+                // Resize image
+                image.Resize(newWidth, newHeight);
+
+                // Embed digital signature with a secure password
+                image.EmbedDigitalSignature("SecurePass123");
+
+                // Save with JPEG options
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                }
+                    Quality = 90
+                };
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded JPEG photos while preserving the original aspect ratio and then protect the files with a password‑protected digital signature before storing them on the server.
- * 2. When an e‑commerce platform must automatically downsize high‑resolution product images to a maximum width of 800 px for faster page loads, and embed a secure signature to verify image authenticity during the upload pipeline.
- * 3. When a document management system processes scanned JPEG documents, resizes them to fit within a standard layout, and applies a password‑protected digital signature to ensure tamper‑evidence before archiving.
- * 4. When a mobile backend service receives JPEG images from devices, reduces their dimensions to meet bandwidth constraints, and embeds a cryptographic signature using a known password to validate the source on later retrieval.
- * 5. When a digital asset workflow needs to prepare marketing JPEG assets by resizing them for social‑media specifications while embedding a secure digital signature to guarantee the brand’s ownership during distribution.
+ * 1. When you need to shrink large photos for web pages while keeping their original proportions and ensure the file cannot be altered without a password.
+ * 2. When an e‑commerce platform must generate product thumbnails that are smaller than 800 px wide and embed a secure digital signature for authenticity.
+ * 3. When a document management system processes uploaded JPEG scans, resizes them to a standard width and signs them to prevent tampering.
+ * 4. When a mobile app prepares user‑taken pictures for cloud storage, reducing file size and adding a password‑protected signature for compliance.
+ * 5. When a legal firm archives evidence images, automatically resizing them for storage efficiency and embedding a digital signature to verify integrity.
  */

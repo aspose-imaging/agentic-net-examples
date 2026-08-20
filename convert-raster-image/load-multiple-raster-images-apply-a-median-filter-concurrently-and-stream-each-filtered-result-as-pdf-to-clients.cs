@@ -1,5 +1,5 @@
+// HOW-TO: Apply Median Filter to Multiple Images in Parallel and Save as PDF C# (Aspose.Imaging for .NET)
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
@@ -12,24 +12,24 @@ class Program
     {
         try
         {
-            // Hardcoded input image file paths
-            var inputPaths = new List<string>
+            // Hardcoded input image paths
+            string[] inputPaths = new[]
             {
-                @"C:\Images\input1.png",
-                @"C:\Images\input2.jpg",
-                @"C:\Images\input3.bmp"
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.png",
+                @"C:\Images\image3.png"
             };
 
-            // Corresponding output PDF file paths
-            var outputPaths = new List<string>
+            // Corresponding hardcoded output PDF paths
+            string[] outputPaths = new[]
             {
-                @"C:\Output\output1.pdf",
-                @"C:\Output\output2.pdf",
-                @"C:\Output\output3.pdf"
+                @"C:\Output\image1.pdf",
+                @"C:\Output\image2.pdf",
+                @"C:\Output\image3.pdf"
             };
 
-            // Validate that each input file exists
-            for (int i = 0; i < inputPaths.Count; i++)
+            // Validate each input file exists; if any missing, write error and exit
+            for (int i = 0; i < inputPaths.Length; i++)
             {
                 string inputPath = inputPaths[i];
                 if (!File.Exists(inputPath))
@@ -39,34 +39,40 @@ class Program
                 }
             }
 
-            // Ensure output directories exist
-            foreach (var outputPath in outputPaths)
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            }
-
             // Process images concurrently
             Parallel.ForEach(
-                Enumerable.Range(0, inputPaths.Count),
+                // Create a range of indices to keep input and output aligned
+                Enumerable.Range(0, inputPaths.Length),
                 index =>
                 {
                     string inputPath = inputPaths[index];
                     string outputPath = outputPaths[index];
 
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                     // Load the raster image
                     using (Image image = Image.Load(inputPath))
                     {
-                        // Cast to RasterImage to apply filters
+                        // Cast to RasterImage to apply filter
                         RasterImage rasterImage = (RasterImage)image;
 
                         // Apply median filter with size 5 to the whole image
                         rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                         // Prepare PDF save options
-                        var pdfOptions = new PdfOptions();
+                        PdfOptions pdfOptions = new PdfOptions();
 
-                        // Save the filtered image as PDF to the output path
-                        rasterImage.Save(outputPath, pdfOptions);
+                        // Save filtered image to a memory stream as PDF
+                        using (MemoryStream pdfStream = new MemoryStream())
+                        {
+                            rasterImage.Save(pdfStream, pdfOptions);
+
+                            // At this point pdfStream contains the PDF data.
+                            // For demonstration, write the PDF to the output file.
+                            // In a real scenario, the stream would be sent to the client.
+                            File.WriteAllBytes(outputPath, pdfStream.ToArray());
+                        }
                     }
                 });
         }
@@ -79,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to batch‑process user‑uploaded photos (PNG, JPG, BMP) to remove noise with a median filter and instantly return each cleaned image as a PDF document.
- * 2. When an e‑commerce platform wants to generate printable product catalogs by converting high‑resolution product images into PDF pages after applying a median filter to improve visual consistency.
- * 3. When a medical imaging application must quickly de‑noise multiple DICOM‑derived raster scans in parallel and stream the filtered results as PDFs to clinicians for review.
- * 4. When a digital archiving system has to ingest large collections of scanned documents, apply a median filter to reduce scanning artifacts, and deliver the cleaned pages as searchable PDF files via an API.
- * 5. When a mobile backend processes batches of user‑submitted screenshots, applies a median filter concurrently to enhance readability, and streams each result as a PDF attachment to email or messaging services.
+ * 1. When you need to denoise a batch of PNG or JPEG photos on a server and deliver each cleaned version as a PDF report.
+ * 2. When an e‑commerce platform must process product images concurrently to reduce noise before generating printable PDF catalogs.
+ * 3. When a medical imaging system wants to apply a median filter to multiple scanned slides in parallel and export them as PDF for archival.
+ * 4. When a document management workflow requires fast conversion of noisy raster scans into searchable PDF files using C# and Aspose.Imaging.
+ * 5. When a cloud‑based API has to stream filtered image results as PDFs to multiple clients without blocking the main thread.
  */

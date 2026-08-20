@@ -1,70 +1,63 @@
+// HOW-TO: Convert OTG to JPEG with Embedded ICC Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.jpg";
-        string rgbProfilePath = @"C:\Profiles\rgb.icc";
-        string cmykProfilePath = @"C:\Profiles\cmyk.icc";
-
         try
         {
-            // Verify input OTG file exists
+            // Hardcoded input OTG file path
+            string inputPath = @"C:\Images\sample.otg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Verify ICC profile files exist
+            // Hardcoded output JPEG file path
+            string outputPath = @"C:\Images\output.jpg";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Hardcoded ICC profile (RGB) path
+            string rgbProfilePath = @"C:\Profiles\eciRGB_v2.icc";
+
+            // Verify ICC profile file exists
             if (!File.Exists(rgbProfilePath))
             {
                 Console.Error.WriteLine($"File not found: {rgbProfilePath}");
                 return;
             }
-            if (!File.Exists(cmykProfilePath))
-            {
-                Console.Error.WriteLine($"File not found: {cmykProfilePath}");
-                return;
-            }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load OTG image
+            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with ICC profiles
-                var jpegOptions = new JpegOptions
-                {
-                    ColorType = JpegCompressionColorMode.Cmyk
-                };
+                // Prepare JPEG save options with ICC profile
+                JpegOptions jpegOptions = new JpegOptions();
 
-                // Load ICC profiles into streams and assign to options
-                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
-                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
+                // Set the RGB ICC profile for color management
+                using (Stream rgbProfileStream = File.OpenRead(rgbProfilePath))
                 {
-                    jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
-                    jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
+                    jpegOptions.RgbColorProfile = new StreamSource(rgbProfileStream);
+
+                    // Configure rasterization to convert vector OTG to raster JPEG
+                    OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                    {
+                        PageSize = image.Size // preserve original size
+                    };
+                    jpegOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save the image as JPEG with embedded ICC profile
+                    image.Save(outputPath, jpegOptions);
                 }
-
-                // Set rasterization options for OTG conversion
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                jpegOptions.VectorRasterizationOptions = otgRasterOptions;
-
-                // Save as JPEG with embedded ICC profiles
-                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -76,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow requires converting proprietary OTG artwork files to JPEG for web preview while preserving accurate colors via embedded RGB and CMYK ICC profiles.
- * 2. When a digital asset management system needs to ingest OTG images and store them as JPEGs with embedded color profiles to ensure consistent display across devices.
- * 3. When a batch processing script must automate the conversion of OTG files to JPEG in a C# application, embedding ICC profiles for color‑managed output in marketing materials.
- * 4. When a desktop publishing tool integrates Aspose.Imaging to allow users to export OTG graphics to JPEG with embedded ICC profiles for accurate color reproduction in proofs.
- * 5. When a cloud‑based image service processes uploaded OTG files and returns JPEG thumbnails that include embedded RGB and CMYK ICC profiles for downstream color‑critical applications.
+ * 1. When you need to display vector OTG graphics on the web as JPEGs while preserving accurate colors across devices.
+ * 2. When a printing workflow requires converting OTG files to JPEG and embedding an ICC profile to ensure color consistency in the final print.
+ * 3. When an application must batch‑process OTG drawings into JPEG thumbnails that include the source color profile for correct rendering in image viewers.
+ * 4. When integrating Aspose.Imaging into a C# service that receives OTG uploads and returns JPEG images with embedded RGB ICC profiles for downstream color‑managed pipelines.
+ * 5. When migrating legacy OTG assets to a JPEG archive and you must retain the original color space information by embedding the appropriate ICC profile during conversion.
  */

@@ -1,43 +1,51 @@
+// HOW-TO: Rasterize CMX Vector to PNG at Specific DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output/output.png";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the CMX vector image
             using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with desired DPI (e.g., 96 DPI for web)
-                var rasterOptions = new CmxRasterizationOptions
+                // Prepare PNG save options with rasterization settings
+                PngOptions pngOptions = new PngOptions();
+
+                // Configure rasterization options (e.g., DPI for web usage)
+                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
                 {
-                    ResolutionSettings = new ResolutionSetting(96, 96)
+                    // Set desired resolution (e.g., 96 DPI)
+                    ResolutionSettings = new ResolutionSetting(96, 96),
+
+                    // Optional: set background color to white
+                    BackgroundColor = Color.White,
+
+                    // Optional: define positioning
+                    Positioning = PositioningTypes.DefinedByDocument
                 };
 
-                // Set PNG export options and attach rasterization settings
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save the rasterized image as PNG
                 cmx.Save(outputPath, pngOptions);
@@ -52,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to display legacy CorelDRAW CMX vector artwork on a website, they can rasterize it to a PNG at 96 DPI for fast loading and cross‑browser compatibility.
- * 2. When an e‑commerce platform must generate product thumbnails from CMX design files, this code converts the vectors into web‑ready PNG images at a specified resolution.
- * 3. When a content management system imports client‑provided CMX logos and must store them as PNGs with consistent DPI for responsive design, the rasterization routine ensures uniform image quality.
- * 4. When an automated build pipeline processes design assets and needs to batch‑convert CMX files to PNG for inclusion in HTML email campaigns, the code provides a reliable C# solution.
- * 5. When a digital asset management tool has to preview CMX drawings in a browser without requiring a vector viewer, rasterizing the file to a PNG at the desired DPI enables instant preview generation.
+ * 1. When you need to display legacy CorelDRAW CMX artwork on a website, you can rasterize it to a PNG at web‑friendly DPI using C#.
+ * 2. When a web application must generate thumbnails from CMX files on the fly, this code converts the vector to a PNG with the required resolution.
+ * 3. When migrating a design archive, you can batch‑process CMX drawings into PNGs for browsers that only support raster images.
+ * 4. When creating printable previews that require a fixed DPI, the snippet renders the CMX vector into a PNG with exact pixel density.
+ * 5. When integrating Aspose.Imaging into a .NET service that receives CMX uploads, you can instantly rasterize and store them as PNGs for downstream processing.
  */

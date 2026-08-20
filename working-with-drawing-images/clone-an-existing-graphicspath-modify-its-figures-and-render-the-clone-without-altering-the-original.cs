@@ -1,3 +1,4 @@
+// HOW-TO: Clone and Modify a GraphicsPath Then Render Both in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,44 +12,45 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\output.png";
+            // Output file path
+            string outputPath = @"output.png";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Create PNG options with a FileCreateSource bound to the output file
+            // Create PNG image options and bind to output file
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas (500x500)
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 600, 400))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // ----- Original GraphicsPath -----
+                // Build the original GraphicsPath
                 GraphicsPath originalPath = new GraphicsPath();
                 Figure originalFigure = new Figure();
-                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+                originalFigure.AddShape(new EllipseShape(new RectangleF(300f, 50f, 150f, 150f)));
                 originalPath.AddFigure(originalFigure);
 
-                // Draw the original path with a black pen
+                // Draw the original path
                 graphics.DrawPath(new Pen(Color.Black, 2), originalPath);
 
-                // ----- Clone and modify -----
+                // Clone the original path
                 GraphicsPath clonedPath = originalPath.DeepClone();
 
-                // Add an additional ellipse to the cloned path
-                Figure extraFigure = new Figure();
-                extraFigure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 100f, 100f)));
-                clonedPath.AddFigure(extraFigure);
+                // Modify the cloned path by adding a new figure
+                Figure newFigure = new Figure();
+                newFigure.AddShape(new PieShape(new RectangleF(200f, 200f, 200f, 200f), 0f, 120f));
+                clonedPath.AddFigure(newFigure);
 
-                // Draw the cloned (modified) path with a red pen
+                // Draw the modified cloned path
                 graphics.DrawPath(new Pen(Color.Red, 2), clonedPath);
 
-                // Save the image (the output file is already bound to the source)
+                // Save the image
                 image.Save();
             }
         }
@@ -61,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a printable PDF report that needs a base shape such as a logo rectangle and an overlay highlight like a red ellipse without changing the original logo geometry.
- * 2. When creating a UI thumbnail where the original vector icon must stay unchanged while a temporary selection ring is drawn around it for preview.
- * 3. When building a map visualization that reuses a country border path but adds a semi‑transparent overlay for a selected region without affecting the master border data.
- * 4. When producing a CAD drawing where the original component outline is cloned to add measurement annotations (ellipse) for a design review, preserving the original model.
- * 5. When developing a game asset pipeline that clones a sprite’s collision path to draw debugging guides (red ellipse) on the same canvas while keeping the original collision shape intact.
+ * 1. Use this code to draw the original GraphicsPath in black and a modified clone in red, allowing you to show both the unchanged vector shape and its edited version on the same PNG image.
+ * 2. Apply the deep clone technique when building an undo feature for a C# drawing app, so the original path remains intact while the user experiments with new figures.
+ * 3. Generate a base diagram and then overlay additional annotations by cloning the GraphicsPath, useful for creating layered technical illustrations saved as PNG.
+ * 4. Compare two versions of a vector drawing by rendering the original and the altered cloned path with different pen colors, helpful for visual diff reports.
+ * 5. Implement a design‑tool workflow where a user adds a pie slice to a copied GraphicsPath, enabling safe experimentation before updating the original artwork.
  */

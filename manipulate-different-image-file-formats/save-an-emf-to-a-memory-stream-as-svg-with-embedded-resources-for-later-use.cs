@@ -1,3 +1,4 @@
+// HOW-TO: Convert EMF to SVG with Embedded Resources Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,11 +12,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Temp\input.emf";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Temp\test.emf";
             string outputPath = @"C:\Temp\output.svg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,31 +29,30 @@ class Program
             // Load the EMF image
             using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Configure SVG save options
+                // Set up SVG save options
                 SvgOptions svgOptions = new SvgOptions
                 {
-                    TextAsShapes = true,
-                    // Use a callback that forces embedding of resources
-                    Callback = new InMemorySvgResourceKeeperCallback()
+                    TextAsShapes = true // render text as shapes
                 };
 
-                // Configure rasterization options for the EMF source
+                // Configure rasterization options specific to EMF
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
+                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
                     PageSize = emfImage.Size,
-                    BackgroundColor = Color.WhiteSmoke,
-                    RenderMode = EmfRenderMode.Auto,
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
                     BorderX = 0,
                     BorderY = 0
                 };
+
                 svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save to a memory stream (SVG with embedded resources)
+                // Save the SVG to a memory stream (embedded resources are kept in the stream)
                 using (MemoryStream ms = new MemoryStream())
                 {
                     emfImage.Save(ms, svgOptions);
 
-                    // For demonstration, also write the SVG to a file
+                    // Example: write the memory stream to a file for later inspection
                     File.WriteAllBytes(outputPath, ms.ToArray());
                 }
             }
@@ -64,29 +64,11 @@ class Program
     }
 }
 
-// Callback that forces all image resources to be embedded in the SVG
-class InMemorySvgResourceKeeperCallback : SvgResourceKeeperCallback
-{
-    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
-    {
-        // Force embedding of the image resource
-        useEmbeddedImage = true;
-        // Return a dummy relative path (not used because the image is embedded)
-        return suggestedFileName;
-    }
-
-    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-    {
-        // No special handling needed for the SVG document itself
-        return suggestedFileName;
-    }
-}
-
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a Windows Metafile (EMF) into a scalable SVG for web display while embedding all fonts and images directly in a memory stream for later transmission.
- * 2. When an application must generate SVG thumbnails of EMF reports on the fly and store them in a database without creating temporary files on disk.
- * 3. When a server‑side service has to embed EMF‑based logos into an SVG email template, requiring the resources to be inlined so the email renders correctly in any client.
- * 4. When a document‑conversion pipeline needs to rasterize EMF pages to SVG with a white‑smoke background and then pass the SVG data through a REST API without writing to the file system.
- * 5. When a Windows desktop tool wants to preview an EMF drawing as SVG in a WPF control, using a memory stream to avoid file‑system I/O while preserving all vector and raster elements.
+ * 1. When you need to display vector graphics from a Windows Metafile on a web page without external files, you can convert the EMF to an SVG stored in a memory stream.
+ * 2. When generating dynamic reports that embed charts as EMF files and require them to be exported as scalable SVGs for PDF or HTML output, this code handles the conversion.
+ * 3. When building a server‑side service that receives EMF uploads and must return SVG data for further processing or storage, the memory‑stream approach avoids temporary disk files.
+ * 4. When preserving the original appearance of text in an EMF by rendering it as shapes in SVG, the SvgOptions.TextAsShapes setting ensures accurate visual fidelity.
+ * 5. When creating a batch conversion tool that processes multiple EMF files and saves the resulting SVGs with embedded raster resources for later reuse, this pattern provides a reliable workflow.
  */

@@ -1,49 +1,49 @@
+// HOW-TO: Apply 3x3 Laplacian Edge Detection to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output_laplacian.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage raster = (RasterImage)pngImage;
+                // Cast to RasterImage for pixel operations
+                RasterImage raster = (RasterImage)image;
 
-                // 3×3 Laplacian kernel for edge detection
+                // Define a 3×3 Laplacian kernel
                 double[,] laplacianKernel = new double[,]
                 {
-                    { 0, -1, 0 },
+                    { 0, -1,  0 },
                     { -1, 4, -1 },
-                    { 0, -1, 0 }
+                    { 0, -1,  0 }
                 };
 
                 // Apply the convolution filter with the Laplacian kernel
-                var filterOptions = new ConvolutionFilterOptions(laplacianKernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(laplacianKernel));
 
-                // Save the processed image
-                pngImage.Save(outputPath);
+                // Save the processed image as PNG
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight edges in a PNG screenshot for a visual inspection tool, they can apply a 3×3 Laplacian kernel using Aspose.Imaging in C#.
- * 2. When preparing PNG assets for a machine‑learning pipeline, a developer may use this code to perform edge detection as a preprocessing step.
- * 3. When building a C# desktop application that generates stylized thumbnails, a developer can use the Laplacian filter to create outline‑enhanced PNG previews.
- * 4. When automating quality‑control checks on scanned PNG documents, a developer can run the Laplacian convolution to detect missing or blurred lines.
- * 5. When creating a custom PNG watermark detection routine, a developer can apply the Laplacian edge detector to isolate watermark contours before further analysis.
+ * 1. When you need to highlight edges in a PNG image for computer‑vision preprocessing.
+ * 2. When you want to create a sketch‑like outline of a photo for UI thumbnails.
+ * 3. When you must detect boundaries in scanned documents before OCR analysis.
+ * 4. When you are building a custom filter pipeline and need a fast Laplacian convolution on raster images.
+ * 5. When you need to generate edge maps for quality‑control inspection in manufacturing images.
  */

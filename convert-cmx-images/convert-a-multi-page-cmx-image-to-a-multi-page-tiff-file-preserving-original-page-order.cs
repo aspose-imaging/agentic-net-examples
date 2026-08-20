@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multi‑Page CMX to Multi‑Page TIFF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,37 +9,35 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.cmx";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the multi‑page CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                // Configure vector rasterization to render each CMX page
-                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                if (image is VectorImage)
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
+                    tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                }
 
-                // Save all pages as a multi‑page TIFF preserving order
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -51,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive legacy multi‑page CMX drawings into a widely supported multi‑page TIFF for long‑term storage or compliance.
- * 2. When a printing workflow requires converting CMX vector pages to raster TIFF pages while preserving the original page order for accurate pagination.
- * 3. When a document management system must ingest CMX files and store them as TIFFs to enable thumbnail generation and preview in web browsers.
- * 4. When a batch processing tool automates the migration of engineering schematics from CMX to TIFF to integrate with OCR or image analysis pipelines.
- * 5. When a C# application needs to export multi‑page CMX artwork to a single TIFF file for easy sharing with clients who only have TIFF viewers.
+ * 1. When you need to archive a multi‑page CMX design as a single TIFF document for long‑term storage or printing.
+ * 2. When a workflow requires converting vector‑based CMX pages to raster TIFF pages while preserving the original page sequence.
+ * 3. When integrating Aspose.Imaging into a C# application to batch‑process CMX files into TIFFs for compatibility with legacy imaging systems.
+ * 4. When you must ensure each CMX page is rasterized with a white background and no smoothing before saving as TIFF.
+ * 5. When an automated service must validate the existence of the source CMX file, create output directories, and handle errors during the conversion to TIFF.
  */

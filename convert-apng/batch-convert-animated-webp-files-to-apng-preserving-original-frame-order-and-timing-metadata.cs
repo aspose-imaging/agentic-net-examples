@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Animated WebP Files to APNG with Frame Timing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,13 +11,16 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = "C:\\WebpInput";
-            string outputDir = "C:\\ApngOutput";
+            string inputDir = @"C:\InputWebp";
+            string outputDir = @"C:\OutputApng";
 
-            // Get all animated WebP files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
+            // Ensure output directory exists (creates if missing)
+            Directory.CreateDirectory(outputDir);
 
-            foreach (string inputPath in inputFiles)
+            // Get all animated WEBP files in the input directory
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
+
+            foreach (string inputPath in webpFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -26,22 +30,20 @@ class Program
                 }
 
                 // Build the output file path (same name with .png extension)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure the output directory exists (handles subfolders if any)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the animated WebP image
+                // Load the animated WEBP image and save it as APNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as APNG, preserving original frame timing and metadata
-                    var apngOptions = new ApngOptions
-                    {
-                        KeepMetadata = true // retain frame timing information
-                    };
-                    image.Save(outputPath, apngOptions);
+                    // Save using default ApngOptions to preserve frame order and timing
+                    image.Save(outputPath, new ApngOptions());
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a library of animated WebP assets to APNG for better browser compatibility while preserving frame order and timing metadata.
- * 2. When an e‑learning platform wants to batch convert user‑uploaded animated WebP illustrations into APNG files for use in HTML5 slideshows without losing animation speed.
- * 3. When a game studio automates the conversion of animated WebP spritesheets into APNG textures for Unity, ensuring each frame’s delay is kept intact.
- * 4. When a digital marketing team processes a folder of promotional animated WebP banners into APNG format to embed in email newsletters that require PNG support.
- * 5. When a content management system runs a nightly job to transform newly added animated WebP icons into APNG files, maintaining original frame sequence and metadata for consistent UI rendering.
+ * 1. When you need to migrate a collection of animated WebP assets to APNG for better browser compatibility while keeping the original animation speed.
+ * 2. When an e‑learning platform requires converting user‑uploaded animated WebP stickers into APNGs for consistent playback across iOS devices.
+ * 3. When a game developer wants to batch process sprite animations stored as WebP into APNGs to use with a framework that only supports PNG sequences.
+ * 4. When a marketing team automates the conversion of animated product demos from WebP to APNG to embed them in email newsletters that support APNG.
+ * 5. When a CI/CD pipeline must ensure all animated WebP files in a repository are transformed into APNGs with preserved frame order before deployment.
  */

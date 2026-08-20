@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to 1‑Bit Monochrome and Get Byte Array in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output\converted.bmp";
+        string inputPath = @"C:\Temp\input.bmp";
+        string outputPath = @"C:\Temp\output_converted.bmp";
 
         try
         {
@@ -27,32 +28,29 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to BmpImage to access BMP‑specific operations (optional conversion)
-                if (image is BmpImage bmpImage)
+                // Optionally, perform conversion or processing here
+                // For example, convert to a 1‑bit monochrome BMP
+                BmpImage bmpImage = (BmpImage)image;
+                bmpImage.BinarizeOtsu();
+
+                // Prepare BMP save options (monochrome palette)
+                BmpOptions saveOptions = new BmpOptions
                 {
-                    // Example conversion: binarize using Otsu method
-                    bmpImage.BinarizeOtsu();
-                }
+                    Palette = ColorPaletteHelper.CreateMonochrome(),
+                    BitsPerPixel = 1
+                };
 
-                // Prepare BMP save options (default options are sufficient for most cases)
-                BmpOptions saveOptions = new BmpOptions();
+                // Save the converted image to a file
+                image.Save(outputPath, saveOptions);
 
-                // Save the image to a memory stream to obtain the byte array
+                // Save the converted image to a memory stream to obtain a byte array
                 using (MemoryStream ms = new MemoryStream())
                 {
                     image.Save(ms, saveOptions);
                     byte[] imageBytes = ms.ToArray();
 
-                    // For demonstration, write the size of the byte array
-                    Console.WriteLine($"Byte array length: {imageBytes.Length}");
-
-                    // Optionally, also save to a physical file using the same options
-                    // (demonstrates the required output path handling)
-                    ms.Position = 0; // Reset stream position before re‑reading
-                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        ms.CopyTo(fileStream);
-                    }
+                    // The byte array can now be used for storage or transmission
+                    Console.WriteLine($"Converted image byte size: {imageBytes.Length}");
                 }
             }
         }
@@ -65,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a processed BMP image into a database column as a BLOB for later retrieval.
- * 2. When a developer wants to send a converted BMP over a Web API as a base‑64 encoded payload.
- * 3. When a developer must cache a binarized BMP in memory to reuse it across multiple threads without writing temporary files.
- * 4. When a developer is generating a thumbnail preview of a BMP and needs the byte array to embed it in a PDF document.
- * 5. When a developer is integrating with a legacy system that accepts BMP data via a socket stream and requires the image as a byte array after Otsu binarization.
+ * 1. When you need to store a processed 1‑bit BMP in a database as a binary blob.
+ * 2. When you must send a monochrome BMP over a network API that accepts byte arrays.
+ * 3. When you want to embed a small black‑and‑white image into a PDF or email attachment without writing a temporary file.
+ * 4. When you are building a thumbnail service that converts high‑resolution BMPs to low‑size 1‑bit images for caching.
+ * 5. When you need to apply Otsu binarization to a BMP and immediately use the resulting bytes for further image analysis in memory.
  */

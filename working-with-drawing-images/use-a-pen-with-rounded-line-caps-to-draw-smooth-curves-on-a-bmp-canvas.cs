@@ -1,3 +1,4 @@
+// HOW-TO: Draw Smooth Curves on BMP with Rounded Pen Caps in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,44 +11,42 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output\\smooth_curve.bmp";
+            // Output BMP file path (hard‑coded)
+            string outputPath = @"C:\temp\smooth_curves.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+            // Set up BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int canvasWidth = 800;
-            int canvasHeight = 600;
-
-            // Create canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            // Create a 500x300 BMP canvas
+            using (Image image = Image.Create(bmpOptions, 500, 300))
             {
-                // Initialize graphics
-                Graphics graphics = new Graphics(canvas);
+                // Initialize graphics for drawing on the canvas
+                Graphics graphics = new Graphics(image);
+
+                // Clear the canvas with a white background
                 graphics.Clear(Color.White);
 
-                // Pen for drawing
-                Pen pen = new Pen(Color.Blue, 5);
+                // Create a pen with blue color, width 5 and rounded line caps
+                Pen pen = new Pen(Color.Blue, 5f);
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
 
-                // Points for smooth curve
-                Point[] curvePoints = new Point[]
+                // Draw a smooth curve using a set of points
+                graphics.DrawCurve(pen, new[]
                 {
-                    new Point(100, 500),
-                    new Point(200, 100),
-                    new Point(400, 300),
-                    new Point(600, 150),
-                    new Point(700, 450)
-                };
+                    new Point(50, 250),
+                    new Point(150, 50),
+                    new Point(250, 250),
+                    new Point(350, 50),
+                    new Point(450, 250)
+                });
 
-                // Draw the curve
-                graphics.DrawCurve(pen, curvePoints);
-
-                // Save the image (bound to the file source)
-                canvas.Save();
+                // Save the bound image (no need to pass path/options again)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -59,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution BMP file that visualizes a smooth, blue curve for a scientific chart or engineering diagram using C# and Aspose.Imaging.
- * 2. When an application must programmatically create a white background canvas, draw anti‑aliased curved paths with a Pen that has rounded line caps, and export the result as a BMP for legacy Windows printing.
- * 3. When a reporting tool has to embed custom spline graphics—such as a route map or trend line—directly into a BMP image without relying on external drawing libraries.
- * 4. When an automated image‑processing pipeline requires creating placeholder graphics with smooth curves to test OCR or image‑analysis algorithms on BMP files.
- * 5. When a game‑development utility needs to pre‑render decorative curve assets (e.g., borders or UI elements) into BMP sprites using Aspose.Imaging’s Graphics.DrawCurve method.
+ * 1. When you need to generate a BMP image that visualizes a smooth curve chart using Aspose.Imaging’s Graphics.DrawCurve with a rounded‑cap pen in C#.
+ * 2. When you want to create custom icons or UI elements with anti‑aliased, rounded‑cap lines on a bitmap for a Windows desktop application.
+ * 3. When you must programmatically draw decorative wave patterns or borders on a BMP canvas using a blue pen with rounded caps.
+ * 4. When you need to export hand‑drawn‑style signatures or free‑form paths to a BMP file with smooth, rounded‑cap strokes.
+ * 5. When you are building a server‑side service that produces BMP diagrams with smooth curves for embedding in reports or PDFs.
  */

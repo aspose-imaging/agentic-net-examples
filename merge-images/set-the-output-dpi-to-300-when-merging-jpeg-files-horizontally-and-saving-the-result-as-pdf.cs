@@ -1,11 +1,12 @@
+// HOW-TO: Merge JPEG Images Horizontally Into PDF With 300 DPI In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -13,78 +14,61 @@ class Program
     {
         try
         {
-            // Define input and output directories (hardcoded literals)
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all JPEG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-
             if (files.Length == 0)
             {
                 Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            // Validate each input file exists
-            foreach (string filePath in files)
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+            foreach (string file in files)
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
-            }
 
-            // Collect sizes of all images
-            List<Size> sizes = new List<Size>();
-            foreach (string filePath in files)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(filePath))
+                using (RasterImage img = (RasterImage)Image.Load(file))
                 {
-                    sizes.Add(img.Size);
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int newWidth = widths.Sum();
+            int newHeight = heights.Max();
 
-            // Prepare temporary JPEG canvas source
-            string tempJpegPath = Path.Combine(outputDirectory, "merged.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
-            Source tempSource = new FileCreateSource(tempJpegPath, false);
-
-            // Configure JPEG options with 300 DPI
-            JpegOptions jpegOptions = new JpegOptions()
+            using (JpegOptions jpegOptions = new JpegOptions
             {
-                Source = tempSource,
                 Quality = 100,
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                ResolutionSettings = new ResolutionSetting(300, 300),
                 ResolutionUnit = ResolutionUnit.Inch
-            };
-
-            // Create the canvas image
+            })
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (string filePath in files)
+                foreach (string file in files)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(filePath))
+                    using (RasterImage img = (RasterImage)Image.Load(file))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -92,8 +76,16 @@ class Program
                     }
                 }
 
-                // Save the merged image
-                canvas.Save();
+                string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+                using (PdfOptions pdfOptions = new PdfOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                })
+                {
+                    canvas.Save(pdfPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -105,9 +97,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple JPEG product photos into a single high‑resolution PDF catalog page with a 300 DPI setting for professional printing.
- * 2. When creating side‑by‑side comparison sheets of before‑and‑after images, merging the JPEGs horizontally and exporting a 300 DPI PDF for clear visual analysis.
- * 3. When generating a printable invoice that includes scanned JPEG receipts stitched together, ensuring the final PDF meets 300 DPI quality standards for audit compliance.
- * 4. When assembling a large‑format poster from several high‑resolution JPEG sections, merging them horizontally and saving as a 300 DPI PDF for accurate print scaling.
- * 5. When preparing a legal evidence document that requires multiple JPEG photographs to be merged into a single PDF with 300 DPI to satisfy court‑mandated image quality requirements.
+ * 1. When you need to combine multiple scanned JPEG pages into a single high‑resolution PDF for printing or archiving.
+ * 2. When generating a printable catalog where each product photo (JPEG) must appear side‑by‑side on one PDF page at 300 DPI.
+ * 3. When creating a PDF report that stitches together screenshots saved as JPEGs while preserving print‑quality resolution.
+ * 4. When automating the preparation of legal documents that require merged JPEG evidence images in a single PDF with exact DPI settings.
+ * 5. When developing a web service that receives JPEG uploads, merges them horizontally, and returns a 300‑DPI PDF for downstream workflow.
  */

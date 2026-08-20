@@ -1,9 +1,9 @@
+// HOW-TO: Batch Adjust Contrast of PSD Files and Save as PDFs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -11,46 +11,35 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Get all PSD files in the input directory
-            string[] psdFiles = Directory.GetFiles(inputDirectory, "*.psd");
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in psdFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (string inputPath in files)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path with .pdf extension
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage for adjustment
-                    RasterImage raster = (RasterImage)image;
-                    if (!raster.IsCached)
-                    {
-                        raster.CacheData();
-                    }
+                    // Adjust contrast using dynamic to accommodate PSD images
+                    dynamic dynImage = image;
+                    dynImage.AdjustContrast(30f);
 
-                    // Apply contrast enhancement (example value: 30)
-                    raster.AdjustContrast(30f);
-
-                    // Save as PDF
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -63,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to batch‑process client PSD mockups, boost their contrast for better print quality, and deliver the results as PDF portfolios.
- * 2. When an e‑learning platform converts layered Photoshop course slides into high‑contrast PDFs for clearer on‑screen viewing.
- * 3. When a marketing team automates the preparation of product catalog pages stored as PSD files, enhancing contrast to meet brand guidelines before exporting to PDF for distribution.
- * 4. When a legal firm archives scanned PSD documents, applies contrast adjustment to improve legibility, and stores them as searchable PDF files.
- * 5. When a photography workflow tool processes PSD files from a shoot, increases contrast to highlight details, and saves each image as a PDF for client review.
+ * 1. When you need to improve the visual clarity of a collection of Photoshop PSD files before distributing them as printable PDFs.
+ * 2. When an automated workflow must process dozens of layered PSD assets, increase their contrast, and generate PDF versions for client review.
+ * 3. When a web service converts user‑uploaded PSD designs to high‑contrast PDFs for faster preview loading in browsers.
+ * 4. When a desktop application prepares marketing materials by batch‑enhancing PSD images and exporting them to PDF for easy sharing.
+ * 5. When a migration script updates legacy PSD artwork, applies contrast correction, and stores the results in PDF format for archival purposes.
  */

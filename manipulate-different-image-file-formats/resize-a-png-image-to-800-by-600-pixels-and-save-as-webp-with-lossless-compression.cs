@@ -1,9 +1,10 @@
+// HOW-TO: Resize PNG to 800x600 and Save as Lossless WebP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.webp";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,16 +27,19 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (Image pngImage = Image.Load(inputPath))
             {
-                // Convert to WebP image
-                using (WebPImage webpImage = new WebPImage(pngImage))
+                // Create a WebPImage from the loaded raster image
+                using (WebPImage webpImage = new WebPImage((RasterImage)pngImage))
                 {
-                    // Resize to 800x600 using bilinear resampling
-                    webpImage.Resize(800, 600, ResizeType.BilinearResample);
+                    // Resize to 800x600 using nearest neighbour resampling
+                    webpImage.Resize(800, 600, ResizeType.NearestNeighbourResample);
 
                     // Save as lossless WebP
-                    var webpOptions = new WebPOptions { Lossless = true };
+                    var webpOptions = new WebPOptions
+                    {
+                        Lossless = true
+                    };
                     webpImage.Save(outputPath, webpOptions);
                 }
             }
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate optimized, lossless WebP thumbnails from high‑resolution PNG assets for faster page loads.
- * 2. When an e‑commerce platform must convert product PNG images to 800×600 WebP files to reduce bandwidth while preserving image quality.
- * 3. When a mobile app backend processes user‑uploaded PNG photos, resizes them to a standard 800×600 size, and stores them as lossless WebP for efficient storage.
- * 4. When a content management system automates batch conversion of PNG graphics to WebP with exact dimensions for responsive design.
- * 5. When a digital publishing workflow requires converting PNG illustrations to 800×600 lossless WebP to maintain visual fidelity across browsers.
+ * 1. When you need to generate web‑optimized thumbnails from high‑resolution PNG assets while preserving full visual fidelity using lossless WebP in a C# application.
+ * 2. When a content management system must convert uploaded PNG graphics to a standardized 800×600 size and store them as compact, lossless WebP files for faster page loads.
+ * 3. When an e‑commerce platform wants to resize product images to a fixed dimension and serve them in WebP format to reduce bandwidth without sacrificing image quality.
+ * 4. When a desktop utility processes batches of PNG screenshots, resizing each to 800×600 and saving them as lossless WebP to save disk space while keeping exact pixel data.
+ * 5. When a mobile app backend prepares user‑provided PNG avatars for display on various devices by resizing them and delivering them as lossless WebP to ensure consistent appearance across platforms.
  */

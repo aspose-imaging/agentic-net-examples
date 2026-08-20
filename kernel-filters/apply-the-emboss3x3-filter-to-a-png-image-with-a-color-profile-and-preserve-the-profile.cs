@@ -1,15 +1,15 @@
+// HOW-TO: Apply Emboss3x3 Filter to PNG While Preserving Color Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output\\result.png";
 
         try
         {
@@ -21,20 +21,26 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Apply Emboss3x3 filter
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-                // Save with metadata preservation
-                PngOptions pngOptions = new PngOptions
+                // Preserve metadata (including color profile)
+                PngOptions saveOptions = new PngOptions
                 {
                     KeepMetadata = true
                 };
 
-                raster.Save(outputPath, pngOptions);
+                // Apply Emboss3x3 filter
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
+                {
+                    raster.Filter(
+                        raster.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                }
+
+                // Save the processed image
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a subtle 3×3 emboss effect to product photos stored as PNG files while keeping the embedded ICC color profile for accurate color reproduction.
- * 2. When an e‑commerce platform wants to generate stylized thumbnail images with an emboss filter and must preserve the original PNG metadata for SEO and compliance.
- * 3. When a digital publishing workflow requires batch processing of PNG illustrations to apply a texture‑like emboss effect without stripping the embedded color profile needed for print.
- * 4. When a mobile app backend processes user‑uploaded PNG avatars, applying the Emboss3x3 filter for visual flair while retaining the profile information for consistent display across devices.
- * 5. When a scientific imaging tool converts raw PNG scans into embossed visualizations for reports, ensuring the original color calibration data remains intact.
+ * 1. When you need to add a subtle 3‑D emboss effect to product photos stored as PNGs without losing their embedded ICC color profile.
+ * 2. When generating web‑ready thumbnails that require an artistic emboss filter while keeping original color accuracy for brand consistency.
+ * 3. When processing scanned documents in PNG format and you want to enhance edge details with an emboss filter without stripping metadata needed for downstream workflows.
+ * 4. When building a C# batch‑processing tool that applies the Emboss3x3 convolution to a collection of PNG images while preserving all metadata for archival purposes.
+ * 5. When integrating Aspose.Imaging into a .NET application to create stylized PNG assets for UI themes, ensuring the embedded color profile remains intact after filtering.
  */

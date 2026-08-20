@@ -1,3 +1,4 @@
+// HOW-TO: Convert PNG to SVG with Light Blue Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,39 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.svg";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.svg";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions();
+                var svgOptions = new SvgOptions();
 
-                // Configure rasterization options for SVG conversion
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Configure rasterization options with a light‑blue background
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    // Set the desired background color (light blue)
-                    BackgroundColor = Aspose.Imaging.Color.LightBlue,
-                    // Use the original image size as the page size
+                    BackgroundColor = Color.FromArgb(255, 173, 216, 230), // LightBlue
                     PageSize = image.Size
                 };
 
-                // Attach rasterization options to the save options
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as SVG
-                image.Save(outputPath, saveOptions);
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a PNG logo to a scalable SVG for responsive web design while applying a light‑blue background to match the site’s color scheme.
- * 2. When an application must generate vector graphics from user‑uploaded raster images for printing, ensuring the output SVG uses the original image dimensions and a light‑blue canvas.
- * 3. When automating the preparation of icons for a mobile app, converting raster PNG assets to SVG format with a consistent light‑blue background for visual uniformity.
- * 4. When a reporting tool requires embedding images as SVG to reduce file size and maintain quality, and the developer wants to set a light‑blue background to meet branding guidelines.
- * 5. When a batch‑processing script processes scanned documents, converting each raster page to SVG while applying a light‑blue background to improve readability on dark‑mode interfaces.
+ * 1. When you need to embed a PNG logo into a web page as scalable SVG while ensuring a consistent light‑blue canvas behind it.
+ * 2. When generating vector graphics from user‑uploaded raster photos for print layouts and you want a uniform background color.
+ * 3. When converting product thumbnails to SVG for responsive UI designs and need to replace transparent areas with a light‑blue fill.
+ * 4. When automating batch processing of scanned images to SVG format and require a specific background to match corporate branding.
+ * 5. When creating SVG assets from raster icons for mobile apps and must set a light‑blue background to improve visibility on dark themes.
  */

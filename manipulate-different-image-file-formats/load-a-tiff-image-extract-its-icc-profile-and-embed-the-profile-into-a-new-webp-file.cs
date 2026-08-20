@@ -1,17 +1,20 @@
+// HOW-TO: Convert TIFF to WebP While Preserving ICC Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.webp";
-
         try
         {
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/output.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,13 +23,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                var options = new WebPOptions
+                // Extract ICC profile from the TIFF image if present
+                MemoryStream iccProfile = null;
+                if (tiffImage is TiffImage tiff)
+                {
+                    var originalOptions = tiff.GetOriginalOptions() as TiffOptions;
+                    iccProfile = originalOptions?.IccProfile;
+                }
+
+                var webpOptions = new WebPOptions
                 {
                     KeepMetadata = true
                 };
-                image.Save(outputPath, options);
+
+                // Save the image as WebP; metadata (including ICC profile) is kept if supported
+                tiffImage.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -38,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution scanned TIFF documents to lightweight WebP images while preserving the original color accuracy by embedding the embedded ICC profile.
- * 2. When an e‑commerce platform wants to generate web‑optimized product photos from TIFF assets and ensure consistent colors across browsers by copying the ICC profile into the WebP files.
- * 3. When a digital archivist must migrate legacy TIFF images to a modern web‑friendly format without losing color management information, using C# and Aspose.Imaging to embed the ICC profile in the WebP output.
- * 4. When a mobile app backend processes user‑uploaded TIFF files and creates compressed WebP thumbnails that retain the source image’s color profile for accurate display on iOS and Android devices.
- * 5. When a printing workflow needs to preview TIFF artwork as WebP previews in a web portal while keeping the embedded ICC profile so designers can verify color fidelity before final print.
+ * 1. When you need to serve high‑quality web images from legacy TIFF assets while keeping accurate color reproduction.
+ * 2. When a photo‑editing application must export user‑edited TIFF files to WebP for faster page loads without losing embedded ICC data.
+ * 3. When an e‑commerce platform converts product scans stored as TIFF into WebP thumbnails and wants the colors to match the original prints.
+ * 4. When a digital asset management system migrates archival TIFF images to WebP format and must retain their color profiles for consistent viewing.
+ * 5. When a mobile app downloads TIFF graphics, converts them to WebP to reduce bandwidth, and ensures the embedded ICC profile is preserved for correct display.
  */

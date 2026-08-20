@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multi‑Page DjVu to Single PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\sample.pdf";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = "input.djvu";
+            string outputPath = "output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,12 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
+            // Load the DjVu document from a file stream
             using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Save all pages to a single PDF preserving layout
-                djvuImage.Save(outputPath, new PdfOptions());
+                // Prepare PDF save options with multi‑page export
+                var pdfOptions = new PdfOptions
+                {
+                    // Export all pages; an empty DjvuMultiPageOptions means all pages
+                    MultiPageOptions = new DjvuMultiPageOptions()
+                };
+
+                // Save all pages into a single PDF file
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned archival DjVu documents into a single searchable PDF for easy distribution in a legal or historical research portal.
- * 2. When an application must batch‑process multi‑page DjVu files from a document management system and generate combined PDF reports while preserving the original layout.
- * 3. When a desktop utility is built to let end‑users select a DjVu e‑book and export all its pages into one PDF for reading on standard PDF viewers.
- * 4. When a cloud service ingests DjVu images uploaded by users and needs to store them as PDF files to integrate with existing PDF‑based workflows.
- * 5. When a migration script is required to transform legacy DjVu technical manuals into PDF format for inclusion in a company's knowledge base without losing page formatting.
+ * 1. When you need to archive scanned documents originally saved as DjVu by converting them into a universally viewable PDF file.
+ * 2. When a web application must merge all pages of a DjVu e‑book into one PDF for easier distribution to users.
+ * 3. When an automated batch process has to transform DjVu reports into PDF format for compliance and printing workflows.
+ * 4. When a desktop utility needs to preserve the original layout while converting multi‑page DjVu diagrams into a single PDF for sharing with non‑technical stakeholders.
+ * 5. When a document management system requires importing DjVu files and storing them as searchable PDFs without losing page order.
  */

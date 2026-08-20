@@ -1,15 +1,15 @@
+// HOW-TO: Sharpen PNG Image With 5x5 Filter While Preserving Brightness In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output\\sharpened.png";
 
         try
         {
@@ -20,21 +20,15 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (creates current directory if none)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image (automatically determines format)
+            // Load the image and apply Sharpen5x5 filter
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Sharpen filter with kernel size 5 and sigma 4.0
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                // Save the processed image; default options preserve original brightness
+                // Sharpen filter with kernel size 5 and sigma 4.0 (preserves original brightness)
+                rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
                 rasterImage.Save(outputPath);
             }
         }
@@ -47,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the edge definition of a PNG drawing for a web‑based diagram editor while keeping the original brightness unchanged.
- * 2. When an automated batch process must sharpen scanned engineering schematics in BMP format before archiving them without altering their visual tone.
- * 3. When a C# application generates printable PDFs from vector drawings and requires a temporary raster PNG with a 5×5 sharpen filter to improve on‑screen clarity.
- * 4. When a mobile app syncs user‑created sketches to a server and applies a Sharpen5x5 filter to reduce blur caused by low‑resolution input devices while preserving the original lighting.
- * 5. When a CI/CD pipeline validates that image assets in a UI library meet sharpness standards by programmatically applying a 5×5 sharpen filter and saving the result with the same brightness for visual regression testing.
+ * 1. When a web application needs to enhance scanned drawings in PNG format without altering their original lighting, developers can use this code to apply a 5x5 sharpen filter while keeping brightness consistent.
+ * 2. When preparing product manuals, a developer may want to improve the clarity of line art before embedding it in PDFs, using Aspose.Imaging to sharpen the PNG images without over‑exposing them.
+ * 3. When building an automated batch‑processing tool that receives user‑uploaded PNG sketches, this snippet can quickly sharpen each image while preserving its visual tone for downstream analysis.
+ * 4. When integrating image enhancement into a C# desktop utility that cleans up old architectural drawings, the code provides a simple way to apply a 5x5 sharpen filter and save the result to a designated folder.
+ * 5. When creating a CI pipeline that validates visual assets, developers can use this example to programmatically sharpen PNG assets and verify that brightness remains unchanged before publishing.
  */

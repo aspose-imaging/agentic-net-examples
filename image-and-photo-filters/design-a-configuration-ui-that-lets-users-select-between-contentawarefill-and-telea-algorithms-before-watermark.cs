@@ -1,4 +1,4 @@
-// HOW-TO: Create Elliptical Mask on PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Watermark From PNG Using Telea Or Content Aware Fill In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,14 +21,31 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                GraphicsPath mask = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(10, 10, 100, 100)));
+                var raster = (RasterImage)image;
+
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                image.Save(outputPath);
+                Console.WriteLine("Select algorithm: 1 - Telea, 2 - Content Aware Fill");
+                var choice = Console.ReadLine();
+
+                var options = choice == "2"
+                    ? (Aspose.Imaging.Watermark.Options.WatermarkOptions)new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                    : new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+
+                if (choice == "2")
+                {
+                    ((Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions)options).MaxPaintingAttempts = 4;
+                }
+
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
+                {
+                    result.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically define an elliptical region to hide or process part of a PNG image in a .NET application.
- * 2. When building a photo‑editing tool that lets users draw elliptical selections for cropping or applying effects using Aspose.Imaging.
- * 3. When automating batch processing to add transparent masks over specific areas of PNG files before further image manipulation.
- * 4. When integrating image masking into a web service that receives PNG uploads and returns the same image with an elliptical overlay.
- * 5. When creating a custom UI that generates shape‑based masks (e.g., ellipses) for watermark removal or content‑aware fill operations in C#.
+ * 1. When you need to automatically erase a logo or text watermark from a PNG image using a selectable inpainting algorithm in a C# application.
+ * 2. When you want to provide a simple console UI that lets users choose between Telea and Content‑Aware Fill for optimal watermark removal.
+ * 3. When you have to adjust the maximum painting attempts for the Content‑Aware Fill algorithm to improve the quality of the restored area.
+ * 4. When you are processing scanned documents and need to mask a specific region before applying Aspose.Imaging’s WatermarkRemover to restore the background.
+ * 5. When you must save the cleaned image to a predefined folder structure after removing the watermark in a .NET workflow.
  */

@@ -1,42 +1,38 @@
+// HOW-TO: Save a GIF to a Network Share Path Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"\\NetworkShare\Images\output.gif";
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"\\RemoteServer\SharedFolder\output.gif";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (network share)
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Load the GIF image from the input path
             using (Image image = Image.Load(inputPath))
             {
-                // Set GIF save options (default options can be used)
-                var gifOptions = new GifOptions();
-
-                // Save the image as GIF to the network share path
-                image.Save(outputPath, gifOptions);
+                // Save the GIF image to the network share
+                image.Save(outputPath);
             }
-
-            Console.WriteLine("Image successfully converted and saved to network share.");
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -44,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert PNG assets to GIF format and store the results on a centralized file server for web publishing pipelines.
- * 2. When an enterprise application must generate static GIF thumbnails from user‑uploaded PNG images and save them to a network share accessed by multiple services.
- * 3. When a scheduled C# service processes a batch of product images, converts them to GIF for email marketing, and writes the files to a remote SMB share for the marketing team.
- * 4. When a Windows desktop utility must ensure that converted GIF files are placed in a shared folder so that other machines on the LAN can retrieve them without additional copying.
- * 5. When a CI/CD build step includes image format conversion using Aspose.Imaging and the output GIF must be deposited on a network share for downstream QA validation.
+ * 1. When you need to move processed GIF files from a local workstation to a shared network folder for team collaboration.
+ * 2. When an automated C# service must store generated or converted GIF images on a remote server for centralized access.
+ * 3. When a web application creates GIF thumbnails and must save them to a network share that multiple applications read.
+ * 4. When a batch job processes GIF animations and writes the results to a UNC path to integrate with existing file‑based workflows.
+ * 5. When you want to ensure the output directory on a remote share exists before saving a GIF using Aspose.Imaging in C#.
  */

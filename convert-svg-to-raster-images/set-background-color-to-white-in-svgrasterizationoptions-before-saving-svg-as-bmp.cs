@@ -1,3 +1,4 @@
+// HOW-TO: Convert SVG to BMP with White Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,37 +11,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.svg";
             string outputPath = @"C:\Images\output.bmp";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Set up rasterization options with a white background
+                // Configure rasterization options with a white background
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = svgImage.Size // preserve original dimensions
+                    PageSize = svgImage.Size // preserve original size
                 };
 
-                // Configure BMP save options and attach the rasterization options
+                // Set BMP save options and attach rasterization options
                 BmpOptions bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the SVG as a BMP file
+                // Save the rasterized image as BMP
                 svgImage.Save(outputPath, bmpOptions);
             }
         }
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting an SVG logo with transparent regions to a BMP thumbnail for a Windows desktop application, a developer can set the background color to white to avoid a black default background.
- * 2. When generating printable BMP assets from SVG icons for a legacy reporting system that does not support alpha channels, the code ensures the images have a solid white background.
- * 3. When batch‑processing SVG diagrams to BMP files for inclusion in a PDF document, a developer uses this snippet to guarantee consistent white backgrounds across all pages.
- * 4. When creating BMP previews of user‑uploaded SVG drawings in a web service, the code provides a white canvas so the preview looks correct on light‑themed pages.
- * 5. When migrating SVG assets to BMP format for an embedded device that only renders BMP images, setting the background color to white prevents visual artifacts caused by transparent SVG layers.
+ * 1. When you need to generate a BMP thumbnail of an SVG logo and ensure the image has a solid white background for consistent display in Windows applications.
+ * 2. When converting vector graphics to raster format for printing on devices that only support BMP and require a non‑transparent background.
+ * 3. When preparing SVG assets for legacy systems that cannot handle transparency, so you rasterize them to BMP with a white canvas.
+ * 4. When automating batch processing of SVG icons to BMP files for inclusion in a game’s texture atlas, guaranteeing a uniform white backdrop.
+ * 5. When creating documentation screenshots from SVG diagrams and need the output BMP to have a white background to match the surrounding page layout.
  */

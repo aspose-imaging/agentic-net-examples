@@ -1,3 +1,4 @@
+// HOW-TO: Set Custom Loop Count and Frame Delay for APNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,33 +8,34 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\animated.apng.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Configure APNG options: custom loop count and frame delay
+            ApngOptions apngOptions = new ApngOptions
+            {
+                // Number of times the animation should loop (0 = infinite)
+                NumPlays = 4,
+                // Default frame duration in milliseconds
+                DefaultFrameTime = 150
+            };
+
+            // Load source image and save as APNG with the configured options
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options: set frame delay (in ms) and loop count
-                var apngOptions = new ApngOptions
-                {
-                    DefaultFrameTime = 150, // 150 ms per frame
-                    NumPlays = 4            // Play the animation 4 times (0 = infinite)
-                };
-
-                // Save the image as an APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a web banner as an animated PNG that repeats exactly four times with each frame displayed for 150 ms.
- * 2. When an e‑learning platform creates step‑by‑step tutorial visuals and wants the APNG animation to pause 150 ms per frame and stop after four loops.
- * 3. When a mobile application produces lightweight animated icons in APNG format, controlling the frame delay and limiting playback to four cycles to save battery life.
- * 4. When a reporting tool converts a series of PNG charts into an APNG slideshow, requiring a uniform 150 ms frame interval and a finite loop count for embedding in PDFs.
- * 5. When a game developer exports sprite animations as APNG files, setting a custom frame time and a loop count of four so the animation ends after four repetitions.
+ * 1. When you need an animated PNG that repeats a specific number of times instead of looping forever, you can set the NumPlays property with Aspose.Imaging in C#.
+ * 2. When creating a web banner where each frame should display for a precise duration, you can define DefaultFrameTime to control the frame delay of the APNG.
+ * 3. When generating product showcase animations that must stop after a set number of cycles for compliance reasons, configuring the loop count ensures the animation ends as required.
+ * 4. When converting a static PNG into an animated sequence and you want consistent timing across all frames, using ApngOptions lets you apply a uniform frame time before saving.
+ * 5. When integrating animated PNGs into a mobile app and need to limit playback to conserve battery, setting a custom loop count and frame delay helps manage resource usage.
  */

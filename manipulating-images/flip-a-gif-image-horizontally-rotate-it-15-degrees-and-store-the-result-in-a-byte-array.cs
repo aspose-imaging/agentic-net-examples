@@ -1,3 +1,4 @@
+// HOW-TO: Flip GIF Horizontally and Rotate 15 Degrees to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,36 +7,46 @@ using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"C:\Images\output.png";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the GIF image
+            using (GifImage image = (GifImage)Image.Load(inputPath))
             {
                 // Flip horizontally
-                gif.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                // Rotate 15 degrees with white background
-                gif.Rotate(15f, true, Color.White);
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-                using (MemoryStream ms = new MemoryStream())
+                // Rotate 15 degrees clockwise, resize proportionally, transparent background
+                image.Rotate(15f, true, Color.Transparent);
+
+                // Save to a memory stream (PNG format) and also to file
+                using (var ms = new MemoryStream())
                 {
-                    GifOptions options = new GifOptions();
-                    gif.Save(ms, options);
+                    // Save to memory stream
+                    image.Save(ms, new PngOptions());
+
+                    // Get byte array of the transformed image
                     byte[] resultBytes = ms.ToArray();
 
-                    // Optionally write to file
+                    // Write the byte array to the output file
                     File.WriteAllBytes(outputPath, resultBytes);
+
+                    // Optionally, you can use resultBytes further in your application
                 }
             }
         }
@@ -48,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to create a mirrored and slightly rotated animated GIF for a banner and needs the transformed image as a byte array to embed directly into an HTML response.
- * 2. When a mobile app backend must generate a horizontally flipped, 15‑degree rotated GIF thumbnail and store it in a database as binary data.
- * 3. When an e‑learning platform needs to preprocess user‑uploaded GIFs by flipping and rotating them before saving the result to a CDN, using C# and Aspose.Imaging.
- * 4. When a desktop application requires on‑the‑fly manipulation of GIF animations—flipping, rotating, and retrieving the result as a byte[] for further processing or transmission.
- * 5. When an email marketing system must adjust the orientation of animated GIFs (flip and rotate) and embed the final image bytes into MIME messages without writing intermediate files.
+ * 1. When you need to mirror a GIF animation and slightly tilt it before embedding it in a web page.
+ * 2. When you must convert a transformed GIF into a PNG byte array for storage in a database.
+ * 3. When you want to generate a thumbnail with a horizontal flip and custom rotation for a photo‑gallery app.
+ * 4. When you are preprocessing animated assets for a game and require the result as a PNG stream.
+ * 5. When you need to apply a flip and rotation to a GIF on the server side and send the resulting bytes to an API client.
  */

@@ -1,7 +1,8 @@
+// HOW-TO: Convert BMP Image to PDF and Stream to HTTP Response in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,33 +10,28 @@ class Program
     {
         try
         {
-            // Hardcoded input BMP file path (relative to the executable directory)
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.bmp";
+            string outputPath = "Output/sample.pdf";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // The HTTP response stream would be provided by the web framework.
-                // Here we simulate it with a MemoryStream for demonstration.
-                using (MemoryStream responseStream = new MemoryStream())
+                // Simulated HTTP response stream (replace with actual response stream in real scenario)
+                using (Stream responseStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
-                    // Save the image as PDF directly to the response stream
-                    image.Save(responseStream, pdfOptions);
-
-                    // Example: write the size of the generated PDF to console
-                    Console.WriteLine($"PDF generated, size: {responseStream.Length} bytes");
-                    
-                    // In a real HTTP scenario, the responseStream would be the HttpResponse.Body stream.
+                    // Save image as PDF directly to the response stream
+                    image.Save(responseStream, new PdfOptions());
                 }
             }
         }
@@ -48,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to let users download a scanned BMP document as a PDF without storing a temporary file on the server.
- * 2. When an ASP.NET Core API must return dynamically generated PDF reports from legacy BMP images directly in the HTTP response to reduce I/O overhead.
- * 3. When an e‑commerce platform converts product photos saved as BMP into PDF brochures on the fly for email attachments sent via an HTTP response.
- * 4. When a document management system streams BMP‑based engineering drawings as PDF to a browser for immediate preview, using Aspose.Imaging to handle the conversion in memory.
- * 5. When a cloud service provides a REST endpoint that receives a BMP file path, converts it to PDF, and streams the result back to the client to avoid disk usage and improve performance.
+ * 1. When you need to serve a dynamically generated PDF version of a BMP picture directly to a web browser without creating a temporary file.
+ * 2. When an ASP.NET application must convert uploaded BMP scans into PDF documents for download or email attachment on the fly.
+ * 3. When a web service provides on‑the‑fly image format conversion, turning BMP assets into PDF for compliance or printing purposes.
+ * 4. When you want to embed BMP graphics into a PDF report and send it as part of an HTTP response in a REST API.
+ * 5. When a server‑side process must convert legacy BMP files to PDF and stream them to clients to reduce disk I/O and improve performance.
  */

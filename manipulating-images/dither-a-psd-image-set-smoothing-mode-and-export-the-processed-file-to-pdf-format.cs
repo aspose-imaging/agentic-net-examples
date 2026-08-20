@@ -1,6 +1,6 @@
+// HOW-TO: How To Dither A PSD And Save As PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Input PSD file and output PDF file (relative paths)
             string inputPath = "Input/sample.psd";
             string outputPath = "Output/processed.pdf";
 
@@ -24,33 +24,28 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Dither the raster image
-                RasterImage raster = image as RasterImage;
-                if (raster != null)
+                // Cast to RasterImage for dithering
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached)
                 {
-                    if (!raster.IsCached)
-                        raster.CacheData();
-
-                    // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                    raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                    raster.CacheData();
                 }
+
+                // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                raster.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
 
                 // Prepare PDF export options with smoothing mode set
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions();
+                var vecOptions = new VectorRasterizationOptions
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        SmoothingMode = SmoothingMode.None
-                    };
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                };
+                pdfOptions.VectorRasterizationOptions = vecOptions;
 
-                    // Save the processed image as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Save the processed image as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution Photoshop PSD file into a compact 1‑bit PDF for printing on low‑cost monochrome printers, applying Floyd‑Steinberg dithering to preserve detail while disabling smoothing.
- * 2. When an application must generate archival PDF documents from layered PSD assets, ensuring the rasterized output uses a white background, exact page dimensions, and no anti‑aliasing to meet compliance standards.
- * 3. When a web service processes user‑uploaded PSD designs and returns a PDF preview that mimics the original appearance by dithering the image to a limited palette and preserving sharp edges with SmoothingMode.None.
- * 4. When a batch‑processing tool automates the conversion of multiple PSD files into PDF portfolios, using Aspose.Imaging to cache raster data, apply 1‑bit dithering, and export each file with consistent page size and background color.
- * 5. When a digital publishing workflow requires converting color‑rich PSD artwork into a PDF suitable for e‑ink devices, leveraging Floyd‑Steinberg dithering and disabling smoothing to optimize readability on grayscale screens.
+ * 1. When you need to convert a high‑resolution Photoshop PSD into a compact black‑and‑white PDF for printing or archiving.
+ * 2. When you want to apply Floyd‑Steinberg dithering to reduce colors to a 1‑bit palette before embedding the image in a PDF report.
+ * 3. When you must ensure the PDF export uses no smoothing to preserve the sharp edges of a dithered bitmap.
+ * 4. When you are automating a batch process that validates the PSD file exists, creates output folders, and generates PDF files programmatically in a .NET application.
+ * 5. When you need to cache raster data of a large PSD to avoid memory issues while performing image processing and saving the result as PDF.
  */

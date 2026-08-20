@@ -1,3 +1,4 @@
+// HOW-TO: Convert WMF to PNG with Custom Font Folder in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,25 +9,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.wmf";
-        string outputPath = "Output\\sample.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.wmf";
+            string outputPath = "Output\\sample.png";
+            // Custom font folder
+            string fontFolder = "Fonts";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set custom font folder
-            string customFontFolder = "Fonts";
-            FontSettings.SetFontsFolders(new string[] { customFontFolder }, true);
+            // Set custom font folder for Aspose.Imaging
+            FontSettings.SetFontsFolders(new[] { fontFolder }, true);
 
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            // Load WMF image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to WmfImage to access size property
+                WmfImage wmfImage = (WmfImage)image;
+
+                // Configure rasterization options
                 var rasterOptions = new WmfRasterizationOptions
                 {
                     BackgroundColor = Color.White,
@@ -34,12 +44,14 @@ class Program
                     RenderMode = WmfRenderMode.Auto
                 };
 
+                // Set PNG save options with vector rasterization
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                wmfImage.Save(outputPath, pngOptions);
+                // Save as raster PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must render legacy WMF diagrams that use corporate brand fonts stored in a private Fonts folder, the code sets the custom font path before converting the WMF to PNG.
- * 2. When generating thumbnails of WMF icons for a web portal that relies on non‑system fonts, developers use this snippet to load the fonts from a specific directory and rasterize the image.
- * 3. When automating batch conversion of WMF reports on a build server that does not have the required TrueType fonts installed, the code points FontSettings to a bundled font folder to ensure accurate rendering.
- * 4. When creating printable PNG assets from WMF files in a multi‑tenant SaaS solution, each tenant can supply its own font collection, and the code loads those fonts before rasterization.
- * 5. When converting WMF graphics in a Windows service that runs under a restricted user account lacking access to system fonts, the developer supplies a custom font directory to avoid missing‑glyph errors.
+ * 1. When you need to render a WMF diagram that uses fonts not installed on the server, you can point Aspose.Imaging to a custom font directory before converting it to PNG.
+ * 2. When generating thumbnails of legacy vector graphics in a web application and the fonts are stored in a specific folder, this code ensures the text appears correctly in the raster image.
+ * 3. When automating batch conversion of WMF files to PNG in a CI pipeline on a machine without the required fonts, setting FontSettings avoids missing‑glyph errors.
+ * 4. When creating printable PNG assets from WMF logos that rely on corporate brand fonts located in a shared repository, the code loads those fonts before rasterization.
+ * 5. When developing a desktop tool that converts user‑uploaded WMF files to PNG on a client PC with limited font installations, you can supply a custom font folder to preserve text layout.
  */

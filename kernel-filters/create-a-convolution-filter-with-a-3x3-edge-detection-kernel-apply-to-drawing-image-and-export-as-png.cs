@@ -1,47 +1,43 @@
-// HOW-TO: Apply 3x3 Edge Detection Convolution Filter to PNG Canvas in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Edge Detection Convolution Filter to Drawn Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/output.png";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output path (hardcoded)
-            string outputPath = "output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create PNG options with a bound output file
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new PNG image canvas
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            int width = 500;
+            int height = 500;
+
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Draw on the canvas
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
-                graphics.DrawRectangle(new Pen(Color.Black, 5), new Rectangle(50, 50, 300, 300));
+                graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(100, 100, 300, 300));
+                graphics.DrawLine(new Pen(Color.Red, 2), new Point(100, 100), new Point(400, 400));
 
-                // Apply a 3x3 edge detection convolution filter
                 RasterImage raster = (RasterImage)image;
-                double[,] edgeKernel = new double[,]
+                double[,] kernel = new double[3, 3]
                 {
                     { -1, -1, -1 },
                     { -1,  8, -1 },
                     { -1, -1, -1 }
                 };
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
-                raster.Filter(raster.Bounds, convOptions);
+                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the final image (output file already bound)
                 image.Save();
             }
         }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG image with custom graphics and highlight edges for visual analysis.
- * 2. When you want to programmatically draw shapes and then apply an edge detection filter to emphasize outlines.
- * 3. When you must create a PNG file on the fly without writing an intermediate bitmap, using Aspose.Imaging in C#.
- * 4. When you need to process a raster image in memory and export the filtered result directly to disk.
- * 5. When you are building a server‑side service that adds edge detection to user‑uploaded drawings before saving them as PNG.
+ * 1. When you need to programmatically generate a diagram, highlight its edges, and export it as a high‑quality PNG for web display.
+ * 2. When you want to add custom edge‑detection processing to dynamically drawn shapes in a C# application without using external image‑processing libraries.
+ * 3. When you must create a raster image, draw geometric primitives, apply a 3×3 convolution kernel, and save the result for further analysis or reporting.
+ * 4. When you are building a preview generator that emphasizes outlines of vector drawings by applying a convolution filter before saving to PNG.
+ * 5. When you require an automated way to produce PNG assets with enhanced edge contrast for machine‑vision or OCR preprocessing in .NET.
  */

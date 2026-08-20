@@ -1,45 +1,51 @@
+// HOW-TO: Blend JPEG Onto Transparent PNG With 50% Opacity In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
+        string inputPath = "sample.jpg";
+        string outputPath = "result.png";
 
-        // Validate input file existence
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the JPEG image as a raster image
-            using (RasterImage jpegImage = (RasterImage)Image.Load(inputPath))
+            // Load the JPEG image
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Prepare PNG creation options with a bound file source
-                Source fileSource = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = fileSource };
-
-                // Create a blank PNG canvas with the same dimensions as the JPEG
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, jpegImage.Width, jpegImage.Height))
+                // Prepare PNG creation options (transparent background)
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Blend the JPEG onto the canvas with 127 (≈50%) opacity
-                    canvas.Blend(new Point(0, 0), jpegImage, 127);
+                    // Use a memory stream source; the stream itself is not used for creation
+                    Source = new StreamSource(new MemoryStream(), false)
+                };
 
-                    // Save the bound canvas to the output PNG file
-                    canvas.Save();
+                // Create a blank PNG image with the same dimensions as the JPEG
+                using (RasterImage pngImage = (RasterImage)Image.Create(pngOptions, jpegImage.Width, jpegImage.Height))
+                {
+                    // Apply alpha blending with 127 (≈50% opacity)
+                    // Blend the JPEG onto the PNG background at (0,0) with the specified alpha
+                    pngImage.Blend(new Point(0, 0), jpegImage, 127);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the result as PNG
+                    pngImage.Save(outputPath);
                 }
             }
         }
@@ -52,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a JPEG photograph onto a transparent PNG canvas with 50% opacity to create watermarked thumbnails.
- * 2. When an e‑commerce platform wants to convert product JPEG images into semi‑transparent PNGs for layered UI composition in a C# web application.
- * 3. When a mobile app generates PNG assets with blended JPEG logos to achieve consistent opacity across different screen resolutions using Aspose.Imaging for .NET.
- * 4. When a digital publishing workflow requires converting high‑resolution JPEG scans into PNG files with reduced opacity for use in PDF overlays.
- * 5. When a game developer prepares sprite sheets by loading JPEG textures, applying 127‑level alpha blending, and saving them as PNGs for better alpha channel support.
+ * 1. When you need to convert a JPEG photograph to a PNG with a semi‑transparent background for web overlays.
+ * 2. When creating watermarked thumbnails where the original JPEG must be blended at 50% opacity onto a PNG canvas.
+ * 3. When preparing images for UI elements that require PNG format with controlled opacity to match design specifications.
+ * 4. When integrating legacy JPEG assets into a game engine that only accepts PNG textures with alpha channels.
+ * 5. When generating printable graphics where the JPEG content must be merged with a transparent PNG layer to preserve background flexibility.
  */

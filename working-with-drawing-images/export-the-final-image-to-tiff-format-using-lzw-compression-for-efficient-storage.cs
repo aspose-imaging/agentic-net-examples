@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to LZW Compressed TIFF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,9 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.jpg";
-            string outputPath = @"C:\temp\output_lzw.tif";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.jpg";
+            string outputPath = "C:\\temp\\output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,34 +22,22 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure TIFF options with LZW compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                // 8 bits per color component (RGB)
-                BitsPerSample = new ushort[] { 8, 8, 8 },
-
-                // Use Big Endian byte order (Motorola)
-                ByteOrder = TiffByteOrder.BigEndian,
-
-                // LZW compression
-                Compression = TiffCompressions.Lzw,
-
-                // Predictor improves LZW compression for continuous-tone images
-                Predictor = TiffPredictor.Horizontal,
-
-                // RGB photometric interpretation
-                Photometric = TiffPhotometrics.Rgb,
-
-                // Store all components in a single plane
-                PlanarConfiguration = TiffPlanarConfigs.Contiguous
-            };
-
-            // Load the source image and save it as TIFF with the configured options
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
+                // Configure TIFF options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                tiffOptions.ByteOrder = TiffByteOrder.BigEndian;
+                tiffOptions.Compression = TiffCompressions.Lzw;
+                tiffOptions.Predictor = TiffPredictor.Horizontal;
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+                // Save the image as TIFF with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -61,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution photographs in a lossless but space‑efficient format, they can use this C# code with Aspose.Imaging to convert JPEGs to LZW‑compressed TIFF files.
- * 2. When a medical‑imaging application must store scans as TIFF with predictable byte order and RGB photometric interpretation, the sample demonstrates how to enforce Big‑Endian and appropriate TIFF settings.
- * 3. When a GIS system requires raster layers to be saved as contiguous‑planar TIFFs with LZW compression for faster network loading, this snippet shows the exact configuration.
- * 4. When a print‑shop workflow needs to generate print‑ready TIFF files with 8‑bit per channel color and a horizontal predictor to reduce file size without sacrificing quality, the code provides the necessary steps.
- * 5. When a document‑management platform must batch‑convert user‑uploaded JPEGs to archival‑grade TIFFs using C# and Aspose.Imaging while ensuring the output directory exists, this example illustrates the complete process.
+ * 1. When you need to archive high‑resolution photographs while reducing file size, you can convert JPEG files to LZW‑compressed TIFF using C# and Aspose.Imaging.
+ * 2. When a document management system requires TIFF images with lossless compression for reliable printing, this code creates the required format from existing JPEGs.
+ * 3. When migrating legacy image assets to a format that supports metadata and lossless storage, developers can use this snippet to batch‑convert JPEGs to LZW‑compressed TIFFs.
+ * 4. When implementing a web service that receives user‑uploaded JPEGs and stores them as compact TIFF files for long‑term retention, the code provides the conversion logic.
+ * 5. When preparing images for scientific analysis that demands TIFF’s planar configuration and LZW compression to balance quality and storage efficiency, this example performs the conversion in C#.
  */

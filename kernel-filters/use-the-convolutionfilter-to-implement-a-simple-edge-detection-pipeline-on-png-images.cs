@@ -1,19 +1,21 @@
+// HOW-TO: Apply Edge Detection to PNG Using Aspose.Imaging Convolution Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output_edge.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/edge_detected.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,27 +23,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Edge detection kernel (Laplacian)
-                double[,] kernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
-
-                // Apply convolution filter for edge detection
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply a simple edge detection using the emboss kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
                 // Save the processed image as PNG
-                var pngOptions = new PngOptions();
+                PngOptions pngOptions = new PngOptions();
                 raster.Save(outputPath, pngOptions);
             }
         }
@@ -54,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight object boundaries in scanned PNG documents to improve OCR accuracy, they can run this edge detection pipeline on the images.
- * 2. When building a security camera system that flags motion by detecting edges in PNG video frames, this code can quickly generate edge maps for analysis.
- * 3. When creating a photo‑editing application that offers a “sketch” filter, developers can apply the Laplacian convolution to PNG photos to produce line‑art style images.
- * 4. When preparing PNG assets for a game’s silhouette rendering, developers can use this pipeline to extract clean edge outlines for collision masks.
- * 5. When automating quality control for printed circuit board images, engineers can run edge detection on PNG scans to identify missing traces or defects.
+ * 1. When you need to highlight object outlines in product photos before uploading them to an e‑commerce site.
+ * 2. When you want to preprocess scanned documents to emphasize text edges for OCR accuracy.
+ * 3. When you are building a desktop tool that converts raw PNG screenshots into stylized line‑art for presentations.
+ * 4. When you must generate edge‑detected thumbnails for a gallery that helps users spot visual differences quickly.
+ * 5. When you are automating a batch job that applies emboss‑style edge detection to PNG assets for a game’s UI effects.
  */

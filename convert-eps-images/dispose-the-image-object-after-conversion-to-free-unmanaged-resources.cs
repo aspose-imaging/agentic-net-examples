@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to PNG and Dispose Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,7 +9,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
+        string inputPath = @"C:\temp\input.jpg";
         string outputPath = @"C:\temp\output.png";
 
         try
@@ -23,14 +24,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Load the image, convert, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Set PNG save options (default options are sufficient)
-                var pngOptions = new PngOptions();
+                // Define save options (PNG in this example)
+                PngOptions saveOptions = new PngOptions();
 
-                // Save the image in PNG format
-                image.Save(outputPath, pngOptions);
+                // Save the image to the output path
+                image.Save(outputPath, saveOptions);
             } // Image is disposed here
         }
         catch (Exception ex)
@@ -42,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑convert legacy BMP files to PNG for web upload while ensuring unmanaged memory is released after each conversion.
- * 2. When an automated build script processes scanned documents stored as BMP and saves them as lossless PNG to reduce file size without leaking resources.
- * 3. When a Windows service monitors a folder, converts newly added BMP images to PNG for downstream processing, and must dispose the Image object to avoid memory leaks.
- * 4. When a C# utility prepares product screenshots in BMP format for inclusion in a mobile app by converting them to PNG and ensuring the image handle is closed promptly.
- * 5. When a server‑side API receives BMP uploads, converts them to PNG for storage, and needs to free unmanaged resources to maintain high concurrency.
+ * 1. When you need to convert user‑uploaded JPEG photos to PNG format for web display while ensuring the Image object is properly disposed to free unmanaged memory.
+ * 2. When a desktop application must generate lossless PNG thumbnails from existing JPEG files without leaking resources.
+ * 3. When an automated batch job processes a folder of JPEG images and saves them as PNG files, using a using block to guarantee cleanup.
+ * 4. When a server‑side API receives a JPEG image, converts it to PNG for downstream processing, and must release the Aspose.Imaging resources promptly.
+ * 5. When integrating Aspose.Imaging into a C# utility that validates input files, creates the output directory, and safely converts and saves images with proper disposal.
  */

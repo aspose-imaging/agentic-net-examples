@@ -1,3 +1,4 @@
+// HOW-TO: Increase DICOM Image Brightness by 20 and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -22,18 +23,14 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Load the DICOM image
+            // Load the DICOM image, adjust brightness, and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
-
-                // Increase brightness by 20 units (range -255 to 255)
                 dicomImage.AdjustBrightness(20);
-
-                // Save the adjusted image as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to convert a DICOM scan to a PNG thumbnail with enhanced visibility for a web portal, a developer can use this code to load the DICOM, boost brightness by 20, and save the result as PNG.
- * 2. When a medical research team wants to preprocess DICOM images for machine‑learning pipelines that require PNG inputs with consistent lighting, this snippet adjusts the brightness and outputs the required format.
- * 3. When a hospital’s PACS integration needs to generate patient‑friendly PNG snapshots from DICOM files for inclusion in electronic health records, the code provides a quick way to brighten and export the images.
- * 4. When a mobile health app must display diagnostic images with better contrast on low‑resolution screens, a developer can employ this routine to increase brightness and convert the DICOM to a PNG that the app can render.
- * 5. When an automated reporting tool extracts DICOM images, applies a uniform brightness correction, and stores them as PNG files for archival or printing, this example shows the exact C# steps to achieve it.
+ * 1. When a radiology software needs to enhance the visibility of a DICOM scan before displaying it in a web portal, developers can use this code to brighten the image and convert it to PNG.
+ * 2. When a medical research project requires batch processing of DICOM files to improve contrast for analysis, the snippet can be integrated to adjust brightness and store the results in a widely supported PNG format.
+ * 3. When a healthcare mobile app must show patient scans with consistent lighting, developers can apply the brightness adjustment and PNG conversion to ensure the images render correctly on different devices.
+ * 4. When an archival system needs to create thumbnail previews of DICOM images with higher brightness for quick visual inspection, this code provides a simple way to generate brighter PNG thumbnails.
+ * 5. When a diagnostic AI pipeline expects input images in PNG with standardized brightness, the example can be used to preprocess DICOM files before feeding them into the model.
  */

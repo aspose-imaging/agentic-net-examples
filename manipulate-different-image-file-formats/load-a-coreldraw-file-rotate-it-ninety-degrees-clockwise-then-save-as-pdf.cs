@@ -1,39 +1,39 @@
+// HOW-TO: Rotate CorelDRAW CDR File 90 Degrees And Save As PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.pdf";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.cdr";
+            string outputPath = @"C:\Temp\output.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the CorelDRAW file
             using (CdrImage image = (CdrImage)Image.Load(inputPath))
             {
                 // Rotate 90 degrees clockwise
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Prepare PDF save options with rasterization settings
+                var pdfOptions = new PdfOptions();
+                var rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must programmatically convert a CorelDRAW (.cdr) design to a PDF for client delivery and needs to rotate the artwork 90 degrees clockwise to match landscape layout.
- * 2. When an automated workflow requires batch processing of CDR files, applying a clockwise rotation before exporting them as PDF documents for archival purposes.
- * 3. When a web application needs to preview user‑uploaded CorelDRAW graphics as PDF pages, ensuring the preview orientation is corrected by rotating the image during the conversion.
- * 4. When a print‑ready pipeline must transform rotated CorelDRAW vectors into PDF files with specific rasterization settings such as TextRenderingHint and SmoothingMode using Aspose.Imaging for .NET.
- * 5. When a document management system integrates C# code to load CDR files, apply a 90‑degree rotation, and save them as PDFs to maintain consistent page orientation across different viewing platforms.
+ * 1. When you need to automatically re‑orient a legacy CorelDRAW design before generating a printable PDF report in a C# application.
+ * 2. When a batch process must convert multiple CDR drawings to PDF while applying a 90‑degree clockwise rotation to match page layout requirements.
+ * 3. When integrating Aspose.Imaging into a document‑management system that stores engineering schematics as PDFs after correcting their orientation.
+ * 4. When creating a server‑side service that receives CDR files, rotates them for proper viewing on mobile devices, and returns PDF files to users.
+ * 5. When developing a workflow that rasterizes vector CDR content with specific rendering settings and outputs a PDF for archival compliance.
  */

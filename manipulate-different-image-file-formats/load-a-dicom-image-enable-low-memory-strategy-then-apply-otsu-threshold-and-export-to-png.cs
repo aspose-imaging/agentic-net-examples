@@ -1,3 +1,4 @@
+// HOW-TO: Load DICOM Image With Low Memory Apply Otsu Binarization And Save PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.dicom";
-            string outputPath = @"c:\temp\sample.BinarizeOtsu.png";
+            string inputPath = "c:\\temp\\sample.dicom";
+            string outputPath = "c:\\temp\\sample.BinarizeOtsu.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,24 +25,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open the DICOM file as a stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Configure low‑memory load options (256 KB buffer)
+            LoadOptions loadOptions = new LoadOptions
             {
-                // Configure low‑memory load options (e.g., 256 KB buffer)
-                LoadOptions loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 256 * 1024
-                };
+                BufferSizeHint = 256 * 1024
+            };
 
-                // Load the DICOM image with the low‑memory strategy
-                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                {
-                    // Apply Otsu threshold binarization
-                    dicomImage.BinarizeOtsu();
+            // Load DICOM image using a stream and the low‑memory options
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+            {
+                // Apply Otsu threshold binarization
+                dicomImage.BinarizeOtsu();
 
-                    // Save the result as PNG
-                    dicomImage.Save(outputPath, new PngOptions());
-                }
+                // Save the result as PNG
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert large DICOM scans to lightweight PNG files on a low‑memory device, this code loads the DICOM image with a small buffer, applies Otsu binarization, and saves the result.
- * 2. When a radiology workflow requires automated thresholding of CT or MRI images for quick visual inspection, developers can use this C# snippet to binarize the DICOM data using Otsu’s method and export it as a PNG thumbnail.
- * 3. When a cloud‑based service processes patient DICOM files in a memory‑constrained container, the example demonstrates how to enable a low‑memory load strategy, perform Otsu binarization, and store the output in a web‑friendly PNG format.
- * 4. When a research project needs to generate binary masks from DICOM images for machine‑learning preprocessing, the code shows how to load the image with Aspose.Imaging, apply the BinarizeOtsu function, and save the mask as a PNG file.
- * 5. When a desktop utility must batch‑convert DICOM files to PNG while minimizing RAM usage and preserving diagnostic contrast via Otsu thresholding, this example provides the necessary C# steps.
+ * 1. When a medical imaging application must process large DICOM files on a server with limited RAM, this code loads the image using a small buffer, binarizes it with Otsu’s method, and writes a lightweight PNG for downstream analysis.
+ * 2. When a radiology workflow needs to convert DICOM scans to binary masks for machine‑learning preprocessing, the Otsu thresholding creates a clean black‑and‑white image that can be fed into algorithms.
+ * 3. When a desktop tool has to display DICOM data as a PNG thumbnail without consuming much memory, the low‑memory load option and binarization produce a fast, compact representation.
+ * 4. When an integration pipeline must archive diagnostic images in a lossless format while reducing file size, converting the DICOM to a binarized PNG helps meet storage constraints.
+ * 5. When a developer is building a diagnostic report generator that includes highlighted regions of interest, using Otsu binarization on the DICOM and saving as PNG simplifies overlay creation.
  */

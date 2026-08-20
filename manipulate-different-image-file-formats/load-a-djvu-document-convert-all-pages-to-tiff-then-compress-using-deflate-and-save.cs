@@ -1,3 +1,4 @@
+// HOW-TO: Convert DjVu Document to Multi‑Page Deflate Compressed TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,18 +15,18 @@ class Program
         string inputPath = "input.djvu";
         string outputPath = "output\\output.tif";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive scanned documents originally stored as DjVu files by converting every page into a single multi‑page TIFF with lossless Deflate compression for long‑term storage.
- * 2. When a .NET application must generate printable TIFF files from a DjVu e‑book so that downstream printing services that only accept TIFF can process the document.
- * 3. When a workflow requires extracting all pages of a DjVu technical manual and saving them as a compressed TIFF bundle to reduce file size before uploading to a document management system.
- * 4. When a developer wants to integrate Aspose.Imaging into a C# service that transforms DjVu legal filings into TIFF format with Deflate compression to meet court‑mandated file format standards.
- * 5. When an image processing pipeline needs to read a DjVu image stream, apply multi‑page export, and output a single TIFF file with Deflate compression for efficient network transmission.
+ * 1. When you need to archive scanned DjVu files as lossless TIFFs for long‑term storage while reducing file size with Deflate compression.
+ * 2. When a document management system requires all pages of a DjVu document to be converted to a single multi‑page TIFF for compatibility with legacy printers.
+ * 3. When you are building a batch conversion tool that extracts every page from DjVu ebooks and saves them as compressed TIFF images for downstream OCR processing.
+ * 4. When integrating Aspose.Imaging into a C# application to transform DjVu blueprints into TIFF format that can be opened by standard image viewers without losing detail.
+ * 5. When you must programmatically convert DjVu reports into TIFF files with Deflate compression to meet email attachment size limits.
  */

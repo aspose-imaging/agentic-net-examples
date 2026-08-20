@@ -1,3 +1,4 @@
+// HOW-TO: Apply Horizontal Motion Wiener Filter to PNG Video Frame in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\video_frame.png";
+        string outputPath = @"C:\Images\video_frame_motion_wiener.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.MotionWiener.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,14 +27,13 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Configure MotionWiener filter: size=10, sigma=1.0, angle=0 (horizontal)
-                var filterOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-
-                // Apply the filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                // Apply MotionWiener filter with horizontal motion (angle = 0 degrees)
+                // Size = 10, Sigma = 1.0 (adjust as needed)
+                var options = new MotionWienerFilterOptions(10, 1.0, 0.0);
+                rasterImage.Filter(rasterImage.Bounds, options);
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce horizontal motion blur in a PNG frame extracted from a video before publishing it on a website, they can use this Aspose.Imaging C# code to apply a Motion‑Wiener filter with a horizontal vector.
- * 2. When an automated video‑to‑image pipeline must clean up noisy PNG screenshots captured during live streaming, the code can be integrated to sharpen the images by filtering horizontally.
- * 3. When a forensic analyst wants to enhance a single PNG image taken from surveillance footage to reveal details obscured by camera shake along the X‑axis, the MotionWiener filter in C# provides a quick solution.
- * 4. When a game developer generates PNG textures from recorded gameplay and needs to remove motion artifacts caused by fast horizontal panning, this snippet applies the filter directly to the raster image.
- * 5. When a batch processing tool for digital archives must improve the visual quality of horizontally blurred PNG frames before archiving, the provided Aspose.Imaging filter code can be scheduled to run on each file.
+ * 1. When you need to reduce motion blur in a single video frame saved as a PNG before further analysis.
+ * 2. When you want to enhance the sharpness of horizontally moving objects in surveillance footage stored as PNG images.
+ * 3. When preparing PNG screenshots from a video for machine‑learning preprocessing that requires de‑blurring.
+ * 4. When cleaning up PNG frames extracted from a dash‑cam video to improve visual quality for reporting.
+ * 5. When automating a batch process that applies a motion‑compensated Wiener filter to PNG images captured from any video source.
  */

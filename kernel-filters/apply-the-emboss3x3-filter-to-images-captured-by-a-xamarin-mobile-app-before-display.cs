@@ -1,19 +1,17 @@
+// HOW-TO: Apply Emboss 3x3 Filter to PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,10 +22,11 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                PngOptions options = new PngOptions();
-                rasterImage.Save(outputPath, options);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -39,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Xamarin mobile app needs to display user‑taken photos with a stylized 3‑D look, a developer can load the PNG, apply the Emboss3x3 convolution filter, and save the result for immediate rendering.
- * 2. When generating thumbnail previews for a gallery view, applying the Emboss3x3 filter in C# creates a distinctive embossed effect that helps users quickly identify images.
- * 3. When preparing images for print‑ready PDFs, developers can emboss PNG assets using Aspose.Imaging to add depth before embedding them in the document.
- * 4. When creating custom UI icons or buttons that require a raised appearance, the Emboss3x3 filter can be applied to the source PNG files during the app’s asset pipeline.
- * 5. When a social‑sharing feature must apply a consistent artistic filter to all uploaded pictures, the code can process each image on the server side with the Emboss3x3 convolution before sending it back to the Xamarin client.
+ * 1. When you need to give photos taken in a Xamarin app a stylized 3‑D look before showing them to users, you can load the PNG, apply the Emboss3x3 convolution filter with Aspose.Imaging, and save the result.
+ * 2. When generating thumbnails for a gallery where each thumbnail should appear embossed to highlight texture, you can process the source image with the Emboss3x3 filter in C# and output a PNG.
+ * 3. When building an AR preview that overlays a realistic relief effect on captured images, applying the Emboss3x3 filter to the raster image ensures the effect is applied consistently across devices.
+ * 4. When converting scanned documents to a visual style that mimics raised lettering for a printing workflow, you can use Aspose.Imaging’s ConvolutionFilterOptions to emboss the PNG before saving.
+ * 5. When creating a custom image‑processing pipeline that must handle missing files gracefully and automatically create output directories, the sample code demonstrates how to check file existence, apply the Emboss3x3 filter, and store the processed image.
  */

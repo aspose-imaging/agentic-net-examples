@@ -1,18 +1,20 @@
-// HOW-TO: Convert JPEG to PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Export Magic Wand Selection as Grayscale BMP Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "mask.bmp";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,9 +23,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                image.Save(outputPath, new PngOptions());
+                ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(120, 100));
+                mask.Apply();
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -35,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve transparency while converting a photographic JPEG to a loss‑less PNG for web display.
- * 2. When an automated batch process must change image format from JPEG to PNG before uploading to a content management system.
- * 3. When you want to reduce file size by re‑encoding a JPEG as PNG with Aspose.Imaging’s built‑in options.
- * 4. When a desktop application requires PNG output for further editing or annotation after loading a JPEG source.
- * 5. When integrating image conversion into a C# service that validates the source file exists and creates the target folder automatically.
+ * 1. When you need to isolate a foreground object from a PNG and store the binary mask as a BMP for later compositing.
+ * 2. When you want to reuse the same selection across multiple image processing steps without recalculating the Magic Wand region.
+ * 3. When a batch pipeline requires a separate grayscale mask file to feed into machine‑learning models for segmentation.
+ * 4. When you are preparing assets for a game engine that expects masks in BMP format for alpha‑channel handling.
+ * 5. When you need to archive the exact selection used for quality‑control audits in a medical imaging workflow.
  */

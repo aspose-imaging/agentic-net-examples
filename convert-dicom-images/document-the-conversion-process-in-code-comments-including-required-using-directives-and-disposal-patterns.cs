@@ -1,19 +1,21 @@
+// HOW-TO: Convert JPEG to TIFF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.jpg");
-        string outputPath = Path.Combine("Output", "sample.tif");
-
         try
         {
+            // Input image path (relative to the current directory)
+            string inputPath = Path.Combine("Input", "sample.jpg");
+            // Output TIFF path (relative to the current directory)
+            string outputPath = Path.Combine("Output", "sample.tif");
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,10 +29,10 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF save options (using default format)
+                // Configure TIFF export options
                 using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    // Save the image as a TIFF file
+                    // Save the image as TIFF using the configured options
                     image.Save(outputPath, tiffOptions);
                 }
             }
@@ -44,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded JPEG photos to lossless TIFF files for archival storage using C# and Aspose.Imaging.
- * 2. When an application must ensure that image files are saved in a format compatible with printing workflows, such as converting JPEG to TIFF before sending to a print service.
- * 3. When a document management system requires batch conversion of JPEG scans to TIFF files, and the code provides a simple per‑file conversion pattern.
- * 4. When a medical imaging solution needs to transform diagnostic JPEG images into TIFF format to meet regulatory compliance and preserve image fidelity.
- * 5. When a web service processes incoming image payloads and must store them as TIFF files on disk while handling missing files and directory creation gracefully.
+ * 1. When you need to archive high‑quality photos by converting JPEG files to lossless TIFF for printing or long‑term storage.
+ * 2. When a desktop application must transform user‑uploaded JPEG images into TIFF before sending them to a document management system that only accepts TIFF.
+ * 3. When automating a batch process that standardizes image formats by converting mixed JPEG assets to a single TIFF format for downstream processing.
+ * 4. When integrating Aspose.Imaging into a C# service that receives JPEG images and must deliver them as TIFF to comply with medical imaging standards.
+ * 5. When developing a migration tool that reads legacy JPEG assets and saves them as TIFF to preserve image fidelity during a platform upgrade.
  */

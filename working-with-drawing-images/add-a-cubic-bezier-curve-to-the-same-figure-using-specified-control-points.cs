@@ -1,6 +1,6 @@
+// HOW-TO: Draw a Cubic Bezier Curve on a PNG with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -11,48 +11,36 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = @"C:\temp\bezier_output.png";
+            string outputPath = "output.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Set up PNG options with a bound file source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image
-            using (Image image = Image.Create(pngOptions, 600, 400))
+            using (PngOptions pngOptions = new PngOptions())
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                pngOptions.Source = new FileCreateSource(outputPath, false);
 
-                // Create a graphics path and a figure
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-
-                // Example rectangle shape (optional)
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-
-                // Add a cubic Bezier curve to the same figure
-                PointF[] bezierPoints = new PointF[]
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 600, 400))
                 {
-                    new PointF(0f, 0f),          // Start point
-                    new PointF(200f, 133f),      // First control point
-                    new PointF(400f, 166f),      // Second control point
-                    new PointF(600f, 400f)       // End point
-                };
-                figure.AddShape(new BezierShape(bezierPoints));
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                    graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Add the figure to the path
-                path.AddFigure(figure);
+                    Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+                    Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-                // Draw the path with a red pen
-                graphics.DrawPath(new Pen(Color.Red, 2), path);
+                    Aspose.Imaging.PointF pt1 = new Aspose.Imaging.PointF(0, 0);
+                    Aspose.Imaging.PointF pt2 = new Aspose.Imaging.PointF(200, 133);
+                    Aspose.Imaging.PointF pt3 = new Aspose.Imaging.PointF(400, 166);
+                    Aspose.Imaging.PointF pt4 = new Aspose.Imaging.PointF(600, 400);
 
-                // Save the image (file is already bound to the source)
-                image.Save();
+                    BezierShape bezier = new BezierShape(new Aspose.Imaging.PointF[] { pt1, pt2, pt3, pt4 });
+                    figure.AddShape(bezier);
+                    path.AddFigure(figure);
+
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2);
+                    graphics.DrawPath(pen, path);
+
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -64,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG diagram that combines vector shapes such as rectangles and smooth cubic Bezier curves for a web‑ready illustration.
- * 2. When creating dynamic chart annotations in a C# reporting tool, and the annotation line must follow a custom curved path defined by control points.
- * 3. When programmatically producing a signature stamp image where the signature stroke is rendered as a cubic Bezier curve over a white background.
- * 4. When building a CAD‑style preview image that overlays a curved guide line on top of existing geometric shapes and saves the result as a PNG file.
- * 5. When automating the creation of UI mock‑up assets that require a red curved connector between two components, using Aspose.Imaging’s GraphicsPath and BezierShape in .NET.
+ * 1. When you need to generate a vector‑based illustration such as a smooth curve and export it as a PNG for web or UI assets.
+ * 2. When you want to programmatically create custom chart lines or signature strokes in a .NET application using Aspose.Imaging.
+ * 3. When you must overlay a precise cubic Bezier path onto an existing image for watermarking or diagram annotations.
+ * 4. When you are building a design‑tool feature that lets users define control points and renders the resulting curve directly to a raster file.
+ * 5. When you require automated generation of scalable curve graphics for reports or PDFs without relying on external drawing libraries.
  */

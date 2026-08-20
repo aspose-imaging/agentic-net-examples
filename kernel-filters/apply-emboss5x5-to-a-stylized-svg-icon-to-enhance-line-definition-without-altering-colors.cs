@@ -1,3 +1,4 @@
+// HOW-TO: Apply Emboss5x5 Filter to SVG Icon and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,57 +6,61 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/input.svg";
-        string outputPath = "output/output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string tempPng = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPng));
-
-            // Rasterize SVG to temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
+                // Prepare rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    BackgroundColor = Color.White
+                    PageSize = ((SvgImage)image).Size
                 };
 
-                var pngOptions = new PngOptions
+                // Set up PNG save options with rasterization
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                svgImage.Save(tempPng, pngOptions);
-            }
+                // Rasterize SVG to a memory stream
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-            // Apply Emboss5x5 filter to the rasterized PNG
-            using (Image img = Image.Load(tempPng))
-            {
-                var raster = (RasterImage)img;
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-                raster.Save(outputPath, new PngOptions());
-            }
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)rasterImage;
 
-            // Clean up temporary file
-            if (File.Exists(tempPng))
-            {
-                File.Delete(tempPng);
+                        // Apply Emboss5x5 convolution filter
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+
+                        // Save the filtered image as PNG
+                        raster.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -67,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector‑based SVG icon into a raster PNG while preserving its original colors but wants the edges to appear sharper, they can use this code to rasterize and apply an Emboss5x5 filter.
- * 2. When building a web UI that displays SVG logos as PNG thumbnails with enhanced line definition for low‑resolution screens, the code provides a C# solution that rasterizes the SVG and embosses the result without changing hue.
- * 3. When generating asset bundles for mobile apps where SVG icons must be pre‑processed into PNGs with a subtle embossed effect to improve visual contrast, this snippet automates the rasterization and convolution filter steps.
- * 4. When creating printable PDFs that embed PNG versions of SVG icons with clearer outlines, developers can employ this routine to rasterize the SVG, apply the Emboss5x5 filter, and save the output while keeping the original color palette intact.
- * 5. When a design pipeline requires batch processing of stylized SVG symbols into PNGs with enhanced edge detail for UI mockups, the code demonstrates how to use Aspose.Imaging’s VectorRasterizationOptions and ConvolutionFilterOptions in C#.
+ * 1. When you need to sharpen the edges of a vector‑based icon for a UI without changing its colors, you can rasterize the SVG and apply an Emboss5x5 filter before exporting to PNG.
+ * 2. When generating high‑contrast thumbnails for a web catalog, applying an emboss filter to SVG graphics ensures the lines stand out after conversion to raster images.
+ * 3. When preparing SVG logos for print or PDF embedding, embossing the rasterized version improves line definition while keeping the original vector shape intact.
+ * 4. When creating stylized assets for a game UI, developers can use this code to convert SVG assets to PNG with enhanced edge detail via the Emboss5x5 convolution.
+ * 5. When automating a batch process that converts design icons to PNG with a subtle 3‑D effect, the Emboss5x5 filter provides a quick way to add depth without manual editing.
  */

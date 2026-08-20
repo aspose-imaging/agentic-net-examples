@@ -1,3 +1,4 @@
+// HOW-TO: Convert DICOM to PNG while Preserving XMP Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output\\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,23 +26,26 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific properties
-                DicomImage dicomImage = image as DicomImage;
+                DicomImage dicomImage = img as DicomImage;
                 if (dicomImage == null)
                 {
-                    Console.Error.WriteLine("The input file is not a valid DICOM image.");
+                    Console.Error.WriteLine("Failed to load DICOM image.");
                     return;
                 }
 
-                // Prepare PNG options and copy XMP metadata from the DICOM image
+                // Extract XMP metadata from the DICOM image
+                var xmpMetadata = dicomImage.XmpData;
+
+                // Configure PNG options and embed the extracted metadata
                 var pngOptions = new PngOptions
                 {
-                    XmpData = dicomImage.XmpData // preserve original metadata
+                    KeepMetadata = true,
+                    XmpData = xmpMetadata
                 };
 
-                // Save as PNG with the transferred metadata
+                // Save the image as PNG with metadata
                 dicomImage.Save(outputPath, pngOptions);
             }
         }
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert DICOM scans to PNG for web viewing while preserving patient and study metadata for audit trails.
- * 2. When a radiology workflow needs to generate thumbnail PNGs from DICOM files for integration into electronic health record (EHR) systems without losing XMP metadata.
- * 3. When a research project requires batch conversion of DICOM images to PNG for machine‑learning preprocessing while keeping original acquisition parameters embedded.
- * 4. When a hospital IT team wants to archive DICOM images as lossless PNGs on a file server and retain traceability by copying the DICOM XMP metadata.
- * 5. When a developer builds a diagnostic reporting tool that extracts DICOM images, converts them to PNG for inclusion in PDF reports, and needs the original metadata for regulatory compliance.
+ * 1. When a medical imaging system must export DICOM scans as PNG files for web viewers while keeping the original XMP metadata for audit trails.
+ * 2. When a research project needs to convert patient scans to a lightweight format for machine‑learning pipelines but still retain the embedded metadata for later reference.
+ * 3. When a hospital’s PACS integration requires generating PNG thumbnails that include the DICOM’s metadata to ensure traceability across different software tools.
+ * 4. When a compliance audit demands that any converted image files preserve the source metadata, enabling verification that the PNG originated from a specific DICOM study.
+ * 5. When a developer builds a document‑management workflow that stores diagnostic images as PNGs yet must retain the original DICOM tags for regulatory reporting.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert EPS Files to PNG with Double Size and Transparency in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,14 +11,14 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputEps";
-            string outputFolder = @"C:\OutputPng";
+            // Hardcoded list of EPS files to process
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\Input1.eps",
+                @"C:\Images\Input2.eps"
+            };
 
-            // Get all EPS files in the input folder
-            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
-
-            foreach (string inputPath in epsFiles)
+            foreach (string inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -26,9 +27,8 @@ class Program
                     return;
                 }
 
-                // Determine output PNG path
-                string outputPath = Path.Combine(outputFolder,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Determine output path (same folder, .png extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -40,7 +40,7 @@ class Program
                     int newWidth = image.Width * 2;
                     int newHeight = image.Height * 2;
 
-                    // Resize using nearest neighbour (default) interpolation
+                    // Resize using default interpolation
                     image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
                     // Save as PNG preserving transparency
@@ -58,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to generate high‑resolution PNG previews of a folder of EPS logos for a web catalog, scaling each image by 2 while keeping the transparent background.
- * 2. When an e‑commerce platform must automatically convert vendor‑supplied EPS product illustrations into double‑size PNG thumbnails for mobile app display.
- * 3. When a publishing workflow requires batch processing of EPS artwork into PNG assets for print‑to‑digital conversion, ensuring the images are enlarged and retain alpha transparency.
- * 4. When a GIS application imports EPS map symbols and needs to upscale them to PNG format for overlay on high‑DPI maps without losing transparent regions.
- * 5. When a software build script prepares documentation assets by converting EPS diagrams to larger PNG files for inclusion in PDF manuals, preserving the transparent background.
+ * 1. When you need to generate high‑resolution PNG thumbnails from a set of vector EPS logos while keeping their transparent background.
+ * 2. When an automated build process must export EPS artwork to PNG for web preview, scaling each image by a factor of two.
+ * 3. When a desktop application imports EPS drawings and must save them as PNG files that retain the alpha channel for later compositing.
+ * 4. When a batch script processes multiple EPS files to create larger PNG assets for print‑ready PDFs without losing transparency.
+ * 5. When a migration tool converts legacy EPS assets to PNG format, enlarging them for modern UI screens while preserving transparent regions.
  */

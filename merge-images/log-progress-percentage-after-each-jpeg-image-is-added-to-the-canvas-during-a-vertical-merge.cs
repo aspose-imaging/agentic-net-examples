@@ -1,6 +1,8 @@
+// HOW-TO: Log Progress While Vertically Merging Multiple JPEG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -10,20 +12,18 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG file paths
-        string[] inputPaths = new string[]
-        {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
-        };
-
-        // Hardcoded output JPEG file path
-        string outputPath = "output.jpg";
-
         try
         {
-            // Validate each input file exists
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_output.jpg";
+
+            // Validate each input file
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -34,31 +34,26 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Determine canvas size: max width and sum of heights
-            int maxWidth = 0;
-            int totalHeight = 0;
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    if (img.Width > maxWidth)
-                        maxWidth = img.Width;
-                    totalHeight += img.Height;
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Create JPEG options with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = source,
-                Quality = 100
-            };
+            // Calculate canvas dimensions for vertical merge
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create the output canvas bound to the file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
+            // Create JPEG canvas bound to output file
+            Source fileSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions { Source = fileSource, Quality = 100 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
                 for (int i = 0; i < inputPaths.Length; i++)
@@ -66,19 +61,17 @@ class Program
                     string path = inputPaths[i];
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        // Copy pixels of the current image onto the canvas
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-
                         offsetY += img.Height;
                     }
 
-                    // Log progress percentage after each image is added
+                    // Log progress percentage
                     int percent = (i + 1) * 100 / inputPaths.Length;
                     Console.WriteLine($"Progress: {percent}%");
                 }
 
-                // Save the bound canvas (no need to pass path again)
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -91,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple product photos into a single tall JPEG for an e‑commerce catalog while showing a progress percentage after each image is added.
- * 2. When building a C# utility that stitches scanned pages of a document into one continuous JPEG and wants to log the merge progress for user feedback.
- * 3. When creating an automated report generator that merges daily screenshot JPEGs into a vertical timeline image and needs to track the percentage completed during the merge.
- * 4. When developing a photo‑journalism app that concatenates a series of event images into a single JPEG banner and displays real‑time progress updates to the editor.
- * 5. When implementing a server‑side image processing pipeline that assembles advertisement banner slices into a full‑width JPEG and logs each step’s progress for monitoring and debugging.
+ * 1. When you need to combine several scanned JPEG pages into a single long image and display the merge percentage in the console.
+ * 2. When generating a vertical sprite sheet from multiple product photos for a web gallery and want to log the processing progress.
+ * 3. When creating a tall banner from separate JPEG sections for digital signage and need to monitor the merge progress in a C# application.
+ * 4. When preprocessing image datasets for machine learning by stitching individual JPEG samples into one file while tracking completion rate.
+ * 5. When automating the assembly of screenshot fragments into a single JPEG report and providing real‑time progress updates to the user.
  */

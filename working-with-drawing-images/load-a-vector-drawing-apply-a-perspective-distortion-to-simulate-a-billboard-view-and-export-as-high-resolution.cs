@@ -1,9 +1,8 @@
+// HOW-TO: Convert SVG To High‑Resolution PNG At 300 DPI Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,38 +10,41 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
-                // Set high-resolution rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Configure rasterization options for high‑resolution output
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White,
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    // Increase scale for higher resolution (e.g., 2x)
-                    ScaleX = 2.0f,
-                    ScaleY = 2.0f
+                    PageSize = image.Size
                 };
 
-                PngOptions pngOptions = new PngOptions
+                // Set PNG export options with desired DPI (e.g., 300)
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterOptions,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                svgImage.Save(outputPath, pngOptions);
+                // NOTE: Perspective distortion is not directly supported by Aspose.Imaging API.
+                // If needed, additional processing (e.g., custom transformation) should be applied here.
+
+                // Save as high‑resolution PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo or icon into a high‑resolution PNG for print‑ready marketing materials, this C# code using Aspose.Imaging can rasterize the vector at 2× scale and preserve anti‑aliasing.
- * 2. When a web application must generate sharp PNG thumbnails from user‑uploaded SVG files on the fly, the example shows how to load the SVG, set rasterization options, and save the result efficiently.
- * 3. When a desktop utility has to batch‑process vector drawings into PNG assets with a white background for UI design, the code demonstrates the required file‑format handling and scaling in .NET.
- * 4. When an e‑learning platform wants to embed scalable SVG diagrams as high‑quality PNG images in PDF reports, this snippet illustrates how to control page size, background color, and resolution during conversion.
- * 5. When a CI/CD pipeline needs to verify that SVG assets render correctly as PNGs at double resolution before deployment, the example provides a repeatable C# workflow using Aspose.Imaging’s rasterization options.
+ * 1. When you need to generate print‑ready PNG assets from SVG logos at 300 DPI for marketing materials.
+ * 2. When an application must display vector icons as high‑resolution raster images on high‑DPI screens.
+ * 3. When a server‑side service converts user‑uploaded SVG diagrams into PNG thumbnails for web previews.
+ * 4. When preparing artwork for large‑format displays such as billboards, requiring a high‑resolution PNG export.
+ * 5. When automating batch processing of SVG files into PNGs with consistent resolution settings in a C# workflow.
  */

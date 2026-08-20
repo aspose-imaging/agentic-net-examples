@@ -1,12 +1,13 @@
+// HOW-TO: Apply Emboss Convolution Filter to PNG in ASP.NET Core Web API (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -25,17 +26,15 @@ public class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply an emboss convolution filter
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                PngOptions pngOptions = new PngOptions
-                {
-                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive,
-                    Source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false)
-                };
-
-                raster.Save(outputPath, pngOptions);
+                // Save the filtered image as PNG
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +46,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs an ASP.NET Core Web API method that accepts a PNG file, applies the Aspose.Imaging ConvolutionFilter (e.g., Emboss3x3) to enhance edge details, and streams the filtered PNG back to the caller.
- * 2. When a developer wants to generate on‑the‑fly thumbnail previews of uploaded PNGs with a custom emboss effect using C# and Aspose.Imaging before storing them in a cloud bucket.
- * 3. When a developer must provide a REST endpoint that converts user‑submitted PNGs into an adaptive‑filtered PNG with a convolution filter for artistic rendering in a web‑based photo editor.
- * 4. When a developer is building a microservice that processes batch PNG images, applying the Emboss3x3 convolution filter to each raster image and saving the results with Aspose.Imaging’s PngOptions for lossless compression.
- * 5. When a developer needs to integrate server‑side image sharpening for PNG assets in an e‑commerce platform by applying a convolution filter via an ASP.NET Core API and returning the enhanced image to improve product visual quality.
+ * 1. When you need to add a 3‑D embossed effect to user‑uploaded PNG images before returning them from an ASP.NET Core Web API endpoint.
+ * 2. When an e‑commerce platform wants to dynamically apply an emboss filter to product PNGs for enhanced visual appeal via a RESTful service.
+ * 3. When a document‑management system generates preview thumbnails with an emboss convolution filter to differentiate file types in a web gallery.
+ * 4. When a mobile app backend must provide on‑the‑fly image processing that returns filtered PNGs for augmented‑reality overlays.
+ * 5. When a reporting dashboard requires server‑side generation of embossed PNG charts delivered through a C# Web API.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Create 24bpp BMP Image With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,31 +9,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded output path
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Create a source bound to the output file
             Source source = new FileCreateSource(outputPath, false);
 
-            // Set BMP options with 24 bits per pixel
-            BmpOptions options = new BmpOptions
+            // Set up BMP options with 24bpp RGB format
+            BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
                 Source = source
             };
 
-            // Create the image with the specified options and size
-            using (Image image = Image.Create(options, 500, 500))
+            // Create a new image with the specified options
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics and clear the canvas
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Save the bound image
+                // Clear the canvas with a background color
+                graphics.Clear(Color.Wheat);
+
+                // Save the image (bound to the source, so no path needed)
                 image.Save();
             }
         }
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a blank 24‑bit BMP canvas for drawing vector graphics such as logos or diagrams in a C# desktop application, they can use Image.Create with BmpOptions.
- * 2. When an automated reporting tool must create high‑resolution bitmap images on the fly to embed charts into PDF documents, the code provides a reliable way to produce a 500 × 500 24‑bpp BMP file.
- * 3. When a batch image‑processing pipeline requires a temporary white background image to composite scanned documents before applying OCR, Image.Create with a FileCreateSource ensures the file is created directly on disk.
- * 4. When a game development utility needs to export level‑design thumbnails as BMP files with exact pixel depth for compatibility with legacy engines, this snippet creates the required 24‑bit image programmatically.
- * 5. When a web service generates custom QR‑code overlays and must save them as BMP files with a known color depth for downstream Windows applications, the code demonstrates how to create and save the image in C#.
+ * 1. When you need to generate a blank 24‑bit BMP file programmatically for a reporting system that requires a specific pixel format.
+ * 2. When you must create a bitmap canvas, fill it with a solid color, and save it directly to disk without using intermediate streams.
+ * 3. When an application has to produce thumbnails or placeholders in BMP format for legacy devices that only support 24bpp RGB images.
+ * 4. When you want to automate the creation of custom‑sized images for batch processing, such as generating test patterns for image‑processing pipelines.
+ * 5. When you are integrating Aspose.Imaging into a C# service that dynamically creates graphics for print‑ready documents that require BMP with exact color depth.
  */

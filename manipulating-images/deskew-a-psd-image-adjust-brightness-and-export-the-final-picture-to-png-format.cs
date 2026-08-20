@@ -1,53 +1,37 @@
+// HOW-TO: Deskew PSD, Increase Brightness and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access processing methods
-                var raster = image as Aspose.Imaging.RasterImage;
-                if (raster == null)
+                if (!raster.IsCached)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
+                    raster.CacheData();
                 }
 
-                // Deskew the image (normalize angle)
-                raster.NormalizeAngle();
+                raster.NormalizeAngle(false, Color.White);
+                raster.AdjustBrightness(30);
 
-                // Adjust brightness (value can be changed as needed)
-                raster.AdjustBrightness(20);
-
-                // Prepare PNG save options
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-
-                // Save the processed image as PNG
+                PngOptions pngOptions = new PngOptions();
                 raster.Save(outputPath, pngOptions);
             }
         }
@@ -60,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to automatically deskew scanned Photoshop (PSD) files, boost their brightness, and generate web‑optimized PNG thumbnails for faster loading.
- * 2. When a batch‑processing script must straighten misaligned PSD artwork, enhance visibility with brightness adjustment, and save the results as PNG images for archival.
- * 3. When an e‑commerce platform preprocesses product mockups in PSD format, corrects tilt, increases brightness, and converts them to PNG for display on product pages.
- * 4. When a digital asset management system imports user‑uploaded PSD designs, normalizes the angle, improves brightness, and creates PNG previews for quick browsing.
- * 5. When a desktop utility converts legacy Photoshop PSD assets into PNG files for mobile apps, ensuring the images are level and properly brightened.
+ * 1. When you need to correct a scanned Photoshop file that is slightly rotated, enhance its visibility, and deliver it as a web‑friendly PNG using C#.
+ * 2. When an automated workflow must straighten product mockups saved as PSD, brighten them for better contrast, and store the results in PNG for downstream processing.
+ * 3. When a batch job processes user‑uploaded PSD designs, removes tilt, adjusts lighting, and converts them to PNG thumbnails for a gallery.
+ * 4. When a desktop application has to import a tilted PSD layer, improve its brightness, and export the final image in PNG format for printing or sharing.
+ * 5. When integrating Aspose.Imaging into a C# service that normalizes angle, boosts brightness, and converts PSD assets to PNG for mobile app consumption.
  */

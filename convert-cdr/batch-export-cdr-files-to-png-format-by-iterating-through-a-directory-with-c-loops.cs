@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Multiple CDR Files To PNG Images In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,44 +9,45 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputCdr";
+        string outputDirectory = @"C:\OutputPng";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputCdr";
-            string outputDirectory = @"C:\OutputPng";
-
             // Get all CDR files in the input directory
             string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
             foreach (string inputPath in cdrFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Ensure all pages are cached to avoid lazy loading during save
-                    cdrImage.CacheData();
-                    foreach (CdrImagePage page in cdrImage.Pages)
+                    // Iterate through each page of the CDR document
+                    for (int pageIndex = 0; pageIndex < cdrImage.PageCount; pageIndex++)
                     {
-                        page.CacheData();
+                        // Retrieve the specific page
+                        var page = (CdrImagePage)cdrImage.Pages[pageIndex];
 
-                        // Build output file name for each page
-                        string outputFileName = Path.Combine(
-                            outputDirectory,
-                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.PageNumber}.png");
+                        // Build the output PNG file path
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                         // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputFileName));
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Set PNG save options (default options are sufficient for basic export)
+                        var pngOptions = new PngOptions();
 
                         // Save the page as PNG
-                        PngOptions pngOptions = new PngOptions();
-                        page.Save(outputFileName, pngOptions);
+                        page.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -59,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to convert a batch of CorelDRAW (.cdr) artwork files into PNG thumbnails for a web gallery, they can use this C# loop to process each file and each page.
- * 2. When an automated build pipeline must generate PNG previews of multi‑page CDR documents for documentation or QA, the code iterates through a directory and saves each page as a separate PNG.
- * 3. When a migration project moves legacy CDR assets to a PNG‑based asset management system, developers can run this script to bulk export every CDR file and its pages to PNG files.
- * 4. When a cloud service receives uploaded CDR files and must provide downloadable PNG versions for end‑users, the code demonstrates how to load, cache, and save each page in C#.
- * 5. When a batch‑processing tool needs to create high‑resolution PNG sprites from a collection of CDR source files for game development, this loop automates the conversion of each page to PNG.
+ * 1. When you need to automatically export every page of several CorelDRAW (CDR) documents in a folder to high‑resolution PNG files for web publishing.
+ * 2. When a desktop application must generate PNG previews of CDR assets stored on a server without manual conversion.
+ * 3. When a build pipeline has to transform a collection of CDR design files into PNG thumbnails for a product catalog.
+ * 4. When a migration script has to extract each page of legacy CDR files and save them as PNGs for use in a new .NET‑based imaging system.
+ * 5. When an automated reporting tool must batch‑process CDR drawings and output them as PNG images for inclusion in PDF reports.
  */

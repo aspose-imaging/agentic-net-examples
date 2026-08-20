@@ -1,12 +1,13 @@
+// HOW-TO: Set EMF DPI and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -23,19 +24,26 @@ public class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                EmfImage emfImage = (EmfImage)image;
-
-                using (PngOptions pngOptions = new PngOptions())
+                EmfImage emfImage = image as EmfImage;
+                if (emfImage == null)
                 {
-                    var rasterOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageSize = emfImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    emfImage.Save(outputPath, pngOptions);
+                    Console.Error.WriteLine("Loaded image is not an EMF image.");
+                    return;
                 }
+
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = emfImage.Width,
+                    PageHeight = emfImage.Height
+                };
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                emfImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +55,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert a high‑resolution EMF logo to a PNG thumbnail that matches a specific print DPI, they adjust EmfImage.DpiX/DpiY before rasterization.
- * 2. When an application generates PDF reports containing EMF charts that need to be exported as PNG images for web preview at a consistent screen DPI, the DPI properties are set prior to saving.
- * 3. When a CAD system exports vector drawings in EMF format and the downstream system requires raster images at 300 DPI for quality control, the code modifies DpiX/DpiY before conversion.
- * 4. When a mobile app downloads EMF icons and needs to downscale them to 72 DPI PNG assets to reduce memory usage, the developer changes the DPI settings before rasterizing.
- * 5. When a batch processing script standardizes the DPI of multiple EMF files to 96 DPI so that all resulting PNG files align with the UI design grid, the DpiX/DpiY properties are adjusted before export.
+ * 1. When you need to change the resolution of a vector EMF file before turning it into a raster PNG for consistent display on screens.
+ * 2. When generating thumbnails of EMF drawings for web galleries and must ensure the output PNG has a specific DPI.
+ * 3. When preparing EMF graphics for printing workflows that require a known DPI setting before rasterization to PNG.
+ * 4. When converting legacy EMF diagrams to PNG while preserving their original size and aspect ratio by adjusting DpiX/DpiY.
+ * 5. When automating batch processing of EMF assets in a C# application and need to control the raster DPI to match other image assets.
  */

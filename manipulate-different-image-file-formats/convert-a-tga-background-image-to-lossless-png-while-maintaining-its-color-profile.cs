@@ -1,9 +1,8 @@
+// HOW-TO: Convert TGA Background Image to Lossless PNG with Color Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tga;
 
 class Program
 {
@@ -13,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\background.tga";
-            string outputPath = @"C:\Images\background_converted.png";
+            string outputPath = @"C:\Images\background.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,16 +25,16 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TGA image
-            using (RasterImage tgaImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Save as lossless PNG while preserving metadata (including color profile)
+                // Prepare PNG options to keep metadata (color profile)
                 var pngOptions = new PngOptions
                 {
-                    // KeepMetadata preserves color profile and other metadata
                     KeepMetadata = true
                 };
 
-                tgaImage.Save(outputPath, pngOptions);
+                // Save as lossless PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to convert legacy TGA background textures to lossless PNG files for modern engines while preserving the original color profile.
- * 2. When a UI designer wants to replace high‑resolution TGA assets with PNGs for web deployment without losing color accuracy or embedded metadata.
- * 3. When an automated build script must batch‑process TGA images into PNGs in a .NET application, ensuring the output remains lossless and retains ICC profiles.
- * 4. When a digital archivist needs to migrate TGA files to a more widely supported PNG format while keeping all metadata intact for future retrieval.
- * 5. When a C# service integrates Aspose.Imaging to read TGA files and store them as PNGs with preserved color information for downstream image‑processing pipelines.
+ * 1. When you need to replace a TGA texture used as a game background with a PNG that retains the original color accuracy.
+ * 2. When preparing assets for a web application that requires lossless PNG files but the source images are stored in TGA format.
+ * 3. When migrating legacy graphics from a design pipeline to a modern .NET system while preserving embedded ICC profiles.
+ * 4. When automating a batch process that converts background images to PNG to reduce file size without sacrificing quality.
+ * 5. When ensuring that a background image’s color profile is kept intact during format conversion for accurate printing or display.
  */

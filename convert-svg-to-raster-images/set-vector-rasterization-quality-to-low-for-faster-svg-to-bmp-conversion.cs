@@ -1,20 +1,21 @@
+// HOW-TO: Convert SVG to BMP with Low Quality Rasterization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.bmp";
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,14 +30,14 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options for low quality (no smoothing)
-                VectorRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size,
                     SmoothingMode = Aspose.Imaging.SmoothingMode.None
                 };
 
-                // Set up BMP save options with the rasterization options
-                BmpOptions bmpOptions = new BmpOptions
+                // Set up BMP save options and attach rasterization options
+                var bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate low‑resolution BMP thumbnails from user‑uploaded SVG icons quickly, developers can use this code to rasterize the vectors with low quality for faster response times.
- * 2. When a desktop application processes thousands of SVG diagrams into BMP files for legacy reporting tools and must minimize CPU usage, setting the vector rasterization quality to low speeds up the conversion.
- * 3. When an automated build pipeline creates BMP assets from SVG logos for a mobile app that only requires small preview images, this low‑quality rasterization reduces conversion time and build duration.
- * 4. When a server‑side batch job converts SVG floor plans to BMP maps on a low‑powered VM, using low smoothing mode ensures the conversion completes within limited resources.
- * 5. When a data‑migration script moves vector graphics stored as SVG into a BMP‑based archive and the visual fidelity is not critical, applying low rasterization quality accelerates the migration process.
+ * 1. When you need to quickly generate thumbnail BMP images from SVG icons for a web dashboard without preserving fine details.
+ * 2. When a server‑side C# application must batch‑convert large numbers of SVG diagrams to BMP format while minimizing CPU usage.
+ * 3. When you are building a reporting tool that embeds BMP snapshots of vector graphics and prefer faster rendering over high‑resolution quality.
+ * 4. When you want to reduce memory consumption during SVG to BMP conversion in a low‑power device or cloud function.
+ * 5. When you need to create low‑quality BMP previews of SVG files for preview panes in a Windows desktop application.
  */

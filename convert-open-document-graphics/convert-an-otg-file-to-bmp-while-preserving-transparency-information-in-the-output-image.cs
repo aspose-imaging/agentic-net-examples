@@ -1,19 +1,19 @@
+// HOW-TO: Convert OTG to BMP with Transparency Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.otg";
-            string outputPath = "output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,25 +22,26 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            using (Image otgImage = Image.Load(inputPath))
             {
-                // Configure rasterization options for OTG to preserve vector data
-                var otgRasterOptions = new OtgRasterizationOptions
+                // Prepare rasterization options for OTG conversion
+                var otgRasterizationOptions = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    // Preserve original size
+                    PageSize = otgImage.Size
                 };
 
-                // Set BMP options (default compression supports transparency)
+                // Set up BMP save options (default compression preserves transparency)
                 var bmpOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = otgRasterOptions
+                    VectorRasterizationOptions = otgRasterizationOptions
                 };
 
-                // Save as BMP preserving transparency
-                image.Save(outputPath, bmpOptions);
+                // Save as BMP
+                otgImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must import legacy OTG vector graphics and export them as BMP files for compatibility with Windows desktop software while keeping transparent backgrounds.
- * 2. When an image processing pipeline needs to batch‑convert OTG design assets into BMP format for use in a game engine that only supports raster images with alpha channels.
- * 3. When a reporting tool generates charts in OTG format and the final PDF requires embedded BMP images with preserved transparency for proper layering.
- * 4. When a document conversion service receives OTG files from clients and must deliver BMP thumbnails that retain the original transparent regions for preview in web galleries.
- * 5. When a migration script updates an old CAD system’s assets by rasterizing OTG drawings into BMP files so that legacy Windows applications can display them without losing the transparent background.
+ * 1. When you need to display vector OTG graphics in a Windows application that only supports BMP files while keeping the original transparent background.
+ * 2. When converting batch OTG assets from a design system into BMPs for legacy printing pipelines that require raster images with an alpha channel.
+ * 3. When exporting OTG diagrams from a CAD tool to BMP format for embedding in reports where the transparency must remain intact.
+ * 4. When integrating Aspose.Imaging in a C# service that receives OTG uploads and must store them as BMPs for compatibility with third‑party image viewers.
+ * 5. When automating image preprocessing to transform OTG icons into BMP thumbnails without losing their transparent edges.
  */

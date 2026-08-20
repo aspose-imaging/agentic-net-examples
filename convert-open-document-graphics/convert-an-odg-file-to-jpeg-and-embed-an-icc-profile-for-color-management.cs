@@ -1,8 +1,9 @@
+// HOW-TO: Convert ODG to JPEG with Embedded RGB and CMYK ICC Profiles in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,20 +11,20 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.odg";
-            string outputPath = "sample.jpg";
+            // Hardcoded paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample.jpg";
+            string rgbProfilePath = @"C:\Profiles\eciRGB_v2.icc";
+            string cmykProfilePath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
 
-            // Hardcoded ICC profile paths
-            string rgbProfilePath = "eciRGB_v2.icc";
-            string cmykProfilePath = "ISOcoated_v2_FullGamut4.icc";
-
-            // Validate input files
+            // Validate input ODG file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Validate ICC profile files
             if (!File.Exists(rgbProfilePath))
             {
                 Console.Error.WriteLine($"File not found: {rgbProfilePath}");
@@ -41,21 +42,16 @@ class Program
             // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Open ICC profile streams
-                using (var rgbStream = File.OpenRead(rgbProfilePath))
-                using (var cmykStream = File.OpenRead(cmykProfilePath))
+                // Prepare JPEG save options with ICC profiles
+                var jpegOptions = new JpegOptions
                 {
-                    // Configure JPEG save options with embedded ICC profiles
-                    var jpegOptions = new JpegOptions
-                    {
-                        ColorType = JpegCompressionColorMode.Cmyk,
-                        RgbColorProfile = new Aspose.Imaging.Sources.StreamSource(rgbStream),
-                        CmykColorProfile = new Aspose.Imaging.Sources.StreamSource(cmykStream)
-                    };
+                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
+                    RgbColorProfile = new StreamSource(File.OpenRead(rgbProfilePath)),
+                    CmykColorProfile = new StreamSource(File.OpenRead(cmykProfilePath))
+                };
 
-                    // Save as JPEG with embedded profiles
-                    image.Save(outputPath, jpegOptions);
-                }
+                // Save as JPEG with embedded profiles
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -67,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument graphics (ODG) drawings into JPEG files for web preview while preserving accurate colors across monitors and printers by embedding both RGB and CMYK ICC profiles.
- * 2. When an application must generate print‑ready JPEG assets from ODG source files and ensure the output complies with industry‑standard color spaces such as ISO Coated v2.
- * 3. When a document management system automates the creation of thumbnail JPEGs from ODG diagrams and requires embedded ICC profiles to maintain consistent visual fidelity in downstream workflows.
- * 4. When a digital asset pipeline extracts vector artwork from ODG files, converts them to JPEG, and embeds color profiles to guarantee that the resulting images match the original design intent on different devices.
- * 5. When a batch‑processing tool processes multiple ODG files, converts each to JPEG, and embeds the appropriate RGB and CMYK ICC profiles to support color‑critical publishing and archival.
+ * 1. When a publishing workflow needs to convert OpenDocument graphics to web‑ready JPEGs while preserving color accuracy with both RGB and CMYK ICC profiles.
+ * 2. When a print‑shop application must generate JPEG previews from ODG files and embed the correct color profiles for downstream RIP processing.
+ * 3. When a digital asset management system imports ODG artwork and stores it as JPEGs with embedded ICC data to ensure consistent display across devices.
+ * 4. When an automated batch job converts a folder of ODG diagrams to JPEG for email distribution, embedding the company’s standard RGB and CMYK profiles.
+ * 5. When a C# service creates color‑managed JPEG thumbnails from ODG source files for a marketing portal that requires accurate brand colors.
  */

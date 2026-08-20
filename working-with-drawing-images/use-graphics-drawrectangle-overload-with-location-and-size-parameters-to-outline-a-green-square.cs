@@ -1,41 +1,46 @@
+// HOW-TO: Draw a Green Square on PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string outputPath = @"C:\temp\green_square.png";
+
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\green_square.png";
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            // Create PNG options with a stream source
+            var pngOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-            // Create a new 500x500 image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a new image (200x200 pixels)
+            using (Image image = Image.Create(pngOptions, 200, 200))
             {
                 // Initialize graphics for the image
-                Graphics graphics = new Graphics(image);
+                var graphics = new Graphics(image);
 
-                // Optional: clear background to white
+                // Clear background (optional)
                 graphics.Clear(Color.White);
 
-                // Create a green pen with a thickness of 2
-                Pen greenPen = new Pen(Color.Green, 2);
+                // Create a green pen with width 2
+                var greenPen = new Pen(Color.Green, 2);
 
-                // Draw a green square at (150,150) with size 200x200
-                graphics.DrawRectangle(greenPen, 150, 150, 200, 200);
+                // Draw a green square at (50,50) with size 100x100
+                graphics.DrawRectangle(greenPen, 50, 50, 100, 100);
 
-                // Save the image
+                // Save the image (the stream source already points to outputPath)
                 image.Save();
             }
         }
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG report thumbnail that highlights a region of interest by drawing a green square with the Graphics.DrawRectangle overload (location and size) using Aspose.Imaging for .NET.
- * 2. When creating a custom UI overlay in a C# desktop application that outlines selected objects on a 500×500 canvas by calling Graphics.DrawRectangle with location and size parameters and a green Pen.
- * 3. When preprocessing images for a machine‑learning pipeline and need to annotate bounding boxes in green on PNG files by using the Graphics.DrawRectangle overload to draw a square at a specific coordinate.
- * 4. When building an automated testing tool that visualizes expected layout positions by drawing a green square with Graphics.DrawRectangle (location, size) on a generated image saved as PNG.
- * 5. When producing printable graphics where a green square serves as a marker for alignment or cropping, and the developer uses Aspose.Imaging’s Graphics.DrawRectangle overload to render the square in a 500×500 PNG image.
+ * 1. When you need to generate a PNG thumbnail with a highlighted green border around a specific region.
+ * 2. When creating programmatic diagrams where a green square marks an area of interest in a 200×200 pixel canvas.
+ * 3. When automating the production of UI assets that require a solid green outline for button states or icons.
+ * 4. When adding a simple visual cue to a white background image for testing image‑processing pipelines in C#.
+ * 5. When preparing sample images for documentation that demonstrate how to use Aspose.Imaging’s Graphics.DrawRectangle overload with location and size parameters.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert SVG to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,49 +9,44 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole execution in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Hardcoded input and output file paths.
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\test.svg";
+            string outputPath = @"C:\temp\test.output.png";
 
-            // Verify that the input file exists.
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists.
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image.
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            // Load the SVG image
+            using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Configure rasterization options for transparent background.
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                // Configure rasterization options with a transparent background
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set background color to transparent.
                     BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    // Optionally indicate that the image has no background color.
-                    // This can be useful for some formats.
-                    // HasBackgroundColor = false // Uncomment if needed.
+                    PageSize = svgImage.Size // preserve original size
                 };
 
-                // Set up PNG save options and attach the rasterization options.
-                PngOptions pngOptions = new PngOptions
+                // Set PNG save options and attach rasterization options
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save the rasterized PNG.
+                // Save as PNG with transparent background
                 svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any error message without crashing.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer uses Aspose.Imaging for .NET to convert SVG icons into PNG files with a transparent background for responsive UI overlays.
- * 2. When an e‑commerce platform employs the Aspose.Imaging C# library to turn product SVG illustrations into transparent PNG thumbnails that adapt to any site theme.
- * 3. When a mobile app builds high‑resolution PNG sprites from SVG logos using Aspose.Imaging’s rasterization options, preserving transparency for the app bundle.
- * 4. When a reporting service rasterizes SVG charts into PNG images via Aspose.Imaging for PDF export, needing a transparent background to match the document’s color scheme.
- * 5. When an automated CI/CD pipeline processes SVG brand assets into PNG assets with Aspose.Imaging for .NET, ensuring the output images retain transparency for email newsletters.
+ * 1. When you need to generate PNG icons from SVG assets while preserving transparency for web UI.
+ * 2. When converting vector logos stored as SVG into PNG files for email signatures that require a clear background.
+ * 3. When creating thumbnails of SVG diagrams for PDF reports and the background must remain invisible.
+ * 4. When processing user‑uploaded SVG illustrations in a C# service and saving them as transparent PNGs for a mobile app.
+ * 5. When automating batch conversion of SVG graphics to PNG for a design system that needs overlay compatibility.
  */

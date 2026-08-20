@@ -1,9 +1,9 @@
+// HOW-TO: Convert EMF to JPEG with Custom ICC Profiles in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,42 +11,51 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.emf";
-            string outputPath = @"C:\temp\output.jpg";
+            // Hard‑coded paths
+            string inputPath = @"C:\Temp\sample.emf";
+            string outputPath = @"C:\Temp\output.jpg";
+            string rgbProfilePath = @"C:\Temp\eciRGB_v2.icc";
+            string cmykProfilePath = @"C:\Temp\ISOcoated_v2_FullGamut4.icc";
 
-            // Verify input file exists
+            // Validate input files
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+            if (!File.Exists(rgbProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {rgbProfilePath}");
+                return;
+            }
+            if (!File.Exists(cmykProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {cmykProfilePath}");
                 return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Paths to custom ICC profiles
-            string rgbProfilePath = @"C:\temp\eciRGB_v2.icc";
-            string cmykProfilePath = @"C:\temp\ISOcoated_v2_FullGamut4.icc";
-
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            // Load EMF image
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with custom color profiles
+                // Prepare JPEG options with custom ICC profiles
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.Rgb
+                    // Use CMYK color mode to match the profiles
+                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk
                 };
 
-                // Load ICC profile streams
-                using (Stream rgbProfileStream = File.OpenRead(rgbProfilePath))
-                using (Stream cmykProfileStream = File.OpenRead(cmykProfilePath))
+                // Open ICC profile streams
+                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
+                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
                 {
-                    jpegOptions.RgbColorProfile = new StreamSource(rgbProfileStream);
-                    jpegOptions.CmykColorProfile = new StreamSource(cmykProfileStream);
+                    jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
+                    jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
 
-                    // Save as JPEG using the configured options
-                    image.Save(outputPath, jpegOptions);
+                    // Save as JPEG with the custom profiles
+                    emfImage.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -59,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EMF graphics to JPEG for web display while preserving the original brand colors using a custom ICC profile.
- * 2. When a printing workflow requires accurate color reproduction from EMF source files to JPEG previews, and the developer must embed specific RGB and CMYK profiles during conversion.
- * 3. When an application generates reports that include EMF charts and must export them as JPEG images that match the corporate color standards defined in external ICC files.
- * 4. When a digital asset management system ingests EMF logos and needs to create JPEG thumbnails with exact color fidelity by applying custom color profiles via Aspose.Imaging in C#.
- * 5. When a developer is building a batch conversion tool that processes multiple EMF files into JPEGs for archival, ensuring each output image uses the correct ICC profile to maintain consistency across devices.
+ * 1. When you need to preserve exact brand colors while converting vector EMF graphics to JPEG for web publishing, you can embed custom RGB and CMYK ICC profiles using Aspose.Imaging in C#.
+ * 2. When preparing print‑ready JPEG files from EMF artwork and must match a specific printing press color space, applying a CMYK ICC profile ensures color fidelity.
+ * 3. When automating a batch conversion pipeline that processes legacy EMF files and requires consistent color management across different devices, you can load custom ICC profiles programmatically.
+ * 4. When integrating image conversion into a C# desktop application that must comply with corporate color standards, using Aspose.Imaging’s JpegOptions with custom profiles guarantees compliance.
+ * 5. When converting EMF diagrams to JPEG thumbnails for a digital asset management system while retaining accurate colors for scientific or medical illustrations, custom ICC profiles prevent color shifts.
  */

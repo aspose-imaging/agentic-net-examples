@@ -1,49 +1,32 @@
+// HOW-TO: Increase Brightness of Animated GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.gif";
-            string outputPath = @"C:\Temp\output.gif";
+            string inputPath = "input.gif";
+            string outputPath = "output\\brightened.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF‑specific methods
-                GifImage gifImage = (GifImage)image;
-
-                // Increase brightness uniformly for all frames (value range: -255 to 255)
-                gifImage.AdjustBrightness(50);
-
-                // Prepare GIF save options for smoother colors
-                GifOptions saveOptions = new GifOptions
-                {
-                    // Enable palette correction to generate an optimal palette
-                    DoPaletteCorrection = true,
-                    // Preserve all frames (full frame mode)
-                    FullFrame = true
-                };
-
-                // Save the adjusted animated GIF
-                gifImage.Save(outputPath, saveOptions);
+                GifImage gif = (GifImage)image;
+                gif.AdjustBrightness(50);
+                gif.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -55,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to brighten a low‑light animated GIF and ensure the resulting file has smooth colors by using Aspose.Imaging’s AdjustBrightness and palette‑correction options in C#.
- * 2. When an e‑commerce site needs to automatically enhance product showcase GIFs that are too dark before publishing them, using C# to load the GIF, increase brightness, and save with an optimal palette.
- * 3. When a social‑media app processes user‑uploaded animated stickers and must make them visually clearer while preserving all frames, leveraging Aspose.Imaging’s GifImage.AdjustBrightness and GifOptions.FullFrame in .NET.
- * 4. When a marketing automation tool generates animated email banners from legacy GIF assets and requires a uniform brightness boost and smoother color transitions via C# and Aspose.Imaging.
- * 5. When a game developer prepares animated UI elements from old GIF sprites, needing to brighten them and apply palette correction to avoid banding, using the provided C# code with Aspose.Imaging.
+ * 1. When you need to make a dark animated GIF clearer for web banners by programmatically boosting its brightness in C#.
+ * 2. When you want to preprocess a series of GIF frames before creating an animated GIF to improve visual quality in a slideshow application.
+ * 3. When an e‑learning platform requires brighter GIF animations to enhance readability on mobile devices using Aspose.Imaging.
+ * 4. When a marketing tool automatically adjusts the brightness of user‑uploaded GIFs to match brand color guidelines before saving them.
+ * 5. When a game developer needs to brighten sprite animations stored as GIFs to ensure they stand out against dark backgrounds.
  */

@@ -1,81 +1,78 @@
+// HOW-TO: Resize Multiple JPEG Images to 1200 Pixels Using Lanczos in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Hard‑coded input and output directories
+            // Hard‑coded input and output directories.
             string inputDir = @"C:\Images\Input\";
             string outputDir = @"C:\Images\Output\";
 
-            // Get all JPEG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.jpg");
-
-            foreach (string inputPath in inputFiles)
+            // List of JPEG files to process (add or modify as needed).
+            string[] files = new[]
             {
-                // Verify that the input file exists
+                "photo1.jpg",
+                "photo2.jpg",
+                "photo3.jpg"
+            };
+
+            // Maximum dimension (width or height) after resizing.
+            const int maxDimension = 1200;
+
+            foreach (string fileName in files)
+            {
+                // Build full input and output paths.
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, fileName);
+
+                // Verify that the input file exists.
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + "_resized.jpg");
-
-                // Ensure the output directory exists
+                // Ensure the output directory exists.
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the JPEG image
+                // Load the JPEG image.
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Determine scaling factor to keep the larger side at most 1200 pixels
-                    int originalWidth = image.Width;
-                    int originalHeight = image.Height;
-                    int maxDimension = 1200;
+                    // Determine scaling factor while preserving aspect ratio.
+                    int newWidth = image.Width;
+                    int newHeight = image.Height;
 
-                    double scale = 1.0;
-                    if (originalWidth > originalHeight && originalWidth > maxDimension)
+                    if (image.Width > image.Height)
                     {
-                        scale = (double)maxDimension / originalWidth;
+                        if (image.Width > maxDimension)
+                        {
+                            newWidth = maxDimension;
+                            newHeight = (int)Math.Round((double)image.Height * maxDimension / image.Width);
+                        }
                     }
-                    else if (originalHeight >= originalWidth && originalHeight > maxDimension)
+                    else
                     {
-                        scale = (double)maxDimension / originalHeight;
-                    }
-
-                    int newWidth = (int)Math.Round(originalWidth * scale);
-                    int newHeight = (int)Math.Round(originalHeight * scale);
-
-                    // If the image is already within the size limit, just copy it
-                    if (scale >= 1.0)
-                    {
-                        newWidth = originalWidth;
-                        newHeight = originalHeight;
+                        if (image.Height > maxDimension)
+                        {
+                            newHeight = maxDimension;
+                            newWidth = (int)Math.Round((double)image.Width * maxDimension / image.Height);
+                        }
                     }
 
-                    // Prepare resize settings with Lanczos algorithm
-                    ImageResizeSettings resizeSettings = new ImageResizeSettings
-                    {
-                        Mode = ResizeType.LanczosResample
-                    };
+                    // Resize using Lanczos resampling.
+                    image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                    // Perform the resize
-                    image.Resize(newWidth, newHeight, resizeSettings);
-
-                    // Save the resized image as JPEG
-                    JpegOptions saveOptions = new JpegOptions
-                    {
-                        Quality = 90 // reasonable quality
-                    };
-                    image.Save(outputPath, saveOptions);
+                    // Save the resized image back as JPEG.
+                    // Using default JPEG options; you can customize if needed.
+                    image.Save(outputPath, new JpegOptions());
                 }
             }
         }
@@ -88,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑resize product photos in JPEG format to a maximum of 1200 pixels for faster page loads on an e‑commerce website, they can use this C# Aspose.Imaging code with the Lanczos resampling algorithm.
- * 2. When a photo‑sharing app must automatically shrink user‑uploaded JPEG images to a 1200‑pixel limit before storing them in Azure Blob storage, the code provides a reliable C# solution for server‑side image processing.
- * 3. When a digital asset management system requires periodic optimization of legacy JPEG archives so that each image’s longest side does not exceed 1200 pixels, this Aspose.Imaging C# routine can be scheduled to run nightly.
- * 4. When a marketing automation tool needs to generate web‑ready versions of high‑resolution JPEG banners for email campaigns, the code resizes the collection to 1200 pixels using the high‑quality Lanczos filter.
- * 5. When a desktop utility must prepare a batch of JPEG screenshots for inclusion in a PDF report, ensuring that no image exceeds 1200 pixels while preserving detail, the provided C# Aspose.Imaging example handles the resizing efficiently.
+ * 1. When you need to batch‑process product photos for a web catalog, ensuring each JPEG does not exceed 1200 pixels while preserving quality with Lanczos resampling.
+ * 2. When preparing user‑uploaded images for a mobile app, you can automatically shrink them to a maximum dimension to reduce bandwidth and storage costs.
+ * 3. When creating thumbnails for a photo‑gallery website, you can resize the original JPEGs to a consistent size without distorting the aspect ratio.
+ * 4. When optimizing images for email newsletters, you can limit the width or height to 1200 pixels to keep the message size small and maintain visual clarity.
+ * 5. When migrating legacy image archives to a new system, you can uniformly resize all JPEG files to a manageable size before importing them.
  */

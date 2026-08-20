@@ -1,3 +1,4 @@
+// HOW-TO: Save Specific PDF Pages As Separate TIFF Files In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,40 +9,37 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.pdf";
+        string outputDirectory = @"C:\temp\output";
+
         try
         {
-            // Hard‑coded input PDF path
-            string inputPath = @"C:\temp\input.pdf";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Directory where the TIFF files will be written
-            string outputDirectory = @"C:\temp\output";
-
-            // Export pages 1‑3 (zero‑based indices 0,1,2) as separate TIFF files
-            for (int pageIndex = 0; pageIndex < 3; pageIndex++)
+            // Load the PDF image
+            using (Image pdfImage = Image.Load(inputPath))
             {
-                // Build output file name (e.g., page1.tif, page2.tif, page3.tif)
-                string outputPath = Path.Combine(outputDirectory, $"page{pageIndex + 1}.tif");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PDF image
-                using (Image pdfImage = Image.Load(inputPath))
+                // Save pages 1‑3 (zero‑based indices 0‑2) as separate TIFF files
+                for (int pageIndex = 0; pageIndex < 3; pageIndex++)
                 {
-                    // Configure TIFF save options with a page range containing only the current page
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    string outputPath = Path.Combine(outputDirectory, $"page{pageIndex + 1}.tif");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure TIFF save options with MultiPageOptions for a single page
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                     {
                         MultiPageOptions = new MultiPageOptions(new int[] { pageIndex })
                     };
 
-                    // Save the selected page as a single‑frame TIFF
+                    // Save the selected page to TIFF
                     pdfImage.Save(outputPath, tiffOptions);
                 }
             }
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first three pages of a multi‑page PDF and store each page as an individual TIFF file for archival or printing workflows using Aspose.Imaging for .NET.
- * 2. When an application must convert specific PDF pages to single‑frame TIFF images to feed into a legacy document management system that only accepts TIFF format.
- * 3. When a batch process has to generate separate high‑resolution TIFFs from selected PDF pages for OCR preprocessing in a C# service.
- * 4. When a developer wants to create page‑by‑page TIFF thumbnails from a PDF to display in a web portal that lists each page as an image.
- * 5. When a compliance tool must isolate the first three pages of a contract PDF and save them as separate TIFF files for digital signature verification.
+ * 1. When you need to extract the first three pages of a multi‑page PDF and store each page as an individual TIFF for archival or printing workflows.
+ * 2. When a document management system requires separate high‑resolution TIFF images for each PDF page to comply with OCR or scanning standards.
+ * 3. When generating thumbnails or preview images from selected PDF pages and saving them in TIFF format for use in a .NET web application.
+ * 4. When converting specific PDF pages to TIFF to embed them into a legacy reporting tool that only accepts single‑page TIFF files.
+ * 5. When automating batch processing that isolates particular pages of PDFs and saves them as TIFFs for downstream image analysis or machine‑learning pipelines.
  */

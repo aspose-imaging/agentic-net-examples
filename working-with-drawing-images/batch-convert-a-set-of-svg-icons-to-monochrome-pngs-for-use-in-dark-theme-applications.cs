@@ -1,10 +1,10 @@
+// HOW-TO: Batch Convert SVG Icons to Monochrome PNGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,67 +12,69 @@ class Program
     {
         try
         {
+            // Define input and output directories relative to the current directory
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all SVG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
             foreach (string inputPath in files)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Prepare output path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image svgImage = Image.Load(inputPath))
+                // Load the SVG image
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Rasterize SVG to PNG in memory
-                    using (MemoryStream rasterStream = new MemoryStream())
+                    // Set up rasterization options for SVG
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        using (PngOptions rasterOptions = new PngOptions())
-                        {
-                            rasterOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                            {
-                                BackgroundColor = Color.White,
-                                PageSize = ((SvgImage)svgImage).Size
-                            };
-                            svgImage.Save(rasterStream, rasterOptions);
-                        }
+                        // Use white background; the resulting PNG will be monochrome (grayscale)
+                        BackgroundColor = Color.White,
+                        // Preserve original size
+                        PageSize = image.Size
+                    };
 
-                        rasterStream.Position = 0;
-
-                        // Load rasterized PNG and convert to monochrome
-                        using (RasterImage raster = (RasterImage)Image.Load(rasterStream))
-                        {
-                            raster.CacheData();
-                            raster.Grayscale();
-                            raster.BinarizeFixed(128);
-
-                            using (PngOptions finalOptions = new PngOptions())
-                            {
-                                finalOptions.ColorType = PngColorType.Grayscale;
-                                raster.Save(outputPath, finalOptions);
-                            }
-                        }
+                    // Configure PNG options for grayscale output
+                    using (PngOptions pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.Grayscale,
+                        VectorRasterizationOptions = rasterOptions
+                    })
+                    {
+                        // Save the rasterized PNG
+                        image.Save(outputPath, pngOptions);
                     }
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -84,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create monochrome PNG versions of a collection of SVG icons for a dark‑theme mobile app, this code batch‑converts and saves the assets in one step.
- * 2. When a UI designer wants to generate high‑resolution PNG sprites from SVG logos for a web dashboard that uses a dark background, the script automates the rasterization process.
- * 3. When a CI/CD pipeline must produce production‑ready PNG icons from source SVG files for a Windows desktop application’s dark mode, the code provides fast, repeatable batch conversion.
- * 4. When an e‑learning platform requires black‑on‑white PNG illustrations derived from SVG diagrams to ensure readability in its dark‑theme player, this routine handles the conversion automatically.
- * 5. When a game developer needs to convert a set of SVG asset files into monochrome PNG textures for use in a night‑mode UI skin, the program efficiently processes the entire folder.
+ * 1. When you need to generate black‑and‑white PNG versions of a library of SVG icons for a dark‑mode UI, this code automates the batch conversion in C#.
+ * 2. When a build pipeline must convert newly added SVG assets into monochrome PNGs for mobile apps that only support raster images, the script processes all files in a folder.
+ * 3. When you want to prepare SVG logos for email newsletters that require PNG format with a single color to ensure consistent rendering across clients, this example handles the conversion automatically.
+ * 4. When a design system requires a set of SVG symbols to be exported as PNGs with a fixed color palette for accessibility testing, the code iterates through the directory and saves the results.
+ * 5. When you are integrating Aspose.Imaging into a C# tool that needs to create dark‑theme ready icons from vector sources without manual editing, this batch process provides a quick solution.
  */

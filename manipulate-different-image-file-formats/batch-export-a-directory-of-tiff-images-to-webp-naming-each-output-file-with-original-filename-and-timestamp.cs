@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert TIFF Images to WebP with Timestamped Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,15 +14,12 @@ class Program
             string inputDirectory = @"C:\Images\Tiff";
             string outputDirectory = @"C:\Images\WebP";
 
-            // Ensure the output directory exists (creates if missing)
-            Directory.CreateDirectory(outputDirectory);
-
             // Get all TIFF files in the input directory
             string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
             foreach (string inputPath in tiffFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,9 +30,11 @@ class Program
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
+
+                // Combine with output directory
                 string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists (unconditional as per rule)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image and save as WebP
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of legacy TIFF scans into modern WebP files for faster web delivery while preserving the original filenames with a timestamp for version tracking.
- * 2. When an automated image pipeline must process daily satellite TIFF imagery and store compressed WebP copies with unique timestamps to avoid overwriting previous exports.
- * 3. When a content management system requires batch migration of high‑resolution TIFF assets to WebP format for mobile optimization, and the filenames must include a timestamp to maintain audit trails.
- * 4. When a Windows service is tasked with nightly archiving of scanned documents, converting them from TIFF to WebP and appending the current date‑time to each file name for easy retrieval.
- * 5. When a developer builds a desktop utility that scans a folder of TIFF photos, exports them as WebP using Aspose.Imaging, and names each output with the original name plus a timestamp to ensure uniqueness across multiple runs.
+ * 1. When you need to archive a large set of high‑resolution TIFF scans as smaller WebP files while preserving the original names and adding a processing timestamp.
+ * 2. When an automated workflow must convert daily‑generated TIFF reports into web‑friendly WebP images for faster loading on a website.
+ * 3. When a migration script has to rename exported images with a unique timestamp to avoid filename collisions in a shared folder.
+ * 4. When a C# application processes scanned documents in bulk and stores them in a compressed format for long‑term storage or backup.
+ * 5. When you want to integrate Aspose.Imaging into a scheduled job that transforms and timestamps image files before uploading them to a cloud storage service.
  */

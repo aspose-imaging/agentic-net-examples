@@ -1,10 +1,10 @@
+// HOW-TO: Increase TIFF Brightness, Apply Gaussian Blur, Export to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -26,19 +26,12 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
+
                 raster.AdjustBrightness(50);
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
 
-                GaussianBlurFilterOptions blurOptions = new GaussianBlurFilterOptions
-                {
-                    Radius = 5,
-                    Sigma = 2.0f
-                };
-                raster.Filter(raster.Bounds, blurOptions);
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    image.Save(outputPath, pdfOptions);
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to enhance the contrast of a high‑resolution TIFF scan, apply a soft blur to reduce noise, and archive the result as a searchable PDF for patient records.
- * 2. When a publishing workflow must convert scanned book pages in TIFF format, brighten faded text, smooth artifacts with a Gaussian blur, and output a print‑ready PDF.
- * 3. When an e‑commerce platform processes product catalog TIFF images, increases brightness for better visibility, applies a subtle blur to hide imperfections, and generates PDF brochures for distribution.
- * 4. When a legal firm digitizes signed documents stored as TIFF files, adjusts brightness to make signatures clearer, uses Gaussian blur to obscure background details, and saves the final document as a PDF for court filing.
- * 5. When an archival software batch‑processes historical photographs in TIFF, boosts brightness to restore faded colors, applies Gaussian blur to soften grain, and creates PDF portfolios for easy viewing.
+ * 1. When you need to enhance a scanned TIFF document’s visibility before archiving it as a PDF.
+ * 2. When preparing medical imaging TIFF files for presentation by brightening and smoothing them for PDF reports.
+ * 3. When converting low‑contrast TIFF photographs to PDF with a subtle blur to reduce noise.
+ * 4. When automating batch processing of TIFF receipts to improve readability and store them as PDFs.
+ * 5. When creating PDF portfolios from TIFF graphics that require brightness correction and a smoothing filter.
  */

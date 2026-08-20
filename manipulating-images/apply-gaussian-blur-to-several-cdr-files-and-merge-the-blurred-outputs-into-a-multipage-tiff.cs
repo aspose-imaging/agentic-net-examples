@@ -1,12 +1,14 @@
-// HOW-TO: Apply Gaussian Blur to Multiple CDR Files and Merge into Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to Multiple CDR Files and Merge into Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -14,13 +16,13 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
-            string inputPath1 = @"c:\temp\input1.cdr";
-            string inputPath2 = @"c:\temp\input2.cdr";
-            string inputPath3 = @"c:\temp\input3.cdr";
+            // Hardcoded input CDR file paths
+            string inputPath1 = "input1.cdr";
+            string inputPath2 = "input2.cdr";
+            string inputPath3 = "input3.cdr";
 
-            // Hardcoded output TIFF file
-            string outputPath = @"c:\temp\merged.tif";
+            // Hardcoded output TIFF path
+            string outputPath = "merged_output.tif";
 
             // Verify input files exist
             if (!File.Exists(inputPath1))
@@ -39,47 +41,60 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // List to hold frames
+            // Prepare list to hold TIFF frames
             List<TiffFrame> frames = new List<TiffFrame>();
 
             // Process each CDR file
-            string[] inputPaths = new[] { inputPath1, inputPath2, inputPath3 };
-            foreach (string inputPath in inputPaths)
+            string[] inputs = { inputPath1, inputPath2, inputPath3 };
+            foreach (string inputPath in inputs)
             {
+                // Load CDR vector image
                 using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
+                    // Rasterize CDR to PNG in memory
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        cdr.Save(ms, new PngOptions
-                        {
-                            VectorRasterizationOptions = new CdrRasterizationOptions
-                            {
-                                PageWidth = cdr.Width,
-                                PageHeight = cdr.Height
-                            }
-                        });
+                        cdr.Save(ms, new PngOptions());
                         ms.Position = 0;
+
+                        // Load rasterized image
                         using (RasterImage raster = (RasterImage)Image.Load(ms))
                         {
-                            TiffFrame frame = new TiffFrame(new TiffOptions(TiffExpectedFormat.Default), raster.Width, raster.Height);
-                            frame.SavePixels(frame.Bounds, raster.LoadPixels(raster.Bounds));
+                            // Apply Gaussian blur
+                            var blurOptions = new GaussianBlurFilterOptions { Radius = 5 };
+                            raster.Filter(raster.Bounds, blurOptions);
+
+                            // Create TIFF frame from blurred raster
+                            TiffFrame frame = new TiffFrame(raster);
                             frames.Add(frame);
                         }
                     }
                 }
             }
 
-            // Create TIFF image and add frames
-            using (TiffImage tiff = new TiffImage(frames[0]))
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Create TIFF options for the multipage TIFF
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Compression = TiffCompressions.Lzw;
+
+            // Build multipage TIFF
+            using (TiffImage tiffImage = new TiffImage(frames[0]))
             {
                 for (int i = 1; i < frames.Count; i++)
                 {
-                    tiff.AddFrame(frames[i]);
+                    tiffImage.AddFrame(frames[i]);
                 }
-                tiff.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+
+                // Save the multipage TIFF
+                tiffImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -91,9 +106,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a blurred preview of several CorelDRAW drawings and combine them into a single multipage TIFF for printing or archiving.
- * 2. When you want to batch‑process CDR files, apply a Gaussian blur filter, and store the results as a compact, paginated TIFF document for easy distribution.
- * 3. When an application must convert vector CDR artwork into raster images with a soft focus effect before merging them into a multi‑page TIFF for PDF generation.
- * 4. When a workflow requires automated image preprocessing—such as blurring confidential details—in multiple CDR files and then consolidating them into one TIFF for compliance reporting.
- * 5. When you need to programmatically generate a single TIFF file that contains blurred versions of several design files for use in web galleries or digital asset management.
+ * 1. When a designer needs to batch‑process CorelDRAW (CDR) artwork, apply a soft blur effect, and combine the results into a single multi‑page TIFF for printing or archiving.
+ * 2. When an application must convert vector CDR drawings to raster images, apply a Gaussian filter for visual smoothing, and store them as pages of a TIFF document for PDF generation.
+ * 3. When a workflow requires automatically generating blurred previews of several CDR files and packaging them into one TIFF file for quick review in document management systems.
+ * 4. When a developer wants to create a multi‑page TIFF slideshow where each slide is a blurred version of a different CDR illustration, without writing intermediate files to disk.
+ * 5. When a server‑side service needs to rasterize multiple CDR assets, apply image‑processing effects, and deliver the combined TIFF to clients for further analysis or printing.
  */

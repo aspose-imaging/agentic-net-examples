@@ -1,10 +1,13 @@
+// HOW-TO: Apply 3x3 Blur Box Filter to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,7 +16,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,32 +28,30 @@ class Program
 
             using (Image svgImage = Image.Load(inputPath))
             {
-                var vectorOptions = new SvgRasterizationOptions
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
+                    PageSize = new SizeF(svgImage.Width, svgImage.Height),
                     BackgroundColor = Color.White
                 };
 
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                using (var memoryStream = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        var rasterImage = (RasterImage)rasterImageContainer;
+                        double[,] kernel = ConvolutionFilter.GetBlurBox(3);
+                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                        raster.Filter(raster.Bounds, filterOptions);
 
-                        var blurKernel = ConvolutionFilter.GetBlurBox(3);
-                        var blurOptions = new ConvolutionFilterOptions(blurKernel);
-                        rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                        rasterImage.Save(outputPath, new PngOptions());
+                        PngOptions outOptions = new PngOptions();
+                        raster.Save(outputPath, outOptions);
                     }
                 }
             }
@@ -64,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews of vector icons for a web gallery, a developer can use this C# code to rasterize the SVG, apply a 3×3 blur box filter, and save the result as a PNG to reduce aliasing.
- * 2. When converting user‑uploaded SVG diagrams to PNG for email attachments, the code enables applying a subtle blur via Aspose.Imaging convolution to smooth edges before saving.
- * 3. When preparing SVG logos for print layouts that require a soft blur effect, a developer can rasterize the SVG, apply the predefined blur box, and output a PNG with the desired visual style.
- * 4. When building a C# batch‑processing tool that rasterizes multiple SVG assets to PNG, this code adds a uniform 3×3 blur to each image, creating consistent background placeholders.
- * 5. When implementing an automated CI pipeline that validates SVG assets, the code renders each SVG to PNG, applies a blur filter to highlight rendering artifacts, and saves the processed images for review.
+ * 1. When you need to generate a softened PNG thumbnail from an SVG logo for a website’s UI.
+ * 2. When you want to preprocess vector graphics by applying a blur effect before embedding them in a PDF report.
+ * 3. When you are creating low‑resolution preview images of SVG diagrams with a uniform blur for a design‑review tool.
+ * 4. When you must convert SVG icons to PNG format while adding a subtle blur to match a mobile app’s visual style.
+ * 5. When you automate batch processing of SVG assets, applying a 3×3 blur box filter and saving the results as PNG files for a game’s texture pipeline.
  */

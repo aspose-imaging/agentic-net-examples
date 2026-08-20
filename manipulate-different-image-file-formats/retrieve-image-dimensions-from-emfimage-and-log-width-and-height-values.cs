@@ -1,3 +1,4 @@
+// HOW-TO: Get Width and Height of EMF Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,36 +10,45 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "input.emf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\output\dimensions.txt";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image using Aspose.Imaging
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access Width and Height properties
+                // Cast to EmfImage to access Width and Height
                 EmfImage emfImage = image as EmfImage;
-                if (emfImage != null)
+                if (emfImage == null)
                 {
-                    // Log dimensions
-                    Console.WriteLine($"Width: {emfImage.Width}");
-                    Console.WriteLine($"Height: {emfImage.Height}");
+                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
+                    return;
                 }
-                else
-                {
-                    Console.Error.WriteLine("The loaded file is not an EMF image.");
-                }
+
+                // Retrieve dimensions
+                int width = emfImage.Width;
+                int height = emfImage.Height;
+
+                // Log dimensions to console
+                Console.WriteLine($"Width: {width}");
+                Console.WriteLine($"Height: {height}");
+
+                // Optionally write dimensions to a file
+                File.WriteAllText(outputPath, $"Width: {width}{Environment.NewLine}Height: {height}");
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application uses Aspose.Imaging to load an EMF file with Image.Load and must verify that the EmfImage.Width and EmfImage.Height meet predefined size limits before further processing.
- * 2. When generating a catalog of graphics where the system logs the width and height of each EMF image to provide metadata for quality‑control reviews.
- * 3. When converting EMF files to another format and the conversion routine reads the EmfImage dimensions to calculate the correct scaling factors.
- * 4. When a server‑side service receives EMF assets from external partners and records the image dimensions using Aspose.Imaging for monitoring and auditing purposes.
- * 5. When building a thumbnail generator that first reads the EMF image’s Width and Height via EmfImage to determine the appropriate thumbnail dimensions.
+ * 1. When a desktop application must display an EMF graphic correctly, it can read the image’s width and height to size the container control.
+ * 2. When generating a PDF report that includes vector EMF files, developers need the dimensions to calculate page layout and scaling.
+ * 3. When validating uploaded EMF files on a server, checking the width and height ensures they meet predefined size restrictions before further processing.
+ * 4. When creating thumbnails or preview images for a document management system, the original EMF dimensions are required to maintain aspect ratio.
+ * 5. When logging image metadata for audit trails, recording the EMF image’s width and height provides essential information for future reference.
  */

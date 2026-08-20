@@ -1,83 +1,87 @@
+// HOW-TO: Apply Sepia Tone to EMF Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.emf";
+            string outputPath = "output\\result.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image emfImage = Image.Load(inputPath))
+            // Load the EMF illustration and rasterize to a temporary PNG
+            using (Aspose.Imaging.Image emfImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare PNG save options with rasterization settings
-                var pngOptions = new PngOptions
+                string tempPath = "temp.png";
+
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.White // optional background
-                    }
+                    PageSize = emfImage.Size,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Save the EMF as a raster PNG (temporary file)
-                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-                emfImage.Save(tempPngPath, pngOptions);
-
-                // Load the raster PNG for pixel manipulation
-                using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+                var pngOptions = new PngOptions
                 {
-                    // Apply sepia tone to each pixel
-                    for (int y = 0; y < raster.Height; y++)
-                    {
-                        for (int x = 0; x < raster.Width; x++)
-                        {
-                            Color original = raster.GetPixel(x, y);
-                            double r = original.R;
-                            double g = original.G;
-                            double b = original.B;
+                    VectorRasterizationOptions = rasterOptions,
+                    Source = new FileCreateSource(tempPath, false)
+                };
 
-                            int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
-                            int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
-                            int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
+                emfImage.Save(tempPath, pngOptions);
+            }
 
-                            tr = Math.Min(255, tr);
-                            tg = Math.Min(255, tg);
-                            tb = Math.Min(255, tb);
+            // Load the rasterized PNG and apply sepia tone
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load("temp.png"))
+            {
+                var bounds = raster.Bounds;
+                int[] pixels = raster.LoadArgb32Pixels(bounds);
 
-                            raster.SetPixel(x, y, Color.FromArgb(original.A, (byte)tr, (byte)tg, (byte)tb));
-                        }
-                    }
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    int argb = pixels[i];
+                    byte a = (byte)(argb >> 24);
+                    byte r = (byte)(argb >> 16);
+                    byte g = (byte)(argb >> 8);
+                    byte b = (byte)(argb);
 
-                    // Save the final sepia PNG to the desired output path
-                    raster.Save(outputPath, new PngOptions());
+                    int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
+                    int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
+                    int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
+
+                    r = (byte)(tr > 255 ? 255 : tr);
+                    g = (byte)(tg > 255 ? 255 : tg);
+                    b = (byte)(tb > 255 ? 255 : tb);
+
+                    pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                 }
 
-                // Clean up temporary file
-                if (File.Exists(tempPngPath))
+                raster.SaveArgb32Pixels(bounds, pixels);
+
+                var finalOptions = new PngOptions
                 {
-                    File.Delete(tempPngPath);
-                }
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, finalOptions);
+            }
+
+            // Clean up temporary file
+            if (File.Exists("temp.png"))
+            {
+                File.Delete("temp.png");
             }
         }
         catch (Exception ex)
@@ -89,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EMF logo into a web‑friendly PNG thumbnail with a vintage sepia look for a marketing website.
- * 2. When an application must generate printable reports that embed EMF charts but require a sepia‑toned PNG version for archival or branding consistency.
- * 3. When a desktop tool processes legacy EMF icons and outputs sepia‑styled PNG assets for use in a themed UI skin.
- * 4. When an automated pipeline transforms EMF diagrams into PNG images with a sepia filter to match a corporate retro visual style before publishing to a documentation portal.
- * 5. When a C# service rasterizes EMF drawings, applies pixel‑level color manipulation, and saves the result as a sepia PNG for inclusion in email newsletters.
+ * 1. When you need to convert a vector EMF illustration to a web‑friendly PNG with a vintage sepia look.
+ * 2. When generating printable reports that require EMF graphics to be displayed with a sepia filter for branding.
+ * 3. When creating thumbnails of EMF icons with a sepia effect for a mobile app’s dark theme.
+ * 4. When processing legacy EMF assets in a batch job to produce sepia‑toned PNGs for archival purposes.
+ * 5. When integrating image transformation in a C# service that receives EMF files and returns sepia‑styled PNG responses.
  */

@@ -1,43 +1,69 @@
+// HOW-TO: Remove Background and Apply Median Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Remove background if the image type supports it
-                if (image is VectorImage vectorImg)
+                PngOptions exportOptions = new PngOptions
                 {
-                    vectorImg.RemoveBackground();
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
+
+                AutoMaskingArgs argsMask = new AutoMaskingArgs();
+
+                MaskingOptions maskingOptions = new MaskingOptions
+                {
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    Args = argsMask,
+                    BackgroundReplacementColor = Color.Transparent,
+                    ExportOptions = exportOptions
+                };
+
+                ImageMasking masking = new ImageMasking(image);
+                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                {
+                    using (RasterImage foregroundMask = maskingResult[1].GetMask())
+                    {
+                        foregroundMask.Resize(image.Width, image.Height, ResizeType.NearestNeighbourResample);
+
+                        using (RasterImage originImage = (RasterImage)Image.Load(inputPath))
+                        {
+                            ImageMasking.ApplyMask(originImage, foregroundMask, maskingOptions);
+
+                            originImage.Save(outputPath, new PngOptions
+                            {
+                                ColorType = PngColorType.TruecolorWithAlpha,
+                                Source = new FileCreateSource(outputPath, false)
+                            });
+                        }
+                    }
                 }
-
-                // Apply median filter to the entire image
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When cleaning up scanned PNG graphics that contain unwanted background before further analysis, a developer can use this code to remove the background and apply a median filter to reduce noise.
- * 2. When preparing product catalog images for web publishing, a developer may need to strip vector backgrounds from PNG files and smooth residual speckles with a median filter before saving the optimized output.
- * 3. When converting vector‑based PNG icons to raster format for a mobile app, a developer can employ this code to eliminate the background and denoise the image to improve visual clarity on high‑resolution screens.
- * 4. When performing pre‑processing on PNG screenshots captured from a UI test suite, a developer can use the median filter after background removal to ensure consistent pixel data for automated image comparison.
- * 5. When building an automated pipeline that ingests PNG files from user uploads, a developer may need to automatically clean the images by removing any embedded background and applying a median filter to suppress compression artifacts before storing them.
+ * 1. When preparing product photos for an e‑commerce site, a developer can remove the original background and smooth remaining noise with a median filter before saving the PNG for web display.
+ * 2. When cleaning scanned documents that contain stray specks after isolating the text region, a C# program can mask out the background and apply a median filter to improve OCR accuracy.
+ * 3. When generating transparent icons from screenshots, a developer can use Aspose.Imaging to automatically cut out the background and then denoise the foreground with a median filter to keep crisp edges.
+ * 4. When processing medical imaging slices that require background subtraction, applying a median filter after masking helps reduce pixel‑level artifacts while preserving diagnostic details.
+ * 5. When creating assets for a game engine, a programmer can strip the background from character sprites and apply a median filter to eliminate residual grain before exporting the PNG with alpha transparency.
  */

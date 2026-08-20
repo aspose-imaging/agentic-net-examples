@@ -1,13 +1,9 @@
+// HOW-TO: Remove Watermark From PNG With Anti‑Aliasing Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
@@ -15,44 +11,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (null‑safe)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (var image = Image.Load(inputPath))
             {
                 var pngImage = (PngImage)image;
 
-                // Define the mask region using a graphics path
                 var mask = new GraphicsPath();
                 var figure = new Figure();
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                // Configure Telea options and enable smoother result via larger half‑patch size
-                var options = new TeleaWatermarkOptions(mask)
-                {
-                    HalfPatchSize = 5 // larger patch size improves anti‑aliasing effect
-                };
+                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-                // Perform watermark removal
-                using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
                 {
-                    // Save the processed image as PNG
-                    result.Save(outputPath, new PngOptions());
+                    result.Save(outputPath);
                 }
             }
         }
@@ -65,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to automatically clean up user‑uploaded PNG logos that contain semi‑transparent watermarks, preserving smooth edges with anti‑aliasing.
- * 2. When a desktop utility processes scanned PNG documents to erase embedded stamps while keeping the original resolution and color fidelity.
- * 3. When an e‑commerce platform batch‑converts product images in PNG format, removing promotional watermarks without jagged artifacts for better display on high‑DPI screens.
- * 4. When a mobile app prepares PNG assets for AR overlays by stripping out placeholder watermarks and ensuring the resulting transparent regions blend seamlessly.
- * 5. When a digital archiving system restores archived PNG graphics by programmatically removing watermarks and applying a larger half‑patch size to achieve smoother visual results.
+ * 1. When you need to automatically erase a logo or text watermark from a PNG image while preserving smooth edges for a web‑ready photo gallery.
+ * 2. When a desktop application must clean scanned documents in PNG format by removing watermarks without introducing jagged artifacts.
+ * 3. When an e‑commerce platform wants to strip promotional watermarks from product PNGs before generating thumbnails, ensuring high visual quality.
+ * 4. When a batch‑processing script processes PNG assets and requires anti‑aliased watermark removal to maintain consistent appearance across different screen resolutions.
+ * 5. When integrating Aspose.Imaging into a C# service that receives user‑uploaded PNGs and must remove confidential watermarks while keeping the image’s original transparency intact.
  */

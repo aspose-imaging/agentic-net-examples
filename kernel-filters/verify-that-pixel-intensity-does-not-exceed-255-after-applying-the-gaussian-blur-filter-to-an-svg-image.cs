@@ -1,57 +1,83 @@
+// HOW-TO: Check Pixel Intensity After Gaussian Blur on SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.svg";
-            string outputPath = @"c:\temp\sample.GaussianBlur.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the SVG image.
+            using (Image svgImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur (size = 5, sigma = 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Verify that no pixel channel exceeds 255
-                bool exceeds = false;
-                for (int y = 0; y < rasterImage.Height && !exceeds; y++)
+                // Set up rasterization options for SVG.
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    for (int x = 0; x < rasterImage.Width && !exceeds; x++)
+                    PageSize = svgImage.Size
+                };
+
+                // Prepare PNG save options with the rasterization settings.
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Rasterize SVG to a memory stream.
+                using (var ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Load the rasterized image as a RasterImage.
+                    using (Image rasterImageContainer = Image.Load(ms))
                     {
-                        var color = rasterImage.GetPixel(x, y);
-                        if (color.R > 255 || color.G > 255 || color.B > 255)
+                        var rasterImage = (RasterImage)rasterImageContainer;
+
+                        // Apply Gaussian blur filter (size=5, sigma=4.0).
+                        rasterImage.Filter(rasterImage.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                        // Verify that pixel intensity does not exceed 255.
+                        bool intensityOk = true;
+                        for (int y = 0; y < rasterImage.Height && intensityOk; y++)
                         {
-                            exceeds = true;
+                            for (int x = 0; x < rasterImage.Width; x++)
+                            {
+                                Aspose.Imaging.Color color = rasterImage.GetPixel(x, y);
+                                if (color.R > 255 || color.G > 255 || color.B > 255 || color.A > 255)
+                                {
+                                    intensityOk = false;
+                                    break;
+                                }
+                            }
                         }
+
+                        if (!intensityOk)
+                        {
+                            Console.Error.WriteLine("Pixel intensity exceeds 255 after applying Gaussian blur.");
+                            return;
+                        }
+
+                        // Save the processed image.
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
-
-                Console.WriteLine(exceeds
-                    ? "Pixel intensity exceeds 255."
-                    : "All pixel intensities are within 0-255.");
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a Gaussian blur to an SVG logo and ensure the resulting PNG does not contain any pixel values above the 0‑255 range for safe web display.
- * 2. When a C# application must convert vector graphics to raster format while validating that the blur filter does not cause channel overflow before uploading to a digital asset management system.
- * 3. When building an automated image‑processing pipeline that reads SVG files, applies a GaussianBlurFilterOptions(5,4.0) and verifies pixel intensity limits to prevent color distortion in printed materials.
- * 4. When performing quality‑assurance testing on a graphics‑editing tool that uses Aspose.Imaging to rasterize SVGs, checking that no pixel channel exceeds 255 after applying the blur filter.
- * 5. When creating a batch script that processes a folder of SVG icons, applies Gaussian blur, and confirms all pixel values stay within the 0‑255 range to maintain compatibility with downstream image‑analysis algorithms.
+ * 1. When converting an SVG logo to a PNG thumbnail and applying a Gaussian blur, you need to ensure the resulting pixel values stay within the 0‑255 range.
+ * 2. When preparing blurred background images for a web page, verifying intensity prevents overflow artifacts after rasterizing vector graphics.
+ * 3. When building an automated pipeline that processes SVG icons with Aspose.Imaging, checking pixel intensity after filtering guarantees valid PNG output for downstream tools.
+ * 4. When performing scientific visualization that requires precise grayscale limits, confirming that Gaussian blur does not exceed 255 maintains data integrity.
+ * 5. When creating print‑ready assets from SVG illustrations, validating pixel intensity after blur helps avoid color banding and ensures compliance with PNG specifications.
  */

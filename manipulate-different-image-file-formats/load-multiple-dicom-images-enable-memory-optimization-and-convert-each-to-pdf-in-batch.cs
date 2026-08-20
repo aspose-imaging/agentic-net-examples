@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert DICOM Files to PDF with Memory Optimization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,33 +10,30 @@ class Program
     {
         try
         {
-            // Hardcoded input DICOM files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\input1.dcm",
-                @"C:\Images\input2.dcm",
-                @"C:\Images\input3.dcm"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputDICOMs";
+            string outputDir = @"C:\OutputPDFs";
 
-            // Process each file
-            foreach (string inputPath in inputPaths)
+            // Get all DICOM files in the input directory
+            string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
+
+            foreach (string inputPath in dicomFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path (same name, .pdf extension, placed in an output folder)
-                string outputDirectory = @"C:\Images\Output";
+                // Build the corresponding PDF output path
                 string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DICOM image with memory optimization (buffer size hint)
+                // Load the DICOM image with memory optimization (buffer size hint)
                 var loadOptions = new LoadOptions
                 {
                     BufferSizeHint = 256 * 1024 // 256 KB
@@ -46,7 +44,7 @@ class Program
                     // Prepare PDF export options
                     var pdfOptions = new PdfOptions();
 
-                    // Save as PDF
+                    // Save the image as PDF
                     dicomImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -60,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system must archive a series of DICOM radiology scans as searchable PDF reports while minimizing memory usage during batch processing.
- * 2. When a medical research lab needs to convert dozens of DICOM images from a scanner into PDF files for inclusion in a publication pipeline without loading the entire image into memory.
- * 3. When a telemedicine platform wants to generate patient‑friendly PDF summaries from uploaded DICOM files on the server, ensuring the conversion runs efficiently in a background job.
- * 4. When a health‑care compliance tool must batch‑convert DICOM files to PDF for secure storage in an electronic health record (EHR) system while controlling RAM consumption.
- * 5. When a C# desktop application automates the export of DICOM images to PDF for printing or sharing, using Aspose.Imaging’s BufferSizeHint to handle large image sets on limited‑resource machines.
+ * 1. When a hospital IT system needs to archive dozens of patient DICOM scans as PDF reports while keeping RAM usage low.
+ * 2. When a research lab processes a folder of radiology images and wants to generate searchable PDF documents for each study.
+ * 3. When a medical imaging workflow requires automated conversion of incoming DICOM files to PDF for integration with a document management system.
+ * 4. When a cloud service batches large numbers of DICOM images and must limit memory consumption during conversion to PDF.
+ * 5. When a desktop application offers users a one‑click export of selected DICOM series to PDF without loading the entire image into memory.
  */

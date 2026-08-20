@@ -1,3 +1,4 @@
+// HOW-TO: Increase GIF Contrast to Maximum Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,11 +11,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output_contrast.gif";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.gif";
+            string outputPath = "C:\\temp\\sample.adjusted.gif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,20 +28,17 @@ class Program
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Apply a high contrast value (maximum allowed is 100)
+                // Apply high contrast (maximum allowed value)
                 gifImage.AdjustContrast(100f);
 
-                // Save the modified image as a GIF
-                GifOptions saveOptions = new GifOptions();
-                gifImage.Save(outputPath, saveOptions);
+                // Save the modified image as GIF
+                gifImage.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visual clarity of animated GIF banners for a web page by increasing contrast using C# and Aspose.Imaging.
- * 2. When an e‑learning platform must preprocess user‑uploaded GIF quizzes to a high‑contrast style before embedding them in course material.
- * 3. When a marketing automation tool automatically converts low‑contrast promotional GIFs into eye‑catching assets by applying a maximum contrast adjustment in a .NET service.
- * 4. When a desktop application generates high‑contrast GIF thumbnails for accessibility compliance, using the AdjustContrast method of Aspose.Imaging.
- * 5. When a batch job processes a folder of legacy GIF icons, raising their contrast to improve readability on high‑resolution displays while preserving the GIF format.
+ * 1. When you need to enhance the visual clarity of animated GIFs for a web gallery by boosting their contrast before publishing.
+ * 2. When a marketing application automatically prepares product demo GIFs and requires high‑contrast images to stand out on social media.
+ * 3. When a desktop tool processes user‑uploaded GIFs and must improve readability for low‑light screenshots by applying maximum contrast.
+ * 4. When a reporting system generates GIF charts and wants to make the lines and colors more distinct for printed PDFs.
+ * 5. When an e‑learning platform converts legacy GIF tutorials and needs to increase contrast to meet accessibility guidelines.
  */

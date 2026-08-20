@@ -1,45 +1,49 @@
+// HOW-TO: Set Image Resolution to 300 DPI When Converting BMP to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
         string outputPath = @"C:\Images\output.pdf";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF save options with higher resolution
+                // Configure PDF save options with higher resolution (e.g., 300 DPI)
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Set desired DPI (e.g., 300x300)
+                    // Do not use the original image DPI; use the specified resolution instead
+                    UseOriginalImageResolution = false,
+                    // Set horizontal and vertical resolution to 300 DPI
                     ResolutionSettings = new ResolutionSetting(300.0, 300.0)
                 };
 
-                // Save the image as PDF with the specified options
+                // Save the image as a PDF with the specified options
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any error that occurs during processing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating printable PDFs from high‑resolution PNG assets, a developer can use this code to set a 300 DPI resolution so the output meets print‑shop standards.
- * 2. When converting scanned documents stored as PNG files into searchable PDF files, setting the resolution ensures the PDF retains the original image clarity for OCR engines.
- * 3. When creating archival PDFs for legal or medical records, a developer needs to enforce a specific DPI to guarantee consistent image quality across different viewing devices.
- * 4. When building a C# web service that returns PDF invoices with embedded product images, adjusting the resolution before saving prevents pixelation on high‑resolution displays.
- * 5. When automating batch conversion of UI screenshots to PDF manuals, specifying the resolution helps maintain sharpness when the PDFs are zoomed or printed.
+ * 1. When a developer must create a printable PDF from a BMP file and needs the output to meet a 300 DPI print quality requirement.
+ * 2. When generating PDFs for archival purposes where all pages must have a consistent resolution regardless of the source image’s original DPI.
+ * 3. When converting scanned documents to PDF and wants to ensure the resulting file is suitable for OCR engines that perform better with higher DPI images.
+ * 4. When building a batch‑processing tool that standardizes image resolution before embedding them into PDFs for a publishing workflow.
+ * 5. When overriding the original image DPI to match a corporate branding guideline that specifies a minimum resolution for all PDF assets.
  */

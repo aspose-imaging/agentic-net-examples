@@ -1,73 +1,61 @@
+// HOW-TO: Render SVG to PNG with Custom Width and Height in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
-namespace SvgToPngExample
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-            // Ensure any runtime exception is reported cleanly
-            try
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Prepare output directory
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Custom dimensions for the rasterized image
-                int targetWidth = 300;   // desired width in pixels
-                int targetHeight = 200;  // desired height in pixels
-
-                // Open the SVG file as a stream and load it
-                using (Stream stream = File.OpenRead(inputPath))
-                using (SvgImage svgImage = new SvgImage(stream))
-                {
-                    // Configure rasterization options with the custom page size
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = new Size(targetWidth, targetHeight),
-                        // Optional: set background color, smoothing, etc.
-                        BackgroundColor = Color.White,
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        TextRenderingHint = TextRenderingHint.AntiAlias
-                    };
-
-                    // Set up PNG save options and attach rasterization settings
-                    PngOptions saveOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    // Save the rasterized PNG image
-                    svgImage.Save(outputPath, saveOptions);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image from file
+            using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                // Set custom rasterization dimensions (e.g., 800x600)
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = new Aspose.Imaging.Size(800, 600) // custom width and height
+                };
+
+                // Prepare PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized PNG image
+                svgImage.Save(outputPath, pngOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos as 300 × 200 pixel PNG files for display in a product catalog.
- * 2. When an automated reporting tool must convert scalable vector diagrams stored as SVG into fixed‑size PNG images to embed in PDF reports that require a specific page layout.
- * 3. When a desktop utility processes a batch of SVG icons and rasterizes each to a uniform PNG size for use as Windows application assets.
- * 4. When an e‑learning platform creates course slides by rendering SVG illustrations to PNG at custom dimensions to ensure consistent rendering across different browsers.
- * 5. When a CI/CD pipeline validates design assets by programmatically converting SVG mockups to PNG with exact width and height before publishing them to a content delivery network.
+ * 1. When you need to generate thumbnail PNGs of vector logos at a specific size for a web gallery.
+ * 2. When an e‑commerce platform must convert product SVG illustrations to fixed‑dimension PNGs for email newsletters.
+ * 3. When a reporting tool requires rasterizing scalable diagrams into PNG charts that fit a predefined layout.
+ * 4. When a mobile app pre‑processes SVG icons into PNG assets with exact pixel dimensions for performance optimization.
+ * 5. When an automated build pipeline creates PNG previews of SVG assets with consistent width and height for documentation.
  */

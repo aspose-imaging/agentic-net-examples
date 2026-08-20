@@ -1,53 +1,46 @@
+// HOW-TO: Create BMP With Rotated Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\rotated.bmp";
+            // Output BMP file path
+            string outputPath = "output\\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with 24 bits per pixel
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new BMP image of size 400x400
+            // Create image canvas
             using (Image image = Image.Create(bmpOptions, 400, 400))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Clear background
-                graphics.Clear(Color.Wheat);
+                // Draw first rectangle
+                Pen pen1 = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(pen1, new Rectangle(50, 50, 200, 150));
 
-                // Draw a black rectangle (unrotated)
-                Pen blackPen = new Pen(Color.Black, 3);
-                graphics.DrawRectangle(blackPen, new RectangleF(50, 50, 150, 100));
+                // Rotate subsequent drawings
+                graphics.RotateTransform(45);
 
-                // Rotate subsequent drawings by 45 degrees around the image center
-                graphics.RotateTransform(45f);
+                // Draw second rectangle after rotation
+                Pen pen2 = new Pen(Color.Red, 3);
+                graphics.DrawRectangle(pen2, new Rectangle(50, 50, 200, 150));
 
-                // Draw a red rectangle after rotation
-                Pen redPen = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(redPen, new RectangleF(200, 150, 150, 100));
-
-                // Save the image (changes are already directed to the output file via FileCreateSource)
+                // Save the image
                 image.Save();
             }
         }
@@ -60,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail that includes a rotated overlay rectangle for a product catalog.
- * 2. When an application must create a 400 × 400 pixel bitmap with a background color and add both unrotated and 45‑degree rotated shapes for a custom watermark.
- * 3. When a reporting tool requires drawing a static frame and then rotating additional graphics to illustrate orientation changes in a diagram saved as a BMP file.
- * 4. When a game asset pipeline needs to programmatically produce BMP sprites with a base rectangle and a rotated hit‑box rectangle for collision detection.
- * 5. When an automation script must produce a BMP image that demonstrates the effect of Graphics.RotateTransform for documentation or teaching C# image‑processing concepts.
+ * 1. When you need to generate a BMP file with custom graphics, such as drawing shapes and applying rotation, for reports or thumbnails.
+ * 2. When you want to programmatically add a rotated rectangle overlay to an existing image canvas in a .NET application.
+ * 3. When creating technical documentation that requires precise, rotated annotations saved as a 24‑bit BMP.
+ * 4. When building a server‑side image service that produces BMP images with multiple layered drawings at different angles.
+ * 5. When automating the creation of printable graphics where the rotation of elements must be controlled before saving the BMP.
  */

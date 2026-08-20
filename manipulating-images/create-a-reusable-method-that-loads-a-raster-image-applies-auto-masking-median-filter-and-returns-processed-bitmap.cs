@@ -1,12 +1,10 @@
+// HOW-TO: Auto Mask and Median Filter a JPEG to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 
 class Program
 {
@@ -14,66 +12,59 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image and keep original size
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Load the source image as RasterImage
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                Size originalSize = image.Size;
-
-                // Resize for faster masking
-                image.ResizeHeightProportionally(600, ResizeType.HighQualityResample);
-
-                // Masking export options (in‑memory)
-                var exportOptions = new PngOptions
+                // Prepare export options for masking (required Source)
+                var maskingExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
-                // Auto‑masking options (GraphCut)
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                // Configure auto‑masking options (GraphCut with default strokes)
+                var autoMaskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                    Method = SegmentationMethod.GraphCut,
+                    FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                    Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = exportOptions,
+                    ExportOptions = maskingExportOptions,
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                // Perform masking
-                var masking = new ImageMasking(image);
-                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                // Perform auto‑masking
+                var masking = new Aspose.Imaging.Masking.ImageMasking(sourceImage);
+                using (Aspose.Imaging.Masking.Result.MaskingResult maskingResult = masking.Decompose(autoMaskingOptions))
                 {
-                    // Get foreground mask and resize to original dimensions
+                    // Get the foreground mask (index 1)
                     using (RasterImage foregroundMask = maskingResult[1].GetMask())
                     {
-                        foregroundMask.Resize(originalSize.Width, originalSize.Height, ResizeType.NearestNeighbourResample);
-
-                        // Apply mask to the original full‑size image
-                        using (RasterImage original = (RasterImage)Image.Load(inputPath))
+                        // Apply the mask to a fresh copy of the original image
+                        using (RasterImage maskedImage = (RasterImage)Image.Load(inputPath))
                         {
-                            ImageMasking.ApplyMask(original, foregroundMask, maskingOptions);
+                            Aspose.Imaging.Masking.ImageMasking.ApplyMask(maskedImage, foregroundMask, autoMaskingOptions);
 
-                            // Apply median filter (kernel size 5)
-                            original.Filter(original.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+                            // Apply median filter (kernel size 5) to the masked image
+                            maskedImage.Filter(maskedImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-                            // Save processed image
-                            var saveOptions = new PngOptions
-                            {
-                                ColorType = PngColorType.TruecolorWithAlpha
-                            };
-                            original.Save(outputPath, saveOptions);
+                            // Save the processed image
+                            var saveOptions = new PngOptions { ColorType = PngColorType.TruecolorWithAlpha };
+                            maskedImage.Save(outputPath, saveOptions);
                         }
                     }
                 }
@@ -88,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an e‑commerce site must automatically remove product backgrounds from JPEG photos, apply a median filter to smooth edges, and export the result as a transparent PNG for catalog listings.
- * 2. When a mobile app needs to isolate a user’s portrait from an uploaded selfie, reduce image noise with a median filter, and save the processed bitmap as a high‑quality PNG with an alpha channel.
- * 3. When a document‑management system scans paper receipts, uses auto‑masking to separate text from the paper background, applies a median filter to clean speckles, and returns a clean bitmap for OCR processing.
- * 4. When a game developer prepares sprite assets by auto‑masking character images, removing background noise with a median filter, and exporting them as truecolor‑with‑alpha PNGs for use in the game engine.
- * 5. When a social‑media analytics tool batch‑processes thousands of profile pictures to extract foreground objects, apply median filtering for noise reduction, and generate transparent PNG thumbnails for visual reports.
+ * 1. When you need to remove the background from a photo and save it as a transparent PNG in a C# web service.
+ * 2. When you want to preprocess scanned documents by applying a median filter to reduce noise before further analysis.
+ * 3. When you are building a batch image conversion tool that automatically masks objects and preserves image quality.
+ * 4. When you need to integrate Aspose.Imaging auto‑masking into a desktop application to isolate subjects for graphic design.
+ * 5. When you require a reusable method that loads any raster image, applies background removal and smoothing, and returns a processed bitmap for further manipulation.
  */

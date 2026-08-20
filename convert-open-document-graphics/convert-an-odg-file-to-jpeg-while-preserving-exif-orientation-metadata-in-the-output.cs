@@ -1,3 +1,4 @@
+// HOW-TO: Convert ODG to JPEG with EXIF Orientation Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,41 +7,36 @@ using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_converted.jpg";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.jpg");
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare JPEG save options – keep original metadata (including EXIF)
-                var jpegOptions = new JpegOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var odgImage = image as OdgImage;
+                if (odgImage == null)
                 {
-                    KeepMetadata = true,
-                    // Rasterize the vector ODG using appropriate options
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = odgImage.Size
-                    }
+                    Console.Error.WriteLine("Failed to load ODG image.");
+                    return;
+                }
+
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    KeepMetadata = true
                 };
 
-                // Save as JPEG while preserving EXIF orientation data
-                odgImage.Save(outputPath, jpegOptions);
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an OpenDocument Graphics (ODG) illustration to a JPEG thumbnail for a web gallery while preserving the original EXIF orientation so the image displays correctly in browsers.
- * 2. When an application must batch‑process vector drawings from LibreOffice and generate JPEG previews for mobile devices without losing metadata required by photo‑management tools.
- * 3. When a document management system imports ODG files and stores them as JPEGs for faster indexing, preserving EXIF orientation to maintain consistent sorting and display.
- * 4. When a C# service creates printable JPEG versions of ODG logos for e‑commerce product listings, ensuring the orientation metadata is retained for downstream image editors.
- * 5. When a migration script moves legacy ODG assets to a JPEG‑based digital asset library and needs to keep the original EXIF orientation to avoid manual rotation after conversion.
+ * 1. When you need to show OpenDocument graphics (ODG) on a website that only supports JPEG images while keeping the original EXIF orientation so the picture displays correctly.
+ * 2. When migrating legacy design files to email‑friendly JPEG format and must retain orientation metadata for recipients’ photo viewers.
+ * 3. When generating thumbnails for a digital asset manager from ODG drawings and want the thumbnails to respect the original orientation.
+ * 4. When integrating Aspose.Imaging into a document management system to automatically convert user‑uploaded ODG files to JPEG while preserving metadata for downstream workflows.
+ * 5. When building a C# microservice that prepares design assets for a printing pipeline, converting ODG to JPEG and ensuring the EXIF orientation is maintained for accurate print layout.
  */

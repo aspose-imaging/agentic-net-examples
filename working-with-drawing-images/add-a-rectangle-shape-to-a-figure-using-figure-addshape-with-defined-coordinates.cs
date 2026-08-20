@@ -1,47 +1,37 @@
+// HOW-TO: Add a Rectangle Shape to a BMP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/output.bmp";
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Define output file path
-            string outputPath = @"c:\temp\rectangle.png";
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up PNG options with a file source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-                // Create a graphics path and a figure
-                GraphicsPath graphicsPath = new GraphicsPath();
-                Figure figure = new Figure();
+                Aspose.Imaging.GraphicsPath graphicPath = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-                // Add a rectangle shape to the figure (x=50, y=50, width=200, height=100)
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 100f)));
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 300f, 200f)));
 
-                // Add the figure to the graphics path
-                graphicsPath.AddFigure(figure);
+                graphicPath.AddFigure(figure);
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicPath);
 
-                // Draw the path with a black pen
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
-
-                // Save the image (output file is already bound to the source)
                 image.Save();
             }
         }
@@ -54,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail with a black rectangular border around a product image for an e‑commerce catalog, they can use Figure.AddShape with a RectangleShape to draw the bounding box on a 500×500 canvas.
- * 2. When creating a printable form preview in C#, a rectangle shape can be added to a Figure to mark a signature field, then saved as a PNG using Aspose.Imaging’s GraphicsPath and Pen objects.
- * 3. When building a UI mock‑up tool that programmatically draws component outlines, developers can define rectangle coordinates with Figure.AddShape to render each element on a white PNG background.
- * 4. When automating QR‑code overlay generation, a developer can draw a precise rectangular frame around the code by adding a RectangleShape to a Figure and saving the result as a PNG file.
- * 5. When writing unit tests for an image‑processing pipeline, a known rectangle can be drawn on a blank canvas using Figure.AddShape, allowing the test to compare the produced PNG against an expected image.
+ * 1. When you need to programmatically generate a BMP diagram with a highlighted rectangular region for a technical report.
+ * 2. When creating a custom thumbnail that includes a bordered rectangle overlay to indicate a selection area in a C# desktop application.
+ * 3. When automating the production of printable forms where a rectangle marks a field boundary on a 500×500 pixel image.
+ * 4. When building a simple image‑based UI mockup that requires drawing geometric shapes like rectangles on a solid‑color background.
+ * 5. When preprocessing images for computer‑vision tests and you must add a known rectangle shape as a reference marker.
  */

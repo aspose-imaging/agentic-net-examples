@@ -1,55 +1,63 @@
+// HOW-TO: Convert SVG to PDF with Embedded Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Data\input.svg";
-        string outputPath = @"C:\Data\output.pdf";
-        string fontsFolder = @"C:\Data\fonts";
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/sample.pdf";
+        string fontFolderPath = "Fonts";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure Aspose.Imaging to use the custom fonts folder
-            FontSettings.SetFontsFolder(fontsFolder);
-            // Update internal font cache (required for some formats)
-            FontSettings.UpdateFonts();
-
-            // Load the vector image (SVG in this example)
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource(args =>
             {
-                // Prepare PDF options with vector rasterization settings
-                var pdfOptions = new PdfOptions
+                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (args.Length > 0)
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    string fontsPath = args[0]?.ToString() ?? string.Empty;
+                    if (Directory.Exists(fontsPath))
                     {
-                        // Use white background, preserve original size
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        // High quality text rendering
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        foreach (var file in Directory.GetFiles(fontsPath))
+                        {
+                            string name = Path.GetFileNameWithoutExtension(file);
+                            byte[] data = File.ReadAllBytes(file);
+                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        }
                     }
-                };
+                }
+                return fonts.ToArray();
+            }, fontFolderPath);
 
-                // Save as PDF; fonts from the specified folder will be embedded
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                var pdfOptions = new PdfOptions();
+
+                var vectorOpts = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+                pdfOptions.VectorRasterizationOptions = vectorOpts;
+
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -62,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting customer‑provided SVG logos to PDF invoices, you embed the corporate fonts from a custom folder to guarantee the logo text appears exactly as designed.
- * 2. When generating printable PDF reports from SVG charts in a C# web service, you use FontSettings to embed the chart’s custom typefaces so the PDFs render correctly on any device.
- * 3. When automating batch conversion of SVG marketing assets to PDF brochures, you specify a fonts directory to ensure all promotional text retains its brand fonts without requiring the end‑user to install them.
- * 4. When creating PDF certificates from SVG templates that contain handwritten or script fonts, you embed those fonts during the Image.Save operation to avoid missing‑font warnings in PDF viewers.
- * 5. When developing a desktop application that exports SVG floor‑plans to PDF, you embed the architectural fonts stored locally so the floor‑plan annotations remain legible across different operating systems.
+ * 1. When you need to generate PDF reports from SVG graphics and must ensure that any custom text fonts appear correctly on any viewer.
+ * 2. When an application processes user‑uploaded SVG files that reference external fonts and you want the resulting PDF to be self‑contained without missing glyphs.
+ * 3. When automating batch conversion of design assets to PDF and the fonts are stored in a separate directory that must be embedded during conversion.
+ * 4. When creating printable PDFs from web‑based SVG diagrams where the target audience may not have the original font files installed.
+ * 5. When integrating Aspose.Imaging into a C# service that converts SVG logos to PDF and must embed the corporate brand fonts for compliance.
  */

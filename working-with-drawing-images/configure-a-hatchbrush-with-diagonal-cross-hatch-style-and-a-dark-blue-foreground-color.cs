@@ -1,9 +1,8 @@
+// HOW-TO: Create Diagonal Cross Hatch Brush with Dark Blue Color in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -25,30 +24,11 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure HatchBrush with diagonal cross style and dark blue foreground
+            // Configure a HatchBrush with diagonal cross hatch style
             HatchBrush brush = new HatchBrush();
-            brush.HatchStyle = HatchStyle.DiagonalCross; // diagonal cross hatch pattern
-            brush.ForegroundColor = Color.Blue; // dark blue color for hatch lines
-
-            // Example usage: create an image, draw a rectangle using the brush, and save
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (Image image = Image.Create(bmpOptions, 200, 200))
-            {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                // Create a pen that uses the configured HatchBrush
-                Pen pen = new Pen(brush, 5);
-                graphics.DrawRectangle(pen, new Rectangle(new Point(20, 20), new Size(160, 160)));
-
-                // Save the image
-                image.Save();
-            }
+            brush.HatchStyle = HatchStyle.DiagonalCross;          // Diagonal cross pattern
+            brush.ForegroundColor = Color.DarkBlue;               // Dark blue hatch lines
+            // BackgroundColor can be left as default or set as needed
         }
         catch (Exception ex)
         {
@@ -59,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a BMP report thumbnail that highlights selected regions with a dark‑blue diagonal‑cross hatch overlay using Aspose.Imaging for .NET.
- * 2. When creating a printable engineering diagram in C# where the background must be white and the boundary of a component is emphasized with a 5‑pixel dark‑blue diagonal‑cross hatch rectangle.
- * 3. When building a custom UI skin that draws scalable vector‑style icons on the fly and needs a consistent dark‑blue diagonal‑cross hatch brush for shading button borders in a BMP image.
- * 4. When automating the production of water‑marked images for a document management system and the watermark is rendered as a dark‑blue diagonal‑cross hatch pattern around a rectangular area.
- * 5. When developing a batch image‑processing tool that adds a diagnostic overlay to scanned BMP files, using a HatchBrush with diagonal‑cross style and dark‑blue foreground to outline regions of interest.
+ * 1. When generating a BMP report that requires a diagonal cross hatch background to highlight sections, you can use this brush configuration.
+ * 2. When adding a dark‑blue patterned overlay to an image for branding or UI themes, the HatchBrush setup provides the needed style.
+ * 3. When creating custom fill patterns for vector shapes in a diagram generated with Aspose.Imaging, the diagonal cross hatch brush defines the texture.
+ * 4. When implementing a watermark that uses a repeating hatch pattern to obscure sensitive information while keeping the image readable, this code creates the appropriate brush.
+ * 5. When designing printable graphics such as engineering schematics that need a distinct cross‑hatch shading to differentiate materials, the configured HatchBrush supplies the pattern.
  */

@@ -1,8 +1,9 @@
+// HOW-TO: Parallel Batch Convert CMX Files to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -11,40 +12,44 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Define base, input and output directories (relative to current directory)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
-            // Ensure directories exist
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all CMX files in the input directory
-            string[] cmxFiles = Directory.GetFiles(inputDirectory, "*.cmx");
+            string[] cmxFiles = Directory.GetFiles(inputDir, "*.cmx");
 
             // Process each file in parallel
-            Parallel.ForEach(cmxFiles, cmxPath =>
+            System.Threading.Tasks.Parallel.ForEach(cmxFiles, inputPath =>
             {
                 // Verify input file exists
-                if (!File.Exists(cmxPath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {cmxPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(cmxPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                // Build output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load CMX image and save as PDF
-                using (Image image = Image.Load(cmxPath))
+                // Load CMX image and convert to PDF
+                using (Image image = Image.Load(inputPath))
                 {
-                    var pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
+
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             });
         }
         catch (Exception ex)
@@ -56,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large batch of legacy Corel Metafile (CMX) drawings into searchable PDF documents for archiving or distribution, they can use this parallel processing code to speed up the conversion.
- * 2. When an automated build or CI pipeline must generate PDF reports from CMX assets stored in a source folder, this code enables fast, thread‑safe conversion without manual intervention.
- * 3. When a web service receives multiple CMX uploads and must return PDF versions to clients, the parallel loop ensures high throughput while handling file existence checks and directory creation.
- * 4. When a migration project moves design files from a legacy CAD system to a modern document management system that only accepts PDF, developers can employ this code to batch‑process the files efficiently.
- * 5. When a desktop application offers a “Convert All” button to transform user‑selected CMX files into PDFs in the background, this snippet provides the necessary C# image loading, PdfOptions configuration, and parallel execution.
+ * 1. When you need to convert a large collection of CorelDRAW CMX drawings to PDF quickly by leveraging multiple CPU cores in a C# application.
+ * 2. When an automated build or CI pipeline must generate PDF reports from CMX assets stored in an input folder without manual intervention.
+ * 3. When a desktop utility has to process user‑uploaded CMX files in parallel and save the resulting PDFs to a designated output directory.
+ * 4. When you want to ensure each CMX file exists before conversion and handle missing files gracefully during batch processing.
+ * 5. When you require thread‑safe creation of output folders and logging of conversion results while using Aspose.Imaging for .NET.
  */

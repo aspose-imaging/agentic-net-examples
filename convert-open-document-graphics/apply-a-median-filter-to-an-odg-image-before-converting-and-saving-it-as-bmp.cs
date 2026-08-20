@@ -1,20 +1,21 @@
+// HOW-TO: Apply Median Filter to ODG Image and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.bmp");
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample_filtered.bmp";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,40 +25,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG vector image
-            using (Image vectorImage = Image.Load(inputPath))
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for BMP output
-                var rasterOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = vectorImage.Size
-                };
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Create BMP options with the rasterization settings
-                var bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                // Apply a median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                // Rasterize the vector image into a memory stream
-                using (var ms = new MemoryStream())
-                {
-                    vectorImage.Save(ms, bmpOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized image
-                    using (Image rasterImageWrapper = Image.Load(ms))
-                    {
-                        var rasterImage = (RasterImage)rasterImageWrapper;
-
-                        // Apply median filter with kernel size 5
-                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                        // Save the filtered image as BMP
-                        rasterImage.Save(outputPath, new BmpOptions());
-                    }
-                }
+                // Save the processed image as BMP
+                BmpOptions bmpOptions = new BmpOptions();
+                rasterImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove speckle noise from scanned ODG drawings before exporting them as BMP files for legacy Windows applications.
- * 2. When a workflow requires converting ODG vector graphics to a raster BMP format while smoothing out pixelated artifacts caused by low‑resolution rasterization.
- * 3. When an image‑processing pipeline must prepare ODG‑based floor plans for OCR or pattern‑recognition engines that expect a clean BMP input.
- * 4. When a desktop publishing system has to generate BMP thumbnails of ODG illustrations and wants to apply a median filter to preserve edge detail while reducing color noise.
- * 5. When a batch conversion tool must ensure that ODG diagrams retain visual quality after being rasterized to BMP for use in embedded systems with limited display capabilities.
+ * 1. When you need to reduce salt‑and‑pepper noise in an ODG diagram before converting it to a BMP for legacy Windows applications.
+ * 2. When a document‑management system stores drawings as ODG files and requires a filtered BMP thumbnail for quick previews.
+ * 3. When preprocessing ODG graphics for OCR or pattern‑recognition pipelines that accept only BMP input.
+ * 4. When integrating Aspose.Imaging into a C# batch job that cleans up scanned ODG assets and archives them as BMP files.
+ * 5. When creating a printable BMP version of an ODG illustration while smoothing out artifacts caused by compression.
  */

@@ -1,7 +1,9 @@
+// HOW-TO: Resize EPS to 2000px Width and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,31 +12,23 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/input.eps";
-            string outputPath = "Output/output.tiff";
+            string inputPath = "input.eps";
+            string outputPath = "output.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Calculate proportional height for the target width of 2000 pixels
-                int newWidth = 2000;
-                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+                int targetWidth = 2000;
+                int newHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+                image.Resize(targetWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                // Resize using high‑quality Lanczos resampling
-                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-                // Save the resized image as TIFF
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
@@ -48,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert large vector EPS artwork to a high‑resolution TIFF for raster‑based pre‑press workflows while keeping the original proportions.
- * 2. When a web service must generate thumbnail‑size TIFF previews of submitted EPS files for archival storage without distorting the image.
- * 3. When a desktop application automates the preparation of EPS logos for inclusion in PDF reports by resizing them to a fixed width of 2000 px and saving as TIFF.
- * 4. When a batch‑processing script needs to ensure that EPS diagrams fit within a specific pixel width for e‑learning platforms, preserving aspect ratio and using Lanczos resampling for quality.
- * 5. When a document management system imports EPS drawings and requires them to be stored as TIFF images with a consistent width for fast rendering and searchable metadata extraction.
+ * 1. When a designer provides vector EPS artwork that must be rasterized to a fixed 2000‑pixel width for high‑resolution printing, a developer can use this code to resize and output a TIFF file.
+ * 2. When an automated publishing pipeline needs to convert incoming EPS logos to TIFF images with consistent width while preserving the original proportions, this snippet handles the transformation.
+ * 3. When a legacy system requires TIFF files for archival but receives EPS files from suppliers, the code resizes the EPS to a standard width and saves it as a TIFF for compliance.
+ * 4. When a web service generates preview thumbnails of EPS drawings and must maintain aspect ratio, developers can adapt this example to produce 2000‑pixel‑wide TIFF previews.
+ * 5. When a batch job processes a folder of EPS files, resizing each to a uniform width before converting to TIFF for downstream image analysis, this approach provides the necessary resizing and format conversion.
  */

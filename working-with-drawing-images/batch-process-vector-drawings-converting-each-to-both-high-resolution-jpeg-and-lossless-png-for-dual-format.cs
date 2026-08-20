@@ -1,8 +1,8 @@
+// HOW-TO: Batch Convert Vector Images to High-Resolution JPEG and PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,10 +10,12 @@ class Program
     {
         try
         {
+            // Define base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -21,39 +23,65 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory);
             foreach (var inputPath in files)
             {
+                // Verify the file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string jpegOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-                string pngOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-
+                // Load the vector image
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (JpegOptions jpegOptions = new JpegOptions())
-                    {
-                        image.Save(jpegOutputPath, jpegOptions);
-                    }
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string jpegOutputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                    string pngOutputPath = Path.Combine(outputDirectory, fileName + ".png");
 
-                    using (PngOptions pngOptions = new PngOptions())
+                    // Ensure output subdirectories exist
+                    Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
+                    // Configure JPEG options (high quality)
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        image.Save(pngOutputPath, pngOptions);
-                    }
+                        Quality = 100,
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
+                    };
+
+                    // Configure PNG options (lossless)
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
+                    };
+
+                    // Save as JPEG
+                    image.Save(jpegOutputPath, jpegOptions);
+                    // Save as PNG
+                    image.Save(pngOutputPath, pngOptions);
                 }
             }
         }
@@ -66,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert a large collection of vector drawings into high‑resolution JPEGs for fast web preview and lossless PNGs for print‑ready distribution, this C# batch‑processing code provides an automated solution.
- * 2. When an e‑commerce platform needs to generate both compressed JPEG thumbnails and full‑quality PNG assets from supplier‑provided SVG or AI files, the code can be integrated into the image pipeline.
- * 3. When a marketing team requires daily conversion of newly uploaded vector artwork into dual formats for email campaigns (JPEG) and social media posts (PNG), the script automates the task on a Windows server.
- * 4. When a document management system has to archive vector illustrations as JPEG for quick indexing and PNG for archival integrity, developers can employ this code to process all files in a designated folder.
- * 5. When a desktop publishing workflow demands simultaneous creation of screen‑optimized JPEGs and lossless PNGs from source vector files before sending them to designers and printers, this example handles the batch conversion in C#.
+ * 1. When a marketing team needs both web‑ready JPEGs and print‑quality PNGs from a folder of SVG logos.
+ * 2. When an e‑commerce platform must generate high‑resolution product images in JPEG for browsers and lossless PNGs for catalog PDFs.
+ * 3. When a developer automates the conversion of vector illustrations into dual formats for mobile app assets and desktop documentation.
+ * 4. When a digital archive requires batch exporting of vector drawings to JPEG for quick preview and PNG for archival preservation.
+ * 5. When a content management system must process incoming vector files and store them as JPEG thumbnails and PNG originals for downstream workflows.
  */

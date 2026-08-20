@@ -1,10 +1,10 @@
+// HOW-TO: Convert PDF Vector Pages to Separate PNG Images with Transparency Flattening in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,45 +13,39 @@ class Program
         try
         {
             string inputPath = "input.pdf";
-            string outputDir = "output";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            string outputDirectory = "output";
 
-            using (Image pdfImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The loaded document is not a multipage image.");
-                    return;
-                }
+                IMultipageImage multipage = image as IMultipageImage;
+                int pageCount = multipage?.PageCount ?? 1;
 
-                for (int i = 0; i < multipage.PageCount; i++)
+                for (int i = 0; i < pageCount; i++)
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     PngOptions pngOptions = new PngOptions();
 
-                    if (pdfImage is VectorImage)
+                    if (image is VectorImage)
                     {
                         pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.White,
-                            PageWidth = pdfImage.Width,
-                            PageHeight = pdfImage.Height
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
                         };
                     }
 
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
 
-                    pdfImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -64,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert each page of a multi‑page PDF that contains vector graphics into separate PNG files with preserved transparency for web preview.
- * 2. When an application must flatten PDF transparency layers and export the pages as PNG images with an alpha channel for use in graphic design tools.
- * 3. When a reporting system generates PDF invoices with vector logos and requires high‑resolution PNG thumbnails for email attachments.
- * 4. When a document management workflow extracts individual pages from a scanned PDF and saves them as PNGs while maintaining the original page dimensions and background color.
- * 5. When a C# service automates the conversion of PDF brochures into PNG assets for mobile apps, ensuring each page retains its vector quality and transparent elements.
+ * 1. When you need to generate high‑resolution PNG thumbnails of each page in a PDF that contains vector graphics for web preview.
+ * 2. When you must preserve the visual appearance of PDF artwork while removing transparency by rasterizing onto a white background for printing workflows.
+ * 3. When an application has to batch‑process multi‑page PDF reports and save each page as an individual PNG file for downstream image analysis.
+ * 4. When you want to extract vector‑based PDF pages as PNGs with an alpha channel to overlay them on other graphics in a C# desktop application.
+ * 5. When you are building a document conversion service that requires converting PDF pages to PNG format while ensuring consistent color rendering across all pages.
  */

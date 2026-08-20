@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PNG with Gamma Correction Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,48 +9,58 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_converted.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the OTG image
             using (Image otgImage = Image.Load(inputPath))
             {
-                // Prepare PNG save options with OTG rasterization settings
-                var pngOptions = new PngOptions();
-                var otgRasterization = new OtgRasterizationOptions
+                // Prepare PNG options with OTG rasterization settings
+                PngOptions pngOptions = new PngOptions();
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = otgImage.Size // preserve original size
+                    // Preserve original size
+                    PageSize = otgImage.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the rasterized PNG
-                otgImage.Save(outputPath, pngOptions);
-            }
+                // Save the rasterized PNG to a temporary file
+                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+                otgImage.Save(tempPngPath, pngOptions);
 
-            // Load the generated PNG to apply gamma correction
-            using (Image pngImage = Image.Load(outputPath))
-            {
-                // Adjust gamma on the raster image
-                if (pngImage is RasterImage raster)
+                // Load the rasterized PNG to apply gamma correction
+                using (Image pngImage = Image.Load(tempPngPath))
                 {
-                    raster.AdjustGamma(2.2f); // example gamma value
+                    // Cast to RasterImage to access AdjustGamma
+                    if (pngImage is RasterImage rasterImage)
+                    {
+                        // Apply gamma correction (example gamma value 2.2)
+                        rasterImage.AdjustGamma(2.2f);
+                    }
+
+                    // Save the final PNG with gamma correction
+                    pngImage.Save(outputPath, new PngOptions());
                 }
 
-                // Overwrite the PNG with gamma‑corrected data
-                pngImage.Save(outputPath, new PngOptions());
+                // Clean up temporary file
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
+                }
             }
         }
         catch (Exception ex)
@@ -61,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must display OpenDocument graphics (OTG) in a web browser, a developer can use this code to convert the OTG file to a PNG image and apply gamma correction for accurate brightness.
- * 2. When generating printable assets from OpenDocument vector drawings, the code enables conversion of OTG to PNG with preserved page size and gamma‑adjusted colors to match the intended print output.
- * 3. When integrating legacy OTG diagrams into a modern C# reporting system, the snippet rasterizes the vector image to PNG and corrects gamma so the diagram appears consistent across different monitors.
- * 4. When automating batch processing of OTG assets for a mobile app, developers can employ this code to produce PNG thumbnails with proper gamma handling to ensure visual fidelity on low‑power devices.
- * 5. When building an image‑processing pipeline that ingests OpenDocument graphics and stores them in a PNG format for archival, the example shows how to load, rasterize, and gamma‑correct the image using Aspose.Imaging for .NET.
+ * 1. When you need to display an OpenDocument Graphic (OTG) on the web, converting it to a PNG with proper gamma correction ensures consistent brightness across browsers.
+ * 2. When generating thumbnails for a document management system, rasterizing OTG files to PNG and adjusting gamma improves visual quality for preview images.
+ * 3. When preparing print‑ready assets from OTG sources, applying gamma correction after conversion to PNG helps match the intended color appearance on printed media.
+ * 4. When integrating OTG support into a C# desktop application, using Aspose.Imaging to convert and gamma‑adjust the images simplifies handling of vector graphics.
+ * 5. When automating batch processing of design assets, converting multiple OTG files to PNG with gamma correction in a single workflow reduces manual image editing effort.
  */

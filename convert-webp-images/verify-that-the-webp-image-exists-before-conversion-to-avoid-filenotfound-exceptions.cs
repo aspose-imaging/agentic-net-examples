@@ -1,3 +1,4 @@
+// HOW-TO: Convert WebP To PNG In C# With File Existence Check (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,13 +9,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\test.webp";
-        string outputPath = @"c:\temp\test.output.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\test.webp";
+            string outputPath = @"c:\temp\test.output.png";
+
+            // Verify that the input WebP file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -39,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded WebP avatars to PNG for compatibility with older browsers, the code checks the file’s existence before conversion.
- * 2. When an automated image‑processing pipeline processes a batch of WebP assets and must avoid FileNotFound exceptions, the snippet validates each input path prior to saving as PNG.
- * 3. When a desktop utility converts WebP screenshots to PNG for printing, it first ensures the source file exists to prevent runtime errors.
- * 4. When a cloud function receives a WebP image URL, downloads it to a temporary folder, and then transforms it to PNG, the code’s existence check safeguards against missing downloads.
- * 5. When a content‑management system migrates legacy WebP graphics to PNG for archival, the program verifies the source file before performing the format conversion.
+ * 1. When you need to safely transform user‑uploaded WebP graphics into PNGs for browsers that don’t support WebP.
+ * 2. When a batch job processes image assets and must skip missing files to avoid runtime crashes.
+ * 3. When generating thumbnails from WebP sources and you need to ensure the output folder exists before saving.
+ * 4. When integrating Aspose.Imaging into a .NET service that converts WebP logos to PNG for printing pipelines.
+ * 5. When building a migration script that validates source images before converting them to a lossless PNG format.
  */

@@ -1,7 +1,9 @@
+// HOW-TO: Create BMP Thumbnails with Centered Colored Circle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,57 +11,87 @@ class Program
     {
         try
         {
-            // Hardcoded list of input image files
-            string[] inputFiles = { "input1.jpg", "input2.png", "input3.tif" };
-            // Output directory for thumbnails
-            string outputDir = "Thumbnails";
+            // Define base, input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            foreach (var inputPath in inputFiles)
+            // Get all files from the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
             {
                 // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Load the source image
-                using (Image image = Image.Load(inputPath))
+                // Load source image
+                using (Image srcImage = Image.Load(inputPath))
                 {
                     // Define thumbnail size
-                    int thumbWidth = 100;
-                    int thumbHeight = 100;
+                    int thumbWidth = 150;
+                    int thumbHeight = 150;
 
-                    // Resize image to thumbnail dimensions
-                    image.Resize(thumbWidth, thumbHeight);
+                    // Prepare output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Create Graphics object for drawing
-                    Graphics graphics = new Graphics(image);
-
-                    // Calculate centered circle dimensions
-                    int diameter = Math.Min(image.Width, image.Height) / 2;
-                    int x = (image.Width - diameter) / 2;
-                    int y = (image.Height - diameter) / 2;
-                    Rectangle circleRect = new Rectangle(x, y, diameter, diameter);
-
-                    // Define pen for the circle outline
-                    Pen pen = new Pen(Color.Red, 3);
-
-                    // Draw the centered ellipse (circle)
-                    graphics.DrawEllipse(pen, circleRect);
-
-                    // Prepare output file path
-                    string outputPath = Path.Combine(outputDir,
-                        Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp");
-
-                    // Ensure the output directory exists (redundant but follows safety rule)
+                    // Ensure output directory for this file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the thumbnail as BMP
-                    image.Save(outputPath, new BmpOptions());
+                    // Create BMP options with a FileCreateSource
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        bmpOptions.BitsPerPixel = 24;
+                        FileCreateSource source = new FileCreateSource(outputPath, false);
+                        bmpOptions.Source = source;
+
+                        // Create thumbnail canvas
+                        using (Image thumbImage = Image.Create(bmpOptions, thumbWidth, thumbHeight))
+                        {
+                            // Initialize graphics
+                            Graphics graphics = new Graphics(thumbImage);
+                            graphics.Clear(Color.White);
+
+                            // Draw scaled source image onto thumbnail
+                            graphics.DrawImage(
+                                (RasterImage)srcImage,
+                                new Rectangle(0, 0, thumbWidth, thumbHeight),
+                                new Rectangle(0, 0, srcImage.Width, srcImage.Height),
+                                GraphicsUnit.Pixel);
+
+                            // Draw centered colored circle
+                            int radius = Math.Min(thumbWidth, thumbHeight) / 4;
+                            int centerX = thumbWidth / 2;
+                            int centerY = thumbHeight / 2;
+                            Rectangle circleRect = new Rectangle(
+                                centerX - radius,
+                                centerY - radius,
+                                radius * 2,
+                                radius * 2);
+                            graphics.DrawEllipse(new Pen(Color.Red, 3), circleRect);
+
+                            // Save the thumbnail (output path already bound via FileCreateSource)
+                            thumbImage.Save();
+                        }
+                    }
                 }
             }
         }
@@ -72,9 +104,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to create 100 × 100 pixel BMP thumbnails of user‑uploaded photos and overlay a red circular badge to indicate featured images.
- * 2. When an e‑commerce platform wants to generate small BMP preview icons for product pictures and highlight each with a centered colored circle for quick visual categorization.
- * 3. When a desktop utility processes a batch of mixed‑format images (JPG, PNG, TIFF) to produce uniform BMP thumbnails with a red outline circle for use in a custom file explorer.
- * 4. When a reporting tool automatically creates BMP thumbnail charts from source images and draws a centered ellipse to mark the region of interest before embedding them in PDF reports.
- * 5. When a digital asset management system needs to resize various image formats to BMP thumbnails and add a centered colored circle as a watermark to indicate copyright status.
+ * 1. When you need to generate a batch of 150 × 150 BMP preview images for a gallery and highlight each with a colored circle overlay.
+ * 2. When an application must automatically create thumbnail icons for user‑uploaded pictures and add a visual marker for branding or status.
+ * 3. When a reporting tool requires small BMP snapshots of larger images with a centered ellipse to indicate focus areas.
+ * 4. When a legacy system only accepts BMP files, and you must produce consistent thumbnails with a custom graphic element using Aspose.Imaging in C#.
+ * 5. When you want to preprocess a folder of images for a game asset pipeline, adding a colored circle to each thumbnail for quick identification.
  */

@@ -1,18 +1,20 @@
+// HOW-TO: Crop Center 200x200 Region from Image and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,18 +28,22 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Define a 200x200 rectangle centered in the image
+                // Determine the top-left corner of the 200x200 crop region centered in the image
                 int cropWidth = 200;
                 int cropHeight = 200;
                 int left = (image.Width - cropWidth) / 2;
                 int top = (image.Height - cropHeight) / 2;
-                var area = new Rectangle(left, top, cropWidth, cropHeight);
 
-                // Crop the image
-                image.Crop(area);
+                // Create the cropping rectangle
+                Rectangle cropArea = new Rectangle(left, top, cropWidth, cropHeight);
+
+                // Perform the crop
+                image.Crop(cropArea);
+
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
 
                 // Save the cropped image as PDF
-                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -50,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF thumbnail of a user‑uploaded PNG by extracting a 200 × 200 region from the image’s center.
- * 2. When an e‑commerce platform wants to create a centered preview PDF of product photos for catalog PDFs without loading the entire image into memory.
- * 3. When a document management system must convert scanned raster pages into PDF files that contain only the central area of interest for compliance reports.
- * 4. When a mobile app backend processes profile pictures, cropping the middle 200 × 200 pixels and saving the result as a PDF for archival storage.
- * 5. When a reporting tool automatically extracts a centered square from high‑resolution PNG charts and embeds it as a PDF page for inclusion in generated reports.
+ * 1. When you need to generate a PDF thumbnail of the central part of a photo for a product catalog.
+ * 2. When an application must extract a fixed‑size preview from user‑uploaded images before archiving them as PDFs.
+ * 3. When a reporting tool requires a centered 200 px square snapshot of scanned documents to embed in PDF reports.
+ * 4. When you want to automate creation of PDF certificates that contain only the central logo area of a JPEG logo file.
+ * 5. When a web service needs to crop the middle of an image to meet a specific layout and deliver the result as a PDF file.
  */

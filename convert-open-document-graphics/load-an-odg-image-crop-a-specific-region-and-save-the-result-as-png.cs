@@ -1,3 +1,4 @@
+// HOW-TO: Crop a Specific Area from ODG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\cropped.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample_cropped.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,20 +22,24 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to OdgImage to access vector-specific methods
+                // Cast to OdgImage to access ODG-specific methods
                 OdgImage odgImage = (OdgImage)image;
 
-                // Define the crop rectangle (example: top-left corner 50x50, width 200, height 150)
-                var cropArea = new Rectangle(50, 50, 200, 150);
+                // Define the crop rectangle (example: central half of the image)
+                int cropX = odgImage.Width / 4;
+                int cropY = odgImage.Height / 4;
+                int cropWidth = odgImage.Width / 2;
+                int cropHeight = odgImage.Height / 2;
+                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                // Perform cropping
-                odgImage.Crop(cropArea);
+                // Crop the image
+                odgImage.Crop(cropRect);
 
                 // Save the cropped image as PNG
                 var pngOptions = new PngOptions();
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific diagram region from an OpenDocument Graphic (ODG) file and deliver it as a PNG thumbnail for a web preview.
- * 2. When an application must generate a cropped PNG snapshot of a vector illustration stored in ODG format for inclusion in a PDF report.
- * 3. When a content management system requires converting a selected area of an ODG drawing into a PNG image to display on mobile devices.
- * 4. When an automated batch process has to trim unnecessary margins from ODG assets and save the result as PNG files for faster loading in a UI.
- * 5. When a designer tool wants to let users select a portion of an ODG canvas and export that selection as a PNG for use in presentations.
+ * 1. When a developer needs to extract a central portion of an OpenDocument graphic for use in a web thumbnail, they can load the .odg file, crop it, and export it as a PNG.
+ * 2. When integrating legacy ODG assets into a modern .NET application, cropping unwanted margins before converting to PNG ensures consistent layout and reduced file size.
+ * 3. When generating printable assets from a design created in OpenDocument, developers can programmatically crop the required region and save it as a high‑quality PNG for downstream workflows.
+ * 4. When automating batch processing of ODG diagrams, the code can isolate each diagram’s key area, crop it, and store the result as PNG for inclusion in reports or presentations.
+ * 5. When a user uploads an ODG file to a C# web service and only a specific region is needed for a preview, the service can crop that region and return a PNG image instantly.
  */

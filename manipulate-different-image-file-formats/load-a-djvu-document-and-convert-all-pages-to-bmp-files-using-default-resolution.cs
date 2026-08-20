@@ -1,3 +1,4 @@
+// HOW-TO: Convert All DjVu Pages To BMP Images In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file and output directory
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.djvu";
+            string outputDirectory = @"C:\temp\output\";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,14 +25,15 @@ class Program
             // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load the DjVu image from the stream
+                // Load the DjVu image
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Iterate through each page in the document
+                    // Iterate through each page
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output BMP file path
-                        string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.bmp");
+                        // Build output file name
+                        string outputPath = Path.Combine(outputDirectory,
+                            $"sample.{djvuPage.PageNumber}.bmp");
 
                         // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -44,7 +46,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system needs to generate thumbnail previews of each page of a DjVu file for a web gallery, a developer can use this code to load the DjVu document and save every page as a BMP image.
- * 2. When an archival workflow requires converting scanned DjVu pages into a lossless bitmap format for further OCR processing, the code demonstrates how to read the DjVu stream and export each page to BMP using C#.
- * 3. When a printing service must rasterize DjVu pages into BMP files at the default resolution before sending them to a legacy printer that only accepts BMP input, this snippet shows the necessary steps.
- * 4. When a desktop application wants to display DjVu content in a Windows Forms picture box that only supports BMP, the developer can load the DjVu file and convert each page to BMP with this example.
- * 5. When a batch conversion tool needs to extract all pages from a multi‑page DjVu archive and store them as separate BMP files for downstream image analysis, the provided code performs the required page iteration and saving.
+ * 1. When you need to extract each page of a multi‑page DjVu file as separate BMP files for legacy Windows applications.
+ * 2. When you want to batch‑process scanned documents stored in DjVu format and generate bitmap images for OCR preprocessing.
+ * 3. When a printing workflow requires converting DjVu pages to BMP because the downstream printer driver only accepts BMP input.
+ * 4. When you are building a document viewer that must display DjVu content on systems that only support BMP rendering.
+ * 5. When you need to archive DjVu pages as lossless BMP files to preserve image quality before further image analysis.
  */

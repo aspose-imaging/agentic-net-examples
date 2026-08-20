@@ -1,65 +1,58 @@
+// HOW-TO: Batch Convert Multiple EPS Files to Grayscale PSD with RLE Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Psd;
 
-class BatchEpsToPsdTest
+class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\TestData\EpsFiles";
-        string outputDirectory = @"C:\TestData\PsdOutputs";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Test\EpsBatch\Input";
+            string outputFolder = @"C:\Test\EpsBatch\Output";
 
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            // Ensure the output root directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Retrieve all EPS files from the input directory
+            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
 
             foreach (string inputPath in epsFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output file path (same name with .psd extension)
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".psd");
+                // Build the corresponding PSD output path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".psd");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the EPS image
-                using (Image image = Image.Load(inputPath))
+                using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Prepare PSD save options (default settings)
+                    // Configure PSD save options (example: RLE compression, Grayscale mode)
                     var psdOptions = new PsdOptions
                     {
-                        // Example: set compression method to RLE
-                        CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                        // Example: set color mode to Grayscale
-                        ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
+                        CompressionMethod = CompressionMethod.RLE,
+                        ColorMode = ColorModes.Grayscale
                     };
 
-                    // Save as PSD
+                    // Save the image as PSD
                     image.Save(outputPath, psdOptions);
                 }
 
-                // Verify that the PSD file was created
-                if (File.Exists(outputPath))
-                {
-                    Console.WriteLine($"Successfully converted: {inputPath} -> {outputPath}");
-                }
-                else
-                {
-                    Console.Error.WriteLine($"Conversion failed for: {inputPath}");
-                }
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -71,9 +64,9 @@ class BatchEpsToPsdTest
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑convert legacy EPS vector artwork into editable PSD files for Photoshop workflows.
- * 2. When an automated build pipeline must generate PSD previews from EPS assets to populate a web‑based digital asset management system.
- * 3. When a print‑to‑digital conversion service processes client‑supplied EPS logos in bulk and saves them as PSD files with grayscale color mode for pre‑press checks.
- * 4. When a migration script updates an e‑learning content repository by converting multiple EPS illustrations to PSD format with RLE compression to reduce file size.
- * 5. When a QA test suite validates that a collection of EPS files are correctly loaded and saved as PSD using Aspose.Imaging’s C# API across different directories.
+ * 1. When you need to automatically convert a folder of vector EPS artwork into Photoshop PSD files for further editing in a design pipeline.
+ * 2. When you want to ensure all converted PSDs use grayscale color mode and RLE compression to reduce file size while preserving quality.
+ * 3. When you are building an integration test to verify that batch EPS‑to‑PSD conversion works correctly across multiple files in a CI environment.
+ * 4. When you need to process user‑uploaded EPS files on a server and store the resulting PSDs in a structured output directory.
+ * 5. When you are migrating legacy EPS assets to PSD format for compatibility with modern Adobe Photoshop workflows.
  */

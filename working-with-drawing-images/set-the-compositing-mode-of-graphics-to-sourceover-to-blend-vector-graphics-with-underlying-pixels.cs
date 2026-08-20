@@ -1,3 +1,4 @@
+// HOW-TO: How To Set Graphics Compositing Mode To SourceOver In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -21,17 +22,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Source source = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = source };
-
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, inputImage.Width, inputImage.Height))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.DrawImage(inputImage, new Point(0, 0));
-                    canvas.Save();
-                }
+                Graphics graphics = new Graphics(image);
+                Source src = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions() { Source = src };
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a transparent PNG logo onto a background image while preserving the logo’s alpha channel, they can use Aspose.Imaging’s Graphics with SourceOver compositing to blend the two raster images.
- * 2. When creating a composite thumbnail that combines a product photo with a promotional badge, the SourceOver mode ensures the badge is drawn on top of the photo without erasing its underlying pixels.
- * 3. When generating watermarked PDFs by rendering vector‑based watermark graphics onto each page image, SourceOver blending lets the watermark appear semi‑transparent over the original content.
- * 4. When building a photo‑editing tool that lets users add stickers or emojis to pictures, using Graphics.DrawImage with SourceOver merges the sticker’s pixels with the base image while respecting transparency.
- * 5. When automating the preparation of UI assets by compositing multiple PNG layers (background, icons, text) into a single image for mobile apps, SourceOver ensures each layer blends correctly without losing detail.
+ * 1. When you need to overlay a transparent logo onto an existing PNG image while preserving the background colors.
+ * 2. When generating dynamic charts that combine vector shapes with a photo background in a web application.
+ * 3. When creating watermarked product images by compositing semi‑transparent text over a base picture.
+ * 4. When building a thumbnail generator that draws vector icons on top of uploaded user photos.
+ * 5. When implementing a PDF‑to‑PNG conversion that adds annotation graphics without erasing the original raster content.
  */

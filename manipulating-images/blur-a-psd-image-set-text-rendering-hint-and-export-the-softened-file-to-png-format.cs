@@ -1,8 +1,9 @@
+// HOW-TO: Apply Gaussian Blur To PSD And Save As PNG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
+            string inputPath = "input/input.psd";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,20 +24,24 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                // Apply Gaussian blur to the raster image
                 RasterImage raster = image as RasterImage;
-                if (raster != null)
+                if (raster == null)
                 {
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
                 }
 
-                // Configure PNG export options with text rendering hint
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions();
-                pngOptions.VectorRasterizationOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
+                // Apply Gaussian blur
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the processed image as PNG
-                image.Save(outputPath, pngOptions);
+                // Prepare PNG export options
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the blurred image as PNG
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to create a softened preview of a Photoshop PSD file for faster page loading, they can apply a Gaussian blur and export it as a PNG with optimized text rendering.
- * 2. When an e‑learning platform wants to generate low‑resolution PNG thumbnails of high‑resolution PSD slides while preserving crisp vector text, they can use this code to blur the background and set the TextRenderingHint to SingleBitPerPixel.
- * 3. When a digital asset management system must automatically produce watermarked PNG copies of PSD artwork with a subtle blur effect to protect intellectual property, the code provides the necessary image filtering and export options.
- * 4. When a mobile app needs to display a blurred background derived from a PSD design and ensure that any overlaid text renders sharply in the PNG output, developers can employ this routine.
- * 5. When a batch‑processing tool is required to convert multiple PSD files into PNG format with a uniform Gaussian blur and consistent text rendering settings for print‑ready PDFs, this snippet handles the conversion efficiently.
+ * 1. When a web application needs to generate a softened preview of a Photoshop PSD file for faster loading, developers can use this code to blur the image and export it as a lightweight PNG.
+ * 2. When an e‑commerce platform wants to create background‑blurred product thumbnails from original PSD assets, the snippet provides a simple way to apply a Gaussian blur and save the result in PNG format.
+ * 3. When a digital publishing workflow requires converting high‑resolution PSD artwork into PNG with a subtle blur for watermarking or visual effect, this code automates the process in C#.
+ * 4. When a desktop utility must batch‑process PSD files to produce blurred PNG versions for UI placeholders, developers can integrate the Aspose.Imaging filter and save steps shown here.
+ * 5. When a mobile app backend needs to serve blurred versions of user‑uploaded PSD designs to protect intellectual property while still displaying a preview, this example demonstrates how to apply the blur and output a PNG using C#.
  */

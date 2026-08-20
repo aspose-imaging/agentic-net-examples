@@ -1,3 +1,4 @@
+// HOW-TO: Create BMP Image With Specified Dimensions Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,27 +12,30 @@ class Program
     {
         try
         {
-            // Output file path
+            // Define image dimensions
+            int width = 800;
+            int height = 600;
+
+            // Output file path (hardcoded)
             string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options
+            // Set up BMP options with a FileCreateSource
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the bitmap image canvas
-            using (Image image = Image.Create(bmpOptions, 500, 400))
+            // Create the bitmap image
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Instantiate Graphics object for drawing
+                // Instantiate Graphics for the image
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with a background color
-                graphics.Clear(Color.Wheat);
+                // Optional: clear the canvas with a background color
+                graphics.Clear(Color.White);
 
-                // Save the image (file is already bound via FileCreateSource)
+                // Save the image (no need to specify path again)
                 image.Save();
             }
         }
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a blank BMP file of a specific size (e.g., 500×400 pixels) for a report or document and fill it with a solid background color using C# and Aspose.Imaging.
- * 2. When an application must programmatically create a 24‑bit bitmap thumbnail for a product catalog and requires a Graphics object to draw additional elements later.
- * 3. When a Windows service has to produce a temporary BMP canvas for batch image processing, ensuring the output directory exists and the file is saved via FileCreateSource.
- * 4. When a developer wants to initialize a bitmap canvas, clear it with a custom Color (such as Wheat), and save it as a BMP image without using System.Drawing, leveraging Aspose.Imaging’s Image and Graphics classes.
- * 5. When an automated testing framework needs to create a known‑size BMP image on the fly to verify image‑handling logic, using BmpOptions, Image.Create, and Graphics in a .NET environment.
+ * 1. When you need to generate a blank BMP canvas of a custom size for a reporting tool that later draws charts or text.
+ * 2. When an application must create placeholder images on the fly for missing product photos, using a specific width and height.
+ * 3. When a server‑side service prepares a BMP background to overlay watermarks or logos before sending it to clients.
+ * 4. When you are automating the creation of bitmap files for unit tests that require a known image size and format.
+ * 5. When you want to programmatically produce a white‑filled BMP file to serve as a template for further drawing operations in a C# graphics pipeline.
  */

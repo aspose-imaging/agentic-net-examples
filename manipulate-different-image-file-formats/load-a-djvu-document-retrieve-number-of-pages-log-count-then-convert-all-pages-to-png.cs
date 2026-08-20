@@ -1,3 +1,4 @@
+// HOW-TO: Extract All Pages From DjVu And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = @"C:\Temp\sample.djvu";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.djvu";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,32 +21,28 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for PNG files
-            string outputDir = @"C:\Temp\Output";
-
-            // Ensure the output directory exists (creates if missing)
-            Directory.CreateDirectory(outputDir);
-
             // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load the DjVu image from the stream
+                // Load DjVu image from the stream
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Log the total number of pages
+                    // Log total number of pages
                     Console.WriteLine($"Total pages: {djvuImage.PageCount}");
 
                     // Iterate through each page and save as PNG
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build the output file path for the current page
-                        string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
+                        // Build output file name based on page number
+                        string outputFileName = $"sample.{djvuPage.PageNumber}.png";
+                        string outputPath = Path.Combine(@"c:\temp\", outputFileName);
 
-                        // Ensure the directory for the output file exists
+                        // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as PNG using Aspose.Imaging PNG options
+                        // Save the page as PNG
                         djvuPage.Save(outputPath, new PngOptions());
+                        Console.WriteLine($"Saved page {djvuPage.PageNumber} to {outputPath}");
                     }
                 }
             }
@@ -59,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract every page from a multi‑page DjVu document (such as scanned books) and generate PNG images for web preview.
- * 2. When an application must read a DjVu file, log its total page count, and display pagination information to users.
- * 3. When a batch conversion utility converts archival DjVu files to PNG format to ensure compatibility with image editors that do not support DjVu.
- * 4. When a document management system records the page count of uploaded DjVu files and saves each page as a separate PNG thumbnail for quick search indexing.
- * 5. When a C# service processes DjVu files from a shared folder, creates PNG versions of each page, and writes them to a designated output directory for downstream processing.
+ * 1. When you need to batch‑convert a multi‑page DjVu document into individual PNG images for web preview.
+ * 2. When you must programmatically determine how many pages a DjVu file contains before processing.
+ * 3. When you want to automate the extraction of each DjVu page to PNG for OCR or further image analysis.
+ * 4. When you need to ensure the output folder exists and save each page with a clear naming convention.
+ * 5. When you are handling DjVu files in a .NET application and want robust error handling around file I/O and conversion.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG File To PDF With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,17 +24,16 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions();
+                var vectorOptions = new VectorRasterizationOptions
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+                pdfOptions.VectorRasterizationOptions = vectorOptions;
 
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application generates design schematics in OTG format and the developer must automatically convert them to PDF files with embedded XMP metadata for version control and easy sharing.
- * 2. When a document management workflow receives OTG vector drawings from field engineers and needs a C# service that transforms them into PDF documents while preserving image dimensions and adding XMP metadata for indexing.
- * 3. When an e‑learning platform stores lesson illustrations as OTG files and requires a backend routine that rasterizes each image to a PDF page of the same size and injects XMP metadata for author and copyright details.
- * 4. When a legal firm archives case diagrams created in OTG and wants to use Aspose.Imaging in a .NET application to produce PDF evidence files that include XMP metadata for timestamps and reviewer information.
- * 5. When a publishing system processes batch OTG artwork and must generate PDF proofs with a consistent white background, exact page size, and embedded XMP metadata to support automated content management and search.
+ * 1. When a CAD or engineering application exports drawings as OTG and you need to generate printable PDF reports programmatically in a C# backend.
+ * 2. When an automated document pipeline must convert OTG graphics to PDF for archival or sharing while preserving the original dimensions and white background.
+ * 3. When a web service receives OTG images from users and must return PDF versions for viewing in standard browsers without requiring client‑side plugins.
+ * 4. When you are building a batch conversion tool that processes multiple OTG files into PDFs using Aspose.Imaging’s vector rasterization options in .NET.
+ * 5. When integrating OTG to PDF conversion into a C# application to create PDF invoices that embed vector graphics generated from design software.
  */

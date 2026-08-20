@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to TIFF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,11 +12,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,12 +24,12 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access the Filter method
+                // Cast to TiffImage to access TIFF-specific methods
                 TiffImage tiffImage = (TiffImage)image;
 
                 // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften a high‑resolution scanned TIFF document (e.g., a blueprint or photograph) before publishing it on a website, they can apply a Gaussian blur with radius five and save the result as a PNG for web‑friendly delivery.
- * 2. When preparing archival TIFF images for inclusion in a PDF report, a developer may blur sensitive details using a radius‑5 Gaussian filter and convert the output to PNG to reduce file size while preserving transparency.
- * 3. When building an automated image‑processing pipeline that receives TIFF files from a scanner, a developer can use this code to smooth the images with a Gaussian blur (radius 5) and store them as PNGs for downstream machine‑learning models that require a consistent format.
- * 4. When creating thumbnail previews of large TIFF photographs for a digital asset management system, a developer can apply a radius‑5 Gaussian blur to reduce visual noise and then save the thumbnails as PNGs for fast loading.
- * 5. When a developer must comply with a client’s branding guidelines that require all exported images to have a subtle soft‑focus effect, they can blur the original TIFF using a radius of five and output the final image in PNG format for use in marketing materials.
+ * 1. When you need to soften scanned documents stored as TIFF before converting them to PNG for web display.
+ * 2. When a batch process must reduce image detail in high‑resolution TIFF photos by applying a Gaussian blur and output them as PNG thumbnails.
+ * 3. When preparing medical imaging TIFF files for patient portals, you may blur sensitive details and deliver the result in PNG format.
+ * 4. When integrating legacy TIFF assets into a modern C# application that requires PNG images with a uniform blur effect for UI consistency.
+ * 5. When automating a workflow that converts archived TIFF maps into blurred PNGs to protect copyrighted information while keeping them viewable.
  */

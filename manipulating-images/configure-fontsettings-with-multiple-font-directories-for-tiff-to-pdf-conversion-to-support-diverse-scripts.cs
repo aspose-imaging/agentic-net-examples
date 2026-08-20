@@ -1,3 +1,4 @@
+// HOW-TO: Configure Multiple Font Folders for TIFF to PDF Conversion in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,20 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Output\sample.pdf";
+
+        // Font directories to support diverse scripts
+        string[] fontDirectories = new string[]
+        {
+            @"C:\Fonts\Latin",
+            @"C:\Fonts\CJK",
+            @"C:\Fonts\Arabic"
+        };
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.tif";
-            string outputPath = @"C:\Output\sample.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,23 +32,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure multiple font directories (recursive search enabled)
-            string[] fontDirectories = new string[]
-            {
-                @"C:\Fonts\Latin",
-                @"C:\Fonts\CJK",
-                @"C:\Fonts\Arabic"
-            };
-            FontSettings.SetFontsFolders(fontDirectories, true);
+            // Configure Aspose.Imaging font settings with multiple folders (non‑recursive)
+            FontSettings.SetFontsFolders(fontDirectories, recursive: false);
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
                 // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a multinational company needs to convert scanned TIFF documents containing Latin, CJK, and Arabic text into searchable PDFs, they can use this code to load the appropriate fonts from separate directories.
- * 2. When a legal firm digitizes multilingual contracts stored as TIFF files and must preserve the original script in the resulting PDF, the code ensures the correct fonts are applied during conversion.
- * 3. When a publishing house automates the generation of PDF e‑books from high‑resolution TIFF artwork that includes captions in various languages, configuring multiple font folders guarantees accurate rendering.
- * 4. When a government agency processes archival TIFF images of historical records written in different scripts and needs to produce PDF archives that display the text correctly, this code provides the necessary font resolution.
- * 5. When a medical imaging system exports patient scans saved as TIFF files with embedded annotations in several languages and must create PDF reports that retain those annotations, the code’s FontSettings setup handles the multilingual fonts.
+ * 1. When converting scanned documents that contain Latin, CJK, and Arabic text to PDF, you need to point Aspose.Imaging to the appropriate font folders so the characters render correctly.
+ * 2. When generating PDF reports from multi‑language TIFF images in a .NET application, setting multiple font directories ensures each script uses the right typeface.
+ * 3. When deploying an image‑to‑PDF service on a server that stores fonts in separate directories, you must configure FontSettings non‑recursively to avoid loading unwanted fonts.
+ * 4. When processing archival TIFF files with mixed scripts and you want to preserve text appearance in the resulting PDF, adding specific font paths guarantees accurate glyph mapping.
+ * 5. When building a batch conversion tool that handles TIFF files from different regions, configuring multiple font folders lets the application support diverse scripts without manual font installation.
  */

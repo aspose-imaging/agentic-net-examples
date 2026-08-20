@@ -1,20 +1,20 @@
+// HOW-TO: Increase Brightness of CDR by 15% and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample_adjusted.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample_brightness.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,29 +22,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR document
             using (Image image = Image.Load(inputPath))
             {
                 // Adjust brightness upward by ~15% (≈38 on a scale of -255..255)
-                if (image is RasterImage raster)
+                if (image is RasterImage rasterImage)
                 {
-                    raster.AdjustBrightness(38);
-                }
-                else if (image is TiffImage tiff)
-                {
-                    tiff.AdjustBrightness(38);
+                    rasterImage.AdjustBrightness(38);
                 }
                 else
                 {
-                    // Attempt generic AdjustBrightness via dynamic (fallback)
-                    dynamic dyn = image;
-                    try { dyn.AdjustBrightness(38); } catch { }
+                    // Fallback: try generic AdjustBrightness if available
+                    var method = image.GetType().GetMethod("AdjustBrightness");
+                    method?.Invoke(image, new object[] { 38 });
                 }
 
-                // Save the result as a TIFF file
+                // Save the result as TIFF
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing service needs to convert CorelDRAW (.cdr) artwork to high‑resolution TIFF for press output and must increase the image brightness by about 15 % to meet the client’s visual specifications.
- * 2. When an archival system imports legacy CDR files, brightens them to improve legibility, and stores the results as TIFF files for long‑term preservation.
- * 3. When a web application generates printable previews by loading a CDR design, applying a 15 % brightness boost, and delivering the preview as a TIFF image to browsers that only support raster formats.
- * 4. When a batch‑processing tool automates the conversion of multiple CDR logos, enhances their brightness for better on‑screen appearance, and saves each as a TIFF for use in marketing collateral.
- * 5. When a document‑management workflow requires programmatically adjusting the brightness of a CDR diagram before exporting it to TIFF so that downstream OCR engines can recognize the content more accurately.
+ * 1. When a designer needs to brighten a CorelDRAW (.cdr) illustration by roughly 15% before converting it to a high‑resolution TIFF for printing.
+ * 2. When an automated workflow must adjust the exposure of batch‑processed CDR files and store the results as lossless TIFF images for archival.
+ * 3. When a web service receives CDR graphics and must improve their visibility by increasing brightness before delivering them as TIFF thumbnails.
+ * 4. When a document conversion tool integrates Aspose.Imaging to enhance the brightness of vector drawings and output them in a TIFF format compatible with legacy systems.
+ * 5. When a quality‑control script checks CDR assets, applies a uniform brightness boost, and saves the corrected files as TIFF for downstream image analysis.
  */

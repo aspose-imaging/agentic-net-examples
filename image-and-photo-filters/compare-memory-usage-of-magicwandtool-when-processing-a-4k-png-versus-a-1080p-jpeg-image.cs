@@ -1,68 +1,65 @@
+// HOW-TO: Measure Magic Wand Memory Usage for 4K PNG vs 1080p JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPng = "input_4k.png";
+        string outputPng = "output_4k.png";
+        string inputJpeg = "input_1080.jpg";
+        string outputJpeg = "output_1080.jpg";
+
         try
         {
-            // Input and output paths
-            string pngInputPath = "input4k.png";
-            string pngOutputPath = "output4k_processed.png";
-            string jpegInputPath = "input1080.jpg";
-            string jpegOutputPath = "output1080_processed.jpg";
+            // Verify input files exist
+            if (!File.Exists(inputPng))
+            {
+                Console.Error.WriteLine($"File not found: {inputPng}");
+                return;
+            }
+            if (!File.Exists(inputJpeg))
+            {
+                Console.Error.WriteLine($"File not found: {inputJpeg}");
+                return;
+            }
 
-            // Validate input files
-            if (!File.Exists(pngInputPath))
-            {
-                Console.Error.WriteLine($"File not found: {pngInputPath}");
-                return;
-            }
-            if (!File.Exists(jpegInputPath))
-            {
-                Console.Error.WriteLine($"File not found: {jpegInputPath}");
-                return;
-            }
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPng));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputJpeg));
 
             // Process 4K PNG
-            using (RasterImage pngImage = (RasterImage)Image.Load(pngInputPath))
+            long beforePng = Cache.AllocatedMemoryBytesCount;
+            using (RasterImage image = (RasterImage)Image.Load(inputPng))
             {
-                long memBefore = System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64;
-
+                // Apply Magic Wand with arbitrary settings
                 MagicWandTool
-                    .Select(pngImage, new MagicWandSettings(100, 100))
+                    .Select(image, new MagicWandSettings(100, 100) { Threshold = 100 })
                     .Apply();
 
-                long memAfter = System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64;
-                Console.WriteLine($"PNG processing memory increase: {memAfter - memBefore} bytes");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath) ?? ".");
-                pngImage.Save(pngOutputPath, new PngOptions());
+                // Save result
+                image.Save(outputPng, new PngOptions());
             }
+            long afterPng = Cache.AllocatedMemoryBytesCount;
+            Console.WriteLine($"Memory used for 4K PNG processing: {afterPng - beforePng} bytes");
 
             // Process 1080p JPEG
-            using (RasterImage jpegImage = (RasterImage)Image.Load(jpegInputPath))
+            long beforeJpeg = Cache.AllocatedMemoryBytesCount;
+            using (RasterImage image = (RasterImage)Image.Load(inputJpeg))
             {
-                long memBefore = System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64;
-
                 MagicWandTool
-                    .Select(jpegImage, new MagicWandSettings(100, 100))
+                    .Select(image, new MagicWandSettings(100, 100) { Threshold = 100 })
                     .Apply();
 
-                long memAfter = System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64;
-                Console.WriteLine($"JPEG processing memory increase: {memAfter - memBefore} bytes");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath) ?? ".");
-                jpegImage.Save(jpegOutputPath, new JpegOptions());
+                image.Save(outputJpeg, new JpegOptions());
             }
+            long afterJpeg = Cache.AllocatedMemoryBytesCount;
+            Console.WriteLine($"Memory used for 1080p JPEG processing: {afterJpeg - beforeJpeg} bytes");
         }
         catch (Exception ex)
         {
@@ -73,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to benchmark the memory footprint of Aspose.Imaging’s MagicWandTool on a high‑resolution 4K PNG versus a standard‑resolution 1080p JPEG to optimize performance.
- * 2. When an image‑processing application must ensure that applying MagicWand selections to large PNG assets does not exceed available RAM compared to processing smaller JPEG files.
- * 3. When a DevOps engineer wants to log the process’s private memory size before and after using MagicWandTool in C# to detect potential memory leaks in a batch workflow.
- * 4. When a UI designer integrates MagicWand selection into a .NET photo‑editing tool and needs to verify that the memory impact differs between lossless PNG and lossy JPEG inputs.
- * 5. When a cloud‑based image service needs to size its containers appropriately by measuring how much extra memory MagicWandTool consumes for 4K PNG files versus 1080p JPEG files.
+ * 1. When you need to benchmark how much RAM the MagicWandTool consumes while processing high‑resolution 4K PNG files versus standard 1080p JPEGs in a .NET application.
+ * 2. When you want to ensure your server can handle large PNG selections without exceeding memory limits by measuring allocated bytes before and after the operation.
+ * 3. When optimizing an image‑processing pipeline that uses Aspose.Imaging, you compare memory footprints of different image formats to choose the most efficient one.
+ * 4. When diagnosing out‑of‑memory exceptions in a C# service that applies Magic Wand selections to user‑uploaded images of varying resolutions.
+ * 5. When creating performance tests to validate that caching and disposal of RasterImage objects correctly release memory after MagicWandTool processing.
  */

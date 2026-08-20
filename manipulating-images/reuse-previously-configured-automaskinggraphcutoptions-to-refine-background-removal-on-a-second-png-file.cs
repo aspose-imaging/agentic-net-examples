@@ -1,18 +1,24 @@
+// HOW-TO: Reuse AutoMasking GraphCut Options for Background Removal on Another PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath1 = "input1.png";
-        string outputPath1 = Path.Combine("output", "output1.png");
+        string outputPath1 = "output1.png";
         string inputPath2 = "input2.png";
-        string outputPath2 = Path.Combine("output", "output2.png");
+        string outputPath2 = "output2.png";
+
+        string tempMaskPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
 
         try
         {
@@ -21,33 +27,57 @@ class Program
                 Console.Error.WriteLine($"File not found: {inputPath1}");
                 return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1) ?? ".");
+
+            AutoMaskingGraphCutOptions maskingOptions;
+            using (RasterImage image1 = (RasterImage)Image.Load(inputPath1))
+            {
+                int featheringRadius = (Math.Max(image1.Width, image1.Height) / 500) + 1;
+
+                maskingOptions = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = featheringRadius,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(tempMaskPath, false)
+                    },
+                    BackgroundReplacementColor = Color.Transparent
+                };
+
+                MaskingResult results1 = new ImageMasking(image1).Decompose(maskingOptions);
+                using (RasterImage resultImage1 = (RasterImage)results1[1].GetImage())
+                {
+                    resultImage1.Save(outputPath1, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                }
+            }
+
+            maskingOptions.CalculateDefaultStrokes = false;
+
             if (!File.Exists(inputPath2))
             {
                 Console.Error.WriteLine($"File not found: {inputPath2}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
-
-            using (RasterImage image1 = (RasterImage)Image.Load(inputPath1))
-            {
-                var options = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath1, false)
-                };
-                image1.Save(outputPath1, options);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2) ?? ".");
 
             using (RasterImage image2 = (RasterImage)Image.Load(inputPath2))
             {
-                var options = new PngOptions
+                MaskingResult results2 = new ImageMasking(image2).Decompose(maskingOptions);
+                using (RasterImage resultImage2 = (RasterImage)results2[1].GetImage())
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath2, false)
-                };
-                image2.Save(outputPath2, options);
+                    resultImage2.Save(outputPath2, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                }
+            }
+
+            if (File.Exists(tempMaskPath))
+            {
+                File.Delete(tempMaskPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply the same graph‑cut based AutoMaskingGraphCutOptions to multiple product photos to consistently remove the background from each PNG image.
- * 2. When an e‑commerce platform wants to batch‑process newly uploaded PNG files using previously tuned AutoMaskingGraphCutOptions to ensure uniform transparent backgrounds for catalog thumbnails.
- * 3. When a mobile app generates user‑edited stickers and must reuse the same background‑removal parameters on a second PNG to maintain visual consistency across stickers.
- * 4. When a digital marketing team automates the preparation of campaign assets and wants to apply the same AutoMaskingGraphCutOptions to a second PNG after the first image has been successfully processed.
- * 5. When a document‑generation service needs to embed PNG graphics with removed backgrounds and reuses the configured AutoMaskingGraphCutOptions to refine the mask on subsequent images without recalibrating the algorithm.
+ * 1. When you need to apply the same graph‑cut masking settings to multiple PNG images to produce consistent transparent backgrounds.
+ * 2. When you want to speed up batch background removal by reusing a previously generated AutoMaskingGraphCutOptions object instead of recalculating strokes for each file.
+ * 3. When you are building a C# photo‑editing tool that must replace the background of a second image with transparency using the same feathering radius and segmentation method as the first image.
+ * 4. When you need to generate a temporary mask file and then apply it to another picture without losing the original mask configuration.
+ * 5. When you are automating product‑photo preparation and require identical background‑extraction parameters for a series of PNG files in a .NET application.
  */

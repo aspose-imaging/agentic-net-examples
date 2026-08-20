@@ -1,47 +1,51 @@
+// HOW-TO: Apply Anti-Aliasing to CDR When Converting to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.cdr";
+        string outputPath = "sample_output.tiff";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\Images\\sample.cdr";
-            string outputPath = "C:\\Images\\sample.tiff";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR vector image
+            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with smoothing (anti-aliasing)
+                // Prepare rasterization options for CDR
                 var rasterOptions = new CdrRasterizationOptions
                 {
+                    // Apply anti‑aliasing to reduce jagged lines
                     SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    PageSize = image.Size
+                    // Preserve original size
+                    PageSize = image.Size,
+                    // Optional: set a white background
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Set up TIFF save options and attach rasterization options
+                // Prepare TIFF save options and attach rasterization options
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the image as TIFF
+                // Save the rasterized image as TIFF
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting CorelDRAW (CDR) vector artwork to high‑resolution TIFF files for printing, a developer can apply anti‑alias smoothing to eliminate jagged edges.
- * 2. When a .NET application needs to generate archival TIFF images from CDR designs while preserving line quality, the code sets SmoothingMode to AntiAlias during rasterization.
- * 3. When integrating Aspose.Imaging into a document‑management system that ingests CDR files and outputs TIFF for downstream OCR processing, smoothing ensures clearer text and graphics.
- * 4. When automating batch conversion of CDR logos to TIFF for web publishing, developers use this code to apply anti‑aliasing so the logos appear crisp on high‑DPI screens.
- * 5. When building a C# utility that validates CDR drawings by exporting them to TIFF for visual inspection, the smoothing mode helps reveal subtle design details without pixelation.
+ * 1. When you need to generate high‑quality printable TIFF files from CorelDRAW (CDR) graphics without jagged edges.
+ * 2. When a reporting system must embed vector‑based CDR logos into TIFF images for PDF export while preserving smooth lines.
+ * 3. When an e‑commerce platform converts product illustrations stored as CDR into TIFF thumbnails and wants anti‑aliasing to improve visual appearance.
+ * 4. When a document archiving workflow rasterizes CDR drawings to TIFF for long‑term storage and requires consistent smoothing across pages.
+ * 5. When a desktop application batch‑processes CDR files to TIFF for OCR preprocessing and needs anti‑aliased output to enhance text recognition accuracy.
  */

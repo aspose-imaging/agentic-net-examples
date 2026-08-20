@@ -1,7 +1,8 @@
+// HOW-TO: Apply Custom Edge Detection Kernel to PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -31,12 +32,9 @@ class Program
                     { -1, -1, -1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel, 1.0, 0));
 
-                raster.Filter(raster.Bounds, filterOptions);
-
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight the outlines of objects in a PNG photograph for a computer‑vision preprocessing step, they can apply the custom edge‑detection kernel using Aspose.Imaging’s ConvolutionFilter in C#.
- * 2. When building a web service that generates printable line‑art versions of user‑uploaded PNG graphics, the code can be used to convert the image to a high‑contrast edge map before saving the result.
- * 3. When creating an automated quality‑control pipeline that flags blurry product images, the edge‑detection filter helps measure edge strength in PNG files by processing them with Aspose.Imaging’s raster filter options.
- * 4. When integrating a desktop application that visualizes architectural floor plans as sharp outlines, developers can run this C# snippet to apply a Laplacian kernel to PNG scans and store the enhanced output.
- * 5. When developing a batch‑processing tool that prepares PNG assets for OCR by emphasizing edges, the ConvolutionFilterOptions with a custom kernel can be applied to each raster image before feeding it to the OCR engine.
+ * 1. When you need to highlight object boundaries in a PNG before performing OCR or pattern recognition.
+ * 2. When you want to generate stylized edge‑enhanced thumbnails for a web gallery using C#.
+ * 3. When preprocessing medical scan images to emphasize edges for diagnostic analysis in a .NET application.
+ * 4. When creating a custom filter pipeline that applies a Laplacian kernel to PNG assets for computer‑vision training data.
+ * 5. When automating batch processing of product photos to detect defects by accentuating edges with Aspose.Imaging.
  */

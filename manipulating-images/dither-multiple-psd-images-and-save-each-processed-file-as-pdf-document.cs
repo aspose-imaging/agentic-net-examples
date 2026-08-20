@@ -1,8 +1,10 @@
+// HOW-TO: Batch Dither PSD Files and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -13,44 +15,43 @@ class Program
             // Hardcoded input PSD files
             string[] inputPaths = new string[]
             {
-                @"C:\Images\input1.psd",
-                @"C:\Images\input2.psd"
+                @"C:\Images\image1.psd",
+                @"C:\Images\image2.psd"
             };
 
-            // Corresponding output PDF files
-            string[] outputPaths = new string[]
+            foreach (string inputPath in inputPaths)
             {
-                @"C:\Images\output1.pdf",
-                @"C:\Images\output2.pdf"
-            };
-
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Determine output PDF path (same folder, same name with .pdf extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply dithering to the raster image (if applicable)
-                    RasterImage raster = image as RasterImage;
-                    if (raster != null)
+                    // Apply dithering if the image is raster based
+                    if (image is RasterImage rasterImage)
                     {
-                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                        // Floyd‑Steinberg dithering with 1‑bit palette (black & white)
+                        rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
                     }
 
-                    // Save the processed image as PDF
+                    // Prepare PDF save options
                     PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the processed image as PDF
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Processed and saved: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -62,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert Photoshop PSD files to PDF documents while applying Floyd‑Steinberg dithering to preserve visual quality for print‑ready output.
- * 2. When an automated workflow must generate PDF portfolios from multiple PSD artworks, using C# image loading and PdfOptions to ensure consistent dithering across all files.
- * 3. When a web service processes user‑uploaded PSD designs and returns PDF previews, applying raster dithering to improve gradient smoothness on screen.
- * 4. When a desktop application prepares marketing assets by converting several PSD files to PDFs with uniform dithering, guaranteeing that color transitions appear smooth on different devices.
- * 5. When a CI/CD pipeline validates graphic assets by converting source PSD files to PDF and applying Floyd‑Steinberg dithering to detect rendering issues before release.
+ * 1. When you need to prepare high‑contrast black‑and‑white PDFs from a series of Photoshop PSD designs for fast printing or archival.
+ * 2. When an application must automatically convert multiple layered PSD assets into PDF documents while applying Floyd‑Steinberg dithering to reduce file size.
+ * 3. When a workflow requires batch processing of PSD artwork to generate PDF proofs with a 1‑bit palette for e‑book publishing.
+ * 4. When you want to integrate image preprocessing in a C# service that transforms PSD files into PDF format for downstream OCR or document management systems.
+ * 5. When a developer needs to ensure each PSD is saved as a PDF in the same folder, handling missing files and creating output directories on the fly.
  */

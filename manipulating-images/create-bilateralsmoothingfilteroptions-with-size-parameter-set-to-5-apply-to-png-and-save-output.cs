@@ -1,3 +1,4 @@
+// HOW-TO: Apply Bilateral Smoothing Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,35 +10,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\Images\sample.png";
             string outputPath = @"C:\Images\sample.BilateralSmoothingFilter.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, apply bilateral smoothing filter, and save
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Apply bilateral smoothing filter with kernel size 5
                 rasterImage.Filter(rasterImage.Bounds, new BilateralSmoothingFilterOptions(5));
 
-                // Save the processed image as PNG
+                // Save the filtered image as PNG
                 rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a scanned PNG document while preserving edges for OCR preprocessing, they can apply a bilateral smoothing filter with size 5 and save the cleaned image.
- * 2. When building a web service that automatically optimizes user‑uploaded PNG avatars, the code can smooth the image to remove compression artifacts before storing the result.
- * 3. When creating a desktop application that prepares PNG screenshots for printing, a bilateral smoothing filter with a kernel size of 5 can be used to improve visual quality without blurring important details.
- * 4. When integrating image processing into a C# batch job that processes a folder of PNG assets for a game, the filter can be applied to each image to achieve consistent noise reduction across the asset pipeline.
- * 5. When developing a medical imaging tool that visualizes PNG‑encoded microscopy slides, applying bilateral smoothing with size 5 helps enhance tissue structures while keeping edges sharp for accurate analysis.
+ * 1. When you need to reduce noise in a PNG photograph while preserving edges before further analysis, you can use Aspose.Imaging’s bilateral smoothing filter in C#.
+ * 2. When preparing product screenshots for a web catalog, applying a bilateral smoothing filter helps smooth gradients without blurring text or icons.
+ * 3. When converting scanned PNG documents that contain grainy backgrounds, the filter can clean up the image to improve OCR accuracy.
+ * 4. When building a C# image‑processing pipeline that must keep the original PNG format, you can apply the filter and save the result directly with Aspose.Imaging.
+ * 5. When creating a desktop application that lets users enhance their PNG images with a single click, the bilateral smoothing filter provides a fast, edge‑preserving smoothing operation.
  */

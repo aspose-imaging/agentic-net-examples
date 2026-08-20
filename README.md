@@ -193,5 +193,15 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | [aspose-email/agentic-net-examples](https://github.com/aspose-email/agentic-net-examples) | Aspose.Email for .NET |
 | [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
 
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
+| 🤖 Agent API | [agent.json](/.well-known/agent.json) |
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*

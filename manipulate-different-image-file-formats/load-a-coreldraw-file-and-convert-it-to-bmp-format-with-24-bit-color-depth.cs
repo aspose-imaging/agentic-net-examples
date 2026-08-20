@@ -1,8 +1,8 @@
+// HOW-TO: Convert CorelDRAW CDR to 24‑Bit BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.bmp";
+            string inputPath = "Input\\sample.cdr";
+            string outputPath = "Output\\sample.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,26 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR vector image
+            // Load the CDR file
             using (Image image = Image.Load(inputPath))
             {
-                // Configure BMP options with 24‑bit color depth
-                BmpOptions bmpOptions = new BmpOptions
+                // Configure BMP options for 24‑bit depth
+                using (BmpOptions options = new BmpOptions())
                 {
-                    BitsPerPixel = 24,
-                    // Set up vector rasterization to render the vector image to raster
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
-
-                // Save the rasterized image as BMP
-                image.Save(outputPath, bmpOptions);
+                    options.BitsPerPixel = 24;
+                    // Save as BMP
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop publishing workflow requires converting legacy CorelDRAW (CDR) vector artwork into a 24‑bit BMP file for inclusion in a Windows‑based print catalog, a developer can use this code to rasterize and save the image.
- * 2. When an automated document processing system needs to generate high‑resolution bitmap thumbnails of CDR designs for preview in a web portal, the code provides a C# solution that loads the CDR file and outputs a 24‑bit BMP.
- * 3. When a legacy engineering application only accepts BMP images with 24‑bit color depth, developers can employ this snippet to import CorelDRAW schematics and convert them to the required format.
- * 4. When a batch conversion utility must ensure consistent background color and page dimensions while transforming multiple CDR files to BMP for archival storage, the code demonstrates how to configure VectorRasterizationOptions in Aspose.Imaging.
- * 5. When a game development pipeline needs to import vector assets created in CorelDRAW and rasterize them to 24‑bit BMP textures for use in DirectX rendering, this C# example shows the necessary steps.
+ * 1. When you need to display a CorelDRAW illustration in a Windows application that only supports BMP images with 24‑bit color.
+ * 2. When a legacy printing system requires input files in BMP format and you must convert CDR files programmatically in C#.
+ * 3. When automating a batch workflow to generate thumbnail previews of CDR designs as high‑quality BMP files for documentation.
+ * 4. When integrating Aspose.Imaging into a .NET service that transforms client‑uploaded CDR artwork into BMP for further image analysis.
+ * 5. When migrating assets from CorelDRAW to a format compatible with older graphics libraries that only read 24‑bit BMP files.
  */

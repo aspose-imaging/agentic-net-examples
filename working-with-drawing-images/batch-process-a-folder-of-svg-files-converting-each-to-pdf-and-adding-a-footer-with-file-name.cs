@@ -1,8 +1,10 @@
+// HOW-TO: Batch Convert SVG Files to PDF with Filename Footer in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -14,29 +16,67 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    using (MemoryStream pngStream = new MemoryStream())
                     {
-                        image.Save(outputPath, pdfOptions);
+                        var pngOptions = new PngOptions();
+                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = svgImage.Width,
+                            PageHeight = svgImage.Height
+                        };
+                        svgImage.Save(pngStream, pngOptions);
+                        pngStream.Position = 0;
+
+                        using (RasterImage rasterSvg = (RasterImage)Image.Load(pngStream))
+                        {
+                            var pdfOptions = new PdfOptions();
+                            pdfOptions.Source = new FileCreateSource(outputPath, false);
+                            using (Image pdfImage = Image.Create(pdfOptions, svgImage.Width, svgImage.Height))
+                            {
+                                Graphics graphics = new Graphics(pdfImage);
+                                graphics.Clear(Color.White);
+                                graphics.DrawImage(rasterSvg, new Point(0, 0));
+
+                                Font font = new Font("Arial", 12, FontStyle.Regular);
+                                using (SolidBrush brush = new SolidBrush(Color.Black))
+                                {
+                                    int footerY = svgImage.Height - 20;
+                                    graphics.DrawString(fileName, font, brush, new Point(10, footerY));
+                                }
+
+                                pdfImage.Save();
+                            }
+                        }
                     }
                 }
             }
@@ -50,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must batch‑process a folder of SVG images, converting each to PDF with Aspose.Imaging and automatically appending a footer that displays the original file name for branding or traceability.
- * 2. When an automated document generation pipeline uses Aspose.Imaging for .NET to turn a collection of SVG diagrams into PDF reports, adding a file‑name footer so reviewers can identify the source of each page.
- * 3. When a SaaS platform receives multiple user‑uploaded SVG assets and needs to generate downloadable PDFs that include a footer with the asset’s filename to comply with audit requirements.
- * 4. When a desktop utility written in C# needs to convert SVG icons to PDF for printing, inserting a footer with the icon’s name to help designers match printed assets to their source files.
- * 5. When a migration script leverages Aspose.Imaging to bulk‑convert legacy SVG files to PDF while embedding a filename footer, ensuring the new PDFs retain a reference to the original assets for future maintenance.
+ * 1. When you need to automatically generate printable PDFs from a collection of SVG icons and include each original file name as a footer for documentation purposes.
+ * 2. When a web application must batch‑process user‑uploaded SVG diagrams into PDF reports while labeling each page with the source file name.
+ * 3. When a CI/CD pipeline should convert design assets stored as SVG into PDF assets and embed the asset name for version tracking.
+ * 4. When an enterprise system has to archive vector graphics as PDFs and add a filename footer to comply with audit‑trail requirements.
+ * 5. When a desktop utility must scan a folder of SVG logos, create PDF versions, and append the logo name at the bottom for easy identification.
  */

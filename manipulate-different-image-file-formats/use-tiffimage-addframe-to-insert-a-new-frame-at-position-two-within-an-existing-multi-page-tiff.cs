@@ -1,41 +1,47 @@
+// HOW-TO: Insert a New Frame at Position Two in a Multi‑Page TIFF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            // Load the existing multi‑page TIFF
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
-            {
-                // Create a new blank frame with the same dimensions as the first frame
-                int width = tiff.Frames[0].Width;
-                int height = tiff.Frames[0].Height;
+                // Create options for the new frame
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                frameOptions.Photometric = TiffPhotometrics.Rgb;
 
-                // Insert the new frame at position two (index 1)
-                tiff.InsertFrame(1, newFrame);
+                // Create a blank frame (100x100 pixels)
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                // Insert the new frame at position two (zero‑based index 1)
+                tiffImage.InsertFrame(1, newFrame);
 
                 // Save the modified TIFF
-                tiff.Save(outputPath);
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting a multi‑page PDF to TIFF and need to insert a blank cover page as the second frame of the resulting TIFF using Aspose.Imaging for .NET.
- * 2. When processing scanned document batches and must add a separator page between existing pages to meet archival or workflow requirements in a C# TIFF image manipulation routine.
- * 3. When generating a multi‑page TIFF for a printing pipeline and need to insert a color‑calibration frame after the first page to ensure consistent output across printers.
- * 4. When assembling digital invoices as multi‑page TIFF files and require inserting a logo or title page as the second frame before saving the document with Aspose.Imaging.
- * 5. When developing a medical imaging application that extracts DICOM series to TIFF and must add a patient‑information frame at position two to comply with reporting standards.
+ * 1. When you need to add a blank placeholder page to a scanned multi‑page TIFF document before the second page for later annotation.
+ * 2. When generating a multi‑page TIFF report and you must insert a chart image as the second page without rewriting the whole file.
+ * 3. When updating an existing TIFF archive of medical images by inserting a new image at a specific position to maintain chronological order.
+ * 4. When creating a TIFF‑based e‑catalog and you want to programmatically add a product photo as the second page of the file.
+ * 5. When processing batch TIFF files and you must insert a watermark page at index two to comply with branding guidelines.
  */

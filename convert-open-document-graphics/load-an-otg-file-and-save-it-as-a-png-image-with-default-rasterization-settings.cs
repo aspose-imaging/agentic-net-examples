@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG Vector Image to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,36 +8,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output\sample.png";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.png";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with default OTG rasterization settings
-                PngOptions pngOptions = new PngOptions();
-
-                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                // Set up default rasterization options
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    // Use the source image size as the page size
-                    PageSize = image.Size
+                    PageSize = image.Size // Preserve original size
                 };
 
-                // Assign rasterization options to the PNG options
-                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                // Configure PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = otgRasterOptions
+                };
 
                 // Save the image as PNG
                 image.Save(outputPath, pngOptions);
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector OTG drawing into a raster PNG for web preview using Aspose.Imaging in C#.
- * 2. When a developer wants to generate a PNG thumbnail from an OTG file to display in a file‑manager UI.
- * 3. When a developer must export an OTG diagram as a PNG image to embed in PDF or Word reports.
- * 4. When a developer automates batch conversion of multiple OTG assets to PNG files for use in a mobile application.
- * 5. When a developer saves an OTG map overlay as a PNG to integrate with GIS or mapping software.
+ * 1. When you need to display an OTG vector graphic on a web page that only supports PNG raster images.
+ * 2. When you are generating thumbnails of OTG files for a gallery application that stores images as PNG.
+ * 3. When you must preserve the original dimensions of an OTG drawing while converting it to a lossless PNG for archival.
+ * 4. When you integrate Aspose.Imaging into a C# service that receives OTG uploads and returns PNG previews to clients.
+ * 5. When you automate a workflow that converts engineering diagrams saved as OTG into PNG files for inclusion in PDF reports.
  */

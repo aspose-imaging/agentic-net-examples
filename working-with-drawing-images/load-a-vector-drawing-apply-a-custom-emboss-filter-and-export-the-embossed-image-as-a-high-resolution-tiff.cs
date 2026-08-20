@@ -1,59 +1,63 @@
+// HOW-TO: Apply Emboss Filter to SVG and Save as High‑Resolution TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\vector.svg";
-        string outputPath = @"C:\temp\output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.svg";
+            string outputPath = @"c:\temp\output.tif";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the vector image
             using (Image vectorImage = Image.Load(inputPath))
             {
+                // Prepare rasterization options for the vector image
                 var rasterOptions = new SvgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
-                    PageWidth = vectorImage.Width,
-                    PageHeight = vectorImage.Height
+                    PageSize = vectorImage.Size
                 };
 
-                using (var memoryStream = new MemoryStream())
+                // Rasterize to PNG in a memory stream
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                    vectorImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    using (Image rasterImage = Image.Load(memoryStream))
+                    var pngOptions = new PngOptions
                     {
-                        var raster = rasterImage as RasterImage;
-                        if (raster != null)
+                        Source = new StreamSource(ms),
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Load the rasterized image
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        // Prepare high‑resolution TIFF options
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                         {
-                            var embossKernel = ConvolutionFilter.Emboss3x3;
-                            var embossOptions = new ConvolutionFilterOptions(embossKernel);
-                            raster.Filter(raster.Bounds, embossOptions);
+                            ResolutionSettings = new ResolutionSetting(300, 300)
+                        };
 
-                            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                            {
-                                ResolutionSettings = new ResolutionSetting(300, 300)
-                            };
-
-                            raster.Save(outputPath, tiffOptions);
-                        }
+                        // Save the image as TIFF
+                        raster.Save(outputPath, tiffOptions);
                     }
                 }
             }
@@ -67,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a high‑resolution 300 DPI TIFF for print‑ready catalogs while adding a 3×3 emboss effect using Aspose.Imaging for .NET.
- * 2. When a web‑application must generate embossed preview images from user‑uploaded vector drawings and store them as lossless TIFF files for archival purposes.
- * 3. When an engineering tool requires rasterizing technical diagrams from SVG, applying a custom convolution emboss filter, and exporting the result as a TIFF to meet ISO imaging standards.
- * 4. When a desktop utility has to batch‑process vector artwork, add depth with an emboss filter, and output high‑quality TIFFs for downstream GIS or CAD software.
- * 5. When a reporting system needs to embed stylized vector graphics into PDF reports by first creating an embossed TIFF at 300 dpi using C# and Aspose.Imaging’s rasterization and filter APIs.
+ * 1. When you need to convert a scalable vector logo into a printable TIFF with an embossed effect for marketing brochures.
+ * 2. When a web service must generate high‑resolution, embossed product images from SVG files for e‑commerce catalogs.
+ * 3. When automating the creation of embossed artwork thumbnails for a digital asset management system using C#.
+ * 4. When preparing archival TIFF files with enhanced depth from vector illustrations for museum digitization projects.
+ * 5. When integrating a custom emboss filter into a batch processing pipeline that transforms SVG icons into 300 dpi TIFFs for desktop publishing.
  */

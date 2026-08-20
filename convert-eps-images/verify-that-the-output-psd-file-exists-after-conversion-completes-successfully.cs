@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to Grayscale PSD with RLE Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -41,7 +42,7 @@ class Program
             // Verify that the PSD file was created
             if (File.Exists(outputPath))
             {
-                Console.WriteLine("PSD file created successfully.");
+                Console.WriteLine("PSD file saved successfully.");
             }
             else
             {
@@ -57,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an automated graphics pipeline must convert legacy BMP assets to Photoshop‑compatible PSD files with RLE compression and confirm the conversion succeeded before publishing.
- * 2. When a desktop application needs to batch‑process user‑uploaded bitmap images, save them as grayscale PSDs, and verify the output files exist to avoid missing assets.
- * 3. When a CI/CD build script validates that image resources are correctly transformed from BMP to PSD format as part of a pre‑release quality check.
- * 4. When a server‑side service generates PSD mockups from BMP templates and must ensure the generated files are stored in the target directory without errors.
- * 5. When a migration tool moves image data from an old file system to a new one, converting each BMP to PSD and checking file existence to guarantee data integrity.
+ * 1. When you need to generate a Photoshop PSD file from a bitmap image for further editing in Photoshop.
+ * 2. When you want to verify that the converted PSD file was created successfully before continuing with downstream processing.
+ * 3. When you require RLE compression and grayscale color mode to reduce the size of the resulting PSD file.
+ * 4. When automating a batch workflow that converts multiple BMP images to PSD format using C#.
+ * 5. When you must ensure the output directory exists and handle missing input files gracefully in an image conversion utility.
  */

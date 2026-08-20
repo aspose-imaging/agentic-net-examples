@@ -1,55 +1,59 @@
+// HOW-TO: Export SVG to HTML5 Canvas and Generate React Component in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.html";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputHtmlPath = "output.html";
-            string reactComponentPath = "CanvasComponent.jsx";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputHtmlPath) ?? string.Empty);
-            Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath) ?? string.Empty);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the vector image and export to HTML5 Canvas
+            // Load the vector image (e.g., SVG)
             using (Image image = Image.Load(inputPath))
             {
-                Html5CanvasOptions canvasOptions = new Html5CanvasOptions
+                // Configure HTML5 Canvas export options
+                var canvasOptions = new Html5CanvasOptions
                 {
+                    // Rasterize the vector source
                     VectorRasterizationOptions = new SvgRasterizationOptions(),
-                    CanvasTagId = "myCanvas",
+                    // Export only the canvas tag (no full HTML page)
                     FullHtmlPage = false
                 };
-                image.Save(outputHtmlPath, canvasOptions);
+
+                // Save the canvas HTML file
+                image.Save(outputPath, canvasOptions);
             }
 
-            // Create a simple React component that embeds the canvas tag
-            string componentContent = 
-@"import React from 'react';
+            // Generate a simple React component that embeds the canvas HTML
+            string reactComponent = $@"import React from 'react';
 
 const CanvasComponent = () => (
-  <canvas id=""myCanvas""></canvas>
+    <div dangerouslySetInnerHTML={{{{ __html: `{File.ReadAllText(outputPath)}` }}}} />
 );
 
 export default CanvasComponent;
 ";
 
-            File.WriteAllText(reactComponentPath, componentContent);
+            // Write the React component to a .jsx file
+            string reactPath = "CanvasComponent.jsx";
+            Directory.CreateDirectory(Path.GetDirectoryName(reactPath) ?? ".");
+            File.WriteAllText(reactPath, reactComponent);
         }
         catch (Exception ex)
         {
@@ -60,9 +64,9 @@ export default CanvasComponent;
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to convert an SVG logo into an HTML5 Canvas element for dynamic rendering in a web page built with React.
- * 2. When a team needs to automate the generation of reusable React components that embed vector graphics without relying on external image files.
- * 3. When a .NET backend service must export vector illustrations to lightweight canvas markup to improve page load performance in single‑page applications.
- * 4. When a designer wants to preview SVG artwork directly inside a React component during development, using Aspose.Imaging to handle the SVG‑to‑Canvas conversion.
- * 5. When an e‑learning platform requires programmatic conversion of SVG diagrams to HTML5 Canvas so they can be manipulated with JavaScript in a React‑based interactive tutorial.
+ * 1. When you need to convert an SVG logo into a lightweight HTML5 canvas for faster rendering in a web app built with React.
+ * 2. When you want to programmatically generate a React component that displays vector graphics without loading external image files.
+ * 3. When you are building a .NET backend that prepares vector assets for client‑side canvas manipulation in a single‑page application.
+ * 4. When you must embed scalable graphics into a React UI while keeping the markup minimal by exporting only the canvas tag.
+ * 5. When you require automated conversion of multiple SVG files to canvas HTML and creation of corresponding JSX components during a build process.
  */

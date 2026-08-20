@@ -1,33 +1,30 @@
+// HOW-TO: Batch Extract JPEG EXIF Tags to CSV Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
             string inputDirectory = "InputImages";
-            string outputFilePath = "Output/exif_data.sql";
+            string outputCsvPath = "Output\\exif_data.csv";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputCsvPath));
 
-            // Collect JPEG files
-            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
-            var allFiles = new List<string>();
-            allFiles.AddRange(jpgFiles);
-            allFiles.AddRange(jpegFiles);
+            // Get all JPEG files in the input directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-            using (StreamWriter writer = new StreamWriter(outputFilePath, false))
+            using (var writer = new StreamWriter(outputCsvPath))
             {
-                writer.WriteLine("-- EXIF data extraction");
+                // Write CSV header
+                writer.WriteLine("FilePath,TagId,TagValue");
 
-                foreach (string inputPath in allFiles)
+                foreach (string inputPath in jpegFiles)
                 {
                     if (!File.Exists(inputPath))
                     {
@@ -35,21 +32,26 @@ public class Program
                         return;
                     }
 
-                    using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
+                    using (JpegImage image = (JpegImage)Image.Load(inputPath))
                     {
-                        var exif = jpeg.ExifData;
-                        if (exif != null)
+                        var exifData = image.ExifData;
+                        if (exifData == null)
+                            continue;
+
+                        // Iterate over all EXIF tags
+                        foreach (var tag in exifData.Properties)
                         {
-                            writer.WriteLine($"-- EXIF for {Path.GetFileName(inputPath)}");
-                            writer.WriteLine("EXIF data extracted.");
-                        }
-                        else
-                        {
-                            writer.WriteLine($"-- No EXIF data for {Path.GetFileName(inputPath)}");
+                            string tagId = tag.TagId.ToString();
+                            string tagValue = tag.Value != null ? tag.Value.ToString().Replace(",", ";") : string.Empty;
+
+                            // Write CSV line
+                            writer.WriteLine($"{inputPath},{tagId},{tagValue}");
                         }
                     }
                 }
             }
+
+            Console.WriteLine($"EXIF data extraction completed. Results saved to: {outputCsvPath}");
         }
         catch (Exception ex)
         {
@@ -60,9 +62,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to batch‑extract EXIF tags from thousands of JPEG images and store them in a relational database for statistical analysis of camera settings, this C# code using Aspose.Imaging provides a quick solution.
- * 2. When a digital asset management system must index image metadata across multiple folders, developers can use this script to read JPEG EXIF data and generate SQL insert statements for easy querying.
- * 3. When a marketing team wants to analyze geolocation and timestamp information from product photos to track campaign timelines, the code automates the extraction of EXIF fields and writes them to a .sql file.
- * 4. When a compliance audit requires verification that all uploaded JPEG files contain required metadata such as copyright or author tags, this program scans the files and records the presence or absence of EXIF data in a database.
- * 5. When an e‑commerce platform needs to populate a database with image resolution, exposure, and ISO values from vendor‑supplied JPEGs to improve search filters, the example demonstrates how to pull those EXIF values programmatically.
+ * 1. When you need to catalog camera settings from thousands of product photos to import into a database for quality control.
+ * 2. When building a forensic tool that audits image metadata across a folder of JPEGs to detect tampering.
+ * 3. When creating a digital asset management system that indexes EXIF information for fast search and filtering.
+ * 4. When generating a CSV report of location, date, and device data from travel photographs for analytics.
+ * 5. When preparing image metadata for a machine‑learning pipeline that requires EXIF features stored in a relational table.
  */

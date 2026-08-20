@@ -1,3 +1,4 @@
+// HOW-TO: Batch Resize Images To 400px Width And Convert To PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,37 +8,39 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded list of input image files
-            string[] inputFiles = new[]
-            {
-                @"C:\Images\image1.jpg",
-                @"C:\Images\image2.png",
-                @"C:\Images\image3.bmp"
-            };
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            foreach (string inputPath in inputFiles)
+            // Process each file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir))
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same folder, prefixed with "resized_", PNG format)
-                string outputPath = Path.Combine(
-                    Path.GetDirectoryName(inputPath),
-                    "resized_" + Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Determine output file path (same name with .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, resize width to 400 pixels while preserving aspect ratio, and save as PNG
+                // Load, resize, and save the image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Resize width to 400 pixels, preserving aspect ratio
                     image.ResizeWidthProportionally(400, ResizeType.NearestNeighbourResample);
+
+                    // Save as PNG
                     image.Save(outputPath, new PngOptions());
                 }
             }
@@ -51,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready thumbnails from a mixed set of JPEG, PNG, and BMP files by resizing each image to a fixed width of 400 px while keeping the original height proportionally and outputting PNG files for consistent compression.
- * 2. When an e‑commerce platform must batch‑process product photos stored locally, converting them to a uniform 400‑pixel width PNG to ensure fast page loads and consistent image quality across browsers.
- * 3. When a content management system needs to prepare user‑uploaded images for email newsletters, automatically resizing them to 400 px wide, preserving aspect ratio, and saving as PNG to avoid lossy artifacts.
- * 4. When a desktop application that archives scanned documents must normalize the width of scanned JPEG, PNG, and BMP images to 400 px before storing them as lossless PNG files for archival compliance.
- * 5. When a developer builds a batch image‑conversion utility in C# that scans a folder, checks file existence, resizes each image to a 400‑pixel width using nearest‑neighbour resampling, and saves the results as PNG for downstream processing.
+ * 1. When you need to generate web‑ready thumbnails for a large collection of photos by scaling each image to a fixed 400‑pixel width while keeping the original height proportionally.
+ * 2. When you must convert a mixed set of source formats (JPEG, BMP, TIFF) into PNG files for consistent transparency support across a website.
+ * 3. When an automated build or deployment script has to process all images in a folder, resize them, and store the results in a separate output directory without manual intervention.
+ * 4. When you are preparing product images for an e‑commerce platform that requires a uniform width but allows variable heights to preserve aspect ratios.
+ * 5. When you want to use Aspose.Imaging in a C# application to batch‑process images, applying nearest‑neighbour resampling for fast resizing before saving them as PNGs.
  */

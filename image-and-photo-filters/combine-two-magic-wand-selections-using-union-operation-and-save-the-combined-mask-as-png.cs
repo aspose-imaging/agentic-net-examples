@@ -1,3 +1,4 @@
+// HOW-TO: Combine Two Magic Wand Selections Into a PNG Mask in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,36 +12,39 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output_mask.png";
+        string outputPath = "combined_mask.png";
 
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
+        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // First magic wand selection at pixel (120, 100)
-                ImageBitMask mask1 = MagicWandTool.Select(image, new MagicWandSettings(120, 100));
+                // Create first magic wand selection
+                var firstSelection = new MagicWandSettings(120, 80); // example coordinates
 
-                // Second magic wand selection at pixel (300, 200)
-                ImageBitMask mask2 = MagicWandTool.Select(image, new MagicWandSettings(300, 200));
+                // Create second magic wand selection
+                var secondSelection = new MagicWandSettings(300, 200); // example coordinates
 
-                // Union of the two masks
-                ImageBitMask combinedMask = mask1.Union(mask2);
+                // Combine the two selections using union
+                ImageBitMask combinedMask = MagicWandTool
+                    .Select(image, firstSelection)
+                    .Union(secondSelection);
 
-                // Apply the combined mask to the image
-                combinedMask.Apply();
+                // Apply the combined mask to the image (makes masked areas transparent)
+                combinedMask.ApplyTo(image);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Save the resulting image (mask applied) as PNG
+                // Save the resulting mask image as PNG
                 image.Save(outputPath, new PngOptions());
             }
         }
@@ -53,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to isolate and merge two separate background regions in a PNG photograph for further editing, they can use the Magic Wand union to create a combined mask.
- * 2. When generating a composite mask for a medical imaging scan where two distinct tissue areas must be highlighted together, the code merges the selections and saves the result as a PNG mask.
- * 3. When preparing assets for a game, a programmer may want to combine two non‑contiguous sprite outlines into a single mask file to simplify collision detection.
- * 4. When automating the removal of multiple logo watermarks from a scanned document, the union of two Magic Wand selections creates one mask that can be applied and exported as a PNG.
- * 5. When building a batch‑processing tool that extracts and saves combined foreground objects from product photos, the union operation merges the selections and outputs a clean PNG mask for downstream workflows.
+ * 1. When you need to isolate and export multiple non‑contiguous regions of a PNG photo for further editing or analysis.
+ * 2. When creating a transparent overlay that combines two separate object selections for use in UI graphics or game assets.
+ * 3. When automating batch processing to generate combined masks from scanned documents that contain several distinct elements.
+ * 4. When preparing a composite mask for machine‑learning training data by merging two manually selected areas in an image.
+ * 5. When simplifying a workflow that requires applying a union of two magic‑wand selections before saving the result as a PNG file.
  */

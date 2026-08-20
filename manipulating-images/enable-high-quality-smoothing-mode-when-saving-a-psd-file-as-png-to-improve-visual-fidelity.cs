@@ -1,40 +1,47 @@
+// HOW-TO: Save PSD as PNG with Anti‑Aliasing Smoothing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.psd";
+        string outputPath = @"C:\temp\output.png";
+
         try
         {
-            string inputPath = "Input\\sample.psd";
-            string outputPath = "Output\\sample.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                var exportOptions = new PngOptions();
-
-                if (image is VectorImage)
+                // Configure PNG save options with high‑quality smoothing
+                PngOptions pngOptions = new PngOptions
                 {
-                    var vectorOptions = new VectorRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
-                    exportOptions.VectorRasterizationOptions = vectorOptions;
-                }
+                        // Enable anti‑aliasing for smoother edges
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                        // Optional: set a background color (white) for transparent areas
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    }
+                };
 
-                image.Save(outputPath, exportOptions);
+                // Save the image as PNG using the configured options
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer uses Aspose.Imaging for .NET to convert layered PSD artwork into PNG thumbnails for a website and needs high‑quality smoothing to keep edges anti‑aliased and crisp.
- * 2. When an e‑learning platform automatically processes instructor‑provided PSD slides in C# and saves them as PNG images with smoothing enabled to ensure clear, legible visuals on mobile devices.
- * 3. When a digital asset management system imports Photoshop files and generates PNG previews using Aspose.Imaging, applying smoothing to preserve smooth gradients and fine details for quick browsing.
- * 4. When a print‑to‑screen workflow rasterizes vector layers inside a PSD to PNG in C# and requires smoothing to avoid jagged lines and maintain visual fidelity on screen displays.
- * 5. When a batch‑processing utility written in C# converts a directory of PSD files to PNG for archival, enabling high‑quality smoothing to retain smooth color transitions and sharp image quality.
+ * 1. When you need to convert layered Photoshop files to PNG for web display while preserving smooth edges.
+ * 2. When generating thumbnails from PSD assets for a gallery and want anti‑aliased borders.
+ * 3. When exporting design mockups to PNG for client review and require high visual fidelity.
+ * 4. When automating batch conversion of PSD files to PNG in a C# application and need consistent smoothing.
+ * 5. When preparing PNG assets for printing or UI components where transparent areas should have a white background.
  */

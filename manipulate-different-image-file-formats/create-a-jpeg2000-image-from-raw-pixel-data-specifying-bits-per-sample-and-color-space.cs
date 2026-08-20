@@ -1,29 +1,40 @@
+// HOW-TO: Create JPEG2000 Image From Raw Pixels With Specified Bit Depth In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "C:\\temp\\output.jp2";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            int width = 200;
-            int height = 100;
-            int bitsPerSample = 8;
+            // Output file path (hardcoded)
+            string outputPath = "output.jp2";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Image dimensions and bits per sample
+            int width = 100;
+            int height = 100;
+            int bitsPerSample = 8; // bits count per pixel
+
+            // Create a JPEG2000 image with specified bits per sample
             using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(width, height, bitsPerSample))
             {
+                // Draw onto the image
                 Graphics graphics = new Graphics(jpeg2000Image);
-                graphics.Clear(Color.Red);
+                using (SolidBrush brush = new SolidBrush(Color.Red))
+                {
+                    graphics.FillRectangle(brush, jpeg2000Image.Bounds);
+                }
 
-                jpeg2000Image.Save(outputPath, new Jpeg2000Options());
+                // Save the image
+                jpeg2000Image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -35,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG2000 file from programmatically created pixel data, such as rendering a solid‑color rectangle for a thumbnail in a C# web service, they can use this code to set width, height, bits per sample and save the image.
- * 2. When an application must export medical imaging data to the lossless JPEG2000 format with a specific bits‑per‑sample depth for compliance with DICOM standards, this snippet shows how to create the image and define the color space in .NET.
- * 3. When a game engine requires pre‑rendered background textures stored as JPEG2000 to reduce file size while preserving 8‑bit color fidelity, developers can employ this example to programmatically generate the textures from raw pixel buffers.
- * 4. When an automated reporting tool needs to embed a red warning banner into a PDF by first creating a JPEG2000 image with defined dimensions and color depth, the code demonstrates the necessary C# operations with Aspose.Imaging.
- * 5. When a batch‑processing script must convert raw sensor output into a standardized JPEG2000 image for archival, specifying bits per sample and using the Aspose.Imaging library ensures consistent image creation across different platforms.
+ * 1. When you need to generate a JPEG2000 file from generated pixel data in a C# application, such as creating a thumbnail or preview for a medical imaging workflow.
+ * 2. When you must control the bit depth of each sample (e.g., 8‑bit or 16‑bit) to meet compression or quality requirements for archival image storage.
+ * 3. When you want to programmatically fill a JPEG2000 canvas with a solid color or custom graphics before saving, using Aspose.Imaging’s drawing API.
+ * 4. When integrating image generation into a server‑side service that outputs JPEG2000 files for web or cloud delivery, ensuring the output directory is created automatically.
+ * 5. When testing or prototyping color space handling by creating a JPEG2000 image with a known bits‑per‑sample value to verify downstream processing pipelines.
  */

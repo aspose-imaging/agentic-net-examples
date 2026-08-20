@@ -1,8 +1,9 @@
+// HOW-TO: Convert DICOM to TIFF with Otsu Binarization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/output.tiff";
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\processed.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,14 +23,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-
-                // Apply Otsu threshold binarization
                 dicomImage.BinarizeOtsu();
 
-                // Save the processed image as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application must batch‑process DICOM radiology images, apply Otsu binarization to enhance contrast, and save the results as TIFF files for compatibility with downstream analysis tools.
- * 2. When a research project needs to convert raw DICOM scans into lossless TIFF format while automatically performing Otsu thresholding to prepare the images for machine‑learning segmentation.
- * 3. When a PACS integration requires generating printable TIFF copies of DICOM studies with enhanced contrast using Otsu’s method for radiologists reviewing hard‑copy reports.
- * 4. When a diagnostic imaging workflow has to extract DICOM pixel data, apply Otsu threshold to create binary masks, and store the processed images as TIFF for archival in a document management system.
- * 5. When a C# developer wants to automate the transformation of DICOM files into TIFF format with built‑in Otsu binarization to simplify image preprocessing before applying computer‑vision algorithms.
+ * 1. When a medical imaging application needs to create a high‑contrast binary version of a DICOM scan for easier analysis or segmentation, developers can load the DICOM, apply Otsu thresholding, and save the result as a TIFF file.
+ * 2. When a radiology workflow requires archiving processed images in a widely supported format, the code converts the original DICOM to TIFF after binarization, ensuring compatibility with PACS and document management systems.
+ * 3. When a research project needs to generate binary masks from CT or MRI slices for quantitative measurements, developers can use Aspose.Imaging to perform Otsu binarization and export the masks as lossless TIFFs.
+ * 4. When a diagnostic tool must preprocess DICOM images before feeding them into a machine‑learning model, this snippet provides a quick way to produce thresholded TIFF inputs in C#.
+ * 5. When a healthcare IT system wants to automate batch conversion of DICOM files to TIFF with built‑in contrast enhancement, the example shows how to integrate Otsu binarization into a C# processing pipeline.
  */

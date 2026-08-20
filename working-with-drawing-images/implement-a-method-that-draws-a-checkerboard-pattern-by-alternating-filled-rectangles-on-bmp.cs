@@ -1,9 +1,9 @@
+// HOW-TO: Create a BMP Checkerboard Pattern with Alternating Rectangles in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,50 +11,47 @@ class Program
     {
         try
         {
-            // Output BMP file path (hard‑coded)
-            string outputPath = "output\\checkerboard.bmp";
+            string outputPath = "output/checkerboard.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Image dimensions
-            int width = 400;
-            int height = 400;
-            int rows = 8;
-            int cols = 8;
-            int cellWidth = width / cols;
-            int cellHeight = height / rows;
-
-            // Set up BMP options with a FileCreateSource (binds the file)
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create BMP options with a file stream source
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                // Initialize Graphics for drawing
-                Graphics graphics = new Graphics(image);
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(stream);
 
-                // Draw the checkerboard pattern
-                for (int row = 0; row < rows; row++)
+                int cellSize = 50;
+                int rows = 8;
+                int cols = 8;
+                int width = cellSize * cols;
+                int height = cellSize * rows;
+
+                // Create the image canvas
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
                 {
-                    for (int col = 0; col < cols; col++)
-                    {
-                        // Alternate colors
-                        Aspose.Imaging.Color cellColor = ((row + col) % 2 == 0) ? Aspose.Imaging.Color.Black : Aspose.Imaging.Color.White;
+                    // Initialize graphics for drawing
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                        // Create a solid brush for the cell
-                        using (SolidBrush brush = new SolidBrush(cellColor))
+                    // Prepare brushes
+                    using (SolidBrush whiteBrush = new SolidBrush(Aspose.Imaging.Color.White))
+                    using (SolidBrush blackBrush = new SolidBrush(Aspose.Imaging.Color.Black))
+                    {
+                        for (int y = 0; y < rows; y++)
                         {
-                            int x = col * cellWidth;
-                            int y = row * cellHeight;
-                            graphics.FillRectangle(brush, new Rectangle(x, y, cellWidth, cellHeight));
+                            for (int x = 0; x < cols; x++)
+                            {
+                                Aspose.Imaging.Brushes.SolidBrush brush = ((x + y) % 2 == 0) ? whiteBrush : blackBrush;
+                                graphics.FillRectangle(brush,
+                                    new Aspose.Imaging.Rectangle(x * cellSize, y * cellSize, cellSize, cellSize));
+                            }
                         }
                     }
-                }
 
-                // Save the image (file is already bound via FileCreateSource)
-                image.Save();
+                    // Save the image
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -66,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file that visualizes a classic 8×8 checkerboard for testing image rendering pipelines in C# using Aspose.Imaging.
- * 2. When creating placeholder graphics for board game UI mock‑ups, a developer can use this code to programmatically draw alternating black and white squares in a BMP image.
- * 3. When validating color depth and file‑creation performance of the Aspose.Imaging Graphics API, a developer can produce a checkerboard pattern to measure rendering speed.
- * 4. When automating the production of printable calibration sheets for scanners, a developer can generate a BMP checkerboard to verify alignment and contrast.
- * 5. When building a unit test that requires a known bitmap with alternating pixel blocks, a developer can employ this code to create a deterministic BMP image for comparison.
+ * 1. When you need to generate a chessboard‑style BMP image for a game UI or visual test using Aspose.Imaging in C#.
+ * 2. When you want to produce a tiled black‑and‑white background for a Windows Forms or WPF application by drawing filled rectangles programmatically.
+ * 3. When you require a simple high‑contrast pattern to calibrate or validate image‑processing and computer‑vision algorithms.
+ * 4. When you are creating sample images for documentation or tutorials that demonstrate drawing primitives and brush usage with Aspose.Imaging.
+ * 5. When you need an automated way to generate printable checkerboard patterns for scanner or printer calibration tasks.
  */

@@ -1,19 +1,20 @@
+// HOW-TO: Convert PNG to SVG with Matching ViewBox in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,25 +26,31 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int width = rasterImage.Width;
-                int height = rasterImage.Height;
-
-                // Create an SVG image with the same dimensions
-                using (SvgImage svgImage = new SvgImage(width, height))
+                // Cast to RasterImage to access dimensions
+                var raster = image as RasterImage;
+                if (raster == null)
                 {
-                    // Set viewbox (page size) to match original dimensions via SvgOptions
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = new Size(width, height)
-                        }
-                    };
+                    Console.Error.WriteLine("The input file is not a raster image.");
+                    return;
+                }
 
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96; // Standard screen DPI
+
+                // Create an SVG graphics canvas with the same size as the PNG
+                var graphics = new SvgGraphics2D(width, height, dpi);
+
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+
+                // Finalize the SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
                     // Save the SVG file
-                    svgImage.Save(outputPath, svgOptions);
+                    svgImage.Save(outputPath);
                 }
             }
         }
@@ -56,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a raster PNG file to a scalable SVG for responsive web design while preserving the original image dimensions.
- * 2. When an application must generate vector graphics from user‑uploaded PNGs so they can be resized without loss of quality in C#.
- * 3. When a batch‑processing tool has to automate the transformation of PNG assets into SVG files with matching viewbox settings for printing workflows.
- * 4. When a .NET service needs to store images in a lightweight, XML‑based format like SVG to reduce bandwidth while keeping the exact width and height of the source PNG.
- * 5. When a graphics pipeline requires converting PNG screenshots into SVG vectors for further editing in vector‑editing software, ensuring the viewbox matches the original pixel size.
+ * 1. When you need to embed a raster PNG into a responsive web page as scalable SVG without losing the original dimensions.
+ * 2. When converting legacy PNG assets to vector SVG files for better scalability in mobile apps using C#.
+ * 3. When generating SVG placeholders from PNG thumbnails for print layouts that require precise viewbox settings.
+ * 4. When automating batch processing of PNG logos into SVG format to maintain consistent DPI across design tools.
+ * 5. When creating SVG graphics from PNG images for use in PDF reports where vector format ensures crisp rendering.
  */

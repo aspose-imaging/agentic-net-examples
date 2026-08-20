@@ -1,30 +1,34 @@
+// HOW-TO: Convert EPS to PNG in C# with Automatic Resource Disposal (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/result.png";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.eps";
-            if (!File.Exists(inputPath))
+            // Load EPS image and automatically dispose it after use
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputPath = "Output/result.png";
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load EPS image and automatically dispose it with using
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
-            {
-                // Save the EPS image as PNG
+                // Save the image as PNG
                 image.Save(outputPath, new PngOptions());
             }
         }
@@ -37,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# desktop application must convert vector EPS files to raster PNG images while ensuring the loaded image resources are released promptly to avoid memory leaks.
- * 2. When an automated build pipeline processes design assets, converting EPS logos to PNG thumbnails and using a using block to guarantee disposal of the EpsImage object after each conversion.
- * 3. When a web API receives EPS uploads and returns PNG previews, the code safely loads and saves the image within a using statement to prevent resource exhaustion under high request volume.
- * 4. When a Windows service monitors a folder of EPS files and generates PNG versions for downstream reporting, the using construct ensures each image is disposed before the next file is processed.
- * 5. When a batch script runs on a server to migrate legacy EPS artwork to PNG format, employing the using statement simplifies cleanup and reduces the risk of running out of file handles.
+ * 1. When you need to convert vector EPS artwork to a raster PNG for web display while ensuring the image object is properly released.
+ * 2. When building a C# service that processes user‑uploaded EPS files and returns PNG thumbnails without leaking memory.
+ * 3. When integrating Aspose.Imaging into an automated build pipeline that transforms EPS assets into PNG assets for mobile apps.
+ * 4. When creating a desktop utility that validates EPS files exist, creates output folders, and safely saves them as PNG using a using block.
+ * 5. When handling large numbers of EPS files in a loop and want each Image instance to be disposed immediately after saving to PNG to avoid out‑of‑memory errors.
  */

@@ -1,49 +1,65 @@
+// HOW-TO: Create SVG From BMP And Set Stroke Width In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the BMP raster image
-            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            // Hardcoded input BMP path
+            string inputBmpPath = @"C:\Images\source.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputBmpPath))
             {
-                // Create an SVG graphics context with the same dimensions as the BMP
-                SvgGraphics2D graphics = new SvgGraphics2D(rasterImage.Width, rasterImage.Height, 96);
+                Console.Error.WriteLine($"File not found: {inputBmpPath}");
+                return;
+            }
 
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(rasterImage, new Point(0, 0), new Size(rasterImage.Width, rasterImage.Height));
+            // Hardcoded output SVG path
+            string outputSvgPath = @"C:\Images\result.svg";
 
-                // Set stroke width for vector paths (example: draw a rectangle border)
-                Pen borderPen = new Pen(Color.Black, 5); // Stroke width set to 5
-                graphics.DrawRectangle(borderPen, 0, 0, rasterImage.Width, rasterImage.Height);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
 
-                // Finalize the SVG image
+            // Load the BMP image
+            using (RasterImage bmpImage = (RasterImage)Image.Load(inputBmpPath))
+            {
+                // Create an SVG graphics canvas with the same dimensions as the BMP
+                int width = bmpImage.Width;
+                int height = bmpImage.Height;
+                int dpi = 96; // standard screen DPI
+
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+
+                // Draw the raster BMP onto the SVG canvas
+                graphics.DrawImage(bmpImage, new Point(0, 0), new Size(width, height));
+
+                // Create a simple rectangular path to demonstrate stroke width customization
+                Figure rectFigure = new Figure { IsClosed = true };
+                GraphicsPath rectPath = new GraphicsPath();
+                rectPath.AddFigure(rectFigure);
+                rectFigure.AddShapes(new Shape[]
+                {
+                    new RectangleShape(new Rectangle(0, 0, width, height))
+                });
+
+                // Set stroke width (e.g., 5 pixels) using a Pen
+                Pen strokePen = new Pen(Color.Black, 5);
+                graphics.DrawPath(strokePen, rectPath);
+
+                // Finalize SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
                     // Save the customized SVG
-                    svgImage.Save(outputPath);
+                    svgImage.Save(outputSvgPath);
                 }
             }
         }
@@ -56,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP icons into scalable SVG files with a consistent border for use in responsive web applications.
- * 2. When an automation script must generate vector‑based product labels from raster photographs, adding a 5‑pixel stroke to ensure the edges remain visible at any size.
- * 3. When a desktop application creates printable PDFs and first transforms user‑uploaded BMP drawings into SVG format with a defined outline to preserve line thickness during scaling.
- * 4. When a GIS tool imports bitmap map tiles and exports them as SVG overlays, applying a uniform stroke to highlight tile boundaries in the final vector layer.
- * 5. When a CI/CD pipeline processes UI mockup BMP assets, converting them to SVG with a black border so designers can preview crisp vector assets directly in browsers.
+ * 1. When you need to convert a legacy BMP logo into a scalable SVG for responsive web design while preserving a custom border thickness.
+ * 2. When generating vector graphics from raster screenshots to allow designers to edit outlines, such as adding a 5‑pixel stroke around the image.
+ * 3. When automating batch processing of product images, converting each BMP to SVG and applying a uniform stroke for consistent branding.
+ * 4. When creating printable SVG assets from bitmap assets and requiring precise control over the path stroke width for cut‑line accuracy.
+ * 5. When integrating Aspose.Imaging in a C# application to embed raster images into SVG files and programmatically style the vector shapes.
  */

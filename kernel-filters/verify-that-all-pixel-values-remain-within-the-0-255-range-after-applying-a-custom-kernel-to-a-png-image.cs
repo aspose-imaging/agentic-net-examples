@@ -1,95 +1,60 @@
+// HOW-TO: Validate PNG Pixel Values After Applying Custom Convolution Kernel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel access
                 RasterImage raster = (RasterImage)image;
-                int width = raster.Width;
-                int height = raster.Height;
 
-                // Store original pixel data
-                Color[,] original = new Color[width, height];
-                for (int y = 0; y < height; y++)
+                double[,] kernel = new double[,]
                 {
-                    for (int x = 0; x < width; x++)
-                    {
-                        original[x, y] = raster.GetPixel(x, y);
-                    }
-                }
-
-                // Define a 3×3 sharpening kernel
-                int[,] kernel = new int[,]
-                {
-                    {  0, -1,  0 },
-                    { -1,  5, -1 },
-                    {  0, -1,  0 }
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
                 };
-                int kSize = 3;
-                int kOffset = kSize / 2;
 
-                // Apply convolution, clamping results to 0‑255
-                for (int y = 0; y < height; y++)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                bool allValid = true;
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    for (int x = 0; x < width; x++)
+                    int argb = pixels[i];
+                    int a = (argb >> 24) & 0xFF;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    if (a < 0 || a > 255 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
                     {
-                        int r = 0, g = 0, b = 0, a = 0;
-
-                        for (int ky = 0; ky < kSize; ky++)
-                        {
-                            for (int kx = 0; kx < kSize; kx++)
-                            {
-                                int ix = x + kx - kOffset;
-                                int iy = y + ky - kOffset;
-
-                                if (ix >= 0 && ix < width && iy >= 0 && iy < height)
-                                {
-                                    Color src = original[ix, iy];
-                                    int k = kernel[ky, kx];
-                                    r += src.R * k;
-                                    g += src.G * k;
-                                    b += src.B * k;
-                                    a += src.A * k;
-                                }
-                            }
-                        }
-
-                        // Clamp each channel to the 0‑255 range
-                        r = Math.Max(0, Math.Min(255, r));
-                        g = Math.Max(0, Math.Min(255, g));
-                        b = Math.Max(0, Math.Min(255, b));
-                        a = Math.Max(0, Math.Min(255, a));
-
-                        raster.SetPixel(x, y, Color.FromArgb(a, r, g, b));
+                        allValid = false;
+                        Console.WriteLine($"Pixel out of range at index {i}: A={a}, R={r}, G={g}, B={b}");
+                        break;
                     }
                 }
 
-                // Save the processed image
-                image.Save(outputPath);
+                Console.WriteLine(allValid ? "All pixel values are within 0-255." : "Some pixel values are out of range.");
+
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -101,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a custom sharpening filter to PNG assets for a web application and must ensure the resulting pixel values stay within the 0‑255 range to avoid color distortion.
- * 2. When building an automated image‑processing pipeline that processes user‑uploaded PNG files with custom convolution kernels and requires validation that no pixel exceeds the byte range before saving.
- * 3. When creating a desktop photo‑editing tool in C# that lets users experiment with custom kernels on PNG images and needs to clamp pixel values to prevent overflow errors.
- * 4. When integrating Aspose.Imaging into a server‑side service that generates thumbnails from PNG sources using a custom kernel and must guarantee valid RGB/A values for downstream rendering.
- * 5. When performing quality‑control checks on batch‑processed PNG graphics where a custom convolution is applied and the code must verify that all pixel components remain between 0 and 255 to maintain compliance with PNG specifications.
+ * 1. When you need to ensure that a PNG image processed with a custom edge‑detection kernel does not produce overflow or underflow pixel values before saving it with Aspose.Imaging in C#.
+ * 2. When you want to verify that applying any convolution filter (sharpen, blur, emboss) to a raster image keeps all ARGB components within the 0‑255 range to avoid corrupted output files.
+ * 3. When building an automated image‑processing pipeline that must detect out‑of‑range pixel values after transformations to maintain compatibility with downstream systems.
+ * 4. When debugging a C# application that uses Aspose.Imaging’s Filter method and you need to log the first pixel that exceeds valid color bounds.
+ * 5. When creating a quality‑control step for batch‑processed PNG files to confirm that custom kernels do not introduce invalid color data before archiving or publishing.
  */

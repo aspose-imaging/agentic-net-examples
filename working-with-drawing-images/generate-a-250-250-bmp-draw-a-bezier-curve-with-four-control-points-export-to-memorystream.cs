@@ -1,7 +1,9 @@
+// HOW-TO: Create 250x250 BMP with Bezier Curve and Save to MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,33 +11,41 @@ class Program
     {
         try
         {
-            // Output path (used only for directory creation as per safety rules)
-            string outputPath = "output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a 250x250 BMP image
-            BmpOptions bmpOptions = new BmpOptions();
-            using (Image image = Image.Create(bmpOptions, 250, 250))
+            // Create a memory stream to hold the BMP data
+            using (var memoryStream = new MemoryStream())
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                // Define pen and control points for the Bezier curve
-                Pen pen = new Pen(Color.Blue, 2);
-                Point p1 = new Point(20, 200);
-                Point p2 = new Point(80, 20);
-                Point p3 = new Point(170, 180);
-                Point p4 = new Point(230, 30);
-
-                // Draw the Bezier curve
-                graphics.DrawBezier(pen, p1, p2, p3, p4);
-
-                // Save the image to a MemoryStream
-                using (MemoryStream ms = new MemoryStream())
+                // Set up BMP options with the stream as the destination
+                var bmpOptions = new BmpOptions
                 {
-                    image.Save(ms, new BmpOptions());
-                    Console.WriteLine($"Memory stream length: {ms.Length}");
+                    Source = new StreamSource(memoryStream)
+                };
+
+                // Create a 250x250 BMP image
+                using (var image = Image.Create(bmpOptions, 250, 250))
+                {
+                    // Initialize graphics for drawing
+                    var graphics = new Graphics(image);
+
+                    // Define a blue pen for the Bezier curve
+                    var pen = new Pen(Color.Blue, 2);
+
+                    // Draw a Bezier curve with four control points
+                    graphics.DrawBezier(
+                        pen,
+                        new Point(20, 200),   // start point
+                        new Point(80, 20),    // first control point
+                        new Point(170, 230),  // second control point
+                        new Point(230, 50)    // end point
+                    );
+
+                    // Save the image into the memory stream
+                    image.Save();
+
+                    // Reset stream position if further processing is needed
+                    memoryStream.Position = 0;
+
+                    // Example output: length of the generated BMP data
+                    Console.WriteLine($"MemoryStream length: {memoryStream.Length} bytes");
                 }
             }
         }
@@ -48,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 250 × 250 BMP thumbnail that contains a custom Bezier curve for a dynamic chart preview in a .NET web application, they can use this Aspose.Imaging code to draw the curve and store the result in a MemoryStream for immediate response.
- * 2. When an automated reporting tool must embed a vector‑style signature line drawn with a Bezier curve into a BMP image before sending it via email, the code creates the image in memory without touching the file system.
- * 3. When a desktop application requires on‑the‑fly creation of a BMP sprite that includes a smooth Bezier path for game UI elements, this snippet shows how to draw the curve and keep the image in a MemoryStream for further processing.
- * 4. When a document conversion service needs to add a decorative blue Bezier underline to a BMP watermark and then stream the modified image to another API, the example demonstrates the necessary C# operations with Aspose.Imaging.
- * 5. When a testing framework wants to validate that the Aspose.Imaging Graphics.DrawBezier method correctly renders control points on a 250 × 250 BMP, the code provides a reproducible in‑memory image for comparison against expected results.
+ * 1. When you need to generate a BMP thumbnail with a custom Bezier overlay for a web API without writing to disk.
+ * 2. When you want to create an in‑memory bitmap for dynamic email attachments that include vector‑style curves.
+ * 3. When a reporting tool must render a scalable curve on a fixed‑size image before streaming it to a client.
+ * 4. When you are building a game asset pipeline that programmatically draws paths onto BMP sprites stored in a memory buffer.
+ * 5. When you need to benchmark Aspose.Imaging’s drawing performance by drawing a Bezier curve onto a 250 × 250 BMP held in a MemoryStream.
  */

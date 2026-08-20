@@ -1,10 +1,15 @@
-// HOW-TO: Convert Multi‑Page SVG To Multi‑Page TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page SVG to Combined TIFF with Custom Kernel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -13,8 +18,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.tif";
+            string inputPath = @"C:\temp\multipage.svg";
+            string outputPath = @"C:\temp\combined.tiff";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -26,18 +31,89 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Load the SVG (could be multipage)
+            using (Image svgImage = Image.Load(inputPath))
             {
+                IMultipageImage multipage = svgImage as IMultipageImage;
+                int pageCount = multipage != null ? multipage.PageCount : 1;
+
+                List<RasterImage> processedPages = new List<RasterImage>();
+
+                for (int i = 0; i < pageCount; i++)
+                {
+                    Image pageImage = multipage != null ? multipage.Pages[i] : svgImage;
+
+                    // Rasterization options for SVG page
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = pageImage.Size,
+                        BackgroundColor = Color.White
+                    };
+
+                    // Temporary PNG path
+                    string tempPng = Path.Combine(Path.GetTempPath(), $"page_{i}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPng));
+
+                    // Save rasterized PNG
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    pageImage.Save(tempPng, pngOptions);
+
+                    // Load rasterized PNG and apply convolution filter
+                    RasterImage raster = (RasterImage)Image.Load(tempPng);
+                    double[,] kernel = new double[,]
+                    {
+                        { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
+                        { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
+                        { 1.0 / 9, 1.0 / 9, 1.0 / 9 }
+                    };
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                    // Keep processed raster for later merging
+                    processedPages.Add(raster);
+
+                    // Delete temporary PNG
+                    try { File.Delete(tempPng); } catch { }
+                }
+
+                if (processedPages.Count == 0)
+                {
+                    Console.Error.WriteLine("No pages were processed.");
+                    return;
+                }
+
                 // Prepare TIFF output options
-                Source outputSource = new FileCreateSource(outputPath, false);
+                Source tiffSource = new FileCreateSource(outputPath, false);
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    Source = outputSource
+                    Source = tiffSource
                 };
 
-                // Save as TIFF
-                image.Save(outputPath, tiffOptions);
+                // Create TIFF canvas and add pages
+                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, processedPages[0].Width, processedPages[0].Height))
+                {
+                    // Write first page pixels
+                    ((RasterImage)tiff).SaveArgb32Pixels(
+                        new Rectangle(0, 0, processedPages[0].Width, processedPages[0].Height),
+                        processedPages[0].LoadArgb32Pixels(processedPages[0].Bounds));
+
+                    // Add remaining pages
+                    for (int i = 1; i < processedPages.Count; i++)
+                    {
+                        tiff.AddPage(processedPages[i]);
+                    }
+
+                    // Save the multipage TIFF
+                    tiff.Save();
+                }
+
+                // Dispose processed raster pages
+                foreach (var page in processedPages)
+                {
+                    page.Dispose();
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +125,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive vector graphics from an SVG file as a lossless, multi‑page TIFF for long‑term storage or compliance.
- * 2. When a reporting system generates charts as SVG and you must convert them to TIFF to embed in PDF reports that only accept raster images.
- * 3. When a batch process must transform user‑uploaded SVG diagrams into TIFF files for printing on high‑resolution printers that require TIFF input.
- * 4. When integrating Aspose.Imaging in a C# application to programmatically convert multi‑page SVG assets into a single TIFF document for easy viewing in standard image viewers.
- * 5. When automating a workflow that consolidates several SVG pages into one TIFF file to simplify distribution to stakeholders who cannot open SVG files.
+ * 1. When you need to turn a multi‑page vector illustration into a single multipage TIFF for printing or archival.
+ * 2. When you must rasterize each SVG page to a high‑resolution bitmap before applying a custom image filter.
+ * 3. When you want to automate the conversion of SVG assets into a format supported by legacy document management systems.
+ * 4. When you need to generate a combined TIFF from separate SVG pages for batch processing in a .NET application.
+ * 5. When you require a temporary PNG intermediate to apply normalization kernels before merging pages into a final TIFF file.
  */

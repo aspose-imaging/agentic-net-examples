@@ -1,69 +1,58 @@
+// HOW-TO: Apply Custom Convolution Kernel with Emboss Fallback to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define a custom 3x3 kernel (example)
                 double[,] customKernel = new double[,]
                 {
-                    { -1, 0, 1 },
-                    { -2, 0, 2 },
-                    { -1, 0, 1 }
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
                 };
 
-                bool customApplied = false;
+                bool useFallback = false;
 
-                // Attempt to apply the custom kernel
                 try
                 {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(customKernel));
-                    customApplied = true;
+                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
+                    raster.Filter(raster.Bounds, convOptions);
                 }
                 catch (Exception)
                 {
-                    // Fallback to Emboss3x3 filter if custom kernel fails
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                    useFallback = true;
                 }
 
-                // Prepare PNG save options
-                PngOptions options = new PngOptions
+                if (useFallback)
                 {
-                    // Example: set maximum compression
-                    CompressionLevel = 9,
-                    // Use adaptive filter for better compression
-                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
-                };
+                    var fallbackOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                    raster.Filter(raster.Bounds, fallbackOptions);
+                }
 
-                // Save the processed image
-                raster.Save(outputPath, options);
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -75,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to apply a user‑defined edge‑detecting convolution to uploaded PNG photos but must guarantee a result even if the kernel is invalid, the code falls back to the built‑in Emboss3x3 filter.
- * 2. When an automated batch job processes thousands of PNG assets and a custom sharpening kernel may be corrupted, the fallback ensures each image still receives a visual enhancement without stopping the pipeline.
- * 3. When a desktop C# tool lets designers experiment with custom 3×3 kernels on PNG graphics, the fallback to Emboss3x3 provides a safe preview when the entered matrix fails Aspose.Imaging validation.
- * 4. When a server‑side image‑processing service validates incoming kernel data for security and, upon rejection, needs to return a consistently embossed PNG to maintain UI layout.
- * 5. When integrating Aspose.Imaging into a CI/CD workflow that applies custom convolution filters to PNG screenshots, the fallback guarantees the build does not fail if the kernel definition is malformed.
+ * 1. When you need to sharpen a PNG image using a custom convolution kernel but want a safe fallback if the kernel is invalid.
+ * 2. When processing user‑uploaded PNG files and must ensure the filter operation never crashes the application.
+ * 3. When you want to automatically apply an emboss effect to images when a custom filter cannot be applied.
+ * 4. When building a batch image‑processing pipeline that validates kernels at runtime and substitutes a default filter.
+ * 5. When you need to save the filtered result back to PNG format while handling missing files and directory creation.
  */

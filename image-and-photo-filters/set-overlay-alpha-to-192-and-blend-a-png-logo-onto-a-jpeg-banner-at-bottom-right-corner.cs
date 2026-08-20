@@ -1,3 +1,4 @@
+// HOW-TO: Blend PNG Logo onto JPEG Banner with Custom Alpha in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -34,17 +35,21 @@ class Program
             using (RasterImage banner = (RasterImage)Image.Load(bannerPath))
             using (RasterImage logo = (RasterImage)Image.Load(logoPath))
             {
-                // Calculate bottom‑right corner position
-                Point origin = new Point(banner.Width - logo.Width, banner.Height - logo.Height);
+                // Calculate bottom‑right position
+                int x = banner.Width - logo.Width;
+                int y = banner.Height - logo.Height;
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
+                Point origin = new Point(x, y);
 
                 // Blend logo onto banner with alpha 192
                 banner.Blend(origin, logo, 192);
 
-                // Save the result as JPEG
+                // Save result as JPEG
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    Quality = 100
+                    Quality = 90
                 };
                 banner.Save(outputPath, jpegOptions);
             }
@@ -58,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing web app must add a semi‑transparent PNG logo to the bottom‑right corner of a JPEG banner before sending the image to an email campaign.
- * 2. When an e‑commerce platform needs to watermark product photos by blending a company logo with 75 % opacity onto large JPEG images for brand consistency.
- * 3. When a desktop publishing tool automatically generates promotional flyers by overlaying a PNG sponsor badge onto a JPEG background at the lower‑right edge.
- * 4. When a mobile game server prepares shareable screenshots by compositing a PNG achievement icon onto a JPEG game scene with an alpha value of 192.
- * 5. When a digital signage system updates billboard graphics by programmatically merging a PNG logo onto a JPEG advertisement image at the bottom‑right corner using C# and Aspose.Imaging.
+ * 1. When you need to add a semi‑transparent PNG watermark to a promotional JPEG banner for online advertising.
+ * 2. When generating product catalog images that require a company logo placed at the bottom‑right corner with consistent opacity.
+ * 3. When creating personalized email header images by blending a user‑provided PNG badge onto a JPEG background.
+ * 4. When automating the preparation of social‑media graphics that combine a logo overlay with a fixed transparency level.
+ * 5. When building a batch process that stamps a PNG logo onto multiple JPEG flyers while preserving JPEG quality.
  */

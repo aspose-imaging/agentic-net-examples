@@ -1,10 +1,9 @@
+// HOW-TO: How To Clip Drawing Area With GraphicsPath In Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,25 +11,40 @@ class Program
     {
         try
         {
-            string outputPath = "clipped_output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            string inputPath = @"c:\temp\input.png";
+            string outputPath = @"c:\temp\clipped_output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.LightGray);
+                graphics.Clear(Color.White);
+
+                // Define clipping region as a rectangle
                 GraphicsPath clipPath = new GraphicsPath();
                 Figure clipFigure = new Figure();
-                clipFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
+                clipFigure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 200f, 200f)));
                 clipPath.AddFigure(clipFigure);
                 graphics.Clip = new Region(clipPath);
-                graphics.DrawRectangle(new Pen(Color.Red, 5), new Rectangle(0, 0, 400, 400));
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillEllipse(brush, new RectangleF(0f, 0f, 400f, 400f));
-                }
-                image.Save();
+
+                // Draw a diagonal line (only the part inside the clip will appear)
+                Pen redPen = new Pen(Color.Red, 5);
+                graphics.DrawLine(redPen, new Point(0, 0), new Point(image.Width, image.Height));
+
+                // Draw a rectangle that extends beyond the clip region
+                Pen bluePen = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(bluePen, new Rectangle(50, 50, 300, 300));
+
+                // Save the result
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG thumbnail where only a central square should contain the image content, a developer can use Graphics.SetClip with a GraphicsPath to limit drawing to that region and prevent overflow.
- * 2. When creating a custom badge or logo that requires a circular pattern confined inside a rectangular border, the clipping region ensures the ellipse is drawn only within the defined rectangle.
- * 3. When producing printable PDFs or raster images that need a watermark applied only to a specific area, the code demonstrates how to restrict the fill operation to a clipping path using Aspose.Imaging for .NET.
- * 4. When building a UI component that renders a progress ring but must not draw outside the component’s bounds, the SetClip method with a GraphicsPath can enforce the drawing limits in a 400×400 PNG canvas.
- * 5. When developing an image processing pipeline that overlays colored shapes on a background while preserving a transparent margin, the clipping region defined by a GraphicsPath guarantees that the overlay respects the margin.
+ * 1. When you need to restrict drawing to a specific rectangular region of a PNG image, such as creating a masked overlay in a C# application.
+ * 2. When you want to generate a thumbnail that only shows content inside a defined area while discarding the rest of the original image.
+ * 3. When you are building a reporting tool that draws charts but must hide parts that fall outside a printable margin using Aspose.Imaging.
+ * 4. When you need to apply a custom clipping mask before compositing multiple shapes onto an image to avoid unwanted overlap.
+ * 5. When you are preparing images for UI components and must ensure that drawn lines or shapes do not exceed a designated viewport.
  */

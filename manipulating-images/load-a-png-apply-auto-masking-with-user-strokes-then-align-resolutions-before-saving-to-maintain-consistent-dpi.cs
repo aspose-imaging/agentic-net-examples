@@ -1,4 +1,4 @@
-// HOW-TO: Auto Mask PNG With Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Auto Mask PNG With User Strokes And Preserve DPI In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -15,37 +15,65 @@ class Program
     {
         try
         {
+            // Hard‑coded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source PNG as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                // User‑defined strokes for auto‑masking (background then foreground points)
+                AutoMaskingArgs maskArgs = new AutoMaskingArgs
                 {
-                    CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = new PngOptions
+                    ObjectsPoints = new Point[][]
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Color.Transparent
+                        new Point[] { new Point(50, 50), new Point(60, 50) },   // background points
+                        new Point[] { new Point(120, 120), new Point(130, 130) } // foreground points
+                    }
                 };
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                // Export options for the masking operation (in‑memory PNG)
+                PngOptions exportOptions = new PngOptions
                 {
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
+
+                // Configure auto‑masking with GraphCut and the user strokes
+                AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = false, // use provided strokes only
+                    FeatheringRadius = 3,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = exportOptions,
+                    BackgroundReplacementColor = Color.Transparent,
+                    Args = maskArgs
+                };
+
+                // Perform the masking operation
+                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+                {
+                    // The foreground (object) is at index 1
+                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                    {
+                        // Align DPI: make vertical resolution equal to horizontal resolution of the original
+                        foreground.HorizontalResolution = image.HorizontalResolution;
+                        foreground.VerticalResolution = image.HorizontalResolution;
+
+                        // Save the masked foreground as PNG
+                        foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
                 }
             }
         }
@@ -58,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove the background from a product photo stored as PNG and keep the original resolution for e‑commerce listings.
- * 2. When you want to programmatically isolate a foreground object in a scanned PNG diagram while preserving the alpha channel for further compositing.
- * 3. When an application must automatically generate cut‑out images from user‑uploaded PNGs without manual selection, maintaining consistent DPI for print output.
- * 4. When you are building a batch process that converts PNGs with complex edges into transparent PNGs using graph‑cut segmentation in C#.
- * 5. When you need to integrate Aspose.Imaging auto‑masking into a workflow that requires the output PNG to retain its original size and resolution for GIS or mapping overlays.
+ * 1. When you need to remove a background from a PNG image based on manually drawn points and keep the original image resolution for printing or UI display.
+ * 2. When you want to generate a transparent PNG mask using Aspose.Imaging’s GraphCut algorithm after a user selects foreground and background strokes in a C# application.
+ * 3. When you must ensure that a processed PNG retains the same DPI as the source file so that layout dimensions remain consistent across devices.
+ * 4. When building an automated image‑preparation pipeline that extracts objects from photos and saves the result as a high‑quality PNG with alpha channel in .NET.
+ * 5. When integrating user‑guided image segmentation into a desktop tool and need to export the masked image without altering its size or metadata.
  */

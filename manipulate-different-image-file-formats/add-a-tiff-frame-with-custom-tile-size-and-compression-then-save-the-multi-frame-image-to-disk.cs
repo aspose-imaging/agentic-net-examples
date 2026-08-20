@@ -1,10 +1,11 @@
-// HOW-TO: Create Multi‑Frame TIFF from Multiple PNG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multi‑Frame TIFF With LZW Compression And Gradient Frames In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,47 +14,50 @@ class Program
         try
         {
             // Output file path
-            string outputPath = "C:\\Temp\\multi_frame.tif";
+            string outputPath = @"C:\Temp\output.tif";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Input file paths
-            string inputPath1 = "C:\\Temp\\frame1.png";
-            if (!File.Exists(inputPath1))
+            // Options for the first frame
+            var options1 = new TiffOptions(TiffExpectedFormat.Default);
+            options1.BitsPerSample = new ushort[] { 8, 8, 8 };
+            options1.Compression = TiffCompressions.Lzw;
+            options1.Photometric = TiffPhotometrics.Rgb;
+            options1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create first frame
+            var frame1 = new TiffFrame(options1, 200, 200);
+            var graphics1 = new Graphics(frame1);
+            var brush1 = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(frame1.Width, frame1.Height),
+                Color.Blue,
+                Color.Yellow);
+            graphics1.FillRectangle(brush1, frame1.Bounds);
+
+            // Options for the second frame
+            var options2 = new TiffOptions(TiffExpectedFormat.Default);
+            options2.BitsPerSample = new ushort[] { 8, 8, 8 };
+            options2.Compression = TiffCompressions.Lzw;
+            options2.Photometric = TiffPhotometrics.Rgb;
+            options2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create second frame
+            var frame2 = new TiffFrame(options2, 200, 200);
+            var graphics2 = new Graphics(frame2);
+            var brush2 = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(frame2.Width, frame2.Height),
+                Color.Green,
+                Color.Red);
+            graphics2.FillRectangle(brush2, frame2.Bounds);
+
+            // Create multi‑frame TIFF image and add the second frame
+            using (var tiffImage = new TiffImage(frame1))
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-
-            string inputPath2 = "C:\\Temp\\frame2.png";
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-
-            // Load input images
-            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
-            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
-            {
-                int width = img1.Width;
-                int height = img1.Height;
-
-                // Create TIFF options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Create multi-frame TIFF
-                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
-                {
-                    // First frame
-                    tiff.SavePixels(tiff.Bounds, img1.LoadPixels(img1.Bounds));
-
-                    // Add second frame
-                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-                    tiff.Frames[1].SavePixels(tiff.Frames[1].Bounds, img2.LoadPixels(img2.Bounds));
-
-                    // Save the TIFF file
-                    tiff.Save(outputPath);
-                }
+                tiffImage.AddFrame(frame2);
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -65,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several PNG scans into a single multi‑page TIFF document for archival or printing.
- * 2. When an application must generate a multi‑frame TIFF on the fly from user‑uploaded images using C# and Aspose.Imaging.
- * 3. When you want to produce a TIFF file that can be opened as separate pages in viewers like Adobe Acrobat or Windows Photo Viewer.
- * 4. When you need to programmatically assemble a multi‑page TIFF for fax transmission or medical imaging workflows.
- * 5. When you are building a batch process that converts a set of PNG files into a multi‑frame TIFF for efficient storage and distribution.
+ * 1. When you need to generate a multi‑page TIFF document where each page has a different gradient background and must be compressed with LZW to reduce file size.
+ * 2. When you are building a C# application that creates scanned‑like TIFF files with multiple frames for archival or printing workflows.
+ * 3. When you want to programmatically add custom TIFF frames with specific bits‑per‑sample and planar configuration for compatibility with legacy imaging systems.
+ * 4. When you need to export chart or map images as tiled TIFF frames that preserve color fidelity and use lossless compression.
+ * 5. When you are automating the creation of multi‑frame medical or satellite imagery files that require consistent compression and photometric settings across all frames.
  */

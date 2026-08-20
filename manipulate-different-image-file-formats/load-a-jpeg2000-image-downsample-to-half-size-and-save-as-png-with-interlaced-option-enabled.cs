@@ -1,44 +1,34 @@
+// HOW-TO: Convert JPEG2000 to Interlaced PNG and Reduce Size by Half in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jp2";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jp2";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the JPEG2000 image
-            using (Jpeg2000Image jpeg2000Image = (Jpeg2000Image)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Calculate half size
-                int newWidth = jpeg2000Image.Width / 2;
-                int newHeight = jpeg2000Image.Height / 2;
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                // Downsample to half size using nearest neighbour resampling
-                jpeg2000Image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                // Configure PNG options
                 PngOptions pngOptions = new PngOptions();
-
-                // Save the result as PNG
-                jpeg2000Image.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must convert high‑resolution JPEG2000 photos to smaller, progressive PNG files for faster page loads, a developer can use this code to downsample the image by 50 % and enable PNG interlacing.
- * 2. When an archival system needs to preserve original JPEG2000 scans but provide thumbnail previews in a widely supported format, this snippet loads the JP2, halves its dimensions, and saves an interlaced PNG for quick preview rendering.
- * 3. When a mobile app requires low‑memory image assets, a developer can employ the example to read a JPEG2000 source, resize it to half size using nearest‑neighbour resampling, and output an interlaced PNG that streams smoothly on limited bandwidth.
- * 4. When a digital publishing workflow must transform large JP2 artwork into web‑ready PNG images with progressive display, the code demonstrates how to load, resize, and save the image with PNG interlacing enabled.
- * 5. When a batch‑processing script needs to automate conversion of satellite JPEG2000 imagery into smaller, interlaced PNG tiles for GIS applications, this C# example provides the necessary steps to resize and save the images efficiently.
+ * 1. When you need to display high‑resolution JPEG2000 photos on a web page that only supports PNG, you can downsample them to half size and save as interlaced PNG for faster progressive loading.
+ * 2. When a mobile app must reduce bandwidth by sending smaller images, you can load a JPEG2000 asset, resize it to 50 % and output an interlaced PNG that browsers can render progressively.
+ * 3. When archiving scanned documents originally stored as JPEG2000, you may want to create smaller PNG previews with interlacing to allow quick thumbnail generation while preserving visual quality.
+ * 4. When integrating a legacy imaging pipeline that outputs JPEG2000, you can convert those files to interlaced PNGs with half the dimensions to meet a third‑party API’s size constraints.
+ * 5. When building an automated batch process that prepares images for email newsletters, you can use this code to shrink JPEG2000 images and save them as interlaced PNGs that load smoothly in most email clients.
  */

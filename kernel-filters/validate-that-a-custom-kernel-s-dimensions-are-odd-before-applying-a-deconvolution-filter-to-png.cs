@@ -1,8 +1,9 @@
+// HOW-TO: Validate Odd Kernel Size Before Deconvolution Filter on PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output/result.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,29 +25,44 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom kernel (3x3 example)
-            double[,] kernel2D = new double[,]
-            {
-                { 0, -1, 0 },
-                { -1, 5, -1 },
-                { 0, -1, 0 }
-            };
-
-            // Validate kernel dimensions: must be square and odd-sized
-            int rows = kernel2D.GetLength(0);
-            int cols = kernel2D.GetLength(1);
-            if (rows != cols || rows % 2 == 0)
-            {
-                Console.Error.WriteLine("Kernel must be square with odd dimensions.");
-                return;
-            }
-
-            // Load the PNG image, apply deconvolution filter, and save
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new DeconvolutionFilterOptions(kernel2D));
-                raster.Save(outputPath, new PngOptions());
+
+                // Define custom kernel size (must be odd)
+                int kernelSize = 5;
+                if (kernelSize % 2 == 0)
+                {
+                    Console.Error.WriteLine("Kernel size must be odd.");
+                    return;
+                }
+
+                // Create a simple averaging kernel
+                double[,] kernel2D = new double[kernelSize, kernelSize];
+                double value = 1.0 / (kernelSize * kernelSize);
+                for (int y = 0; y < kernelSize; y++)
+                {
+                    for (int x = 0; x < kernelSize; x++)
+                    {
+                        kernel2D[y, x] = value;
+                    }
+                }
+
+                // Create deconvolution filter options with the custom kernel
+                var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.DeconvolutionFilterOptions(kernel2D);
+
+                // Apply the deconvolution filter to the entire image
+                raster.Filter(raster.Bounds, deconvOptions);
+
+                // Prepare PNG save options with a FileCreateSource
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the processed image
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a PNG image using a custom 3x3 kernel and must ensure the kernel is square and odd‑sized before applying the deconvolution filter with Aspose.Imaging for .NET.
- * 2. When building an automated image‑processing pipeline that loads PNG files, validates user‑provided convolution kernels, and applies deconvolution to improve edge definition.
- * 3. When creating a desktop C# application that lets users upload PNG graphics, specify their own filter matrix, and the code must reject even‑sized or non‑square kernels to prevent runtime errors.
- * 4. When integrating Aspose.Imaging into a server‑side service that receives PNG images and custom kernel data via API, the service must verify the kernel dimensions are odd before performing deconvolution for noise reduction.
- * 5. When performing batch processing of PNG assets in a folder, a developer uses this code to ensure each custom kernel meets the required odd‑dimension rule before applying the deconvolution filter and saving the results.
+ * 1. When you need to apply a custom averaging deconvolution filter to a PNG image in C# and must verify that the kernel size is odd to avoid runtime errors.
+ * 2. When you want to programmatically load a PNG, apply image sharpening or blurring using a user‑defined kernel, and save the processed result to a specific folder.
+ * 3. When building an automated image‑processing pipeline that checks for the source file, creates missing output directories, and safely applies a deconvolution filter.
+ * 4. When integrating Aspose.Imaging into a C# application to perform raster‑level filtering on PNGs with custom kernel parameters.
+ * 5. When ensuring image‑processing code validates kernel dimensions before calling the Filter method to prevent exceptions in production environments.
  */

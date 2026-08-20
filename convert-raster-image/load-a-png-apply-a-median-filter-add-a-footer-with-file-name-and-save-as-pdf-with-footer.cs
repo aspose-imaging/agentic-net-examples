@@ -1,8 +1,10 @@
+// HOW-TO: Convert PNG to PDF with Median Filter and Filename Footer in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/input.png";
-            string outputPath = "output/output.pdf";
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -25,24 +27,23 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
+                // Apply median filter with kernel size 5
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
                 // Add footer with file name
-                Graphics graphics = new Graphics(raster);
-                int footerHeight = 30;
-                Rectangle footerRect = new Rectangle(0, raster.Height - footerHeight, raster.Width, footerHeight);
-
-                using (SolidBrush backgroundBrush = new SolidBrush(Color.White))
+                Graphics graphics = new Graphics(image);
+                using (SolidBrush brush = new SolidBrush(Color.Black))
                 {
-                    graphics.FillRectangle(backgroundBrush, footerRect);
-                }
-
-                Font font = new Font("Arial", 12);
-                using (SolidBrush textBrush = new SolidBrush(Color.Black))
-                {
-                    graphics.DrawString(Path.GetFileName(inputPath), font, textBrush, new Point(5, raster.Height - footerHeight + 5));
+                    Font font = new Font("Arial", 12);
+                    string footer = Path.GetFileName(inputPath);
+                    float x = 10;
+                    float y = image.Height - 20;
+                    graphics.DrawString(footer, font, brush, new PointF(x, y));
                 }
 
                 // Save as PDF
                 PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert uploaded PNG screenshots into PDF reports while automatically appending the original file name as a footer for traceability.
- * 2. When an automated document generation pipeline must batch‑process PNG assets, add a consistent footer, and produce searchable PDF files for archival.
- * 3. When a desktop utility has to display a PNG image, embed a caption with the file name at the bottom, and export the result as a PDF for printing or sharing.
- * 4. When a compliance system requires every exported PDF to contain the source image name in a footer to satisfy audit‑trail requirements.
- * 5. When a C# service integrates Aspose.Imaging to transform product‑catalog PNG images into PDF catalogs, adding a footer with the image filename for easy reference.
+ * 1. When you must reduce noise in a PNG screenshot, embed the original file name as a footer, and provide the result as a PDF document for client review.
+ * 2. When generating PDF invoices that include product images, you can apply a median filter to improve image quality and automatically add the image filename at the bottom of each page.
+ * 3. When creating archival PDFs from a batch of PNG scans, the code cleans the images with a median filter and stamps each page with its source filename for traceability.
+ * 4. When building a C# utility that converts user‑uploaded PNG graphics into PDF manuals, the median filter sharpens the visuals while the footer identifies the source file.
+ * 5. When preparing documentation PDFs that need consistent branding, you can programmatically add a filename footer to each converted PNG and apply noise reduction before saving as PDF.
  */

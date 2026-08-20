@@ -1,48 +1,53 @@
+// HOW-TO: How To Reduce BMP Size From EMF Using Lossy Compression In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.bmp";
-
-        // Path‑safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\source.emf";
+            string outputPath = @"C:\Images\result.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options to match the source size
-                var rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Prepare BMP save options with lossy 8‑bpp palette reduction
+                // Prepare BMP save options with lossy settings
                 var bmpOptions = new BmpOptions
                 {
+                    // Reduce color depth to 8 bits per pixel
                     BitsPerPixel = 8,
-                    // Generate a palette that approximates the source colors
-                    Palette = ColorPaletteHelper.GetCloseImagePalette((RasterImage)image, 256),
-                    // Use a simple compression (RGB) – optional, can be omitted
-                    Compression = BitmapCompression.Rgb,
-                    VectorRasterizationOptions = rasterOptions
+                    // Use RGB (uncompressed) or you could use RLE-8 for further reduction
+                    Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
+                    // Set rasterization options to render the vector EMF onto a bitmap
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
                 };
+
+                // Optionally create an 8‑bit palette that approximates the original colors
+                if (image is RasterImage rasterImage)
+                {
+                    bmpOptions.Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256);
+                }
 
                 // Save the rasterized BMP with the specified options
                 image.Save(outputPath, bmpOptions);
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution EMF vector graphics to a compact 8‑bpp BMP for legacy Windows applications, this code rasterizes the EMF and applies lossy palette reduction to shrink the file size.
- * 2. When an automated image‑processing pipeline must generate thumbnail BMPs from EMF reports while minimizing storage costs, the sample shows how to load, rasterize, and save with compression in C#.
- * 3. When a desktop software installer bundles documentation images and must meet a strict installer size limit, the code demonstrates converting EMF diagrams to compressed BMPs using Aspose.Imaging.
- * 4. When a web service creates printable BMP files from user‑uploaded EMF logos and wants to reduce bandwidth for download, this example provides the steps to apply 8‑bpp lossy compression in .NET.
- * 5. When a migration tool replaces vector EMF assets with raster BMPs for compatibility with older hardware, the snippet shows how to preserve visual fidelity while drastically lowering the BMP file size.
+ * 1. When you need to convert vector EMF drawings to smaller BMP files for legacy Windows applications that only accept bitmap images.
+ * 2. When you want to lower the storage footprint of generated BMPs by rasterizing EMF with an 8‑bit palette before saving.
+ * 3. When you must create BMP thumbnails from high‑resolution EMF graphics while keeping file size under a specific limit.
+ * 4. When you are preparing EMF‑based reports for email attachment and need the BMP version to be compact enough to avoid size restrictions.
+ * 5. When you are building a batch processing tool that rasterizes multiple EMF files to BMP with lossy compression to speed up loading in resource‑constrained environments.
  */

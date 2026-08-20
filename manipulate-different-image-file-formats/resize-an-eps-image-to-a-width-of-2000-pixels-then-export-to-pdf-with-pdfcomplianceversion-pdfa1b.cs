@@ -1,40 +1,42 @@
+// HOW-TO: Resize EPS to 2000px Width and Save as PDF/A‑1b in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
-            // Load the EPS image
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\source.eps";
+            string outputPath = @"C:\Images\result.pdf";
+
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
             {
-                // Calculate new height to preserve aspect ratio
-                int newHeight = (int)Math.Round((double)image.Height * 2000 / image.Width);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Resize the image to the required width (2000 px) and computed height
-                image.Resize(2000, newHeight, ResizeType.LanczosResample);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Prepare PDF export options with PDF/A-1b compliance
+            // Load the EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Calculate new height to preserve aspect ratio for a width of 2000 pixels
+                int newWidth = 2000;
+                int newHeight = (int)((double)epsImage.Height / epsImage.Width * newWidth);
+
+                // Resize the image using a high‑quality resampling method
+                epsImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+
+                // Prepare PDF export options with PDF/A‑1b compliance
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -43,8 +45,8 @@ class Program
                     }
                 };
 
-                // Save the resized image as PDF
-                image.Save(outputPath, pdfOptions);
+                // Save the resized image as a PDF file
+                epsImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS artwork into a PDF/A‑1b compliant document for archival while ensuring the output fits a 2000‑pixel width for consistent printing.
- * 2. When an automated publishing pipeline must resize high‑resolution EPS logos to a standard width before embedding them in PDF reports that must meet PDF/A‑1b compliance for legal submission.
- * 3. When a web service processes user‑uploaded EPS files, scales them to a fixed 2000‑pixel width to reduce file size, and returns a PDF/A‑1b file suitable for long‑term storage.
- * 4. When a desktop application generates printable PDFs from EPS diagrams, preserving aspect ratio and applying Lanczos resampling to maintain image quality while complying with PDF/A‑1b standards.
- * 5. When a batch job iterates over a collection of EPS files, resizes each to a uniform 2000‑pixel width and saves them as PDF/A‑1b PDFs for inclusion in a searchable digital archive.
+ * 1. When you need to downscale a large EPS illustration to a fixed 2000‑pixel width while preserving aspect ratio before archiving it as a PDF/A‑1b compliant document.
+ * 2. When a printing workflow requires converting vector EPS artwork into a PDF/A‑1b file with a specific pixel width for consistent on‑screen preview.
+ * 3. When generating PDF reports that must include resized EPS graphics meeting PDF/A‑1b standards for long‑term preservation.
+ * 4. When automating batch processing of EPS logos to fit within a 2000‑pixel width constraint and exporting them as PDF/A‑1b for legal document submission.
+ * 5. When a web application needs to transform user‑uploaded EPS files into PDF/A‑1b PDFs of a known size for display in browsers that only support rasterized PDFs.
  */

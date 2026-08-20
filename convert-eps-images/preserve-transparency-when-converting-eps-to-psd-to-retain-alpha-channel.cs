@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS to PSD with Alpha Channel Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\output.psd";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "sample.eps";
-            string outputPath = "sample.psd";
-
             // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
@@ -27,16 +28,17 @@ class Program
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options to keep transparency (RGBA)
+                // Configure PSD saving options to preserve transparency (RGBA)
                 var psdOptions = new PsdOptions
                 {
-                    ColorMode = ColorModes.Rgb,          // Use RGB color mode
-                    ChannelsCount = 4,                  // R, G, B, Alpha
-                    ChannelBitsCount = 8,               // 8 bits per channel
-                    CompressionMethod = CompressionMethod.Raw // No compression (preserves data)
+                    ChannelBitsCount = 8,                     // 8 bits per channel
+                    ChannelsCount = 4,                        // R, G, B, Alpha
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
+                    Version = 6                               // Default PSD version
                 };
 
-                // Save as PSD preserving the alpha channel
+                // Save the image as PSD preserving the alpha channel
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to import vector EPS artwork into Photoshop while keeping a transparent background for layer compositing, a developer can use this code to convert EPS to PSD with an alpha channel.
- * 2. When an automated publishing pipeline must generate PSD mock‑ups from EPS logos without losing transparency, the code enables C# batch conversion preserving RGBA data.
- * 3. When a web service receives EPS files from users and must store them as PSD files for further editing in Adobe Photoshop, this snippet ensures the alpha channel is retained during the conversion.
- * 4. When a digital asset management system migrates legacy EPS assets to PSD format for compatibility with modern tools, the code provides a reliable way to keep transparency intact.
- * 5. When a C# application needs to render EPS graphics on a transparent canvas and export the result as a PSD for layer‑based manipulation, this example shows how to configure PsdOptions to preserve the alpha channel.
+ * 1. When you need to import vector EPS artwork into Photoshop while keeping its transparent background for further editing.
+ * 2. When an automated pipeline must convert EPS logos to PSD files for a design system without losing the alpha channel.
+ * 3. When generating print‑ready PSD composites from EPS illustrations and you require the original transparency for layer masking.
+ * 4. When migrating legacy EPS assets to PSD format in a C# application and must retain RGBA data for web publishing.
+ * 5. When building a batch converter that processes multiple EPS files to PSD using Aspose.Imaging and must preserve transparency for downstream graphics workflows.
  */

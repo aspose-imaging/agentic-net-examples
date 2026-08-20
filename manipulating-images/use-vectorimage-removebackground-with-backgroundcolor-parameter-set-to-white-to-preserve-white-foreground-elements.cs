@@ -1,3 +1,4 @@
+// HOW-TO: Remove White Background from SVG While Keeping White Objects in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,33 +8,39 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.emf";
-            string outputPath = @"C:\temp\output.emf";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image
-            using (VectorImage vectorImage = (VectorImage)Image.Load(inputPath))
+            // Load the image as a VectorImage
+            using (VectorImage vectorImage = Image.Load(inputPath) as VectorImage)
             {
-                // Configure background removal to treat white as the background color
-                var settings = new RemoveBackgroundSettings
+                if (vectorImage == null)
                 {
-                    Color1 = Aspose.Imaging.Color.White
+                    Console.Error.WriteLine("The loaded file is not a vector image.");
+                    return;
+                }
+
+                // Configure background removal to treat white as background
+                var bgSettings = new RemoveBackgroundSettings
+                {
+                    Color1 = Aspose.Imaging.Color.White // set background color to white
                 };
 
-                // Remove the background using the specified settings
-                vectorImage.RemoveBackground(settings);
+                // Remove the background using the configured settings
+                vectorImage.RemoveBackground(bgSettings);
 
                 // Save the processed image
                 vectorImage.Save(outputPath);
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting legacy EMF diagrams that have a white canvas but contain white line art that must stay visible, a developer can use VectorImage.RemoveBackground with a white backgroundColor to strip only the true background while preserving white foreground elements.
- * 2. When preparing vector graphics for printing on colored paper, a developer needs to remove the default white background from an EMF file without erasing white logos or text, using the provided code.
- * 3. When integrating a document generation system that embeds vector icons into PDFs, a developer can clean up the icons by removing the white background while keeping white symbols intact, ensuring correct rendering.
- * 4. When building a web service that receives user‑uploaded EMF files and returns a transparent version for overlay on web pages, a developer can apply RemoveBackground with Color1 set to white to achieve transparency without losing white details.
- * 5. When automating batch processing of corporate branding assets stored as EMF files, a developer can use this code to strip the white background from each file while retaining white brand elements before exporting to other vector formats.
+ * 1. When you need to clean up scanned SVG logos by stripping a white canvas but retaining white text or icons.
+ * 2. When preparing SVG assets for dark‑mode websites, you want to eliminate the white background without losing white foreground elements.
+ * 3. When converting vector graphics for printing, you may need to remove the page‑white background while preserving white decorative details.
+ * 4. When automating batch processing of SVG files to make them transparent for overlay on other images, you set the background color to white to keep white shapes visible.
+ * 5. When integrating SVGs into a UI that applies its own background, you remove the original white background to avoid double‑layering while keeping any white graphics intact.
  */

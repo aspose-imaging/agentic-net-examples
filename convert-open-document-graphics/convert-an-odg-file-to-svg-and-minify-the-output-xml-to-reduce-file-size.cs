@@ -1,20 +1,21 @@
+// HOW-TO: Convert ODG To SVG And Minify XML In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.odg";
-            string outputPath = "Output/sample.svg";
+            string inputPath = "input.odg";
+            string outputPath = "output.svg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,19 +25,30 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to specific ODG image type
-                OdgImage odgImage = (OdgImage)image;
-
-                // Prepare SVG save options (no compression to keep plain SVG)
-                using (SvgOptions options = new SvgOptions())
+                // Configure SVG export options
+                var svgOptions = new SvgOptions
                 {
-                    options.Compress = false;
-                    odgImage.Save(outputPath, options);
-                }
+                    // No compression; we'll minify manually
+                    Compress = false,
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
+
+            // Minify the resulting SVG XML
+            string xmlContent = File.ReadAllText(outputPath);
+            // Remove whitespace between tags
+            string minified = Regex.Replace(xmlContent, @">\s+<", "><").Trim();
+            File.WriteAllText(outputPath, minified);
         }
         catch (Exception ex)
         {
@@ -47,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must transform LibreOffice ODG drawings into web‑ready SVG vectors and shrink the resulting XML for faster page loads, this C# Aspose.Imaging routine loads the ODG, saves it as SVG, and can be followed by XML minification.
- * 2. When an automated publishing pipeline needs to batch‑convert OpenDocument graphics to compact SVG assets for inclusion in HTML newsletters, the code provides a reliable Image.Load and SvgOptions workflow in .NET.
- * 3. When a document management system requires extracting vector illustrations from ODG files and storing them as size‑optimized SVG files for long‑term archival, this snippet demonstrates the necessary file‑format conversion and directory handling.
- * 4. When a SaaS application offers users the ability to upload ODG sketches and instantly receive a minimized SVG preview for embedding in reports, the example shows how to perform the conversion using Aspose.Imaging in C#.
- * 5. When a developer is building a CI/CD task that validates design assets by converting ODG files to SVG and reducing their XML footprint before committing to a repository, this code outlines the essential steps for loading, saving, and preparing the output.
+ * 1. When you need to embed LibreOffice Draw graphics in a web page, converting ODG to SVG and minifying the XML reduces load time.
+ * 2. When an automated build pipeline must transform design assets from ODG to scalable SVG files for responsive UI, this code provides a quick C# solution.
+ * 3. When you want to store vector drawings in a database with minimal storage footprint, minifying the exported SVG helps shrink file size.
+ * 4. When a SaaS platform generates custom diagrams in ODG format and serves them as SVG to browsers, the code ensures fast delivery by removing unnecessary whitespace.
+ * 5. When integrating Aspose.Imaging into a C# application to batch‑process ODG files into clean SVGs for further editing or printing, this snippet handles conversion and XML cleanup.
  */

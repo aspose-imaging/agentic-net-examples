@@ -1,7 +1,9 @@
+// HOW-TO: Resize EPS to 1024x768 and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,9 +14,9 @@ class Program
         {
             // Hardcoded input and output file paths
             string inputPath = "input.eps";
-            string outputPath = "output.tiff";
+            string outputPath = "output\\result.tiff";
 
-            // Verify that the input EPS file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,12 +27,12 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Resize to 1024×768 using Mitchell cubic interpolation
+                // Resize to the required dimensions using Mitchell interpolation
                 image.Resize(1024, 768, ResizeType.Mitchell);
 
-                // Prepare TIFF save options
+                // Prepare TIFF save options (default format)
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the resized image as TIFF
@@ -39,7 +41,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo into a raster TIFF thumbnail of 1024×768 for inclusion in a print‑ready PDF catalog.
- * 2. When an automated C# batch job must downscale high‑resolution EPS artwork to a standard 1024×768 size and store it as a lossless TIFF for archival in a digital asset management system.
- * 3. When a web service generates preview images of uploaded EPS files by resizing them to 1024×768 pixels and returning the result as a TIFF to ensure compatibility with legacy imaging pipelines.
- * 4. When a desktop application prepares EPS illustrations for a slide deck by resizing them to 1024×768 and exporting them as TIFF files that can be embedded in PowerPoint.
- * 5. When a document conversion tool needs to transform EPS diagrams into 1024×768 TIFF images to meet the input requirements of a third‑party OCR engine.
+ * 1. When you need to convert a vector EPS logo to a fixed‑size TIFF for inclusion in a printed catalog.
+ * 2. When a web service must generate 1024×768 preview thumbnails from EPS artwork and store them as TIFF files.
+ * 3. When automating a batch workflow that resizes EPS diagrams to match a standard document layout before archiving them as TIFF.
+ * 4. When integrating Aspose.Imaging in a C# application to downscale EPS drawings for a GIS system that only accepts TIFF images.
+ * 5. When preparing EPS illustrations for a medical imaging system that requires TIFF format with specific pixel dimensions.
  */

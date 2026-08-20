@@ -1,3 +1,4 @@
+// HOW-TO: Convert SVG to High Resolution PNG with 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,11 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output/output.png";
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,18 +24,19 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                VectorImage vector = image as VectorImage;
+                if (vector == null)
                 {
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageWidth = 1000,
-                        PageHeight = 1000,
-                        BackgroundColor = Color.White
-                    }
+                    Console.Error.WriteLine("Input image is not a vector image.");
+                    return;
+                }
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                image.Save(outputPath, pngOptions);
+                vector.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a 300 dpi PNG for high‑quality print collateral, they can use this code to rasterize the vector at a specified page size and background color.
- * 2. When an e‑commerce platform must generate product thumbnails with a consistent white background from scalable SVG illustrations, the snippet loads the SVG, rasterizes it at 1000 × 1000 pixels, and saves a high‑resolution PNG.
- * 3. When a reporting tool requires embedding a detailed SVG diagram into a PDF as a raster image, the code provides a C# way to load the SVG, set resolution settings, and export a PNG that retains sharpness at 300 dpi.
- * 4. When a mobile app needs to pre‑process user‑uploaded SVG icons into PNG assets for faster rendering on devices, this example shows how to programmatically load the vector, define rasterization options, and save the result with proper resolution.
- * 5. When a CI/CD pipeline automates the creation of marketing assets, the script can be used to batch‑convert SVG assets to high‑resolution PNG files, ensuring consistent dimensions and color handling across builds.
+ * 1. When you need to render scalable SVG icons as crisp 300 DPI PNG files for print‑ready brochures using Aspose.Imaging in a .NET application.
+ * 2. When a web service must generate high‑resolution PNG thumbnails from user‑uploaded SVG logos for e‑commerce product listings.
+ * 3. When an automated build pipeline converts vector diagrams into raster PNG assets with exact DPI settings for inclusion in PDF reports.
+ * 4. When a desktop utility transforms SVG floor plans into detailed PNG images for GIS systems that require a specific resolution.
+ * 5. When a C# microservice prepares SVG artwork for high‑quality merchandise printing by exporting it as a 300 DPI PNG file.
  */

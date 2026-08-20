@@ -1,55 +1,68 @@
+// HOW-TO: Apply Multiple Convolution Filters Concurrently with Thread‑Safe ConvolutionFilter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputDir = @"C:\Images\output";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            // Hardcoded input and output directory paths
-            string inputPath = "input.png";
+            // Define the filters to apply concurrently
+            string[] filterNames = { "Sharpen3x3", "Emboss3x3", "GaussianBlur" };
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Process each filter in parallel
+            Parallel.ForEach(filterNames, filterName =>
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output file paths
-            List<string> outputPaths = new List<string>();
-            for (int i = 0; i < 5; i++)
-            {
-                string outputPath = $"output_{i}.png";
-                outputPaths.Add(outputPath);
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            }
-
-            // Apply Sharpen filter concurrently using separate filter instances per thread
-            System.Threading.Tasks.Parallel.For(0, outputPaths.Count, i =>
-            {
-                // Load the source image for each parallel iteration
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                // Load the image inside the parallel loop (each thread gets its own instance)
+                using (Image image = Image.Load(inputPath, new LoadOptions { ConcurrentImageProcessing = true }))
                 {
-                    // Each thread gets its own SharpenFilterOptions instance (thread‑safe)
-                    var filterOptions = new SharpenFilterOptions(5, 4.0);
-                    image.Filter(image.Bounds, filterOptions);
+                    var raster = (RasterImage)image;
 
-                    // Save the processed image
-                    var saveOptions = new PngOptions();
-                    image.Save(outputPaths[i], saveOptions);
+                    // Create a separate ConvolutionFilterOptions instance per thread
+                    ConvolutionFilterOptions options = filterName switch
+                    {
+                        "Sharpen3x3" => new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3, 1.0, 0),
+                        "Emboss3x3"  => new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3, 1.0, 0),
+                        "GaussianBlur" => new ConvolutionFilterOptions(
+                                            ConvolutionFilter.GetGaussian(5, 1.0), // 5x5 Gaussian kernel, sigma 1.0
+                                            1.0,
+                                            0),
+                        _ => null
+                    };
+
+                    if (options == null) return;
+
+                    // Apply the convolution filter to the whole image
+                    raster.Filter(raster.Bounds, options);
+
+                    // Build output path and save the processed image
+                    string outputPath = Path.Combine(outputDir, $"output_{filterName}.png");
+                    raster.Save(outputPath);
                 }
             });
         }
         catch (Exception ex)
         {
+            // Unified error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -57,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate multiple sharpened thumbnails of a PNG image simultaneously to serve high‑traffic requests.
- * 2. When a desktop batch‑processing tool must apply a sharpening filter to a large collection of PNG files in parallel to reduce overall processing time.
- * 3. When an automated image‑analysis pipeline runs on a multi‑core server and requires thread‑safe convolution filters to preprocess PNG scans before feature extraction.
- * 4. When a cloud function processes user‑uploaded PNG pictures concurrently, applying a sharpen filter to each image without risking shared‑state corruption.
- * 5. When a real‑time video‑frame renderer extracts individual PNG frames and applies a convolution filter in parallel threads to maintain smooth playback.
+ * 1. When you need to generate sharpened, embossed, and blurred versions of the same PNG image in a batch job that runs on multiple CPU cores.
+ * 2. When processing large numbers of images on a server and want to avoid race conditions by loading each image inside the parallel loop with ConcurrentImageProcessing enabled.
+ * 3. When applying custom Gaussian blur kernels to images in a multi‑threaded environment without sharing filter objects between threads.
+ * 4. When building a real‑time photo‑editing service that must apply different convolution effects simultaneously to improve throughput.
+ * 5. When creating automated test suites that verify Aspose.Imaging’s convolution filters work correctly under parallel execution.
  */

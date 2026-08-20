@@ -1,3 +1,4 @@
+// HOW-TO: Resize Image To Fit Within 1024x1024 Using Nearest Neighbor In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,43 +7,45 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        const string inputPath = @"C:\Images\input.jpg";
-        const string outputPath = @"C:\Images\output.jpg";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_resized.jpg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                const int maxSize = 1024; // Bounding box dimension
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
                 // Determine scaling factor to fit within 1024x1024 while preserving aspect ratio
-                double widthRatio = (double)maxSize / image.Width;
-                double heightRatio = (double)maxSize / image.Height;
+                const int maxSize = 1024;
+                double widthRatio = (double)maxSize / originalWidth;
+                double heightRatio = (double)maxSize / originalHeight;
                 double scale = Math.Min(widthRatio, heightRatio);
 
-                // If the image is larger than the bounding box, resize it
-                if (scale < 1.0)
-                {
-                    int newWidth = Math.Max(1, (int)(image.Width * scale));
-                    int newHeight = Math.Max(1, (int)(image.Height * scale));
+                // If the image already fits, keep original dimensions
+                if (scale > 1.0)
+                    scale = 1.0;
 
-                    // Resize using NearestNeighbour algorithm
-                    image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-                }
+                int newWidth = (int)Math.Round(originalWidth * scale);
+                int newHeight = (int)Math.Round(originalHeight * scale);
 
-                // Save the (possibly resized) image
+                // Resize using NearestNeighbour algorithm
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                // Save the resized image
                 image.Save(outputPath);
             }
         }
@@ -55,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded JPEG photos so they fit inside a 1024 × 1024 box without distortion, a developer can use this C# Aspose.Imaging code with the NearestNeighbour algorithm.
- * 2. When an e‑commerce platform must downsize product images before storing them in Azure Blob Storage to meet a 1 MB size limit while preserving aspect ratio, the code resizes the PNG or JPG files to a maximum of 1024 × 1024 pixels.
- * 3. When a mobile game server processes sprite sheets in BMP format and wants to reduce their dimensions for faster transmission to clients, the developer can call Image.Resize with ResizeType.NearestNeighbourResample to keep the graphics crisp.
- * 4. When an automated email system attaches resized screenshots of a Windows desktop (saved as PNG) to keep the email size low, the C# routine ensures each image fits within a 1024 × 1024 bounding box.
- * 5. When a content‑management workflow converts high‑resolution scans (TIFF) into web‑ready images, the developer can use this Aspose.Imaging snippet to proportionally shrink the files to 1024 × 1024 pixels while using the fast NearestNeighbour resampling method.
+ * 1. When you need to generate web‑ready thumbnails that never exceed 1024 px in either dimension while preserving the original aspect ratio.
+ * 2. When uploading user photos to a cloud service and you must downscale large JPEGs to a 1024 × 1024 bounding box to reduce bandwidth and storage costs.
+ * 3. When preparing product images for an e‑commerce catalog and you want a fast nearest‑neighbor resize to keep sharp edges on pixel art or icons.
+ * 4. When processing scanned documents in C# and you need to ensure the resulting PNG fits within a 1024 px limit for PDF embedding without distortion.
+ * 5. When building a desktop utility that automatically resizes images in a folder to a maximum size of 1024 px while maintaining aspect ratio using Aspose.Imaging.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Split WebP Animation into Frames and Create Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract WebP Animation Frames and Create Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,8 +14,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.webp";
-            string outputPath = "output.tif";
+            string inputPath = @"C:\temp\animation.webp";
+            string outputPath = @"C:\temp\result.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -25,38 +25,37 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = new WebPImage(inputPath))
+            using (WebPImage webP = new WebPImage(inputPath))
             {
-                IMultipageImage multipage = webp as IMultipageImage;
+                IMultipageImage multipage = webP as IMultipageImage;
                 if (multipage == null || multipage.PageCount == 0)
                 {
-                    Console.Error.WriteLine("No frames found in the WebP animation.");
+                    Console.Error.WriteLine("The WebP image does not contain any frames.");
                     return;
                 }
 
-                // Assume all frames have the same dimensions as the first frame
-                RasterImage firstFrame = (RasterImage)multipage.Pages[0];
+                int frameCount = multipage.PageCount;
+
+                RasterImage firstFrame = (RasterImage)webP.Pages[0];
                 int width = firstFrame.Width;
                 int height = firstFrame.Height;
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                using (Image tiffBase = Image.Create(tiffOptions, width, height))
                 {
-                    // Copy first frame pixels to the base image
-                    tiff.SavePixels(tiff.Bounds, firstFrame.LoadPixels(firstFrame.Bounds));
+                    TiffImage tiff = (TiffImage)tiffBase;
 
-                    // Process remaining frames
-                    for (int i = 1; i < multipage.PageCount; i++)
+                    tiff.SavePixels(tiff.ActiveFrame.Bounds, firstFrame.LoadPixels(firstFrame.Bounds));
+
+                    for (int i = 1; i < frameCount; i++)
                     {
-                        RasterImage frame = (RasterImage)multipage.Pages[i];
+                        RasterImage frame = (RasterImage)webP.Pages[i];
                         tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-                        TiffFrame tiffFrame = tiff.Frames[i];
-                        tiffFrame.SavePixels(tiffFrame.Bounds, frame.LoadPixels(frame.Bounds));
+                        tiff.Frames[i].SavePixels(tiff.Frames[i].Bounds, frame.LoadPixels(frame.Bounds));
                     }
 
-                    // Save the assembled TIFF file
                     tiff.Save();
                 }
             }
@@ -70,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each frame from an animated WebP to process or edit them individually before archiving them as a single multi‑page TIFF document.
- * 2. When a web application must convert user‑uploaded animated WebP stickers into a TIFF file that can be opened in legacy desktop publishing tools.
- * 3. When a batch job has to transform a series of WebP animations into TIFF stacks for printing or archival workflows that only accept TIFF.
- * 4. When you want to programmatically generate a multi‑page TIFF report by combining frames of a WebP animation with other raster images using C# and Aspose.Imaging.
- * 5. When an image‑processing pipeline requires converting WebP animation frames to a TIFF format to leverage TIFF‑specific features such as lossless compression or multi‑layer support.
+ * 1. When you need to convert an animated WebP advertisement into a multi‑page TIFF for archival or printing.
+ * 2. When a web service must break down a WebP animation into individual frames to generate a PDF or document.
+ * 3. When a desktop application processes user‑uploaded WebP animations and stores them as TIFF stacks for further analysis.
+ * 4. When a batch job converts a collection of animated WebP files into TIFF sequences for compatibility with legacy imaging tools.
+ * 5. When you want to extract each frame of a WebP animation to edit them separately and then re‑assemble into a single TIFF file.
  */

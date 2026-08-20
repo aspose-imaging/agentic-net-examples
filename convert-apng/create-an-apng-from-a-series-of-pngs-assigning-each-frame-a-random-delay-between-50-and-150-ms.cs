@@ -1,3 +1,4 @@
+// HOW-TO: Create Animated PNG From Multiple PNGs With Random Frame Delays In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,27 +9,28 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input PNG file paths
-            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png", "frame4.png" };
+
+            // Verify each input file exists
+            foreach (var path in inputPaths)
+            {
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
             // Hardcoded output APNG file path
             string outputPath = "output\\animation.apng";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Verify each input file exists
-            foreach (var inputPath in inputPaths)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-            }
 
             // Load the first image to obtain canvas size
             using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
@@ -36,16 +38,17 @@ class Program
                 int width = first.Width;
                 int height = first.Height;
 
-                // Set up APNG creation options
+                // Create APNG options bound to the output file
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG image canvas
+                // Create the APNG image
                 using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
                 {
+                    // Remove the default frame that exists upon creation
                     apngImage.RemoveAllFrames();
 
                     Random rnd = new Random();
@@ -55,12 +58,12 @@ class Program
                     {
                         using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            uint delay = (uint)rnd.Next(50, 151);
+                            uint delay = (uint)rnd.Next(50, 151); // inclusive upper bound
                             apngImage.AddFrame(frame, delay);
                         }
                     }
 
-                    // Save the APNG file (output is already bound via FileCreateSource)
+                    // Save the APNG (output is already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
@@ -74,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate an animated PNG (APNG) from a set of static PNG assets for a web banner and needs each frame to appear for a slightly different duration to create a more natural motion.
- * 2. When building a game UI in C# where character sprites are stored as individual PNG files and the animation speed should vary randomly between 50 ms and 150 ms to simulate jittery movement.
- * 3. When creating a data‑driven slideshow in a desktop application and the slide transition times must be randomized to keep the presentation engaging, using Aspose.Imaging to combine the PNG slides into a single APNG file.
- * 4. When developing an e‑learning platform that converts step‑by‑step tutorial screenshots (PNG) into an APNG tutorial animation with unpredictable frame delays to emphasize key steps.
- * 5. When automating the generation of promotional GIF‑like animations for social media, but preferring the lossless APNG format and needing C# code that assigns each PNG frame a random delay between 50 ms and 150 ms.
+ * 1. When you need to generate an animated PNG for a web banner using a set of static PNG assets and want each frame to appear for a different, randomly chosen duration.
+ * 2. When building a game UI that displays a looping character animation where the frame timing should vary to create a more natural, jitter‑free motion.
+ * 3. When creating a slideshow‑like effect for a desktop application but require true‑color with alpha support, which APNG provides, and you want unpredictable frame pacing.
+ * 4. When automating the production of promotional graphics that combine several product images into a single APNG file with varied display times to highlight each item.
+ * 5. When developing a testing tool that simulates irregular network‑latency animation playback by assigning random delays to each PNG frame in an APNG sequence.
  */

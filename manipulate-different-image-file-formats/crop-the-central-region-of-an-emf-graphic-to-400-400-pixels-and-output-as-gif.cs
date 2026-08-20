@@ -1,3 +1,4 @@
+// HOW-TO: Crop Center of EMF to 400x400 and Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,29 +10,29 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.gif";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to EmfImage to access EMF-specific members
                 EmfImage emfImage = (EmfImage)image;
 
-                // Determine the central 400x400 rectangle
+                // Determine the rectangle for the central 400x400 region
                 int cropWidth = 400;
                 int cropHeight = 400;
                 int left = (emfImage.Width - cropWidth) / 2;
@@ -43,12 +44,13 @@ class Program
                 if (cropWidth > emfImage.Width) cropWidth = emfImage.Width;
                 if (cropHeight > emfImage.Height) cropHeight = emfImage.Height;
 
-                // Crop the image
-                var area = new Rectangle(left, top, cropWidth, cropHeight);
-                emfImage.Crop(area);
+                // Perform the crop
+                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight);
+                emfImage.Crop(cropArea);
 
                 // Save the cropped image as GIF
-                emfImage.Save(outputPath, new GifOptions());
+                GifOptions gifOptions = new GifOptions();
+                emfImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to extract the central 400×400 pixels from a Windows Metafile (EMF) and deliver it as a lightweight GIF for web preview.
- * 2. When a reporting tool generates vector charts in EMF format and must create a fixed‑size thumbnail GIF for inclusion in PDF or email summaries.
- * 3. When a batch‑processing service processes legacy EMF icons and crops their central area to a 400×400 pixel GIF to meet a mobile app’s asset size requirements.
- * 4. When a document conversion pipeline converts scanned EMF diagrams into GIF images and needs to focus on the central region to remove surrounding whitespace.
- * 5. When a C# utility automates the preparation of EMF logos for e‑commerce sites by cropping the core 400×400 pixel area and saving it as an optimized GIF.
+ * 1. When you need to extract a fixed‑size thumbnail from the middle of a vector EMF file and deliver it as a lightweight GIF for web previews.
+ * 2. When generating report thumbnails where the original EMF diagram must be cropped to a 400 × 400 region before embedding in an email or dashboard.
+ * 3. When converting legacy Windows Metafile graphics to GIF format while focusing on the central content for consistent UI icons.
+ * 4. When automating batch processing of EMF assets to create uniformly sized GIF previews for a digital asset management system.
+ * 5. When preparing a central portion of a large EMF illustration for inclusion in a mobile app that only supports GIF images.
  */

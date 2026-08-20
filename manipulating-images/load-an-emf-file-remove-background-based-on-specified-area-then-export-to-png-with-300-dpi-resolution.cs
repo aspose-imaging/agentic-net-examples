@@ -1,9 +1,10 @@
+// HOW-TO: Remove Background from EMF and Export to 300 DPI PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,37 +12,39 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.emf";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                var emfImage = (Aspose.Imaging.FileFormats.Emf.EmfImage)image;
+                // Cast to VectorImage and remove background if possible
+                if (image is VectorImage vectorImage)
+                {
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                }
 
-                // Remove background (default settings)
-                emfImage.RemoveBackground(new RemoveBackgroundSettings());
-
-                // Configure PNG export with 300 DPI resolution
+                // Configure PNG export options with 300 DPI resolution
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Aspose.Imaging.Color.Transparent
-                    }
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                emfImage.Save(outputPath, pngOptions);
+                // Save the result as PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Windows Metafile (EMF) diagrams into high‑resolution PNG images for web publishing while stripping the original white background.
- * 2. When an application must generate print‑ready PNG assets from vector EMF logos, ensuring a 300 DPI resolution and transparent background for overlay on marketing materials.
- * 3. When a reporting tool has to embed EMF charts into PDF reports by first rasterizing them to PNG at 300 DPI and removing the background to match the document’s theme.
- * 4. When a batch‑processing service automates the migration of EMF icons to PNG thumbnails with consistent DPI and no background clutter for use in mobile apps.
- * 5. When a GIS system requires converting EMF map overlays into PNG layers at 300 DPI, eliminating the background so the layers can be stacked transparently in a mapping UI.
+ * 1. When you need to convert vector EMF drawings to high‑resolution PNGs for web publishing while stripping unwanted background layers.
+ * 2. When generating printable assets from legacy EMF logos and require a 300 DPI PNG with transparent background for design tools.
+ * 3. When automating batch processing of EMF diagrams to produce DPI‑specific PNG thumbnails without background artifacts.
+ * 4. When integrating a C# service that receives EMF files from users and must deliver clean PNG images for mobile apps.
+ * 5. When preparing EMF‑based technical schematics for inclusion in PDF reports and need lossless PNG output at print‑ready resolution.
  */

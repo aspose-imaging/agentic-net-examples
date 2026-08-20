@@ -1,7 +1,7 @@
+// HOW-TO: Save Modified SVG Image Back to Original Folder in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = Path.Combine(@"C:\Images\templates", Path.GetFileName(inputPath));
+        string inputPath = @"templates\sample.svg";
+        string outputPath = @"templates\sample.svg";
 
         try
         {
@@ -25,14 +25,21 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Here you could apply any filtering to the SVG.
-                // For demonstration, we simply save the image unchanged.
+                // Cast to SvgImage for SVG-specific operations (if needed)
+                SvgImage svgImage = image as SvgImage;
+                if (svgImage == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not a valid SVG image.");
+                    return;
+                }
 
-                // Save the SVG back to the templates folder preserving the original filename
-                SvgOptions saveOptions = new SvgOptions();
-                svgImage.Save(outputPath, saveOptions);
+                // Perform any desired filtering here.
+                // For demonstration, we simply re-save the image without modifications.
+
+                // Save the SVG back to the templates folder, preserving the original filename
+                svgImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -44,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application generates dynamic SVG graphics and needs to store the processed version in a templates directory while keeping the original filename for later reuse.
- * 2. When an automated build pipeline applies filters to SVG assets and must save the modified files back to the project's template folder without renaming them.
- * 3. When a desktop C# utility updates company branding SVG logos and writes the updated images to a shared templates folder, preserving the original file names for consistency across marketing materials.
- * 4. When a batch script processes a collection of SVG icons, applies transformations, and saves each result to a templates directory so that other services can reference the unchanged filenames.
- * 5. When a content management system imports SVG illustrations, runs a validation filter, and stores the verified files in the templates repository while maintaining their original names for version control.
+ * 1. When you need to apply filters to an SVG template and overwrite the original file without changing its name.
+ * 2. When a batch job processes SVG assets stored in a templates directory and must save the results back to the same location.
+ * 3. When you want to validate that an SVG file exists before loading it with Aspose.Imaging and then re‑save it safely.
+ * 4. When integrating Aspose.Imaging into a C# application that updates vector graphics in place for a web‑based design system.
+ * 5. When automating a build pipeline that generates or modifies SVG icons and must keep the original filenames for downstream tools.
  */

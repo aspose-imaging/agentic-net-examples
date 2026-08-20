@@ -1,51 +1,42 @@
+// HOW-TO: Subtract Green Magic Wand Selection From Blue Area And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\result.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/result.bmp";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask for the blue selection (adjust coordinates as needed)
-                ImageBitMask blueMask = MagicWandTool.Select(
-                    image,
-                    new MagicWandSettings(100, 100) { Threshold = 30 });
+                // Create a mask for the blue selection at (100, 100)
+                // Subtract the green selection at (200, 200) from it
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(100, 100))
+                    .Subtract(new MagicWandSettings(200, 200))
+                    .Apply();
 
-                // Create a mask for the green selection (adjust coordinates as needed)
-                ImageBitMask greenMask = MagicWandTool.Select(
-                    image,
-                    new MagicWandSettings(200, 200) { Threshold = 30 });
-
-                // Subtract the green mask from the blue mask
-                ImageBitMask resultMask = blueMask.Subtract(greenMask);
-
-                // Apply the resulting mask to the image
-                resultMask.Apply();
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image as BMP
+                // Save the resulting image as BMP
                 image.Save(outputPath, new BmpOptions());
             }
         }
@@ -58,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to isolate a blue region of a product photo while removing overlapping green highlights, they can use this code to subtract the green selection and save the result as a BMP for downstream printing.
- * 2. When preparing assets for a GIS application that requires BMP layers, a developer can remove green vegetation masks from blue water bodies using the magic wand subtraction technique.
- * 3. When creating a game sprite sheet where blue armor must be displayed without green glow effects, this code lets the developer subtract the green mask and export the cleaned sprite as BMP.
- * 4. When generating medical imaging reports that need a blue tissue region isolated from surrounding green staining, a developer can apply the subtraction and save the output in BMP format for compatibility with legacy analysis tools.
- * 5. When automating batch processing of scanned engineering diagrams to extract blue circuit lines while discarding green annotations, the code provides a C# solution to subtract the green selection and output BMP files for archival.
+ * 1. When you need to remove a green object from a blue background in a PNG and output the cleaned image as a BMP for legacy Windows applications.
+ * 2. When creating automated graphics pipelines that require precise region subtraction using Aspose.Imaging's Magic Wand tool in C#.
+ * 3. When generating bitmap assets for game development where a specific color region must be excluded from another selection.
+ * 4. When processing scanned documents to eliminate overlapping colored stamps before converting them to BMP format.
+ * 5. When building a batch image editor that programmatically subtracts one color‑based mask from another and saves the result for further analysis.
  */

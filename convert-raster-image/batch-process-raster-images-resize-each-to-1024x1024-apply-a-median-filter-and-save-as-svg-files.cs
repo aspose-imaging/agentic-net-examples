@@ -1,3 +1,4 @@
+// HOW-TO: Batch Resize Images to 1024x1024, Apply Median Filter, Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,46 +11,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = "C:\\Images\\Input";
-            string outputFolder = "C:\\Images\\Output";
-
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputFolder);
-            foreach (string inputPath in files)
+            // Hardcoded list of input raster images
+            string[] inputFiles = new[]
             {
-                // Verify input file exists
+                @"C:\Images\input1.png",
+                @"C:\Images\input2.jpg",
+                @"C:\Images\input3.bmp"
+            };
+
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the image
+                // Determine the output SVG path (same folder, .svg extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to 1024x1024
+                    // Resize to 1024x1024 using the default resampling method
                     image.Resize(1024, 1024);
 
-                    // Apply median filter if the image is raster
+                    // Apply a median filter (size 5) to the entire image
                     if (image is RasterImage rasterImage)
                     {
                         rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
                     }
 
-                    // Build output path with .svg extension
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Prepare SVG save options
+                    // Prepare SVG save options with appropriate rasterization settings
                     var svgOptions = new SvgOptions
                     {
                         VectorRasterizationOptions = new SvgRasterizationOptions
                         {
-                            PageSize = image.Size
+                            PageSize = new Size(1024, 1024)
                         }
                     };
 
@@ -67,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a folder of JPEG or PNG photos, resize each to a uniform 1024 × 1024 pixel canvas, reduce noise with a median filter, and export the results as scalable SVG files for web display.
- * 2. When an e‑commerce platform must convert product thumbnail images into vector‑compatible SVGs while preserving image dimensions and cleaning up artifacts before uploading to a CDN.
- * 3. When a digital archiving system requires automated conversion of scanned raster documents into SVG format, standardizing size and applying a median filter to improve readability for OCR pipelines.
- * 4. When a mobile app backend has to prepare user‑uploaded screenshots for responsive UI components by resizing them, smoothing pixel noise, and delivering them as lightweight SVG assets.
- * 5. When a GIS application needs to transform a collection of raster map tiles into vector SVG layers, ensuring each tile is resized to 1024 × 1024 and denoised with a median filter for consistent rendering.
+ * 1. When you need to batch‑process a folder of PNG, JPG, or BMP photos, resize them to a uniform 1024 × 1024 canvas, reduce noise with a median filter, and output scalable SVG files for web galleries.
+ * 2. When preparing scanned documents for vector‑based annotation, you can resize each raster page, smooth out speckles with a median filter, and convert the result to SVG to retain editability.
+ * 3. When generating icon assets for a responsive UI, this code lets you take existing raster icons, standardize their size, clean up edges, and produce SVG versions that scale without quality loss.
+ * 4. When feeding images into a machine‑learning pipeline that expects fixed‑size inputs, you can resize, denoise, and store the pre‑processed data as SVG to keep file size low while preserving visual detail.
+ * 5. When creating printable graphics that must be resized and cleaned before vector conversion, the script automates the workflow for multiple raster files, applying a median filter and exporting them as SVG for high‑resolution output.
  */

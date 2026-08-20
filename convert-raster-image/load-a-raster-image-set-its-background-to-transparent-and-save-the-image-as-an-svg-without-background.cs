@@ -1,3 +1,4 @@
+// HOW-TO: Convert PNG to SVG with Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -27,19 +28,21 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options with transparent background
-                var svgOptions = new SvgOptions();
-
+                // Configure SVG rasterization options with transparent background
                 var rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.Transparent // make background transparent
+                    BackgroundColor = Aspose.Imaging.Color.Transparent
                 };
 
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                // Set up SVG save options
+                var saveOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                // Save the image as SVG without background
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert PNG logos with solid backgrounds into scalable SVG icons with a transparent background for responsive UI design.
- * 2. When a desktop application generates chart screenshots and must embed them in vector‑based reports without background artifacts.
- * 3. When an e‑commerce platform wants to transform product photos into SVG thumbnails that can be overlaid on different colored backgrounds.
- * 4. When a mobile app processes user‑uploaded images and needs to create transparent SVG assets for custom stickers or emojis.
- * 5. When a GIS tool rasterizes map tiles and saves them as SVG files with no background to overlay on other map layers.
+ * 1. When you need to embed a logo originally in PNG into a web page as a scalable SVG without any background color.
+ * 2. When generating vector graphics for print layouts from raster assets while preserving transparency to overlay on other designs.
+ * 3. When creating responsive UI icons that must scale without pixelation and require a transparent canvas in SVG format.
+ * 4. When converting user‑uploaded images to SVG for a graphics editor that expects a transparent background layer.
+ * 5. When automating batch processing of product images to produce SVG files that can be tinted or styled with CSS.
  */

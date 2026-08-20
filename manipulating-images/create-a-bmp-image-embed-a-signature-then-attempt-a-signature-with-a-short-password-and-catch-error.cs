@@ -1,55 +1,58 @@
+// HOW-TO: Create BMP Image, Embed Digital Signature, Handle Invalid Password in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output path
-            string outputPath = "output.bmp";
+            // Hardcoded output path
+            string outputPath = @"C:\Temp\output.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP image
-            BmpOptions bmpOptions = new BmpOptions();
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Create a new 100x100 BMP image with 24 bits per pixel
+            var bmpOptions = new BmpOptions
             {
-                // Fill image with a solid color
-                RasterImage raster = (RasterImage)image;
-                for (int y = 0; y < image.Height; y++)
-                {
-                    for (int x = 0; x < image.Width; x++)
-                    {
-                        raster.SetPixel(x, y, Aspose.Imaging.Color.FromArgb(255, 100, 150, 200));
-                    }
-                }
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                // Embed digital signature with a valid password
-                raster.EmbedDigitalSignature("secure123");
+            using (RasterImage image = (RasterImage)Image.Create(bmpOptions, 100, 100))
+            {
+                // Fill the image with a solid color (white)
+                image.Save(); // initial save to create the file
 
-                // Save the image
-                image.Save(outputPath, bmpOptions);
+                // Embed a digital signature using a valid password
+                image.EmbedDigitalSignature("StrongPassword123!");
+
+                // Save the signed image
+                image.Save(outputPath);
             }
 
-            // Load the saved image for the invalid password test
-            using (Image loadedImage = Image.Load(outputPath))
+            // Load the signed image to attempt a second embedding with a short password
+            using (RasterImage signedImage = (RasterImage)Image.Load(outputPath))
             {
-                RasterImage raster = (RasterImage)loadedImage;
                 try
                 {
-                    // Attempt to embed signature with a short (invalid) password
-                    raster.EmbedDigitalSignature("123");
+                    // This should trigger a DigitalSignatureException due to an insufficient password
+                    signedImage.EmbedDigitalSignature("12");
+                    signedImage.Save(outputPath);
                 }
-                catch (Aspose.Imaging.CoreExceptions.ImageException ex)
+                catch (DigitalSignatureException dse)
                 {
-                    // Handle the expected exception
-                    Console.WriteLine($"HANDLED: {ex.Message}");
+                    Console.Error.WriteLine($"DigitalSignatureException caught: {dse.Message}");
+                }
+                catch (ImageException ie)
+                {
+                    Console.Error.WriteLine($"ImageException caught: {ie.Message}");
                 }
             }
         }
@@ -62,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must generate a BMP file with a solid background and embed a secure digital signature to ensure image authenticity in a .NET application.
- * 2. When a C# program needs to protect a BMP image with a password‑protected digital signature and later verify that the signature cannot be created with an insufficient password length.
- * 3. When an image processing workflow requires creating a raster image, filling it with a specific ARGB color, and saving it as a BMP using Aspose.Imaging.ImageOptions.
- * 4. When a developer wants to demonstrate proper exception handling for Aspose.Imaging.CoreExceptions.ImageException when an invalid (too short) password is supplied to EmbedDigitalSignature.
- * 5. When building a document management system that stores BMP thumbnails with embedded signatures and must catch and log errors if the signature password does not meet security requirements.
+ * 1. When you need to generate a blank BMP file and protect it with a digital signature for tamper detection.
+ * 2. When you want to embed a secure signature into an image using a strong password before distributing it.
+ * 3. When you must verify that a short or weak password is rejected by the Aspose.Imaging digital signature API.
+ * 4. When you are building an automated workflow that creates, signs, and validates images on a server file system.
+ * 5. When you need to catch and log specific DigitalSignatureException errors while processing signed images in a .NET application.
  */

@@ -1,7 +1,10 @@
+// HOW-TO: Apply Motion Blur to Each Page of a Multi‑Page PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,37 +12,51 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            string outputPath = "output\\output.png";
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page PNG
             using (Image image = Image.Load(inputPath))
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage != null)
+                // If the image supports multiple pages, process each page
+                if (image is IMultipageImage multipageImage)
                 {
-                    for (int i = 0; i < multipage.PageCount; i++)
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        RasterImage page = multipage.Pages[i] as RasterImage;
-                        if (page != null)
+                        // Retrieve the page as an Image
+                        Image page = multipageImage.Pages[i];
+
+                        // Apply motion blur to raster pages
+                        if (page is RasterImage rasterPage)
                         {
-                            page.Filter(page.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 90.0));
+                            rasterPage.Filter(rasterPage.Bounds, new MotionWienerFilterOptions(5, 1.0, 90.0));
                         }
                     }
                 }
+                else
+                {
+                    // Single‑page image fallback
+                    if (image is RasterImage raster)
+                    {
+                        raster.Filter(raster.Bounds, new MotionWienerFilterOptions(5, 1.0, 90.0));
+                    }
+                }
 
-                PngOptions saveOptions = new PngOptions();
+                // Save the processed image as PNG
+                PngOptions saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -52,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a vertical motion blur effect to every frame of a multi‑page PNG (such as an animated PNG) before saving it as a new PNG file using C# and Aspose.Imaging.
- * 2. When an image‑processing pipeline must automatically enhance scanned document pages stored in a multi‑page PNG by adding a size‑5, 90‑degree motion blur to reduce scanning artifacts with Aspose.Imaging’s MotionWienerFilterOptions.
- * 3. When a graphics application requires batch processing of layered PNG assets, applying a consistent motion blur filter across all layers (pages) in C# and then exporting the result with PngOptions.
- * 4. When a developer is building a server‑side service that receives multi‑page PNG uploads, needs to uniformly blur each page for privacy or artistic effect, and must save the modified image using Aspose.Imaging’s Image.Load and Save methods.
- * 5. When a .NET utility must iterate through each page of a multi‑page PNG, apply a 5‑pixel motion blur at a 90‑degree angle to simulate camera movement, and output the processed image while preserving the original PNG format.
+ * 1. When you need to add a vertical motion‑blur effect to every frame of an animated PNG before publishing it.
+ * 2. When processing scanned documents saved as a multi‑page PNG and you want to simulate camera shake on each page.
+ * 3. When creating a slideshow where each slide is a PNG page and you need a consistent blur filter applied automatically.
+ * 4. When preparing multi‑page PNG assets for a game and you must apply the same motion blur parameters to all layers.
+ * 5. When batch‑editing a multi‑page PNG archive to improve visual consistency by applying a 5‑pixel, 90‑degree blur across all pages.
  */

@@ -1,19 +1,20 @@
+// HOW-TO: Apply Custom 3x3 Sharpen Convolution to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string outputPath = "output\\output.jpg";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,23 +27,30 @@ public class Program
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Define a custom 3x3 convolution kernel (edge detection example)
-                double[,] kernel = new double[3, 3]
+                // Define a custom 3x3 convolution kernel (sharpen example)
+                double[,] kernel = new double[,]
                 {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
+                    { 0, -1,  0 },
+                    { -1, 5, -1 },
+                    { 0, -1,  0 }
                 };
 
-                // Apply the custom convolution filter to the entire image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                // Create convolution filter options with the custom kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Save the processed image as JPEG
-                JpegOptions jpegOptions = new JpegOptions();
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Prepare JPEG save options
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+
+                // Save the processed image
                 rasterImage.Save(outputPath, jpegOptions);
             }
         }
@@ -55,9 +63,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to detect edges in a JPEG photograph by applying a custom 3x3 convolution matrix for computer‑vision preprocessing.
- * 2. When an application must enhance the contrast of scanned documents by running an edge‑detection filter on raster images loaded from disk.
- * 3. When a photo‑editing tool requires applying a user‑defined convolution kernel to batch‑process JPEG files and save the results with specific JpegOptions.
- * 4. When a C# service processes incoming image uploads and needs to perform real‑time edge detection before storing the processed JPEG in a server folder.
- * 5. When a developer wants to experiment with custom image filters in Aspose.Imaging by loading a JPEG, applying a 3x3 kernel, and saving the transformed image to a new directory.
+ * 1. When you need to enhance the details of a JPEG photograph by sharpening it programmatically in a C# application.
+ * 2. When you want to apply a custom 3x3 convolution matrix to any raster image for edge enhancement using Aspose.Imaging.
+ * 3. When you must process batches of JPEG files on a server, applying the same filter before saving them with a specific quality setting.
+ * 4. When you are building an image‑editing tool that lets users upload a JPEG, apply a custom filter, and download the processed result.
+ * 5. When you need to ensure the output directory exists and automatically create it while applying a convolution filter to a loaded image.
  */

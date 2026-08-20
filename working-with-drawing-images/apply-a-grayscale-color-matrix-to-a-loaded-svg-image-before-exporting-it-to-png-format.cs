@@ -1,7 +1,9 @@
+// HOW-TO: Apply Grayscale Color Matrix to SVG and Export as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -24,30 +26,29 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Temporary file for intermediate PNG rasterization
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+            // Load SVG and rasterize to temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Prepare SVG export options with grayscale color mode
-                var svgExportOptions = new SvgOptions
-                {
-                    ColorType = SvgColorMode.Grayscale
-                };
+                var rasterOptions = new SvgRasterizationOptions(); // default rasterization options
+                var pngSaveOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                svgImage.Save(tempPngPath, pngSaveOptions);
+            }
 
-                // Rasterization options required for PNG conversion
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgExportOptions.VectorRasterizationOptions = rasterOptions;
+            // Load the rasterized PNG, apply grayscale, and save to final output
+            using (PngImage pngImage = (PngImage)Image.Load(tempPngPath))
+            {
+                pngImage.Grayscale(); // Convert to grayscale
+                pngImage.Save(outputPath);
+            }
 
-                // PNG save options using the same rasterization settings
-                var pngSaveOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized grayscale image as PNG
-                image.Save(outputPath, pngSaveOptions);
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application uses Aspose.Imaging for .NET to generate grayscale thumbnails from user‑uploaded SVG logos and save them as PNG files for faster page loads.
- * 2. When an automated reporting service needs to convert vector diagrams in SVG format to monochrome PNG images with Aspose.Imaging’s rasterization options for inclusion in printable PDF reports.
- * 3. When a desktop utility processes a batch of SVG icons, applies a grayscale color matrix via Aspose.Imaging, and exports them to PNG to match a dark‑mode UI theme.
- * 4. When a CI/CD pipeline validates that SVG assets are correctly rendered in grayscale by rasterizing them to PNG with Aspose.Imaging for visual regression testing.
- * 5. When a mobile app backend prepares low‑contrast PNG assets from SVG illustrations using Aspose.Imaging’s grayscale export to improve accessibility for users with visual sensitivities.
+ * 1. When you need to generate a black‑and‑white version of a vector logo by converting an SVG file to a grayscale PNG for printing or web display.
+ * 2. When you must transform user‑uploaded SVG icons into grayscale PNG thumbnails to match a dark UI theme in a C# application.
+ * 3. When a reporting tool requires all chart images to be grayscale, so you convert the source SVG charts to grayscale PNGs using Aspose.Imaging.
+ * 4. When you want to preprocess SVG diagrams for OCR or image‑analysis pipelines that accept only grayscale raster images, converting them to PNG first.
+ * 5. When you need to store vector graphics as compact grayscale PNG files for mobile apps that cannot render SVG directly.
  */

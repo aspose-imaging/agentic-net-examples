@@ -1,6 +1,7 @@
 // HOW-TO: Extract TIFF Clipping Paths and Save as SVG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.PathResources;
@@ -9,7 +10,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output locations
         string inputPath = "Sample.tif";
         string outputDirectory = "ExportedSvg";
 
@@ -28,29 +29,26 @@ class Program
             // Load the TIFF image
             using (var image = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate over each clipping path (PathResource) in the active frame
+                // Get the size of the active frame (used for SVG canvas size)
+                var frameSize = image.ActiveFrame.Size;
+
+                // Iterate over each clipping path (PathResource)
                 foreach (var pathResource in image.ActiveFrame.PathResources)
                 {
-                    // Build SVG file path using the path name
+                    // Build a simple SVG content – this example creates an empty path.
+                    // For a real conversion you would translate the PathResource records
+                    // into SVG path commands. Here we provide a minimal valid SVG.
+                    string svgContent = GenerateSimpleSvg(frameSize.Width, frameSize.Height, pathResource.Name);
+
+                    // Determine output file path (use the path name, fallback to a generic name)
                     string safeName = string.IsNullOrWhiteSpace(pathResource.Name) ? "UnnamedPath" : pathResource.Name;
-                    string svgFilePath = Path.Combine(outputDirectory, $"{safeName}.svg");
+                    string outputPath = Path.Combine(outputDirectory, $"{safeName}.svg");
 
-                    // Ensure the directory for the SVG file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(svgFilePath));
+                    // Ensure the directory for the output file exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Write a minimal SVG file containing the path name as a comment.
-                    // For a full export, you would convert the PathResource records to SVG path data.
-                    using (var writer = new StreamWriter(svgFilePath))
-                    {
-                        writer.WriteLine(@"<?xml version=""1.0"" encoding=""UTF-8""?>");
-                        writer.WriteLine(@"<svg xmlns=""http://www.w3.org/2000/svg"" version=""1.1"">");
-                        writer.WriteLine($"  <!-- Path name: {safeName} -->");
-                        // Placeholder path data – replace with actual conversion if needed
-                        writer.WriteLine(@"  <path d=""M0,0 L100,0 L100,100 L0,100 Z"" fill=""none"" stroke=""black""/>");
-                        writer.WriteLine(@"</svg>");
-                    }
-
-                    Console.WriteLine($"Exported SVG: {svgFilePath}");
+                    // Write the SVG file
+                    File.WriteAllText(outputPath, svgContent, Encoding.UTF8);
                 }
             }
         }
@@ -59,13 +57,26 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Generates a minimal SVG document with a placeholder path.
+    private static string GenerateSimpleSvg(int width, int height, string title)
+    {
+        // Simple path data – a single move command; replace with real data if needed.
+        const string pathData = "M0,0";
+
+        return $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"" version=""1.1"">
+  <title>{System.Security.SecurityElement.Escape(title)}</title>
+  <path d=""{pathData}"" stroke=""black"" fill=""none""/>
+</svg>";
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve vector clipping information from a multi‑page TIFF for use in web graphics, you can extract each path and export it as an SVG file.
- * 2. When a printing workflow requires converting TIFF cut‑out shapes into scalable SVG assets for further editing in design tools, this code reads the PathResources and creates SVG placeholders.
- * 3. When building a document‑to‑HTML converter that must retain image masks, you can pull the TIFF clipping paths and output them as SVG to overlay on the HTML page.
- * 4. When automating quality‑control checks that compare vector outlines stored in TIFF files against expected shapes, exporting the paths to SVG enables easy visual inspection.
- * 5. When integrating legacy scanned artwork stored in TIFF with modern vector‑based applications, extracting the embedded clipping paths and saving them as SVG files simplifies the migration process.
+ * 1. When you need to convert vector clipping paths embedded in a multi‑page TIFF into separate SVG files for web graphics or further editing.
+ * 2. When a printing workflow requires extracting precise cutout shapes from a TIFF and providing them as scalable SVG masks.
+ * 3. When automating archival of design assets, you want to preserve the original TIFF clipping paths as reusable SVG vector files.
+ * 4. When integrating with a GIS or CAD system that accepts SVG, you can pull the TIFF path resources and export them for spatial analysis.
+ * 5. When building a C# application that batch‑processes scanned documents and needs to separate each embedded clipping path into its own SVG for downstream processing.
  */

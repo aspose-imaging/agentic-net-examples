@@ -1,8 +1,13 @@
+// HOW-TO: Merge Multiple CMX Files into One PNG Preserving Layer Order in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,16 +15,19 @@ class Program
     {
         try
         {
-            // Input CMX files
-            string[] inputPaths = new string[]
+            // Hardcoded input CMX file paths
+            string[] inputPaths = new[]
             {
-                @"C:\Images\first.cmx",
-                @"C:\Images\second.cmx",
-                @"C:\Images\third.cmx"
+                @"C:\Images\input1.cmx",
+                @"C:\Images\input2.cmx",
+                @"C:\Images\input3.cmx"
             };
 
-            // Verify each input file exists
-            foreach (var path in inputPaths)
+            // Hardcoded output PNG path
+            string outputPath = @"C:\Images\merged_output.png";
+
+            // Validate input files
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -28,17 +36,52 @@ class Program
                 }
             }
 
-            // Output composite PDF
-            string outputPath = @"C:\Images\merged.pdf";
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PDF options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Create a multipage image from the CMX files and save as PDF
-            using (Image composite = Image.Create(inputPaths))
+            // First pass: determine maximum canvas size
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
             {
-                composite.Save(outputPath, pdfOptions);
+                using (CmxImage cmx = (CmxImage)Image.Load(path))
+                {
+                    sizes.Add(cmx.Size);
+                }
+            }
+
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
+
+            // Create output source and PNG options
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = outputSource };
+
+            // Create raster canvas bound to the output file
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            {
+                // Second pass: rasterize each CMX and merge onto canvas
+                foreach (string path in inputPaths)
+                {
+                    using (CmxImage cmx = (CmxImage)Image.Load(path))
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            // Rasterize CMX to PNG in memory
+                            cmx.Save(ms, new PngOptions());
+                            ms.Position = 0;
+
+                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            {
+                                // Merge raster onto canvas at (0,0)
+                                Rectangle bounds = new Rectangle(0, 0, raster.Width, raster.Height);
+                                canvas.SaveArgb32Pixels(bounds, raster.LoadArgb32Pixels(raster.Bounds));
+                            }
+                        }
+                    }
+                }
+
+                // Save the composite image (already bound to output source)
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD engineer needs to combine several CMX vector drawings into a single PDF report while preserving the original layer order.
- * 2. When an architectural firm wants to merge multiple CorelDRAW CMX files into one composite document for client presentation without losing layer hierarchy.
- * 3. When a manufacturing workflow requires consolidating separate CMX schematics into a multipage PDF for inclusion in a quality‑control manual.
- * 4. When a GIS analyst must combine layered CMX map overlays into a single PDF file for easy distribution and printing.
- * 5. When a software developer automates the creation of a single PDF portfolio from multiple CMX design assets while ensuring each layer remains intact.
+ * 1. When a CAD system exports separate CMX drawings for each component and you need to combine them into a single PNG for web preview while keeping the original layer stacking.
+ * 2. When an automated reporting tool must generate a composite image from several CMX design files to embed in a PDF report without losing the order of visual elements.
+ * 3. When a batch processing script has to consolidate multiple CMX pages into one high‑resolution PNG for archival or printing, ensuring the layers appear exactly as designed.
+ * 4. When a GIS application receives individual CMX layers representing map features and you need to merge them into a single PNG overlay while preserving their drawing order.
+ * 5. When a legacy workflow requires converting a series of CMX files into a single raster image for use in a mobile app, and the correct layer sequence is critical for proper display.
  */

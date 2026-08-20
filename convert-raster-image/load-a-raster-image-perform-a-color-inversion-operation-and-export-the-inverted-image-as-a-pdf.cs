@@ -1,16 +1,16 @@
+// HOW-TO: Invert Colors of a PNG and Save as PDF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths (relative)
+            // Hardcoded relative input and output paths
             string inputPath = "Input/sample.png";
             string outputPath = "Output/inverted.pdf";
 
@@ -24,36 +24,43 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image and process it
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
+                // Cast to RasterImage for pixel-level operations
                 RasterImage raster = (RasterImage)image;
-
-                // Ensure image data is cached
                 if (!raster.IsCached)
                 {
                     raster.CacheData();
                 }
 
-                // Define the full image rectangle
-                var rect = new Rectangle(0, 0, raster.Width, raster.Height);
+                int width = raster.Width;
+                int height = raster.Height;
 
-                // Load ARGB pixels
-                int[] pixels = raster.LoadArgb32Pixels(rect);
-
-                // Invert colors (bitwise NOT)
-                for (int i = 0; i < pixels.Length; i++)
+                // Invert colors pixel by pixel
+                for (int y = 0; y < height; y++)
                 {
-                    pixels[i] = ~pixels[i];
+                    for (int x = 0; x < width; x++)
+                    {
+                        int argb = raster.GetArgb32Pixel(x, y);
+                        int a = (argb >> 24) & 0xFF;
+                        int r = (argb >> 16) & 0xFF;
+                        int g = (argb >> 8) & 0xFF;
+                        int b = argb & 0xFF;
+
+                        // Invert RGB components
+                        r = 255 - r;
+                        g = 255 - g;
+                        b = 255 - b;
+
+                        int invertedArgb = (a << 24) | (r << 16) | (g << 8) | b;
+                        raster.SetArgb32Pixel(x, y, invertedArgb);
+                    }
                 }
 
-                // Write the inverted pixels back
-                raster.SaveArgb32Pixels(rect, pixels);
-
-                // Save the result as PDF
-                var pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                // Save the processed image as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF version of a scanned document with a negative (color‑inverted) effect for archival or visual inspection, they can load the PNG, invert the ARGB pixels, and save as PDF using Aspose.Imaging for .NET.
- * 2. When an application must automatically create high‑contrast PDF previews of user‑uploaded images (e.g., for accessibility compliance), the code can load the raster image, perform bitwise NOT color inversion, and export the result as a PDF.
- * 3. When a batch‑processing tool has to convert a folder of PNG graphics into PDF files with inverted colors for a marketing campaign’s “night‑mode” assets, this snippet demonstrates the required C# image manipulation and PDF saving steps.
- * 4. When a developer is building a diagnostic utility that highlights image defects by inverting colors and then bundles the output into a PDF report, the example shows how to cache raster data, manipulate pixels, and generate the PDF with Aspose.Imaging.
- * 5. When integrating a document management system that stores images as PDFs with a visual “negative” effect for security watermarking, the code provides a straightforward way to load a raster image, invert its colors, and export the result as a PDF file.
+ * 1. When you need to create a negative version of a raster image for printing or visual effects and output it directly as a PDF.
+ * 2. When a web application must generate PDF previews with inverted colors for a dark‑mode theme without using external image editors.
+ * 3. When you want to process scanned documents to highlight details by inverting their colors before archiving them as PDF files.
+ * 4. When an automated batch job has to convert a folder of PNG files into PDF reports with color inversion applied to each image.
+ * 5. When a digital‑signage system requires on‑the‑fly color‑inverted images saved as PDFs for devices that only support PDF rendering.
  */

@@ -1,19 +1,20 @@
+// HOW-TO: Apply Gaussian Blur to BMP and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,25 +22,28 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the processed image as PDF
+                // Prepare PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the blurred image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PDF report that includes a blurred version of a scanned BMP document for privacy or visual effect.
- * 2. When an application must preprocess a BMP image by applying a Gaussian blur to reduce noise before embedding it into a PDF brochure.
- * 3. When a web service converts user‑uploaded BMP files to PDF while automatically softening the image with a Gaussian blur to meet branding guidelines.
- * 4. When a batch job processes legacy BMP assets, applies a Gaussian blur for artistic styling, and saves the results as searchable PDF files.
- * 5. When a desktop utility needs to load a BMP, apply a radius‑5 Gaussian blur, and export the result as a PDF for printing or archiving.
+ * 1. When you need to soften a scanned BMP document before embedding it into a PDF report.
+ * 2. When you want to create a PDF preview of a BMP image with a subtle blur for privacy protection.
+ * 3. When generating printable PDFs from BMP graphics while applying a Gaussian blur to reduce visual noise.
+ * 4. When converting legacy BMP assets to PDF format in a C# application and need a built-in blur filter for aesthetic effect.
+ * 5. When automating batch processing of BMP files to produce blurred PDF versions for web publishing or archival.
  */

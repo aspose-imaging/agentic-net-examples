@@ -1,3 +1,4 @@
+// HOW-TO: Compress GIF With Floyd Steinberg Dithering And Lossy Palette In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,10 +10,9 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.gif";
-        string outputPath = @"c:\temp\output.gif";
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Ensure any runtime exception is reported without crashing
         try
         {
             // Verify input file exists
@@ -22,28 +22,28 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with a 4‑bit palette (16 colors)
-                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette (full color depth)
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Prepare GIF save options with lossy compression
+                // Configure GIF saving options for lossy compression
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable palette correction for better visual quality
+                    // Enable palette correction for better color matching
                     DoPaletteCorrection = true,
-                    // Recommended lossy compression level
+                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
                     MaxDiff = 80
                 };
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed GIF using the specified options
+                // Save the processed image using the configured options
                 gifImage.Save(outputPath, saveOptions);
             }
         }
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to reduce the bandwidth of animated GIFs on a website while preserving visual detail, they can apply Floyd‑Steinberg dithering and lossy GIF compression using Aspose.Imaging for .NET.
- * 2. When a mobile app needs to bundle animated icons that must stay under a strict file‑size limit, the code can shrink the GIF by dithering to a 4‑bit palette and setting MaxDiff for controlled quality loss.
- * 3. When an e‑learning platform generates slide‑show animations from high‑resolution source GIFs, this routine ensures the output GIFs load faster by compressing them without noticeable color banding.
- * 4. When a digital marketing tool creates personalized GIF banners from user‑uploaded images, the developer can use the sample to automatically optimize each GIF for email delivery.
- * 5. When a game developer packages animated UI elements in a Unity project and wants to keep the asset bundle size low, they can run this code to dither and compress the GIFs before importing them.
+ * 1. When you need to reduce the file size of animated GIFs for faster web page loading while preserving visual quality through Floyd‑Steinberg dithering.
+ * 2. When you want to generate optimized GIFs for email newsletters that must stay under attachment size limits without noticeable color banding.
+ * 3. When you are building a C# batch‑processing tool that automatically compresses user‑uploaded GIFs before storing them in a cloud bucket.
+ * 4. When you need to apply palette correction and lossy compression to GIFs created from high‑resolution screenshots to meet mobile app bandwidth constraints.
+ * 5. When you are converting a series of GIF frames into a smaller animated file for social‑media sharing, using Aspose.Imaging’s Dither and MaxDiff settings.
  */

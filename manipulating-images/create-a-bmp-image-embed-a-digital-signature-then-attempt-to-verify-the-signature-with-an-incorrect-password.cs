@@ -1,62 +1,74 @@
+// HOW-TO: Create BMP Image, Embed Digital Signature and Test Wrong Password in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "images/original.bmp";
+        string signedPath = "images/signed.bmp";
+
         try
         {
-            // Define paths
-            string outputDir = "output";
-            string signedPath = Path.Combine(outputDir, "signed.bmp");
+            // Ensure output directory for the original image
+            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(signedPath));
-
-            // Create a BMP image, fill with gradient, embed digital signature, and save
-            using (BmpImage bmpImage = new BmpImage(200, 200))
+            // Create a BMP image (minimum 200x200)
+            int width = 200;
+            int height = 200;
+            var createSource = new FileCreateSource(inputPath, false);
+            var createOptions = new BmpOptions { Source = createSource };
+            using (BmpImage bmpImage = (BmpImage)Aspose.Imaging.Image.Create(createOptions, width, height))
             {
-                int width = bmpImage.Width;
-                int height = bmpImage.Height;
+                // Fill with a simple gradient
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         int hue = (255 * x) / width;
-                        bmpImage.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
+                        bmpImage.SetPixel(x, y, Aspose.Imaging.Color.FromArgb(255, hue, 0, 0));
                     }
                 }
-
-                // Embed digital signature with a valid password
-                try
-                {
-                    bmpImage.EmbedDigitalSignature("secure123");
-                }
-                catch (Aspose.Imaging.CoreExceptions.ImageException ex)
-                {
-                    Console.Error.WriteLine($"Error embedding signature: {ex.Message}");
-                }
-
-                // Save the signed image
-                bmpImage.Save(signedPath);
+                // Save the created image (bound to the source)
+                bmpImage.Save();
             }
 
-            // Verify the signature with an incorrect password
+            // Verify the created image exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the image and embed a digital signature with a valid password
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                raster.EmbedDigitalSignature("secure123");
+
+                // Ensure output directory for the signed image
+                Directory.CreateDirectory(Path.GetDirectoryName(signedPath));
+
+                var signedSource = new FileCreateSource(signedPath, false);
+                var signedOptions = new BmpOptions { Source = signedSource };
+                raster.Save(signedPath, signedOptions);
+            }
+
+            // Verify the signed image exists
             if (!File.Exists(signedPath))
             {
                 Console.Error.WriteLine($"File not found: {signedPath}");
                 return;
             }
 
-            using (Image loadedImage = Image.Load(signedPath))
+            // Load the signed image and attempt verification with an incorrect password
+            using (Aspose.Imaging.RasterImage signedRaster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(signedPath))
             {
-                RasterImage raster = (RasterImage)loadedImage;
-                bool isSigned = raster.IsDigitalSigned("123");
-                Console.WriteLine($"Is image digitally signed with incorrect password? {isSigned}");
+                bool isSigned = signedRaster.IsDigitalSigned("123");
+                Console.WriteLine($"Signature verification with incorrect password: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -68,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file with a custom gradient and protect it with a password‑protected digital signature to ensure authenticity.
- * 2. When an application must embed a digital signature into an image file (e.g., BMP) and later verify that the signature cannot be validated with an incorrect password, demonstrating tamper detection.
- * 3. When building a document‑management system that stores scanned BMP images and requires signing them programmatically using Aspose.Imaging for .NET to prevent unauthorized modifications.
- * 4. When creating a test suite for image‑security features that programmatically creates a BMP, signs it, and confirms that verification fails with a wrong password, ensuring robust error handling.
- * 5. When integrating image processing workflows that need to programmatically generate BMP graphics, embed a secure digital signature, and validate the signature handling logic for compliance or audit purposes.
+ * 1. When you need to generate a BMP file programmatically and protect it with a password‑protected digital signature before distribution.
+ * 2. When you want to embed a secure digital signature into an existing bitmap to ensure its authenticity in a .NET application.
+ * 3. When you need to demonstrate how a verification routine fails when an incorrect password is supplied for a signed image.
+ * 4. When building a workflow that creates placeholder images, signs them, and validates the signature as part of a quality‑assurance process.
+ * 5. When integrating Aspose.Imaging into a C# service that must create, sign, and test image integrity for compliance or audit purposes.
  */

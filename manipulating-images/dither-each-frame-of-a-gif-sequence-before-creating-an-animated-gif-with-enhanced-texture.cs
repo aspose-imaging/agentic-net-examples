@@ -1,97 +1,80 @@
+// HOW-TO: Dither Each Frame And Create Animated GIF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input directory containing individual frame images
-        string inputDirectory = @"C:\temp\frames";
-        // Hardcoded output animated GIF path
+        // Hardcoded input folder containing individual frames and output file path
+        string inputFolder = @"C:\temp\frames\";
         string outputPath = @"C:\temp\output\animated_dithered.gif";
 
         try
         {
-            // Verify input directory exists (if not, the subsequent file checks will fail)
-            if (!Directory.Exists(inputDirectory))
+            // Verify input folder exists
+            if (!Directory.Exists(inputFolder))
             {
-                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
+                Console.Error.WriteLine($"Folder not found: {inputFolder}");
                 return;
             }
 
-            // Gather image files (common raster formats)
-            var frameFiles = Directory.GetFiles(inputDirectory)
+            // Get all image files in the folder
+            var frameFiles = Directory.GetFiles(inputFolder)
                                       .Where(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
                                                   f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                                                   f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
                                                   f.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
                                       .OrderBy(f => f) // Ensure deterministic order
                                       .ToArray();
 
             if (frameFiles.Length == 0)
             {
-                Console.Error.WriteLine($"No image files found in: {inputDirectory}");
+                Console.Error.WriteLine("No image frames found in the input folder.");
                 return;
             }
 
-            GifImage gifImage = null;
-
-            // Process each frame
-            foreach (var filePath in frameFiles)
+            // Load the first frame, dither it, and create the initial GifImage
+            using (Image firstImg = Image.Load(frameFiles[0]))
             {
-                // Input file existence check
-                if (!File.Exists(filePath))
+                var firstRaster = (RasterImage)firstImg;
+                firstRaster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
+
+                using (var firstBlock = new GifFrameBlock(firstRaster))
+                using (var gifImage = new GifImage(firstBlock))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
-                    return;
-                }
-
-                // Load the raster image
-                using (Image img = Image.Load(filePath))
-                {
-                    // Cast to RasterImage for dithering
-                    RasterImage raster = (RasterImage)img;
-
-                    // Apply Floyd‑Steinberg dithering with a 4‑bit palette (16 colors)
-                    raster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-
-                    // Create a GIF frame block from the dithered raster image
-                    using (GifFrameBlock frameBlock = new GifFrameBlock(raster))
+                    // Process remaining frames
+                    for (int i = 1; i < frameFiles.Length; i++)
                     {
-                        if (gifImage == null)
+                        // Verify each input file exists (redundant but follows the rule)
+                        if (!File.Exists(frameFiles[i]))
                         {
-                            // First frame: initialize the GifImage
-                            gifImage = new GifImage(frameBlock);
+                            Console.Error.WriteLine($"File not found: {frameFiles[i]}");
+                            continue;
                         }
-                        else
+
+                        using (Image img = Image.Load(frameFiles[i]))
                         {
-                            // Subsequent frames: add to the existing GifImage
-                            gifImage.AddBlock(frameBlock);
+                            var raster = (RasterImage)img;
+                            raster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
+
+                            // Create a frame block from the dithered raster and add it to the GIF
+                            var block = new GifFrameBlock(raster);
+                            gifImage.AddBlock(block);
                         }
                     }
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the animated GIF
+                    gifImage.Save(outputPath);
                 }
             }
-
-            if (gifImage == null)
-            {
-                Console.Error.WriteLine("Failed to create GIF image.");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Save the animated GIF
-            gifImage.Save(outputPath);
-            gifImage.Dispose();
-
-            Console.WriteLine($"Animated GIF saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -102,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated product showcase from high‑resolution PNG frames, you can dither each frame with Aspose.Imaging for C# to reduce file size while preserving texture before saving the result as a GIF.
- * 2. When generating a retro‑style game sprite animation from BMP files, dithering each frame converts the images to a palette‑limited GIF that emulates classic console graphics.
- * 3. When building an email newsletter that includes an animated GIF assembled from JPEG screenshots, applying dithering to each frame prevents color banding and keeps the animation lightweight for email clients.
- * 4. When processing a batch of scanned documents saved as TIFF or PNG and converting them into an animated GIF for quick preview, dithering each frame maintains the readability of fine text on limited‑color displays.
- * 5. When developing a social‑media posting tool that stitches user‑uploaded images into an animated GIF, using Aspose.Imaging to dither each frame ensures the final GIF looks smooth on platforms that support only 256 colors.
+ * 1. When you need to add a retro pixelated look to a series of PNG or JPEG images before combining them into an animated GIF.
+ * 2. When you want to reduce color banding in each frame of a GIF animation by applying Floyd‑Steinberg dithering with Aspose.Imaging.
+ * 3. When you have a folder of individual image frames and must generate a single animated GIF while preserving the original frame order.
+ * 4. When you are building a C# utility that processes user‑uploaded images and outputs a dithered animated GIF for web or mobile display.
+ * 5. When you need to improve the visual quality of low‑color GIFs by dithering each frame before saving the final GifImage.
  */

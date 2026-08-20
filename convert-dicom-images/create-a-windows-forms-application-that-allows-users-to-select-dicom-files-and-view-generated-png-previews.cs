@@ -1,9 +1,9 @@
+// HOW-TO: Generate PNG Previews from Multi‑Page DICOM Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,33 +11,31 @@ class Program
     {
         try
         {
-            // Hardcoded input DICOM file and output directory
-            string inputPath = "Input/sample.dcm";
-            string outputDirectory = "Output";
+            string inputPath = "sample.dcm";
+            string outputDir = "Previews";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load DICOM image and generate PNG previews for each page
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int pageIndex = 0;
-                foreach (var dicomPage in dicomImage.DicomPages)
+                DicomImage dicomImage = image as DicomImage;
+                if (dicomImage == null)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine("The file is not a DICOM image.");
+                    return;
+                }
 
-                    // Save the page as PNG
-                    dicomPage.Save(outputPath, new PngOptions());
-
+                int pageIndex = 0;
+                foreach (DicomPage page in dicomImage.DicomPages)
+                {
+                    string outputPath = Path.Combine(outputDir, $"preview_{pageIndex}.png");
+                    page.Save(outputPath, new PngOptions());
                     pageIndex++;
                 }
             }
@@ -51,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application needs to let clinicians quickly preview multi‑frame DICOM studies as PNG thumbnails in a Windows Forms viewer.
- * 2. When a health‑tech startup wants to generate web‑ready PNG snapshots from DICOM files for integration into electronic health record portals.
- * 3. When a research lab must batch‑convert DICOM series into PNG images for machine‑learning preprocessing using C# and Aspose.Imaging.
- * 4. When a hospital IT team needs a simple Windows desktop tool that lets users select a DICOM file and instantly view each slice as a PNG without installing a full PACS viewer.
- * 5. When a medical device manufacturer requires an automated C# utility to extract every page of a multi‑page DICOM file and save them as PNG files for quality‑control documentation.
+ * 1. When a radiology application needs to show quick thumbnail previews of each slice in a multi‑frame DICOM study, developers can use this code to export the slices as PNG images.
+ * 2. When building a web portal that displays medical images, the code lets developers convert DICOM files to web‑friendly PNG files for fast browser rendering.
+ * 3. When preparing training data for a machine‑learning model, developers can batch‑convert DICOM series into PNG files to feed into image‑processing pipelines.
+ * 4. When generating printable reports that include patient scans, the code provides a simple way to create high‑quality PNG snapshots of each DICOM page.
+ * 5. When integrating a Windows Forms viewer that lets users select DICOM files and see preview images, this snippet handles the conversion and storage of PNG previews automatically.
  */

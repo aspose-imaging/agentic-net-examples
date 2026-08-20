@@ -1,3 +1,4 @@
+// HOW-TO: Scale DjVu Image Proportionally and Convert to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,29 +10,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.djvu";
-        string outputPath = "output/output.tiff";
+        // Hardcoded input and output paths
+        string inputPath = "input.djvu";
+        string outputPath = "output.tiff";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
+            // Load DjVu document
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 // Retrieve original dimensions
                 int originalWidth = djvu.Width;
                 int originalHeight = djvu.Height;
 
-                // Proportional scaling: double the width (height adjusts automatically)
-                djvu.ResizeWidthProportionally(originalWidth * 2, ResizeType.NearestNeighbourResample);
+                // Apply proportional scaling (double the size)
+                int newWidth = originalWidth * 2;
+                djvu.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
 
-                // Save the resized image as TIFF
+                // Convert and save as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 djvu.Save(outputPath, tiffOptions);
             }
@@ -45,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to import a scanned DjVu document, double its size while preserving aspect ratio, and store it as a high‑resolution TIFF for archival or printing purposes.
- * 2. When a legal‑tech application must convert multi‑page DjVu case files into TIFF images with proportional scaling to meet court‑required image specifications.
- * 3. When a digital library system processes DjVu e‑books, enlarges each page for better readability on high‑DPI displays, and saves the result as TIFF for compatibility with legacy viewers.
- * 4. When an OCR pipeline requires DjVu source pages to be upscaled proportionally before converting them to TIFF, ensuring the text extraction engine receives sufficiently detailed raster images.
- * 5. When a medical imaging workflow receives DjVu scans of patient records, needs to double the width while maintaining aspect ratio, and output TIFF files for integration with DICOM‑compatible software.
+ * 1. When you need to enlarge scanned DjVu pages for better readability before archiving them as high‑resolution TIFF files.
+ * 2. When a document‑management system requires DjVu documents to be converted to TIFF while maintaining aspect ratio for downstream processing.
+ * 3. When generating printable TIFF copies of DjVu illustrations that must be scaled up without distortion.
+ * 4. When integrating a C# service that automatically resizes DjVu graphics to double size and stores them in a TIFF format for compatibility with legacy software.
+ * 5. When creating a batch workflow that reads DjVu files, extracts their dimensions, applies proportional scaling, and saves the results as TIFF for OCR or archival purposes.
  */

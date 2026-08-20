@@ -1,33 +1,44 @@
+// HOW-TO: Draw a Full Circle on PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\circle.png";
+
         try
         {
-            string outputPath = @"C:\temp\circle.png";
-
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Create a file stream for the output image
             using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
+                // Set up PNG options with the stream as source
                 PngOptions pngOptions = new PngOptions();
                 pngOptions.Source = new StreamSource(stream);
 
+                // Create a new image with the specified dimensions
                 using (Image image = Image.Create(pngOptions, 500, 500))
                 {
+                    // Initialize graphics for drawing
                     Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
 
-                    Pen pen = new Pen(Color.Black, 2);
-                    Rectangle rect = new Rectangle(50, 50, 400, 400);
-                    graphics.DrawArc(pen, rect, 0, 360);
+                    // Optional: clear background
+                    graphics.Clear(Aspose.Imaging.Color.White);
 
+                    // Draw a full circle using DrawArc (startAngle=0, sweepAngle=360)
+                    Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
+                    graphics.DrawArc(pen, 100, 100, 300, 300, 0, 360);
+
+                    // Save changes to the image
                     image.Save();
                 }
             }
@@ -41,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A developer can use this code to generate a 500 × 500 PNG badge with a black circular border around a user’s profile picture by drawing a full circle with Aspose.Imaging’s Graphics.DrawArc.
- * 2. When building a reporting tool that exports charts as PNG files, a developer can draw a complete circle to serve as a background for a radial progress indicator using the Pen and Rectangle parameters.
- * 3. An e‑learning platform can programmatically create lesson slide assets by rendering a perfect circle in a PNG image, leveraging C# and Aspose.Imaging’s DrawArc overload for consistent diagram elements.
- * 4. To provide a status‑icon library for a monitoring dashboard, a developer can produce transparent PNG icons that contain a full circle drawn with Graphics.DrawArc, ensuring uniform sizing and line thickness.
- * 5. In a game‑asset pipeline, a developer may need to generate circular collision‑mask sprites as PNG files, using the DrawArc method with a 0‑degree start angle and 360‑degree sweep to guarantee a precise circle shape.
+ * 1. When you need to generate a PNG badge with a perfect circular border programmatically in a C# application.
+ * 2. When creating a template for printable circular stickers and you must draw the outline directly onto a 500×500 pixel image.
+ * 3. When automating the production of UI assets that require a black circle on a white background for icons or diagrams.
+ * 4. When a server‑side service must return a dynamically drawn circle as a PNG response for web or mobile clients.
+ * 5. When testing the Aspose.Imaging Graphics.DrawArc method to verify that a 0‑to‑360 degree sweep produces a complete circle.
  */

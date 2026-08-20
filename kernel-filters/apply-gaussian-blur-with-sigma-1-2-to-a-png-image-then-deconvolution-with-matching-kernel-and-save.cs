@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur and Deconvolution to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.png";
 
@@ -26,18 +27,14 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with size 5 and sigma 1.2
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 1.2));
+                // Apply Gaussian blur with size 5 (odd) and sigma 1.2
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 1.2));
 
-                // Apply Gaussian deconvolution (Gauss-Wiener) with matching kernel
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussWienerFilterOptions(5, 1.2));
+                // Apply deconvolution (Gauss-Wiener) with matching kernel parameters
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 1.2));
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -52,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to pre‑process a PNG image to smooth out high‑frequency noise before applying computer‑vision algorithms, they can use Aspose.Imaging in C# to apply a Gaussian blur with sigma 1.2 and then restore edge detail with Gauss‑Wiener deconvolution, saving the cleaned image.
- * 2. When building a .NET application that automatically improves the visual quality of scanned PNG documents for archival, the code can blur the image to suppress scanning artifacts and then deconvolve with a matching kernel to retain sharpness, using the RasterImage.Filter method.
- * 3. When creating a batch‑processing tool that prepares PNG assets for web delivery by reducing speckle noise while preserving fine details, a developer can invoke the GaussianBlurFilterOptions and GaussWienerFilterOptions in Aspose.Imaging to achieve the effect in a single C# workflow.
- * 4. When integrating image enhancement into a medical‑imaging viewer that loads PNG scans, the developer can apply a sigma 1.2 Gaussian blur to smooth sensor noise and then perform Gauss‑Wiener deconvolution to recover diagnostic details before saving the result.
- * 5. When implementing a C# service that receives user‑uploaded PNG pictures and needs to normalize their appearance by removing grain and then sharpening the image, the provided code demonstrates how to chain Gaussian blur and deconvolution filters with Aspose.Imaging and write the output to a new file.
+ * 1. When you need to reduce noise in a scanned PNG before OCR by blurring and then restoring details with deconvolution.
+ * 2. When preparing product photos for a web catalog, you can smooth edges with Gaussian blur and sharpen them back using Gauss‑Wiener deconvolution.
+ * 3. When cleaning up medical imaging PNGs that contain grain, applying a blur followed by deconvolution helps improve visual clarity without losing diagnostic information.
+ * 4. When creating a batch job that automatically enhances PNG screenshots from UI tests, the code can apply a controlled blur and reverse it to balance contrast.
+ * 5. When implementing a custom image preprocessing pipeline in a C# application, you can use Aspose.Imaging to apply Gaussian blur with sigma 1.2 and then deconvolve with a matching kernel before saving the result.
  */

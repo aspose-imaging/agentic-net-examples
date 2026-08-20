@@ -1,35 +1,40 @@
+// HOW-TO: Extract Selected PDF Pages As Vector SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.pdf";
+        string outputPath = "output/output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.pdf";
-            string outputPath = "output/output.svg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PDF and export first two pages to SVG
             using (Image image = Image.Load(inputPath))
             {
                 SvgOptions exportOptions = new SvgOptions
                 {
-                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 2))
+                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 2)),
+                    TextAsShapes = true,
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
 
                 image.Save(outputPath, exportOptions);
@@ -44,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert the first two pages of a multi‑page PDF brochure into a scalable SVG for responsive web display, they can use this code.
- * 2. When an engineering team wants to extract vector layers from a PDF technical drawing and merge them into a single SVG for inclusion in CAD documentation, this snippet provides the solution.
- * 3. When a publishing workflow requires batch conversion of selected PDF pages into SVG assets for high‑resolution printing, the code demonstrates how to achieve it with Aspose.Imaging for .NET.
- * 4. When a SaaS platform must generate lightweight, searchable vector graphics from user‑uploaded PDF reports, developers can apply this example to export specific pages as SVG.
- * 5. When an e‑learning application needs to embed vector‑based illustrations from a multi‑page PDF curriculum into HTML5 lessons, this code shows how to extract and combine the needed pages into one SVG file.
+ * 1. When you need to convert specific pages of a multi‑page PDF into a scalable SVG for web display without losing vector quality.
+ * 2. When you want to combine vector graphics from several PDF pages into a single SVG file for inclusion in a design system.
+ * 3. When you must preserve text as editable shapes during PDF‑to‑SVG conversion to enable further editing in vector editors.
+ * 4. When you are building a C# service that extracts vector layers from PDFs and stores them as white‑background SVGs for printing workflows.
+ * 5. When you require automated batch processing of PDFs to generate SVG assets for responsive UI components in a .NET application.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Set APNG Frame Delays From JSON File Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -9,19 +10,19 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded paths
-            string inputImagePath = "input.png";
-            string jsonConfigPath = "config.json";
-            string outputPath = "output.apng";
+            string sourceImagePath = "source.png";
+            string jsonConfigPath = "frame_delays.json";
+            string outputPath = "output_animation.apng";
 
-            // Input validation
-            if (!File.Exists(inputImagePath))
+            // Validate input files
+            if (!File.Exists(sourceImagePath))
             {
-                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                Console.Error.WriteLine($"File not found: {sourceImagePath}");
                 return;
             }
             if (!File.Exists(jsonConfigPath))
@@ -30,57 +31,58 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Parse frame delays from JSON (expects an array of numbers)
+            List<uint> frameDelays = new List<uint>();
+            string json = File.ReadAllText(jsonConfigPath);
+            int start = json.IndexOf('[');
+            int end = json.IndexOf(']', start);
+            if (start >= 0 && end > start)
+            {
+                string numbers = json.Substring(start + 1, end - start - 1);
+                foreach (var part in numbers.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (uint.TryParse(part.Trim(), out uint value))
+                        frameDelays.Add(value);
+                }
+            }
+
+            if (frameDelays.Count == 0)
+            {
+                Console.Error.WriteLine("No frame delays found in configuration.");
+                return;
+            }
 
             // Load source raster image
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(sourceImagePath))
             {
-                // Parse frame delays from JSON (expects an array of numbers)
-                var delays = new List<uint>();
-                string json = File.ReadAllText(jsonConfigPath);
-                string number = "";
-                foreach (char ch in json)
-                {
-                    if (char.IsDigit(ch))
-                    {
-                        number += ch;
-                    }
-                    else
-                    {
-                        if (number.Length > 0)
-                        {
-                            delays.Add(uint.Parse(number));
-                            number = "";
-                        }
-                    }
-                }
-                if (number.Length > 0)
-                {
-                    delays.Add(uint.Parse(number));
-                }
-
-                // Create APNG options
+                // Create APNG with desired options
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 0, // will be set per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
                 {
-                    // Remove default frame
                     apngImage.RemoveAllFrames();
 
-                    // Add frames with specific delays
-                    foreach (uint delay in delays)
+                    // Add frames with individual delays
+                    foreach (uint delay in frameDelays)
                     {
                         apngImage.AddFrame(sourceImage, delay);
                     }
 
-                    // Save the APNG (output is already bound via FileCreateSource)
+                    // Ensure output directory exists
+                    string outputDir = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrWhiteSpace(outputDir))
+                    {
+                        Directory.CreateDirectory(outputDir);
+                    }
+
+                    // Save the APNG
                     apngImage.Save();
                 }
             }
@@ -94,9 +96,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate an animated PNG (APNG) whose frame timing is driven by a JSON configuration file that stores per‑frame delay values.
- * 2. When an application needs to synchronize animation speed with external data such as sensor readings or user‑defined timelines stored in JSON.
- * 3. When a game or UI designer must create a sprite sheet animation where each frame’s display duration is customized without hard‑coding values in C#.
- * 4. When a content management system must convert a static PNG into an APNG and apply variable frame delays based on metadata exported as JSON.
- * 5. When a developer is building a reporting tool that visualizes step‑by‑step processes, using JSON‑defined delays to control the pacing of each APNG frame.
+ * 1. When you need to synchronize an animated PNG with audio or video cues, you can read precise frame‑delay values from a JSON file and apply them using Aspose.Imaging in C#.
+ * 2. When a game developer wants to adjust the speed of sprite animations dynamically based on level data stored in JSON, this code shows how to rebuild the APNG with custom delays.
+ * 3. When an e‑learning platform must match slide transition timings defined in a configuration file, the example demonstrates loading those timings and updating the APNG frames accordingly.
+ * 4. When a marketing team requires different animation pacing for A/B testing and stores the timing parameters in JSON, the snippet lets you generate separate APNGs with the specified delays.
+ * 5. When a CI/CD pipeline needs to regenerate animated assets after a data‑driven timing change, the code provides a programmatic way to read the new delays and produce an updated APNG automatically.
  */

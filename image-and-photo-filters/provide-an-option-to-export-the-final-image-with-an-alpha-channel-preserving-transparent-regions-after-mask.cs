@@ -1,12 +1,13 @@
+// HOW-TO: Export JPEG As PNG With Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,18 +16,18 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\BigImage.jpg";
-            string outputPath = @"c:\temp\BigImage_foreground.png";
+            string inputImagePath = @"C:\temp\BigImage.jpg";
+            string outputImagePath = @"C:\temp\BigImage_foreground.png";
 
             // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputImagePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputImagePath}");
                 return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputImagePath));
 
             // Prepare export options with alpha channel support
             var exportOptions = new PngOptions
@@ -38,42 +39,37 @@ class Program
             // Configure masking options
             var maskingOptions = new MaskingOptions
             {
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
+                Method = SegmentationMethod.GraphCut, // any method; GraphCut used in examples
+                Decompose = false,                    // we will apply mask manually
                 Args = new AutoMaskingArgs(),
                 BackgroundReplacementColor = Color.Transparent,
                 ExportOptions = exportOptions
             };
 
             // Load the source image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
             {
-                // Keep original size for later resizing of mask
-                var originalSize = image.Size;
+                // Reduce size for faster segmentation (optional)
+                sourceImage.ResizeHeightProportionally(600, ResizeType.HighQualityResample);
 
-                // Reduce size to speed up segmentation (optional)
-                image.ResizeHeightProportionally(600, ResizeType.HighQualityResample);
+                // Create ImageMasking instance
+                var masking = new ImageMasking(sourceImage);
 
-                // Create masking instance
-                var masking = new ImageMasking(image);
-
-                // Perform segmentation
+                // Perform segmentation to obtain a mask
                 using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
-                    // Get the foreground mask (index 1 is typically the first object)
+                    // Assume the first foreground object is at index 1
                     using (RasterImage foregroundMask = maskingResult[1].GetMask())
                     {
-                        // Resize mask back to original image dimensions
-                        foregroundMask.Resize(originalSize.Width, originalSize.Height, ResizeType.NearestNeighbourResample);
+                        // Resize mask back to original dimensions
+                        foregroundMask.Resize(sourceImage.Width, sourceImage.Height, ResizeType.NearestNeighbourResample);
 
-                        // Load the original image again for final output
-                        using (RasterImage originalImage = (RasterImage)Image.Load(inputPath))
+                        // Apply the mask to the original (full‑size) image
+                        using (RasterImage originalFullSize = (RasterImage)Image.Load(inputImagePath))
                         {
-                            // Apply the mask to the original image
-                            ImageMasking.ApplyMask(originalImage, foregroundMask, maskingOptions);
-
+                            ImageMasking.ApplyMask(originalFullSize, foregroundMask, maskingOptions);
                             // Save the result preserving transparency
-                            originalImage.Save(outputPath, exportOptions);
+                            originalFullSize.Save(outputImagePath, exportOptions);
                         }
                     }
                 }
@@ -88,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove the background from a high‑resolution JPEG photo and save the foreground as a PNG with transparent areas for use in web design.
- * 2. When an e‑commerce platform wants to generate product cut‑outs automatically from product photos so the images can be layered over different background colors in a catalog.
- * 3. When a mobile app creates stickers by extracting objects from user‑uploaded images and requires a PNG with an alpha channel to preserve the shape of each sticker.
- * 4. When a game engine imports character sprites from photographs and needs the masked images with preserved transparency to blend seamlessly with the game scene.
- * 5. When a digital marketing tool batch‑processes social‑media graphics, applying graph‑cut segmentation to isolate logos and exporting them as PNGs with transparent backgrounds for overlay on promotional videos.
+ * 1. When you need to remove the background of a large JPEG photo and save the result as a PNG that retains transparent areas for web or UI overlays.
+ * 2. When you want to generate cut‑out images for e‑commerce product listings, preserving alpha channels so the product can be placed on any background.
+ * 3. When you are building a graphics pipeline that requires converting scanned images to PNG with mask‑based transparency for further compositing in design tools.
+ * 4. When you need to automate batch processing of images to create foreground PNGs with transparent backgrounds for game assets or AR applications.
+ * 5. When you must integrate Aspose.Imaging masking to produce PNGs with true‑color and alpha for printing workflows that demand precise color and transparency handling.
  */

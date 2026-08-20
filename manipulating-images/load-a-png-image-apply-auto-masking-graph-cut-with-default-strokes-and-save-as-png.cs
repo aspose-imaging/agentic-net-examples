@@ -1,33 +1,39 @@
+// HOW-TO: Auto Mask PNG Image Using Graph Cut In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Load the PNG image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+                // Configure auto‑masking Graph Cut options with default strokes
+                var options = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
                     FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
@@ -36,21 +42,24 @@ class Program
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource("tempMask.png", false)
+                        Source = new FileCreateSource("tempFile", false)
                     },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                MaskingResult results = new ImageMasking(image).Decompose(options);
+                // Perform masking
+                var results = new ImageMasking(image).Decompose(options);
 
+                // Retrieve the foreground (masked) image and save it as PNG
                 using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                 {
                     resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
 
-                if (File.Exists("tempMask.png"))
+                // Clean up temporary file created by ExportOptions
+                if (File.Exists("tempFile"))
                 {
-                    File.Delete("tempMask.png");
+                    File.Delete("tempFile");
                 }
             }
         }
@@ -63,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove the background from a user‑uploaded PNG photo for a web‑based avatar editor, they can load the image, apply Aspose.Imaging’s auto‑masking Graph Cut with default strokes, and save the transparent PNG.
- * 2. When an e‑commerce platform wants to generate product thumbnails with clean cut‑outs from supplier PNG files, the code can segment the object using Graph Cut, feather the edges, and output a PNG with an alpha channel.
- * 3. When a mobile app requires batch processing of PNG icons to create transparent versions for dark‑mode themes, the developer can use this routine to auto‑mask each image and preserve the truecolor with alpha format.
- * 4. When a digital publishing workflow needs to isolate scanned illustrations from their white backgrounds before embedding them in PDFs, the Graph Cut auto‑masking in C# quickly produces a PNG mask that can be composited later.
- * 5. When a machine‑learning pipeline prepares training data by extracting foreground objects from PNG samples, the code provides an efficient way to generate masked PNGs with transparent backgrounds for model input.
+ * 1. When you need to automatically remove the background from a PNG photograph for e‑commerce product listings.
+ * 2. When you want to isolate the foreground of a scanned PNG logo to create a transparent version for branding assets.
+ * 3. When you are building a C# batch‑processing tool that extracts subjects from PNG screenshots for UI testing.
+ * 4. When you require a quick way to generate PNG images with transparent backgrounds for game sprites without manually drawing masks.
+ * 5. When you are integrating image preprocessing in a .NET application that must separate foreground objects from PNG files before applying further analysis.
  */

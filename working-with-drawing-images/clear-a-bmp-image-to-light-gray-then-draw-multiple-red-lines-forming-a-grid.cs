@@ -1,46 +1,64 @@
+// HOW-TO: Create Light Gray BMP with Red Grid Overlay in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
         try
         {
+            // Default input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outDir ?? ".");
-
-            using (Image image = Image.Load(inputPath))
+            // Load the BMP image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.LightGray);
+                // Create graphics object for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                Pen redPen = new Pen(Color.Red, 1);
+                // Clear the canvas to light gray
+                graphics.Clear(Aspose.Imaging.Color.LightGray);
+
                 int width = image.Width;
                 int height = image.Height;
+                int cellSize = 50; // spacing between grid lines
 
-                for (int x = 0; x <= width; x += 50)
+                // Pen for grid lines (red, 1 pixel width)
+                Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1);
+
+                // Draw vertical grid lines
+                for (int x = 0; x <= width; x += cellSize)
                 {
-                    graphics.DrawLine(redPen, x, 0, x, height);
+                    graphics.DrawLine(redPen,
+                        new Aspose.Imaging.Point(x, 0),
+                        new Aspose.Imaging.Point(x, height));
                 }
 
-                for (int y = 0; y <= height; y += 50)
+                // Draw horizontal grid lines
+                for (int y = 0; y <= height; y += cellSize)
                 {
-                    graphics.DrawLine(redPen, 0, y, width, y);
+                    graphics.DrawLine(redPen,
+                        new Aspose.Imaging.Point(0, y),
+                        new Aspose.Imaging.Point(width, y));
                 }
 
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image as BMP
                 BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save(outputPath, bmpOptions);
             }
         }
@@ -53,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a light‑gray BMP template with a red grid overlay for CAD or mapping applications.
- * 2. When a reporting tool must create a printable BMP chart where a uniform grid helps align data points.
- * 3. When a game engine requires a simple BMP texture atlas with visible red grid lines for debugging sprite placement.
- * 4. When an image‑processing pipeline needs to clear an existing BMP image to a neutral color before drawing guide lines for OCR preprocessing.
- * 5. When a desktop utility program wants to convert user‑provided BMP files into a standardized light‑gray background with evenly spaced red lines for visual inspection.
+ * 1. When you need to generate a printable BMP template with a light‑gray background and a red grid to help users align content in a desktop application.
+ * 2. When you want to programmatically add a visual guide to an existing bitmap for a game level editor that requires evenly spaced red lines.
+ * 3. When you must create a diagnostic image that highlights coordinate divisions on a BMP for testing image‑processing algorithms in C#.
+ * 4. When you are building a reporting tool that overlays a red grid on scanned BMP documents to assist manual measurement or annotation.
+ * 5. When you need to prepare a BMP placeholder with a light gray canvas and a red grid for UI mockups or wireframes in a .NET project.
  */
