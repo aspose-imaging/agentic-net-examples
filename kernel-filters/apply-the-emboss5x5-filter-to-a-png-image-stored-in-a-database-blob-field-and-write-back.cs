@@ -1,10 +1,9 @@
+// HOW-TO: Apply Emboss5x5 Filter to PNG BLOB and Save Back in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -12,46 +11,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            // TODO: Retrieve the PNG image bytes from the database BLOB field.
+            byte[] imageData = new byte[0]; // Placeholder for actual DB fetch.
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Load the image from the byte array.
+            using (MemoryStream inputStream = new MemoryStream(imageData))
+            using (Image image = Image.Load(inputStream))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Cast to RasterImage to apply filters.
+                RasterImage raster = (RasterImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Apply the Emboss5x5 convolution filter to the entire image.
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
 
-            // Simulate reading PNG blob from a database
-            byte[] imageBlob = File.ReadAllBytes(inputPath); // placeholder for DB read
-
-            using (MemoryStream inputStream = new MemoryStream(imageBlob))
-            {
-                // Load PNG image from stream
-                using (PngImage pngImage = (PngImage)Image.Load(inputStream))
+                // Save the processed image back to a memory stream in PNG format.
+                using (MemoryStream outputStream = new MemoryStream())
                 {
-                    // Cast to RasterImage for filtering
-                    RasterImage raster = pngImage;
+                    raster.Save(outputStream, new PngOptions());
 
-                    // Apply Emboss5x5 convolution filter
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                    // Get the resulting byte array.
+                    byte[] outputData = outputStream.ToArray();
 
-                    // Save processed image back to a memory stream (simulating DB write)
-                    using (MemoryStream outputStream = new MemoryStream())
-                    {
-                        PngOptions saveOptions = new PngOptions();
-                        pngImage.Save(outputStream, saveOptions);
-
-                        // Get the resulting byte array
-                        byte[] resultBlob = outputStream.ToArray();
-
-                        // Placeholder for writing back to the database
-                        // ...
-                    }
+                    // TODO: Write outputData back to the database BLOB field.
                 }
             }
         }
@@ -64,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate stylized product thumbnails stored as PNG blobs in a SQL database, a developer can use this code to emboss the images before serving them to users.
- * 2. When an e‑learning platform stores diagram images in a database and wants to add a subtle 3‑D effect for printed worksheets, the Emboss5x5 filter can be applied directly to the PNG BLOBs.
- * 3. When a digital asset management system requires batch processing of user‑uploaded PNG icons to create embossed previews for catalog listings, this C# routine reads the blob, applies the filter, and writes the result back.
- * 4. When a medical imaging portal saves scanned PNG slides as BLOBs and wants to highlight texture details for research reports, developers can run this filter to enhance edge contrast without leaving the database.
- * 5. When a mobile game backend stores level background PNGs in a database and needs to generate an embossed version for a special event theme, this code performs the in‑memory convolution and updates the stored blob.
+ * 1. When you need to enhance product photos stored as PNG BLOBs in a SQL database by applying an emboss effect before displaying them on a web portal.
+ * 2. When a desktop application must retrieve scanned document images from a database, apply a 5x5 emboss convolution filter for visual emphasis, and store the modified PNG back.
+ * 3. When an automated image‑processing pipeline reads PNG assets from a data store, adds texture using the Emboss5x5 filter, and writes the result back for downstream analytics.
+ * 4. When you want to programmatically apply a convolution filter to user‑uploaded PNG images saved as BLOBs, then persist the altered image without creating temporary files.
+ * 5. When a reporting service needs to generate stylized PNG thumbnails from database‑stored images by embossing them and returning the byte array to the caller.
  */
