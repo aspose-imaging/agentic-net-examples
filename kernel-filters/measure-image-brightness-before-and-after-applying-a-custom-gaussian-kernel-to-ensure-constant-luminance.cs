@@ -1,68 +1,70 @@
+// HOW-TO: Measure Image Luminance Before and After Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Compute average luminance as the mean of the R, G, B components of all pixels.
-    static double ComputeAverageLuminance(RasterImage rasterImage)
+    // Calculates average luminance (simple average of R, G, B) of a raster image
+    static double CalculateAverageLuminance(RasterImage raster)
     {
         long sum = 0;
-        int width = rasterImage.Width;
-        int height = rasterImage.Height;
+        int pixelCount = raster.Width * raster.Height;
 
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < raster.Height; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < raster.Width; x++)
             {
-                // GetPixel returns an Aspose.Imaging.Color structure.
-                var color = rasterImage.GetPixel(x, y);
-                // Simple luminance approximation: average of R, G, B.
+                var color = raster.GetPixel(x, y);
+                // Simple luminance approximation: average of R, G, B
                 sum += (color.R + color.G + color.B) / 3;
             }
         }
 
-        return (double)sum / (width * height);
+        return (double)sum / pixelCount;
     }
 
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths.
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\sample.GaussianBlur.png";
-
-            // Verify input file exists.
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists.
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image.
+            // Load image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel access and filtering.
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage for processing
+                RasterImage raster = (RasterImage)image;
 
-                // Measure brightness before filtering.
-                double beforeLuminance = ComputeAverageLuminance(rasterImage);
+                // Measure brightness before applying filter
+                double beforeLuminance = CalculateAverageLuminance(raster);
                 Console.WriteLine($"Average luminance before filter: {beforeLuminance:F2}");
 
-                // Apply a custom Gaussian blur filter (radius 5, sigma 4.0).
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply custom Gaussian blur (radius 5, sigma 4.0)
+                var gaussianOptions = new GaussianBlurFilterOptions(5, 4.0);
+                raster.Filter(raster.Bounds, gaussianOptions);
 
-                // Measure brightness after filtering.
-                double afterLuminance = ComputeAverageLuminance(rasterImage);
+                // Measure brightness after applying filter
+                double afterLuminance = CalculateAverageLuminance(raster);
                 Console.WriteLine($"Average luminance after filter: {afterLuminance:F2}");
 
-                // Save the filtered image.
-                rasterImage.Save(outputPath);
+                // Save the processed image
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -74,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that a PNG thumbnail generated with a Gaussian blur retains the same average luminance as the original for consistent UI brightness.
- * 2. When an image‑processing pipeline for JPEG photos must ensure that applying a custom Gaussian kernel (radius 5, sigma 4.0) does not unintentionally darken or brighten the image before saving to a web‑optimized folder.
- * 3. When a medical imaging application using C# and Aspose.Imaging must compare pre‑ and post‑filter luminance of DICOM‑converted PNG scans to maintain diagnostic visibility after noise reduction.
- * 4. When an automated batch script processes a folder of BMP assets and needs to log the average RGB luminance before and after applying a Gaussian blur to guarantee uniform visual appearance across game textures.
- * 5. When a developer integrates a custom Gaussian blur into a PDF conversion workflow and wants to measure the average luminance of the rasterized page image to keep printed output brightness consistent.
+ * 1. When you need to verify that applying a Gaussian blur to a PNG does not unintentionally darken or brighten the image, you can calculate average luminance before and after the filter.
+ * 2. When building an automated photo‑editing pipeline that must maintain consistent brightness across processed images, this code lets you measure and adjust luminance after each blur operation.
+ * 3. When performing quality‑control on scanned documents, you can use the routine to ensure that the blur used for noise reduction preserves the original text readability by checking luminance levels.
+ * 4. When creating a custom image‑processing library with Aspose.Imaging, you may need to benchmark the visual impact of different Gaussian kernel settings by comparing before‑and‑after luminance.
+ * 5. When developing a C# application that dynamically adjusts UI thumbnails, you can use the luminance check to decide whether additional exposure compensation is required after applying the blur.
  */
