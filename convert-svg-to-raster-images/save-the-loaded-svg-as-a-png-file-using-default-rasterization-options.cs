@@ -1,6 +1,6 @@
+// HOW-TO: Convert SVG to PNG with Default Rasterization Options in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output\\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,16 +28,16 @@ class Program
             using (FileStream stream = File.OpenRead(inputPath))
             using (SvgImage svgImage = new SvgImage(stream))
             {
-                // Set up rasterization options (default)
+                // Set up default rasterization options
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
-                // Set up PNG save options and attach rasterization options
+                // Configure PNG save options with the rasterization settings
                 PngOptions saveOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save as PNG
+                // Save the rasterized image as PNG
                 svgImage.Save(outputPath, saveOptions);
             }
         }
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application uses Aspose.Imaging for .NET to generate PNG thumbnails from user‑uploaded SVG logos for faster browser rendering.
- * 2. When a reporting service converts vector SVG charts into raster PNG images with default rasterization options to embed them in PDF or Word reports.
- * 3. When an e‑commerce site rasterizes SVG product icons to PNG files using C# and Aspose.Imaging so they display correctly on legacy mobile browsers.
- * 4. When a desktop batch‑processing tool iterates over a directory of SVG files and saves each as a PNG using default rasterization to prepare assets for email newsletters.
- * 5. When a CI/CD pipeline validates design assets by programmatically converting SVG mockups to PNGs with Aspose.Imaging for visual regression testing.
+ * 1. When you need to generate raster PNG thumbnails from vector SVG assets for web display using Aspose.Imaging in a C# application.
+ * 2. When an automated build process must batch‑convert design SVG files into PNGs for inclusion in mobile app resources without custom raster settings.
+ * 3. When a reporting tool requires embedding high‑quality PNG images derived from SVG charts, and you want a simple default rasterization approach.
+ * 4. When a server‑side service receives uploaded SVG logos and must store them as PNG files for compatibility with legacy browsers.
+ * 5. When you are creating a document conversion pipeline that transforms vector graphics into PNG format for PDF generation using C# and Aspose.Imaging.
  */
