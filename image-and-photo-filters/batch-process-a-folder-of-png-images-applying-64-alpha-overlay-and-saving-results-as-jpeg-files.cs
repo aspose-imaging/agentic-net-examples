@@ -1,9 +1,10 @@
-// HOW-TO: Batch Convert JPG Images to PNG in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Add 64% Alpha Black Overlay to PNGs and Convert to JPEG C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,8 +13,9 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -27,9 +29,9 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -37,16 +39,36 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                using (PngImage png = (PngImage)Image.Load(inputPath))
                 {
-                    var options = new PngOptions
+                    // Create an overlay image of the same size
+                    PngOptions overlayOptions = new PngOptions()
                     {
-                        Source = new FileCreateSource(outputPath, false)
+                        Source = new FileCreateSource(Path.Combine(outputDirectory, "overlay_temp.png"), false)
                     };
-                    image.Save(outputPath, options);
+                    using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, png.Width, png.Height))
+                    {
+                        // Fill overlay with black color
+                        Graphics overlayGraphics = new Graphics(overlay);
+                        overlayGraphics.Clear(Aspose.Imaging.Color.Black);
+                        // Blend overlay onto the original image with 64 alpha
+                        png.Blend(new Point(0, 0), overlay, 64);
+                    }
+
+                    // Prepare output JPEG path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as JPEG with quality 90
+                    JpegOptions jpegOptions = new JpegOptions()
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        Quality = 90
+                    };
+                    png.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -59,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a large collection of JPEG photos to lossless PNG format for archival or further editing.
- * 2. When an automated pipeline must read JPG files from a directory, apply Aspose.Imaging processing, and output PNGs for web‑compatible transparency support.
- * 3. When a desktop application has to batch‑process user‑uploaded JPEGs and store them as PNGs to preserve image quality before applying filters.
- * 4. When migrating legacy image assets stored as JPG into a PNG‑based asset library without manual intervention.
- * 5. When generating PNG thumbnails from a folder of JPEG images as part of a reporting or documentation workflow.
+ * 1. When you need to watermark a whole folder of transparent PNG icons with a semi‑transparent black shade before publishing them as JPEGs for web use.
+ * 2. When an application must reduce file size by converting PNGs to JPEG while ensuring a consistent 64‑percent opacity overlay for visual consistency.
+ * 3. When a batch script is required to prepare product images by darkening them uniformly and changing the format for a legacy e‑commerce platform.
+ * 4. When you want to automate the process of applying a low‑opacity overlay to scanned PNG documents and saving them as JPEGs for archival storage.
+ * 5. When a developer needs to programmatically process user‑uploaded PNG avatars, add a subtle dark overlay, and store them as JPEG thumbnails.
  */
