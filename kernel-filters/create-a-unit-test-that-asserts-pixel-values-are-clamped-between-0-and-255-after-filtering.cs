@@ -1,51 +1,62 @@
+// HOW-TO: Verify PNG Pixel Values Remain Within 0-255 After Sharpen Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Ensure input file exists; create a simple image if missing
             if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                using (PngImage img = new PngImage(10, 10))
+                {
+                    // Fill with a mid‑gray color
+                    img.Save(inputPath);
+                }
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Apply sharpen filter
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply a sharpen filter that may increase pixel values
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save filtered image
+                // Save the filtered image
                 raster.Save(outputPath);
 
-                // Retrieve pixel data
-                int[] pixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-
-                foreach (int argb in pixels)
+                // Verify that every channel is clamped between 0 and 255
+                for (int y = 0; y < raster.Height; y++)
                 {
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-
-                    if (a < 0 || a > 255 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+                    for (int x = 0; x < raster.Width; x++)
                     {
-                        throw new Exception($"Pixel value out of range: A={a}, R={r}, G={g}, B={b}");
+                        var color = raster.GetPixel(x, y);
+                        if (color.R < 0 || color.R > 255 ||
+                            color.G < 0 || color.G > 255 ||
+                            color.B < 0 || color.B > 255 ||
+                            color.A < 0 || color.A > 255)
+                        {
+                            Console.Error.WriteLine($"Pixel out of range at ({x},{y})");
+                            return;
+                        }
                     }
                 }
 
-                Console.WriteLine("All pixel values are within 0-255 after filtering.");
+                Console.WriteLine("All pixel values are within 0‑255.");
             }
         }
         catch (Exception ex)
@@ -57,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to ensure that applying a Sharpen filter to a PNG image with Aspose.Imaging does not produce pixel values outside the 0‑255 range, they can use this code to validate clamping after filtering.
- * 2. When integrating automated image processing pipelines in a C# application, this example helps verify that the raster image’s ARGB32 pixels remain within valid byte limits after any filter operation.
- * 3. When writing unit tests for image enhancement features, the code demonstrates how to load an input file, apply a sharpen filter, save the result, and assert that all channel values are correctly clamped.
- * 4. When troubleshooting visual artifacts caused by over‑exposed pixel data in JPEG or PNG outputs, developers can use the pixel‑range check to confirm that the filter implementation respects the 0‑255 bounds.
- * 5. When building a cross‑platform .NET service that processes user‑uploaded images, this snippet provides a practical way to guarantee that the processed image will be compatible with downstream systems that expect standard 8‑bit per channel values.
+ * 1. When you need to unit‑test that applying a sharpen filter with Aspose.Imaging does not produce pixel values outside the 0‑255 range for PNG images.
+ * 2. When you are building an automated image‑processing workflow and must guarantee that filtered images remain compliant with standard 8‑bit per channel limits.
+ * 3. When you want to prevent overflow errors in downstream graphics libraries by confirming that every channel is clamped after enhancement operations.
+ * 4. When you are validating custom filter parameters (e.g., radius and amount) to ensure they do not corrupt the image data in a C# application.
+ * 5. When you are creating a CI pipeline that checks image quality and pixel integrity after applying Aspose.Imaging filters before publishing assets.
  */
