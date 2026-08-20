@@ -1,20 +1,22 @@
+// HOW-TO: Chain Blur, Edge Detection, and Sharpen Filters on PNG to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.jpg";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,29 +29,20 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Apply Gaussian blur filter
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Apply edge detection using a Sobel kernel (convolution filter)
-                double[,] sobelKernel = new double[,]
-                {
-                    { -1, 0, 1 },
-                    { -2, 0, 2 },
-                    { -1, 0, 1 }
-                };
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(sobelKernel));
+                // Apply a sharpen filter as a simple edge‑detection step
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Apply sharpen filter
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply another sharpen filter for final sharpening
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save the result as JPEG
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
-                raster.Save(outputPath, jpegOptions);
+                // Save the processed image as JPEG
+                rasterImage.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -61,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess a PNG screenshot by blurring, detecting edges, and sharpening before converting it to a high‑quality JPEG for inclusion in a web report.
- * 2. When an e‑commerce platform must automatically enhance product photos—applying Gaussian blur to reduce noise, Sobel edge detection to highlight contours, and sharpening—while saving the final image as a JPEG for faster page loads.
- * 3. When a medical imaging application requires batch conversion of PNG scans into JPEGs with a custom filter pipeline to improve visual clarity for remote diagnosis.
- * 4. When a game developer wants to generate stylized JPEG thumbnails from PNG assets by chaining blur, edge detection, and sharpen filters using Aspose.Imaging in C#.
- * 5. When a content management system needs to transform uploaded PNG graphics into optimized JPEGs with a three‑step filter process to ensure consistent visual quality across browsers.
+ * 1. When you need to reduce noise in a PNG, highlight edges, and enhance details before converting it to a JPEG for web publishing.
+ * 2. When preparing product photos for an e‑commerce site, applying blur, edge detection, and sharpening can improve visual clarity while reducing file size by saving as JPEG.
+ * 3. When creating thumbnails that require a smooth background, defined outlines, and crisp final appearance, chaining these filters automates the process in C#.
+ * 4. When migrating legacy PNG assets to JPEG format and want to apply a consistent image‑processing pipeline to maintain quality across the batch.
+ * 5. When building an automated image‑processing service that must preprocess PNG uploads with blur, edge detection, and sharpening before storing them as JPEGs.
  */
