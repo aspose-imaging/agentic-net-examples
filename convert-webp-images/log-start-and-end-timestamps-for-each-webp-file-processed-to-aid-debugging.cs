@@ -1,3 +1,4 @@
+// HOW-TO: Log Timestamps While Converting Multiple WebP Files to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,26 +11,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input\";
-            string outputDir = @"C:\Images\Output\";
-
-            // List of WebP files to process (hardcoded)
-            string[] webpFiles = new string[]
-            {
-                "sample1.webp",
-                "sample2.webp",
-                "sample3.webp"
+            // Hardcoded input and output file paths
+            string[] inputPaths = {
+                @"c:\temp\test1.webp",
+                @"c:\temp\test2.webp"
             };
 
-            foreach (string fileName in webpFiles)
-            {
-                // Build full paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
+            string[] outputPaths = {
+                @"c:\temp\test1.output.png",
+                @"c:\temp\test2.output.png"
+            };
 
-                // Log start timestamp
-                Console.WriteLine($"Processing started: {fileName} at {DateTime.Now:O}");
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -37,6 +33,9 @@ class Program
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
+
+                // Log start timestamp
+                Console.WriteLine($"Processing started: {inputPath} at {DateTime.Now:O}");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -48,7 +47,7 @@ class Program
                 }
 
                 // Log end timestamp
-                Console.WriteLine($"Processing completed: {fileName} at {DateTime.Now:O}");
+                Console.WriteLine($"Processing completed: {outputPath} at {DateTime.Now:O}");
             }
         }
         catch (Exception ex)
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a set of WebP images to PNG format while recording start and end times for each file to troubleshoot performance issues.
- * 2. When an automated image‑processing pipeline must verify the existence of source WebP files, create missing output folders, and log timestamps for audit trails.
- * 3. When integrating Aspose.Imaging for .NET into a C# console application to monitor and debug the conversion of web‑optimized images to lossless PNGs in a production environment.
- * 4. When building a scheduled task that processes a predefined list of WebP assets and requires precise timing logs to detect stalls or failures.
- * 5. When a QA engineer wants to capture detailed processing timestamps for each WebP‑to‑PNG conversion to compare against expected processing windows during regression testing.
+ * 1. When you need to batch‑convert WebP images to PNG and keep a start‑and‑end log for each file to troubleshoot performance issues.
+ * 2. When your application must verify that source WebP files exist before processing to avoid runtime errors.
+ * 3. When you want to automatically create missing output directories while converting images in a C# service.
+ * 4. When you require detailed timestamps in the console to monitor how long each WebP‑to‑PNG conversion takes.
+ * 5. When you are using Aspose.Imaging for .NET to handle WebP files and need simple error handling that reports conversion failures.
  */

@@ -1,30 +1,41 @@
+// HOW-TO: Convert WebP Image to A4 PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.webp";
-        string outputPath = "Output\\sample.pdf";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.FileFormats.Webp.WebPImage webpImage = new Aspose.Imaging.FileFormats.Webp.WebPImage(inputPath))
+            // Hardcoded input and output paths (relative)
+            string inputPath = "Input\\sample.webp";
+            string outputPath = "Output\\sample.pdf";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                pdfOptions.PageSize = new Aspose.Imaging.SizeF(595f, 842f); // A4 size in points
-                webpImage.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with A4 page size (595x842 points)
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.PageSize = new SizeF(595f, 842f);
+                    // Save the image as PDF using the configured options
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -36,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating printable reports that include WebP graphics, a developer can use this code to convert each WebP image to an A4‑sized PDF page for consistent document layout.
- * 2. When building an automated batch job that archives web‑optimized images as PDF files for legal or compliance purposes, the snippet ensures the PDFs use the standard A4 dimensions.
- * 3. When creating a desktop application that lets users export their WebP photos to PDF for sharing with colleagues who only view PDFs, the code sets the page size to A4 so the output matches typical office paper.
- * 4. When integrating Aspose.Imaging into a C# web service that receives WebP uploads and returns PDF documents, the example demonstrates how to specify the A4 page size to avoid scaling issues on downstream printers.
- * 5. When preparing marketing collateral that combines WebP assets with text in a PDF brochure, developers can employ this code to maintain A4 page proportions and preserve image quality during the conversion.
+ * 1. When you need to embed a WebP graphic into a printable PDF report that must follow the standard A4 page dimensions.
+ * 2. When generating invoices or receipts from WebP logos and ensuring the output PDF matches corporate A4 formatting requirements.
+ * 3. When automating the creation of marketing brochures where source images are in WebP and the final PDF must be sized for A4 printers.
+ * 4. When building a document conversion service that receives WebP uploads and returns A4-sized PDFs for archival or email distribution.
+ * 5. When developing a batch process that converts multiple WebP files to PDFs with consistent A4 layout for legal or compliance documentation.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert WebP to GIF with Adjustable Lossy Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,9 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.gif";
+        string inputPath = @"C:\Images\input.webp";
+        string outputPath = @"C:\Images\output.gif";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
             // Verify that the input file exists
@@ -26,19 +28,22 @@ class Program
             // Load the WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF compression using MaxDiff (higher value = more lossy compression)
-                var gifOptions = new GifOptions
+                // Configure GIF compression (lossy) to reduce file size
+                GifOptions gifOptions = new GifOptions
                 {
-                    MaxDiff = 80 // recommended value for optimal lossy compression
+                    // MaxDiff > 0 enables lossy compression; 80 is a recommended value
+                    MaxDiff = 80
                 };
 
-                // Save the image as a GIF with the specified compression options
+                // Save the image as GIF using the configured options
                 image.Save(outputPath, gifOptions);
             }
+
+            Console.WriteLine($"Conversion completed successfully. Output saved to: {outputPath}");
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
+            // Report any error that occurs during processing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution WebP graphics to static or animated GIFs for legacy browsers while minimizing the resulting file size by adjusting the MaxDiff compression level.
- * 2. When an e‑commerce platform must generate lightweight product GIF previews from WebP assets to improve page load speed on mobile devices.
- * 3. When a marketing automation tool creates email‑friendly GIF banners from WebP images and must keep the attachment size under a specific limit.
- * 4. When a content management system processes user‑uploaded WebP photos and stores them as compressed GIFs for compatibility with older image viewers.
- * 5. When a game developer exports sprite sheets originally saved as WebP into GIF format for use in legacy game engines that only support GIF, requiring lossy compression to fit within memory constraints.
+ * 1. When you need to shrink animated GIFs generated from WebP assets for faster web page loading.
+ * 2. When you must create low‑size GIF thumbnails from high‑resolution WebP images for email newsletters.
+ * 3. When an application converts user‑uploaded WebP pictures to GIFs and must stay within a strict file‑size limit.
+ * 4. When you want to batch‑process WebP graphics into GIFs with lossy compression to meet mobile bandwidth constraints.
+ * 5. When integrating Aspose.Imaging in a C# service that delivers GIFs with reduced size for social‑media sharing.
  */

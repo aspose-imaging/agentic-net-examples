@@ -1,8 +1,10 @@
+// HOW-TO: Asynchronously Convert Multiple WebP Files to GIF with Cancellation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Multithreading;
@@ -10,17 +12,20 @@ using Aspose.Imaging.Multithreading;
 class Program
 {
     // Hardcoded input and output directories
-    private const string InputDirectory = "c:\\temp\\webp\\";
-    private const string OutputDirectory = "c:\\temp\\gif\\";
+    private const string InputDirectory = @"C:\temp\input\";
+    private const string OutputDirectory = @"C:\temp\output\";
 
     static async Task Main()
     {
         try
         {
-            // Create a cancellation token source that can be triggered by the user
+            // Ensure output directory exists
+            Directory.CreateDirectory(OutputDirectory);
+
+            // Create a cancellation token source that can be triggered by user input
             using var cts = new CancellationTokenSource();
 
-            // Start a task that listens for a key press to cancel the operation
+            // Start a task that waits for the user to press 'c' to cancel
             Task.Run(() =>
             {
                 Console.WriteLine("Press 'c' to cancel the batch conversion...");
@@ -32,13 +37,18 @@ class Program
                 Console.WriteLine("Cancellation requested.");
             });
 
-            // Get all WebP files in the input directory
-            string[] inputFiles = Directory.GetFiles(InputDirectory, "*.webp");
+            // Gather all WebP files in the input directory
+            string[] webpFiles = Directory.GetFiles(InputDirectory, "*.webp");
 
-            // Prepare conversion tasks
-            var conversionTasks = inputFiles.Select(inputPath => ConvertWebPToGifAsync(inputPath, cts.Token)).ToArray();
+            // Create a list of conversion tasks
+            var conversionTasks = webpFiles.Select(inputPath =>
+            {
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
+                string outputPath = Path.Combine(OutputDirectory, outputFileName);
+                return ConvertWebPToGifAsync(inputPath, outputPath, cts.Token);
+            }).ToArray();
 
-            // Await all tasks (they will observe the cancellation token)
+            // Await all tasks (they will respect cancellation)
             await Task.WhenAll(conversionTasks);
         }
         catch (Exception ex)
@@ -47,7 +57,8 @@ class Program
         }
     }
 
-    private static async Task ConvertWebPToGifAsync(string inputPath, CancellationToken token)
+    // Asynchronous conversion of a single WebP file to GIF with cancellation support
+    private static async Task ConvertWebPToGifAsync(string inputPath, string outputPath, CancellationToken token)
     {
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -56,25 +67,25 @@ class Program
             return;
         }
 
-        // Determine output path
-        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-        string outputPath = Path.Combine(OutputDirectory, fileNameWithoutExt + ".gif");
-
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Observe cancellation before starting heavy work
-        token.ThrowIfCancellationRequested();
+        // If cancellation was requested before starting, exit early
+        if (token.IsCancellationRequested)
+            return;
 
-        // Load WebP image and save as GIF
+        // Perform the conversion on a thread-pool thread
         await Task.Run(() =>
         {
-            // Check cancellation inside the task as well
-            token.ThrowIfCancellationRequested();
+            // Check cancellation again inside the task
+            if (token.IsCancellationRequested)
+                return;
 
+            // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Save to GIF using default options
+                // Save as GIF using default options
+                // Aspose.Imaging provides GifOptions; using default constructor
                 webPImage.Save(outputPath, new GifOptions());
             }
         }, token);
@@ -83,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop photo‑management app needs to let users convert a large folder of WebP images to GIFs without freezing the UI, the async batch conversion with a cancellation token lets the operation be stopped instantly.
- * 2. When an online content‑creation tool processes user‑uploaded WebP graphics into animated GIFs and must honor a “Cancel” button to avoid unnecessary server load, this code provides responsive cancellation.
- * 3. When a mobile game editor batch‑converts WebP sprites to GIFs for legacy platform support and needs to abort the process if the developer runs out of time or battery, the cancellation token enables graceful termination.
- * 4. When a digital marketing dashboard generates GIF previews from WebP assets in the background and the user navigates away, the code’s cancellation support prevents wasted CPU cycles.
- * 5. When an automated CI/CD pipeline converts WebP assets to GIFs as part of a build step and a developer wants to stop the job early due to a failing test, the cancellation token allows immediate interruption.
+ * 1. When you need to let users cancel a large batch of WebP‑to‑GIF conversions in a desktop app without freezing the UI.
+ * 2. When a server process must convert many uploaded WebP images to animated GIFs while allowing graceful shutdown on cancellation requests.
+ * 3. When building an image‑processing pipeline that transforms a folder of WebP assets to GIF format asynchronously to improve throughput.
+ * 4. When integrating Aspose.Imaging into a C# service that requires responsive cancellation handling during long‑running format conversions.
+ * 5. When creating a command‑line tool that processes thousands of WebP files into GIFs and needs to respond to user‑initiated abort signals.
  */

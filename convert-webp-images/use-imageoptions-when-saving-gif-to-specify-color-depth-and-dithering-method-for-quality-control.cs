@@ -1,3 +1,4 @@
+// HOW-TO: Save GIF With Custom Color Depth And Floyd Steinberg Dithering In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output.gif";
+            string inputPath = @"C:\Images\sample.gif";
+            string outputPath = @"C:\Images\Result\output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,40 +24,36 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access dithering
-                GifImage gifImage = image as GifImage;
-                if (gifImage != null)
+                // If the image is a GIF, apply dithering for quality control
+                if (image is GifImage gifImage)
                 {
-                    // Apply dithering (e.g., Floyd‑Steinberg with 8‑bit palette)
-                    gifImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8, null);
+                    // Apply Floyd‑Steinberg dithering with a 4‑bit palette
+                    gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
                 }
 
                 // Configure GIF saving options
                 GifOptions saveOptions = new GifOptions
                 {
-                    // ColorResolution = bits per primary color minus 1 (e.g., 7 => 8 bits)
+                    // Set color depth (bits per primary color minus 1). 7 => 8 bits per channel.
                     ColorResolution = 7,
                     // Enable palette correction for better color matching
                     DoPaletteCorrection = true,
-                    // Optional: make the GIF interlaced
+                    // Save as interlaced GIF (optional)
                     Interlaced = true,
-                    // Optional: set MaxDiff for lossy compression (0 = lossless)
-                    MaxDiff = 0
+                    // Use lossy compression with a moderate max difference
+                    MaxDiff = 80
                 };
 
                 // Save the image as GIF using the configured options
-                gifImage?.Save(outputPath, saveOptions);
-                // If the source wasn't a GIF, fall back to generic save
-                if (gifImage == null)
-                {
-                    image.Save(outputPath, saveOptions);
-                }
+                image.Save(outputPath, saveOptions);
             }
+
+            Console.WriteLine("GIF saved successfully.");
         }
         catch (Exception ex)
         {
@@ -67,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate optimized animated GIFs from user‑uploaded images while controlling color depth and applying Floyd‑Steinberg dithering to preserve visual quality.
- * 2. When a desktop application must convert legacy 8‑bit GIF assets to a consistent palette with palette correction and interlacing for faster progressive loading in browsers.
- * 3. When an e‑learning platform creates GIF screenshots of software tutorials and wants lossless compression (MaxDiff = 0) combined with a specific ColorResolution to meet branding color standards.
- * 4. When a game developer exports sprite animations as GIF files and needs to enforce a fixed 8‑bit palette and dithering to ensure the animation looks the same across different devices.
- * 5. When an automated image‑processing pipeline processes bulk GIF files and requires explicit GifOptions settings (ColorResolution, DoPaletteCorrection, Interlaced) to guarantee predictable file size and color fidelity for downstream analytics.
+ * 1. When you need to reduce the file size of an animated GIF while preserving visual quality by controlling the palette and applying dithering.
+ * 2. When you want to ensure consistent colors across different browsers by correcting the GIF palette during export.
+ * 3. When you need to create interlaced GIFs that load progressively on slow connections.
+ * 4. When you are generating GIFs with a specific bits‑per‑channel setting (e.g., 8‑bit per channel) for compatibility with legacy systems.
+ * 5. When you must apply lossy compression with a defined maximum color difference to balance quality and compression for web delivery.
  */

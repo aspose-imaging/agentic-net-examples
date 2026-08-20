@@ -1,3 +1,4 @@
+// HOW-TO: Convert Animated WebP to GIF with Infinite Loop in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,25 +12,25 @@ class Program
         string inputPath = @"C:\temp\input.webp";
         string outputPath = @"C:\temp\output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options with infinite loop count (0)
+                // Configure GIF options with infinite looping (0 means infinite)
                 var gifOptions = new GifOptions
                 {
-                    LoopsCount = 0 // 0 indicates infinite looping
+                    LoopsCount = 0
                 };
 
                 // Save as GIF with the specified options
@@ -45,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated GIF banner for a website that must loop forever after converting from an animated WebP file using C# and Aspose.Imaging.
- * 2. When developing a desktop application that generates continuous‑play GIF stickers from user‑uploaded animated WebP images, requiring an infinite LoopsCount.
- * 3. When building an automated batch conversion tool that processes a folder of animated WebP assets into GIFs for digital signage, ensuring each GIF repeats without end.
- * 4. When implementing a C# service that converts animated WebP advertisements to GIF format for email newsletters, and the GIF must loop infinitely to meet marketing guidelines.
- * 5. When migrating legacy animation assets from WebP to GIF for a mobile game, and the game engine expects GIFs with an infinite loop count for seamless background animations.
+ * 1. When you need to embed an animated WebP banner on a website that only supports GIFs and must play continuously.
+ * 2. When creating a slideshow of product demos where the original animation is in WebP but the target platform requires looping GIFs.
+ * 3. When exporting frame‑by‑frame animations from a design tool as WebP and need to generate GIFs that never stop for digital signage.
+ * 4. When building a C# utility that converts user‑uploaded animated WebP files to GIFs for email newsletters that require infinite playback.
+ * 5. When automating the preparation of animated assets for legacy mobile apps that only understand GIF format and need endless looping.
  */
