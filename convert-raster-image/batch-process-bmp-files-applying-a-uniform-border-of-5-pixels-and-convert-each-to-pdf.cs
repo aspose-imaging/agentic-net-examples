@@ -1,60 +1,68 @@
+// HOW-TO: Add 5 Pixel Border to BMP Images and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
+            // Get all BMP files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            foreach (string inputPath in files)
+            foreach (string file in files)
             {
-                if (!File.Exists(inputPath))
+                // Validate input file existence
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {file}");
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+                string tempBmpPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_bordered.bmp");
+                string pdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                using (RasterImage src = (RasterImage)Image.Load(inputPath))
+                // Ensure directories for temporary BMP and PDF exist
+                Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+                // Load the original BMP image
+                using (RasterImage src = (RasterImage)Image.Load(file))
                 {
-                    int border = 5;
-                    int newWidth = src.Width + border * 2;
-                    int newHeight = src.Height + border * 2;
+                    int newWidth = src.Width + 10;   // 5 pixels border on each side
+                    int newHeight = src.Height + 10;
 
-                    BmpOptions bmpOptions = new BmpOptions();
-
-                    using (Image canvas = Image.Create(bmpOptions, newWidth, newHeight))
+                    // Create a BMP canvas with a white background
+                    Source bmpSource = new FileCreateSource(tempBmpPath, false);
+                    BmpOptions bmpOptions = new BmpOptions { Source = bmpSource };
+                    using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, newWidth, newHeight))
                     {
                         Graphics graphics = new Graphics(canvas);
                         graphics.Clear(Color.White);
-                        graphics.DrawImage(src, new Rectangle(border, border, src.Width, src.Height));
+                        graphics.DrawImage(src, new Rectangle(5, 5, src.Width, src.Height));
 
-                        canvas.Save(outputPath, new PdfOptions());
+                        // Save the bordered BMP (bound to the file)
+                        canvas.Save();
                     }
+                }
+
+                // Convert the bordered BMP to PDF
+                using (Image bordered = Image.Load(tempBmpPath))
+                {
+                    PdfOptions pdfOptions = new PdfOptions();
+                    bordered.Save(pdfPath, pdfOptions);
                 }
             }
         }
@@ -67,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive scanned engineering drawings stored as BMP files, adding a uniform white border and converting them to PDF for consistent printing and document management.
- * 2. When an e‑learning platform wants to batch‑prepare BMP screenshots of software tutorials, framing each image with a 5‑pixel margin and packaging them as PDFs for easy distribution to learners.
- * 3. When a legal firm must submit BMP evidence images with a required margin for court filings, automatically adding the border and converting each file to PDF to meet filing standards.
- * 4. When a marketing team creates product catalogs from BMP assets and requires a clean white edge around each image before generating PDF pages for print‑ready brochures.
- * 5. When a medical imaging system exports BMP scans that need a standardized border for patient records, and the workflow converts the bordered images to PDF for secure archival in electronic health records.
+ * 1. When you need to automatically add a uniform white border to a collection of BMP scans before generating printable PDF reports.
+ * 2. When you must prepare legacy BMP assets with a margin for inclusion in PDF catalogs or e‑books without manual editing.
+ * 3. When a document‑management system requires batch conversion of BMP graphics to PDF while ensuring a consistent 5‑pixel frame around each image.
+ * 4. When you are creating PDF invoices that embed BMP logos and need a fixed border to align with layout guidelines.
+ * 5. When an archival workflow demands converting BMP photographs to PDF with a standard margin for consistent viewing across devices.
  */
