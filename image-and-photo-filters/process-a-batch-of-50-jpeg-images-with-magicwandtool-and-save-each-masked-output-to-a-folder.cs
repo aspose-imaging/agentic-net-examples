@@ -1,11 +1,11 @@
+// HOW-TO: Batch Apply Magic Wand Mask to JPEGs and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
-using System.Drawing;
 
 class Program
 {
@@ -13,35 +13,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            // Hardcoded input and output folders
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            // Process exactly 50 JPEG files
+            // Process 50 JPEG images
             for (int i = 1; i <= 50; i++)
             {
-                string inputPath = Path.Combine(inputDir, $"image{i}.jpg");
-                string outputPath = Path.Combine(outputDir, $"image{i}_masked.png");
-
-                // Verify input file exists
+                string inputPath = Path.Combine(inputFolder, $"image{i}.jpg");
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                string outputPath = Path.Combine(outputFolder, $"image{i}_masked.png");
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Load image, apply magic wand mask, and save
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Create a mask using MagicWandTool at point (0,0) with default settings
-                    MagicWandTool
-                        .Select(image, new MagicWandSettings(0, 0))
-                        .Apply();
+                    // Create a mask based on pixel (10,10) with default settings
+                    MagicWandTool.Select(image, new MagicWandSettings(10, 10)).Apply();
 
-                    // Save the masked image as PNG with alpha channel
+                    // Save masked image as PNG with alpha channel
                     image.Save(outputPath, new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove backgrounds from a batch of 50 JPEG photos and save the results as PNGs with transparency using Aspose.Imaging's MagicWandTool in C#.
- * 2. When an e‑commerce platform wants to generate product thumbnail masks for 50 uploaded JPEG images to improve visual consistency on the website.
- * 3. When a digital archivist must apply a quick mask to a set of scanned JPEG documents before converting them to PNG with an alpha channel for further compositing.
- * 4. When a marketing automation script has to process exactly 50 campaign images, isolate the foreground using MagicWand settings, and store the masked PNG files in a designated output folder.
- * 5. When a photo‑editing application needs to batch‑process 50 user‑selected JPEG files to create transparent PNG overlays for use in mobile app UI design.
+ * 1. When you need to automatically remove backgrounds from a large set of product photos stored as JPEGs and generate transparent PNGs for e‑commerce listings.
+ * 2. When a photo‑editing application must apply a quick selection mask to dozens of images based on a reference pixel and preserve the result with an alpha channel.
+ * 3. When a migration script has to convert scanned JPEG documents into masked PNG assets for use in a web portal that requires transparency.
+ * 4. When a game‑development pipeline requires batch processing of texture JPEGs to create masked PNG sprites with per‑pixel opacity.
+ * 5. When an automated reporting tool must preprocess a fixed number of camera images, apply a Magic Wand selection, and store the masked outputs in a separate folder for downstream analysis.
  */
