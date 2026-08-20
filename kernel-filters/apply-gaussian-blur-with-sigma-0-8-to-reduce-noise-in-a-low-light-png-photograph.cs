@@ -1,14 +1,16 @@
+// HOW-TO: Apply Gaussian Blur With Sigma 0.8 To PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\photo.png";
-        string outputPath = "output\\denoised.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\lowlight.png";
+        string outputPath = @"C:\Images\lowlight_blur.png";
 
         try
         {
@@ -22,20 +24,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a RasterImage
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with sigma 0.8
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions()
-                    {
-                        Sigma = 0.8
-                    });
+                // Apply Gaussian blur with kernel size 5 and sigma 0.8 to the whole image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(5, 0.8)
+                );
 
                 // Save the processed image
-                raster.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically reduce noise in low‑light PNG photos before uploading them to a web gallery, they can apply a Gaussian blur with sigma 0.8 using Aspose.Imaging for .NET.
- * 2. When building a desktop C# application that processes batches of user‑submitted images, the code can be used to denoise each PNG file by applying a Gaussian blur filter.
- * 3. When integrating image preprocessing into a machine‑learning pipeline, a developer can use this snippet to smooth low‑light PNG inputs and improve model accuracy.
- * 4. When creating a photo‑editing tool that offers a quick “noise reduction” button, the code demonstrates how to implement the feature with Aspose.Imaging’s RasterImage filter API.
- * 5. When preparing PNG screenshots captured in dim environments for documentation, a developer can run this routine to apply a subtle Gaussian blur and enhance visual clarity.
+ * 1. When you need to reduce noise in low‑light PNG photos before further analysis or display.
+ * 2. When preparing PNG assets for a web gallery and want a subtle blur to smooth grainy images.
+ * 3. When cleaning up scanned PNG documents taken in dim conditions to improve readability.
+ * 4. When preprocessing images for a computer‑vision pipeline that requires less high‑frequency noise.
+ * 5. When automating batch processing of PNG screenshots captured at night to enhance visual quality.
  */
