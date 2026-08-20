@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,18 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\temp\sample.png";
             string outputPath = @"C:\temp\sample.GaussianBlur.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
@@ -45,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the edges of a PNG logo before embedding it in a web page to reduce visual harshness, they can use Aspose.Imaging's GaussianBlurFilterOptions with a 5‑pixel kernel and sigma 4.0.
- * 2. When preparing product photos in a C# application for a catalog and wants to create a subtle background blur effect to highlight the foreground, the code can apply a Gaussian blur to the entire PNG image.
- * 3. When building an automated image‑processing pipeline that removes noise from scanned PNG documents by smoothing pixel variations, developers can invoke the rasterImage.Filter method with GaussianBlurFilterOptions.
- * 4. When generating thumbnail previews of PNG screenshots where a gentle blur helps mask pixelation after downscaling, the Gaussian blur filter provides a quick C# solution using Aspose.Imaging.
- * 5. When implementing a privacy feature that obscures sensitive details in a PNG image before sharing, applying a Gaussian blur with a defined kernel size and sigma ensures consistent smoothing across the image.
+ * 1. When you need to soften edges or reduce noise in a PNG before embedding it in a web page.
+ * 2. When you want to create a background‑blur effect for product photos in an e‑commerce catalog using C#.
+ * 3. When you must preprocess scanned PNG documents to hide sensitive details by applying a Gaussian blur.
+ * 4. When you are generating thumbnail previews that require a smooth blur to improve visual appeal.
+ * 5. When you automate batch processing of PNG assets to apply a consistent blur radius for a mobile app’s UI.
  */
