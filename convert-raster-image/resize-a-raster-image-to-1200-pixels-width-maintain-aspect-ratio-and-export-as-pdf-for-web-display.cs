@@ -1,3 +1,4 @@
+// HOW-TO: Resize Image to 1200px Width and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,31 +8,33 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.jpg";
+        string outputPath = @"C:\Images\ResizedOutput.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.jpg";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Calculate new height to maintain aspect ratio
-                int newWidth = 1200;
-                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+                // Desired width
+                int targetWidth = 1200;
 
-                // Resize the image
-                image.Resize(newWidth, newHeight);
+                // Calculate proportional height
+                int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+
+                // Resize while preserving aspect ratio
+                image.Resize(targetWidth, targetHeight, ResizeType.HighQualityResample);
 
                 // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a PDF thumbnail of a high‑resolution JPEG for faster page load, they can resize the raster image to a 1200‑pixel width while preserving aspect ratio and export it as PDF using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform wants to create printable product catalogs from user‑uploaded photos, the code can resize each image to a consistent width and convert it to PDF for consistent layout.
- * 3. When a content management system must automatically produce PDF previews of uploaded images for SEO‑friendly indexing, the snippet resizes the source image and saves it as a PDF document.
- * 4. When a digital marketing agency needs to batch‑process campaign assets, converting large JPEG banners into 1200‑pixel‑wide PDFs ensures uniform size for email newsletters.
- * 5. When a desktop application offers a “Save as PDF” feature for image files, this code provides the logic to maintain the original aspect ratio while scaling the image to a web‑ready width before saving.
+ * 1. When you need to generate a web‑friendly PDF from a high‑resolution JPEG by scaling it to a fixed width for faster page load.
+ * 2. When an e‑commerce site must display product photos in PDF catalogs with consistent width while preserving the original aspect ratio.
+ * 3. When a reporting tool creates printable PDFs from user‑uploaded images and requires automatic resizing to fit standard page layouts.
+ * 4. When a content management system converts uploaded raster images to PDFs for archival, ensuring each file is no wider than 1200 pixels.
+ * 5. When a mobile app backend prepares image‑based PDFs for email attachments, resizing them to reduce file size without distortion.
  */
