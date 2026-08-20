@@ -1,3 +1,4 @@
+// HOW-TO: How to Apply Median Filter, Resize, and Save PNG as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,7 +10,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
+        string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.svg";
 
         try
@@ -27,20 +28,17 @@ class Program
             // Load raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering and resizing
+                // Cast to RasterImage for filtering and resizing
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply median filter with size 5 to the whole image
+                // Apply median filter with size 5
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                 // Resize to thumbnail size (e.g., 150x150)
-                int thumbWidth = 150;
-                int thumbHeight = 150;
-                rasterImage.Resize(thumbWidth, thumbHeight);
+                rasterImage.Resize(150, 150);
 
-                // Save as SVG using default SvgOptions
-                SvgOptions svgOptions = new SvgOptions();
-                rasterImage.Save(outputPath, svgOptions);
+                // Save the processed image as SVG
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate lightweight SVG thumbnails from user‑uploaded PNG photos while reducing noise with a median filter, they can use this C# Aspose.Imaging code.
- * 2. When an e‑commerce platform wants to display product preview icons as scalable vector graphics and must first clean up the original raster images, the code provides a simple way to filter, resize, and save as SVG.
- * 3. When a desktop application creates a gallery of small, noise‑free previews for high‑resolution scans, the snippet shows how to load the raster image, apply a 5‑pixel median filter, shrink it to 150×150, and export to SVG.
- * 4. When a content‑management system automatically converts uploaded bitmap assets into vector thumbnails for responsive design, developers can employ this routine to perform the median filtering, resizing, and SVG saving in C#.
- * 5. When a data‑visualization tool needs to embed cleaned‑up, size‑optimized SVG icons derived from PNG sources, this example demonstrates the required steps using Aspose.Imaging’s RasterImage, MedianFilterOptions, and SvgOptions.
+ * 1. When you need to clean up noisy PNG screenshots, shrink them to 150 × 150 thumbnails, and store the result as scalable SVG for web dashboards.
+ * 2. When generating lightweight vector icons from raster assets, applying a median filter to reduce artifacts before converting to SVG.
+ * 3. When preprocessing user‑uploaded images for a mobile app, removing speckle noise, creating a small preview, and saving it in SVG to maintain resolution independence.
+ * 4. When automating batch conversion of scanned documents to vector format, smoothing the raster data and resizing it to a standard thumbnail size.
+ * 5. When integrating image processing into a C# reporting tool that requires filtered, resized images saved as SVG for inclusion in PDF or HTML reports.
  */
