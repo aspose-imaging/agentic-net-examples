@@ -1,7 +1,9 @@
+// HOW-TO: Batch Sharpen All PNG Images in a Folder Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -18,30 +20,30 @@ class Program
 
             foreach (string inputPath in pngFiles)
             {
-                // Verify that the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Prepare output path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".sharpened.png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering
+                    // Cast to RasterImage to apply filter
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply the sharpen filter (kernel size 5, sigma 4.0)
+                    // Apply Sharpen filter with kernel size 5 and sigma 4.0
                     rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Build the output file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".sharpened.png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed image
+                    // Save the processed image as PNG
                     rasterImage.Save(outputPath);
                 }
             }
@@ -55,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically enhance the visual clarity of a large collection of product photos stored as PNG files before uploading them to an e‑commerce website, they can use this code to batch apply a sharpen filter with Aspose.Imaging in C#.
- * 2. When a photo‑editing tool must prepare a set of PNG screenshots for a software manual by increasing edge definition without manual intervention, the code provides a repeatable C# solution that processes an entire folder.
- * 3. When a digital asset management system requires periodic sharpening of newly imported PNG graphics to improve print quality, this script can be scheduled to run on the server and save the sharpened versions to an output directory.
- * 4. When a developer is building a CI/CD pipeline that validates image assets and needs to automatically apply a predefined sharpening filter to every PNG in a repository before packaging, the example demonstrates how to integrate Aspose.Imaging filtering into the build process.
- * 5. When a content‑creation workflow involves converting raw PNG illustrations into web‑ready images with enhanced detail, the code enables batch processing of the source folder and saves the sharpened PNGs to a separate output location.
+ * 1. When you need to improve the clarity of dozens of product photos stored as PNGs before uploading them to an e‑commerce site.
+ * 2. When an automated workflow must enhance scanned screenshots by applying a sharpen filter to every PNG in a nightly batch.
+ * 3. When a desktop application processes user‑generated PNG graphics and must save a sharpened version alongside the original.
+ * 4. When a server‑side service prepares PNG assets for a mobile game, applying a consistent sharpening effect to all images in a directory.
+ * 5. When a migration script updates legacy PNG files by batch‑sharpening them to meet new visual quality standards.
  */

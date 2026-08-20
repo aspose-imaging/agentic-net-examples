@@ -1,9 +1,8 @@
-// HOW-TO: Convert Multi‑Layer SVG to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Filter to SVG Layers and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,50 +10,43 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
+            string tempPngPath = "temp.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                SvgImage svgImage = image as SvgImage;
-                if (svgImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not an SVG.");
-                    return;
-                }
+                var pngOptions = new PngOptions();
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Prepare rasterization options
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            using (Image img = Image.Load(tempPngPath))
+            {
+                RasterImage raster = (RasterImage)img;
 
-                // Rasterize SVG to a memory stream and save to output file
-                using (MemoryStream ms = new MemoryStream())
+                double[,] kernel = new double[,]
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-                    using (FileStream outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        ms.CopyTo(outStream);
-                    }
-                }
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+
+                raster.Filter(raster.Bounds, convOptions);
+                raster.Save(outputPath);
+            }
+
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -66,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a raster PNG preview of an SVG diagram for web thumbnails.
- * 2. When you must programmatically convert user‑uploaded SVG assets to PNG for email attachments.
- * 3. When you want to ensure consistent page size by rasterizing an SVG at its original dimensions.
- * 4. When you need to automate batch processing of SVG files into PNGs in a .NET backend service.
- * 5. When you require error handling for missing files while converting vector graphics to raster images.
+ * 1. When you need to sharpen each layer of a multi‑layer SVG before converting it to a high‑quality PNG for web publishing.
+ * 2. When you want to programmatically apply a custom kernel (e.g., edge‑enhancement) to SVG graphics in a C# batch‑processing pipeline.
+ * 3. When you must rasterize vector artwork, apply image processing filters, and generate PNG thumbnails for a content‑management system.
+ * 4. When you are building an automated workflow that converts SVG icons to sharpened PNG assets for mobile app resources.
+ * 5. When you require a temporary raster conversion step to use Aspose.Imaging’s convolution filter on vector files without manual editing.
  */

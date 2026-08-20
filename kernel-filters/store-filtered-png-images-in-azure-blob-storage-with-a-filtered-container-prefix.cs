@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to PNG and Upload to Azure Blob in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -24,22 +25,29 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (PngImage pngImage = (PngImage)Image.Load(inputPath))
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with a filter type (e.g., Adaptive)
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
+
+                // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Prepare PNG save options
                 PngOptions saveOptions = new PngOptions
                 {
-                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive,
-                    // Additional options can be set here if needed
+                    // Use adaptive filtering for better compression
+                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
                 };
 
-                // Save the filtered image to the output path
-                pngImage.Save(outputPath, saveOptions);
+                // Save the filtered image
+                raster.Save(outputPath, saveOptions);
             }
 
-            // Placeholder: Upload the file at outputPath to Azure Blob Storage
-            // using Azure REST API or SDK (not included due to library restrictions)
+            // Placeholder for Azure Blob Storage upload
+            throw new NotSupportedException("Azure Blob Storage upload not implemented.");
         }
         catch (Exception ex)
         {
@@ -50,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of PNG assets before uploading them to Azure Blob Storage for a web‑site CDN, they can use this code to apply an adaptive PNG filter and store the optimized image in a “filtered” container.
- * 2. When an e‑commerce platform must preprocess product photos in C# to ensure consistent PNG compression before archiving them in Azure Blob Storage, this snippet creates the filtered output folder and saves the image with Aspose.Imaging’s filter options.
- * 3. When a medical imaging application wants to apply a loss‑less PNG filter to scanned documents and then push the filtered files to Azure Blob Storage for secure cloud backup, the code demonstrates the required file‑existence check, directory creation, and saving with Aspose.Imaging.
- * 4. When a DevOps pipeline automates the preparation of PNG icons by applying an adaptive filter and storing them under a “filtered” prefix in Azure Blob Storage, this example shows how to perform the operation programmatically in .NET.
- * 5. When a content‑management system needs to validate that a source PNG exists, apply a specific PNG filter using Aspose.Imaging, and then upload the filtered version to Azure Blob Storage for later retrieval, this code provides the essential steps.
+ * 1. When you need to automatically blur sensitive areas of a PNG image before storing it in an Azure Blob container.
+ * 2. When you want to preprocess product photos with a Gaussian blur and save the compressed PNGs to a “filtered” folder for later cloud upload.
+ * 3. When a web service must generate blurred PNG thumbnails, apply adaptive PNG filtering for better compression, and prepare them for Azure Blob storage.
+ * 4. When a batch job processes incoming PNG files, applies a Gaussian blur filter, and saves the results in a specific directory ready for Azure Blob transfer.
+ * 5. When you are building a CI pipeline that validates image transformations by blurring PNGs and ensures the output can be uploaded to an Azure Blob container.
  */

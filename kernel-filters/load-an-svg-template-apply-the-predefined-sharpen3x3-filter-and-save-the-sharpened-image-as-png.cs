@@ -1,9 +1,10 @@
+// HOW-TO: Sharpen SVG Template and Save as PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -13,8 +14,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string inputPath = @"C:\Images\template.svg";
+            string outputPath = @"C:\Images\sharpened.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -29,23 +30,25 @@ class Program
             // Load the SVG image
             using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Set up rasterization options for PNG output
-                var rasterizationOptions = new SvgRasterizationOptions();
-                var pngOptions = new PngOptions
+                // Prepare rasterization options for SVG -> raster conversion
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
+
+                // Prepare PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Rasterize SVG to a memory stream (PNG format)
-                using (var ms = new MemoryStream())
+                // Rasterize SVG into a memory stream as PNG
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    svgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
 
-                    // Load the rasterized PNG as a RasterImage to apply the filter
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    // Load the rasterized PNG as a RasterImage to apply filters
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
                     {
-                        // Apply the predefined 3x3 sharpen convolution kernel
+                        // Apply the predefined 3x3 sharpen convolution filter
                         rasterImage.Filter(
                             rasterImage.Bounds,
                             new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
@@ -65,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG icon set into PNG assets for a mobile app and wants to improve edge definition by applying the Sharpen3x3 convolution filter.
- * 2. When a web‑service generates dynamic charts as SVG templates and must deliver them as sharpened PNG images for faster loading in browsers.
- * 3. When an e‑commerce platform automates product image processing by rasterizing vendor‑provided SVG logos to PNG and enhancing visual clarity with a 3×3 sharpen filter.
- * 4. When a reporting tool exports vector diagrams to PNG for inclusion in PDF reports and requires a crisp appearance achieved through Aspose.Imaging’s Sharpen3x3 filter.
- * 5. When a desktop application batch‑processes SVG UI assets, converts them to PNG, and applies a convolution sharpen operation to meet branding guidelines for high‑contrast displays.
+ * 1. When you need to enhance the visual clarity of a vector logo before embedding it in a web page, you can rasterize the SVG, apply a sharpen filter, and output a high‑quality PNG.
+ * 2. When generating product thumbnails from SVG designs that must appear crisp on high‑DPI screens, applying a 3×3 sharpen filter ensures the PNGs retain edge detail.
+ * 3. When preparing SVG‑based icons for email newsletters where only raster images are supported, you can sharpen them to avoid blurriness after conversion.
+ * 4. When automating a batch process that converts SVG diagrams to printable PNGs with improved sharpness for reports, this code provides the necessary steps.
+ * 5. When integrating Aspose.Imaging into a C# application to dynamically render and sharpen user‑uploaded SVG artwork before saving it as a PNG for further processing.
  */

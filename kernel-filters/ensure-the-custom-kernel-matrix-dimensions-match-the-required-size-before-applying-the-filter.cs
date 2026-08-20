@@ -1,3 +1,4 @@
+// HOW-TO: Apply Custom 3x3 Sharpen Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,7 +25,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom convolution kernel (3x3 sharpen example)
+            // Define a custom convolution kernel (example 3x3 sharpen kernel)
             double[,] kernel = new double[,]
             {
                 { 0, -1, 0 },
@@ -41,17 +42,19 @@ class Program
                 return;
             }
 
-            // Load the image as a RasterImage
+            // Load the image as a raster image and apply the custom filter
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the custom convolution filter to the entire image
+                // Create convolution filter options with the custom kernel
                 var filterOptions = new ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Save the processed image
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -63,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a PNG image by applying a custom 3x3 convolution kernel before uploading it to a web gallery.
- * 2. When an automated batch job must validate that a user‑provided kernel is square and odd‑sized before filtering JPEG files to avoid runtime errors.
- * 3. When a desktop application wants to ensure the output directory exists and then save the filtered image as PNG after applying a custom convolution filter to improve OCR accuracy.
- * 4. When a C# service processes scanned documents, loads them as RasterImage, applies a sharpen filter to enhance edges, and writes the result to a specified folder for downstream processing.
- * 5. When a developer integrates Aspose.Imaging into a CI pipeline to test that custom kernel dimensions are checked and the convolution filter correctly modifies the image bounds for PNG assets.
+ * 1. When you need to sharpen a PNG image using a custom 3x3 convolution kernel in a C# application.
+ * 2. When you want to ensure a user‑provided kernel is square and odd‑sized before applying it with Aspose.Imaging.
+ * 3. When you must programmatically process images in bulk, applying the same custom filter to each file.
+ * 4. When you need to validate input files and create output directories automatically while performing image filtering.
+ * 5. When you are integrating Aspose.Imaging into a .NET service that requires custom image enhancement without external libraries.
  */

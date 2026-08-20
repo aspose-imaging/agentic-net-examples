@@ -1,6 +1,11 @@
+// HOW-TO: Batch Apply Custom Convolution Kernel to PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -8,13 +13,14 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -25,22 +31,38 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (var file in files)
+            foreach (string inputPath in files)
             {
-                string inputPath = file;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_filtered.png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath);
+                    RasterImage raster = (RasterImage)image;
+
+                    double[,] kernel = new double[,]
+                    {
+                        { 0.1, 0.1, 0.1 },
+                        { 0.1, 0.2, 0.1 },
+                        { 0.1, 0.1, 0.0 }
+                    };
+                    double factor = 1.0 / 0.9; // Normalize kernel sum to 1
+
+                    var filterOptions = new ConvolutionFilterOptions(kernel, factor, 0);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    using (var options = new PngOptions { Source = new FileCreateSource(outputPath, false) })
+                    {
+                        raster.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -53,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to copy a large collection of PNG assets from an input folder to an output folder while ensuring each image is correctly parsed and saved using Aspose.Imaging to prevent file corruption.
- * 2. When an application must batch‑process user‑uploaded PNG files by loading them with the Aspose.Imaging .NET library and re‑saving them to a standardized output directory for downstream processing.
- * 3. When a CI/CD pipeline includes a validation step that loads every PNG in a repository with Image.Load and writes it back with Image.Save to confirm the files are readable by Aspose.Imaging before release.
- * 4. When a desktop utility has to import multiple PNG screenshots, normalize their file paths, and store the images in a dedicated output folder as a preparation stage for further analysis.
- * 5. When a server‑side service iterates through an Input directory, loads each PNG using Aspose.Imaging, and writes unchanged copies to an Output directory to create a staging area for subsequent image filtering operations.
+ * 1. When you need to automatically apply a custom edge‑enhancement convolution filter to a folder of PNG files and save the filtered results.
+ * 2. When you must keep image brightness consistent after filtering by normalizing a kernel whose sum is less than one.
+ * 3. When you are preparing PNG assets for a machine‑learning pipeline and require the same convolution operation on every image.
+ * 4. When you want to generate stylized versions of PNG icons for different UI themes without editing each file manually.
+ * 5. When you are building an automated workflow that applies a custom blur or sharpen effect to a batch of PNG graphics in C#.
  */

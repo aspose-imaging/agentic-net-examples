@@ -1,7 +1,8 @@
-// HOW-TO: Apply User-Defined Gaussian Blur to PNG in C# with Aspose Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Apply Sharpen Filter With User‑Defined Kernel Size And Sigma In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -23,41 +24,34 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prompt user for Gaussian blur parameters
-            Console.Write("Enter blur radius (integer > 0): ");
-            string radiusInput = Console.ReadLine();
-            Console.Write("Enter sigma value (positive double): ");
-            string sigmaInput = Console.ReadLine();
+            // Get dynamic kernel parameters from the user
+            Console.Write("Enter kernel size (odd integer): ");
+            string sizeStr = Console.ReadLine();
+            Console.Write("Enter sigma (positive number): ");
+            string sigmaStr = Console.ReadLine();
 
-            if (!int.TryParse(radiusInput, out int radius) || radius <= 0)
+            if (!int.TryParse(sizeStr, out int kernelSize) || kernelSize <= 0 || kernelSize % 2 == 0)
             {
-                Console.Error.WriteLine("Invalid radius value.");
+                Console.Error.WriteLine("Invalid kernel size.");
                 return;
             }
 
-            if (!double.TryParse(sigmaInput, out double sigma) || sigma <= 0)
+            if (!double.TryParse(sigmaStr, out double sigma) || sigma <= 0)
             {
                 Console.Error.WriteLine("Invalid sigma value.");
                 return;
             }
 
-            // Load the image and apply the filter
+            // Load image, apply sharpen filter with user-defined parameters, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(kernelSize, sigma));
 
-                // Create Gaussian blur options with user-defined parameters
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(radius, sigma);
-
-                // Apply the filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                PngOptions options = new PngOptions();
+                rasterImage.Save(outputPath, options);
             }
-
-            Console.WriteLine($"Filtered image saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -68,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to let end‑users adjust the blur strength of a PNG before saving it in a Windows desktop application.
- * 2. When you want to programmatically apply a custom Gaussian blur with specific radius and sigma values to images for photo‑editing tools.
- * 3. When you must validate user input for blur parameters and ensure the filtered image is saved without errors using Aspose.Imaging.
- * 4. When you are building a batch‑processing utility that lets operators specify different blur settings for each image at runtime.
- * 5. When you require a simple console‑based UI to preview and export Gaussian‑blurred PNGs with dynamically chosen kernel coefficients.
+ * 1. When a desktop application needs to let users fine‑tune sharpening strength for PNG photos by entering a custom kernel size and sigma.
+ * 2. When you want to programmatically enhance scanned documents in C# using Aspose.Imaging while giving end‑users control over the filter parameters.
+ * 3. When building a photo‑editing tool that applies a sharpen filter only after validating user‑provided odd kernel dimensions and positive sigma values.
+ * 4. When you must ensure the output directory exists and save the processed image with Aspose’s PngOptions after applying a user‑specified filter.
+ * 5. When handling image processing errors gracefully in a C# console UI that prompts for filter settings before saving the sharpened result.
  */

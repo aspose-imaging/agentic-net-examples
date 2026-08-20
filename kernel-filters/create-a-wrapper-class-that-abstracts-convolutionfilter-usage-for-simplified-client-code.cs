@@ -1,18 +1,18 @@
+// HOW-TO: Apply 5x5 Blur Box Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,11 +25,16 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-                raster.Filter(raster.Bounds, filterOptions);
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5);
+                double factor = 1.0;
+                int bias = 0;
 
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, factor, bias);
+
+                raster.Filter(raster.Bounds, convOptions);
+
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically blur sensitive information in PNG screenshots before storing them in a secure archive, they can use the wrapper to apply a Gaussian blur filter with a single method call.
- * 2. When building a C# web service that generates thumbnail previews of uploaded PNG files and wants to smooth edges for a professional look, the wrapper simplifies applying the convolution filter.
- * 3. When creating a batch image processing tool that prepares product photos by reducing noise in PNG images, the wrapper abstracts the Aspose.Imaging filter options for easy integration.
- * 4. When implementing a desktop application that applies artistic effects such as soft focus to user‑selected PNG images, the wrapper lets developers invoke the Gaussian blur without handling low‑level raster operations.
- * 5. When integrating image preprocessing into a machine‑learning pipeline that requires blurred PNG inputs to augment training data, the wrapper provides a concise API to apply the convolution filter across many files.
+ * 1. When you need to soften the edges of a PNG image to create a smoother web thumbnail.
+ * 2. When you want to reduce visual noise in scanned PNG documents before running OCR.
+ * 3. When you need to generate a blurred background effect for UI overlays using C#.
+ * 4. When you are preprocessing PNG images for a machine‑learning pipeline that requires uniform smoothing.
+ * 5. When you must batch‑process PNG files to apply a consistent blur for privacy masking.
  */

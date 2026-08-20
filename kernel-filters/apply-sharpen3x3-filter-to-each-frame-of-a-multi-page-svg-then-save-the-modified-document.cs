@@ -1,52 +1,71 @@
+// HOW-TO: Sharpen Each Page of Multi‑Page SVG and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Process each page if the image is multipage
-                if (image is IMultipageImage multipage && multipage.Pages != null)
+                if (!(image is IMultipageImage multipage))
                 {
-                    foreach (var page in multipage.Pages)
-                    {
-                        // Apply sharpen filter to raster pages
-                        if (page is RasterImage rasterPage)
-                        {
-                            rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions(5, 4.0));
-                        }
-                    }
-                }
-                else if (image is RasterImage rasterImage)
-                {
-                    // Single-page raster image
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                    Console.Error.WriteLine("The loaded image is not a multipage vector image.");
+                    return;
                 }
 
-                // Save the modified SVG
-                image.Save(outputPath);
+                List<RasterImage> frames = new List<RasterImage>();
+
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    };
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        image.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        RasterImage raster = (RasterImage)Image.Load(ms);
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                        frames.Add(raster);
+                    }
+                }
+
+                using (Image result = Image.Create(frames.ToArray(), true))
+                {
+                    result.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                }
+
+                foreach (var frame in frames)
+                {
+                    frame.Dispose();
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visual clarity of each frame in a multi‑page SVG diagram by applying a Sharpen3x3 filter before publishing it online.
- * 2. When an automated pipeline must process SVG assets generated from CAD software, sharpening each rasterized page to improve edge definition for high‑resolution printing.
- * 3. When a web application dynamically loads SVG icons that contain multiple frames and wants to apply consistent sharpening to all frames to maintain a crisp UI across browsers.
- * 4. When a batch conversion tool converts multi‑page SVG files to sharpened raster images for inclusion in PDF reports, requiring per‑page filter application in C#.
- * 5. When a developer integrates Aspose.Imaging into a CI/CD workflow to automatically sharpen every page of SVG assets stored in a repository before they are deployed to a marketing site.
+ * 1. When you need to enhance the visual sharpness of every layer in a multi‑page SVG before converting it to a high‑resolution TIFF for printing.
+ * 2. When an application must batch‑process vector diagrams, applying a 3×3 sharpen filter to each page and exporting them as a single multipage TIFF for archival.
+ * 3. When you want to programmatically improve the clarity of SVG icons embedded in a document and store the result as a TIFF for compatibility with legacy systems.
+ * 4. When generating thumbnails of each SVG page with increased edge definition and compiling them into a TIFF slideshow using C# and Aspose.Imaging.
+ * 5. When converting a multi‑page SVG chart into a TIFF while automatically applying a sharpen filter to ensure details remain crisp after rasterization.
  */

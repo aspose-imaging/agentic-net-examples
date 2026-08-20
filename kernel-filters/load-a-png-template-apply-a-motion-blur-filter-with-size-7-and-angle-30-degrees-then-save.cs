@@ -1,33 +1,46 @@
+// HOW-TO: Apply 7‑Pixel Motion Blur At 30° To PNG With Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "template.png";
-            string outputPath = "output/output.png";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\template.png";
+            string outputPath = @"C:\Images\output_motion_blur.png";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(7, 1.0, 30.0));
+
+                // Apply a motion blur filter with size 7 and angle 30 degrees
+                // MotionWienerFilterOptions constructor: (length, smooth, angle)
+                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(7, 1.0, 30.0));
+
+                // Save the processed image
                 raster.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -35,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to add a subtle motion blur effect to a PNG logo before embedding it in a marketing email.
- * 2. When an e‑commerce site needs to generate product thumbnails with a directional blur to simulate movement in a promotional banner.
- * 3. When a game UI designer applies a motion‑wiener filter to a PNG button image to create a dynamic hover effect.
- * 4. When a photo‑editing application programmatically processes user‑uploaded PNG files and saves the blurred result to an output folder.
- * 5. When an automated report generator adds a motion‑blurred PNG watermark to highlight a specific section of a PDF export.
+ * 1. When you need to add a realistic motion‑blur effect to a PNG template for a web banner or UI element.
+ * 2. When generating a series of images that simulate camera movement, such as in a game UI or animated tutorial.
+ * 3. When preprocessing product photos to create a stylized background blur before compositing them into marketing material.
+ * 4. When automating the creation of motion‑blurred placeholders for loading screens in a .NET application.
+ * 5. When applying consistent blur parameters to multiple PNG assets during a batch image‑processing pipeline.
  */

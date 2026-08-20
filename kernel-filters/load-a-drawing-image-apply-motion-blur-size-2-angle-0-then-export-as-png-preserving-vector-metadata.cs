@@ -1,47 +1,48 @@
-// HOW-TO: Apply Motion Blur to EMF and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur to PNG and Preserve Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image (vector or raster)
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Apply a motion blur (size 2, angle 0) using MotionWienerFilterOptions
-                // The filter works on RasterImage, so cast accordingly
+                // Apply motion blur (size 2, angle 0) if the image is raster
                 if (image is RasterImage rasterImage)
                 {
-                    // Length = 2, smooth value = 1.0 (default), angle = 0 degrees
-                    var motionOptions = new MotionWienerFilterOptions(2, 1.0, 0.0);
-                    rasterImage.Filter(rasterImage.Bounds, motionOptions);
+                    // MotionWienerFilterOptions can be used to simulate motion blur
+                    rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(2, 1.0, 0.0));
                 }
 
-                // Prepare PNG save options (vector metadata is preserved automatically where possible)
-                var pngOptions = new PngOptions();
+                // Prepare PNG save options (metadata is preserved by default)
+                PngOptions pngOptions = new PngOptions();
 
                 // Save the processed image as PNG
-                image.Save(outputPath, pngOptions);
+                using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
+                {
+                    image.Save(outStream, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a subtle motion‑blur effect to a vector drawing (EMF) before converting it to a PNG for web display.
- * 2. When a reporting tool generates EMF charts that must be exported as PNGs with preserved vector information for high‑resolution printing.
- * 3. When you want to programmatically process scanned engineering diagrams, applying a motion blur to reduce aliasing before saving them as PNG files.
- * 4. When integrating Aspose.Imaging into a C# application to batch‑convert legacy EMF assets to PNG while maintaining metadata for downstream GIS systems.
- * 5. When creating thumbnail previews of vector illustrations where a slight motion blur improves visual appeal and the result needs to be stored as a PNG image.
+ * 1. When you need to add a subtle motion‑blur effect to a PNG drawing while keeping its original vector metadata intact for later editing.
+ * 2. When an automated graphics pipeline must process user‑uploaded PNG illustrations, apply a consistent blur filter, and output files that remain compatible with vector‑aware applications.
+ * 3. When a desktop application generates preview images of technical diagrams and requires the blur to simulate motion without stripping embedded metadata such as DPI or color profile.
+ * 4. When a batch‑processing script has to enhance a collection of rasterized drawings with a fixed blur size and angle before archiving them as PNGs that retain their source metadata.
+ * 5. When integrating Aspose.Imaging into a C# service that transforms PNG assets for web display, ensuring the motion blur is applied and the images still carry their original metadata for SEO or accessibility purposes.
  */

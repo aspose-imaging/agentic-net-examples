@@ -1,62 +1,55 @@
+// HOW-TO: Apply Gaussian Blur and Edge Detection to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputSvgPath = "input.svg";
+        string intermediatePngPath = "temp.png";
+        string outputPngPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Verify input SVG exists
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
 
-            // Load SVG image from file stream
-            using (FileStream svgStream = File.OpenRead(inputPath))
-            using (SvgImage svgImage = new SvgImage(svgStream))
+            // Rasterize SVG to PNG (intermediate file)
+            using (var svgImage = new SvgImage(inputSvgPath))
             {
-                // Set up rasterization options for SVG to raster conversion
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
+                var rasterizationOptions = new SvgRasterizationOptions();
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterizationOptions };
+                svgImage.Save(intermediatePngPath, pngOptions);
+            }
 
-                // Set up PNG save options with the rasterization settings
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+            // Load the rasterized PNG as a RasterImage
+            using (Image image = Image.Load(intermediatePngPath))
+            {
+                var rasterImage = (RasterImage)image;
 
-                // Rasterize SVG into a memory stream
-                using (MemoryStream rasterStream = new MemoryStream())
-                {
-                    svgImage.Save(rasterStream, pngOptions);
-                    rasterStream.Position = 0;
+                // Apply Gaussian blur filter
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    // Load the rasterized image as a RasterImage
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                    {
-                        // Apply Gaussian blur filter
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply custom edge‑detection kernel (using the built‑in Emboss3x3 kernel as an example)
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                        // Apply a sharpen filter (used here as a simple edge‑detection kernel)
-                        rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                        // Save the processed image
-                        rasterImage.Save(outputPath);
-                    }
-                }
+                // Save the final image
+                rasterImage.Save(outputPngPath);
             }
         }
         catch (Exception ex)
@@ -68,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to generate a blurred background thumbnail from an SVG logo and then highlight its edges for a hover effect in a responsive UI.
- * 2. When an e‑learning platform needs to preprocess SVG diagrams by softening details with Gaussian blur and then extracting outlines to create printable PNG worksheets.
- * 3. When a GIS application must convert vector map symbols to raster PNG tiles, applying blur to reduce visual clutter and edge detection to emphasize boundaries for better map readability.
- * 4. When a marketing automation tool automatically creates stylized product icons by blurring the original SVG artwork and then applying a custom edge‑detection kernel to produce a sharp, high‑contrast PNG for email campaigns.
- * 5. When a medical imaging system imports SVG anatomical illustrations, applies blur to simulate depth of field and edge detection to accentuate structures before embedding the result in a patient report PDF.
+ * 1. When you need to soften an SVG illustration and then highlight its outlines for a web thumbnail, you can rasterize the SVG to PNG, apply a Gaussian blur, and run an emboss edge‑detection filter using Aspose.Imaging in C#.
+ * 2. When generating print‑ready assets that require a subtle blur followed by a stylized edge effect, this code converts the vector SVG to a raster image, applies the blur and custom convolution, and saves the result as PNG.
+ * 3. When creating a preprocessing pipeline for computer‑vision models that expects blurred and edge‑enhanced PNG inputs derived from SVG sources, the example shows how to automate the conversion and filtering in .NET.
+ * 4. When building an image‑editing feature in a desktop application that lets users apply a blur then an emboss effect to uploaded SVG files, the snippet demonstrates the required Aspose.Imaging calls.
+ * 5. When preparing SVG graphics for UI icons that need a softened background and a highlighted border, this code shows how to rasterize, blur, apply a convolution kernel, and output a PNG using C#.
  */

@@ -1,58 +1,80 @@
+// HOW-TO: Verify Sequential Image Filters Do Not Accumulate Rounding Errors In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\output.png";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load original image
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                // Apply a sequence of filters
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                // Save the filtered image
-                raster.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Reload original and filtered images for comparison
-            using (Image originalImg = Image.Load(inputPath))
-            using (Image filteredImg = Image.Load(outputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the original image to obtain baseline pixel data
+            using (Image originalImage = Image.Load(inputPath))
             {
-                RasterImage original = (RasterImage)originalImg;
-                RasterImage filtered = (RasterImage)filteredImg;
+                RasterImage originalRaster = (RasterImage)originalImage;
+                int[] originalPixels = originalRaster.GetDefaultArgb32Pixels(originalRaster.Bounds);
 
-                double totalDifference = ComputeTotalDifference(original, filtered);
-                double tolerance = 1.0; // acceptable cumulative rounding error
+                // Load a fresh copy for sequential filtering
+                using (Image filteredImage = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)filteredImage;
 
-                Console.WriteLine($"Total pixel difference: {totalDifference}");
-                Console.WriteLine(totalDifference <= tolerance
-                    ? "Rounding error is within tolerance."
-                    : "Rounding error exceeds tolerance.");
+                    // Apply multiple filters sequentially
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0));
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+                    // Save the filtered image
+                    PngOptions saveOptions = new PngOptions();
+                    raster.Save(outputPath, saveOptions);
+
+                    // Retrieve filtered pixel data
+                    int[] filteredPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+
+                    // Compute average absolute per‑channel difference
+                    long totalDiff = 0;
+                    for (int i = 0; i < originalPixels.Length; i++)
+                    {
+                        int orig = originalPixels[i];
+                        int filt = filteredPixels[i];
+
+                        int aDiff = Math.Abs(((orig >> 24) & 0xFF) - ((filt >> 24) & 0xFF));
+                        int rDiff = Math.Abs(((orig >> 16) & 0xFF) - ((filt >> 16) & 0xFF));
+                        int gDiff = Math.Abs(((orig >> 8) & 0xFF) - ((filt >> 8) & 0xFF));
+                        int bDiff = Math.Abs((orig & 0xFF) - (filt & 0xFF));
+
+                        totalDiff += aDiff + rDiff + gDiff + bDiff;
+                    }
+
+                    double avgDiff = (double)totalDiff / (originalPixels.Length * 4);
+                    double tolerance = 0.5; // Example tolerance value
+
+                    Console.WriteLine($"Average per‑channel difference: {avgDiff:F3}");
+                    if (avgDiff <= tolerance)
+                    {
+                        Console.WriteLine("Rounding error within tolerance.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Rounding error exceeds tolerance.");
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -60,36 +82,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Computes the sum of absolute differences for each channel across all pixels
-    static double ComputeTotalDifference(RasterImage img1, RasterImage img2)
-    {
-        if (img1.Width != img2.Width || img1.Height != img2.Height)
-            throw new InvalidOperationException("Images must have the same dimensions.");
-
-        double diff = 0.0;
-        for (int y = 0; y < img1.Height; y++)
-        {
-            for (int x = 0; x < img1.Width; x++)
-            {
-                var c1 = img1.GetPixel(x, y);
-                var c2 = img2.GetPixel(x, y);
-
-                diff += Math.Abs(c1.R - c2.R);
-                diff += Math.Abs(c1.G - c2.G);
-                diff += Math.Abs(c1.B - c2.B);
-                diff += Math.Abs(c1.A - c2.A);
-            }
-        }
-        return diff;
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When building a C# desktop application that enhances PNG photographs by applying median, Gaussian blur, and sharpen filters, a developer can use this code to ensure the combined operations do not introduce perceptible rounding errors.
- * 2. When implementing an automated image‑processing pipeline for e‑commerce product photos, the code helps verify that sequential filters applied with Aspose.Imaging preserve pixel fidelity within a defined tolerance before the images are uploaded.
- * 3. When performing quality‑assurance tests on a medical‑imaging viewer that processes raster images, developers can run this example to confirm that successive filters do not accumulate rounding errors that could affect diagnostic accuracy.
- * 4. When creating a batch job that normalizes satellite PNG tiles using multiple filters, the snippet provides a quick way to compare the original and filtered tiles and guarantee that cumulative rounding stays below the acceptable threshold.
- * 5. When developing a CI/CD build step that validates image‑processing libraries, this code can be used to programmatically compute total pixel difference after applying several filters and fail the build if the error exceeds the tolerance.
+ * 1. When you need to ensure that applying a median filter, Gaussian blur, and sharpen filter one after another on a PNG does not introduce noticeable rounding errors, this code lets you compare original and processed pixel values.
+ * 2. When performing automated quality‑control tests for an image‑processing service built with Aspose.Imaging for .NET, you can use this example to validate that sequential filters preserve color fidelity within a defined tolerance.
+ * 3. When developing a photo‑editing application that chains multiple filters, you can run this snippet to confirm that the cumulative effect does not degrade image data beyond acceptable limits.
+ * 4. When creating a CI/CD pipeline for image‑conversion jobs, this code helps verify that each filter step produces consistent ARGB32 pixel results across builds.
+ * 5. When troubleshooting discrepancies between expected and actual output after applying filters to PNG files, the example provides a straightforward way to measure per‑channel differences and detect rounding issues.
  */

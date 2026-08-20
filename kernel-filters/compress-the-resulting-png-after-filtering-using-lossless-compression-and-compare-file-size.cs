@@ -1,3 +1,4 @@
+// HOW-TO: Compress PNG with Maximum Lossless Compression and Compare File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,30 +11,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output_compressed.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output_compressed.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for lossless, maximum compression
+                // Configure PNG options for lossless compression
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,                     // Max compression (0-9)
-                    FilterType = PngFilterType.Adaptive,      // Adaptive filter for best compression
-                    Progressive = true,                       // Enable progressive loading
-                    ColorType = PngColorType.TruecolorWithAlpha,
+                    CompressionLevel = 9,                         // Max compression
+                    FilterType = PngFilterType.Adaptive,          // Adaptive filter for best lossless result
+                    Progressive = true,                           // Optional progressive loading
+                    ColorType = PngColorType.TruecolorWithAlpha,  // Preserve color depth
                     BitDepth = 8
                 };
 
@@ -58,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to reduce PNG asset size for faster page load without losing image quality, they can use this code to apply lossless compression and verify the size reduction.
- * 2. When a mobile app builds an offline image cache and needs to store PNGs in limited storage, the code can compress the images and compare original versus compressed sizes to ensure they fit.
- * 3. When a CI/CD pipeline processes generated screenshots and must archive them efficiently, the script can filter and compress PNGs and log the byte savings for reporting.
- * 4. When a digital asset management system imports high‑resolution PNG files and wants to standardize them with adaptive filters and progressive loading, this code compresses the images and confirms the new file size.
- * 5. When a game developer prepares texture atlases in PNG format and needs to guarantee that the final package stays within a size budget, they can run this code to apply maximum lossless compression and measure the reduction.
+ * 1. When you need to reduce the storage footprint of PNG assets without losing image quality, such as optimizing web graphics before deployment.
+ * 2. When you want to generate progressive PNG files that load gradually in browsers while keeping the original color depth.
+ * 3. When you must compare the effectiveness of different PNG compression settings by measuring original and compressed file sizes.
+ * 4. When you are building an automated image pipeline that validates that PNG files meet a maximum size threshold for mobile apps.
+ * 5. When you need to ensure that a PNG image retains its alpha channel and true‑color data while applying the strongest lossless compression available in .NET.
  */

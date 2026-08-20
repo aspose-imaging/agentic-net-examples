@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to PNG Using Environment Variables in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.png";
+            string outputPath = @"C:\temp\sample.GaussianBlur.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,36 +22,31 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Read configuration from environment variables
-            // Default values are used if variables are missing or invalid
-            int size = 5; // default kernel size
-            double sigma = 4.0; // default sigma
+            // Read environment variables for size and sigma, with defaults
+            string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIZE");
+            string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIGMA");
 
-            string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIZE");
-            if (int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1)
+            int size = 5;          // default odd positive size
+            double sigma = 4.0;    // default positive sigma
+
+            if (!string.IsNullOrEmpty(sizeEnv) && int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1)
             {
                 size = parsedSize;
             }
 
-            string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIGMA");
-            if (double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
+            if (!string.IsNullOrEmpty(sigmaEnv) && double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
             {
                 sigma = parsedSigma;
             }
 
-            // Load the image, apply Gaussian blur, and save the result
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur filter with configured size and sigma
+                // Apply Gaussian blur filter with configured parameters
                 var blurOptions = new GaussianBlurFilterOptions(size, sigma);
                 rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
@@ -67,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a configurable Gaussian blur to PNG images in a CI/CD pipeline, using environment variables to set kernel size and sigma without changing source code.
- * 2. When an automated image‑processing service must adapt blur strength per deployment environment (e.g., staging vs production) by reading GAUSSIAN_SIZE and GAUSSIAN_SIGMA from the host’s environment.
- * 3. When a desktop application processes user‑uploaded photos and wants to let system administrators control default blur parameters via OS environment settings for compliance or performance reasons.
- * 4. When a batch job processes large folders of raster images and the blur kernel dimensions need to be tuned at runtime without recompiling the C# project.
- * 5. When a cloud function using Aspose.Imaging for .NET applies a Gaussian blur to images and the blur intensity must be configurable through container environment variables for easy scaling.
+ * 1. When you need to automatically blur images in a CI pipeline and want the blur radius and sigma to be configurable without changing code.
+ * 2. When processing user‑uploaded PNG files on a server and you want to adjust the Gaussian blur strength via environment settings for different deployment environments.
+ * 3. When creating a batch job that applies a consistent blur effect to a folder of images and you need to change the filter size without recompiling the application.
+ * 4. When integrating Aspose.Imaging into a microservice that must read blur parameters from container environment variables for dynamic runtime configuration.
+ * 5. When building a desktop tool that lets administrators set default Gaussian blur parameters through OS environment variables to standardize image preprocessing.
  */

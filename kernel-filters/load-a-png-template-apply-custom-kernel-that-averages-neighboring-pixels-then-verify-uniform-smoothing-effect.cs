@@ -1,49 +1,52 @@
+// HOW-TO: Apply 3x3 Averaging Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input/template.png";
+        string outputPath = "output/smoothed.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "template.png";
-            string outputPath = "smoothed.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG template as a raster image
+            // Load the PNG template
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Create a 3x3 averaging kernel (each weight = 1/9)
+                // Define a 3x3 averaging kernel (each weight = 1/9)
                 double[,] kernel = new double[3, 3];
-                for (int y = 0; y < 3; y++)
+                for (int i = 0; i < 3; i++)
                 {
-                    for (int x = 0; x < 3; x++)
+                    for (int j = 0; j < 3; j++)
                     {
-                        kernel[y, x] = 1.0 / 9.0;
+                        kernel[i, j] = 1.0 / 9.0;
                     }
                 }
 
                 // Apply the custom convolution filter to the entire image
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Save the smoothed image
-                raster.Save(outputPath);
+                // Save the result as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a PNG template before printing by applying a uniform smoothing filter using Aspose.Imaging’s convolution capabilities in C#.
- * 2. When a web application must generate a softened version of user‑uploaded PNG graphics for thumbnails, using a 3×3 averaging kernel to ensure consistent blur across the image.
- * 3. When an automated batch process has to prepare PNG assets for machine‑learning training by smoothing pixel variations with a custom convolution filter in .NET.
- * 4. When a desktop utility wants to preview the effect of a simple low‑pass filter on a raster image, loading the PNG, applying the averaging kernel, and saving the result for visual verification.
- * 5. When a developer is testing image‑processing pipelines and needs a quick way to verify that Aspose.Imaging correctly applies a uniform convolution filter to a PNG file’s pixel data.
+ * 1. When you need to smooth a PNG template to reduce noise before adding dynamic graphics in a C# application.
+ * 2. When you want to create a uniform blur effect on a raster image for background preprocessing in a .NET image pipeline.
+ * 3. When you must apply a custom 3x3 averaging kernel to all pixels of a PNG to achieve consistent smoothing across the whole picture.
+ * 4. When you are building a batch process that loads PNG files, applies a simple convolution filter, and saves the softened results automatically.
+ * 5. When you require a quick way to verify that a convolution filter works correctly by comparing the original and smoothed PNG outputs in C#.
  */

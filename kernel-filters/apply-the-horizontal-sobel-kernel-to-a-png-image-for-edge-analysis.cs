@@ -1,3 +1,4 @@
+// HOW-TO: Apply Horizontal Sobel Edge Detection to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,18 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.png";
-            string outputPath = "C:\\temp\\output_sobel.png";
+            // Hard‑coded input and output file paths
+            string inputPath = "c:\\temp\\input.png";
+            string outputPath = "c:\\temp\\output_sobel.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
@@ -29,16 +30,17 @@ class Program
                 // Cast to RasterImage to access pixel data and filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define the horizontal Sobel kernel
-                double[,] sobelKernel = new double[,]
+                // Horizontal Sobel kernel (3x3)
+                double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
                     { -2, 0, 2 },
                     { -1, 0, 1 }
                 };
 
-                // Apply the convolution filter over the entire image bounds
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(sobelKernel));
+                // Apply the convolution filter with the Sobel kernel
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
                 // Save the processed image
                 raster.Save(outputPath);
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to detect horizontal edges in a PNG photograph to highlight road lane markings for a traffic‑analysis application.
- * 2. When a C# program must preprocess scanned documents by applying a Sobel filter to emphasize text baselines before OCR processing.
- * 3. When an image‑processing pipeline requires extracting horizontal gradients from satellite PNG tiles to identify river boundaries.
- * 4. When a developer wants to create a visual effect that outlines the top and bottom edges of objects in a game sprite sheet using convolution.
- * 5. When a quality‑control tool needs to compare the edge intensity of manufactured product images by generating Sobel‑filtered PNGs for defect detection.
+ * 1. When you need to highlight horizontal edges in a PNG for computer‑vision preprocessing using Aspose.Imaging in C#.
+ * 2. When you want to generate an edge map of scanned documents to improve OCR accuracy by applying a Sobel filter.
+ * 3. When you are building a medical‑imaging tool that requires fast horizontal gradient extraction from PNG X‑ray images.
+ * 4. When you need to create visual diagnostics for quality‑control pipelines by detecting surface defects via Sobel convolution.
+ * 5. When you are developing a game asset pipeline that extracts silhouette outlines from PNG sprites for collision detection.
  */

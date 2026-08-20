@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur To PNG Using MemoryStream In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,39 +8,39 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Read the input file into a memory stream (no temporary files)
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.png";
+            string outputPath = "output\\filtered.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Read the input image into a memory stream
             byte[] imageBytes = File.ReadAllBytes(inputPath);
             using (MemoryStream memoryStream = new MemoryStream(imageBytes))
             {
                 // Load image from the memory stream
                 using (Image image = Image.Load(memoryStream))
                 {
-                    // Cast to RasterImage for filtering
+                    // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply a Gaussian blur convolution filter to the entire image
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
+                    // Apply a Gaussian blur filter (convolution filter) to the whole image
+                    rasterImage.Filter(rasterImage.Bounds,
                         new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
                     // Save the filtered image to the output path as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                    PngOptions pngOptions = new PngOptions();
+                    rasterImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to apply a Gaussian blur to user‑uploaded PNG images on the fly without writing intermediate files to disk.
- * 2. When a desktop application processes scanned documents in memory to enhance readability by blurring noise before saving the result as a PNG.
- * 3. When an automated batch job runs in a cloud container that must filter large image assets using a convolution filter while minimizing I/O overhead.
- * 4. When a mobile backend API receives image bytes, applies a blur effect using Aspose.Imaging’s RasterImage.Filter, and returns the processed PNG directly to the client.
- * 5. When a CI/CD pipeline validates image processing steps by loading test images into a MemoryStream, applying a Gaussian blur, and saving the output for visual regression testing.
+ * 1. When you need to blur a PNG image on the server without creating intermediate files, you can load it into a MemoryStream and apply a Gaussian convolution filter.
+ * 2. When processing user‑uploaded photos in a web API, using Aspose.Imaging with a MemoryStream lets you apply smoothing effects while keeping the operation fully in memory.
+ * 3. When building a batch image‑processing tool that must preserve original file locations, streaming the image data avoids disk I/O overhead and enables fast Gaussian blur.
+ * 4. When integrating image filters into a C# desktop application that works with limited storage, using a MemoryStream and the RasterImage.Filter method applies the blur without temporary files.
+ * 5. When converting raw image bytes received from a network service into a filtered PNG, the code demonstrates how to load, filter, and save the image entirely in memory.
  */

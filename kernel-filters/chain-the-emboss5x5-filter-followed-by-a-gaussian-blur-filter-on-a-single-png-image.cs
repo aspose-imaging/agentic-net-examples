@@ -1,3 +1,4 @@
+// HOW-TO: Apply Emboss and Gaussian Blur Filters to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,38 +9,35 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to use filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the Emboss 5x5 convolution filter
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                // Apply Emboss 5x5 filter
+                var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5);
+                rasterImage.Filter(rasterImage.Bounds, embossOptions);
 
-                // Apply a Gaussian blur filter (radius 5, sigma 4.0)
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                var gaussianOptions = new GaussianBlurFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -47,7 +45,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Output any error messages without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -55,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically add a subtle 3‑D emboss effect to product photos and then smooth the result with a Gaussian blur before saving the PNG for an e‑commerce site.
- * 2. When a C# desktop application processes scanned PNG documents, applying an emboss filter to highlight edges and a Gaussian blur to soften artifacts before archival.
- * 3. When a game‑asset pipeline written in .NET applies an Emboss5x5 convolution to terrain heightmaps and follows it with a Gaussian blur to create smooth, stylized textures for real‑time rendering.
- * 4. When a photo‑editing tool provides a one‑click “engraved look” feature that runs the Emboss5x5 filter then a Gaussian blur on a PNG image to produce a professional matte finish.
- * 5. When an automated reporting service generates PNG icons, using emboss to give depth and a Gaussian blur to ensure consistent visual weight across different screen resolutions.
+ * 1. When you need to give a PNG photo a raised‑edge effect and then soften it with a blur for a stylized UI thumbnail.
+ * 2. When generating preview images for a web gallery where an embossed texture followed by a subtle Gaussian blur improves visual depth.
+ * 3. When preprocessing scanned documents in C# to highlight edges with embossing and reduce noise using Gaussian blur before OCR.
+ * 4. When creating game assets that require a combined emboss and blur effect to simulate terrain relief in a 2‑D sprite.
+ * 5. When automating batch processing of PNG icons to add a tactile emboss look and smooth edges for consistent branding across applications.
  */

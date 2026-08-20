@@ -1,5 +1,7 @@
+// HOW-TO: Apply Normalized Convolution Kernel to PNG Image with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "template.png";
-        string outputPath = "output/output.png";
-
         try
         {
+            string inputPath = "template.png";
+            string outputPath = "output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,36 +23,32 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            double[,] kernel = new double[,]
+            {
+                { 1, 2, 1 },
+                { 2, 4, 2 },
+                { 1, 2, 1 }
+            };
+
+            double sum = kernel.Cast<double>().Sum();
+            if (sum != 0)
+            {
+                for (int i = 0; i < kernel.GetLength(0); i++)
+                {
+                    for (int j = 0; j < kernel.GetLength(1); j++)
+                    {
+                        kernel[i, j] /= sum;
+                    }
+                }
+            }
+
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-
-                double[,] kernel = new double[,]
-                {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
-                };
-
-                double sum = 0;
-                foreach (double v in kernel)
-                    sum += v;
-                if (sum == 0) sum = 1;
-
-                double[,] normalizedKernel = new double[3, 3];
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        normalizedKernel[i, j] = kernel[i, j] / sum;
-                    }
-                }
-
-                var filterOptions = new ConvolutionFilterOptions(normalizedKernel, 1.0, 0);
+                var filterOptions = new ConvolutionFilterOptions(kernel, factor: 1.0, bias: 0);
                 raster.Filter(raster.Bounds, filterOptions);
-
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a PNG logo by applying a custom convolution kernel to enhance edges before embedding it in a web page.
- * 2. When an e‑commerce platform wants to automatically improve product thumbnail clarity by loading a PNG template, normalizing a sharpening filter, and saving the processed image.
- * 3. When a desktop application generates printable certificates and must apply a custom image filter to the background PNG to ensure crisp text rendering.
- * 4. When a game developer preprocesses sprite sheets in PNG format, applying a normalized convolution filter to boost contrast without altering the file size.
- * 5. When a medical imaging tool prepares PNG scans for analysis by applying a custom kernel to emphasize details while preserving the original dimensions.
+ * 1. When you need to blur a PNG template uniformly by applying a Gaussian‑style kernel before generating final graphics.
+ * 2. When you must ensure a custom filter kernel sums to one to preserve image brightness during convolution.
+ * 3. When you want to programmatically apply a sharpening or smoothing effect to a PNG in a .NET service without external libraries.
+ * 4. When you need to preprocess PNG assets for web or print by applying a normalized filter and saving the result automatically.
+ * 5. When you are building an image‑processing pipeline that loads a template, applies a custom convolution filter, and stores the output as a PNG file.
  */

@@ -1,61 +1,66 @@
+// HOW-TO: Validate Custom Sharpening Kernel Sum Exceeds One for PNG Brightness in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom sharpening kernel (example 3×3 kernel)
-            double[] customKernel = new double[]
+            // Define a custom sharpening kernel
+            double[,] kernel = new double[,]
             {
-                0, -1, 0,
-                -1, 5, -1,
-                0, -1, 0
+                { -1, -1, -1 },
+                { -1,  9, -1 },
+                { -1, -1, -1 }
             };
 
-            // Validate that the kernel sum exceeds 1 (required for brightness increase)
-            double kernelSum = 0;
-            foreach (double v in customKernel)
-                kernelSum += v;
-
-            if (kernelSum <= 1.0)
+            // Validate that the sum of kernel elements exceeds 1
+            double sum = 0;
+            for (int i = 0; i < kernel.GetLength(0); i++)
             {
-                Console.Error.WriteLine($"Kernel sum ({kernelSum}) does not exceed 1. Brightness increase will not occur.");
+                for (int j = 0; j < kernel.GetLength(1); j++)
+                {
+                    sum += kernel[i, j];
+                }
+            }
+
+            if (sum <= 1)
+            {
+                Console.Error.WriteLine("Kernel sum must exceed 1 to increase brightness. Filter not applied.");
                 return;
             }
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering APIs
                 RasterImage raster = (RasterImage)image;
 
-                // Apply a sharpen filter using built‑in options (size 3, sigma 1.0)
-                // The custom kernel is not directly set here; the validation step ensures the kernel is suitable.
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(3, 1.0));
+                // Apply the custom sharpening kernel using ConvolutionFilterOptions
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Save the processed image
-                raster.Save(outputPath);
+                // Save as PNG
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -67,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically sharpen and brighten product photos in PNG format before uploading them to an e‑commerce site.
- * 2. When a developer wants to increase the contrast and brightness of scanned PNG documents by applying a custom sharpening kernel that meets the sum‑greater‑than‑one requirement.
- * 3. When a developer is building a batch image‑processing tool that validates custom convolution kernels before applying a sharpen filter to PNG assets for a marketing campaign.
- * 4. When a developer integrates image enhancement into a C# desktop application that must ensure the kernel sum exceeds one to avoid dimming PNG screenshots used in user guides.
- * 5. When a developer creates a preprocessing step for PNG images destined for print, confirming the kernel sum is >1 so the sharpening operation also adds the needed brightness boost.
+ * 1. Use this code when you need to ensure a custom sharpening filter actually brightens a PNG image before saving it in a .NET application.
+ * 2. Apply the validation to avoid applying a convolution filter whose kernel sum is too low, which would unintentionally darken the image.
+ * 3. Employ the routine in batch image processing pipelines to verify kernel parameters and maintain consistent visual output across many PNG files.
+ * 4. Integrate the logic into a photo‑editing tool built with Aspose.Imaging that allows users to define their own sharpening kernels safely.
+ * 5. Use the approach when you want to increase image brightness while sharpening in a single step, eliminating the need for separate brightness adjustments.
  */

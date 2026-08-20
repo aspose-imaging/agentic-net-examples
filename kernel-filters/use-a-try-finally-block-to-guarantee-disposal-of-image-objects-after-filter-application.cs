@@ -1,35 +1,31 @@
+// HOW-TO: Apply Gaussian Blur to PNG and Ensure Proper Disposal in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\filtered.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
 
         try
         {
-            Image image = Image.Load(inputPath);
-            try
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            finally
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
-                image.Dispose();
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -41,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to blur sensitive areas in user‑uploaded PNG images before saving them to a server, they can load the file, apply a Gaussian blur filter with Aspose.Imaging, and use a try‑finally block to guarantee the image is disposed.
- * 2. When building a batch processor that reduces noise in scanned PNG documents prior to OCR, the code loads each raster image, applies a Gaussian blur (radius 5, sigma 4.0), saves the result, and ensures proper disposal with try‑finally.
- * 3. When generating blurred background thumbnails for a photo‑gallery application, a developer can use this pattern to load the original PNG, apply the blur filter, save the thumbnail, and automatically release resources.
- * 4. When creating a server‑side image‑filter API that receives PNG files, applies a configurable Gaussian blur, and returns the filtered image, the try‑finally construct guarantees that the Image object is always disposed after processing.
- * 5. When writing an automated test that verifies the visual impact of a Gaussian blur on PNG assets, the script can load the image, apply the filter, save the output, and rely on try‑finally to prevent memory leaks.
+ * 1. When you need to programmatically soften a PNG image with a Gaussian blur while guaranteeing that the image objects are released correctly in a C# application.
+ * 2. When building an automated batch process that applies a consistent blur effect to uploaded user photos and must avoid memory leaks by disposing of Aspose.Imaging objects.
+ * 3. When integrating image preprocessing into a .NET web service that receives PNG files, applies a blur filter for privacy masking, and requires reliable cleanup of resources.
+ * 4. When creating a desktop utility that sharpens screenshots by first blurring them for artistic effect, and you want to ensure the file handles are closed even if an error occurs.
+ * 5. When developing a CI pipeline that validates image transformations, such as applying a Gaussian blur to test PNG assets, and you need deterministic disposal of the RasterImage to keep the build stable.
  */

@@ -1,10 +1,8 @@
+// HOW-TO: Apply Emboss 5x5 Convolution Filter to JPEG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,38 +10,27 @@ class Program
     {
         try
         {
-            // Input URL and temporary local path
-            string inputUrl = "http://example.com/sample.jpg";
-            string tempInputPath = "temp_input.jpg";
+            string inputPath = "sample.jpg";
+            string outputPath = "output.png";
 
-            // Download the image from the URL to a temporary file
-            using (var webClient = new System.Net.WebClient())
+            if (!File.Exists(inputPath))
             {
-                webClient.DownloadFile(inputUrl, tempInputPath);
-            }
-
-            // Verify the temporary file exists
-            if (!File.Exists(tempInputPath))
-            {
-                Console.Error.WriteLine($"File not found: {tempInputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output path
-            string outputPath = "output_embossed.jpg";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create JPEG options with bound output source
-            Source outputSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 100 };
-
-            // Load the image, apply Emboss5x5 filter, and save
-            using (RasterImage rasterImage = (RasterImage)Image.Load(tempInputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-                rasterImage.Save(outputPath, jpegOptions);
+                RasterImage rasterImage = (RasterImage)image;
+
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                PngOptions pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to download a JPEG image from a remote URL, apply the Emboss5x5 convolution filter, and save the enhanced picture locally for further processing.
- * 2. When building a .NET web application that automatically creates stylized product thumbnails by fetching images from external URLs, embossing them, and storing the high‑quality results in a CDN.
- * 3. When writing a batch image‑processing script that retrieves pictures from an API, adds depth with the Emboss5x5 filter, and outputs JPEG files ready for print catalogs.
- * 4. When integrating Aspose.Imaging into a Windows service that monitors a feed of image URLs, applies edge‑enhancement via the Emboss5x5 convolution, and archives the processed images for compliance.
- * 5. When developing a desktop utility that lets users enter an image URL, instantly preview an embossed version, and save the result with configurable JPEG quality using C# and Aspose.Imaging.
+ * 1. When you need to add a stylized emboss effect to a JPEG photo before converting it to a PNG for web display.
+ * 2. When you want to preprocess scanned documents with a 5x5 emboss filter to enhance edge contrast prior to archival storage.
+ * 3. When building a batch image pipeline that automatically applies the Aspose.Imaging Emboss5x5 filter to user‑uploaded pictures and outputs PNG thumbnails.
+ * 4. When creating a C# utility that transforms product images by embossing them to highlight texture details for e‑commerce catalogs.
+ * 5. When developing a desktop application that lets users apply a classic emboss effect to their pictures and save the result in lossless PNG format.
  */

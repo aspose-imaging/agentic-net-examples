@@ -1,18 +1,18 @@
+// HOW-TO: Apply Gaussian Blur to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string inputPath = @"C:\Images\sample.svg";
+            string outputPath = @"C:\Images\sample_blur.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,33 +25,16 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = svgImage.Size
-                        }
-                    };
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                // Cast to RasterImage to enable filtering
+                RasterImage rasterImage = (RasterImage)image;
 
-                    // Load the rasterized image
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageContainer;
+                // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the filtered image as PNG
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
-                }
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a soft‑focused thumbnail of an SVG logo for a web gallery, they can rasterize the SVG and apply a Gaussian blur filter before saving it as PNG.
- * 2. When creating background images for mobile apps where vector icons must appear with a subtle glow, the code can blur the rasterized SVG to achieve the effect.
- * 3. When preparing print‑ready assets that require a blurred watermark overlay derived from an SVG vector, the developer can use this routine to rasterize and blur the image.
- * 4. When building an automated image‑processing pipeline that converts user‑uploaded SVG diagrams into blurred preview images for faster loading, this code provides the necessary rasterization and Gaussian blur steps.
- * 5. When implementing a PDF generation service that inserts blurred SVG illustrations as decorative elements, the developer can apply the Gaussian blur filter to the rasterized PNG before embedding it.
+ * 1. When you need to soften vector graphics for web thumbnails by applying a Gaussian blur and exporting them as PNG files using C#.
+ * 2. When generating blurred background images from SVG logos for UI overlays in a .NET application.
+ * 3. When preprocessing SVG assets for machine‑learning pipelines that require raster images with reduced detail.
+ * 4. When creating stylized product catalogs where SVG illustrations must be blurred before being embedded in PDF reports.
+ * 5. When automating a batch job that converts SVG icons to blurred PNGs for responsive design breakpoints.
  */

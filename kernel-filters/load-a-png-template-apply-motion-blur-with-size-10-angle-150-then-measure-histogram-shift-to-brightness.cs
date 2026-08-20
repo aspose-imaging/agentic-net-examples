@@ -1,7 +1,9 @@
+// HOW-TO: Apply Motion Blur to PNG and Measure Brightness Shift in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -9,7 +11,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\template.png";
             string outputPath = @"C:\Images\output_motion_blur.png";
 
@@ -26,19 +28,21 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for pixel access and filtering
                 RasterImage raster = (RasterImage)image;
 
                 // Compute average brightness before applying the filter
                 double avgBefore = ComputeAverageBrightness(raster);
 
-                // Apply motion blur (size = 10, sigma = 1.0, angle = 150 degrees)
-                var motionOptions = new MotionWienerFilterOptions(10, 1.0, 150.0);
-                raster.Filter(raster.Bounds, motionOptions);
+                // Apply motion blur using MotionWienerFilterOptions (size=10, brightness=1.0, angle=150)
+                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 150.0));
 
-                // Compute average brightness after the filter
+                // Compute average brightness after applying the filter
                 double avgAfter = ComputeAverageBrightness(raster);
+
+                // Calculate histogram shift (brightness change)
                 double brightnessShift = avgAfter - avgBefore;
-                Console.WriteLine($"Brightness shift after motion blur: {brightnessShift:F2}");
+                Console.WriteLine($"Brightness shift: {brightnessShift:F4}");
 
                 // Save the processed image
                 raster.Save(outputPath);
@@ -50,33 +54,30 @@ class Program
         }
     }
 
-    // Helper method to calculate average brightness of a raster image
-    static double ComputeAverageBrightness(RasterImage raster)
+    // Helper method to compute average brightness of a raster image
+    private static double ComputeAverageBrightness(RasterImage raster)
     {
-        // Load all ARGB pixels within the image bounds
-        int[] pixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-        long totalBrightness = 0;
-
-        foreach (int argb in pixels)
+        // Load all ARGB pixels for the whole image
+        int[] argbPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+        long total = 0;
+        foreach (int pixel in argbPixels)
         {
-            // Extract R, G, B components
-            int r = (argb >> 16) & 0xFF;
-            int g = (argb >> 8) & 0xFF;
-            int b = argb & 0xFF;
-
-            // Simple luminance approximation (average of R, G, B)
-            totalBrightness += (r + g + b) / 3;
+            // Extract RGB components
+            int r = (pixel >> 16) & 0xFF;
+            int g = (pixel >> 8) & 0xFF;
+            int b = pixel & 0xFF;
+            // Simple luminance approximation
+            total += (r + g + b) / 3;
         }
-
-        return (double)totalBrightness / pixels.Length;
+        return (double)total / argbPixels.Length;
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a motion‑blurred preview of a PNG product template for an e‑commerce site and verify that the blur does not unintentionally darken the image, they can use this code to apply a 150° motion blur of size 10 and measure the brightness shift.
- * 2. When building an automated quality‑control pipeline that checks whether a PNG watermark remains visible after simulating camera shake, the code can apply a motion blur filter and compare average brightness before and after to ensure compliance.
- * 3. When creating a visual‑effects tool that lets users preview motion blur on PNG assets and instantly see how the overall luminance changes, developers can employ this snippet to compute the histogram‑based brightness shift for real‑time feedback.
- * 4. When preparing training data for a machine‑learning model that classifies blurred versus sharp PNG images, the code can programmatically blur each template with a 150° motion blur and record the brightness change as a feature.
- * 5. When integrating Aspose.Imaging into a C# desktop application that generates animated GIF frames from a static PNG template, the developer can first apply a motion blur with size 10 and angle 150 and then use the measured brightness shift to adjust subsequent frames for consistent exposure.
+ * 1. When you need to simulate camera shake on a PNG template and evaluate how the blur affects overall image brightness.
+ * 2. When creating automated tests that compare pre‑ and post‑filter brightness levels for quality‑control pipelines.
+ * 3. When generating motion‑blurred assets for games or UI mockups while tracking the histogram shift to maintain visual consistency.
+ * 4. When processing scanned documents to add a realistic motion effect and measuring the resulting brightness change for OCR preprocessing.
+ * 5. When building a batch image‑processing tool that applies a specific motion‑blur angle and size, then logs the brightness difference for analytics.
  */

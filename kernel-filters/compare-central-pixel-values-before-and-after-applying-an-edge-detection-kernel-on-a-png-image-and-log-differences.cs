@@ -1,3 +1,4 @@
+// HOW-TO: How To Compare Central Pixel Values Before And After Edge Detection In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,51 +11,60 @@ class Program
     {
         try
         {
-            string inputPath = "input\\input.png";
-            string outputPath = "output\\output.png";
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.png";
+            string outputPath = "output\\sample_edge.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                int width = raster.Width;
-                int height = raster.Height;
-                int centerX = width / 2;
-                int centerY = height / 2;
-                var centerRect = new Rectangle(centerX, centerY, 1, 1);
+                // Determine central pixel coordinates
+                int centerX = raster.Width / 2;
+                int centerY = raster.Height / 2;
+                Rectangle centerRect = new Rectangle(centerX, centerY, 1, 1);
 
-                int[] originalPixel = raster.LoadArgb32Pixels(centerRect);
+                // Read central pixel before filtering
+                int[] beforePixels = raster.LoadArgb32Pixels(centerRect);
 
-                double[,] edgeKernel = new double[,]
+                // Edge‑detection kernel (simple Laplacian)
+                double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
                     { -1,  8, -1 },
                     { -1, -1, -1 }
                 };
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(edgeKernel));
+                // Apply the convolution filter
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                int[] filteredPixel = raster.LoadArgb32Pixels(centerRect);
+                // Read central pixel after filtering
+                int[] afterPixels = raster.LoadArgb32Pixels(centerRect);
 
-                if (originalPixel[0] != filteredPixel[0])
+                // Log the difference
+                if (beforePixels[0] != afterPixels[0])
                 {
-                    Console.WriteLine($"Central pixel changed from 0x{originalPixel[0]:X8} to 0x{filteredPixel[0]:X8}");
+                    Console.WriteLine($"Central pixel changed from 0x{beforePixels[0]:X8} to 0x{afterPixels[0]:X8}");
                 }
                 else
                 {
-                    Console.WriteLine("Central pixel unchanged after edge detection.");
+                    Console.WriteLine($"Central pixel unchanged: 0x{beforePixels[0]:X8}");
                 }
 
-                var saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the filtered image as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that an Aspose.Imaging edge‑detection convolution filter actually modifies the central pixel of a PNG image, this code compares the original and filtered ARGB values and logs the difference.
- * 2. When building an automated quality‑control pipeline for scanned documents, a programmer can use this snippet to ensure the 3×3 edge‑detection kernel affects the middle pixel and report any unexpected unchanged values.
- * 3. When creating a diagnostic tool for image‑processing algorithms in C#, this example captures the exact ARGB32 value of the centre pixel before and after applying a custom convolution filter to a PNG raster image.
- * 4. When troubleshooting visual discrepancies between original and filtered PNG assets in a graphics‑intensive application, this code helps pinpoint whether the central region is being altered by the edge‑detection filter.
- * 5. When implementing a unit test for a .NET service that applies edge detection to raster images, a tester can use this script to assert that the central pixel value changes as expected after the filter execution.
+ * 1. When you need to verify that an edge‑detection filter actually modifies a PNG image by checking the central pixel value in a C# program.
+ * 2. When debugging a computer‑vision pipeline and you want to log pixel‑level changes after applying a convolution kernel.
+ * 3. When creating automated unit tests to ensure a custom Laplacian filter produces the expected result on sample images.
+ * 4. When generating a quality‑control report that highlights differences between the original and processed PNG files in a .NET imaging workflow.
+ * 5. When building a diagnostic tool that detects the presence of edges by comparing before‑and‑after pixel values of the image’s center.
  */

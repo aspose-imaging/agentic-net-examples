@@ -1,10 +1,10 @@
+// HOW-TO: Batch Apply Custom Edge Detection Kernels to SVG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -20,7 +20,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -31,68 +31,63 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var file in files)
+            foreach (string inputPath in files)
             {
-                // Process only SVG files
-                if (!file.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                if (!inputPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                string inputPath = file;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path for the edge map
-                string outputFileName = Path.GetFileNameWithoutExtension(file) + "_edge.png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
 
-                // Load SVG and rasterize to PNG in memory
-                using (Image svgImage = Image.Load(inputPath))
+                // Load SVG and rasterize to PNG bytes in memory
+                using (Image vectorImage = Image.Load(inputPath))
                 {
                     var rasterOptions = new SvgRasterizationOptions
                     {
-                        PageSize = svgImage.Size,
-                        BackgroundColor = Color.White
+                        BackgroundColor = Color.White,
+                        PageSize = vectorImage.Size
                     };
-
                     var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
 
-                    using (var memoryStream = new MemoryStream())
+                    byte[] pngBytes;
+                    using (var ms = new MemoryStream())
                     {
-                        // Rasterize SVG to PNG stream
-                        svgImage.Save(memoryStream, pngOptions);
-                        memoryStream.Position = 0;
+                        vectorImage.Save(ms, pngOptions);
+                        pngBytes = ms.ToArray();
+                    }
 
-                        // Load rasterized image
-                        using (Image rasterImageContainer = Image.Load(memoryStream))
+                    // Define edge‑detection kernels
+                    var kernels = new Dictionary<string, double[,]>
+                    {
+                        { "horizontal", new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } } },
+                        { "vertical",   new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } } }
+                    };
+
+                    foreach (var kvp in kernels)
+                    {
+                        string orientation = kvp.Key;
+                        double[,] kernel = kvp.Value;
+
+                        using (var rasterStream = new MemoryStream(pngBytes))
+                        using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
                         {
-                            var rasterImage = (RasterImage)rasterImageContainer;
-
-                            // Define a custom Sobel horizontal edge detection kernel
-                            double[,] kernel = new double[,]
-                            {
-                                { -1, 0, 1 },
-                                { -2, 0, 2 },
-                                { -1, 0, 1 }
-                            };
-
-                            // Apply convolution filter using the custom kernel
-                            var convOptions = new ConvolutionFilterOptions(kernel);
+                            var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
                             rasterImage.Filter(rasterImage.Bounds, convOptions);
 
-                            // Save the edge map
+                            string outputPath = Path.Combine(outputDirectory, $"{fileName}_{orientation}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                             rasterImage.Save(outputPath, new PngOptions());
                         }
                     }
                 }
-
-                Console.WriteLine($"Processed edge map saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -104,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a collection of vector icons (SVG) into raster edge‑maps (PNG) for use in a web UI that highlights icon outlines.
- * 2. When a GIS application must extract directional edge information from SVG map layers to feed into a routing algorithm.
- * 3. When an e‑learning platform wants to generate high‑contrast edge images of SVG diagrams for printable worksheets.
- * 4. When a computer‑vision pipeline requires pre‑processing of SVG assets with custom orientation kernels to improve feature detection in downstream ML models.
- * 5. When a branding team automates the creation of stylized edge‑only logos from SVG files for embossing or laser‑cutting workflows.
+ * 1. When you need to automatically generate edge‑map PNGs from a collection of SVG icons for use in computer‑vision training datasets.
+ * 2. When you want to preprocess vector graphics by applying directional edge‑detection filters before embedding them in a web‑based map visualization.
+ * 3. When a CAD workflow requires converting multiple SVG schematics into raster edge images to highlight structural outlines for quality inspection.
+ * 4. When you are building a batch image‑processing pipeline that extracts contour information from SVG logos to create stylized thumbnails.
+ * 5. When you must integrate custom Sobel‑like kernels with Aspose.Imaging to produce orientation‑specific edge maps from SVG assets in a C# backend service.
  */
