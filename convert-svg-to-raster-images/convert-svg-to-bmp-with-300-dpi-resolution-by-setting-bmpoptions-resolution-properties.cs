@@ -1,3 +1,4 @@
+// HOW-TO: Convert SVG to BMP with 300 DPI Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,39 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input\\sample.svg";
+        string outputPath = "Output\\sample.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.svg";
-            string outputPath = "Output/sample.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure BMP save options
-                using (BmpOptions bmpOptions = new BmpOptions())
+                // Configure BMP save options with 300 DPI resolution
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    // Set 300 DPI resolution
-                    bmpOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-
-                    // Set vector rasterization options for proper rendering
-                    bmpOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    };
+                    }
+                };
 
-                    // Save as BMP with the specified options
-                    image.Save(outputPath, bmpOptions);
-                }
+                // Save the image as BMP
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑resolution bitmap thumbnails from scalable vector graphics for printing or archival purposes, they can use this C# code to convert SVG files to 300 DPI BMP images with Aspose.Imaging.
- * 2. When a Windows desktop application must embed vector icons into legacy components that only accept BMP format, the code enables conversion of SVG icons to 300 DPI BMP while preserving visual fidelity.
- * 3. When an automated build pipeline creates documentation PDFs and requires rasterized BMP assets at print‑ready resolution, this snippet converts source SVG diagrams to 300 DPI BMP files using Aspose.Imaging in C#.
- * 4. When a GIS system exports map layers as SVG and the downstream analysis tool only reads BMP at a specific DPI, developers can employ this example to rasterize the SVG to a 300 DPI BMP with proper background handling.
- * 5. When a game development pipeline needs to pre‑process SVG UI elements into BMP textures for older engines that lack SVG support, the code provides a straightforward way to produce 300 DPI BMP assets in C#.
+ * 1. When you need to generate high‑resolution bitmap thumbnails from vector SVG assets for printing or PDF embedding.
+ * 2. When a desktop application must export user‑drawn SVG diagrams as BMP files with a fixed 300 DPI for compatibility with legacy imaging software.
+ * 3. When an automated build pipeline converts SVG icons to BMP format at 300 DPI to meet a corporate style guide that requires raster images for documentation.
+ * 4. When a reporting tool rasterizes scalable SVG charts into BMP images at 300 DPI to ensure consistent sizing across different monitors and printers.
+ * 5. When a migration script replaces SVG logos with BMP equivalents while preserving exact physical dimensions by setting the resolution explicitly.
  */

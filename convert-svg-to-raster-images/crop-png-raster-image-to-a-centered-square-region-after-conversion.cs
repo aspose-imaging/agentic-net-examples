@@ -1,3 +1,4 @@
+// HOW-TO: Crop PNG Image to Centered Square Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output_cropped.png";
 
@@ -25,19 +26,22 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access raster-specific methods
+                RasterImage rasterImage = (RasterImage)image;
+
                 // Determine the size of the centered square
-                int side = Math.Min(image.Width, image.Height);
-                int left = (image.Width - side) / 2;
-                int top = (image.Height - side) / 2;
+                int side = Math.Min(rasterImage.Width, rasterImage.Height);
+                int left = (rasterImage.Width - side) / 2;
+                int top = (rasterImage.Height - side) / 2;
 
                 // Define the cropping rectangle
                 Rectangle cropArea = new Rectangle(left, top, side, side);
 
-                // Crop the image to the centered square
-                image.Crop(cropArea);
+                // Perform the crop
+                rasterImage.Crop(cropArea);
 
-                // Save the cropped image as PNG
-                image.Save(outputPath);
+                // Save the cropped image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate uniformly sized avatar thumbnails from user‑uploaded PNG photos, a developer can use this C# code to crop each image to a centered square before resizing.
- * 2. When an e‑commerce platform must prepare product images for a mobile carousel that requires square PNG icons, the code can automatically trim the larger dimension and keep the central area.
- * 3. When a desktop utility processes scanned documents saved as PNG and needs to extract the central portion for OCR, the developer can employ this cropping routine to isolate the region of interest.
- * 4. When a game developer wants to convert arbitrary PNG textures into square sprites for consistent tile mapping, this snippet provides a quick C# solution to center‑crop the images.
- * 5. When an automated batch job prepares profile pictures for a social network and must ensure all PNG files are square without distortion, the code can be integrated to perform the centered crop before saving.
+ * 1. When you need to generate square thumbnails from user‑uploaded PNG photos for a profile gallery.
+ * 2. When preparing PNG assets for a mobile app that requires a centered square image to fit a circular avatar mask.
+ * 3. When standardizing product images by cropping varied‑size PNGs to a uniform square before uploading to an e‑commerce platform.
+ * 4. When creating consistent icons from larger PNG designs by extracting the central square region programmatically in C#.
+ * 5. When automating batch processing of PNG screenshots to remove excess borders and keep only the central square content.
  */

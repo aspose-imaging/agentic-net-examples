@@ -1,3 +1,4 @@
+// HOW-TO: Set Custom Width and Height for SVG to PNG Conversion in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,41 +11,43 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
                 // Configure rasterization options with custom page size
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Set custom width and height (in pixels)
-                    PageWidth = 800f,
-                    PageHeight = 600f,
-                    // Optional: set background color
-                    BackgroundColor = Color.White
-                };
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+
+                // Set custom width and height (in pixels)
+                rasterOptions.PageWidth = 800;   // custom width
+                rasterOptions.PageHeight = 600;  // custom height
+
+                // Optional: set background color, smoothing, etc.
+                rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
+                rasterOptions.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                rasterOptions.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias;
 
                 // Prepare PNG save options and attach rasterization options
-                PngOptions saveOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the rasterized image
-                svgImage.Save(outputPath, saveOptions);
+                svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews of user‑uploaded SVG logos for a web portal, a developer can set PageWidth and PageHeight in SvgRasterizationOptions to produce consistent 800×600 PNG thumbnails.
- * 2. When creating printable product catalogs where SVG diagrams must fit a specific page layout, a developer uses custom page dimensions in SvgRasterizationOptions to rasterize the SVG to a PNG of the exact size required by the layout engine.
- * 3. When integrating SVG assets into a Windows desktop application that expects bitmap resources of a fixed resolution, a developer sets the rasterization options’ PageWidth and PageHeight to match the target bitmap size before saving as PNG.
- * 4. When automating batch conversion of SVG icons to high‑resolution PNG sprites for a mobile app, a developer defines custom page width and height in SvgRasterizationOptions to ensure each sprite meets the required pixel dimensions.
- * 5. When performing server‑side image processing that overlays SVG graphics onto photographs, a developer controls the rasterized SVG size by configuring PageWidth and PageHeight in SvgRasterizationOptions so the overlay aligns correctly with the background image.
+ * 1. When you need to generate PNG thumbnails of SVG logos at a specific 800×600 pixel size for a web gallery.
+ * 2. When a desktop application must render SVG diagrams into fixed‑size PNG files to fit into a predefined UI panel.
+ * 3. When preparing print‑ready images, you set exact pixel dimensions to ensure the SVG artwork scales correctly before saving as PNG.
+ * 4. When creating batch reports that embed SVG charts as PNGs with uniform dimensions for consistent layout across pages.
+ * 5. When exporting SVG assets for mobile apps, you rasterize them to a specific width and height to meet device resolution requirements.
  */
