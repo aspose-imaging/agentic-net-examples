@@ -1,3 +1,4 @@
+// HOW-TO: How To Rasterize WMF To JPEG At 300 DPI In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,29 +15,31 @@ class Program
             string inputPath = @"C:\Images\sample.wmf";
             string outputPath = @"C:\Images\sample_300dpi.jpg";
 
-            // Verify that the input file exists
+            // Verify that the input WMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up WMF rasterization options (page size matches the source image)
-                var wmfRasterOptions = new WmfRasterizationOptions
+                // Configure rasterization options for WMF
+                var rasterOptions = new WmfRasterizationOptions
                 {
+                    // Use the original image size as the page size
                     PageSize = image.Size
                 };
 
-                // Configure JPEG save options with 300 DPI resolution
+                // Set JPEG save options with 300 DPI resolution
                 var jpegOptions = new JpegOptions
                 {
-                    VectorRasterizationOptions = wmfRasterOptions,
+                    VectorRasterizationOptions = rasterOptions,
+                    // 300 DPI for both horizontal and vertical axes
                     ResolutionSettings = new ResolutionSetting(300.0, 300.0)
                 };
 
@@ -46,7 +49,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors without crashing
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating high‑resolution printable PDFs from legacy WMF vector graphics, a developer can rasterize the WMF to a 300 DPI JPEG to ensure crisp output on laser printers.
- * 2. When converting WMF icons for inclusion in marketing brochures, setting the JPEG resolution to 300 DPI guarantees that the images retain sharpness after scaling.
- * 3. When automating a batch job that prepares WMF diagrams for archival in a document management system, using Aspose.Imaging to rasterize them to 300 DPI JPEGs preserves detail for future printing.
- * 4. When building a C# web service that serves WMF‑based charts as JPEG thumbnails for high‑quality reports, configuring the DPI to 300 ensures the thumbnails look professional on printed pages.
- * 5. When integrating legacy WMF assets into a desktop publishing workflow, developers need to rasterize them to 300 DPI JPEG files so that the final printed catalog meets industry print standards.
+ * 1. When you need to convert vector WMF graphics into high‑resolution JPEG files for printing brochures, you can set the DPI to 300 using Aspose.Imaging.
+ * 2. When a desktop publishing workflow requires embedding WMF logos into PDF or Word documents as JPEG images with print‑ready resolution, this code ensures the correct DPI.
+ * 3. When an automated batch process must generate web‑ready thumbnails from WMF files while preserving detail for large‑format displays, the 300 DPI setting provides sharper results.
+ * 4. When a legacy engineering application stores schematics as WMF and you must export them to JPEG for archival on a high‑resolution scanner, the code guarantees proper scaling.
+ * 5. When a C# service creates product catalogs and needs to rasterize WMF icons to JPEG at 300 DPI to meet printer specifications, this approach handles the conversion reliably.
  */
