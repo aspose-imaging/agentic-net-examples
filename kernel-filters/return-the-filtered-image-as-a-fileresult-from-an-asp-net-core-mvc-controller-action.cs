@@ -1,33 +1,37 @@
+// HOW-TO: Return Blurred WebP Image As FileResult In ASP.NET Core MVC C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string inputPath = "input.webp";
+        string outputPath = "output.webp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "sample.webp";
-            string outputPath = "output.webp";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             using (Image image = Image.Load(inputPath))
             {
-                var options = new WebPOptions();
-                image.Save(outputPath, options);
-            }
+                RasterImage raster = (RasterImage)image;
 
-            Console.WriteLine($"Image saved to {outputPath}");
+                // Apply a Gaussian blur filter to the entire image
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image as WebP
+                raster.Save(outputPath, new WebPOptions());
+            }
         }
         catch (Exception ex)
         {
@@ -38,9 +42,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert uploaded WebP images to a standardized format and stream the processed file back to the browser as a FileResult in an ASP.NET Core MVC action.
- * 2. When an e‑commerce site wants to apply server‑side compression to product photos and deliver the optimized WebP image directly to the client without storing a temporary file.
- * 3. When a content management system must generate thumbnails on the fly from original WebP assets and return them as downloadable files via a controller endpoint.
- * 4. When a mobile backend API has to resize or re‑encode user‑submitted WebP pictures and send the transformed image back as an HTTP response using FileResult.
- * 5. When a reporting dashboard requires on‑demand conversion of legacy image formats to WebP and needs to serve the resulting file through an ASP.NET Core MVC controller for immediate preview.
+ * 1. When you need to apply a Gaussian blur to user‑uploaded WebP photos and send the processed image back to the browser in an ASP.NET Core MVC application.
+ * 2. When building a web service that generates softened thumbnails of WebP graphics on the fly and returns them as downloadable files.
+ * 3. When creating an API endpoint that sanitizes images by blurring sensitive areas before delivering the result as a FileResult.
+ * 4. When implementing a server‑side image filter for a content management system that stores and serves blurred WebP images directly to clients.
+ * 5. When optimizing a photo‑editing web app that applies a blur effect to WebP pictures and streams the edited file without saving it to disk.
  */
