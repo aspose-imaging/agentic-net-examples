@@ -1,63 +1,77 @@
+// HOW-TO: Generate JSON Kernel Configuration File for Custom Image Filters in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
+using System.Text.Json;
+using System.Collections.Generic;
 
-class Program
+namespace AsposeImagingKernelConfig
 {
-    static void Main(string[] args)
+    // Represents a kernel definition that can be loaded at runtime
+    public class KernelDefinition
     {
-        try
+        public string Name { get; set; }
+        public double[] Matrix { get; set; }
+    }
+
+    class Program
+    {
+        static void Main()
         {
-            // Define the output path for the JSON configuration file.
-            string outputPath = "custom_kernels.json";
+            // Hardcoded paths
+            string outputPath = @"C:\Temp\kernelConfig.json";
 
-            // Ensure the output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            try
+            {
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Build the JSON content defining custom kernel matrices.
-            StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.AppendLine("{");
-            jsonBuilder.AppendLine("  \"kernels\": [");
-            jsonBuilder.AppendLine("    {");
-            jsonBuilder.AppendLine("      \"name\": \"CustomKernel1\",");
-            jsonBuilder.AppendLine("      \"size\": 3,");
-            jsonBuilder.AppendLine("      \"matrix\": [");
-            jsonBuilder.AppendLine("        [0, -1, 0],");
-            jsonBuilder.AppendLine("        [-1, 5, -1],");
-            jsonBuilder.AppendLine("        [0, -1, 0]");
-            jsonBuilder.AppendLine("      ]");
-            jsonBuilder.AppendLine("    },");
-            jsonBuilder.AppendLine("    {");
-            jsonBuilder.AppendLine("      \"name\": \"CustomKernel2\",");
-            jsonBuilder.AppendLine("      \"size\": 5,");
-            jsonBuilder.AppendLine("      \"matrix\": [");
-            jsonBuilder.AppendLine("        [1, 1, 1, 1, 1],");
-            jsonBuilder.AppendLine("        [1, 2, 2, 2, 1],");
-            jsonBuilder.AppendLine("        [1, 2, 3, 2, 1],");
-            jsonBuilder.AppendLine("        [1, 2, 2, 2, 1],");
-            jsonBuilder.AppendLine("        [1, 1, 1, 1, 1]");
-            jsonBuilder.AppendLine("      ]");
-            jsonBuilder.AppendLine("    }");
-            jsonBuilder.AppendLine("  ]");
-            jsonBuilder.AppendLine("}");
+                // Define custom kernels
+                var kernels = new List<KernelDefinition>
+                {
+                    new KernelDefinition
+                    {
+                        Name = "CustomSharpen3x3",
+                        Matrix = new double[]
+                        {
+                            0, -1, 0,
+                            -1, 5, -1,
+                            0, -1, 0
+                        }
+                    },
+                    new KernelDefinition
+                    {
+                        Name = "CustomBlur5x5",
+                        Matrix = new double[]
+                        {
+                            1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1
+                        }
+                    }
+                };
 
-            // Write the JSON content to the file.
-            File.WriteAllText(outputPath, jsonBuilder.ToString());
+                // Serialize to JSON with indentation for readability
+                var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(kernels, jsonOptions);
 
-            Console.WriteLine($"Configuration file created at: {outputPath}");
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+                // Write JSON to the output file
+                File.WriteAllText(outputPath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to let end‑users choose or edit sharpening, edge‑enhancement or blur filters without recompiling, they can generate a JSON file with custom kernel matrices and load it at runtime with Aspose.Imaging.
- * 2. When an application processes medical or satellite images and requires a specific 5×5 convolution mask for noise reduction, the code can create a configuration file that stores the matrix for later use by the imaging pipeline.
- * 3. When a CI/CD pipeline needs to test multiple custom filters across different image formats such as JPEG, PNG or TIFF, the JSON file provides a portable definition of each kernel that can be swapped automatically during test runs.
- * 4. When a developer builds a plug‑in architecture where third‑party developers supply their own convolution kernels, this code generates the JSON schema that the plug‑in can read to apply the custom filter at runtime.
- * 5. When an image‑processing service must support locale‑specific visual effects (e.g., a stylized emboss for a marketing campaign), the JSON configuration lets the service load the appropriate kernel matrix without hard‑coding values in C#.
+ * 1. When you need to define custom sharpening or blur kernels once and load them at runtime without recompiling the application.
+ * 2. When you want to store image processing filter definitions in a portable JSON file that can be edited by non‑developers.
+ * 3. When you are building a plugin system that lets end users add or modify convolution kernels without changing code.
+ * 4. When you need to ensure the kernel configuration directory exists before writing the JSON file to avoid runtime errors.
+ * 5. When you want to serialize multiple kernel matrices with readable indentation for easy debugging or version control.
  */
