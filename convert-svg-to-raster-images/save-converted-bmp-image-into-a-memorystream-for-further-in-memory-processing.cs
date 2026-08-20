@@ -1,45 +1,40 @@
+// HOW-TO: Save BMP Image to MemoryStream for In-Memory Processing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.bmp";
-
         try
         {
-            // Verify input file exists
+            // Hard‑coded input path
+            string inputPath = @"C:\temp\sample.bmp";
+
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the BMP image
+            // Load the BMP image from disk
             using (Image image = Image.Load(inputPath))
             {
-                // Example processing: rotate the image 180 degrees around X axis
-                image.RotateFlip(RotateFlipType.Rotate180FlipX);
-
                 // Prepare BMP save options (default settings)
                 BmpOptions saveOptions = new BmpOptions();
 
-                // Save the processed image into a MemoryStream
+                // Save the image into a memory stream for further in‑memory processing
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     image.Save(memoryStream, saveOptions);
-
-                    // The stream now contains the BMP data; it can be used for further in‑memory processing
-                    Console.WriteLine($"Image saved to MemoryStream. Size in bytes: {memoryStream.Length}");
-                    
-                    // Example of resetting the position if further reading is needed
+                    // Reset the stream position if it will be read later
                     memoryStream.Position = 0;
-                    // ... further processing of memoryStream ...
+
+                    Console.WriteLine($"Image saved to memory stream. Size = {memoryStream.Length} bytes.");
+                    // Additional in‑memory processing can be performed here
                 }
             }
         }
@@ -52,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to receive a BMP file, rotate it, and return the modified image without writing to disk, a developer can load the BMP with Aspose.Imaging, apply RotateFlip, and save it to a MemoryStream for immediate transmission.
- * 2. When generating a PDF report that embeds a processed BMP image, a developer can keep the image in a MemoryStream to feed it directly into the PDF library without creating temporary files.
- * 3. When performing batch image transformations in a background worker and storing the results in a database as BLOBs, a developer can use the MemoryStream to capture the BMP bytes and insert them into the database.
- * 4. When integrating with a third‑party API that expects image data as a byte array, a developer can convert the rotated BMP to a MemoryStream and then call ToArray() to supply the required payload.
- * 5. When implementing an in‑memory caching layer for frequently accessed BMP thumbnails, a developer can load, rotate, and save the image to a MemoryStream so the cached byte array can be served quickly without disk I/O.
+ * 1. When you need to load a BMP file, convert it with Aspose.Imaging and keep the result in a MemoryStream instead of writing to disk, such as when passing the image to another API that expects a stream.
+ * 2. When you want to embed a BMP image directly into a database BLOB field without creating a temporary file, you can save it to a MemoryStream and store the byte array.
+ * 3. When you are building a web service that returns a BMP image as a response, saving the image to a MemoryStream lets you set the response body directly from memory.
+ * 4. When you need to chain multiple image operations (e.g., resizing, watermarking) without intermediate files, you can keep each step’s output in a MemoryStream for fast in‑memory processing.
+ * 5. When you are generating a BMP thumbnail to be sent over a message queue or saved to cloud storage, using a MemoryStream avoids filesystem I/O and simplifies the upload code.
  */
