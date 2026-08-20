@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Images to PDF with Original Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,33 +11,36 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputBmp";
-            string outputDirectory = @"C:\OutputPdf";
+            string inputDirectory = @"C:\Images\BmpInput";
+            string outputDirectory = @"C:\Images\PdfOutput";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all BMP files in the input directory
             string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF path using the original file name
+                // Construct the output PDF path with the same filename (different extension)
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PDF export options
-                    var pdfOptions = new PdfOptions();
+                    // Set up PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
 
                     // Save the image as PDF
                     image.Save(outputPath, pdfOptions);
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automate the conversion of a large collection of legacy BMP scans into PDF documents for archival in a document management system.
- * 2. When an application must generate PDF reports from user‑uploaded BMP screenshots in a batch process without manual file handling.
- * 3. When a migration tool has to transform BMP assets stored in a folder into PDF format to reduce file size and improve cross‑platform compatibility.
- * 4. When a C# utility is required to process every BMP file in a directory and save each as a PDF using the original filename for downstream workflows.
- * 5. When a developer wants to use Aspose.Imaging’s PdfOptions to convert BMP images to PDF in a single script, preserving the naming convention for easy reference.
+ * 1. When you need to generate printable PDF reports from a collection of scanned BMP diagrams stored in a folder.
+ * 2. When an automated workflow must archive legacy BMP assets as PDF files while preserving their original names.
+ * 3. When a desktop application has to export user‑uploaded BMP screenshots to PDF for email attachment.
+ * 4. When a server‑side service processes incoming BMP files and creates PDF versions for downstream document management systems.
+ * 5. When you want to migrate a batch of BMP product images to PDF format for consistent viewing across platforms.
  */

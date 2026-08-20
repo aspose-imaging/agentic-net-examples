@@ -1,3 +1,4 @@
+// HOW-TO: Invert BMP Colors and Save as PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.bmp";
-            string outputPath = "output\\output.pdf";
+            string outputPath = "output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -33,7 +34,7 @@ class Program
                     for (int x = 0; x < bmp.Width; x++)
                     {
                         var pixel = bmp.GetPixel(x, y);
-                        var inverted = Color.FromArgb(
+                        var inverted = Aspose.Imaging.Color.FromArgb(
                             pixel.A,
                             255 - pixel.R,
                             255 - pixel.G,
@@ -42,7 +43,7 @@ class Program
                     }
                 }
 
-                // Save the inverted image as a PDF (image embedded in a PDF page)
+                // Save the inverted image into a PDF file
                 var pdfOptions = new PdfOptions();
                 bmp.Save(outputPath, pdfOptions);
             }
@@ -56,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP graphics into printable PDF documents while applying a negative‑film effect for visual emphasis.
- * 2. When an application must generate PDF reports that include scanned BMP images with colors inverted to improve contrast for accessibility compliance.
- * 3. When a batch‑processing tool has to prepare marketing assets by turning product photos stored as BMP files into PDF handouts with a stylized inverted color scheme.
- * 4. When a document‑management system requires embedding security‑enhanced BMP images—where colors are inverted to obscure details—directly into PDF files for archival.
- * 5. When a C# utility must programmatically read a BMP, perform per‑pixel color inversion using Aspose.Imaging, and output a PDF for downstream workflows such as e‑signing or printing.
+ * 1. When you need to generate a negative‑style preview of a BMP diagram and embed it directly into a PDF report.
+ * 2. When an application must automatically convert scanned BMP assets into PDF files with inverted colors for printing on dark backgrounds.
+ * 3. When a batch job processes legacy BMP icons, applies a color inversion filter, and stores the results as PDF documents for archival.
+ * 4. When a web service receives BMP uploads, inverts the image colors for visual effect, and returns a PDF version to the client.
+ * 5. When you want to create a PDF portfolio that contains BMP images with their colors reversed to meet branding guidelines.
  */

@@ -1,42 +1,42 @@
+// HOW-TO: Resize BMP Image with Nearest Neighbor and Export to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output\\resized.svg";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            // Load the BMP image, resize it using the default NearestNeighbourResample,
+            // and save the result as an SVG document.
             using (Image image = Image.Load(inputPath))
             {
-                // Desired size (example: double the original size)
-                int newWidth = image.Width * 2;
-                int newHeight = image.Height * 2;
+                // Example resize dimensions – adjust as needed
+                int newWidth = 200;
+                int newHeight = 200;
 
-                // Resize using nearest‑neighbor interpolation
-                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                // Resize with nearest‑neighbor interpolation (default)
+                image.Resize(newWidth, newHeight);
 
-                // Save the resized image as SVG
-                var svgOptions = new SvgOptions(); // default options
-                image.Save(outputPath, svgOptions);
+                // Save as SVG
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP icons into scalable SVG graphics for high‑resolution UI designs while preserving pixel‑art style using nearest‑neighbor interpolation.
- * 2. When an e‑commerce platform must generate SVG thumbnails from BMP product photos to ensure fast loading and infinite zoom without losing the original blocky appearance.
- * 3. When a game developer wants to double the size of BMP sprite sheets and export them as SVG assets for vector‑based rendering pipelines in Unity.
- * 4. When a document‑automation system requires batch processing of scanned BMP diagrams, resizing them with nearest‑neighbor resampling and saving as SVG for inclusion in PDF reports.
- * 5. When a GIS application needs to upscale BMP map tiles and convert them to SVG format for responsive web mapping interfaces that adapt to different screen sizes.
+ * 1. When you need to generate a scalable vector version of a low‑resolution bitmap for web graphics, you can resize the BMP and save it as SVG.
+ * 2. When a legacy application only outputs BMP files but the downstream system requires SVG, this code converts and scales the image in one step.
+ * 3. When creating thumbnails for a UI that must remain crisp at any zoom level, you can resize the bitmap with nearest‑neighbor interpolation and output SVG.
+ * 4. When preparing assets for responsive design where vector format is preferred, you can quickly downscale a BMP and export it to SVG using C#.
+ * 5. When automating a batch process that standardizes image dimensions and converts raster BMPs to vector SVG for printing pipelines, this snippet handles the resize and conversion.
  */

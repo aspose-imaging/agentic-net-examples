@@ -1,3 +1,4 @@
+// HOW-TO: Center Crop a JPEG to 400x400 and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,25 +27,20 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Define a 400x400 centered rectangle
+                // Determine the rectangle for a centered 400x400 crop
                 int cropWidth = 400;
                 int cropHeight = 400;
                 int left = (image.Width - cropWidth) / 2;
                 int top = (image.Height - cropHeight) / 2;
-
-                // Adjust if the source image is smaller than the crop size
-                if (left < 0) left = 0;
-                if (top < 0) top = 0;
-                int actualWidth = Math.Min(cropWidth, image.Width);
-                int actualHeight = Math.Min(cropHeight, image.Height);
-
-                var area = new Rectangle(left, top, actualWidth, actualHeight);
+                var cropArea = new Rectangle(left, top, cropWidth, cropHeight);
 
                 // Perform the crop
-                image.Crop(area);
+                image.Crop(cropArea);
+
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
 
                 // Save the cropped image as PDF
-                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PDF thumbnail of a product photo by extracting a centered 400 × 400 pixel region from a JPEG image.
- * 2. When an application must create a printable PDF preview of a scanned document by cropping the central area of a raster image before saving.
- * 3. When a web service processes user‑uploaded photos and must produce a fixed‑size PDF receipt by performing a center crop on the original image.
- * 4. When a batch job converts a collection of large JPEG files into PDF flyers with a consistent 400 × 400 px focus area for branding purposes.
- * 5. When a desktop utility needs to extract the main subject from a picture and store it as a PDF for archival or sharing, using C# image loading, cropping, and PdfOptions.
+ * 1. When you need to generate a PDF thumbnail of a photo by extracting the central 400×400 region.
+ * 2. When creating printable PDFs from scanned images and you want to focus on the image’s central area.
+ * 3. When preparing a fixed‑size preview for a web gallery and the output must be a PDF document.
+ * 4. When automating a workflow that extracts a centered square from product photos and stores it as PDF for archival.
+ * 5. When converting high‑resolution JPEGs to smaller PDF files while preserving only the most important central content.
  */

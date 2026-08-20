@@ -1,52 +1,41 @@
+// HOW-TO: Create SVG From BMP With Custom Border Stroke Width In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.bmp";
+        string inputPath = "input.bmp";
         string outputPath = "output.svg";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load raster image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96; // Standard DPI
+                int dpi = 96;
 
-                // Create SVG graphics canvas
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+                var svgGraphics = new SvgGraphics2D(width, height, dpi);
 
-                // Define a custom pen with desired stroke width
-                Pen customPen = new Pen(Color.Blue, 5);
+                var borderPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
+                svgGraphics.DrawRectangle(borderPen, 0, 0, width, height);
 
-                // Draw a rectangle border using the custom pen
-                graphics.DrawRectangle(customPen, 0, 0, width, height);
+                svgGraphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
 
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0));
-
-                // Finalize SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (SvgImage svgImage = svgGraphics.EndRecording())
                 {
-                    // Save the SVG file
                     svgImage.Save(outputPath);
                 }
             }
@@ -60,9 +49,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a bitmap (BMP) into a scalable SVG for responsive web graphics while preserving the original raster content.
- * 2. When a developer wants to add a custom blue border with a 5‑pixel stroke around an image before embedding it in an SVG for branding or UI design.
- * 3. When a developer must generate an SVG file from a raster source on the server side in a .NET application, ensuring the output directory exists and handling missing files gracefully.
- * 4. When a developer requires a DPI‑aware SVG canvas (96 DPI) to maintain consistent sizing across different devices when rendering raster images in vector format.
- * 5. When a developer needs to programmatically create an SVG with defined stroke widths using Aspose.Imaging for .NET, then save it as a vector file for further editing in design tools.
+ * 1. When you need to embed a bitmap logo into a scalable SVG document while adding a thick black outline for branding consistency.
+ * 2. When generating printable vector graphics from scanned photos and you want a uniform border to match corporate style guidelines.
+ * 3. When converting UI screenshots to SVG for responsive web design and require a defined stroke width around the image to preserve layout spacing.
+ * 4. When automating batch processing of BMP assets to SVG format and need to ensure each output includes a consistent border for visual separation.
+ * 5. When creating diagram assets programmatically in C# and want to overlay a custom‑width rectangle around a raster image before saving as SVG for further editing.
  */

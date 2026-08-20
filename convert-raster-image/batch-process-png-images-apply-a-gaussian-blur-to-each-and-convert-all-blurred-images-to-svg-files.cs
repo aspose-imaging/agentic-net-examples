@@ -1,8 +1,9 @@
+// HOW-TO: Batch Apply Gaussian Blur to PNGs and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,13 +12,13 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputImages";
-            string outputDirectory = @"C:\OutputSvgs";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
+            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in pngFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -27,8 +28,8 @@ class Program
                 }
 
                 // Determine output SVG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -40,18 +41,14 @@ class Program
                     RasterImage rasterImage = (RasterImage)image;
                     rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    // Prepare SVG save options with rasterization settings
+                    // Prepare SVG rasterization options
                     SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
-                    SvgOptions svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
 
                     // Save the blurred image as SVG
-                    image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, new SvgOptions { VectorRasterizationOptions = rasterizationOptions });
                 }
             }
         }
@@ -64,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate blurred background SVG assets from a collection of PNG icons for responsive web design.
- * 2. When an automation script must preprocess product photos by applying a Gaussian blur and converting them to scalable SVG format for printing catalogs.
- * 3. When a CI/CD pipeline has to batch‑convert PNG UI screenshots into blurred SVG placeholders to improve page load performance.
- * 4. When a desktop application requires converting user‑uploaded PNG graphics into blurred vector SVGs for use in diagramming tools.
- * 5. When a data‑migration tool must transform a folder of PNG map tiles into blurred SVG layers for integration with GIS software.
+ * 1. When you need to automatically blur a collection of PNG assets and generate scalable SVG versions for web graphics.
+ * 2. When preparing product images for a responsive website that requires vector files with a soft focus effect applied uniformly.
+ * 3. When converting scanned PNG diagrams into SVG while applying a Gaussian blur to hide sensitive details before distribution.
+ * 4. When creating a batch workflow that processes user‑uploaded PNG icons, adds a blur for a UI hover effect, and saves them as SVG for high‑resolution displays.
+ * 5. When migrating legacy PNG artwork to SVG format and want to apply a consistent blur filter to all files in a single C# script.
  */

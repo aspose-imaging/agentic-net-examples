@@ -1,3 +1,4 @@
+// HOW-TO: Batch Resize BMP Images to 1024x768 and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,16 +14,19 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
             // Get all BMP files in the input folder
             string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
                 // Load the BMP image
@@ -31,15 +35,24 @@ class Program
                     // Resize to 1024x768 using the default resampling method
                     image.Resize(1024, 768);
 
-                    // Prepare output SVG path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
+                    // Prepare the output SVG file path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
 
-                    // Ensure the output directory exists
+                    // Ensure the output directory exists (unconditional as required)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set up SVG save options
-                    SvgOptions svgOptions = new SvgOptions();
+                    // Set up SVG rasterization options based on the resized image size
+                    var rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
+
+                    // Configure SVG save options
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
 
                     // Save the resized image as SVG
                     image.Save(outputPath, svgOptions);
@@ -55,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of BMP screenshots to scalable SVG graphics for a web portal, resizing them to a uniform 1024x768 resolution.
- * 2. When an automated build pipeline must generate optimized SVG assets from a folder of BMP icons, ensuring each icon fits a 1024x768 canvas before deployment.
- * 3. When a desktop application must batch‑process user‑uploaded BMP photos, resize them to a standard size, and store them as SVG files for vector‑based printing.
- * 4. When a content management system requires converting archived BMP diagrams into SVG format while normalizing their dimensions to 1024x768 for consistent display across devices.
- * 5. When a data‑migration script needs to read BMP files from a network share, resize them to 1024x768, and save them as SVG files in a new directory using Aspose.Imaging for .NET.
+ * 1. When you need to prepare a large collection of legacy BMP graphics for web display by resizing them to a standard 1024x768 resolution and converting them to lightweight SVG files.
+ * 2. When an application must automatically generate scalable vector versions of scanned BMP assets for responsive UI components without manual editing.
+ * 3. When a migration script has to process thousands of BMP files in a folder, normalize their dimensions, and output SVGs for use in modern design tools.
+ * 4. When a reporting tool requires all input bitmap charts to be resized and stored as SVG to ensure crisp rendering at any zoom level.
+ * 5. When a CI/CD pipeline needs to validate image assets by batch converting BMPs to SVG after resizing them to a fixed size for quality checks.
  */

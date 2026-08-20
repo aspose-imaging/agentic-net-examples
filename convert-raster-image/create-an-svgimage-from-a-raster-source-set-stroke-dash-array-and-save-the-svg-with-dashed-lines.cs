@@ -1,3 +1,4 @@
+// HOW-TO: Create SVG from BMP with Dashed Line Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,12 +11,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\source.bmp";
-        string outputPath = @"C:\Temp\output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,26 +24,25 @@ class Program
                 return;
             }
 
-            // Load raster image
+            // Load the raster image
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Create SVG graphics with same dimensions as raster image
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96; // standard screen DPI
+                int dpi = 96;
 
+                // Create SVG graphics canvas
                 SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Create a pen with dash pattern for drawing a border
-                Pen dashedPen = new Pen(Color.Black, 2);
-                // Set dash pattern: 5 units on, 5 units off
-                dashedPen.DashPattern = new float[] { 5, 5 };
-
-                // Draw a dashed rectangle around the image bounds
-                graphics.DrawRectangle(dashedPen, 0, 0, width, height);
-
                 // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
+
+                // Create a pen with a dash pattern
+                Pen dashedPen = new Pen(Aspose.Imaging.Color.Black, 2);
+                dashedPen.DashPattern = new float[] { 5, 5 }; // 5 units dash, 5 units gap
+
+                // Draw a diagonal dashed line
+                graphics.DrawLine(dashedPen, 0, 0, width, height);
 
                 // Finalize SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
@@ -50,7 +50,7 @@ class Program
                     // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save SVG file
+                    // Save the SVG file
                     svgImage.Save(outputPath);
                 }
             }
@@ -64,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a BMP screenshot into a scalable SVG file while adding a dashed border for visual emphasis in a web dashboard.
- * 2. When generating printable diagrams from raster scans where the output SVG must retain the original dimensions and include a custom dash pattern around the image edges.
- * 3. When creating SVG assets for responsive UI components that require a consistent 96‑dpi size and a stylized dashed outline to match corporate branding guidelines.
- * 4. When automating the preparation of image assets for PDF reports, converting raster images to SVG and applying a dash array to highlight sections without increasing file size.
- * 5. When building a C# tool that overlays vector graphics on raster photos, using Aspose.Imaging to draw a dashed rectangle and embed the original bitmap into an SVG for interactive web viewers.
+ * 1. When you need to embed a bitmap into an SVG for scalable web graphics while adding custom dashed annotations.
+ * 2. When you want to generate vector‑based diagrams from raster images programmatically in a C# application.
+ * 3. When you must overlay measurement lines or guides with dash patterns on an SVG that contains a raster background.
+ * 4. When you are converting legacy BMP assets to SVG format to reduce file size and enable resolution‑independent rendering.
+ * 5. When you require automated creation of SVG files with specific stroke styles for printing or reporting pipelines.
  */

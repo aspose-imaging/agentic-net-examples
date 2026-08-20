@@ -1,64 +1,59 @@
+// HOW-TO: Convert BMP to SVG with Inverted Colors Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg; // Required for SVG handling
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = "input.bmp";
         string outputPath = "output.svg";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                // Apply a simple custom color filter (invert colors)
+                if (image is RasterImage raster)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
-
-                // Apply a simple custom color filter:
-                // Example: swap red and blue channels for each pixel
-                for (int y = 0; y < raster.Height; y++)
-                {
-                    for (int x = 0; x < raster.Width; x++)
+                    for (int y = 0; y < raster.Height; y++)
                     {
-                        // Get current pixel color
-                        Color original = raster.GetPixel(x, y);
+                        for (int x = 0; x < raster.Width; x++)
+                        {
+                            // Get the current pixel
+                            Color original = raster.GetPixel(x, y);
 
-                        // Swap red and blue components
-                        Color filtered = Color.FromArgb(
-                            original.A,
-                            original.B, // new Red = original Blue
-                            original.G,
-                            original.R  // new Blue = original Red
-                        );
+                            // Invert RGB channels while preserving alpha
+                            Color filtered = Color.FromArgb(
+                                original.A,
+                                (byte)(255 - original.R),
+                                (byte)(255 - original.G),
+                                (byte)(255 - original.B));
 
-                        // Set the modified pixel back
-                        raster.SetPixel(x, y, filtered);
+                            // Set the new pixel value
+                            raster.SetPixel(x, y, filtered);
+                        }
                     }
                 }
 
-                // Save the filtered image as SVG with default options
-                SvgOptions svgOptions = new SvgOptions();
-                raster.Save(outputPath, svgOptions);
+                // Export the filtered image as SVG with default options
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP graphics to scalable SVG files while applying a custom color transformation such as swapping red and blue channels using Aspose.Imaging for .NET.
- * 2. When an application must preprocess scanned BMP images by adjusting their color channels before embedding them as vector SVG assets in a web page.
- * 3. When a game developer wants to recolor sprite sheets stored as BMPs and export them as SVGs for resolution‑independent rendering in a C# UI.
- * 4. When a reporting tool generates BMP charts that require a specific color filter and then needs to embed the results as SVG diagrams in PDF or HTML outputs.
- * 5. When an automation script processes a batch of BMP files, applies pixel‑level color manipulation, and saves the results as SVG vectors for downstream design workflows.
+ * 1. When you need to generate scalable vector graphics from legacy BMP assets while applying a color inversion for a dark‑mode UI.
+ * 2. When you want to programmatically recolor a bitmap image and export it as SVG for responsive web design.
+ * 3. When you must batch‑process scanned BMP files, apply a custom filter, and store the results in a resolution‑independent format.
+ * 4. When you are building a C# tool that converts user‑uploaded BMP icons into SVG icons with a specific color scheme.
+ * 5. When you require an automated way to transform raster images into vector format with custom pixel‑level color adjustments for printing pipelines.
  */

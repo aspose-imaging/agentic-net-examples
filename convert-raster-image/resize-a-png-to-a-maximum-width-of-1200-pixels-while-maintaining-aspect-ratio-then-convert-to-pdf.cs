@@ -1,19 +1,19 @@
+// HOW-TO: Resize PNG to Max Width and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,18 +29,16 @@ class Program
             {
                 const int maxWidth = 1200;
 
-                // Resize only if the width exceeds the maximum
+                // Resize only if width exceeds the maximum, preserving aspect ratio
                 if (image.Width > maxWidth)
                 {
                     int newWidth = maxWidth;
                     int newHeight = (int)Math.Round((double)image.Height * maxWidth / image.Width);
-
-                    // Resize while maintaining aspect ratio using high‑quality resampling
-                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                    image.Resize(newWidth, newHeight);
                 }
 
                 // Convert and save as PDF
-                var pdfOptions = new PdfOptions();
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate printable PDF reports from user‑uploaded PNG screenshots while ensuring the images do not exceed 1200 px width for faster download.
- * 2. When an e‑commerce platform must batch‑process product PNG assets, downscale them to a maximum width of 1200 pixels to meet layout constraints, and archive the results as PDF catalogs.
- * 3. When a document management system receives high‑resolution PNG scans, it resizes them to a 1200 px width to preserve aspect ratio and then converts them to PDF for consistent viewing across devices.
- * 4. When a marketing automation tool creates PDF newsletters from PNG banners, it uses C# and Aspose.Imaging to limit banner width to 1200 px and maintain visual quality with high‑quality resampling.
- * 5. When a desktop utility needs to compress large PNG illustrations for legal filings, it resizes the images to a maximum width of 1200 pixels and saves them as PDF files using the Aspose.Imaging library.
+ * 1. When you need to shrink large PNG photos to fit web page layouts while preserving their aspect ratio before generating a PDF report.
+ * 2. When an automated batch job must ensure uploaded PNGs do not exceed 1200 pixels in width before archiving them as PDF documents.
+ * 3. When a desktop application creates printable PDFs from user‑selected PNG images and must resize oversized images to avoid oversized PDF files.
+ * 4. When a document‑generation service converts marketing PNG assets into PDF brochures and must limit image width for consistent page design.
+ * 5. When a server‑side API receives high‑resolution PNGs, resizes them to a safe width, and returns a PDF version for client download.
  */

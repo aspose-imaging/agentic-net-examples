@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert PNG Images to PDF and Zip Them in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -11,70 +12,54 @@ class Program
         try
         {
             // Hardcoded input directory containing PNG files
-            string inputDirectory = @"C:\Images\Input";
-
+            string inputDirectory = @"C:\InputPngs";
             // Hardcoded output ZIP file path
-            string outputZipPath = @"C:\Images\Output\converted.zip";
+            string outputZipPath = @"C:\Output\images.zip";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-            // Verify the input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
-                return;
-            }
-
             // Get all PNG files in the input directory
             string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-            // Shared memory stream that will hold the ZIP archive
-            using (MemoryStream zipStream = new MemoryStream())
+            // Shared memory stream used for each PDF conversion
+            using (MemoryStream sharedPdfStream = new MemoryStream())
+            // Create the ZIP archive
+            using (FileStream zipFileStream = new FileStream(outputZipPath, FileMode.Create))
+            using (ZipArchive zipArchive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
             {
-                // Create a ZIP archive in the memory stream
-                using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+                foreach (string pngPath in pngFiles)
                 {
-                    foreach (string pngPath in pngFiles)
+                    // Verify input file exists
+                    if (!File.Exists(pngPath))
                     {
-                        // Verify each input file exists
-                        if (!File.Exists(pngPath))
+                        Console.Error.WriteLine($"File not found: {pngPath}");
+                        return;
+                    }
+
+                    // Load the PNG image
+                    using (Image image = Image.Load(pngPath))
+                    {
+                        // Prepare PDF options (default compression)
+                        PdfOptions pdfOptions = new PdfOptions();
+
+                        // Reset shared stream for new PDF content
+                        sharedPdfStream.SetLength(0);
+                        sharedPdfStream.Position = 0;
+
+                        // Save image as PDF into the shared memory stream
+                        image.Save(sharedPdfStream, pdfOptions);
+                        sharedPdfStream.Position = 0;
+
+                        // Create a ZIP entry named after the original PNG file
+                        string entryName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
+                        ZipArchiveEntry zipEntry = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
+                        using (Stream entryStream = zipEntry.Open())
                         {
-                            Console.Error.WriteLine($"File not found: {pngPath}");
-                            return;
-                        }
-
-                        // Load the PNG image
-                        using (Image image = Image.Load(pngPath))
-                        {
-                            // Prepare PDF export options (default compression)
-                            PdfOptions pdfOptions = new PdfOptions();
-
-                            // Save the image as PDF into a temporary memory stream
-                            using (MemoryStream pdfStream = new MemoryStream())
-                            {
-                                image.Save(pdfStream, pdfOptions);
-                                pdfStream.Position = 0; // Reset for reading
-
-                                // Create a ZIP entry named after the original file but with .pdf extension
-                                string entryName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
-                                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
-
-                                // Write the PDF bytes into the ZIP entry
-                                using (Stream entryStream = entry.Open())
-                                {
-                                    pdfStream.CopyTo(entryStream);
-                                }
-                            }
+                            // Copy PDF bytes from the shared stream into the ZIP entry
+                            sharedPdfStream.CopyTo(entryStream);
                         }
                     }
-                }
-
-                // Write the ZIP archive from memory to the output file
-                zipStream.Position = 0;
-                using (FileStream fileStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
-                {
-                    zipStream.CopyTo(fileStream);
                 }
             }
         }
@@ -87,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to let users upload multiple PNG screenshots and receive a single downloadable PDF archive, a developer can use this code to convert each PNG to PDF in memory and zip them for fast delivery.
- * 2. When an automated reporting system generates chart images as PNG files nightly and must bundle them into a PDF portfolio for compliance auditors, this snippet enables batch conversion and compression without writing intermediate files to disk.
- * 3. When a desktop utility must archive scanned PNG documents into a searchable PDF collection for archival storage, the shared MemoryStream approach reduces I/O overhead while creating a zip file for easy transport.
- * 4. When a cloud function processes user‑submitted PNG assets and needs to return a single compressed package of PDFs to a mobile client, the code demonstrates how to perform the conversion and zip creation entirely in memory using Aspose.Imaging for .NET.
- * 5. When a CI/CD pipeline validates that generated PNG assets can be correctly rendered as PDFs and packaged for distribution, this example provides a quick way to batch convert and zip the results as part of automated testing.
+ * 1. When you need to generate a single downloadable ZIP containing PDFs for a large set of PNG assets, such as product photos for an e‑commerce catalog.
+ * 2. When an automated reporting tool must transform scanned PNG diagrams into PDF pages before archiving them for compliance.
+ * 3. When a web service receives multiple PNG uploads and must return a compressed PDF bundle to the client without writing intermediate files to disk.
+ * 4. When a desktop application wants to batch‑process user‑selected PNG files into PDFs while keeping memory usage low by reusing a single MemoryStream.
+ * 5. When a CI/CD pipeline has to package documentation screenshots (PNG) as PDFs inside a ZIP for distribution to stakeholders.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Resize JPEG to 800x600 with Lanczos and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,36 +9,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.jpg";
-        string outputPath = "result.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Define the desired size (example: half the original dimensions)
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
+                // Desired dimensions (example: 800x600)
+                int newWidth = 800;
+                int newHeight = 600;
 
-                // Resize using Lanczos resampling for high‑quality results
+                // Resize using Lanczos resampling
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Save the resized image as a PDF document
+                // Save the resized image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a printable PDF from user‑uploaded JPEG photos while preserving visual quality, a developer can use this C# code to resize the image with Lanczos resampling and save it as a PDF.
- * 2. When an e‑commerce platform wants to create thumbnail‑size PDF catalogs from high‑resolution product images, the code provides a fast way to halve the dimensions with high‑quality Lanczos scaling before exporting to PDF.
- * 3. When a document management system must compress large scanned images into smaller PDF files for archival, the developer can apply Lanczos resampling in C# to reduce file size without noticeable loss and then save the result as a PDF.
- * 4. When a desktop utility needs to batch‑process photos into PDF slideshows, the sample shows how to programmatically load each raster image, resize it using Lanczos for sharpness, and convert it to a PDF document in .NET.
- * 5. When a mobile backend service receives raw JPEG uploads and must deliver a PDF preview to clients, this code demonstrates the C# workflow of verifying the file, resizing with Lanczos resample, and exporting to PDF for fast rendering.
+ * 1. When you need to generate a high‑quality PDF thumbnail from a large photo for an e‑commerce product catalog.
+ * 2. When you must downscale scanned documents to a standard size before embedding them in a PDF report.
+ * 3. When creating printable PDFs from user‑uploaded images while preserving detail using Lanczos resampling.
+ * 4. When automating batch conversion of JPEG images to PDF with consistent dimensions for archival purposes.
+ * 5. When integrating image resizing and PDF export into a C# web service that returns PDFs to client applications.
  */

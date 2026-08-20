@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to SVG and Add XML Comment in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample_converted.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_converted.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,18 +27,16 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG conversion
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Prepare rasterization options matching the source size
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure SVG save options
-                var svgOptions = new SvgOptions
+                // Prepare SVG save options
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    // Example: render text as shapes (optional)
-                    TextAsShapes = true
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save as SVG
@@ -45,24 +44,9 @@ class Program
             }
 
             // Embed a custom XML comment describing the conversion
-            const string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
-
+            string comment = $"<!-- Converted from BMP to SVG using Aspose.Imaging on {DateTime.Now:u} -->{Environment.NewLine}";
             string svgContent = File.ReadAllText(outputPath);
-            string newContent;
-
-            if (svgContent.StartsWith("<?xml"))
-            {
-                // Insert comment after the XML declaration line
-                int firstLineEnd = svgContent.IndexOf('>') + 1;
-                newContent = svgContent.Insert(firstLineEnd, Environment.NewLine + comment);
-            }
-            else
-            {
-                // Prepend comment if no XML declaration
-                newContent = comment + Environment.NewLine + svgContent;
-            }
-
-            File.WriteAllText(outputPath, newContent);
+            File.WriteAllText(outputPath, comment + svgContent);
         }
         catch (Exception ex)
         {
@@ -73,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets into scalable SVG graphics for responsive web design while preserving image dimensions.
- * 2. When an automated build pipeline must generate vector versions of bitmap icons and add a traceable XML comment for audit compliance.
- * 3. When a desktop application processes user‑uploaded BMP screenshots and saves them as SVG files to reduce file size for cloud storage.
- * 4. When a reporting tool requires embedding conversion metadata inside SVG files so downstream systems can identify the source format.
- * 5. When a C# service migrates graphic resources from a Windows‑only BMP library to cross‑platform SVG format and needs to ensure the conversion step is documented within the SVG markup.
+ * 1. When you need to transform legacy BMP graphics into scalable SVG files for web display while preserving the original dimensions.
+ * 2. When you want to programmatically embed a timestamped XML comment into an SVG to document the conversion process for audit purposes.
+ * 3. When an automated build pipeline must convert a batch of BMP assets to SVG format and include conversion metadata for downstream tools.
+ * 4. When integrating image conversion into a C# desktop application that requires raster‑to‑vector conversion and custom documentation inside the SVG.
+ * 5. When generating SVG assets from BMP sources for responsive design and need to include conversion details for future maintenance.
  */

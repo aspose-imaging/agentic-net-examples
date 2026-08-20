@@ -1,20 +1,21 @@
+// HOW-TO: Convert PNG to SVG With Background Color In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.png";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\Images\\source.png";
+            string outputPath = "C:\\Images\\result.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,23 +29,16 @@ class Program
             // Load the PNG image
             using (Image pngImage = Image.Load(inputPath))
             {
-                // Prepare SVG rasterization options with a background color
-                var rasterOptions = new SvgRasterizationOptions
+                // Create an SVG image with the same dimensions as the PNG
+                using (SvgImage svgImage = new SvgImage(pngImage.Width, pngImage.Height))
                 {
-                    // Set desired background color
-                    BackgroundColor = Aspose.Imaging.Color.LightBlue,
-                    // Preserve original image size
-                    PageSize = pngImage.Size
-                };
+                    // Set background color (example: LightBlue)
+                    svgImage.BackgroundColor = Aspose.Imaging.Color.LightBlue;
+                    svgImage.HasBackgroundColor = true;
 
-                // Configure SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the image as SVG
-                pngImage.Save(outputPath, svgOptions);
+                    // Save the SVG image
+                    svgImage.Save(outputPath, new SvgOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a PNG logo into a responsive web page and wants to convert it to a scalable SVG with a light‑blue background for consistent rendering across browsers.
- * 2. When an automated build script must batch‑process PNG assets from a design folder and generate SVG versions with a predefined background color for use in vector‑based UI components.
- * 3. When a reporting tool creates charts as PNG images but the final PDF requires vector graphics, so the PNG is raster‑converted to SVG with a specific background to preserve appearance.
- * 4. When a mobile app loads PNG icons at runtime and the developer wants to cache them as SVG files with a uniform background to reduce memory usage and enable scaling.
- * 5. When a content management system imports user‑uploaded PNG pictures and needs to store them as SVG files with a set background color to maintain brand colors in all downstream publications.
+ * 1. When you need to embed a PNG graphic into a web page as scalable SVG with a solid background color for consistent rendering across browsers.
+ * 2. When generating vector assets from raster logos for print or marketing materials while preserving a specific background hue using C#.
+ * 3. When automating batch conversion of product images to SVG format for responsive design, ensuring each SVG has a predefined background shade.
+ * 4. When creating SVG placeholders from PNG thumbnails in a .NET application, setting a background color to match the app’s theme.
+ * 5. When integrating Aspose.Imaging into a C# service that transforms user‑uploaded PNG files into SVG files with a custom background for further editing in vector editors.
  */
