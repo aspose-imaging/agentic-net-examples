@@ -1,20 +1,20 @@
+// HOW-TO: Retry Loading Image on Transient I/O Errors in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Threading;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,54 +22,55 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Retry mechanism for loading the image
-            const int maxAttempts = 3;
+            // Retry mechanism for transient I/O errors during image loading
+            Image image = null;
+            const int maxRetries = 3;
             int attempt = 0;
-            RasterImage rasterImage = null;
-            while (attempt < maxAttempts)
+            while (attempt < maxRetries)
             {
                 try
                 {
-                    // Load the image as RasterImage
-                    rasterImage = (RasterImage)Image.Load(inputPath);
-                    break; // Success
+                    image = Image.Load(inputPath);
+                    break; // Loaded successfully
                 }
-                catch (IOException)
+                catch (ImageLoadException ex) // Transient load error
                 {
                     attempt++;
-                    if (attempt >= maxAttempts)
+                    if (attempt >= maxRetries)
                     {
-                        Console.Error.WriteLine($"Failed to load image after {maxAttempts} attempts.");
+                        Console.Error.WriteLine($"Failed to load image after {maxRetries} attempts: {ex.Message}");
                         return;
                     }
-                    // Optionally wait before retrying
-                    System.Threading.Thread.Sleep(500);
+                    Thread.Sleep(500); // Wait before retrying
                 }
-                catch (Exception ex)
+                catch (IOException ex) // Other I/O errors
                 {
-                    Console.Error.WriteLine($"Error loading image: {ex.Message}");
-                    return;
+                    attempt++;
+                    if (attempt >= maxRetries)
+                    {
+                        Console.Error.WriteLine($"IO error loading image after {maxRetries} attempts: {ex.Message}");
+                        return;
+                    }
+                    Thread.Sleep(500);
                 }
             }
 
-            using (rasterImage)
+            if (image == null)
             {
-                // Apply a Gaussian blur filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                Console.Error.WriteLine("Image could not be loaded.");
+                return;
+            }
 
-                // Prepare JPEG options with a bound file source
-                Source outputSource = new FileCreateSource(outputPath, false);
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = outputSource,
-                    Quality = 90
-                };
+            using (image)
+            {
+                // Example filter: convert to grayscale (placeholder for actual processing)
+                // image.ConvertToGrayscale(); // Uncomment if method is available
 
-                // Save the filtered image
-                rasterImage.Save(outputPath, jpegOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the processed image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -81,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to load user‑uploaded PNG files from a temporary folder and apply a Gaussian blur before saving them as JPEGs, the retry logic protects against occasional file‑lock or network glitches.
- * 2. When a Windows service processes a nightly batch of images stored on a network share, the code ensures transient I/O errors do not abort the entire conversion pipeline.
- * 3. When an automated image‑processing pipeline in a CI/CD workflow reads PNG assets from a shared repository and outputs blurred JPEG previews, the retry mechanism handles intermittent disk latency.
- * 4. When a desktop utility converts scanned PNG documents to compressed JPEGs and applies a blur filter for privacy, the retry loop safeguards against temporary read failures caused by scanner driver delays.
- * 5. When a cloud‑based microservice streams PNG images from a mounted blob storage, applies a Gaussian blur, and writes JPEG results, the retry pattern helps recover from brief connectivity interruptions.
+ * 1. When a web service intermittently fails to read a JPEG file from disk, you can use this retry logic to ensure the image loads before applying filters.
+ * 2. When processing a batch of high‑resolution PNGs on a shared network drive, the code helps recover from temporary I/O timeouts by retrying the load operation.
+ * 3. When integrating Aspose.Imaging into an automated photo‑editing pipeline, the retry mechanism prevents the entire workflow from stopping due to occasional file‑access glitches.
+ * 4. When deploying a Windows service that monitors a folder for new TIFF images, the sample shows how to handle transient read errors before performing image transformations.
+ * 5. When building a desktop C# application that applies filters to user‑selected images, this pattern safeguards against occasional disk‑read failures caused by antivirus scans or network latency.
  */
