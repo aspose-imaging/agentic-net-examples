@@ -1,7 +1,7 @@
+// HOW-TO: Load SVG Image From Templates Folder Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -9,39 +9,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "templates/example.svg";
-            string outputPath = "output/example.png";
+            // Hardcoded input path to the SVG file in the templates folder
+            string inputPath = "templates/sample.svg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
+            // Load the SVG image using Aspose.Imaging.Image.Load
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for PNG conversion
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save the rasterized image as PNG
-                image.Save(outputPath, pngOptions);
+                // Example usage: output basic image information
+                Console.WriteLine($"Loaded SVG image. Width: {image.Width}, Height: {image.Height}");
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG template stored in the project’s “templates” folder into a PNG file for web display or email attachments.
- * 2. When an application must verify the existence of an SVG asset before rasterizing it to a bitmap format to avoid runtime errors.
- * 3. When a C# service generates dynamic graphics by loading vector SVG logos and saving them as PNGs with the same dimensions for consistent branding.
- * 4. When a batch processing tool has to ensure the output directory exists and then rasterize multiple SVG files to PNG using Aspose.Imaging’s SvgRasterizationOptions.
- * 5. When troubleshooting image conversion, a developer uses a try‑catch block around Image.Load and image.Save to capture and log any exceptions during SVG to PNG transformation.
+ * 1. When you need to read an SVG file stored in a project’s templates directory to retrieve its dimensions for layout calculations.
+ * 2. When you want to verify that an SVG asset exists before processing it in a .NET application.
+ * 3. When you are building a reporting tool that extracts basic metadata such as width and height from vector graphics.
+ * 4. When you need to load an SVG into memory with Aspose.Imaging to later convert it to another format like PNG or PDF.
+ * 5. When you are debugging an image pipeline and need to quickly display the size of an SVG loaded from a known path.
  */
