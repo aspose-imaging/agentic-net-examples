@@ -1,3 +1,4 @@
+// HOW-TO: Apply 5x5 Gaussian Deconvolution Filter With Sigma 1.0 In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,30 +8,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/input.png";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input/input.png";
+            string outputPath = "output/output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Configure Deconvolution filter with 5x5 kernel and sigma 1.0
-                var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions();
-                deconvOptions.Size = 5;   // 5x5 kernel
-                deconvOptions.Sigma = 1.0; // sigma value
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                raster.Filter(raster.Bounds, deconvOptions);
+            // Load image as RasterImage and apply deconvolution filter
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                // Configure a 5x5 Gaussian deconvolution filter with sigma 1.0
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 1.0);
+
+                // Apply filter to the whole image
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Save the result as PNG
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a scanned document PNG by reducing blur caused by camera shake, they can apply a 5×5 Gauss‑Wiener deconvolution filter with sigma 1.0 before saving the image.
- * 2. When processing medical X‑ray PNG files that contain subtle noise, using a 5×5 kernel and sigma 1.0 deconvolution helps enhance edge details while preserving diagnostic information.
- * 3. When preparing product photos for an e‑commerce website, a C# routine can deblur PNG images with a 5×5 deconvolution filter (sigma 1.0) to improve visual clarity without over‑sharpening.
- * 4. When restoring old scanned photographs stored as PNG, applying a 5×5 Gauss‑Wiener filter with sigma 1.0 in Aspose.Imaging can reduce motion blur and make the image look cleaner.
- * 5. When building an automated image‑processing pipeline that receives PNG uploads, developers can use the 5×5 kernel and sigma 1.0 deconvolution filter to standardize sharpness across all incoming files.
+ * 1. When you need to reduce blur in a scanned PNG document by applying a 5×5 Gaussian deconvolution with sigma 1.0 using C#.
+ * 2. When you want to enhance details in a medical imaging PNG file by performing a Wiener deconvolution filter in an Aspose.Imaging .NET application.
+ * 3. When you are building an automated image‑processing pipeline that restores sharpness of batch‑processed PNG photos with a 5×5 Gaussian kernel in C#.
+ * 4. When you must improve the clarity of security camera footage saved as PNG by applying a sigma 1.0 deconvolution filter before archiving it.
+ * 5. When you are developing a desktop tool that lets users clean up noisy PNG graphics by running a Gaussian deconvolution filter via Aspose.Imaging for .NET.
  */
