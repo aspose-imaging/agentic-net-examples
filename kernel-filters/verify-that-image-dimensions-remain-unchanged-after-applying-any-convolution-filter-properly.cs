@@ -1,4 +1,4 @@
-// HOW-TO: Check That Image Dimensions Remain Same After Applying Gaussian Blur in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check Image Dimensions Remain Same After Gaussian Blur In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,21 +9,18 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = "input\\sample.png";
+        string outputPath = "output\\filtered.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
@@ -38,13 +35,23 @@ class Program
                 var filterOptions = new GaussianBlurFilterOptions(5, 4.0);
                 rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                // Verify dimensions are unchanged
-                bool dimensionsUnchanged = rasterImage.Width == originalWidth && rasterImage.Height == originalHeight;
-                Console.WriteLine(dimensionsUnchanged
-                    ? "Image dimensions unchanged after filter."
-                    : "Image dimensions changed after filter.");
+                // Verify dimensions after filtering
+                int newWidth = rasterImage.Width;
+                int newHeight = rasterImage.Height;
 
-                // Save the processed image
+                if (originalWidth != newWidth || originalHeight != newHeight)
+                {
+                    Console.WriteLine("Dimensions changed after applying the filter!");
+                }
+                else
+                {
+                    Console.WriteLine("Image dimensions remain unchanged after applying the filter.");
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the filtered image
                 rasterImage.Save(outputPath);
             }
         }
@@ -57,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply a Gaussian blur to a PNG while ensuring the original width and height stay unchanged for layout consistency.
- * 2. When validating an image processing pipeline that uses convolution filters and you must confirm that the filter does not alter image dimensions before further processing.
- * 3. When integrating Aspose.Imaging in a C# application to batch‑process photos and you need a quick check that each filtered image retains its original size.
- * 4. When creating a thumbnail generator that applies blur effects and you must guarantee the output dimensions match the source to avoid stretching in UI components.
- * 5. When debugging a custom filter implementation and you want to log whether the filter unintentionally resized the raster image.
+ * 1. When you need to apply a Gaussian blur to a PNG without altering its width and height.
+ * 2. When validating that image processing operations in a .NET application preserve original dimensions for downstream layout calculations.
+ * 3. When automating batch image filtering and you must ensure the filtered files can replace the originals without breaking UI constraints.
+ * 4. When debugging custom filter pipelines and you want a quick console check that the filter does not resize the raster.
+ * 5. When integrating Aspose.Imaging into a C# service that processes user‑uploaded images and you must guarantee size consistency after applying any convolution filter.
  */
