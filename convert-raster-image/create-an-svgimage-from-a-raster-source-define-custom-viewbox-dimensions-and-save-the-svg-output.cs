@@ -1,3 +1,4 @@
+// HOW-TO: Create SVG From PNG With Custom ViewBox In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,7 +10,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
+        string inputPath = @"C:\temp\source.png";
         string outputPath = @"C:\temp\output.svg";
 
         // Ensure any runtime exception is reported cleanly
@@ -25,26 +26,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
+            // Load the raster source image
             using (Image rasterImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage for drawing
-                RasterImage raster = rasterImage as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("The input file is not a raster image.");
-                    return;
-                }
+                // Define custom viewbox dimensions (width, height, dpi)
+                int viewBoxWidth = 800;   // custom width in pixels
+                int viewBoxHeight = 600;  // custom height in pixels
+                int dpi = 96;             // typical screen DPI
 
-                int width = raster.Width;
-                int height = raster.Height;
-                int dpi = 96; // Standard screen DPI
+                // Create an SVG graphics context with the custom viewbox
+                SvgGraphics2D graphics = new SvgGraphics2D(viewBoxWidth, viewBoxHeight, dpi);
 
-                // Create an SVG graphics context with custom dimensions (viewbox)
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
+                // Draw the raster image onto the SVG canvas, scaling to fit the viewbox
+                graphics.DrawImage((RasterImage)rasterImage,
+                                   new Aspose.Imaging.Point(0, 0),
+                                   new Aspose.Imaging.Size(viewBoxWidth, viewBoxHeight));
 
                 // Finalize the SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
@@ -63,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert a PNG logo into a scalable SVG for responsive design while preserving the original dimensions and DPI.
- * 2. When an e‑learning platform wants to embed high‑resolution raster diagrams as vector graphics in HTML5 courses to reduce page load and enable zoom without pixelation.
- * 3. When a desktop application generates printable reports and must embed raster charts as SVG to ensure they scale correctly on different paper sizes.
- * 4. When a CI/CD pipeline automates asset optimization by turning raster icons into SVG files with a defined viewbox so they can be styled with CSS.
- * 5. When a GIS tool needs to overlay a raster map tile onto an SVG canvas with custom viewbox coordinates before exporting the result for vector‑based mapping applications.
+ * 1. When you need to embed a high‑resolution PNG into a scalable SVG for responsive web design, this code converts the raster image and sets a specific viewbox size.
+ * 2. When generating vector graphics for print layouts that require exact dimensions and DPI, the example creates an SVG with a custom viewbox matching the desired output size.
+ * 3. When automating batch conversion of product photos to SVG icons with consistent width and height, the code demonstrates how to draw and scale each raster image onto an SVG canvas.
+ * 4. When integrating Aspose.Imaging into a C# application that must produce SVG assets for mobile apps, the snippet shows how to load a PNG, define viewbox parameters, and save the result.
+ * 5. When you need to programmatically create SVG placeholders that reference existing raster images while preserving aspect ratio, this example illustrates drawing the image onto an SVG graphics context with custom scaling.
  */
