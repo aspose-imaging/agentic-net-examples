@@ -1,3 +1,4 @@
+// HOW-TO: Save JPEG As PDF To Cloud Mapped Drive Folder In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = "Input/sample.jpg";
+            string outputPath = @"Z:\CloudStorage\Converted\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,8 +27,10 @@ class Program
             // Load the image and save as PDF
             using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -39,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded JPEG photos to PDF and store the PDFs in a shared network folder that is mapped to a cloud storage service such as OneDrive or SharePoint for later retrieval by other team members.
- * 2. When an automated document‑processing pipeline runs nightly, transforms scanned images into searchable PDF files, and saves them to a mapped drive that points to an Azure Files share so that downstream services can access them without additional authentication steps.
- * 3. When a desktop utility creates PDF invoices from product images and writes them to a mapped drive representing an Amazon S3 bucket mounted via a file‑system gateway, enabling accountants to open the PDFs directly from their file explorer.
- * 4. When a Windows service monitors an “Input” directory, converts each new JPG to PDF, and deposits the PDFs into a mapped drive that syncs with Google Drive, ensuring remote collaborators can instantly view the converted documents.
- * 5. When a batch job processes marketing assets, converts high‑resolution JPEG banners to PDF for archival, and saves the PDFs to a network‑mapped drive linked to a corporate Dropbox folder so that the marketing team can access the files from any device.
+ * 1. When you need to automatically convert user‑uploaded JPEG photos to PDF documents and store them in a shared cloud folder accessed via a mapped network drive.
+ * 2. When a batch job must process local image files and place the resulting PDFs into a centralized cloud‑based file share for downstream workflow automation.
+ * 3. When an enterprise application saves scanned product images as PDFs directly to a cloud‑mapped folder to ensure all team members can retrieve them instantly.
+ * 4. When you want to verify the existence of an input image, create the destination directory if missing, and then use Aspose.Imaging to generate a PDF in a cloud‑mapped location.
+ * 5. When a C# service integrates with existing file‑system permissions and writes converted PDFs to a network‑mapped drive that syncs with cloud storage for backup and collaboration.
  */
