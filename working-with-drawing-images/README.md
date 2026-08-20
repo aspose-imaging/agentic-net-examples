@@ -58,6 +58,7 @@ Examples and tasks in this folder:
 | [apply-graphics-rotatetransform-to-rotate-the-path-45-degrees-around-its-center-point.cs](./apply-graphics-rotatetransform-to-rotate-the-path-45-degrees-around-its-center-point.cs) |
 | [apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs](./apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs) |
 | [batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm-for-storage-efficiency.cs](./batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm-for-storage-efficiency.cs) |
+| [batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm.cs](./batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm.cs) |
 | [batch-convert-a-set-of-emf-files-to-pdf-embedding-each-file-s-original-filename-as-a-pdf-bookmark.cs](./batch-convert-a-set-of-emf-files-to-pdf-embedding-each-file-s-original-filename-as-a-pdf-bookmark.cs) |
 | [batch-convert-a-set-of-svg-icons-to-monochrome-pngs-for-use-in-dark-theme-applications.cs](./batch-convert-a-set-of-svg-icons-to-monochrome-pngs-for-use-in-dark-theme-applications.cs) |
 | [batch-convert-all-emf-files-in-a-directory-to-png-applying-a-uniform-background-color-to-each-image.cs](./batch-convert-all-emf-files-in-a-directory-to-png-applying-a-uniform-background-color-to-each-image.cs) |
@@ -66,7 +67,6 @@ Examples and tasks in this folder:
 | [batch-convert-svg-illustrations-to-pdf-embedding-each-file-s-description-as-pdf-metadata-for-cataloging.cs](./batch-convert-svg-illustrations-to-pdf-embedding-each-file-s-description-as-pdf-metadata-for-cataloging.cs) |
 | [batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs](./batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs) |
 | [batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs](./batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs) |
-| [batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs](./batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs) |
 [**View all 401 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images)
 
 ## Requirements
