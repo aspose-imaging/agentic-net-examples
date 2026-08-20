@@ -37,12 +37,6 @@ Examples and tasks in this folder:
 
 | Example |
 |---------|
-| [load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs](./load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs) |
-| [create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs](./create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs) |
-| [create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs](./create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs) |
-| [create-a-png-image-with-alpha-channel-embed-a-digital-signature-and-verify-signature-confidence-after-saving.cs](./create-a-png-image-with-alpha-channel-embed-a-digital-signature-and-verify-signature-confidence-after-saving.cs) |
-| [adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs](./adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs) |
-| [modify-gamma-of-several-cdr-files-and-combine-the-corrected-outputs-into-a-multipage-tiff.cs](./modify-gamma-of-several-cdr-files-and-combine-the-corrected-outputs-into-a-multipage-tiff.cs) |
 | [add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs](./add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs) |
 | [adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs](./adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs) |
 | [adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs](./adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs) |
@@ -67,6 +61,12 @@ Examples and tasks in this folder:
 | [apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs](./apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs) |
 | [apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs](./apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs) |
 | [apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs](./apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs) |
+| [apply-a-median-filter-to-images-to-reduce-noise-while-preserving-edges-and-fine-details.cs](./apply-a-median-filter-to-images-to-reduce-noise-while-preserving-edges-and-fine-details.cs) |
+| [apply-a-motion-wiener-filter-to-apng-images-to-reduce-motion-blur-while-preserving-animation-integrity.cs](./apply-a-motion-wiener-filter-to-apng-images-to-reduce-motion-blur-while-preserving-animation-integrity.cs) |
+| [apply-a-motion-wiener-filter-to-images-to-reduce-noise-while-preserving-motion-details.cs](./apply-a-motion-wiener-filter-to-images-to-reduce-noise-while-preserving-motion-details.cs) |
+| [apply-a-smoothing-mode-to-image-processing-operations-to-control-rendering-quality-and-reduce-visual-artifacts.cs](./apply-a-smoothing-mode-to-image-processing-operations-to-control-rendering-quality-and-reduce-visual-artifacts.cs) |
+| [apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs](./apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs) |
+| [apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs](./apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs) |
 [**View all 425 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images)
 
 ## Requirements
