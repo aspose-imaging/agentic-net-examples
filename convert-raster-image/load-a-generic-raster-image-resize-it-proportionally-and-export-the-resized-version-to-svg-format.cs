@@ -1,3 +1,4 @@
+// HOW-TO: Resize JPEG Proportionally and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.svg";
+            // Hardcoded input and output file paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,24 +29,16 @@ class Program
             {
                 // Define a scaling factor (e.g., 50% of original size)
                 const double scaleFactor = 0.5;
+
+                // Compute new dimensions while preserving aspect ratio
                 int newWidth = (int)(image.Width * scaleFactor);
                 int newHeight = (int)(image.Height * scaleFactor);
 
-                // Resize proportionally
+                // Resize the image proportionally
                 image.Resize(newWidth, newHeight);
 
-                // Prepare SVG save options with rasterization settings
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = new Size(newWidth, newHeight)
-                };
-
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
                 // Save the resized image as SVG
+                var svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -58,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate lightweight, scalable web graphics from user‑uploaded JPEG photos by shrinking them to half size and converting them to SVG for responsive design.
- * 2. When an e‑commerce platform wants to create thumbnail previews of product images that can be zoomed without loss of quality, using C# to resize the raster image and save it as an SVG vector.
- * 3. When a content management system must batch‑process legacy bitmap assets, reducing their dimensions and converting them to SVG to improve page load speed and SEO.
- * 4. When a mobile app backend requires on‑the‑fly image optimization, taking a high‑resolution PNG, scaling it down proportionally, and delivering it as an SVG to support different screen densities.
- * 5. When a reporting tool needs to embed resized charts originally rendered as raster bitmaps into PDF or HTML reports as scalable SVG graphics using Aspose.Imaging for .NET.
+ * 1. When you need to generate lightweight vector thumbnails from user‑uploaded raster photos for responsive web pages.
+ * 2. When you want to shrink a bitmap image while preserving its aspect ratio before embedding it in an SVG‑based report.
+ * 3. When you must create scalable icons from existing JPEG assets for high‑DPI displays in a .NET application.
+ * 4. When you are building an automated pipeline that converts product photos to SVG for printing on variable‑size merchandise.
+ * 5. When you need to preprocess images for a vector‑based GIS system that only accepts SVG input.
  */
