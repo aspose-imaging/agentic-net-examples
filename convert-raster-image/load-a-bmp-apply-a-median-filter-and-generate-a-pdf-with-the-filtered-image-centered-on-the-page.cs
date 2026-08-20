@@ -1,7 +1,9 @@
+// HOW-TO: Create PDF from BMP with Median Filter and Centered Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.bmp");
-            string outputPath = Path.Combine("Output", "filtered.pdf");
+            string inputPath = "input.bmp";
+            string outputPath = "output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -36,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up noisy BMP scans of handwritten forms and embed the denoised image into a PDF report for archival, they can use this code to apply a median filter and center the result on the PDF page.
- * 2. When an application must convert legacy BMP assets from a game’s texture library into PDF documentation while reducing pixelated noise, the code provides a C# solution that filters and saves the image as a centered PDF.
- * 3. When a medical imaging system exports BMP images of X‑ray films and requires a quick noise‑reduction step before generating patient PDFs, this snippet demonstrates how to apply a median filter and produce a centered PDF using Aspose.Imaging for .NET.
- * 4. When a batch‑processing tool needs to read BMP screenshots, remove salt‑and‑pepper artifacts, and create printable PDFs with the cleaned image centered, the example shows the necessary C# operations.
- * 5. When a document‑generation service must embed a filtered BMP logo into a PDF brochure, ensuring the logo appears without speckle noise and is centered on the page, this code illustrates the required steps.
+ * 1. When you need to remove noise from a BMP scan and embed the cleaned image centered in a PDF report.
+ * 2. When you want to automatically convert raw bitmap files into printable PDFs with a median filter applied for better visual quality.
+ * 3. When you are building a C# document generation workflow that processes BMP images, applies noise reduction, and saves them as centered PDF pages.
+ * 4. When you must prepare a PDF portfolio that includes BMP graphics with salt‑and‑pepper noise removed using a median filter.
+ * 5. When you require a quick C# script to load a BMP, apply image filtering, and output a PDF without manual editing.
  */
