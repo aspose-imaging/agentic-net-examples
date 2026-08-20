@@ -1,3 +1,4 @@
+// HOW-TO: Asynchronously Load SVG and Save As PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.svg";
-            string outputPath = "C:\\temp\\output.png";
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Temp\input.svg";
+            string outputPath = @"C:\Temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,22 +26,40 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open SVG file as an async stream and load it
-            using (FileStream svgStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
-            using (SvgImage svgImage = await LoadSvgAsync(svgStream))
+            // Asynchronously read the SVG file into a memory stream
+            await using (FileStream fileStream = new FileStream(
+                inputPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 81920,
+                useAsync: true))
             {
-                // Configure rasterization options for PNG output
-                var rasterizationOptions = new SvgRasterizationOptions
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    PageSize = svgImage.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                    await fileStream.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0; // Reset for reading
 
-                // Save the rasterized PNG asynchronously
-                await SavePngAsync(svgImage, outputPath, pngOptions);
+                    // Load SVG image from the memory stream
+                    using (SvgImage svgImage = new SvgImage(memoryStream))
+                    {
+                        // Set rasterization options for PNG output
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                        {
+                            // Example: set desired size; adjust as needed
+                            PageWidth = svgImage.Width,
+                            PageHeight = svgImage.Height
+                        };
+
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions
+                        };
+
+                        // Save the rasterized image as PNG
+                        svgImage.Save(outputPath, pngOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -48,25 +67,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Wrap synchronous SvgImage constructor in a Task to avoid blocking
-    private static Task<SvgImage> LoadSvgAsync(Stream stream)
-    {
-        return Task.Run(() => new SvgImage(stream));
-    }
-
-    // Wrap synchronous Save method in a Task to avoid blocking
-    private static Task SavePngAsync(SvgImage image, string path, PngOptions options)
-    {
-        return Task.Run(() => image.Save(path, options));
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to convert user‑uploaded SVG icons to PNG thumbnails without blocking the request thread, developers can use this async loading and saving pattern.
- * 2. When a desktop application processes large batches of vector graphics overnight and wants to keep the UI responsive, the asynchronous SVG‑to‑PNG conversion helps avoid UI freezes.
- * 3. When a cloud function generates PNG previews of SVG diagrams on demand and must scale under high concurrency, the async/await approach ensures non‑blocking I/O.
- * 4. When an automated build pipeline includes image assets conversion and needs to run in parallel with other tasks, the async SVG loading and PNG saving reduces overall build time.
- * 5. When a mobile backend service streams SVG files from storage, rasterizes them to PNG, and writes the result back to a CDN, using asynchronous streams prevents thread starvation.
+ * 1. When you need to convert user‑uploaded SVG graphics to PNG thumbnails without blocking the UI thread in a desktop or web application.
+ * 2. When a background service processes large batches of SVG files and must keep I/O operations non‑blocking to improve throughput.
+ * 3. When you want to read an SVG from a network share or cloud storage asynchronously before rasterizing it to PNG for reporting.
+ * 4. When you need to ensure the output directory exists and handle missing input files gracefully while performing async image conversion.
+ * 5. When integrating Aspose.Imaging into an ASP.NET Core API that returns PNG images generated from SVG payloads without tying up server threads.
  */
