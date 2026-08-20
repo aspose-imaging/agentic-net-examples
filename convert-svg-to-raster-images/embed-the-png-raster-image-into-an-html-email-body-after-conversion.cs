@@ -1,8 +1,8 @@
+// HOW-TO: Embed PNG Image in HTML Email Body Using C# and Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputHtmlPath = "output.html";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Emails\email.html";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,29 +21,31 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputHtmlPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
+            // Load the PNG image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as an HTML5 Canvas page
-                var options = new Html5CanvasOptions
+                // Save the image to a memory stream to obtain raw bytes
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    FullHtmlPage = true,
-                    // For raster images, VectorRasterizationOptions can be left null
-                };
-                image.Save(outputHtmlPath, options);
+                    image.Save(ms, new PngOptions());
+                    byte[] imageBytes = ms.ToArray();
+
+                    // Convert image bytes to Base64 string
+                    string base64 = Convert.ToBase64String(imageBytes);
+
+                    // Build HTML email body with embedded image
+                    string html = $"<html><body>" +
+                                  $"<p>Hello,</p>" +
+                                  $"<img src=\"data:image/png;base64,{base64}\" alt=\"Embedded Image\"/>" +
+                                  $"</body></html>";
+
+                    // Write the HTML to the output file
+                    File.WriteAllText(outputPath, html);
+                }
             }
-
-            // Read the generated HTML content
-            string canvasHtml = File.ReadAllText(outputHtmlPath);
-
-            // Build the final email body embedding the canvas HTML
-            string emailBody = $"<html><body>{canvasHtml}</body></html>";
-
-            // Output the email body to console (or write to a file as needed)
-            Console.WriteLine(emailBody);
         }
         catch (Exception ex)
         {
@@ -54,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to convert a PNG raster image into an HTML5 canvas snippet and embed it directly into an HTML email body for consistent rendering across email clients.
- * 2. When an automated reporting system must include dynamically generated PNG charts inside HTML email notifications without attaching separate image files.
- * 3. When a marketing application uses Aspose.Imaging to transform product PNG visuals into inline HTML canvas code for responsive email newsletters.
- * 4. When a corporate workflow requires embedding PNG logos into transactional email templates by converting them to HTML5 canvas using C# and saving the result as a single HTML string.
- * 5. When a developer builds a bulk‑email sender that programmatically loads PNG assets, converts them with Aspose.Imaging’s Html5CanvasOptions, and inserts the canvas HTML into the email’s body to avoid external image references.
+ * 1. When you need to send a PNG logo directly inside an HTML email without attaching separate image files.
+ * 2. When an automated reporting system must embed dynamically generated charts as inline images in email notifications.
+ * 3. When a marketing application creates personalized newsletters and wants to include product images encoded as Base64 to avoid external image loading.
+ * 4. When a C# service prepares transactional emails and must ensure the image renders correctly across email clients that block external resources.
+ * 5. When you want to convert any PNG file to a Base64 string and embed it in an HTML template for compliance‑friendly email archiving.
  */
