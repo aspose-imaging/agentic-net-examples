@@ -1,10 +1,9 @@
-// HOW-TO: Apply Emboss Convolution to Indexed PNG While Preserving Palette in C# (Aspose.Imaging for .NET)
+// HOW-TO: Sharpen Indexed PNG With Convolution Filter While Preserving Palette In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -12,37 +11,44 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a convolution kernel (Emboss3x3) to the raster image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Preserve original palette (or generate a close palette)
+                var palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(raster, 256, Aspose.Imaging.PaletteMiningMethod.Histogram);
 
-                // Prepare PNG save options with indexed color and a palette that matches the processed image
+                // Define a 3x3 sharpening kernel
+                double[,] kernel = new double[,]
+                {
+                    { 0, -1,  0 },
+                    { -1, 5, -1 },
+                    { 0, -1,  0 }
+                };
+
+                // Apply convolution filter using the kernel
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                // Save as indexed PNG preserving the palette
                 PngOptions saveOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(raster, 256, Aspose.Imaging.PaletteMiningMethod.Histogram)
+                    Palette = palette,
+                    CompressionLevel = 9,
+                    Progressive = true
                 };
 
-                // Save the processed image preserving the palette
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -55,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add an emboss effect to a small‑size PNG sprite sheet without losing its indexed color palette.
- * 2. When you must process a game asset PNG with a convolution kernel and keep the original 256‑color palette for memory‑constrained devices.
- * 3. When you want to apply a custom filter to a PNG icon set while ensuring the saved file remains indexed for fast web loading.
- * 4. When you are generating stylized thumbnails from indexed PNGs and require the output to retain exact palette mapping for consistent colors.
- * 5. When you are automating batch image processing of indexed PNG maps and need each filtered image saved with a matching palette to avoid color distortion.
+ * 1. When you need to sharpen a PNG or GIF that uses an indexed color palette without altering the original colors.
+ * 2. When you want to apply a custom 3×3 convolution kernel to an indexed image and keep the file size low by saving as an indexed PNG with compression.
+ * 3. When processing legacy graphics that rely on a specific palette and require post‑processing such as sharpening before publishing on a website.
+ * 4. When building a batch image‑processing tool that must maintain exact palette mapping after applying filters to PNG sprites.
+ * 5. When generating high‑quality, progressive UI assets where the palette must stay consistent after applying a sharpening filter.
  */
