@@ -1,7 +1,10 @@
+// HOW-TO: Convert WebP To GIF And Verify Output File In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -9,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.gif";
+            // Hard‑coded input and output paths
+            string inputPath = "C:\\temp\\input.webp";
+            string outputPath = "C:\\temp\\output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,13 +23,14 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image and save it as GIF
-            using (Image image = Image.Load(inputPath))
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                image.Save(outputPath, new GifOptions());
+                // Save the image as GIF using default GifOptions
+                webPImage.Save(outputPath, new GifOptions());
             }
 
             // Validate that the GIF file was created
@@ -48,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded WebP avatars to GIF format for compatibility with older browsers that only support GIF.
- * 2. When an automated image processing pipeline must generate GIF previews from WebP assets stored on a Windows server.
- * 3. When a desktop utility needs to batch‑convert product photos from WebP to GIF to embed them in email newsletters that require GIF images.
- * 4. When a content management system validates that a conversion step succeeded by checking the existence of the output GIF after saving with Aspose.Imaging.
- * 5. When a CI/CD build script verifies that image assets are correctly transformed from WebP to GIF before publishing a mobile app’s resource bundle.
+ * 1. When you need to display a WebP image on platforms that only support GIF, you can convert it to GIF using Aspose.Imaging in C# and confirm the file was created.
+ * 2. When automating a batch process that extracts WebP assets from a repository and generates GIF previews for a web gallery, this code ensures each conversion succeeds.
+ * 3. When integrating image conversion into a .NET service that receives user‑uploaded WebP files and must store them as GIFs for email attachments, the validation step guarantees the output exists before sending.
+ * 4. When migrating legacy content from a WebP‑based CMS to a GIF‑compatible system, the snippet provides a quick way to convert individual images and verify the conversion result.
+ * 5. When writing unit tests for an image‑processing pipeline that transforms WebP to GIF, this example demonstrates how to programmatically check that the GIF file is generated successfully.
  */
