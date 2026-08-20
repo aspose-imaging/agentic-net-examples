@@ -1,35 +1,20 @@
+// HOW-TO: Convert PNG to SVG with Embedded Fonts Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
-{
-    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-    {
-        // Simply return the suggested file name; resources are embedded automatically.
-        return suggestedFileName;
-    }
-
-    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
-    {
-        // Indicate that the image should be embedded in the SVG.
-        useEmbeddedImage = true;
-        return suggestedFileName;
-    }
-}
-
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -43,19 +28,19 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG conversion
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Configure SVG options to embed fonts
+                var svgOptions = new SvgOptions
+                {
+                    TextAsShapes = false,                     // Keep text as text (fonts can be embedded)
+                    Callback = new SvgResourceKeeperCallback() // Handles embedding of resources such as fonts
+                };
+
+                // Set rasterization options based on the source image size
+                var rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-
-                // Configure SVG options, including font embedding via callback
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    TextAsShapes = false, // Keep text as text to allow font embedding
-                    Callback = new MySvgResourceKeeperCallback()
-                };
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save as SVG with embedded fonts
                 image.Save(outputPath, svgOptions);
@@ -70,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display high‑resolution PNG icons as scalable SVG graphics while preserving the original text styling, a developer can load the PNG, convert it to an SvgImage and embed the required font family using Aspose.Imaging for .NET.
- * 2. When generating printable marketing materials that combine raster images and custom typography, the code lets a C# program transform a PNG logo into an SVG with embedded fonts so the document renders correctly on any printer.
- * 3. When building an automated asset pipeline that converts user‑uploaded PNG screenshots into searchable SVG files for SEO, embedding the font ensures the text remains selectable and indexable by search engines.
- * 4. When creating a cross‑platform mobile app that needs to resize PNG illustrations without losing text clarity, developers can use this snippet to rasterize the PNG into an SVG and embed the font so the UI scales smoothly on different devices.
- * 5. When preparing technical documentation that includes PNG diagrams with annotated labels, the code enables conversion to SVG with embedded fonts, guaranteeing that the labels appear consistently regardless of the viewer’s installed fonts.
+ * 1. When you need to transform a raster PNG logo into a scalable SVG while keeping the original text editable by embedding the required font family.
+ * 2. When generating web‑ready vector graphics from user‑uploaded PNGs and you must ensure the SVG displays the correct typography across browsers.
+ * 3. When creating printable SVG assets from PNG designs and you want the fonts to be self‑contained so the file can be opened on any system without installing the font.
+ * 4. When automating a batch conversion pipeline that converts PNG icons to SVGs and requires embedded fonts to maintain brand consistency.
+ * 5. When developing a C# application that extracts PNG images and saves them as SVGs with embedded fonts for use in design tools that rely on vector formats.
  */
