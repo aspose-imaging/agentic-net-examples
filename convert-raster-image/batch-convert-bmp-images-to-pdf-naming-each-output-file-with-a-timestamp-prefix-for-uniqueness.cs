@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Files to PDF with Timestamped Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,35 +11,32 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\BmpInput";
-            string outputDirectory = @"C:\Images\PdfOutput";
-
-            // Ensure the output directory exists (will also handle null path safely)
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = @"C:\InputBmp";
+            string outputDirectory = @"C:\OutputPdf";
 
             // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            // Process each BMP file
-            foreach (string bmpPath in bmpFiles)
+            foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
-                if (!File.Exists(bmpPath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {bmpPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Create a unique timestamp prefix for the output file name
+                // Create a unique timestamp prefix
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(bmpPath)}.pdf";
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputFileName = $"{timestamp}_{fileNameWithoutExt}.pdf";
                 string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
-                using (Image image = Image.Load(bmpPath))
+                using (Image image = Image.Load(inputPath))
                 {
                     // Set up PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
@@ -57,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert a folder of legacy BMP screenshots into searchable PDF reports while ensuring each PDF has a unique timestamped filename.
- * 2. When an application must archive scanned BMP documents to PDF format on a daily basis, using C# and Aspose.Imaging to generate timestamp‑prefixed files for version control.
- * 3. When a batch processing script is required to migrate BMP assets from a legacy system to PDF for web publishing, creating unique filenames to avoid overwriting existing files.
- * 4. When a Windows service needs to monitor an input directory, convert incoming BMP images to PDF, and store them in an output folder with a precise timestamp for audit trails.
- * 5. When a developer wants to implement a one‑time data‑migration tool that reads BMP files, applies Aspose.Imaging PDF export options, and saves each result with a millisecond‑level timestamp to guarantee uniqueness.
+ * 1. When you need to archive a large collection of legacy BMP scans as PDF documents while ensuring each PDF has a unique timestamped name to avoid overwriting.
+ * 2. When an automated nightly job must transform newly uploaded BMP images from a folder into PDF reports for downstream workflow systems.
+ * 3. When a web service receives BMP uploads and must store them as PDF files with a timestamp prefix for audit‑trail compliance.
+ * 4. When migrating a digital asset library from BMP to PDF format and you require a quick C# script to batch convert and uniquely name each file.
+ * 5. When generating PDF invoices from BMP graphics produced by a third‑party tool, and you need to guarantee unique filenames for each run.
  */
