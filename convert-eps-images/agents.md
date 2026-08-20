@@ -161,5 +161,56 @@ Load the EPS via `Image.Load` and save it with `PdfOptions` set to `PdfComplianc
 ### Q: How can I convert a multipage EPS file to a multipage PDF while keeping all pages intact with Aspose.Imaging in C#?  
 Load the EPS using `Image.Load` and call `Image.Save` with `PdfOptions` where `MultiPage = true` to retain every page. → See: `convert-multipage-eps-file-to-multipage-pdf-preserving-all-pages.cs`
 
-### Q: How do I embed fonts in the PDF output when converting an SVG to PDF using Aspose.Imaging in C#?  
-Set `PdfOptions.EmbedFonts = true` before saving the SVG image with `Image.Save`. → See: `embed-fonts-in-pdf-output-to-ensure-text-renders-correctly-after-conversion.cs`
+### Q: How do I limit the number of concurrent EPS‑to‑PDF conversions to avoid excessive memory consumption using Aspose.Imaging in C#?  
+Use `Parallel.ForEach` with a `ParallelOptions` object that sets `MaxDegreeOfParallelism` to the desired concurrency level. → See: `limit-concurrency-level-during-batch-conversion-to-avoid-excessive-memory-consumption.cs`
+
+### Q: How can I load an EPS file with default options into an Aspose.Imaging Image object in C#?  
+Call `Image.Load(inputPath)` without specifying load options; the method returns an `Image` instance ready for processing. → See: `load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs`
+
+### Q: How can I set the rasterization DPI when loading an EPS file with Aspose.Imaging in C#?  
+Use `EpsLoadOptions` (or `ImageLoadOptions`) and assign `RasterizationOptions.DpiX` and `RasterizationOptions.DpiY` before calling `Image.Load`. This controls the resolution of the rasterized EPS image. → See: load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs  
+
+### Q: How do I convert a multi‑page EPS to a multi‑page PDF while preserving
+
+### Q: How can I add a custom XMP metadata entry to a PDF generated from an EPS file using Aspose.Imaging in C#?  
+Use `PdfOptions` and assign an `XmpMetadata` object to its `Metadata` property before calling `image.Save(outputPath, pdfOptions)`. → See: add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs  
+
+### Q: Which Aspose.Imaging property lets me choose the PSD compression method (e.g., RLE, ZIP) when converting an EPS to PSD in .NET C#?  
+Set the `CompressionMethod` property of `PsdOptions` to the desired `PsdCompressionMethod` enum value before saving the image. → See: adjust-psd-compression-level-to-balance-quality-and-file-size-during-eps-conversion.cs  
+
+### Q: How do I safely handle missing EPS files inside a foreach batch conversion loop without terminating the whole process in C#?  
+Wrap each iteration in a `try‑catch`, check `File.Exists` for the input path, log the error, and `continue` to the next file. → See: batch-convert-a-collection-of-eps-files-to-psd-using-a-foreach-loop.cs  
+
+### Q: After converting an EPS to PSD, how can I programmatically obtain the resulting file size in bytes using Aspose.Imaging in C#?  
+Create a `FileInfo` object for the output PSD path and read its `Length` property after the save operation. → See: compare-file-sizes-of-original-eps-and-converted-psd-for-storage-assessment.cs  
+
+### Q: How can I retrieve the width and height of an EPS image after loading it with Aspose.Imaging in C#?  
+Load the EPS with `Image.Load`, cast the result to `RasterImage`, and read its `Width` and `Height` properties. → See: load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs
+## Operations Covered
+- Add custom metadata to PDF after EPS conversion  
+- Set custom DPI before saving PDF to increase resolution  
+- Compare file sizes of EPS and converted PDF  
+- Convert EPS to PSD with 16‑bit per channel depth  
+- Convert multipage EPS to multipage PSD preserving pages  
+- Embed fonts in PDF to ensure correct text rendering  
+- Load EPS, PNG, JPEG, and SVG images for conversion  
+- Handle exceptions during PDF saving with error logging  
+
+## Supported Formats
+- **EPS** – source vector image format being converted  
+- **PDF** – target document format for conversion and metadata embedding  
+- **PNG** – source raster image used in DPI‑adjustment example  
+- **JPEG** – source raster image used in exception‑handling example  
+- **PSD** – target Photoshop format for high‑quality editing and multipage preservation  
+- **SVG** – source vector format used when embedding custom fonts  
+
+## API Classes Used
+- `Image` — base class for loading and saving images; provides static `Load` method.  
+- `EpsImage` — derived class representing an EPS image; used after casting the loaded image.  
+- `PsdOptions` — options object that configures how an image is saved as a PSD file.  
+- `VectorRasterizationOptions` — settings that control rasterization of vector images (e.g., DPI, page size).  
+- `LoadOptions` — options for loading images, such as adding custom font sources for SVG/PDF conversion.
+
+<!-- AUTOGENERATED:START -->
+Updated: 2026-08-18 | Run: `20260626_054403` | Examples: 60
+<!-- AUTOGENERATED:END -->

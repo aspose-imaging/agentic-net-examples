@@ -60,9 +60,6 @@ Examples and tasks in this folder:
 | [batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs](./batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs) |
 | [batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs](./batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs) |
 | [convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs](./convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs) |
-| [convert-a-bmp-image-to-pdf-using-image-save-with-exportformats-pdf-enumeration-for-explicit-format-control.cs](./convert-a-bmp-image-to-pdf-using-image-save-with-exportformats-pdf-enumeration-for-explicit-format-control.cs) |
-| [convert-a-png-to-svg-then-use-the-svg-as-a-source-to-generate-a-high-resolution-pdf.cs](./convert-a-png-to-svg-then-use-the-svg-as-a-source-to-generate-a-high-resolution-pdf.cs) |
-| [create-an-svgimage-from-a-bmp-set-a-custom-viewbox-and-save-the-vector-output-as-svg.cs](./create-an-svgimage-from-a-bmp-set-a-custom-viewbox-and-save-the-vector-output-as-svg.cs) |
 [**View all 138 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image)
 
 ## Requirements
