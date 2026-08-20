@@ -1,14 +1,15 @@
+// HOW-TO: Apply Motion Blur to All PNG Images in a Folder Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Define input and output directories
+            // Hardcoded input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
@@ -16,7 +17,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -26,11 +27,12 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
+            // Get all PNG files in the input folder
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in files)
+            foreach (string file in files)
             {
+                string inputPath = file;
+
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -38,22 +40,20 @@ class Program
                     return;
                 }
 
-                // Prepare output path
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
+                // Build output file path
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(file) + "_motion.png");
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, process, and save the image
+                // Load the image, apply motion blur, and save
                 using (Image image = Image.Load(inputPath))
                 {
-                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-                    // Apply motion blur with size 3, smooth factor 1.0, angle 45 degrees
+                    RasterImage raster = (RasterImage)image;
+                    // Motion blur with length 3, smooth factor 1.0, angle 45 degrees
                     raster.Filter(raster.Bounds,
                         new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(3, 1.0, 45.0));
-
                     raster.Save(outputPath);
                 }
             }
@@ -67,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically add a subtle motion‑blur effect to a batch of product PNG images before publishing them on an e‑commerce website.
- * 2. When a game‑development pipeline must process multiple sprite PNG files to simulate motion by applying a 45‑degree blur with size 3 using C# and Aspose.Imaging.
- * 3. When a marketing team wants to generate a series of promotional PNG banners with a consistent motion‑blur style for social‑media ads via a .NET batch script.
- * 4. When an archival system requires preprocessing scanned PNG photographs by adding a uniform motion blur to reduce visual noise before long‑term storage.
- * 5. When a developer creates a desktop utility that scans a folder of PNG icons and applies a 45‑degree motion blur to produce a stylized “loading” effect for UI themes.
+ * 1. When you need to automatically add a subtle motion effect to a large set of product photos stored as PNG files before uploading them to an e‑commerce site.
+ * 2. When you want to preprocess a folder of PNG screenshots with a 45‑degree motion blur of length 3 to simulate camera movement for a video game UI demo.
+ * 3. When a batch of PNG assets must be prepared with consistent motion blur for a marketing animation pipeline using C# and Aspose.Imaging.
+ * 4. When you are building a server‑side service that receives PNG uploads and applies a standard motion‑blur filter before saving them to a CDN.
+ * 5. When you need to quickly generate blurred placeholders for lazy‑loading images by processing all PNG files in a directory with a fixed blur angle and size.
  */
