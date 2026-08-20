@@ -1,40 +1,43 @@
+// HOW-TO: Lazy Load JPEG Image and Rotate 90 Degrees in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.jpg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Lazy‑load the image – it will be loaded only when the filter is applied
+            // Lazy‑load the image – it will be loaded only when Value is accessed
             Lazy<Image> lazyImage = new Lazy<Image>(() => Image.Load(inputPath));
 
-            // Apply a simple processing step (e.g., convert to PNG) after the image is loaded
+            // Access the image (trigger loading) and apply a simple operation
             using (Image image = lazyImage.Value)
             {
-                // Example processing: no modification, just demonstrate lazy loading
-                // Additional processing (e.g., grayscale) could be added here
+                // Example operation: if the image is a raster image, rotate it 90 degrees
+                if (image is RasterImage raster)
+                {
+                    raster.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                }
 
-                // Save the image using PNG options
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the processed image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing large batches of high‑resolution JPEG photos and you want to defer loading each image until you actually apply a conversion to PNG, reducing memory usage.
- * 2. When building a web service that receives image paths and only needs to load the file if a client requests a transformation such as grayscale or format conversion, using Lazy<Image> to avoid unnecessary I/O.
- * 3. When implementing a background job that scans a directory for images but should only read each file when it is time to apply a watermark or other filter, leveraging lazy loading to improve throughput.
- * 4. When creating a desktop application that previews thumbnails of images stored on disk and only loads the full image data when the user selects a file for editing or export to PNG.
- * 5. When integrating Aspose.Imaging into a CI/CD pipeline that validates image assets and converts them to PNG only if they meet certain criteria, using lazy loading to skip loading files that fail early checks.
+ * 1. When you need to improve startup performance by loading large JPEG files only when a rotation operation is required.
+ * 2. When processing batches of images on a server and want to avoid loading each file into memory until a specific filter, such as a 90‑degree rotation, is applied.
+ * 3. When building a desktop application that lets users preview and rotate photos, using lazy loading to keep the UI responsive.
+ * 4. When converting images in an automated pipeline and need to ensure the output directory exists before saving the rotated JPEG.
+ * 5. When handling raster images with Aspose.Imaging in C# and want to safely release resources after applying transformations like RotateFlip.
  */
