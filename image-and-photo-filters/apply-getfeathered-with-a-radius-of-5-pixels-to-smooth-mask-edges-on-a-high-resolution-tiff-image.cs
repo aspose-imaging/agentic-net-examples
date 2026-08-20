@@ -1,10 +1,11 @@
+// HOW-TO: Apply 5‑Pixel Feather To Mask Edges Of TIFF With Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -12,29 +13,23 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the high‑resolution TIFF image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Apply a mask (starting from an arbitrary point) and feather it with a radius of 5 pixels
-                MagicWandTool.Select(image, new MagicWandSettings(100, 100))
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0))
                     .GetFeathered(new FeatheringSettings { Size = 5 })
                     .Apply();
 
-                // Save the processed image as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
@@ -48,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to smooth the edges of a selection mask on a high‑resolution TIFF scanned document before saving it, they can use GetFeathered with a 5‑pixel radius to create a professional‑looking result.
- * 2. When preparing satellite imagery in TIFF format for overlay analysis, applying a 5‑pixel feather to the mask prevents harsh transitions and improves visual blending.
- * 3. When cleaning up scanned architectural blueprints, a C# routine that loads the TIFF, selects an area with MagicWand, and feathers the mask by 5 pixels helps eliminate jagged edges around cut‑outs.
- * 4. When generating printable marketing materials from large TIFF photographs, feathering the mask by 5 pixels ensures smooth borders around cropped sections, reducing artifacts in the final output.
- * 5. When automating a batch process that extracts regions of interest from high‑resolution medical TIFF scans, using GetFeathered with a 5‑pixel radius creates soft edges that are easier for downstream analysis tools to handle.
+ * 1. When you need to soften the boundaries of a selection mask in a large TIFF before printing to avoid harsh edges.
+ * 2. When preparing satellite or aerial imagery in TIFF format for GIS analysis and you want smooth mask transitions to improve visual blending.
+ * 3. When creating medical scan overlays in high‑resolution TIFF files and require feathered edges to prevent abrupt visual artifacts.
+ * 4. When automating a batch process that refines scanned document masks in TIFFs to enhance OCR accuracy by smoothing edge noise.
+ * 5. When developing a C# application that dynamically adjusts mask softness on TIFF images for web‑based image editors or viewers.
  */

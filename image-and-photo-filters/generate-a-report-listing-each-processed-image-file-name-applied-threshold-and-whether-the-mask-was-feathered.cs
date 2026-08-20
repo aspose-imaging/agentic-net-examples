@@ -1,7 +1,7 @@
-// HOW-TO: Create Masked PNGs and Report Thresholds Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate CSV Report of Threshold Masked PNGs with Feathering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -16,64 +16,76 @@ class Program
     {
         try
         {
-            // Hard‑coded input files and associated parameters
-            var inputs = new List<string>
-            {
-                @"C:\Images\input1.jpg",
-                @"C:\Images\input2.jpg"
+            // Hard‑coded input files, thresholds and feathering flags
+            string[] inputFiles = {
+                @"C:\Images\image1.jpg",
+                @"C:\Images\image2.jpg"
             };
+            int[] thresholds = { 128, 200 };
+            bool[] feathered = { true, false };
 
-            var thresholds = new List<int> { 5, 12 };               // example threshold values
-            var feathered = new List<bool> { true, false };        // whether feathering is applied
+            // Prepare report
+            var reportBuilder = new StringBuilder();
+            reportBuilder.AppendLine("FileName,Threshold,Feathered");
 
-            // Header for the report
-            Console.WriteLine("FileName\tThreshold\tFeathered");
-
-            for (int i = 0; i < inputs.Count; i++)
+            // Process each image
+            for (int i = 0; i < inputFiles.Length; i++)
             {
-                string inputPath = inputs[i];
+                string inputPath = inputFiles[i];
                 int threshold = thresholds[i];
                 bool isFeathered = feathered[i];
 
-                // Verify input existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output path
-                string outputDir = @"C:\Images\Output";
+                // Define output path for the masked foreground
+                string outputDir = @"C:\Images\output";
                 Directory.CreateDirectory(outputDir);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + "_masked.png");
+                string outputPath = Path.Combine(outputDir, $"result_{i + 1}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure masking options
-                var maskingOptions = new GraphCutMaskingOptions
+                // Load image as RasterImage
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    FeatheringRadius = isFeathered ? threshold : 0,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = new PngOptions
+                    // Export options for the masked result
+                    var exportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
                         Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Color.Transparent
-                };
+                    };
 
-                // Perform masking
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
-                using (MaskingResult result = new ImageMasking(image).Decompose(maskingOptions))
-                using (RasterImage masked = (RasterImage)result[1].GetImage())
-                {
-                    // Save the masked image
-                    masked.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    // Masking options (GraphCut) with optional feathering
+                    var maskingOptions = new AutoMaskingGraphCutOptions
+                    {
+                        FeatheringRadius = isFeathered ? 3 : 0,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        ExportOptions = exportOptions,
+                        BackgroundReplacementColor = Color.Transparent
+                    };
+
+                    // Perform masking
+                    var masking = new ImageMasking(image);
+                    using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                    {
+                        // Save the foreground mask
+                        foreground.Save(outputPath, exportOptions);
+                    }
                 }
 
-                // Output report line
-                Console.WriteLine($"{Path.GetFileName(inputPath)}\t{threshold}\t{isFeathered}");
+                // Append entry to report
+                reportBuilder.AppendLine($"{Path.GetFileName(inputPath)},{threshold},{isFeathered}");
             }
+
+            // Write report to file
+            string reportPath = @"C:\Images\output\report.csv";
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
+            File.WriteAllText(reportPath, reportBuilder.ToString());
         }
         catch (Exception ex)
         {
@@ -84,9 +96,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process JPEG photos to extract foreground objects and save the results as PNG masks with optional feathering.
- * 2. When you want to generate a simple console report that lists each processed file, the graph‑cut threshold used, and whether feathering was applied.
- * 3. When you have to ensure output directories exist before saving masked images in an automated image‑processing pipeline.
- * 4. When you need to apply different threshold values per image to control the sensitivity of the graph‑cut segmentation.
- * 5. When you must handle missing source files gracefully while continuing to process the remaining images.
+ * 1. When you need to batch‑process JPEG photos, apply a binary threshold to isolate foreground objects, and save the results as transparent PNGs for further compositing.
+ * 2. When you must create a concise CSV log that records each image’s filename, the threshold value used, and whether a feathered edge was applied for quality control.
+ * 3. When you are building an automated workflow that generates mask‑based cutouts from product images, with optional feathering to soften edges before publishing to an e‑commerce site.
+ * 4. When you want to ensure all output directories exist and handle missing source files gracefully while processing multiple images in a .NET application.
+ * 5. When you need to integrate Aspose.Imaging’s masking API into a C# service that produces alpha‑channel PNGs for use in graphic design or AR overlays.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Subtract a Rectangle from Magic Wand Mask and Feather in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,29 +11,35 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output\\result.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output.png";
 
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask with Magic Wand, subtract a small rectangle mask, feather, and apply
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(845, 128))          // initial selection
-                    .Subtract(new RectangleMask(100, 100, 50, 30))          // remove unwanted artifact
-                    .GetFeathered(new FeatheringSettings { Size = 3 })    // feather the edges
-                    .Apply();                                              // apply mask to the image
+                // Create an initial mask using Magic Wand at a sample point (e.g., 100,100)
+                var mask = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
+
+                // Subtract a small rectangular mask from the larger mask
+                // Rectangle defined by left=50, top=50, width=30, height=30
+                mask = mask.Subtract(new RectangleMask(50, 50, 30, 30));
+
+                // Feather the resulting mask
+                var featheredMask = mask.GetFeathered(new FeatheringSettings() { Size = 3 });
+
+                // Apply the feathered mask to the image
+                featheredMask.Apply();
 
                 // Save the processed image
                 image.Save(outputPath);
@@ -47,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When cleaning up a scanned PNG document that contains a stray ink blot inside a larger background selection, a developer can use MagicWand to select the area, subtract a RectangleMask for the blot, feather the edges, and save the corrected image.
- * 2. When preparing product photos for an e‑commerce site and need to remove a small logo that intrudes into a broader background selection, the code lets a C# developer subtract a rectangular mask from the MagicWand selection, feather the border, and export the result as a PNG.
- * 3. When automating removal of a watermark that overlaps a selected region in a batch of images, a developer can apply the MagicWandTool, subtract a RectangleMask covering the watermark, feather the transition, and save the cleaned image.
- * 4. When creating a composite graphic and an unwanted artifact appears inside a previously selected foreground, the code enables a developer to subtract that artifact with a rectangle mask, feather the selection for smooth blending, and write the final PNG file.
- * 5. When processing medical imaging scans where a small sensor glitch lies inside a larger tissue selection, a C# developer can use the MagicWand selection, subtract a precise rectangular mask, apply feathering to avoid harsh edges, and store the corrected image.
+ * 1. When you need to remove a small unwanted object from a selection created with the Magic Wand tool in a PNG before applying a smooth feathered edge.
+ * 2. When preparing product photos where a logo or watermark must be excluded from a larger automatically selected region.
+ * 3. When cleaning scanned documents by subtracting a rectangular blemish from a Magic Wand mask and then feathering to keep the surrounding area seamless.
+ * 4. When building a C# image‑processing pipeline that isolates a foreground area but must cut out a known rectangular overlay before compositing.
+ * 5. When creating custom cut‑outs for UI assets and you must eliminate a rectangular artifact from the auto‑selected mask and apply feathering for a soft transition.
  */

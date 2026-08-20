@@ -1,10 +1,8 @@
+// HOW-TO: Add Red Circle Overlay to TIFF at Specific Coordinates in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,43 +10,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(tiffImage);
-
-                // Create the overlay point at (100, 200)
+                // Create a Point at (100, 200) for overlay positioning
                 Point overlayPoint = new Point(100, 200);
 
-                // Example overlay: draw a red ellipse centered at the point
-                int ellipseRadius = 20;
-                Rectangle ellipseBounds = new Rectangle(
-                    overlayPoint.X - ellipseRadius,
-                    overlayPoint.Y - ellipseRadius,
-                    ellipseRadius * 2,
-                    ellipseRadius * 2);
+                // Draw a simple overlay (red circle) at the specified point
+                Graphics graphics = new Graphics(tiffImage);
+                Pen pen = new Pen(Color.Red, 5);
+                int radius = 20;
+                Rectangle ellipseRect = new Rectangle(overlayPoint.X - radius, overlayPoint.Y - radius, radius * 2, radius * 2);
+                graphics.DrawEllipse(pen, ellipseRect);
 
-                Pen redPen = new Pen(Color.Red, 5);
-                graphics.DrawEllipse(redPen, ellipseBounds);
-
-                // Save the modified image with TIFF options
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffImage.Save(outputPath, saveOptions);
+                // Save the modified TIFF image
+                tiffImage.Save();
             }
         }
         catch (Exception ex)
@@ -60,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to add a watermark or logo at a specific (100,200) coordinate on a TIFF document before printing or archiving.
- * 2. When a GIS application built with C# and Aspose.Imaging for .NET must mark an exact location on a scanned map stored as a TIFF by drawing a red ellipse at point (100,200).
- * 3. When an e‑commerce platform needs to highlight a product defect area on a high‑resolution TIFF photograph by overlaying a red shape at the (100,200) pixel position using Aspose.Imaging.
- * 4. When a medical imaging system automates annotation of a radiology TIFF image with a visual cue at a calibrated point (100,200) via Aspose.Imaging's Graphics API.
- * 5. When a document management workflow programmatically places a signature stamp at a fixed offset (100,200) on scanned TIFF contracts using Aspose.Imaging for .NET before saving the final file.
+ * 1. When you need to mark a precise location on a scanned document by drawing a colored circle on a TIFF file using C#.
+ * 2. When you want to programmatically add a visual indicator at (100,200) to highlight a defect in a high‑resolution TIFF image.
+ * 3. When you are building a .NET service that annotates medical or engineering TIFF images with overlay graphics at known pixel coordinates.
+ * 4. When you must generate watermarked TIFF files that include a red circle at a fixed point for quality‑control tracking.
+ * 5. When you require a simple way to overlay shapes on multi‑page TIFFs for automated report generation in C#.
  */

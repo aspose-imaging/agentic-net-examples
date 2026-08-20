@@ -1,67 +1,70 @@
+// HOW-TO: How To Fallback To Telea When ContentAwareFill Takes Too Long In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists (null‑safe)
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrEmpty(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
         try
         {
-            // Load the image
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Load image
             using (var image = Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var raster = (RasterImage)image;
 
-                // Define a simple elliptical mask
+                // Create mask (example ellipse)
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 100, 100)));
                 mask.AddFigure(figure);
 
-                // First attempt: Content Aware Fill algorithm
-                var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                // Try ContentAwareFill with time limit
+                var caOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 4
                 };
 
-                DateTime start = DateTime.Now;
-                RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, cafOptions);
-                double elapsedSeconds = (DateTime.Now - start).TotalSeconds;
-
-                // If processing exceeds the time limit, fallback to Telea algorithm
-                const double timeLimitSeconds = 5.0;
-                if (elapsedSeconds > timeLimitSeconds)
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, caOptions))
                 {
-                    result.Dispose();
-                    var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                    result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, teleaOptions);
+                    stopwatch.Stop();
+
+                    if (stopwatch.Elapsed > TimeSpan.FromSeconds(5))
+                    {
+                        // Exceeded time limit, fallback to Telea
+                        // Dispose result (handled by using) and continue
+                    }
+                    else
+                    {
+                        result.Save(outputPath);
+                        return;
+                    }
                 }
 
-                // Save the resulting image
-                result.Save(outputPath);
-                result.Dispose();
+                // Fallback to Telea algorithm
+                var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                using (var fallbackResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, teleaOptions))
+                {
+                    fallbackResult.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -73,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove unwanted objects from a PNG photograph in a C# web service while guaranteeing a response time under a few seconds, they can use this fallback logic to switch from ContentAwareFill to the faster Telea algorithm if the processing exceeds the time limit.
- * 2. When building a desktop batch‑processing tool that cleans up scanned documents by applying an elliptical mask and must avoid long stalls on large files, the code ensures the operation falls back to Telea when ContentAwareFill takes too long.
- * 3. When integrating Aspose.Imaging into an image‑editing SaaS platform that offers one‑click background removal for PNG assets, the fallback protects the user experience by limiting processing time and automatically using Telea if ContentAwareFill exceeds the predefined threshold.
- * 4. When creating an automated pipeline that prepares product images for e‑commerce catalogs, the developer can rely on this approach to guarantee that each image is processed within a set time window, switching to Telea if the more advanced ContentAwareFill algorithm is too slow.
- * 5. When developing a C# mobile‑backend service that receives user‑uploaded PNGs and needs to quickly mask out sensitive regions, the fallback pattern lets the service attempt high‑quality ContentAwareFill first and revert to the quicker Telea method when the operation threatens to exceed the allowed latency.
+ * 1. When you need to remove or fill a region in a PNG image but want to ensure the operation completes quickly, using a time‑limited ContentAwareFill with a Telea fallback prevents long processing delays.
+ * 2. When processing large batches of photos where some images cause the ContentAwareFill algorithm to exceed performance budgets, the fallback ensures each image is still saved without manual intervention.
+ * 3. When building an automated watermark removal tool that must handle varying complexities, switching to Telea after a 5‑second limit guarantees a result even for difficult textures.
+ * 4. When integrating Aspose.Imaging into a web service that must respond within a strict timeout, the fallback to a faster inpainting method keeps the API responsive.
+ * 5. When developing a desktop application that lets users erase objects from PNG files, the fallback provides a reliable user experience by avoiding hangs on complex fills.
  */

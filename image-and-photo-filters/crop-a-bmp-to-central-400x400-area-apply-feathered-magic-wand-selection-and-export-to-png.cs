@@ -1,9 +1,8 @@
+// HOW-TO: Crop Central 400x400 BMP, Apply Feathered Magic Wand, Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -11,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.bmp";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,26 +25,27 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // Ensure image data is cached for better performance
+                if (!image.IsCached)
+                    image.CacheData();
+
+                // Crop central 400x400 area
                 int cropWidth = 400;
                 int cropHeight = 400;
                 int left = (image.Width - cropWidth) / 2;
                 int top = (image.Height - cropHeight) / 2;
-                var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
-                image.Crop(cropRect);
+                image.Crop(new Rectangle(left, top, cropWidth, cropHeight));
 
+                // Apply feathered Magic Wand selection at the center of the cropped area
                 int centerX = cropWidth / 2;
                 int centerY = cropHeight / 2;
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(centerX, centerY))
+                MagicWandTool.Select(image, new MagicWandSettings(centerX, centerY))
                     .GetFeathered(new FeatheringSettings() { Size = 5 })
                     .Apply();
 
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                image.Save(outputPath, pngOptions);
+                // Save the result as PNG
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a thumbnail of a large BMP scan by extracting the central 400 × 400 pixels, applying a soft‑edge selection around a subject, and saving it as a PNG with transparency.
- * 2. When an e‑commerce platform must automatically isolate the product area from a high‑resolution BMP photograph, feather the edges to blend with the website background, and output a PNG for faster page loads.
- * 3. When a medical imaging system has to crop the region of interest from a BMP X‑ray, use a feathered Magic Wand to smooth the boundary of a lesion, and store the result as a lossless PNG for diagnostic review.
- * 4. When a game developer wants to preprocess sprite sheets stored as BMP files by extracting the central sprite, applying a feathered selection to remove jagged borders, and exporting the sprite as a PNG with an alpha channel.
- * 5. When a digital archivist needs to prepare scanned BMP documents for web publishing by centering a 400 × 400 excerpt, softening the selection edges to avoid harsh cuts, and converting the output to a PNG for universal browser compatibility.
+ * 1. When you need to extract a centered 400 × 400 region from a large BMP file and deliver it as a PNG for web thumbnails.
+ * 2. When you want to isolate the central area of an image using a feathered Magic Wand selection to create smooth edges before saving.
+ * 3. When you are building a C# batch‑processing tool that converts legacy BMP assets to PNG while applying selective feathering for better visual quality.
+ * 4. When you must programmatically crop and mask scanned documents so only the central portion is retained and exported in a lossless format.
+ * 5. When you are preparing product photos for an e‑commerce catalog, cropping the focus area and applying a soft feathered mask before saving as PNG.
  */

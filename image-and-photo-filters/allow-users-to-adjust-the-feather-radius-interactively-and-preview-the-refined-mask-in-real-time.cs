@@ -1,3 +1,4 @@
+// HOW-TO: Interactively Adjust Feather Radius for Image Masking in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,35 +13,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputDirectory = "output";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             while (true)
             {
-                Console.Write("Enter feather radius (0 to exit): ");
+                Console.Write("Enter feather radius (or press Enter to exit): ");
                 string line = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(line))
+                    break;
+
                 if (!int.TryParse(line, out int radius) || radius < 0)
                 {
-                    Console.WriteLine("Invalid input. Please enter a non‑negative integer.");
+                    Console.WriteLine("Invalid radius. Please enter a non‑negative integer.");
                     continue;
                 }
 
-                if (radius == 0)
-                    break;
+                string outputPath = Path.Combine(outputDirectory, $"masked_feather_{radius}.png");
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    var options = new AutoMaskingGraphCutOptions
+                    var maskingOptions = new AutoMaskingGraphCutOptions
                     {
                         CalculateDefaultStrokes = true,
                         FeatheringRadius = radius,
@@ -54,15 +62,16 @@ class Program
                         BackgroundReplacementColor = Color.Transparent
                     };
 
-                    var results = new ImageMasking(image).Decompose(options);
-
-                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                    using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
                     {
-                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                        {
+                            resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        }
                     }
                 }
 
-                Console.WriteLine($"Mask saved to {outputPath} with feather radius {radius}.");
+                Console.WriteLine($"Masked image saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -74,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to let a user fine‑tune the edge softness of a cut‑out in a JPEG photo and instantly see the transparent PNG result for product photography.
- * 2. When building a desktop tool that lets designers experiment with different feather radii to create smooth masks for images that will be layered in a UI mockup.
- * 3. When implementing an automated batch‑processing UI where operators can adjust the GraphCut feathering radius before exporting each image as a PNG with an alpha channel.
- * 4. When creating a C# console utility for e‑commerce sellers to remove backgrounds from product images and preview how varying feather radius affects the final transparent PNG.
- * 5. When developing a proof‑of‑concept for an image‑editing plugin that requires real‑time feedback on mask refinement using Aspose.Imaging’s AutoMaskingGraphCutOptions.
+ * 1. When building a desktop photo‑editing tool that lets users fine‑tune mask edges on a JPEG and instantly see the softened PNG result.
+ * 2. When creating a batch script that processes a series of images and needs to experiment with different feather radii to achieve the best blend for each file.
+ * 3. When generating PNG assets with soft‑edge cutouts for UI overlays, where the developer must control the feather radius to avoid harsh borders.
+ * 4. When preparing images for compositing in video or graphics projects and wants to preview how varying feather sizes affect the transition between foreground and background.
+ * 5. When developing a medical‑imaging application that extracts regions of interest from scans and requires adjustable feathering to smooth the mask for accurate analysis.
  */

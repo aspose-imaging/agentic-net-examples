@@ -1,3 +1,4 @@
+// HOW-TO: Apply Alpha Blend with Zero Opacity to Preserve Background Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,7 +11,7 @@ class Program
     {
         string backgroundPath = "background.png";
         string overlayPath = "overlay.png";
-        string outputPath = "result.png";
+        string outputPath = "output.png";
 
         try
         {
@@ -19,7 +20,6 @@ class Program
                 Console.Error.WriteLine($"File not found: {backgroundPath}");
                 return;
             }
-
             if (!File.Exists(overlayPath))
             {
                 Console.Error.WriteLine($"File not found: {overlayPath}");
@@ -31,10 +31,7 @@ class Program
             using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
             using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                // Blend overlay onto background with 0 opacity (no change expected)
                 background.Blend(new Point(0, 0), overlay, 0);
-
-                // Save the result as PNG
                 PngOptions options = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
@@ -51,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to unit‑test that the Aspose.Imaging Blend method respects an opacity value of 0, they can overlay a PNG image onto a background PNG and verify the output is identical to the original background.
- * 2. When building a CI/CD pipeline that validates image‑processing steps, the code can be used to confirm that a zero‑opacity blend does not unintentionally modify the source raster image.
- * 3. When creating a graphics editor that offers a “preview without applying changes” feature, the developer can run this blend with 0 opacity to ensure the preview layer leaves the underlying JPEG or PNG unchanged.
- * 4. When troubleshooting a custom watermarking workflow, a programmer can use the sample to check whether the overlay PNG is being applied correctly by first blending with 0 opacity as a control test.
- * 5. When documenting API behavior for Aspose.Imaging’s Blend function, the example demonstrates how to programmatically confirm that a transparent overlay (opacity 0) preserves the original background image file.
+ * 1. When you need to test that applying an overlay with 0% opacity does not alter the original PNG background during automated image processing.
+ * 2. When verifying that a custom watermark routine respects transparency settings by blending an overlay at zero opacity and confirming the base image stays unchanged.
+ * 3. When building a CI pipeline that checks image compositing logic, using Aspose.Imaging to blend a transparent layer and ensure the output matches the source background.
+ * 4. When creating a preview tool that shows the effect of different opacity levels, you first blend with opacity 0 to capture the untouched background as a reference.
+ * 5. When troubleshooting unexpected changes in layered graphics, you can isolate the issue by blending an overlay with zero opacity and confirming the background image remains identical.
  */
