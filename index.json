@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.8.0",
-  "total_examples": 2900,
+  "total_examples": 2901,
   "total_categories": 17,
-  "last_updated": "2026-08-18",
+  "last_updated": "2026-08-20",
   "categories": [
     {
       "name": "conversion",
@@ -272,7 +272,7 @@
       ],
       "more_files": {
         "count": 132,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/conversion"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion"
       }
     },
     {
@@ -407,7 +407,7 @@
       ],
       "more_files": {
         "count": 21,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-apng"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng"
       }
     },
     {
@@ -624,7 +624,7 @@
       ],
       "more_files": {
         "count": 4,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-cmx-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images"
       }
     },
     {
@@ -859,7 +859,7 @@
       ],
       "more_files": {
         "count": 30,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-eps-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-eps-images"
       }
     },
     {
@@ -1068,12 +1068,12 @@
       ],
       "more_files": {
         "count": 90,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-open-document-graphics"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics"
       }
     },
     {
       "name": "convert-raster-image",
-      "file_count": 138,
+      "file_count": 139,
       "all_files": [
         "apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs",
         "batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs",
@@ -1211,6 +1211,7 @@
         "resize-a-raster-image-to-1200-pixels-width-maintain-aspect-ratio-and-export-as-pdf-for-web-display.cs",
         "resize-a-raster-image-to-1200x1200-apply-a-median-filter-and-save-as-svg.cs",
         "resize-a-raster-image-to-fit-within-2000-pixel-width-maintain-aspect-ratio-and-convert-to-pdf-for-large-format-printing.cs",
+        "resize-a-raster-image-to-fit-within-2000-pixel-width-maintain-aspect-ratio-and-convert-to-pdf-for-large-format.cs",
         "resize-a-raster-image-to-thumbnail-size-embed-the-thumbnail-into-a-pdf-page-and-save-the-pdf.cs",
         "resize-a-raster-image-using-lanczos-resampling-then-convert-the-high-quality-result-to-pdf.cs"
       ],
@@ -1294,8 +1295,8 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 108,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-raster-image"
+        "count": 109,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image"
       }
     },
     {
@@ -1405,7 +1406,7 @@
       ],
       "more_files": {
         "count": 10,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-svg-to-raster-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images"
       }
     },
     {
@@ -1844,7 +1845,7 @@
       ],
       "more_files": {
         "count": 118,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/image-and-photo-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters"
       }
     },
     {
@@ -2422,7 +2423,7 @@
       ],
       "more_files": {
         "count": 435,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/kernel-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters"
       }
     },
     {
@@ -4501,7 +4502,7 @@
       ],
       "more_files": {
         "count": 371,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/working-with-drawing-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images"
       }
     }
   ]
