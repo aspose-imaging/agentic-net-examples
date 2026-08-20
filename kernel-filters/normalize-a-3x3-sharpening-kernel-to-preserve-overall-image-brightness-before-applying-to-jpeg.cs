@@ -1,9 +1,8 @@
+// HOW-TO: Normalize 3x3 Sharpen Kernel and Apply to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.jpg";
-            string outputPath = "output/normalized_sharpened.jpg";
+            string outputPath = "output\\sharpened.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -27,6 +26,7 @@ class Program
                 RasterImage rasterImage = (RasterImage)image;
 
                 double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3;
+
                 int rows = kernel.GetLength(0);
                 int cols = kernel.GetLength(1);
                 double sum = 0;
@@ -38,19 +38,23 @@ class Program
                     }
                 }
 
-                double[,] normalizedKernel = new double[rows, cols];
+                double[,] normalized = new double[rows, cols];
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < cols; j++)
                     {
-                        normalizedKernel[i, j] = kernel[i, j] / sum;
+                        normalized[i, j] = kernel[i, j] / sum;
                     }
                 }
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(normalizedKernel);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(normalized);
+
                 rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                JpegOptions jpegOptions = new JpegOptions();
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
                 rasterImage.Save(outputPath, jpegOptions);
             }
         }
@@ -63,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the details of a JPEG photograph while keeping its overall brightness unchanged, they can normalize a 3×3 sharpening kernel and apply it with Aspose.Imaging’s convolution filter.
- * 2. When building an automated image‑processing pipeline that receives raw JPEG uploads and must output consistently brightened, sharpened images for a web gallery, this code provides the necessary C# steps.
- * 3. When creating a desktop C# application that lets users improve the clarity of scanned documents saved as JPEG without causing over‑exposure, the normalized sharpening filter ensures balanced results.
- * 4. When integrating image enhancement into a batch‑processing service that processes thousands of JPEG files on a server, the code demonstrates how to load, filter, and save each image efficiently with Aspose.Imaging.
- * 5. When developing a photo‑editing feature that applies a custom sharpen effect to user‑selected JPEG regions while preserving the original luminance, the example shows how to compute and use a normalized kernel in C#.
+ * 1. When you need to enhance the details of a JPEG photo without darkening the overall image, you can normalize a 3x3 sharpening kernel and apply it using Aspose.Imaging in C#.
+ * 2. When processing a batch of product images for an e‑commerce site, you may want to sharpen each picture while keeping consistent brightness before saving them as high‑quality JPEGs.
+ * 3. When preparing medical scans for diagnostic review, you can use a normalized sharpening filter to improve edge clarity without altering the image’s exposure levels.
+ * 4. When developing a photo‑editing desktop application, you can implement a custom convolution filter that preserves brightness, ensuring the edited JPEGs look natural after sharpening.
+ * 5. When automating image preprocessing for a machine‑learning pipeline, you can apply a brightness‑preserving sharpen filter to JPEG inputs to improve feature detection while maintaining original luminance.
  */
