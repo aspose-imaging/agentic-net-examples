@@ -1,19 +1,21 @@
+// HOW-TO: Convert SVG to PNG with Maximum Compression Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
+            // Verify that the input SVG file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,20 +28,20 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for SVG
+                // Configure rasterization options (use the original image size)
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Set PNG options with maximum compression
+                // Configure PNG save options with maximum compression
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,
+                    CompressionLevel = 9,               // maximum compression (0‑9)
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save the rasterized PNG
+                // Save the rasterized PNG image
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑optimized PNG thumbnails from vector SVG assets while minimizing file size for faster page loads.
- * 2. When an e‑commerce platform must convert product illustration SVGs to high‑compression PNGs for email newsletters that have strict attachment size limits.
- * 3. When a reporting tool creates printable charts as SVG and then rasterizes them to PNG with maximum compression to store them efficiently in a database.
- * 4. When a mobile app backend processes user‑uploaded SVG icons and saves them as compressed PNGs to reduce bandwidth consumption on device downloads.
- * 5. When a CI/CD pipeline automates asset preparation by converting design‑team SVG files to PNG with Aspose.Imaging’s PngOptions.CompressionLevel set to 9 for optimal storage in a version‑controlled repository.
+ * 1. When you need to embed scalable vector graphics in a web page but must serve them as small PNG files for browsers that don’t support SVG.
+ * 2. When generating thumbnail previews of user‑uploaded SVG logos and want the PNGs to be as lightweight as possible for faster loading.
+ * 3. When creating PDF reports that require raster images, converting SVG diagrams to high‑compression PNGs to keep the document size low.
+ * 4. When automating a batch process that converts a library of SVG icons into PNG assets for mobile apps with strict bandwidth limits.
+ * 5. When optimizing SVG artwork for email newsletters, converting it to a compressed PNG to ensure compatibility with email clients that block SVG.
  */
