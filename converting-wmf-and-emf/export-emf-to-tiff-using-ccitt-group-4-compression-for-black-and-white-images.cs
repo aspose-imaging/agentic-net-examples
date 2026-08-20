@@ -1,8 +1,10 @@
+// HOW-TO: Convert EMF to Black and White TIFF with CCITT Group 4 Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.tif";
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,13 +29,27 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for CCITT Group 4 compression (black‑and‑white)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.BitsPerSample = new ushort[] { 1 };                         // 1‑bit per pixel
-                tiffOptions.Compression = TiffCompressions.CcittFax4;                  // CCITT Group 4
-                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;                // 0 = black, 1 = white
+                // Configure TIFF options for CCITT Group 4 (Fax4) compression, 1‑bit B/W
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    BitsPerSample = new ushort[] { 1 },
+                    Compression = TiffCompressions.CcittFax4,
+                    Photometric = TiffPhotometrics.MinIsBlack
+                };
 
-                // Save as TIFF
+                // If the source is a vector image, provide rasterization options
+                if (image is VectorImage)
+                {
+                    var rasterOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    };
+                    tiffOptions.VectorRasterizationOptions = rasterOptions;
+                }
+
+                // Save as TIFF with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -46,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EMF drawings into compact black‑and‑white TIFF files for fax‑compatible archival using C# and Aspose.Imaging with CCITT Group 4 compression.
- * 2. When an application must generate high‑resolution, 1‑bit per pixel TIFF images from EMF logos for inclusion in legal documents that require a lossless, monochrome format.
- * 3. When a document management system processes uploaded EMF schematics and stores them as space‑efficient TIFF files with CCITT Group 4 compression to reduce storage costs.
- * 4. When a batch‑processing tool automates the conversion of EMF engineering diagrams to black‑and‑white TIFFs for printing on legacy line printers that only support monochrome TIFF.
- * 5. When a developer integrates Aspose.Imaging into a C# workflow to ensure EMF graphics are saved as TIFF with MinIsBlack photometric interpretation for accurate black‑on‑white rendering in OCR pipelines.
+ * 1. When you need to archive vector drawings from Windows Metafiles as compact, 1‑bit black‑and‑white TIFF files for fax or document management systems.
+ * 2. When a printing workflow requires converting EMF logos into CCITT Group 4 compressed TIFFs to meet printer or OCR input specifications.
+ * 3. When you want to reduce storage size of high‑resolution EMF schematics by rasterizing them into monochrome TIFFs for long‑term backup.
+ * 4. When integrating a .NET application with a legacy system that only accepts B/W TIFF images, you can transform incoming EMF files on the fly.
+ * 5. When preparing EMF technical diagrams for electronic filing, you need to generate 1‑bit TIFFs with MinIsBlack photometric to ensure correct visual rendering.
  */

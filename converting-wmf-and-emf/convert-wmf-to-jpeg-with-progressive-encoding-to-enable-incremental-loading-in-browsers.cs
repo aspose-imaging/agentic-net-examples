@@ -1,20 +1,22 @@
+// HOW-TO: Convert WMF to Progressive JPEG for Browser Loading in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.jpg";
-
         try
         {
-            // Verify that the input file exists
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample.jpg";
+
+            // Verify that the source WMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,19 +29,21 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with progressive compression
-                var jpegOptions = new JpegOptions
+                // Set up rasterization options so the vector WMF is rendered correctly
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 100,
-                    // Set rasterization options so the vector WMF is rendered to raster JPEG
-                    VectorRasterizationOptions = new WmfRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    PageSize = image.Size
                 };
 
-                // Save the image as JPEG
+                // Configure JPEG options for progressive encoding
+                var jpegOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 90, // Adjust quality as needed (1‑100)
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the rasterized image as a progressive JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display legacy WMF vector graphics in browsers that only support raster images, a developer can use this code to convert the WMF files to progressive JPEGs for faster incremental loading.
- * 2. When optimizing a content management system that stores user‑uploaded WMF diagrams, the code enables automatic conversion to high‑quality progressive JPEGs so the images load progressively on slow connections.
- * 3. When building an e‑learning platform that embeds WMF illustrations in HTML pages, developers can employ this snippet to rasterize the vectors and save them as progressive JPEGs to improve perceived page load speed.
- * 4. When migrating a legacy desktop reporting tool to a web‑based interface, the code helps transform WMF charts into progressive JPEGs that browsers can render while the file is still downloading.
- * 5. When creating a batch processing service in C# that prepares marketing assets, this example shows how to convert multiple WMF logos to progressive JPEG format to ensure smooth, incremental display on product pages.
+ * 1. When you need to display legacy WMF vector graphics on a web page that requires progressive JPEGs for faster incremental rendering.
+ * 2. When converting corporate diagram files (WMF) to JPEG format while preserving quality and enabling browsers to show a low‑resolution preview before the full image loads.
+ * 3. When automating a batch process that transforms WMF icons into progressive JPEGs for use in responsive email newsletters.
+ * 4. When integrating a .NET service that serves images to mobile devices and wants progressive JPEGs to reduce perceived load time for WMF source files.
+ * 5. When migrating a document management system that stores WMF files and you must generate web‑friendly progressive JPEG thumbnails on the fly.
  */

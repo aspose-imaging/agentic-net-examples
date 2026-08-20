@@ -1,3 +1,4 @@
+// HOW-TO: Convert WMF to PNG with Transparent Background and Alpha Channel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,11 +11,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.wmf";
-            string outputPath = @"C:\Images\sample.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.wmf";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,20 +28,20 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization to produce a PNG with transparent background
-                var rasterizationOptions = new WmfRasterizationOptions
+                // Configure rasterization options with a transparent background
+                var rasterOptions = new WmfRasterizationOptions
                 {
                     PageSize = image.Size,
-                    BackgroundColor = Color.Transparent
+                    BackgroundColor = Aspose.Imaging.Color.Transparent
                 };
 
-                // Set PNG options with the rasterization settings
+                // Set PNG options and attach the rasterization options
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save as PNG, preserving alpha channel
+                // Save the image as PNG preserving the alpha channel
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows desktop application needs to display legacy WMF icons on a modern UI that requires PNG images with transparent backgrounds, a developer can use this code to convert the WMF files while preserving the alpha channel.
- * 2. When generating PDF reports that embed vector graphics originally stored as WMF, but the final document format requires raster PNG images with transparency, this snippet enables the conversion in C# using Aspose.Imaging.
- * 3. When automating a batch process that extracts vector logos from old design assets (WMF) and prepares them for web use as PNGs with transparent backgrounds, the code provides a reliable way to retain the alpha channel.
- * 4. When a game development pipeline imports WMF sprites and needs them as PNG textures with per‑pixel transparency for rendering, this example shows how to rasterize and save them correctly in .NET.
- * 5. When a content management system uploads user‑supplied WMF diagrams and must store them as PNG thumbnails with transparent backgrounds for responsive web pages, the code demonstrates the necessary conversion steps.
+ * 1. When you need to display legacy WMF icons on a modern web page that requires PNG images with transparent backgrounds.
+ * 2. When generating PDF reports that embed vector graphics converted to PNG while preserving alpha for overlay effects in a C# application.
+ * 3. When creating thumbnails of WMF drawings for a gallery where the background must remain invisible to blend with different UI themes.
+ * 4. When automating a batch conversion of corporate WMF logos to PNG assets for use in mobile apps that need proper transparency.
+ * 5. When processing user‑uploaded WMF files in a .NET service and saving them as PNGs so they can be composited over other images without a solid background.
  */
