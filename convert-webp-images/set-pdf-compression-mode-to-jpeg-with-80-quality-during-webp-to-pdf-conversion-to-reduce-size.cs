@@ -1,3 +1,4 @@
+// HOW-TO: Convert WebP to PDF With JPEG Compression At 80% Quality In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,26 +9,26 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.pdf";
+
+        // Path safety checks
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with JPEG compression at 80% quality
+                // Configure PDF conversion options with JPEG compression at 80% quality
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed high‑resolution WebP graphics into a PDF report while keeping the file size low by applying JPEG compression at 80 % quality.
- * 2. When an e‑commerce platform must convert product images stored as WebP into printable PDF catalogs and wants to balance image clarity with reduced download size.
- * 3. When a document management system automates the archival of WebP screenshots as PDFs and requires consistent JPEG compression to meet storage quotas.
- * 4. When a web application generates PDF invoices that include WebP logos and wants to ensure the PDFs are optimized for email attachment limits using Aspose.Imaging’s PdfCoreOptions.
- * 5. When a batch‑processing script converts a folder of WebP assets to PDF for legal compliance and needs to set JPEG compression to 80 % to satisfy both quality and size constraints.
+ * 1. When you need to generate smaller PDF files from high‑resolution WebP images for faster web downloads.
+ * 2. When an application must embed WebP graphics into PDFs while controlling file size by applying JPEG compression.
+ * 3. When a batch process converts user‑uploaded WebP pictures to PDFs and must meet a maximum file‑size limit.
+ * 4. When you want to preserve visual quality of WebP images in PDFs but reduce storage costs by using 80 % JPEG quality.
+ * 5. When integrating Aspose.Imaging into a C# service that creates printable PDFs from WebP assets with predictable compression settings.
  */
