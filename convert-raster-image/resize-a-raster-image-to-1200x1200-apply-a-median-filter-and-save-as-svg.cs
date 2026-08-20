@@ -1,56 +1,54 @@
+// HOW-TO: Resize Image to 1200x1200 Apply Median Filter and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = @"C:\Images\input.jpg";
         string outputPath = @"C:\Images\output.svg";
 
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel operations
-                var raster = image as Aspose.Imaging.RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                // Cast to RasterImage to access raster‑specific operations
+                RasterImage raster = (RasterImage)image;
 
-                // Resize to 1200x1200 pixels
+                // Resize to 1200x1200 pixels (default NearestNeighbourResample)
                 raster.Resize(1200, 1200);
 
-                // Apply a median filter with a kernel size of 5
+                // Apply a median filter with a kernel size of 5 to the whole image
                 raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Prepare SVG save options with matching page size
+                // Prepare SVG saving options with appropriate rasterization settings
                 var svgOptions = new SvgOptions();
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
+                    // Set the page size to match the raster image dimensions
                     PageSize = raster.Size
                 };
                 svgOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 // Save the processed image as SVG
-                raster.Save(outputPath, svgOptions);
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must generate a high‑resolution 1200×1200 thumbnail from a user‑uploaded JPEG, clean up noise with a median filter, and deliver the result as a scalable SVG for responsive design.
- * 2. When an e‑commerce platform needs to convert product photos into vector‑compatible SVG files after resizing them to a uniform square size and reducing speckle artifacts for faster page loads.
- * 3. When a desktop utility processes scanned documents by resizing them, applying a median filter to remove scanning noise, and saving them as SVG to preserve quality while enabling zoom without pixelation.
- * 4. When a mobile app backend prepares avatar images by standardizing dimensions, smoothing edges with a median filter, and storing them in SVG format for cross‑platform rendering.
- * 5. When a reporting service transforms chart screenshots into scalable SVG graphics, ensuring a consistent 1200×1200 size and applying a median filter to improve visual clarity before embedding in PDFs.
+ * 1. When you need to generate a scalable SVG thumbnail from a high‑resolution JPEG while reducing noise, you can resize the image to 1200×1200, apply a median filter, and save it as SVG using Aspose.Imaging in C#.
+ * 2. When preparing graphics for responsive web design, you may want to convert raster photos to vector‑compatible SVG files with a fixed size and denoised appearance, which this code accomplishes.
+ * 3. When automating a batch process that cleans up scanned documents before embedding them in PDFs, applying a median filter after resizing ensures consistent quality and the SVG output preserves layout fidelity.
+ * 4. When creating icons for mobile apps that require a specific pixel dimension and smooth edges, resizing to 1200×1200 and filtering the source image before exporting to SVG simplifies the workflow.
+ * 5. When integrating image preprocessing into a C# backend service that receives user‑uploaded photos, this snippet can standardize size, remove speckle noise, and convert the result to an SVG for further vector manipulation.
  */
