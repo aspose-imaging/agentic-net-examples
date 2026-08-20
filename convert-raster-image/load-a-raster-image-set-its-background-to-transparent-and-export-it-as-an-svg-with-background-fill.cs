@@ -1,47 +1,46 @@
+// HOW-TO: Convert PNG to SVG with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string outputPath = "output/output.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             // Load the raster image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare SVG save options with transparent background
-                SvgOptions svgOptions = new SvgOptions
+                // Configure SVG rasterization options with transparent background
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    TextAsShapes = true,
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        // Set background to transparent
-                        BackgroundColor = Aspose.Imaging.Color.Transparent,
-                        // Use the original image size as page size
-                        PageSize = rasterImage.Size
-                    }
+                    BackgroundColor = Aspose.Imaging.Color.Transparent,
+                    PageSize = image.Size
+                };
+
+                // Set up SVG save options
+                var saveOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save as SVG
-                rasterImage.Save(outputPath, svgOptions);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert product PNG images into scalable SVG icons for responsive web design while keeping the background transparent.
- * 2. When generating vector graphics from scanned raster documents and the resulting SVG must have a transparent canvas for overlay in presentations.
- * 3. When preparing logo assets by transforming original PNG files into SVG format without any background fill for clean print and digital use.
- * 4. When creating SVG map layers from raster tile images and the background must be set to transparent to allow seamless stacking with other map data.
- * 5. When automating batch conversion of UI screenshots to SVG for technical documentation, ensuring each SVG retains a transparent background.
+ * 1. When you need to embed a PNG logo into a web page as a scalable SVG without any background color.
+ * 2. When converting scanned bitmap graphics to vector‑friendly SVG files while preserving transparency for overlay in UI designs.
+ * 3. When preparing assets for responsive design, turning raster icons into SVGs that keep a transparent canvas for dynamic theming.
+ * 4. When automating batch processing of product images to generate SVG versions that can be tinted or styled without a solid background.
+ * 5. When integrating Aspose.Imaging in a C# application to export images for print‑ready PDFs where the SVG must have no background fill.
  */
