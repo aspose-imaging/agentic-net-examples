@@ -1,8 +1,8 @@
+// HOW-TO: Convert SVG to PNG With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string outputPath = "output/output.png";
 
         try
         {
@@ -25,18 +25,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for SVG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Set up rasterization options for SVG
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    PageSize = image.Size
                 };
 
                 // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
@@ -54,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to let users upload vector SVG logos and instantly provide a raster PNG version for display on browsers that only support bitmap images.
- * 2. When an e‑commerce platform must convert product illustration SVG files to PNG thumbnails on the fly via an ASP.NET API endpoint.
- * 3. When a content management system requires automated processing of designer‑submitted SVG assets into PNG assets for email newsletters and social media sharing.
- * 4. When a reporting service generates charts as SVG and needs to embed them as PNG images in PDF reports using C# and Aspose.Imaging.
- * 5. When a mobile backend service accepts SVG icons from client apps and returns optimized PNG files to reduce bandwidth and ensure compatibility with older devices.
+ * 1. When you need to programmatically turn user‑uploaded SVG graphics into PNG thumbnails for a web application using C#.
+ * 2. When you must generate high‑quality raster images from vector logos stored as SVG files for PDF reports in a .NET service.
+ * 3. When an e‑commerce platform requires converting scalable product illustrations (SVG) to PNG for email newsletters.
+ * 4. When a desktop utility needs to batch‑process SVG assets into PNG format while preserving original dimensions with Aspose.Imaging.
+ * 5. When a mobile backend service must accept SVG uploads via an API and return PNG files for display on devices that only support raster images.
  */
