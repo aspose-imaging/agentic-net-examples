@@ -1,54 +1,57 @@
+// HOW-TO: Apply Multiple Gaussian Blur Sizes to a PNG Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.png";
-            string outputPath3 = @"C:\temp\sample.GaussianBlur3x3.png";
-            string outputPath5 = @"C:\temp\sample.GaussianBlur5x5.png";
-            string outputPath7 = @"C:\temp\sample.GaussianBlur7x7.png";
+            // Hardcoded input path
+            string inputPath = "input.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Output directory and file paths
+            string outputDir = "output";
+            string outputPath3 = Path.Combine(outputDir, "output_3x3.png");
+            string outputPath5 = Path.Combine(outputDir, "output_5x5.png");
+            string outputPath7 = Path.Combine(outputDir, "output_7x7.png");
+
             // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath5));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath7));
 
-            // Apply 3x3 Gaussian blur (size=3, sigma=1.0)
-            using (Image image = Image.Load(inputPath))
+            // Apply 3x3 Gaussian blur (radius=1, sigma=1.0)
+            using (Image image3 = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(3, 1.0));
-                rasterImage.Save(outputPath3);
+                RasterImage raster3 = (RasterImage)image3;
+                raster3.Filter(raster3.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(1, 1.0));
+                raster3.Save(outputPath3);
             }
 
-            // Apply 5x5 Gaussian blur (size=5, sigma=2.0)
-            using (Image image = Image.Load(inputPath))
+            // Apply 5x5 Gaussian blur (radius=2, sigma=2.0)
+            using (Image image5 = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 2.0));
-                rasterImage.Save(outputPath5);
+                RasterImage raster5 = (RasterImage)image5;
+                raster5.Filter(raster5.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(2, 2.0));
+                raster5.Save(outputPath5);
             }
 
-            // Apply 7x7 Gaussian blur (size=7, sigma=3.0)
-            using (Image image = Image.Load(inputPath))
+            // Apply 7x7 Gaussian blur (radius=3, sigma=3.0)
+            using (Image image7 = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(7, 3.0));
-                rasterImage.Save(outputPath7);
+                RasterImage raster7 = (RasterImage)image7;
+                raster7.Filter(raster7.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(3, 3.0));
+                raster7.Save(outputPath7);
             }
         }
         catch (Exception ex)
@@ -60,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to compare the visual impact of different Gaussian blur kernel sizes (3x3, 5x5, 7x7) on a PNG asset for UI design decisions.
- * 2. When an automated image‑processing pipeline must generate softened previews of a product photo in multiple blur strengths for a web catalog.
- * 3. When a QA engineer wants to validate that the Aspose.Imaging GaussianBlurFilterOptions produce consistent results across various kernel sizes in a C# unit test.
- * 4. When a desktop application requires on‑the‑fly generation of blurred background layers from a source PNG to improve readability of overlaid text.
- * 5. When a batch script processes user‑uploaded PNG files and stores three versions with increasing blur for progressive loading or artistic effects.
+ * 1. When you need to generate preview thumbnails with varying blur levels to compare visual effects for UI design.
+ * 2. When creating before‑and‑after samples for a photo‑editing tutorial that demonstrates how different Gaussian kernel sizes affect image softness.
+ * 3. When preprocessing PNG assets for a game to test which blur radius provides the best performance‑to‑quality balance.
+ * 4. When automating quality‑control checks that require side‑by‑side comparison of 3x3, 5x5, and 7x7 Gaussian blurs on the same image.
+ * 5. When building a batch‑processing tool that applies multiple blur filters to the same source file for artistic or anonymization purposes.
  */
