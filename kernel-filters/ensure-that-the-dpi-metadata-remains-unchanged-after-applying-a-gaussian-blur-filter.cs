@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to JPEG in C# While Keeping Original DPI (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample.GaussianBlur.png";
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,17 +27,17 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering and resolution APIs
+                // Cast to RasterImage to access pixel operations
                 RasterImage raster = (RasterImage)image;
 
                 // Preserve original DPI (resolution)
                 double originalHorizontalDpi = raster.HorizontalResolution;
                 double originalVerticalDpi = raster.VerticalResolution;
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Restore original DPI after filtering
+                // Restore original DPI after processing
                 raster.SetResolution(originalHorizontalDpi, originalVerticalDpi);
 
                 // Save the processed image
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a Gaussian blur to a high‑resolution PNG while keeping the original DPI for accurate printing.
- * 2. When an application must process scanned documents (e.g., PDFs converted to PNG) with a blur filter but preserve the metadata required for OCR scaling.
- * 3. When a web service generates blurred thumbnails from user‑uploaded images and must retain the source image’s resolution information for downstream workflows.
- * 4. When a batch‑processing tool uses Aspose.Imaging in C# to smooth medical images without altering the pixel‑per‑inch settings needed for diagnostic analysis.
- * 5. When a desktop utility needs to enhance photos with a Gaussian blur effect while ensuring the saved file maintains the same horizontal and vertical DPI for consistent display on different devices.
+ * 1. When you need to soften a high‑resolution JPEG for a web gallery but must retain its original DPI for printing later.
+ * 2. When a desktop application must automatically blur scanned documents to protect sensitive information while preserving the scan’s resolution metadata.
+ * 3. When generating thumbnail previews of medical images where the blur is used for visual effect but the DPI must stay unchanged for compliance.
+ * 4. When batch‑processing product photos to add a subtle blur for aesthetic purposes without altering the images’ embedded resolution data.
+ * 5. When integrating an image‑editing feature into a C# reporting tool that applies Gaussian blur to charts yet keeps the DPI intact for accurate PDF export.
  */
