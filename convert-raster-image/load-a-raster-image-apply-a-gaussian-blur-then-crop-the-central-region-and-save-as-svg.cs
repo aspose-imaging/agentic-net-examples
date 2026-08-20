@@ -1,46 +1,63 @@
+// HOW-TO: Apply Gaussian Blur, Crop Center, and Save Raster Image as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.svg";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                // Cast to RasterImage for filtering and cropping
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur (radius 5, sigma 4.0)
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Calculate central crop rectangle (half size)
+                // Calculate central crop rectangle (half width and height)
                 int cropWidth = raster.Width / 2;
                 int cropHeight = raster.Height / 2;
-                int x = (raster.Width - cropWidth) / 2;
-                int y = (raster.Height - cropHeight) / 2;
-                raster.Crop(new Aspose.Imaging.Rectangle(x, y, cropWidth, cropHeight));
+                int cropX = (raster.Width - cropWidth) / 2;
+                int cropY = (raster.Height - cropHeight) / 2;
+                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                // Prepare SVG save options
-                var svgOptions = new SvgOptions();
-                var rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = new Aspose.Imaging.SizeF(raster.Width, raster.Height);
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                // Crop the image to the central region
+                raster.Crop(cropRect);
 
-                // Save the processed image as SVG
-                raster.Save(outputPath, svgOptions);
+                // Create an SVG graphics context with the size of the cropped image
+                const int dpi = 96;
+                var svgGraphics = new SvgGraphics2D(raster.Width, raster.Height, dpi);
+
+                // Draw the processed raster image onto the SVG canvas
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+
+                // Finalize SVG recording and save
+                using (SvgImage svgImage = svgGraphics.EndRecording())
+                {
+                    svgImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution PNG photograph into a lightweight SVG for responsive web design while applying a soft Gaussian blur and focusing on the central area.
- * 2. When an application must generate thumbnail previews of scanned documents by blurring noise, cropping the middle portion, and saving the result as scalable SVG for PDF embedding.
- * 3. When a graphics pipeline requires preprocessing of raster assets—applying a Gaussian blur to reduce aliasing, extracting the core region, and exporting to SVG for use in vector‑based UI components.
- * 4. When an e‑commerce site wants to display product images with a subtle blur effect and a centered crop, then store them as SVG to ensure crisp scaling on high‑DPI screens.
- * 5. When a reporting tool needs to transform PNG charts into SVG charts, smoothing edges with a Gaussian blur, cropping to the chart’s central area, and preserving scalability for print layouts.
+ * 1. When you need to soften a PNG photo with a Gaussian blur, extract its central area, and embed the result in an SVG for responsive web graphics.
+ * 2. When generating thumbnails for a web app that require a blurred background and a centered crop, then exporting them as scalable SVG icons.
+ * 3. When preparing print‑ready assets by applying a blur effect, focusing on the middle portion of an image, and saving it in vector format to retain quality at any size.
+ * 4. When converting raster screenshots into SVG diagrams while automatically cropping to the most important region and adding a subtle blur for visual emphasis.
+ * 5. When building a C# automation script that processes batches of images, applies a Gaussian blur, crops the center, and stores the output as SVG files using Aspose.Imaging.
  */
