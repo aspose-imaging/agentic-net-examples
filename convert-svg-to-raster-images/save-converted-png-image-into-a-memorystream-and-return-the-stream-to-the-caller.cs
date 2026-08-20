@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to PNG and Return MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,53 +6,35 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Converts any supported image to PNG and returns the result in a MemoryStream.
-    static MemoryStream ConvertToPngMemoryStream(string inputPath)
-    {
-        // Load the source image.
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PNG save options (default settings are sufficient for most cases).
-            PngOptions pngOptions = new PngOptions();
-
-            // Save the image into a memory stream.
-            MemoryStream stream = new MemoryStream();
-            image.Save(stream, pngOptions);
-
-            // Reset the stream position so it can be read from the beginning by the caller.
-            stream.Position = 0;
-            return stream;
-        }
-    }
-
     static void Main()
     {
-        // Hardcoded input and output paths.
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
-            // Verify that the input file exists.
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists.
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Perform the conversion.
-            using (MemoryStream pngStream = ConvertToPngMemoryStream(inputPath))
+            // Convert the image to PNG and obtain a MemoryStream
+            using (MemoryStream pngStream = ConvertToPng(inputPath))
             {
-                // For demonstration, write the stream to the output file.
+                // Write the MemoryStream contents to the output file
                 using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
+                    pngStream.Position = 0;
                     pngStream.CopyTo(file);
                 }
 
-                Console.WriteLine($"Conversion successful. PNG size: {pngStream.Length} bytes.");
+                Console.WriteLine($"PNG saved to {outputPath}, stream length: {pngStream.Length}");
             }
         }
         catch (Exception ex)
@@ -59,13 +42,26 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Loads an image, converts it to PNG format, and returns the result in a MemoryStream.
+    static MemoryStream ConvertToPng(string inputPath)
+    {
+        using (Image image = Image.Load(inputPath))
+        {
+            PngOptions pngOptions = new PngOptions(); // Default PNG options
+            MemoryStream stream = new MemoryStream();
+            image.Save(stream, pngOptions); // Save image to the memory stream
+            stream.Position = 0; // Reset position for reading
+            return stream;
+        }
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web API receives an uploaded BMP file, it can convert the image to PNG in a MemoryStream and stream the result back to the client without creating temporary files on the server.
- * 2. When generating a PDF report that embeds various source images, a developer can use the PNG MemoryStream to insert the converted image directly into the PDF using Aspose.PDF.
- * 3. When an Azure Function is triggered by a blob storage event, converting each incoming image to PNG in memory allows the function to upload the PNG to another container without consuming local disk space.
- * 4. When a desktop application needs to preview a user‑selected image in a WPF Image control, converting the file to a PNG MemoryStream provides a fast, format‑agnostic source for rendering.
- * 5. When building a microservice that resizes and optimizes images for a mobile app, returning the optimized PNG as a MemoryStream enables the service to send the image as a byte array in the HTTP response.
+ * 1. When you need to convert a BMP file to a PNG image in memory for further processing or sending over a network.
+ * 2. When an API endpoint must return an image as a stream without writing a temporary file to disk.
+ * 3. When you want to generate a PNG thumbnail from a user‑uploaded bitmap and store it directly in a database BLOB.
+ * 4. When a background service converts legacy bitmap assets to PNG for a web application while keeping the data in a MemoryStream for performance.
+ * 5. When you need to validate or manipulate the PNG data in memory before saving it to a specific folder or cloud storage.
  */
