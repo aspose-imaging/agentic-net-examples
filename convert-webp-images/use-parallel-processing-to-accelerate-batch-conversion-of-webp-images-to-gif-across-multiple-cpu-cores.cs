@@ -1,3 +1,4 @@
+// HOW-TO: Parallel Batch Convert WebP Images to GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,35 +12,44 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
+            // Hardcoded input and output directories
             string inputDir = @"C:\Images\Input";
             string outputDir = @"C:\Images\Output";
 
+            // Verify input directory exists
+            if (!Directory.Exists(inputDir))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inputDir}");
+                return;
+            }
+
             // Get all WebP files in the input directory
-            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp", SearchOption.TopDirectoryOnly);
 
             // Process each file in parallel
-            Parallel.ForEach(webpFiles, inputPath =>
+            Parallel.ForEach(webpFiles, webpPath =>
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Check that the input file exists
+                if (!File.Exists(webpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {webpPath}");
                     return;
                 }
 
-                // Build the output path (same file name with .gif extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".gif");
+                // Determine output file path (same name with .gif extension)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(webpPath) + ".gif");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image and save it as GIF
-                using (WebPImage webPImage = new WebPImage(inputPath))
+                // Load the WebP image using the provided rule
+                using (WebPImage webpImage = new WebPImage(webpPath))
                 {
-                    webPImage.Save(outputPath, new GifOptions());
+                    // Save as GIF using generic save (no specific rule exists for GIF)
+                    webpImage.Save(outputPath, new GifOptions());
                 }
+
+                Console.WriteLine($"Converted: {webpPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
@@ -51,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to quickly convert a large collection of WebP product photos to GIF animations for legacy web browsers, using parallel processing to utilize all CPU cores.
- * 2. When an e‑commerce platform must generate GIF thumbnails from user‑uploaded WebP images in bulk to improve compatibility with email newsletters.
- * 3. When a media‑archiving tool has to migrate archived WebP assets to GIF format for integration with older reporting systems, and wants to speed up the job by processing files concurrently.
- * 4. When a content‑management system requires an automated nightly job that transforms newly added WebP graphics into GIFs for use in animated banners, leveraging Aspose.Imaging’s C# API and parallel loops.
- * 5. When a digital‑marketing agency wants to batch‑process thousands of WebP ad creatives into GIFs for social‑media campaigns while minimizing conversion time by distributing the workload across multiple CPU cores.
+ * 1. When you need to quickly generate GIF previews from a large collection of WebP photos on a server, this code converts them in parallel across all CPU cores.
+ * 2. When migrating a website’s assets from WebP to GIF for compatibility with older browsers, the parallel batch converter speeds up the migration process.
+ * 3. When building an automated image pipeline that processes incoming WebP uploads and stores them as GIFs for downstream analytics, the code handles the conversion concurrently.
+ * 4. When creating a desktop utility that lets users select a folder of WebP files and instantly produces GIF versions without freezing the UI, parallel processing keeps the operation responsive.
+ * 5. When performing nightly batch jobs that archive WebP screenshots as GIFs for archival systems, the parallel approach reduces total processing time on multi‑core machines.
  */
