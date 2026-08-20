@@ -1,20 +1,22 @@
+// HOW-TO: Apply Blur Filter to All SVG Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\SvgInput";
-            string outputDir = @"C:\Images\SvgOutput";
+            string inputDir = "C:\\InputSvgs";
+            string outputDir = "C:\\OutputSvgs";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
             // Get all SVG files in the input directory
@@ -22,51 +24,45 @@ class Program
 
             foreach (string inputPath in svgFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output file path (same name with .blurred.png suffix)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".blurred.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Prepare output file path (PNG format)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
 
-                // Ensure the output directory exists (unconditional as per rules)
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
-                using (Image image = Image.Load(inputPath))
+                using (Image vectorImage = Image.Load(inputPath))
                 {
-                    // Rasterize the SVG to a raster image using default rasterization options
-                    // The loaded image is a VectorImage; we need a RasterImage for filtering
-                    // Convert by saving to a memory stream with rasterization options, then reload
-                    using (MemoryStream rasterStream = new MemoryStream())
+                    // Rasterize SVG to PNG in memory
+                    using (MemoryStream pngStream = new MemoryStream())
                     {
-                        // Set up rasterization options (default size will be used)
-                        var rasterOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        };
-                        var pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = rasterOptions
-                        };
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                        rasterOptions.PageSize = vectorImage.Size;
 
-                        // Save rasterized image to memory stream
-                        image.Save(rasterStream, pngOptions);
-                        rasterStream.Position = 0;
+                        PngOptions pngOptions = new PngOptions();
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                        // Load the rasterized image as RasterImage
-                        using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
+                        vectorImage.Save(pngStream, pngOptions);
+                        pngStream.Position = 0;
+
+                        // Load the rasterized PNG
+                        using (Image rasterImg = Image.Load(pngStream))
                         {
-                            // Apply Gaussian blur filter with radius 5 and sigma 4.0
-                            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-                            rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                            RasterImage rasterImage = (RasterImage)rasterImg;
 
-                            // Save the blurred raster image to the output path
-                            rasterImage.Save(outputPath);
+                            // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                            // Save the blurred image as PNG
+                            rasterImage.Save(outputPath, new PngOptions());
                         }
                     }
                 }
@@ -81,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer wants to automatically generate blurred preview PNGs of all SVG icons in a folder for use as loading placeholders on a website.
- * 2. When a marketing team needs to create a set of low‑resolution, blurred PNG versions of vector logos for quick email attachments without exposing the original SVG files.
- * 3. When a game developer must preprocess a library of SVG assets by applying a uniform blur effect and converting them to PNG textures for performance‑optimized rendering.
- * 4. When a content management system batch‑processes uploaded SVG illustrations, adding a subtle blur and saving them as PNG thumbnails for faster gallery previews.
- * 5. When an e‑learning platform prepares blurred background images from SVG diagrams to overlay text without distracting the learner, converting each to a PNG file for consistent display.
+ * 1. When you need to automatically blur and convert a large collection of SVG icons to PNG for use in a web UI.
+ * 2. When you want to preprocess vector graphics before uploading them to a content management system that only accepts raster images.
+ * 3. When you are generating thumbnail previews of SVG diagrams with a privacy‑preserving blur effect for a reporting dashboard.
+ * 4. When you must apply a consistent blur effect to all SVG assets in a design pipeline without manually editing each file.
+ * 5. When you are creating a batch job that converts SVG logos to blurred PNGs for use in email newsletters that block vector formats.
  */
