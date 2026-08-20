@@ -1,44 +1,54 @@
+// HOW-TO: Create SVG From BMP With Green Outline Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input/sample.bmp";
+        string outputPath = "output/result.svg";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+            // Load the BMP image
+            using (RasterImage bmpImage = (RasterImage)Image.Load(inputPath))
             {
-                int width = bmp.Width;
-                int height = bmp.Height;
-                int dpi = 96;
+                // Create SVG graphics with the same dimensions as the BMP
+                int width = bmpImage.Width;
+                int height = bmpImage.Height;
+                int dpi = 96; // standard screen DPI
 
-                var graphics = new SvgGraphics2D(width, height, dpi);
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Draw the BMP image onto the SVG canvas
-                graphics.DrawImage(bmp, new Point(0, 0), new Size(width, height));
+                // Draw the BMP onto the SVG canvas
+                graphics.DrawImage(bmpImage, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
 
-                // Draw a green outline around the image
-                var greenPen = new Pen(Color.Green, 1);
+                // Draw a green rectangle outline around the image to set the stroke color to green
+                Pen greenPen = new Pen(Color.Green, 2);
                 graphics.DrawRectangle(greenPen, 0, 0, width, height);
 
-                using (SvgImage svg = graphics.EndRecording())
+                // Finalize SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    svg.Save(outputPath);
+                    // Save the SVG file
+                    svgImage.Save(outputPath);
                 }
             }
         }
@@ -51,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets into scalable SVG files with a green border for responsive web design.
- * 2. When an application must generate vector graphics from raster screenshots and highlight them with a green outline for documentation purposes.
- * 3. When a reporting tool requires embedding BMP images as SVG with consistent green stroke styling to match corporate branding.
- * 4. When an automated batch process has to transform a folder of BMP icons into SVG format and add a green rectangle to indicate selection state.
- * 5. When a C# service creates printable SVG diagrams from BMP drawings and uses a green pen to delineate the image boundaries for visual clarity.
+ * 1. When you need to convert a legacy BMP graphic into a scalable SVG for web display while adding a green border to highlight the image.
+ * 2. When generating vector assets from raster screenshots for documentation and you want the outlines colored green to match branding guidelines.
+ * 3. When automating a batch process that creates SVG diagrams from BMP files and requires a consistent green stroke around each diagram for visual emphasis.
+ * 4. When integrating image conversion into a C# application that must produce SVG files with custom stroke colors for downstream editing in vector editors.
+ * 5. When preparing printable SVG assets from BMP sources and need a green rectangle outline to indicate cut lines or safety margins.
  */
