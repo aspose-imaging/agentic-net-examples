@@ -1,9 +1,8 @@
+// HOW-TO: Batch Resize PNG to 640x480, Sharpen, and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -29,7 +28,7 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -42,17 +41,10 @@ class Program
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Resize to 640x480
-                    image.Resize(640, 480);
-                    // Apply sharpening filter
-                    image.Filter(image.Bounds, new SharpenFilterOptions());
-
-                    // Save as PDF
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        pdfOptions.Source = new FileCreateSource(outputPath, false);
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    image.Resize(640, 480, ResizeType.NearestNeighbourResample);
+                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -65,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to batch convert a folder of high‑resolution PNG screenshots into 640×480 PDFs with a sharpening filter for email distribution.
- * 2. When an e‑commerce site needs to generate product catalog PDFs from PNG images, automatically resizing each to 640×480 and applying Aspose.Imaging’s SharpenFilterOptions to enhance detail.
- * 3. When a document management workflow requires automated processing of scanned PNG pages, scaling them to 640×480, sharpening them with Aspose.Imaging, and saving the results as PDF files.
- * 4. When a marketing team wants to create a printable PDF brochure from a collection of PNG assets, using Aspose.Imaging to resize each image to 640×480 and apply a sharpening filter for crisp visuals.
- * 5. When a desktop application must prepare PNG graphics for inclusion in a PDF user manual, employing Aspose.Imaging’s batch resize and sharpen operations before saving each image as a PDF page.
+ * 1. When you need to generate printable PDFs from a folder of product photos, resizing each PNG to a standard 640x480 size and sharpening them for clearer details.
+ * 2. When preparing a batch of scanned documents saved as PNG for archival, you can automatically resize, enhance, and convert them to PDF to reduce storage space and improve readability.
+ * 3. When creating thumbnails for a web gallery and want the final output as PDF reports, the code resizes each image, applies a sharpening filter, and saves them as PDFs in one step.
+ * 4. When automating the conversion of PNG screenshots from automated tests into PDF files with consistent dimensions and enhanced sharpness for documentation purposes.
+ * 5. When building a desktop utility that processes user‑uploaded PNG images, standardizes their size, improves visual quality, and outputs them as PDFs for easy sharing or printing.
  */
