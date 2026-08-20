@@ -4,10 +4,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2900 |
+| Total Examples | 2901 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-08-18 |
+| Last Updated | 2026-08-20 |
 
 ## Repository Structure
 
@@ -44,7 +44,7 @@ README.md
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
-| [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 139 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
@@ -110,7 +110,7 @@ The agent exposes a public REST API for programmatic access:
 
 All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
 
-| Version | Total Examples | 2900 | Framework |
+| Version | Total Examples | 2901 | Framework |
 |---------|---------------|-----------|----------|
 | 26.6.0 | 2909 | 100.0% | net9.0 |
 
