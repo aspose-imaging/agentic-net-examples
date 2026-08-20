@@ -1,19 +1,21 @@
+// HOW-TO: Measure SVG to PNG Conversion Time and File Size in C# (Aspose.Imaging for .NET)
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\test.svg";
+        string outputPath = @"C:\temp\test.output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,23 +26,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Measure conversion time
+            // Measure conversion duration
             Stopwatch sw = Stopwatch.StartNew();
 
-            // Load SVG image and rasterize to PNG
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options
-                var rasterOptions = new SvgRasterizationOptions
+                // Prepare rasterization options
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    // Preserve original size
+                    PageSize = image.Size
                 };
 
-                // Configure PNG save options
-                var pngOptions = new PngOptions
+                // Prepare PNG save options
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save rasterized PNG
@@ -49,9 +51,11 @@ class Program
 
             sw.Stop();
 
-            // Log duration and output file size
-            long fileSize = new FileInfo(outputPath).Length;
+            // Log duration in milliseconds
             Console.WriteLine($"Conversion duration: {sw.ElapsedMilliseconds} ms");
+
+            // Log output file size
+            long fileSize = new FileInfo(outputPath).Length;
             Console.WriteLine($"Output file size: {fileSize} bytes");
         }
         catch (Exception ex)
@@ -63,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service converts user‑uploaded SVG icons to PNG thumbnails and needs to log conversion duration in milliseconds and output file size to monitor performance and bandwidth usage.
- * 2. When a batch job processes thousands of SVG diagrams for a reporting system and records each rasterization’s elapsed time and resulting PNG size to detect bottlenecks.
- * 3. When an e‑commerce platform generates product image previews from SVG assets and must ensure the rasterized PNG files stay within size limits for fast page loads, logging both duration and file size.
- * 4. When a desktop application offers a “Save as PNG” feature for vector drawings and wants to display the conversion time and final file size to the end user after each SVG rasterization.
- * 5. When a CI/CD pipeline validates that automated SVG‑to‑PNG rasterization meets SLA requirements by capturing the elapsed milliseconds and output file size after each build step.
+ * 1. When you need to benchmark how long an SVG rasterization to PNG takes in a .NET application.
+ * 2. When you want to verify that the generated PNG meets specific file‑size limits for web deployment.
+ * 3. When you are automating batch conversion of SVG assets and must log performance metrics for each file.
+ * 4. When you are troubleshooting a slow image‑processing pipeline and require precise conversion duration and output size data.
+ * 5. When you integrate Aspose.Imaging into a CI/CD workflow and need to record conversion time and file size for reporting.
  */
