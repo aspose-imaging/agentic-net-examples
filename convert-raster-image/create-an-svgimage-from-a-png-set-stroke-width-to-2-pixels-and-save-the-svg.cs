@@ -1,8 +1,7 @@
+// HOW-TO: Convert PNG to SVG with 2‑Pixel Border in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -21,19 +20,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage pngImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                int width = raster.Width;
-                int height = raster.Height;
+                int width = pngImage.Width;
+                int height = pngImage.Height;
                 int dpi = 96;
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, dpi);
 
-                // Draw a rectangle border with 2‑pixel stroke
-                graphics.DrawRectangle(new Pen(Color.Black, 2), 0, 0, width, height);
+                // Draw the PNG onto the SVG canvas
+                graphics.DrawImage(pngImage, new Aspose.Imaging.Point(0, 0));
 
-                // Embed the PNG image
-                graphics.DrawImage(raster, new Point(0, 0));
+                // Draw a rectangle border with a 2‑pixel stroke
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                graphics.DrawRectangle(pen, 0, 0, width, height);
 
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a raster PNG logo into a scalable SVG for responsive web design while adding a 2‑pixel border.
- * 2. When an e‑commerce platform wants to generate lightweight SVG product thumbnails from high‑resolution PNG images with a consistent stroke width.
- * 3. When a reporting tool must embed PNG charts into SVG diagrams so they can be printed at any DPI without losing quality.
- * 4. When a mobile app creates vector‑based icons from user‑uploaded PNG avatars, applying a 2‑pixel outline for better visibility on dark backgrounds.
- * 5. When an automated CI pipeline transforms PNG assets into SVG files with a defined stroke to ensure consistent styling across different browsers.
+ * 1. When you need to embed a raster PNG into a scalable SVG for responsive web graphics while adding a uniform 2‑pixel outline.
+ * 2. When generating vector assets from user‑uploaded PNG logos and you want to ensure a consistent border for branding guidelines.
+ * 3. When creating printable SVG diagrams from PNG screenshots and require a precise stroke width to match design specifications.
+ * 4. When automating batch conversion of PNG icons to SVG format with a defined border for use in UI icon libraries.
+ * 5. When integrating Aspose.Imaging in a C# application to transform raster images into SVG files that include a custom stroke for visual emphasis.
  */
