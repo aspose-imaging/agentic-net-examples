@@ -1,18 +1,21 @@
+// HOW-TO: Convert PNG to SVG with White Background Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/output.svg";
-
         try
         {
-            // Validate input file existence
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.svg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,35 +25,26 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load raster image
-            using (Aspose.Imaging.Image loadedImage = Aspose.Imaging.Image.Load(inputPath))
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = loadedImage as Aspose.Imaging.RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Failed to load raster image.");
-                    return;
-                }
-
-                int width = raster.Width;
-                int height = raster.Height;
-                int dpi = 96;
-
-                // Create SVG graphics canvas
-                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, dpi);
-
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0));
-
-                // Finalize SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                // Configure rasterization options for SVG output
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     // Set background color to white
-                    svgImage.BackgroundColor = Aspose.Imaging.Color.White;
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    // Use the size of the source image as the page size
+                    PageSize = image.Size
+                };
 
-                    // Save the SVG file
-                    svgImage.Save(outputPath);
-                }
+                // Create SVG save options and attach rasterization options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the image as SVG
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded PNG screenshots into scalable SVG files for responsive web pages while ensuring a consistent white background.
- * 2. When an automated report generator must embed high‑resolution raster charts as vector graphics in PDF or HTML output, using Aspose.Imaging to draw the PNG onto an SVG canvas.
- * 3. When a desktop application has to batch‑process product photos, turning each raster image into a lightweight SVG thumbnail with a white background for faster loading in e‑commerce catalogs.
- * 4. When a migration script converts legacy bitmap assets stored in PNG format to SVG for a design system, preserving the original dimensions and DPI using C# and Aspose.Imaging.
- * 5. When a CI/CD pipeline validates image assets by rendering them onto an SVG surface and saving the result, allowing visual diff tools to compare vector versions of raster sources.
+ * 1. When you need to embed a raster logo in a web page as scalable SVG while ensuring a solid white background.
+ * 2. When converting scanned PNG diagrams to SVG for printing on white paper without transparent artifacts.
+ * 3. When generating SVG assets from user‑uploaded PNG images in a C# application that requires consistent background color.
+ * 4. When creating vector‑compatible versions of PNG icons for responsive UI designs using Aspose.Imaging.
+ * 5. When automating batch processing of PNG files to SVG format with predefined page size and white background in .NET.
  */
