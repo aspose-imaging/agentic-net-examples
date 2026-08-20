@@ -24,7 +24,7 @@ When working in this repository:
 This repository contains **4856** working code examples demonstrating Aspose.Imaging for .NET capabilities.
 
 **Statistics** (as of 2026-06-29):
-- Total Examples: 2900
+- Total Examples: 2901
 - Categories: 17
 - Overall Pass Rate: 100.0%
 
@@ -238,7 +238,7 @@ README.md
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
-| [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 139 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
