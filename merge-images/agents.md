@@ -125,15 +125,18 @@ All tasks passed ✅
 
 
 ## Use Cases
-- Building a photo‑gallery web app where you need to **merge images C#** to create thumbnail collages on the fly.  
-- Developing a document generation service that **combines images dotnet** into a single banner for PDF reports.  
-- Implementing an e‑commerce platform that stitches product photos into a panoramic view using **image stitching C#** for better visual presentation.  
-- Creating a batch processing tool that merges scanned pages into a single multi‑page TIFF for archival purposes.  
-- Designing a social‑media scheduler that automatically combines user‑uploaded stickers and backgrounds into one final image before posting.
+- **Add a semi‑transparent watermark to a horizontally merged JPEG** – using `Aspose.Imaging.Brushes` and the JPEG merge API you can stitch several JPEG files side‑by‑side and overlay a translucent text watermark in a single C# routine. This is a classic *merge images C#* scenario for branding photo strips or product catalogs.  
 
-## Related Categories  
-The techniques demonstrated in the Merge Images examples often complement the **Resize & Crop** and **Watermark** categories, where you may need to adjust dimensions or add branding before stitching images together. Likewise, the **Format Conversion** examples can be useful when the combined output must be saved in a different file type, such as converting a stitched PNG into a compressed JPEG for web delivery. Exploring these adjacent sections can give you a complete workflow for advanced image manipulation in Aspose.Imaging for .NET.
+- **Create a PDF from a single JPEG by routing it through the TGA format** – the example loads a JPEG, saves it as a temporary TGA (`RasterImage` → `TgaImage`), then embeds the TGA into a PDF document. It demonstrates a reliable way to *combine images dotnet* when the target PDF engine prefers lossless intermediate formats.  
 
+- **Combine multiple JPEGs into a PDF while preserving vector fidelity via EMF** – each JPEG is first converted to an EMF file, which retains any embedded vector information, and the EMFs are then merged into a single PDF. This workflow is useful for *image stitching C#* projects that need high‑quality printable PDFs from raster sources.  
+
+- **Merge two JPEGs into a PNG while applying custom JPEG compression settings** – the code merges the source JPEGs, adjusts the `JpegCompression` options, and finally writes the result as a PNG. Developers can use this pattern to *combine images dotnet* when they need a lossless output format but want to control the source JPEG quality.  
+
+- **Stack several JPEGs vertically in their original order to produce one long JPEG** – by loading an array of JPEG paths, validating each file, and using the JPEG merge API, the example creates a single vertically arranged image. This is a practical *merge images C#* use case for generating receipts, panoramic banners, or continuous scan strips.
+
+## Related Categories
+If you’re working with image merging, you’ll often need to convert between formats, so the **Image Conversion** and **PDF Generation** categories contain examples that show how to turn JPEGs into TGA, EMF, or PDF files before or after stitching. For projects that require visual branding, the **Watermarking** and **Image Compression** sections illustrate how to overlay text or adjust compression levels on merged outputs. Finally, the **Vector Graphics** category provides deeper insight into preserving vector data when raster images are combined, complementing the stitching techniques demonstrated here.
 
 ## Operations Covered
 - Merge JPEG images horizontally  
