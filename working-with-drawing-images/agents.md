@@ -145,18 +145,19 @@ All tasks passed ✅
 
 
 
-## Use Cases  
+## Use Cases
+- **Add custom vector graphics to a PNG thumbnail** – Use Aspose.Imaging’s `Graphics` object to draw a cubic Bézier curve (as shown in the *add‑a‑cubic‑bezier‑curve* sample) when you need to overlay smooth, scalable lines on a PNG image in a C# web service. This is a classic “draw on image C#” scenario that leverages the `Graphics` API for precise curve control.  
 
-- Adding watermarks or logos to product photos programmatically, allowing you to **draw on image C#** files without manual editing.  
-- Generating dynamic charts or infographics on the fly in a web service, using **graphics drawing dotnet** capabilities to render shapes, text, and colors.  
-- Creating custom thumbnails that include overlay text or icons for media libraries, leveraging **image drawing Aspose** to maintain quality across formats.  
-- Automating the annotation of medical or engineering diagrams with measurement lines and labels, a common need for **graphics drawing dotnet** in enterprise applications.  
-- Building a batch processor that stamps batch‑generated certificates with unique QR codes and signatures, demonstrating how to **draw on image C#** at scale.  
+- **Create high‑resolution BMP assets with geometric shapes** – The *create‑a‑bmp‑image‑draw‑a‑90‑degree‑arc* example demonstrates how to generate a 24‑bpp BMP, draw a 90° arc inside a defined rectangle, and save it directly to disk, perfect for producing bitmap icons or background textures in desktop applications.  
 
-## Related Categories  
+- **Batch‑convert SVG icons to vector‑based PDF for print‑ready output** – By iterating through an input folder and using `PdfOptions` together with `Image.Load`, the *batch‑convert‑svg‑icons‑to‑pdf* script converts each SVG into a PDF that retains its vector fidelity, ideal for automating the preparation of scalable assets for marketing collateral.  
 
-The drawing examples often complement the **Image Conversion** and **Image Manipulation** sections, where you might first convert a source file before applying graphics. Techniques shown here also pair well with the **Metadata Handling** category, enabling you to embed drawing results alongside updated EXIF data. Exploring the **Vector Graphics** examples can further extend your workflow, offering additional ways to create and edit scalable drawing elements before rasterizing them with Aspose.Imaging.
+- **Produce multi‑page PDF reports from a series of SVG diagrams** – The *convert‑a‑multi‑page‑svg‑document‑to‑a‑single‑pdf* sample shows how to load a multi‑page SVG, preserve page order, and export a single PDF while keeping all vector information intact, a common requirement for generating technical documentation in .NET.  
 
+- **Generate chart graphics on the fly and embed them in PDF reports** – Using `PngOptions` as a drawing surface, the *create‑a‑vector‑chart‑add‑data‑labels‑and‑export‑the‑chart‑as‑a‑pdf* example draws bars, labels, and colors, then saves the result as a PDF, enabling dynamic chart creation for dashboards or automated reporting pipelines.
+
+## Related Categories
+If you’re working with drawing primitives, the **Image Manipulation** category expands on pixel‑level edits such as filtering, resizing, and color adjustments that often precede or follow graphics drawing operations. For scenarios that require converting between raster and vector formats, explore the **Vector Graphics Conversion** section, which includes examples of SVG ↔ PDF and EPS handling. When you need to embed custom fonts or apply advanced text rendering, the **Text Rendering & Font Embedding** category provides code snippets that complement the graphics drawing workflow demonstrated here.
 
 ## Operations Covered
 - Create PNG image canvas  
