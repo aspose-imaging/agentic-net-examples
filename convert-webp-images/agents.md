@@ -95,16 +95,19 @@ All tasks passed ✅
 
 ## Use Cases  
 
-- A web service needs to accept user‑uploaded WebP photos and store them as JPEGs for compatibility with legacy browsers; the **WebP conversion C#** samples show how to perform a fast **WebP to JPEG dotnet** transformation on the server.  
-- Mobile app developers want to reduce bandwidth by delivering WebP assets but must also generate fallback JPEGs for devices that lack WebP support; the examples illustrate the conversion pipeline in a .NET 9.0 project.  
-- An automated batch job processes a directory of product images, converting each WebP file to a high‑quality JPEG before uploading to a CDN; the code demonstrates efficient file‑system handling and format conversion in C#.  
-- A digital asset management system requires on‑the‑fly conversion of WebP thumbnails to JPEG previews for third‑party integrations; the provided snippets handle streaming conversion without intermediate disk writes.  
-- Developers building a reporting tool need to embed images in PDF reports, but the source images are stored as WebP; using the **WebP conversion C#** examples, they can convert each WebP to JPEG before adding it to the PDF generation workflow.  
+- **Batch‑convert PNG files to high‑quality WebP and embed them in a 300 DPI PDF** – the `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs` sample shows how to set WebP compression quality, save the result, and then export it to a PDF, a common requirement for generating print‑ready documents with WebP conversion C#.  
+
+- **Validate that a WebP‑to‑GIF conversion preserves the original pixel dimensions** – `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs` loads a WebP image, converts it to GIF, and compares width/height, helping developers guarantee size consistency during WebP conversion C#.  
+
+- **Convert a WebP image that resides in a memory stream directly to GIF without temporary files** – the `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs` example demonstrates loading WebP bytes into a `MemoryStream`, converting on‑the‑fly, and saving the GIF, which is useful for web services that process uploaded WebP data.  
+
+- **Control animation speed when turning an animated WebP into a GIF** – `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs` iterates over each frame, assigns a custom delay, and writes the GIF, enabling precise timing adjustments for animated WebP conversion C#.  
+
+- **Profile conversion performance for large WebP batches and log timing metrics** – `measure-conversion-time-for-each-webp-file-to-gif-and-log-performance-metrics-for-optimization.cs` measures the elapsed time for each file, logs the results, and can be adapted to other targets such as WebP to JPEG dotnet, assisting developers who need to optimize bulk WebP conversion C#.
 
 ## Related Categories  
 
-The Convert Webp Images category complements the broader **Image Format Conversion** examples, where you can see how to switch between PNG, BMP, and TIFF alongside WebP. If you need to resize or crop images after conversion, the **Image Resizing and Cropping** samples provide seamless integration with the same Aspose.Imaging API. For scenarios that involve extracting or preserving metadata during conversion, the **Metadata Handling** examples illustrate how to retain EXIF information when moving from WebP to JPEG. Together, these categories give a complete toolkit for end‑to‑end image processing in .NET.
-
+If you are working with WebP conversion C#, you may also explore the **Image Format Conversion** category, which covers transformations between JPEG, PNG, TIFF, and other raster formats. The **Image Compression & Optimization** section provides examples for reducing file size while preserving visual quality, complementing the quality‑control techniques shown here. For scenarios involving animated assets, the **Animated Image Processing** category demonstrates how to manipulate frame timing and extract frames from formats like APNG and animated WebP. Finally, the **PDF Generation** category illustrates how to embed raster images—including WebP‑derived graphics—into PDF documents, extending the workflow demonstrated in the PDF export sample.
 
 ## Operations Covered
 - Convert PNG to WebP with quality setting  
