@@ -148,16 +148,19 @@ All tasks passed ✅
 
 
 
-## Use Cases  
-- A web service that receives user‑uploaded photos and needs to **resize, crop, and rotate C#** images on the fly before storing them in Azure Blob Storage, ensuring consistent thumbnails across the platform.  
-- An e‑commerce application that automatically adjusts product images for different device screens, using **image manipulation C#** to generate high‑resolution and thumbnail versions in a single pipeline.  
-- A desktop utility for batch **image editing dotnet** that processes large TIFF archives, applying rotation and cropping to meet printing specifications without manual intervention.  
-- A medical imaging tool that extracts regions of interest from DICOM‑converted images, employing **resize, crop, rotate C#** operations to focus on diagnostic details.  
-- An automated marketing workflow that creates social‑media graphics by programmatically resizing and rotating source assets, streamlining **image editing dotnet** tasks for rapid campaign launches.  
+## Use Cases
+- **Accurate PSD‑to‑PNG export with custom fonts** – When a design file contains fonts that aren’t installed on the server, you can point `FontSettings` to a local fonts folder and export the PSD as a PNG, preserving exact text appearance. This is a common image manipulation C# scenario for web‑based preview generators.  
 
-## Related Categories  
-The Manipulating Images examples often complement the **Converting Formats** category, where files are first transformed into a suitable format before being resized or cropped. Developers working on **Applying Filters** can chain filter operations after performing basic transformations like rotate and resize, achieving richer visual effects. Additionally, the **Drawing Shapes** and **Metadata Management** sections provide ways to annotate or tag the manipulated images, creating a comprehensive image processing toolkit within the repository.
+- **High‑quality animated PNG creation** – By enabling a smoothing (anti‑aliasing) mode before saving a raster image as an APNG, the resulting animation retains crisp edges and reduced banding, ideal for image editing dotnet projects that need smooth animated graphics.  
 
+- **Batch Gaussian blur on CorelDRAW files and multipage TIFF assembly** – The code loads several *.cdr* files, applies a Gaussian blur filter to each, and then merges the blurred results into a single multipage TIFF, a practical workflow for automated image manipulation C# pipelines in print‑preparation.  
+
+- **TIFF‑to‑PDF conversion with multilingual font support** – Configuring multiple font directories lets the conversion process embed the correct glyphs for Latin, CJK, and Arabic scripts, producing searchable PDFs from scanned TIFFs—an essential image editing dotnet use case for document management systems.  
+
+- **45‑degree rotation of a PNG while preserving dimensions and transparency** – Rotating an image with a transparent background and then verifying that the original width and height remain unchanged is a typical resize‑crop‑rotate C# operation used in thumbnail generation and UI asset pipelines.
+
+## Related Categories
+If you’re working with image manipulation C# examples, you’ll often need to convert between formats, which is covered in the **Converting Image Formats** category (e.g., JPEG ↔ PNG, BMP ↔ TIFF). For more advanced visual effects, the **Applying Filters and Effects** section demonstrates additional blur, sharpen, and threshold techniques that complement the Gaussian blur and Bradley binarization samples. When your workflow involves vector or page‑based sources such as CorelDRAW or PDF, the **Working with Vector and Document Formats** category provides guidance on loading, editing, and rasterizing those files before applying the manipulations shown here. Finally, the **Generating PDFs and Documents** category expands on the TIFF‑to‑PDF conversion example, showing how to embed fonts, set compression, and add watermarks for comprehensive document‑oriented image editing.
 
 ## Operations Covered
 - Export PSD to PNG with custom fonts  
