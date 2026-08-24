@@ -138,15 +138,14 @@ All tasks passed ✅
 
 
 ## Use Cases
-- Applying a **kernel filter C#** to sharpen medical imaging scans, allowing radiologists to highlight subtle tissue details without altering the original DICOM data.  
-- Implementing a custom **convolution filter dotnet** to remove periodic noise from satellite photographs, improving the accuracy of downstream geographic information system (GIS) analyses.  
-- Using **image kernel processing** to create artistic edge‑detection effects in real‑time photo editing apps, giving users a stylized preview before committing changes.  
-- Enhancing OCR preprocessing pipelines by applying a blur kernel filter in C# to reduce high‑frequency artifacts, which boosts text recognition rates on scanned documents.  
-- Developing a batch‑processing tool that applies a Gaussian kernel filter to product images, ensuring consistent background smoothing for e‑commerce catalogs.
+- **Rasterizing SVGs and softening edges for web graphics** – Load an SVG, rasterize it to PNG, then apply a Gaussian blur via the kernel filter C# API to create smooth icons or thumbnails suitable for responsive web design.  
+- **Cleaning up scanned TIFF documents** – Open a multi‑page TIFF, run a Gaussian blur kernel filter to reduce speckle noise, and save the result, an example of image kernel processing that improves OCR accuracy on archival scans.  
+- **Enhancing UI icons stored in ICO format** – Load an ICO file, cast it to a `RasterImage`, apply a Gaussian blur kernel, and export as PNG, demonstrating how convolution filter dotnet can be used to generate softened icon sets for modern applications.  
+- **Restoring detail in PSD layers with deconvolution** – Load a Photoshop PSD, apply a deconvolution kernel filter to counteract blur introduced during editing, then write the restored image back, showcasing advanced image kernel processing for professional photo retouching.  
+- **Applying predefined sharpening or edge‑detection kernels to PNG/BMP assets** – Use the built‑in convolution filter to sharpen a PNG or detect edges in a BMP, enabling developers to quickly add visual emphasis or prepare images for computer‑vision pipelines.
 
-## Related Categories  
-The Kernel Filters examples complement the **Color Adjustments** category, where you can combine tone‑mapping with convolution kernels for richer visual effects. They also intersect with the **Image Transformations** group, enabling you to apply kernel‑based sharpening after geometric operations such as rotation or scaling. Additionally, the **File Format Conversions** section often benefits from kernel filtering to preserve quality when converting between raster formats, making it easy to integrate these techniques into broader image‑processing workflows.
-
+## Related Categories
+Kernel Filters often work hand‑in‑hand with **Image Conversion** examples, where files are transformed between formats before or after filtering. They also complement **Color Adjustment** samples that modify brightness, contrast, or hue, allowing a full preprocessing pipeline. For projects that need to resize or crop images after applying a kernel, the **Resizing & Cropping** category provides the necessary tools, while **Image Compression** examples show how to efficiently store the filtered results.
 
 ## Operations Covered
 - Rasterize SVG to PNG  
