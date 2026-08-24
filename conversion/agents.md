@@ -258,16 +258,21 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 All tasks passed ✅
 
 
-## Use Cases
-- **Batch conversion of legacy assets** – A development team needs to migrate thousands of BMP and TIFF files to modern PNG or JPEG formats; the examples demonstrate how to **convert image C#** code efficiently using Aspose.Imaging’s format converter for .NET.  
-- **Dynamic web thumbnail generation** – An ASP.NET application creates on‑the‑fly thumbnails from user‑uploaded PDFs or SVGs, requiring quick **image format conversion** to PNG or WebP before serving them to browsers.  
-- **Automated document workflow** – When processing scanned documents, the pipeline extracts each page as a BMP and then uses the **format converter dotnet** utilities to produce high‑quality JPEGs for archival storage.  
-- **Cross‑platform mobile app assets** – Mobile developers prepare icon sets by converting a master SVG into PNG, ICO, and WebP files, leveraging the C# conversion samples to ensure consistent rendering across devices.  
-- **Cloud‑based image processing service** – A SaaS platform receives images in various formats via API calls and must **convert image C#** code to a standard format (e.g., JPEG) before applying further analysis or compression.
+## Use Cases  
+
+* **Archiving high‑resolution scans as searchable PDFs** – Load a massive BigTIFF file (`Image.Load`) and export it with `PdfOptions` to preserve every pixel, letting .NET developers create a reliable image format conversion pipeline for archival purposes.  
+
+* **Generating printable PDFs from modern web assets** – Use `WebPImage` to read a WebP picture and save it as a PDF (`PdfOptions`) in a single step, providing a quick “convert image C#” solution for web‑centric workflows.  
+
+* **Converting legacy vector EPS artwork into PDF for cross‑platform sharing** – Cast the loaded EPS (`(EpsImage)Image.Load`) to an image object and write it to a PDF, enabling a format converter dotnet that retains vector fidelity while simplifying distribution.  
+
+* **Transforming SVG illustrations into raster BMP files for legacy applications** – Load an SVG (`Image.Load`), optionally adjust rendering settings, and save it as BMP via `BmpOptions`, giving developers a straightforward way to convert image formats when only bitmap support is available.  
+
+* **Batch‑processing raster pictures into scalable SVG graphics** – Determine supported raster inputs (PNG, JPEG, BMP, GIF, TIFF, etc.), load the source image, and export it as SVG using `SvgOptions`, delivering a reusable .NET format converter for creating resolution‑independent assets.
 
 ## Related Categories  
-The Conversion examples often pair with the **Resizing** and **Cropping** categories, where you first adjust dimensions before changing the file type to meet specific delivery requirements. Likewise, the **Watermarking** and **Metadata** sections show how to embed information or preserve EXIF data after a format conversion, providing a complete end‑to‑end image processing workflow within the Aspose.Imaging for .NET repository.
 
+If you need to reduce file size after conversion, explore the **Compression** examples that show how to apply lossless and lossy techniques to PDFs, BMPs, and SVGs. When preserving or editing image metadata is required, the **Metadata** category demonstrates reading, modifying, and writing EXIF or XMP data before or after a format conversion. For scenarios that involve rendering vector graphics into raster formats with custom color profiles, the **Vector → Raster** samples provide deeper insight into handling SVG, EPS, and PDF sources. Together, these sections complement the Conversion guides and help you build a complete imaging workflow in .NET.
 
 ## Developer Q&A
 
