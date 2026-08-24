@@ -89,15 +89,14 @@ All tasks passed ✅
 
 
 ## Use Cases
-- A hospital IT team needs to integrate DICOM medical imaging C# code into their PACS workflow, converting incoming DICOM scans to PNG for web‑based viewers using Aspose.Imaging’s DICOM to PNG dotnet capabilities.  
-- A research lab processes large batches of MRI studies and requires a script that extracts individual frames from multi‑frame DICOM files, applying medical image processing techniques before saving them as high‑resolution PNGs.  
-- A tele‑radiology platform wants to generate thumbnail previews of DICOM images on the fly; the examples demonstrate how to resize and compress DICOM to PNG in a .NET microservice.  
-- A medical device manufacturer needs to validate image quality by converting DICOM output from their scanners into PNG format for automated visual inspection pipelines written in C#.  
-- An educational software developer is building a teaching tool that overlays annotations on DICOM scans; the provided code shows how to load DICOM files, perform pixel‑level medical image processing, and export the result as PNG for cross‑platform display.
+- Convert grayscale DICOM scans to PNG with a custom color palette, giving radiologists clearer visual contrast when displaying medical image data in C# web applications.  
+- Batch‑process an entire directory of DICOM files, outputting PNG images that retain the original filenames, which is ideal for automated PACS archiving or bulk data migration in .NET environments.  
+- Tune the PNG compression level during DICOM‑to‑PNG conversion to achieve a sweet spot between file size and diagnostic image quality, a common requirement for telemedicine and remote image sharing.  
+- Use a `MemoryStream` to transform a DICOM byte array directly into a PNG image in memory, eliminating temporary files and speeding up high‑throughput medical image processing pipelines.  
+- Deploy a background service that watches a folder for newly arriving DICOM files and instantly converts each to PNG, enabling real‑time medical image ingestion and processing in C# applications.
 
-## Related Categories  
-The Convert DICOM Images examples complement the **Image Conversion** and **File Format Support** sections, where you can find similar workflows for JPEG, TIFF, and BMP transformations. If you need to apply advanced filters or color corrections before conversion, the **Image Editing** category offers ready‑to‑use routines that integrate seamlessly with DICOM handling. Additionally, the **Metadata Extraction** examples illustrate how to read patient and study information from DICOM files, which can be combined with the conversion scripts to build comprehensive medical imaging pipelines.
-
+## Related Categories
+If you need to move beyond PNG output, the **Convert Image Formats** category shows how to transform DICOM data into JPEG, TIFF, or BMP while preserving metadata. For scenarios where image size matters, explore the **Image Compression** examples that demonstrate fine‑grained control over compression algorithms across formats. When annotation or overlay of diagnostic information is required, the **Medical Image Annotation** section provides code for drawing measurements and labels directly onto DICOM‑derived images. Finally, the **Image Watermarking** collection can help you embed patient or study identifiers into PNG outputs to meet compliance and traceability standards.
 
 ## Operations Covered
 - Convert grayscale DICOM to PNG with custom palette  
