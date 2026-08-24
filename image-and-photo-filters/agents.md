@@ -125,16 +125,15 @@ All tasks passed ✅
 
 
 
-## Use Cases  
-- An online gallery lets users upload pictures and instantly **apply filter Aspose.Imaging** to create vintage or black‑and‑white looks before sharing.  
-- An e‑commerce site generates product thumbnails by running an **image filter C#** routine that sharpens edges and balances colors for faster loading.  
-- A desktop photo‑editing tool offers batch processing where developers can plug in a **photo filter dotnet** component to apply artistic effects to hundreds of images in one click.  
-- A medical imaging application enhances X‑ray scans by using **apply filter Aspose.Imaging** to improve contrast and highlight critical details for diagnostic review.  
-- An automated social‑media scheduler adds a brand‑specific **image filter C#** to every visual asset, ensuring consistent visual identity across all posts.
+## Use Cases
+- **Automated quality‑control for mask generation** – Use the `ImageGrayscaleMask` inversion test to verify that white‑and‑black masks are correctly flipped, ensuring reliable mask‑based selections when applying an image filter C# in production pipelines.  
+- **Applying a custom filter to animated PNGs** – Load an APNG with `ApngImage`, iterate over each frame, and modify pixel data (e.g., gamma correction) while preserving animation timing, a practical way to **apply filter Aspose.Imaging** to motion graphics in a .NET application.  
+- **Selective color or brightness adjustments with Magic Wand** – Employ the Magic Wand filter together with `ImageMasks` to isolate regions based on color similarity and then adjust those pixels, providing a fast **photo filter dotnet** solution for targeted retouching.  
+- **Batch watermark removal from PNG collections** – Combine an ellipse mask with the Telea inpainting algorithm across a folder of PNG files, automating the cleanup of watermarks or logos while keeping the original image dimensions intact.  
+- **Merging multiple selection masks into a single PNG** – Use the union operation on two Magic Wand selections to create a composite mask and save it as a PNG, enabling downstream workflows that require a single mask for complex image filter C# operations.
 
-## Related Categories  
-The Image and Photo Filters examples often complement the **Image Conversion** and **Image Resizing and Cropping** sections, where transformed images are later saved in different formats or dimensions. Developers working on **Watermarking and Text Overlay** can combine filter operations with branding overlays to produce polished marketing assets. Additionally, the **Metadata and EXIF** category provides tools to preserve or modify image information after applying filters, ensuring that the processed files remain compliant with downstream workflows.
-
+## Related Categories
+The techniques demonstrated here often complement examples in the **Image Conversion** and **Image Resizing** categories, where filtered images are later saved in different formats or scaled for web delivery. Developers working on **Watermark Removal** or **Image Inpainting** will find the mask‑based workflows directly applicable, while the **Animation Processing** category expands on handling multi‑frame formats like GIF and APNG after filters have been applied. Together, these sections provide a full toolkit for building sophisticated photo‑filter pipelines in .NET.
 
 ## Operations Covered
 - Invert grayscale mask for white and black masks  
