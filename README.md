@@ -203,5 +203,8 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🤖 Agent API | [agent.json](/.well-known/agent.json) |
+
+## Why Aspose.Imaging for .NET
+The repository covers 17 distinct real‑world image‑processing categories—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF) to filters, merging and drawing—showing the breadth of Aspose.Imaging for .NET. Because it is a UI‑agnostic backend API, the same code runs in ASP.NET Core, console apps, Azure Functions, or Docker containers without any display or UI framework dependency. A free temporary license is available for evaluation, and you can see the range of production customers and success stories on Aspose’s website. For enterprises that need implementation assistance, paid consulting services are offered.
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*
