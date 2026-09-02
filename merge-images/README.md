@@ -1,45 +1,90 @@
-# Merge Images C# – Aspose.Imaging for .NET
+# Horizontal JPEG Merge with Semi‑Transparent Watermark in C#
 
-Combine images in .NET quickly with Aspose.Imaging. This collection shows how to **merge images C#**, **combine images dotnet**, and perform **image stitching C#** using simple, production‑ready code.
+Combine several JPEG files side‑by‑side, stamp a semi‑transparent text watermark on the result, and optionally export the merged image to PDF, PNG (inside an EMZ), or an animated GIF – all with Aspose.Imaging for .NET. The library is a UI‑agnostic backend API that runs in ASP.NET Core, console apps, Azure Functions, and Docker containers without any UI dependencies.
 
-## What's in This Category
-- Merge multiple JPEG files horizontally into a single image.  
-- Arrange several JPEG pictures vertically and save the combined result.  
-- Stitch a set of JPEG images side‑by‑side and output the merged picture as a PDF document.  
-- Load images from a directory, calculate dimensions dynamically, and create a composite bitmap.  
+## What You Can Do
+- **Horizontally merge multiple JPEG images** into a single bitmap.  
+- **Add a semi‑transparent watermark text** to the merged JPEG image.  
+- **Save the horizontally merged JPEG collection directly as a PDF** document.  
+- **Convert a set of JPEG images to PSD format first, then combine them into a PDF** (preserves layer information).  
+- **Merge JPEG images into a single PNG wrapped in an EMZ file** while keeping visual fidelity.  
+- **Create a single animated GIF from multiple JPEG files** using a programmatic merging operation.
 
 ## Quick Start
-The most common scenario is merging a series of JPEG files horizontally:
+The snippet below shows the most common scenario – merging JPEGs horizontally and applying a semi‑transparent watermark.
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using System.IO;
-using System.Linq;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-string[] files = Directory.GetFiles(@"C:\Images", "*.jpg");
-
-// Load the first image to obtain height and total width
-using var first = (JpegImage)Image.Load(files[0]);
-int totalWidth = files.Sum(f => ((JpegImage)Image.Load(f)).Width);
-int height = first.Height;
-
-// Create a blank raster to hold the merged result
-using var result = new RasterImage(totalWidth, height, PixelFormat.Format24bppRgb);
-int offsetX = 0;
-
-foreach (string file in files)
+class Program
 {
-    using var img = (JpegImage)Image.Load(file);
-    result.SavePixels(offsetX, 0, img.Width, height, img.LoadPixels(img.Bounds));
-    offsetX += img.Width;
-}
+    static void Main()
+    {
+        // Input JPEG files (hard‑coded for demo)
+        string[] inputs = { "input1.jpg", "input2.jpg", "input3.jpg" };
 
-// Save the merged image
-result.Save(@"C:\Output\merged.jpg", new JpegOptions());
+        // Load all images
+        var images = inputs.Select(p => (RasterImage)Image.Load(p)).ToArray();
+
+        // Calculate total width / max height for horizontal merge
+        int totalWidth = images.Sum(img => img.Width);
+        int maxHeight = images.Max(img => img.Height);
+
+        // Create a blank canvas
+        using var merged = new RasterImage(totalWidth, maxHeight, images[0].BitsPerPixel);
+        int offsetX = 0;
+        foreach (var img in images)
+        {
+            merged.SavePixels(offsetX, 0, img.Width, img.Height, img.LoadPixels(img.Bounds));
+            offsetX += img.Width;
+        }
+
+        // Add semi‑transparent watermark text
+        var watermark = new TextGraphicsOptions()
+        {
+            Antialiasing = true,
+            Blend = new BlendOptions() { Alpha = 0.5f } // 50 % opacity
+        };
+        merged.Graphics.DrawString(
+            "Sample Watermark",
+            System.Drawing.FontFamily.GenericSansSerif,
+            48,
+            new System.Drawing.PointF(totalWidth / 2, maxHeight / 2),
+            watermark,
+            new SolidBrush(Color.FromArgb(255, 255, 255)));
+
+        // Save as JPEG (or change to PdfOptions / PngOptions / GifOptions as needed)
+        merged.Save("merged_watermarked.jpg", new JpegOptions { Quality = 90 });
+    }
+}
 ```
 
-Add the Aspose.Imaging NuGet package and run the snippet – you’ll get a single JPEG that contains all source images side‑by‑side.
+> Adjust the `inputs` array, watermark text, font size, and output format to fit your scenario.
+
+## Requirements
+- .NET 9.0 (or later)
+- Aspose.Imaging for .NET  
+
+Install the NuGet package:
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -78,9 +123,3 @@ Examples and tasks in this folder:
 | [combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs](./combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs) |
 | [combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs](./combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs) |
 [**View all 135 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images)
-
-## Requirements
-- **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
-- **.NET 9** or later
-
-[← Back to main README](../README.md)
