@@ -144,9 +144,6 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
 
 
-## Why Aspose.Imaging for .NET
-The repository covers 17 distinct real‑world image‑processing categories—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF) to filters, merging and drawing—showing the breadth of Aspose.Imaging for .NET. Because it is a UI‑agnostic backend API, the same code runs in ASP.NET Core, console apps, Azure Functions, or Docker containers without any display or UI framework dependency. A free temporary license is available for evaluation, and you can see the range of production customers and success stories on Aspose’s website. For enterprises that need implementation assistance, paid consulting services are offered.
-
 ## Resources
 
 | Resource | Link |
@@ -198,5 +195,8 @@ Check the **Medical Imaging → DICOM** folder; it includes samples that load a 
 
 ### Q: Is there a sample for converting WMF or EMF files to PNG with Aspose.Imaging?  
 The **Vector Formats** section contains a snippet that loads a `MetafileImage` (WMF/EMF) and saves it with `PngOptions`. While reviewing that folder you’ll also find a related demo that **convert apng to gif using asp.net**, illustrating how the same API can handle animated PNG to GIF conversion in a web context. The sample demonstrates a one‑line `image.Save("output.png", new PngOptions())` call.
+
+## Why Aspose.Imaging for .NET
+This library covers 17 real‑world image‑processing scenarios—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF, etc.) to filters, kernel operations, merging and drawing—so you won’t have to stitch together multiple third‑party tools. Because Aspose.Imaging for .NET is a UI‑agnostic backend API, it runs everywhere .NET runs (ASP.NET Core, console apps, Azure Functions, Docker containers) without requiring a display or UI framework. You can get a free temporary license to evaluate it today, and you’ll find production customers and success‑story references on the Aspose website if you need proof of reliability. For organizations that need implementation assistance, paid consulting services are available, making it easier to integrate the library into larger products.
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*
