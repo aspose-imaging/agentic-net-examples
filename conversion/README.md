@@ -1,17 +1,28 @@
-# Image Format Conversion with Aspose.Imaging for .NET  
+# Convert BigTIFF Image to PDF in C# using Aspose.Imaging
 
-Convert image C# code samples that demonstrate how to perform image format conversion using the Aspose.Imaging library. These examples cover common scenarios such as converting between PNG, JPEG, and other supported formats, as well as querying the library for supported source and destination types. Use the format converter dotnet API to integrate seamless image transformations into your .NET applications.
+This repository contains a set of **C# console examples** that demonstrate how to use **Aspose.Imaging for .NET** – a UI‑agnostic backend API that works in ASP.NET Core, console apps, Azure Functions, and Docker containers.  
+The samples show how to:
 
-## What's in This Category
-- **Convert between supported formats** – e.g., PNG to JPEG using `PngOptions` or `JpegOptions`.  
-- **Programmatic output format selection** – specify the desired format at runtime.  
-- **Determine supported source and destination formats** – query the library for conversion capabilities.  
-- **Batch conversion patterns** – apply the same conversion logic to multiple images (illustrated in the examples).  
-- **Handle format‑specific options** – preserve quality, DPI, and other metadata during conversion.
+* Convert a **BigTIFF raster image** into a **PDF** while preserving the original image fidelity.  
+* Transform a **WebP** image into a **GIF** programmatically.  
+* Render an **SVG** vector graphic to a **PNG** raster image without losing visual quality.  
+* Set up the required prerequisites and configuration for raster‑format conversions.  
+* Enumerate PNG input parameters that affect successful conversion.
 
-## Quick Start  
+## What You Can Do
+- **Convert a BigTIFF raster image into a PDF document while preserving fidelity** (`bigimage.tif → bigimage.pdf`).  
+- **Convert a WebP image to a GIF image** (`input.webp → output.gif`).  
+- **Convert an SVG image file to a PNG raster image while maintaining visual fidelity** (`input.svg → output.png`).  
+- **Prepare the environment for image‑to‑raster conversions** (install NuGet package, apply license, target supported .NET runtime).  
+- **Enumerate PNG input parameters** that influence conversion outcomes (e.g., color type, bit depth, compression level).
+
+## Quick Start
+
+The most common scenario – converting a **BigTIFF** image to a **PDF** while keeping the original quality:
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -19,18 +30,61 @@ class Program
 {
     static void Main()
     {
-        // Load the source image (any supported format)
-        using (Image image = Image.Load("source.png"))
+        string inputPath  = @"C:\Images\bigimage.tif";
+        string outputPath = @"C:\Images\bigimage.pdf";
+
+        if (!File.Exists(inputPath))
         {
-            // Define the output format (JPEG in this case)
-            var jpegOptions = new JpegOptions { Quality = 90 };
-            image.Save("output.jpg", jpegOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BigTIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Set PDF options – keep original resolution and compression
+            var pdfOptions = new PdfOptions
+            {
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    PageWidth  = image.Width,
+                    PageHeight = image.Height,
+                    // Preserve original raster fidelity
+                    Source = image
+                }
+            };
+
+            // Save as PDF
+            image.Save(outputPath, pdfOptions);
+        }
+
+        Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
     }
 }
 ```
 
-The snippet loads an image, sets JPEG‑specific options, and saves it as a new format – the most common image format conversion task.
+Run the snippet in a .NET 9.0 console project after installing the Aspose.Imaging package.
+
+## Requirements
+
+* **Aspose.Imaging for .NET** (compatible with .NET 9.0)  
+  ```bash
+  dotnet add package Aspose.Imaging
+  ```
+
+* (Optional) A valid Aspose.Imaging **temporary or permanent license** for full‑functionality.
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet Package | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -69,10 +123,3 @@ Examples and tasks in this folder:
 | [convert-an-svg-image-to-a-tiff-file-preserving-visual-fidelity-and-supporting-optional-compression-settings.cs](./convert-an-svg-image-to-a-tiff-file-preserving-visual-fidelity-and-supporting-optional-compression-settings.cs) |
 | [convert-an-svg-image-to-bmp-format-preserving-visual-fidelity-and-supporting-custom-dimensions.cs](./convert-an-svg-image-to-bmp-format-preserving-visual-fidelity-and-supporting-custom-dimensions.cs) |
 [**View all 162 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion)
-
-## Requirements  
-
-- **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`  
-- **.NET 9.0** or later  
-
-[← Back to the root README](../README.md)
