@@ -1,39 +1,69 @@
-# WebP Conversion C# with Aspose.Imaging for .NET
+# Convert WebP to GIF in C# with Aspose.Imaging  
 
-Convert WebP images to other formats quickly and safely using Aspose.Imaging for .NET. These examples demonstrate common **WebP conversion C#** scenarios such as turning WebP into GIF, PDF, PNG, or JPEG in a .NET 9+ project.
+A collection of ready‑to‑run C# snippets that show how to **convert WebP to GIF**, **adjust WebP image quality before saving as PDF**, **verify dimensions after conversion**, **convert WebP from a memory stream without intermediate files**, and **set custom frame delays when converting animated WebP to GIF**. All examples use Aspose.Imaging for .NET – a UI‑agnostic backend API that runs everywhere (ASP.NET Core, console apps, Azure Functions, Docker, etc.) without any UI dependencies.
 
-## What's in This Category
-- Load a WebP file and save it as a GIF (`Image.Save`)  
-- Convert a WebP image to PDF by specifying `PdfOptions`  
-- Verify that a WebP file exists before attempting conversion to avoid `FileNotFoundException`  
-- Use a `using` statement to automatically dispose of the `WebPImage` object  
-- Convert a WebP image to JPEG (or PNG) with explicit format options  
+## What You Can Do
+- **Convert PNG to WebP with a specific quality and export the result as a 300 DPI PDF** – see `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`.  
+- **Verify that a WebP‑to‑GIF conversion preserves the original image dimensions** – see `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs`.  
+- **Convert a WebP image that is loaded from a `MemoryStream` directly to GIF without creating temporary files** – see `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs`.  
+- **Set a custom frame delay for each frame when converting an animated WebP to GIF, controlling the animation speed** – see `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs`.  
+- **Wrap conversion logic in robust try‑catch blocks to handle unexpected runtime errors gracefully** – demonstrated in the error‑handling sample.
 
-## Quick Start
-The most frequent task is converting a WebP image to JPEG:
+## Quick Start  
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Gif;
 
-class Program
+class ConvertWebpToGif
 {
     static void Main()
     {
-        // Load the WebP image
-        using (WebPImage webp = (WebPImage)Image.Load("input.webp"))
-        {
-            // Set JPEG options (quality = 90)
-            var jpegOptions = new JpegOptions { Quality = 90 };
+        // Input WebP and output GIF paths
+        string webpPath = @"C:\temp\input.webp";
+        string gifPath  = @"C:\temp\output.gif";
 
-            // Save as JPEG
-            webp.Save("output.jpg", jpegOptions);
+        // Load the WebP image
+        using (Image webpImage = Image.Load(webpPath))
+        {
+            // Prepare GIF options (you can also set FrameDelay here for animated WebP)
+            var gifOptions = new GifOptions();
+
+            // Save directly to GIF – no intermediate files required
+            webpImage.Save(gifPath, gifOptions);
         }
+
+        Console.WriteLine("WebP successfully converted to GIF.");
     }
 }
 ```
 
-Add the Aspose.Imaging NuGet package to your project and run the snippet – the WebP file is converted to a high‑quality JPEG in one line of code.
+The snippet above demonstrates the most common scenario: **convert WebP to GIF c# aspose imaging** with a single call to `Save`.
+
+## Requirements  
+
+- .NET 9.0 (or later)  
+- Aspose.Imaging for .NET  
+
+Install the NuGet package:
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources  
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -72,9 +102,3 @@ Examples and tasks in this folder:
 | [validate-that-the-output-gif-file-was-created-successfully-after-converting-from-webp.cs](./validate-that-the-output-gif-file-was-created-successfully-after-converting-from-webp.cs) |
 | [verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs](./verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs) |
 [**View all 30 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-webp-images)
-
-## Requirements
-- **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
-- **.NET 9** or later
-
-[← Back to main README](../README.md)
