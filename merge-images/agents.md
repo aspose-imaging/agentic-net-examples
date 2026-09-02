@@ -124,20 +124,6 @@ All tasks passed ✅
 
 
 
-## Use Cases
-- **Add a semi‑transparent watermark to a horizontally merged JPEG** – using `Aspose.Imaging.Brushes` and the JPEG merge API you can stitch several JPEG files side‑by‑side and overlay a translucent text watermark in a single C# routine. This is a classic *merge images C#* scenario for branding photo strips or product catalogs.  
-
-- **Create a PDF from a single JPEG by routing it through the TGA format** – the example loads a JPEG, saves it as a temporary TGA (`RasterImage` → `TgaImage`), then embeds the TGA into a PDF document. It demonstrates a reliable way to *combine images dotnet* when the target PDF engine prefers lossless intermediate formats.  
-
-- **Combine multiple JPEGs into a PDF while preserving vector fidelity via EMF** – each JPEG is first converted to an EMF file, which retains any embedded vector information, and the EMFs are then merged into a single PDF. This workflow is useful for *image stitching C#* projects that need high‑quality printable PDFs from raster sources.  
-
-- **Merge two JPEGs into a PNG while applying custom JPEG compression settings** – the code merges the source JPEGs, adjusts the `JpegCompression` options, and finally writes the result as a PNG. Developers can use this pattern to *combine images dotnet* when they need a lossless output format but want to control the source JPEG quality.  
-
-- **Stack several JPEGs vertically in their original order to produce one long JPEG** – by loading an array of JPEG paths, validating each file, and using the JPEG merge API, the example creates a single vertically arranged image. This is a practical *merge images C#* use case for generating receipts, panoramic banners, or continuous scan strips.
-
-## Related Categories
-If you’re working with image merging, you’ll often need to convert between formats, so the **Image Conversion** and **PDF Generation** categories contain examples that show how to turn JPEGs into TGA, EMF, or PDF files before or after stitching. For projects that require visual branding, the **Watermarking** and **Image Compression** sections illustrate how to overlay text or adjust compression levels on merged outputs. Finally, the **Vector Graphics** category provides deeper insight into preserving vector data when raster images are combined, complementing the stitching techniques demonstrated here.
-
 ## Operations Covered
 - Merge JPEG images horizontally  
 - Add semi‑transparent text watermark to merged image  
@@ -188,6 +174,19 @@ dotnet add package Aspose.Imaging
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Use Cases
+- When you need to stitch several landscape photos into one wide‑format picture and brand it with a faint logo, the **horizontal JPEG merge with semi transparent watermark** example shows how to concatenate the images side‑by‑side and overlay a semi‑transparent watermark in a single pass.  
+- If you must place copyright or promotional text directly on a merged picture, the **add watermark text to merged JPEG image** snippet demonstrates drawing text with Aspose.Imaging brushes after the horizontal merge is complete.  
+- For creating a PDF catalog where each JPEG is first converted to TGA to retain full color fidelity, the **combine multiple JPG files into a PDF using TGA conversion** sample walks you through loading a JPEG, saving it as TGA, and then assembling the TGA files into a PDF document.  
+- When the source images contain vector‑like line art and you want the final PDF to preserve that fidelity, the **merge JPG images into PDF via EMF preserving vector fidelity** code converts each JPEG to EMF before adding them to the PDF, ensuring sharp vector rendering.  
+- If you are building a PNG collage from several JPEGs but still need to control the JPEG compression quality used during the merge, the **merge JPG images into PNG applying JPEG compression settings** example shows how to apply specific JPEG compression options while merging and then output the result as a PNG file.  
+
+## Related Categories
+The techniques used for merging and converting images often overlap with the **[Conversion](../conversion/)** examples, where you can see how to change file formats before or after a merge.  
+If you need to preserve vector data during a merge, the **[Converting WMF and EMF](../converting-wmf-and-emf/)** category provides deeper insight into handling EMF/WMF streams, complementing the EMF‑based PDF workflow shown here.  
+For post‑merge enhancements such as applying artistic effects or color adjustments, explore the **[Image And Photo Filters](../image-and-photo-filters/)** collection, which offers ready‑to‑use filter pipelines that can be chained after a merge operation.
 
 <!-- AUTOGENERATED:START -->
 Updated: 2026-08-20 | Run: `20260731_111727` | Examples: 135
