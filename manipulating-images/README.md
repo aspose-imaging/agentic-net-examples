@@ -1,35 +1,64 @@
-# Image Manipulation C# with Aspose.Imaging
+# Export PSD to PNG with Custom Fonts Using Aspose.Imaging C#
 
-A collection of concise, ready‑to‑run C# snippets that demonstrate **image manipulation** using Aspose.Imaging for .NET.  
-These examples cover common **image editing** tasks such as loading PNG files, applying auto‑masking, customizing mask feathering, and saving the processed result—perfect for developers looking to integrate resize, crop, rotate, and advanced masking into their .NET applications.
+A quick collection of real‑world C# snippets that show how to **export a Photoshop PSD file to PNG while preserving custom font rendering** with Aspose.Imaging for .NET. The examples also cover contrast adjustment, noise‑reduction filters for APNG, batch conversion of CorelDRAW CDR files to PDF (vector shapes retained), and configuring multiple font folders for TIFF‑to‑PDF conversion. Aspose.Imaging is a UI‑agnostic backend API that runs everywhere – ASP.NET Core, console apps, Azure Functions, Docker containers, etc., without any UI dependencies.
 
-## What's in This Category
-- Load a PNG image and apply auto‑masking with default graph‑cut strokes.  
-- Create `AutoMaskingGraphCutOptions` with a custom feathering radius.  
-- Define a point array for manual masking and apply it to a PNG.  
-- Export the processed image using `PngOptions`.  
+## What You Can Do
+- **Export a PSD as PNG with accurate text appearance** by loading user‑defined fonts into `FontSettings` before rendering.  
+- **Adjust image contrast** on a PNG file with fine‑grained tonal control.  
+- **Apply median and Wiener filters** to an APNG file for advanced noise reduction.  
+- **Batch export multiple CDR files to individual PDF documents**, preserving vector shapes and text.  
+- **Configure multiple font directories** when converting TIFF images to PDF to support diverse scripts.
 
 ## Quick Start
-
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Masking;
 
-// Load a PNG image
-using (RasterImage image = (RasterImage)Image.Load("input.png"))
+class ExportPsdWithFonts
 {
-    // Apply auto‑masking with default graph‑cut options
-    var autoMask = new AutoMaskingGraphCutOptions();
-    image.ApplyAutoMasking(autoMask);
+    static void Main()
+    {
+        string psdPath   = "input.psd";
+        string pngPath   = "output.png";
+        string fontsPath = "Fonts";
 
-    // Save the result
-    var pngOptions = new PngOptions();
-    image.Save("output.png", pngOptions);
+        // Load the PSD image
+        using var image = Image.Load(psdPath);
+
+        // Register custom fonts
+        var fontSettings = new FontSettings();
+        fontSettings.AddFontFolder(fontsPath, recursive: true);
+        image.FontSettings = fontSettings;
+
+        // Export to PNG preserving the custom font rendering
+        var pngOptions = new PngOptions { ColorType = PngColorType.Truecolor };
+        image.Save(pngPath, pngOptions);
+
+        Console.WriteLine("Export completed.");
+    }
 }
 ```
 
-The snippet above shows the most common workflow: load → auto‑mask → save. Add resizing, cropping, or rotation by using the corresponding `Resize`, `Crop`, or `Rotate` methods on the `RasterImage` instance.
+## Requirements
+- .NET 9.0 (or later)  
+- Aspose.Imaging for .NET  
+
+Install the library via NuGet:
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+| Link | Description |
+|------|-------------|
+| [Documentation](https://docs.aspose.com/imaging/net/) | Official Aspose.Imaging API docs |
+| [NuGet](https://www.nuget.org/packages/aspose.imaging) | Package repository |
+| [Release Notes](https://releases.aspose.com/imaging/net/) | Latest version changes |
+| [Online Apps](https://products.aspose.app/imaging/family/) | Try Aspose.Imaging features in the browser |
+| [Free Temporary License](https://purchase.aspose.com/temporary-license) | Get a temporary license for evaluation |
 
 ## Files
 
@@ -68,14 +97,3 @@ Examples and tasks in this folder:
 | [apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs](./apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs) |
 | [apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs](./apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs) |
 [**View all 425 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images)
-
-## Requirements
-- **Aspose.Imaging** NuGet package (latest version)  
-- **.NET 9** or later  
-
-```bash
-dotnet add package Aspose.Imaging
-```
-
-## ↩️ Back to Main README
-[← Return to the repository root README](../README.md)
