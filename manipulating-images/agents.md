@@ -148,20 +148,6 @@ All tasks passed ✅
 
 
 
-## Use Cases
-- **Accurate PSD‑to‑PNG export with custom fonts** – When a design file contains fonts that aren’t installed on the server, you can point `FontSettings` to a local fonts folder and export the PSD as a PNG, preserving exact text appearance. This is a common image manipulation C# scenario for web‑based preview generators.  
-
-- **High‑quality animated PNG creation** – By enabling a smoothing (anti‑aliasing) mode before saving a raster image as an APNG, the resulting animation retains crisp edges and reduced banding, ideal for image editing dotnet projects that need smooth animated graphics.  
-
-- **Batch Gaussian blur on CorelDRAW files and multipage TIFF assembly** – The code loads several *.cdr* files, applies a Gaussian blur filter to each, and then merges the blurred results into a single multipage TIFF, a practical workflow for automated image manipulation C# pipelines in print‑preparation.  
-
-- **TIFF‑to‑PDF conversion with multilingual font support** – Configuring multiple font directories lets the conversion process embed the correct glyphs for Latin, CJK, and Arabic scripts, producing searchable PDFs from scanned TIFFs—an essential image editing dotnet use case for document management systems.  
-
-- **45‑degree rotation of a PNG while preserving dimensions and transparency** – Rotating an image with a transparent background and then verifying that the original width and height remain unchanged is a typical resize‑crop‑rotate C# operation used in thumbnail generation and UI asset pipelines.
-
-## Related Categories
-If you’re working with image manipulation C# examples, you’ll often need to convert between formats, which is covered in the **Converting Image Formats** category (e.g., JPEG ↔ PNG, BMP ↔ TIFF). For more advanced visual effects, the **Applying Filters and Effects** section demonstrates additional blur, sharpen, and threshold techniques that complement the Gaussian blur and Bradley binarization samples. When your workflow involves vector or page‑based sources such as CorelDRAW or PDF, the **Working with Vector and Document Formats** category provides guidance on loading, editing, and rasterizing those files before applying the manipulations shown here. Finally, the **Generating PDFs and Documents** category expands on the TIFF‑to‑PDF conversion example, showing how to embed fonts, set compression, and add watermarks for comprehensive document‑oriented image editing.
-
 ## Operations Covered
 - Export PSD to PNG with custom fonts  
 - Load PSD image file  
@@ -208,6 +194,19 @@ dotnet add package Aspose.Imaging
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Use Cases
+- When you need to **export a PSD file as PNG while preserving custom font appearance**, you can point Aspose.Imaging to a folder of user‑defined fonts with `FontSettings.SetFontsFolder`, load the PSD, and save it using `PngOptions` – this keeps the text rendering identical to the original design.  
+- If your workflow requires **applying Gaussian blur to multiple CDR files and merging the blurred results into a multipage TIFF**, load each `.cdr` file, apply `GaussianBlurFilter`, and add the processed images to a `TiffImage` collection before saving the combined document.  
+- To generate an animated PNG from a series of PNG frames with smoother edges, enable the **smoothing mode in the APNG options** (`ApngOptions.SmoothingMode = SmoothingMode.AntiAlias`) before calling `image.Save(outputPath, new ApngOptions())`.  
+- When you want to **use the Bradley threshold algorithm to binarize an image and output the result as an APNG**, cast the loaded image to `RasterImage`, call `BinarizeBradley`, and then save the processed raster using `ApngOptions`.  
+- For high‑quality batch conversion of TIFF images to PDF where visual fidelity matters, set the **smoothing/anti‑aliasing mode in the PDF options** (`PdfOptions.SmoothingMode = SmoothingMode.AntiAlias`) to ensure crisp text and graphics in the final PDF.
+
+## Related Categories
+Manipulating images often goes hand‑in‑hand with format conversion, so the examples here complement the **[Convert Cdr](../convert-cdr/)** and **[Convert Raster Image](../convert-raster-image/)** categories, where you can learn how to read and write CorelDRAW or generic raster files before applying filters.  
+If you need to apply additional visual effects such as sharpening or color adjustments, the **[Image And Photo Filters](../image-and-photo-filters/)** category provides a wide range of filter options that can be combined with the Gaussian blur or Bradley threshold workflows shown above.  
+Finally, when you want to combine several processed pages into a single document, the **[Merge Images](../merge-images/)** category demonstrates techniques for stitching images together, which aligns naturally with the multipage TIFF merging scenario.
 
 <!-- AUTOGENERATED:START -->
 Updated: 2026-08-20 | Run: `20260723_031247` | Examples: 425
