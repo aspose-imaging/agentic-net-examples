@@ -1,36 +1,62 @@
-# Kernel Filter C# Examples for Aspose.Imaging
+# Apply Gaussian Blur Filter in C# with Aspose.Imaging
 
-Explore how to perform **image kernel processing** with Aspose.Imaging for .NET. These samples demonstrate using convolution filters, custom kernels, and built‑in blur filters in C#. Learn to apply a convolution filter dotnet style, validate kernel dimensions, and integrate kernel filter C# code into your projects.
+A collection of ready‑to‑run C# examples that demonstrate how to use **Aspose.Imaging for .NET** to work with kernel‑based filters.  
+The samples show how to rasterize an SVG to PNG and apply a Gaussian blur, run a custom convolution matrix on a PNG, perform deconvolution on an SVG (via a temporary PNG), chain a predefined blur with an edge‑detection kernel, and more. Aspose.Imaging is a UI‑agnostic backend API that runs everywhere – ASP.NET Core, console apps, Azure Functions, Docker containers, etc., without any UI dependencies.
 
-## What's in This Category
-- Apply a predefined 5×5 blur (box) filter to a PNG image.  
-- Create and use a custom 3×3 convolution matrix on a JPEG file.  
-- Validate that a custom 7×7 kernel has odd dimensions before processing a PNG.  
-- Work with `GaussianBlurFilterOptions` for smooth blur effects.  
-- Inspect and modify `ConvolutionFilterOptions` for advanced image kernel processing.
+## What You Can Do
+- **Rasterize an SVG and apply a Gaussian blur** – load `input.svg`, render it to `intermediate.png`, blur it, and save `output.png`.  
+- **Apply a custom convolution kernel** – define your own matrix coefficients and transform `input.png` into `output.png`.  
+- **Run a deconvolution filter on an SVG** – convert `input.svg` to a temporary PNG, deconvolve it, and store the result as `output.png`.  
+- **Use a predefined kernel blur filter** – apply a built‑in Gaussian blur to `sample.png` and write `sample.GaussianBlur.png`.  
+- **Chain a Gaussian blur with a custom edge‑detection kernel** – first blur an SVG, then run an edge‑detection matrix on the same image.
 
 ## Quick Start
+
+The most common scenario – rasterizing an SVG to PNG and applying a Gaussian blur – can be done in just a few lines:
 
 ```csharp
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Filters;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-// Load a PNG from the Templates folder
-using (RasterImage image = (RasterImage)Image.Load("Templates/sample.png"))
+// Load the SVG
+using (var image = Image.Load(@"C:\Images\input.svg"))
 {
-    // Apply the built‑in 5×5 blur box filter
-    var blurOptions = new GaussianBlurFilterOptions
-    {
-        Radius = 2.5f,          // radius defines the blur strength
-        KernelSize = 5          // 5×5 kernel
-    };
-    image.ApplyFilter(blurOptions);
-    image.Save("output/blurred.png");
+    // Rasterize to PNG
+    var pngOptions = new PngOptions { Source = new FileCreateSource(@"C:\Images\intermediate.png", false) };
+    image.Save(pngOptions);
+
+    // Apply Gaussian blur
+    var blurOptions = new GaussianBlurFilterOptions { Radius = 5 };
+    image.Filter(blurOptions);
+
+    // Save the blurred PNG
+    image.Save(@"C:\Images\output.png");
 }
 ```
 
-The snippet loads an image, applies a predefined blur kernel, and saves the result— the most common kernel filter operation.
+Compile and run the snippet in any .NET 9.0 project (console app, ASP.NET Core, Azure Function, Docker, etc.).
+
+## Requirements
+
+- .NET 9.0 SDK
+- Aspose.Imaging for .NET
+
+Install the library via NuGet:
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -69,9 +95,3 @@ Examples and tasks in this folder:
 | [apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs) |
 | [apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs](./apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs) |
 [**View all 465 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters)
-
-## Requirements
-- **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
-- **.NET 9.0** or later
-
-[← Back to main README](../README.md)
