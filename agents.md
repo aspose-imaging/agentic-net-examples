@@ -314,67 +314,69 @@ dotnet build --configuration Release --verbosity minimal
 
 
 
+
+
 ## Related Resources
 
-| Resource | URL |
-|----------|-----|
-| Documentation | https://docs.aspose.com/imaging/net/ |
-| NuGet Package | https://www.nuget.org/packages/aspose.imaging |
-| Release Notes | https://releases.aspose.com/imaging/net/ |
-| Online Apps | https://products.aspose.app/imaging/family/ |
+Aspose.Imaging for .NET is a UI-agnostic backend API that integrates into any .NET application — ASP.NET Core, console apps, Azure Functions, Docker containers — without requiring a display or UI framework.
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
 
 ## Agent Capabilities
-- **MCP‑compatible image processing agent**: Operates as a Micro‑Component Platform (MCP) node, accepting JSON‑encoded requests and returning JSON responses for image manipulation tasks.  
-- **REST API for C# code generation**: Exposes a HTTP POST endpoint (`/generate`) that receives a request payload describing the desired Aspose.Imaging operation and returns ready‑to‑run C# code snippets.  
-- **Agentic example generator for Aspose.Imaging**: Produces complete, compile‑ready C# examples covering all supported categories (conversion, filters, drawing, merging, etc.) based on natural‑language prompts.  
-- **AI agent for .NET image processing examples**: Accepts high‑level intent such as “convert a PNG to WebP with lossless compression” or “apply a kernel filter to a DICOM image” and translates it into precise Aspose.Imaging API calls.  
-- **OpenAPI‑compatible imaging code generator**: Provides an OpenAPI (Swagger) specification describing the request/response schema, enabling automatic client generation for any language or platform.  
+- **MCP‑compatible image processing agent** – can be invoked through an MCP server to perform on‑demand image‑processing tasks using Aspose.Imaging for .NET.  
+- **REST API for C# code generation** – exposes a `POST /generate-code` endpoint that accepts a JSON payload describing the desired operation and returns ready‑to‑run C# snippets.  
+- **Agentic example generator for Aspose.Imaging** – automatically creates complete, compilable examples for any of the supported categories (e.g., conversion, filters, merging, drawing, WMF/EMF handling).  
+- **AI agent for .NET image processing examples** – interprets natural‑language requests such as “convert an APNG to PNG with lossless compression” and produces the corresponding C# code.  
+- **OpenAPI‑compatible imaging code generator** – provides an OpenAPI specification that defines request/response schemas, enabling seamless integration with other LLM‑driven workflows.  
 
-### Accepted Inputs
-- **Operation intent** (plain English or structured JSON) specifying:
-  - Source image format / path
-  - Target format or processing type (e.g., `convert-apng`, `kernel-filters`, `merge-images`)
-  - Optional parameters (compression level, filter kernel, DPI, etc.)
-- **MCP request envelope** (if invoked via MCP) containing `metadata`, `payload`, and optional `sessionId`.  
-- **REST payload** (application/json) with fields:
-  ```json
-  {
-    "category": "convert-webp-images",
-    "sourcePath": "input.png",
-    "options": { "lossless": true, "quality": 90 }
-  }
-  ```
+### Input / Output Specification
+- **Inputs (JSON payload)**  
+  - `category` – one of the repository categories (e.g., `convert-apng`, `image-and-photo-filters`).  
+  - `source` – local file path, URL, or base‑64 string of the input image.  
+  - `targetFormat` – desired output format (e.g., `png`, `jpeg`, `webp`).  
+  - `options` – optional dictionary of Aspose.Imaging settings (compression level, DPI, color depth, filter type, etc.).  
+  - `outputMode` – `"code"` (plain C# text), `"file"` (downloadable `.cs` file), or `"both"`.  
 
-### Produced Outputs
-- **C# code snippet** (string) that:
-  - Includes necessary `using Aspose.Imaging;` directives
-  - Instantiates the appropriate `Image` or `RasterImage` objects
-  - Executes the requested operation and saves the result
-- **Execution metadata**:
-  - `generatedAt` timestamp
-  - `requiredNuGetPackage` version
-  - `exampleId` for traceability
-- **Error diagnostics** (if the request cannot be fulfilled) in a structured JSON error object.  
+- **Outputs**  
+  - `code` – a complete C# example (including `using` statements, method definition, and error handling) that performs the requested operation.  
+  - `metadata` – JSON object summarizing the operation (input type, output type, required NuGet packages, Aspose.Imaging version).  
+  - `fileUrl` (optional) – link to a generated `.cs` file when `outputMode` includes `"file"`.
 
-All capabilities are discoverable via the OpenAPI spec and can be invoked programmatically through the provided REST API or as an MCP‑compatible micro‑service.
+### Core Functionalities
+- **Image format conversion** across all supported types (APNG, CDR, CMX, DICOM, EPS, Open Document Graphics, raster, SVG → raster, WebP, WMF/EMF, etc.).  
+- **Application of image and photo filters** (kernel filters, color adjustments, sharpening, etc.).  
+- **Manipulation of different image file formats** (cropping, resizing, rotating, metadata editing).  
+- **Merging and compositing images** (layering, drawing primitives, combining multiple sources).  
+- **Working with drawing images** (vector graphics, text overlay, shape creation).  
+
+These capabilities enable downstream AI agents and LLM systems to request, receive, and execute precise .NET imaging code tailored to any scenario covered by the Aspose.Imaging library.
 
 ## Quick Reference
-
 | Task | Category | Key Classes |
 |------|----------|-------------|
-| Convert PNG to JPEG | convert-raster-image | Image, PngOptions, JpegOptions, ImageConverter |
-| Convert SVG to PNG | convert-svg-to-raster-images | SvgImage, PngOptions, ImageConverter |
-| Convert DICOM to PNG | convert-dicom-images | DicomImage, PngOptions, ImageConverter |
-| Convert CDR to PNG | convert-cdr | CdrImage, PngOptions, ImageConverter |
-| Convert WMF/EMF to PNG | converting-wmf-and-emf | WmfImage, EmfImage, PngOptions, ImageConverter |
-| Resize image with high quality | manipulating-images | Image, ResizeFilter, ImageOptionsBase |
-| Apply Gaussian blur filter | kernel-filters | Image, GaussianBlurFilter, ImageProcessor |
-| Crop and rotate image | manipulating-images | Image, CropFilter, RotationFilter |
-| Merge multiple images into a single canvas | merge-images | ImageCollection, Image, Graphics, Rectangle |
-| Add text watermark to image | image-and-photo-filters | Image, Graphics, Font, SolidBrush |
-| Extract frames from animated GIF | working-with-drawing-images | Image, ImageFrame, ImageCollection |
-| Convert multi‑page TIFF to PDF | convert-raster-image | TiffImage, PdfOptions, ImageConverter |
-
+| Load an image from file, stream, or byte array | manipulating-images | Image, ImageLoadOptions |
+| Save or convert an image to PNG, JPEG, BMP, GIF, etc. | conversion | Image, ImageSaveOptions, PngOptions, JpegOptions, BmpOptions, GifOptions |
+| Convert APNG to another format (e.g., PNG, JPEG) | convert-apng | ApngImage, ImageSaveOptions, PngOptions |
+| Convert CorelDRAW (CDR) files to raster formats | convert-cdr | CdrImage, ImageSaveOptions, PngOptions |
+| Convert CMX vector images to raster formats | convert-cmx-images | CmxImage, ImageSaveOptions, JpegOptions |
+| Convert DICOM medical images to common formats | convert-dicom-images | DicomImage, ImageSaveOptions, PngOptions |
+| Convert EPS files to raster images | convert-eps-images | EpsImage, ImageSaveOptions, BmpOptions |
+| Convert OpenDocument graphics (ODG) to PNG/JPEG | convert-open-document-graphics | OdgImage, ImageSaveOptions, PngOptions |
+| Render SVG files to raster images (PNG, JPEG) | convert-svg-to-raster-images | SvgImage, RasterImage, ImageSaveOptions, PngOptions |
+| Convert WebP images to other formats or vice‑versa | convert-webp-images | WebPImage, ImageSaveOptions, WebpOptions |
+| Convert WMF or EMF vector drawings to raster images | converting-wmf-and-emf | WmfImage, EmfImage, ImageSaveOptions, PngOptions |
+| Apply photo filters (e.g., Sepia, Grayscale) | image-and-photo-filters | Image, Filter, FilterOptions, SepiaFilter, GrayscaleFilter |
+| Apply kernel‑based filters (e.g., Gaussian blur, Sharpen) | kernel-filters | Image, Filter, GaussianBlurFilter, SharpenFilter |
+| Resize, rotate, or crop an image | manipulating-images | Image, ImageProcessor, ResizeOptions, RotateFlipType, Rectangle |
+| Merge multiple images into a single canvas | merge-images | Image, ImageCollection, ImageCombiner, ImageSaveOptions |
+| Draw shapes or text on vector/raster images | working-with-drawing-images | VectorImage, Graphics, Pen, Brush, Font |
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-29 | Run: `20260629_035455` | Examples: 4856 | Categories: 17
 <!-- AUTOGENERATED:END -->
