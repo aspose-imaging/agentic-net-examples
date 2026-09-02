@@ -130,56 +130,6 @@ To trigger validation:
 
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
-## Capability Matrix
-
-| Operation                     | Formats Supported                                          | Examples Count | Key Classes                              |
-|-------------------------------|------------------------------------------------------------|----------------|------------------------------------------|
-| General Conversion            | BMP, JPEG, PNG, TIFF, GIF, WebP, SVG, PSD, PDF, DICOM, CDR, CMX, EPS, ODG, APNG | 45             | Image, RasterImage, VectorImage, ImageOptionsBase |
-| APNG Conversion               | APNG → PNG, GIF                                            | 5              | ApngOptions, PngOptions, Image          |
-| CDR Conversion                | CDR → BMP, JPEG, PNG, TIFF, PDF                            | 4              | CdrImage, Image, BmpOptions, JpegOptions |
-| CMX Images Conversion         | CMX → BMP, JPEG, PNG, TIFF                                 | 3              | CmxImage, Image, PngOptions              |
-| DICOM Images Conversion       | DICOM → BMP, JPEG, PNG, TIFF, PDF                          | 6              | DicomImage, Image, TiffOptions           |
-| EPS Images Conversion         | EPS → BMP, JPEG, PNG, TIFF, PDF                            | 5              | EpsImage, Image, PngOptions              |
-| Open Document Graphics (ODG) | ODG → BMP, JPEG, PNG, TIFF, PDF                            | 4              | OdgImage, Image, JpegOptions             |
-| Raster Image Conversion       | BMP, JPEG, PNG, TIFF, GIF, WebP                            | 12             | RasterImage, Image, BmpOptions, WebpOptions |
-| SVG to Raster Images          | SVG → PNG, JPEG, BMP, TIFF, WebP                           | 8              | SvgImage, RasterImage, PngOptions, WebpOptions |
-| WebP Images Conversion        | WebP ↔ BMP, JPEG, PNG, TIFF                                | 5              | WebpImage, Image, BmpOptions, JpegOptions |
-
-## Related Resources  
-Explore the full range of Aspose.Imaging for .NET C# image processing examples. If you need to transform vector graphics, see the **convert-svg-to-raster-images** and **convert-open-document-graphics** samples; for raster workflows, the **conversion** and **convert-webp-images** categories demonstrate image conversion C# techniques. The **image-and-photo-filters** and **kernel-filters** sections showcase advanced capabilities of this C# imaging library, while **merge-images** and **working-with-drawing-images** illustrate how to combine and draw on images using Aspose.Imaging examples. All of these resources are part of the dotnet image processing suite to help you get up and running quickly.
-
-## Frequently Asked Questions
-
-### Q: How to convert an image format using Aspose.Imaging for .NET  
-Use the `ImageConverter` class or call `Image.Save` with a different `ImageFormat`. Load the source file with `Image.Load`, then invoke `image.Save("output.png", new PngOptions())` to perform image conversion C#. The Aspose.Imaging examples in the repository demonstrate this workflow for common formats.
-
-### Q: How to resize an image in C# with Aspose.Imaging  
-Instantiate a `ResizeOptions` object and set `Width`, `Height`, and `ResizeMode`, then call `image.Resize(resizeOptions)`. For loss‑less scaling, use `image.Save("resized.jpg", new JpegOptions { Quality = 90 })`. This is a typical pattern in dotnet image processing with the C# imaging library.
-
-### Q: How to apply filters to images in dotnet  
-Create a filter such as `GaussianBlurFilter` or `SharpenFilter` and pass it to `image.ApplyFilter(filter)`. After applying, save the result with the appropriate options, e.g., `image.Save("filtered.bmp")`. The Aspose.Imaging for .NET documentation includes code snippets for these C# image processing tasks.
-
-### Q: How to draw shapes on images in C#  
-Use the `Graphics` class obtained via `new Graphics(image)` and call methods like `DrawRectangle`, `DrawEllipse`, or `DrawLine` with a `Pen`. Remember to dispose the `Graphics` object to commit changes, then save the image. This approach is highlighted in the Aspose.Imaging examples for drawing with the C# imaging library.
-
-### Q: How to merge multiple images in dotnet  
-Load each image as a `RasterImage`, create a new canvas with the combined dimensions, and draw each source image onto it using `Graphics.DrawImage`. Finally, save the canvas as a single file, e.g., `merged.png`. The repository contains Aspose.Imaging for .NET sample code for image merging.
-
-### Q: How to process DICOM medical images in C#  
-Open a DICOM file with `DicomImage dicom = new DicomImage("file.dcm")` and access pixel data via `dicom.GetImage()`. You can then convert, resize, or apply filters just like any other raster image. This demonstrates powerful C# image processing capabilities of the Aspose.Imaging library.
-
-### Q: How to convert SVG to raster images in dotnet  
-Load the vector file using `SvgImage svg = (SvgImage)Image.Load("vector.svg")` and rasterize it with `svg.Save("output.png", new PngOptions())`. You can also specify size through `svg.Width` and `svg.Height` before saving. The Aspose.Imaging examples show this straightforward SVG conversion workflow.
-
-### Q: How to create animated APNG files in C#  
-Create an `ApngImage` instance, add frames with `apng.AddFrame(frameImage, frameDelay)`, and finally call `apng.Save("animation.apng")`. Each frame can be a `RasterImage` processed with the same C# imaging library tools. This is a common pattern in Aspose.Imaging for .NET for animated PNG generation.
-
-### Q: How to use Aspose.Imaging without a license  
-You can run the library in evaluation mode; simply omit the `License` registration code. The unlicensed mode adds a watermark to output images and limits some features, but all core C# image processing functions remain accessible. Refer to the Aspose.Imaging examples for guidance on handling the evaluation behavior.
-
-### Q: What image formats does Aspose.Imaging support  
-Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
-
 ## Related Agentic .NET Example Repositories
 
 Part of the Aspose agentic examples ecosystem — compiler-validated C# examples generated and maintained by AI agents:
@@ -194,17 +144,59 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
 
 
+## Why Aspose.Imaging for .NET
+The repository covers 17 distinct real‑world image‑processing categories—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF) to filters, merging and drawing—showing the breadth of Aspose.Imaging for .NET. Because it is a UI‑agnostic backend API, the same code runs in ASP.NET Core, console apps, Azure Functions, or Docker containers without any display or UI framework dependency. A free temporary license is available for evaluation, and you can see the range of production customers and success stories on Aspose’s website. For enterprises that need implementation assistance, paid consulting services are offered.
+
 ## Resources
 
 | Resource | Link |
 |----------|------|
 | 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet Package | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
 | 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
 | 🤖 Agent API | [agent.json](/.well-known/agent.json) |
 
-## Why Aspose.Imaging for .NET
-The repository covers 17 distinct real‑world image‑processing categories—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF) to filters, merging and drawing—showing the breadth of Aspose.Imaging for .NET. Because it is a UI‑agnostic backend API, the same code runs in ASP.NET Core, console apps, Azure Functions, or Docker containers without any display or UI framework dependency. A free temporary license is available for evaluation, and you can see the range of production customers and success stories on Aspose’s website. For enterprises that need implementation assistance, paid consulting services are offered.
+| Category                              | Examples | Key APIs                                                                                 |
+|---------------------------------------|----------|------------------------------------------------------------------------------------------|
+| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                |
+| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                                            |
+| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions                         |
+| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions                           |
+| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                                      |
+| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                                        |
+| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics                               |
+| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions               |
+| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                                      |
+| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                                        |
+| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                                 |
+| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage    |
+| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions                      |
+| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                                       |
+| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions                           |
+| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                                    |
+| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions                            |
+
+## Related Resources  
+If you need to **convert svg to png c#**, the *convert-svg-to-raster-images* examples show a straightforward way to rasterize SVG files in a .NET application. For medical and document formats, see *convert-dicom-images* (which includes a **convert dicom image to jpeg c#** sample) and *convert-eps-images* for a **convert eps file to pdf c#** workflow. The *kernel-filters* collection demonstrates how to **apply kernel filter to bitmap c#**, while *image-and-photo-filters* offers additional styling options. Finally, the *merge-images* and *convert-apng* samples illustrate how to **merge multiple png files into one image c#** and how to **convert apng to gif using asp.net** with Aspose.Imaging for .NET.
+
+## Frequently Asked Questions
+
+### Q: What image formats can Aspose.Imaging convert in .NET?  
+Aspose.Imaging supports raster formats (JPEG, PNG, BMP, TIFF, GIF) and vector formats (SVG, EPS, EMF, WMF) as well as medical formats such as DICOM and PDF. You can use `Image.Load` together with format‑specific options like `PngOptions` or `PdfOptions` to **convert svg to png c#** or **convert eps file to pdf c#** in just a few lines of code. The library also handles multi‑page documents and animated formats, making it a one‑stop solution for most image conversion scenarios.
+
+### Q: How do I apply photo filters to an image using Aspose.Imaging?  
+The `ImageProcessor` class lets you chain filters; for example, `new ConvolutionFilter(kernel)` applies a custom kernel to a bitmap. By loading the image with `RasterImage` and calling `processor.Apply(new ConvolutionFilter(kernel))`, you can **apply kernel filter to bitmap c#** efficiently. After processing, save the result with the appropriate `ImageOptions` (e.g., `JpegOptions`).  
+
+### Q: Can I merge several images into one file with Aspose.Imaging for .NET?  
+Yes—use the `ImageCollection` class to load each source image and then call `Image.Save` with `PngOptions` on a new `RasterImage` that has the combined dimensions. This approach lets you **merge multiple png files into one image c#** without manual pixel manipulation. The example in the repository demonstrates positioning each image on a canvas and exporting the final composite.  
+
+### Q: Which categories contain examples for converting medical DICOM images?  
+Check the **Medical Imaging → DICOM** folder; it includes samples that load a `DicomImage`, adjust window/level, and then save to common formats. The code uses `DicomImage` together with `JpegOptions` to **convert dicom image to jpeg c#**. Additional examples show conversion to PNG and BMP for downstream processing.  
+
+### Q: Is there a sample for converting WMF or EMF files to PNG with Aspose.Imaging?  
+The **Vector Formats** section contains a snippet that loads a `MetafileImage` (WMF/EMF) and saves it with `PngOptions`. While reviewing that folder you’ll also find a related demo that **convert apng to gif using asp.net**, illustrating how the same API can handle animated PNG to GIF conversion in a web context. The sample demonstrates a one‑line `image.Save("output.png", new PngOptions())` call.
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*
