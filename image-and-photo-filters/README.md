@@ -1,38 +1,75 @@
-# Image Filter C# Examples with Aspose.Imaging
+# ImageGrayscaleMask Inversion and APNG Frame Filtering with Aspose.Imaging for .NET
 
-A collection of concise C# snippets that demonstrate how to **apply image filters** and photo effects using **Aspose.Imaging for .NET**. These examples cover common scenarios such as alpha blending, overlay composition, and batch processing, helping you quickly integrate photo filter functionality into your .NET applications.
+This collection demonstrates how to work with **ImageGrayscaleMask** inversion for both white and black masks, apply custom filters to every raster frame of an APNG while keeping its animation properties intact, and use the **MagicWand** tool to isolate or modify specific pixel regions. The examples are built with Aspose.Imaging for .NET – a UI‑agnostic backend API that runs everywhere (ASP.NET Core, console apps, Azure Functions, Docker, etc.) without any UI dependencies.
 
-## What's in This Category
-- **Alpha blending with custom opacity** – blend a JPEG with a semi‑transparent overlay and save as PNG.  
-- **Center‑based overlay composition** – calculate the center of a BMP background, blend a PNG overlay, and export to TIFF.  
-- **Batch processing of image folders** – apply a 64‑level alpha overlay to every PNG in a directory and output JPEG results.  
-- **Saving with specific format options** – use `PngOptions`, `JpegOptions`, and `TiffOptions` to control output quality and metadata.  
+## What You Can Do
+- **Test mask inversion** – verify that `ImageGrayscaleMask` correctly inverts fully white and fully black masks (unit‑test example).  
+- **Filter each APNG frame** – apply a user‑defined image filter to every raster frame of an APNG while preserving frame delays, disposal methods, and overall animation integrity.  
+- **Isolate a color region with MagicWand** – select a specific color range in a PNG, create a mask, and process the isolated area.  
+- **Modify APNG pixel data using MagicWand** – run a MagicWand‑based filter across all frames of an APNG to change pixels that meet custom criteria.  
+- **Blend PNG overlay onto BMP background and export** – compute the center coordinates of a BMP, blend a PNG overlay, and save the result as a TIFF file.
 
 ## Quick Start
-
-The most common operation—applying an alpha‑blended overlay and saving the result—can be done in just a few lines:
+Below is a minimal snippet that applies a custom filter to every frame of an APNG while preserving its animation metadata:
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
 
-string sourcePath = @"input.jpg";
-string overlayPath = @"overlay.png";
-string outputPath = @"output.png";
-
-using (RasterImage source = (RasterImage)Image.Load(sourcePath))
-using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+class Program
 {
-    // Apply 50% opacity (alpha = 127) to the overlay
-    overlay.Alpha = 127;
-    source.Blend(overlay, new Point(0, 0));
+    static void Main()
+    {
+        string inputPath  = @"C:\Images\input_animation.apng";
+        string outputPath = @"C:\Images\output_animation_filtered.apng";
 
-    var pngOptions = new PngOptions { ColorType = PngColorType.Truecolor };
-    source.Save(outputPath, pngOptions);
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the APNG
+        using (Image image = Image.Load(inputPath))
+        {
+            var apng = (ApngImage)image;
+
+            // Iterate over each raster frame
+            foreach (var frame in apng.Frames)
+            {
+                // Example filter: increase gamma (you can replace with any filter)
+                frame.AdjustGamma(1.2f);
+            }
+
+            // Save while keeping original animation properties
+            apng.Save(outputPath, new ApngOptions { ColorType = apng.ColorType });
+        }
+
+        Console.WriteLine($"Filtered APNG saved to {outputPath}");
+    }
 }
 ```
 
-Run the code after adding the **Aspose.Imaging** NuGet package (see Requirements) and you’ll have a filtered image ready for use.
+## Requirements
+- .NET 9.0 (or later)
+- Aspose.Imaging NuGet package  
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+
+| Link | Description |
+|------|-------------|
+| [Documentation](https://docs.aspose.com/imaging/net/) | Official Aspose.Imaging for .NET docs |
+| [NuGet](https://www.nuget.org/packages/aspose.imaging) | Package source |
+| [Release Notes](https://releases.aspose.com/imaging/net/) | Latest changes and bug fixes |
+| [Online Apps](https://products.aspose.app/imaging/family/) | Try Aspose.Imaging features in the browser |
+| [Free Temporary License](https://purchase.aspose.com/temporary-license) | Get a temporary license for evaluation |
 
 ## Files
 
@@ -71,13 +108,3 @@ Examples and tasks in this folder:
 | [apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs](./apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs) |
 | [apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs](./apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs) |
 [**View all 148 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters)
-
-## Requirements
-
-- **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
-- **.NET 9** (or later) runtime
-- Visual Studio 2022 (or any compatible IDE)
-
-## Back to Main README
-
-[← Back to the repository root README](../README.md)
