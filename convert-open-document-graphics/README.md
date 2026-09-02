@@ -1,39 +1,81 @@
-# ODG conversion C# – Convert OpenDocument Graphics with Aspose.Imaging for .NET
+# Apply Gaussian Blur to ODG Image and Save as JPEG in C#
 
-This folder contains practical C# snippets that demonstrate how to work with **OpenDocument graphics (ODG)** using Aspose.Imaging for .NET.  
-The examples cover loading an ODG file, rasterizing it, and exporting it to popular raster formats such as PNG, JPEG, BMP, and more – all within a .NET 9+ environment.
+This repository contains ready‑to‑run C# examples that demonstrate how to work with **Open Document Graphics (ODG)** files using **Aspose.Imaging for .NET** – a UI‑agnostic backend API that runs everywhere (ASP.NET Core, console apps, Azure Functions, Docker, etc.).  
+The samples show how to:
 
-## What's in This Category
-- Load an ODG file and save it as a PNG image (`Image.Save` with `PngOptions`).
-- Convert an ODG file to JPEG using default compression settings (`JpegOptions`).
-- Export an ODG file to BMP while preserving the original dimensions (`BmpOptions` + `OdgRasterizationOptions`).
-- (Additional examples) Convert ODG to other raster formats or adjust rasterization parameters.
+* Apply a Gaussian blur filter to an ODG and export it as a JPEG.  
+* Convert ODG to PNG while enabling anti‑aliasing for smoother visuals.  
+* Generate a progressive JPEG from ODG for faster web loading.  
+* Create a PDF from ODG with custom DPI and page margins.  
+* Export ODG to SVG and ensure the `viewBox` attribute is set correctly.
+
+## What You Can Do
+
+- **Apply Gaussian blur to an ODG and save it as JPEG** – using `GaussianBlurFilterOption`.  
+- **Convert ODG to PNG with anti‑aliasing** – by configuring `RasterizationOptions` for smoother results.  
+- **Convert ODG to progressive JPEG** – with maximum quality and progressive encoding.  
+- **Convert ODG to PDF** – specifying custom DPI and page margins for precise layout.  
+- **Convert ODG to SVG** – and automatically correct the `viewBox` attribute.
 
 ## Quick Start
-The most common scenario is converting an ODG document to a PNG image:
+
+The most common scenario is applying a Gaussian blur to an ODG and exporting it as a JPEG:
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Load the ODG file
-        using (Image odgImage = Image.Load("sample.odg"))
-        {
-            // Define PNG export options (optional)
-            var pngOptions = new PngOptions();
+        string inputPath  = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample_blur.jpg";
 
-            // Save as PNG
-            odgImage.Save("output.png", pngOptions);
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
+
+        // Load ODG, apply Gaussian blur, and save as JPEG
+        using (Image image = Image.Load(inputPath))
+        {
+            var blur = new GaussianBlurFilterOption(5); // radius = 5
+            image.Filter(blur);
+
+            var jpegOptions = new JpegOptions { Quality = 90 };
+            image.Save(outputPath, jpegOptions);
+        }
+
+        Console.WriteLine($"Blurred JPEG saved to {outputPath}");
     }
 }
 ```
 
-Add the Aspose.Imaging NuGet package to your project and run the snippet – the ODG will be rasterized and saved as `output.png`.
+## Requirements
+
+- .NET 9.0 (or later)  
+- Aspose.Imaging for .NET  
+
+Install the NuGet package:
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -72,9 +114,3 @@ Examples and tasks in this folder:
 | [convert-an-odg-file-to-pdf-and-set-a-specific-compression-level-for-the-output.cs](./convert-an-odg-file-to-pdf-and-set-a-specific-compression-level-for-the-output.cs) |
 | [convert-an-odg-file-to-pdf-and-set-the-document-title-property-in-the-metadata.cs](./convert-an-odg-file-to-pdf-and-set-the-document-title-property-in-the-metadata.cs) |
 [**View all 120 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics)
-
-## Requirements
-- **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
-- **.NET 9** or later
-
-[← Back to main README](../README.md)
