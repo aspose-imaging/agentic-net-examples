@@ -94,16 +94,6 @@ All tasks passed ✅
 
 
 
-## Use Cases
-- **High‑compression PNG export for web assets** – The `adjust-png-compression-to-maximum-while-converting-a-cdr-file-to-png-in-c.cs` example shows how to load a CorelDRAW CDR file and save it as a PNG with `PngOptions` configured for maximum compression, ideal for reducing bandwidth when serving graphics online.  
-- **Lossless PNG conversion preserving original dimensions** – In `apply-lossless-compression-to-a-cdr-to-png-conversion-while-maintaining-original-dimensions-in-c.cs` the code demonstrates a CDR file‑to‑PNG conversion that keeps the exact size and uses lossless compression, perfect for archival or print‑ready workflows.  
-- **Batch conversion of multiple CDR files to timestamped JPGs** – The `batch-convert-cdr-files-to-jpg-naming-each-output-with-the-original-filename-plus-timestamp-in-c.cs` script iterates over a folder of CDR documents, converts each to JPEG, and appends a timestamp to the filename, streamlining automated image pipelines that need unique output names.  
-- **Preserving layer structure when moving from CDR to PSD** – `batch-transform-a-collection-of-cdr-files-into-separate-psd-files-retaining-original-layer-structure-in-c.cs` loads each CDR, creates a `PsdImage` with the original layers intact, and saves it, enabling designers to continue editing in Photoshop without losing editability.  
-- **In‑memory conversion from a CDR byte array to a PNG stream** – The `convert-a-cdr-file-from-a-byte-array-to-png-and-output-to-a-memory-stream-in-c.cs` snippet reads a CDR file into a byte array, converts it to PNG using a memory stream, and returns the stream, which is useful for web services that must avoid temporary files while performing CDR to image dotnet transformations.
-
-## Related Categories
-If you need to transform the resulting images further, explore the **Image Compression** and **Image Format Conversion** categories, which cover JPEG quality tuning, WebP generation, and TIFF handling. For scenarios that involve extracting vector data or converting multi‑page documents, the **Vector Graphics** and **Multi‑Page Document** sections provide examples of working with SVG, PDF, and multi‑page CDR files. Together, these categories complement the Convert CDR examples by offering end‑to‑end pipelines for CorelDRAW C# projects.
-
 ## Operations Covered
 - Convert CDR to PNG with maximum compression  
 - Convert CDR to PNG with lossless compression while keeping original dimensions  
@@ -150,6 +140,19 @@ dotnet add package Aspose.Imaging
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Use Cases
+- When you need to shrink CorelDRAW files for web delivery, you can **convert CDR to PNG with maximum compression in C#** by setting `PngOptions.CompressionLevel` to the highest value, as shown in the “adjust‑png‑compression‑to‑maximum‑while‑converting‑a‑cdr‑file‑to‑png‑in‑c.cs” example.  
+- If preserving every pixel is critical—such as for archival of design assets—you can perform a **CDR to PNG lossless compression using Aspose.Imaging C#** by using `PngOptions` with `CompressionLevel = 0` and disabling any color reduction, demonstrated in the “apply‑lossless‑compression‑to‑a‑cdr‑to‑png‑conversion‑while‑maintaining‑original‑dimensions‑in‑c.cs” snippet.  
+- For automated pipelines that generate product thumbnails, the **batch convert CDR files to JPG with timestamped filenames in C#** pattern lets you iterate over a folder, convert each `.cdr` to `.jpg`, and append `DateTime.Now:yyyyMMddHHmmss` to the output name, as illustrated in the “batch‑convert‑cdr‑files‑to‑jpg‑naming‑each‑output‑with‑the‑original‑filename‑plus‑timestamp‑in‑c.cs” file.  
+- When a design team needs to hand off layered artwork to Photoshop, the **convert CDR to PSD retaining original layer structure C#** approach uses `PsdOptions` and the `ExportLayers` flag to keep each CorelDRAW layer intact, which is the core of the “batch‑transform‑a‑collection‑of‑cdr‑files‑into‑separate‑psd‑files‑retaining‑original‑layer‑structure‑in‑c.cs” example.  
+- If you are building a service that streams images directly to a client without touching the file system, you can **adjust PNG compression while converting CDR to PNG in C#** by loading the CDR into a `MemoryStream`, applying custom `PngOptions`, and returning the resulting stream, as demonstrated in the “convert‑a‑cdr‑file‑from‑a‑byte‑array‑to‑png‑and‑output‑to‑a‑memory‑stream‑in‑c.cs” code.
+
+## Related Categories
+The techniques for handling CorelDRAW files often overlap with other raster‑to‑raster conversions, so you may find the **[Convert Raster Image](../convert-raster-image/)** examples useful when you need to work with PNG or JPG files after the initial CDR conversion.  
+If your workflow involves vector sources like SVG before reaching CDR, the **[Convert Svg To Raster Images](../convert-svg-to-raster-images/)** category shows how to rasterize SVGs with fine‑grained compression control, which can be combined with the CDR‑to‑PNG pipelines above.  
+For scenarios where you need to embed the resulting images into PDFs or other document formats, the **[Working With Drawing Images](../working-with-drawing-images/)** section provides guidance on handling multi‑page drawings and preserving drawing metadata across formats.
 
 <!-- AUTOGENERATED:START -->
 Updated: 2026-08-20 | Run: `20260722_051918` | Examples: 30
