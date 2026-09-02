@@ -145,20 +145,6 @@ All tasks passed ✅
 
 
 
-## Use Cases
-- **Add custom vector graphics to a PNG thumbnail** – Use Aspose.Imaging’s `Graphics` object to draw a cubic Bézier curve (as shown in the *add‑a‑cubic‑bezier‑curve* sample) when you need to overlay smooth, scalable lines on a PNG image in a C# web service. This is a classic “draw on image C#” scenario that leverages the `Graphics` API for precise curve control.  
-
-- **Create high‑resolution BMP assets with geometric shapes** – The *create‑a‑bmp‑image‑draw‑a‑90‑degree‑arc* example demonstrates how to generate a 24‑bpp BMP, draw a 90° arc inside a defined rectangle, and save it directly to disk, perfect for producing bitmap icons or background textures in desktop applications.  
-
-- **Batch‑convert SVG icons to vector‑based PDF for print‑ready output** – By iterating through an input folder and using `PdfOptions` together with `Image.Load`, the *batch‑convert‑svg‑icons‑to‑pdf* script converts each SVG into a PDF that retains its vector fidelity, ideal for automating the preparation of scalable assets for marketing collateral.  
-
-- **Produce multi‑page PDF reports from a series of SVG diagrams** – The *convert‑a‑multi‑page‑svg‑document‑to‑a‑single‑pdf* sample shows how to load a multi‑page SVG, preserve page order, and export a single PDF while keeping all vector information intact, a common requirement for generating technical documentation in .NET.  
-
-- **Generate chart graphics on the fly and embed them in PDF reports** – Using `PngOptions` as a drawing surface, the *create‑a‑vector‑chart‑add‑data‑labels‑and‑export‑the‑chart‑as‑a‑pdf* example draws bars, labels, and colors, then saves the result as a PDF, enabling dynamic chart creation for dashboards or automated reporting pipelines.
-
-## Related Categories
-If you’re working with drawing primitives, the **Image Manipulation** category expands on pixel‑level edits such as filtering, resizing, and color adjustments that often precede or follow graphics drawing operations. For scenarios that require converting between raster and vector formats, explore the **Vector Graphics Conversion** section, which includes examples of SVG ↔ PDF and EPS handling. When you need to embed custom fonts or apply advanced text rendering, the **Text Rendering & Font Embedding** category provides code snippets that complement the graphics drawing workflow demonstrated here.
-
 ## Operations Covered
 - Create PNG image canvas  
 - Draw cubic Bezier curve on image  
@@ -210,6 +196,19 @@ dotnet add package Aspose.Imaging
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Use Cases
+- When you need to add a smooth curve to a generated PNG, you can use `Graphics` together with `CubicBezierShape` to **draw a cubic bezier curve on PNG** exactly as shown in the “add‑a‑cubic‑bezier‑curve‑to‑the‑same‑figure‑using‑specified‑control‑points” example.  
+- If your project ships a set of SVG icons and you must deliver them as a single, scalable PDF for printing, the “batch‑convert‑svg‑icons‑to‑pdf‑embedding‑each‑icon‑as‑a‑vector‑object‑for‑scalable‑printing” sample demonstrates how to **batch convert SVG icons to vector PDF in C#** with Aspose.Imaging.  
+- For compliance‑driven reports that require all fonts to be embedded, the “batch‑process‑vector‑graphics‑converting‑each‑to‑pdf‑with‑embedded‑fonts‑and‑setting‑pdf‑version‑to‑1‑6” code shows how to **convert vector images to PDF with embedded fonts** using the `PdfOptions` API.  
+- When you receive a multi‑page SVG (e.g., a multi‑sheet diagram) and must produce one PDF that keeps the original page sequence, the “convert‑a‑multi‑page‑svg‑document‑to‑a‑single‑pdf‑file‑preserving‑page‑order‑and‑vector‑fidelity” example illustrates how to **preserve page order when converting multi‑page SVG to a single PDF**.  
+- To create a blank canvas and draw basic shapes such as rectangles, ellipses, or arcs before saving as PNG, the “create‑a‑bmp‑image‑draw‑a‑90‑degree‑arc‑within‑a‑defined‑rectangle‑and‑save‑file” snippet can be adapted to **create a PNG image and draw shapes using Aspose.Imaging Graphics**.
+
+## Related Categories
+If you need to turn raster drawings into other formats, the **[Convert Raster Image](../convert-raster-image/)** category provides examples for exporting PNG or BMP files to JPEG, TIFF, and more.  
+When your workflow involves turning SVG files into raster graphics (e.g., thumbnails) before further processing, see **[Convert Svg To Raster Images](../convert-svg-to-raster-images/)** for straightforward conversions using Aspose.Imaging.  
+For post‑processing tasks such as applying color corrections or filters to the images you create with drawing APIs, the **[Image And Photo Filters](../image-and-photo-filters/)** section offers a rich set of filter examples that can be chained after drawing operations.
 
 <!-- AUTOGENERATED:START -->
 Updated: 2026-08-20 | Run: `20260731_113931` | Examples: 401
