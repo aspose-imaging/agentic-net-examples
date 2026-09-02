@@ -93,22 +93,6 @@ All tasks passed ✅
 
 
 
-## Use Cases  
-
-- **Batch‑convert PNG files to high‑quality WebP and embed them in a 300 DPI PDF** – the `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs` sample shows how to set WebP compression quality, save the result, and then export it to a PDF, a common requirement for generating print‑ready documents with WebP conversion C#.  
-
-- **Validate that a WebP‑to‑GIF conversion preserves the original pixel dimensions** – `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs` loads a WebP image, converts it to GIF, and compares width/height, helping developers guarantee size consistency during WebP conversion C#.  
-
-- **Convert a WebP image that resides in a memory stream directly to GIF without temporary files** – the `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs` example demonstrates loading WebP bytes into a `MemoryStream`, converting on‑the‑fly, and saving the GIF, which is useful for web services that process uploaded WebP data.  
-
-- **Control animation speed when turning an animated WebP into a GIF** – `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs` iterates over each frame, assigns a custom delay, and writes the GIF, enabling precise timing adjustments for animated WebP conversion C#.  
-
-- **Profile conversion performance for large WebP batches and log timing metrics** – `measure-conversion-time-for-each-webp-file-to-gif-and-log-performance-metrics-for-optimization.cs` measures the elapsed time for each file, logs the results, and can be adapted to other targets such as WebP to JPEG dotnet, assisting developers who need to optimize bulk WebP conversion C#.
-
-## Related Categories  
-
-If you are working with WebP conversion C#, you may also explore the **Image Format Conversion** category, which covers transformations between JPEG, PNG, TIFF, and other raster formats. The **Image Compression & Optimization** section provides examples for reducing file size while preserving visual quality, complementing the quality‑control techniques shown here. For scenarios involving animated assets, the **Animated Image Processing** category demonstrates how to manipulate frame timing and extract frames from formats like APNG and animated WebP. Finally, the **PDF Generation** category illustrates how to embed raster images—including WebP‑derived graphics—into PDF documents, extending the workflow demonstrated in the PDF export sample.
-
 ## Operations Covered
 - Convert PNG to WebP with quality setting  
 - Export WebP image to PDF at 300 DPI  
@@ -151,6 +135,17 @@ dotnet add package Aspose.Imaging
 | 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 | 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Use Cases
+- Need to **convert WebP to GIF in C# with Aspose.Imaging**? The `load-a-webp-file-and-save-it-as-a-gif-using-image-save.cs` example shows how to load a WebP image and directly save it as a GIF, handling file‑system checks and error handling.  
+- Want to **adjust WebP image quality before saving as PDF in C#**? The `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs` sample demonstrates setting compression quality and DPI when exporting a WebP‑derived image to a PDF document.  
+- Concerned that a conversion might alter the size? The `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs` script verifies that the **WebP‑to‑GIF conversion keeps the original dimensions**, letting you compare width and height before and after the operation.  
+- Working with streams and want to avoid temporary files? The `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs` code illustrates how to **convert a WebP image from a memory stream to GIF without intermediate files**, which is ideal for in‑memory processing pipelines.  
+- Creating animated GIFs from animated WebP and need precise timing? The `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs` example shows how to **set a custom frame delay when converting animated WebP to GIF in C#**, giving you full control over the resulting animation speed.
+
+## Related Categories
+If you’re converting between other raster formats, the **[Conversion](../conversion/)** category provides a broad set of examples for moving images between JPEG, PNG, BMP, and more. For scenarios that involve converting animated formats like APNG, see **[Convert Apng](../convert-apng/)**, which covers similar frame‑by‑frame handling techniques. When you need to manipulate image pixels or apply filters before or after a WebP conversion, the **[Manipulating Images](../manipulating-images/)** and **[Image And Photo Filters](../image-and-photo-filters/)** sections contain useful patterns that complement the WebP workflows.
 
 <!-- AUTOGENERATED:START -->
 Updated: 2026-08-20 | Run: `20260626_081143` | Examples: 30
