@@ -1,30 +1,83 @@
-# CDR File Conversion with Aspose.Imaging for .NET  
+# Convert CDR to PNG with Maximum Compression in C# (Aspose.Imaging for .NET)
 
-Convert CorelDRAW (CDR) files to popular image and document formats directly from C#. The examples demonstrate CDR to JPG, PNG (with transparency), PDF (vector‑preserving) and other common scenarios using Aspose.Imaging for .NET.
+A set of ready‑to‑run C# examples that show how to use **Aspose.Imaging for .NET** – a UI‑agnostic backend API that works in ASP.NET Core, console apps, Azure Functions, and Docker – to transform CorelDRAW **.cdr** files into raster and layered formats.  
+The samples cover:
 
-## What's in This Category
-- Load a single‑page CDR and export it as a high‑quality JPEG.  
-- Convert a CDR page to PNG while preserving transparency.  
-- Transform a CDR document into a PDF that retains vector data.  
-- Control rasterization options such as DPI, color depth, and background color.  
-- Combine CDR rasterization with other Aspose.Imaging features (e.g., image resizing).
+* Adjusting PNG compression to the maximum level while converting a CDR file.  
+* Performing lossless PNG conversion that preserves the original image dimensions.  
+* Batch converting CDR files to JPG with timestamped filenames.  
+* Batch converting CDR files to PSD while keeping the original layer structure.  
+* Converting a CDR byte array directly to a PNG memory stream.
 
-## Quick Start  
+## What You Can Do
+
+- **Maximum‑compression PNG** – Convert a single `sample.cdr` to `sample.png` using the highest PNG compression settings.  
+- **Lossless PNG** – Convert a CDR to PNG without any quality loss, retaining the original width and height.  
+- **Batch JPG conversion** – Process every `*.cdr` in a folder and output JPG files named `OriginalFile_yyyyMMdd_HHmmss.jpg`.  
+- **Batch PSD conversion** – Transform a collection of CDR files into separate PSD files, preserving each file’s layer hierarchy.  
+- **Byte‑array to PNG stream** – Load a CDR from a `byte[]`, convert it to PNG, and obtain the result as a `MemoryStream` for further processing.
+
+## Quick Start
 
 ```csharp
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
-// Load the first page of a CDR file
-using (var image = (CdrImage)Image.Load("sample.cdr"))
+class Program
 {
-    // Export to high‑quality JPEG
-    var jpegOptions = new JpegOptions { Quality = 100 };
-    image.Save("sample.jpg", jpegOptions);
+    static void Main()
+    {
+        // Input CDR file
+        string inputPath = "Input/sample.cdr";
+        // Output PNG with maximum compression
+        string outputPath = "Output/sample.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the CDR image
+        using (Image cdrImage = Image.Load(inputPath))
+        {
+            // Set PNG options to maximum compression (level 9)
+            var pngOptions = new PngOptions
+            {
+                CompressionLevel = PngCompressionLevel.BestCompression
+            };
+
+            // Save as PNG
+            cdrImage.Save(outputPath, pngOptions);
+            Console.WriteLine($"Converted to PNG with maximum compression: {outputPath}");
+        }
+    }
 }
 ```
 
-The snippet above shows the most common operation: opening a CorelDRAW CDR file and saving it as a JPEG image.
+Run the snippet in a .NET 9.0 console project after installing the Aspose.Imaging package.
+
+## Requirements
+
+- .NET 9.0 SDK
+- Aspose.Imaging for .NET  
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+## Resources
+
+| Resource | Link |
+|----------|------|
+| Documentation | https://docs.aspose.com/imaging/net/ |
+| NuGet | https://www.nuget.org/packages/aspose.imaging |
+| Release Notes | https://releases.aspose.com/imaging/net/ |
+| Online Apps | https://products.aspose.app/imaging/family/ |
+| Free Temporary License | https://purchase.aspose.com/temporary-license |
 
 ## Files
 
@@ -63,12 +116,3 @@ Examples and tasks in this folder:
 | [verify-that-a-jpg-file-created-from-cdr-conversion-exists-and-has-non-zero-size-in-c.cs](./verify-that-a-jpg-file-created-from-cdr-conversion-exists-and-has-non-zero-size-in-c.cs) |
 | [wrap-cdr-to-jpg-conversion-in-try-catch-blocks-to-log-runtime-exceptions-in-c.cs](./wrap-cdr-to-jpg-conversion-in-try-catch-blocks-to-log-runtime-exceptions-in-c.cs) |
 [**View all 30 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cdr)
-
-## Requirements  
-
-- **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
-- **.NET 9.0** or later  
-
-## ↩️ Back to Main README  
-
-[← Return to the repository root README](../README.md)
