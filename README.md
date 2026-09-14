@@ -218,5 +218,25 @@ This library covers 17 real‑world image‑processing scenarios—from format c
 | manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions           |
 | merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                    |
 | working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions            |
+
+| Category                              | Examples | Key APIs                                                                                     |
+|---------------------------------------|----------|----------------------------------------------------------------------------------------------|
+| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                    |
+| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                                                |
+| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions                              |
+| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions                               |
+| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                                          |
+| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                                            |
+| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics                                   |
+| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions                    |
+| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                                           |
+| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                                            |
+| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                                      |
+| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage         |
+| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions                           |
+| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                                           |
+| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions                               |
+| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                                         |
+| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions                                 |
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*
