@@ -1,7 +1,6 @@
-// HOW-TO: Create Animated PNG From Alphabetically Sorted PNG Frames In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated PNG From Sequential PNG Files In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -12,22 +11,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input directory containing PNG frames and output APNG path
-        string inputDirectory = @"C:\Images\Frames";
-        string outputPath = @"C:\Images\output.apng";
-
         try
         {
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string inputDir = "input";
+            string outputPath = "output/output.apng";
 
-            // Get PNG files sorted alphabetically
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png")
-                                          .OrderBy(f => f)
-                                          .ToArray();
+            string[] inputFiles = new[]
+            {
+                Path.Combine(inputDir, "frame1.png"),
+                Path.Combine(inputDir, "frame2.png"),
+                Path.Combine(inputDir, "frame3.png")
+            };
 
-            // Verify each input file exists
-            foreach (string file in pngFiles)
+            foreach (var file in inputFiles)
             {
                 if (!File.Exists(file))
                 {
@@ -36,42 +32,33 @@ class Program
                 }
             }
 
-            if (pngFiles.Length == 0)
-            {
-                Console.Error.WriteLine("No PNG files found in the input directory.");
-                return;
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain dimensions
-            using (RasterImage firstImage = (RasterImage)Image.Load(pngFiles[0]))
+            using (RasterImage first = (RasterImage)Image.Load(inputFiles[0]))
             {
-                int width = firstImage.Width;
-                int height = firstImage.Height;
+                int width = first.Width;
+                int height = first.Height;
 
-                // Create APNG options with bound output source
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 100
                 };
 
-                // Create the APNG canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, width, height))
                 {
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
+                    apng.AddFrame(first);
 
-                    // Add each PNG as a frame
-                    foreach (string pngPath in pngFiles)
+                    for (int i = 1; i < inputFiles.Length; i++)
                     {
-                        using (RasterImage frame = (RasterImage)Image.Load(pngPath))
+                        using (RasterImage frame = (RasterImage)Image.Load(inputFiles[i]))
                         {
-                            apngImage.AddFrame(frame);
+                            apng.AddFrame(frame);
                         }
                     }
 
-                    // Save the APNG (bound image, so just call Save())
-                    apngImage.Save();
+                    apng.Save();
                 }
             }
         }
@@ -84,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a lightweight animated image for a web banner from a series of PNG files that are named in alphabetical order.
- * 2. When you want to combine frame‑by‑frame screenshots of a UI test into a single APNG for documentation or bug reporting.
- * 3. When you have a folder of PNG assets exported from a design tool and must programmatically create an animated PNG to embed in a mobile app.
- * 4. When an automated build process must produce an APNG from rendered PNG frames to visualize simulation results without manual editing.
- * 5. When you need to batch‑convert a sequence of PNG icons into an animated PNG for use in a game’s loading screen, preserving transparency.
+ * 1. When you need to combine a series of PNG images into a single animated PNG for web or app animations.
+ * 2. When you want to generate an APNG from frames stored in a folder with alphabetical naming for consistent playback order.
+ * 3. When you need to programmatically create a lossless animated image with custom frame timing using Aspose.Imaging in a .NET application.
+ * 4. When you are building a reporting tool that visualizes step‑by‑step screenshots as an animated PNG.
+ * 5. When you have to automate the conversion of exported design assets (PNG sequence) into a single APNG for inclusion in documentation or UI components.
  */
