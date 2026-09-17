@@ -1,4 +1,4 @@
-// HOW-TO: Batch Convert PNG Sequence to APNG with Status Report in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Sequences to Animated PNG with Status Report in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,90 +13,70 @@ class Program
     {
         try
         {
-            // Input and output directories (relative)
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string inputRoot = "Input";
+            string outputRoot = "Output";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-                return;
-            }
+            Directory.CreateDirectory(outputRoot);
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            string[] sequenceDirs = Directory.GetDirectories(inputRoot);
 
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-            // Path for the conversion report
-            string reportPath = Path.Combine(outputDirectory, "report.txt");
+            string reportPath = Path.Combine(outputRoot, "report.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
-
-            using (StreamWriter reportWriter = new StreamWriter(reportPath, false))
+            using (StreamWriter reportWriter = new StreamWriter(reportPath, true))
             {
-                foreach (string inputPath in pngFiles)
+                foreach (string seqDir in sequenceDirs)
                 {
-                    // Validate input file existence
-                    if (!File.Exists(inputPath))
+                    string sequenceName = Path.GetFileName(seqDir);
+                    string[] pngFiles = Directory.GetFiles(seqDir, "*.png");
+                    if (pngFiles.Length == 0)
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        reportWriter.WriteLine($"{Path.GetFileName(inputPath)} -> N/A: Input file not found");
+                        reportWriter.WriteLine($"{sequenceName}: Failed - No PNG files found");
                         continue;
                     }
 
-                    // Determine output file path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng.png");
-
-                    // Ensure output directory for this file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    try
+                    string firstPng = pngFiles[0];
+                    if (!File.Exists(firstPng))
                     {
-                        // Load source PNG as raster image
-                        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                        Console.Error.WriteLine($"File not found: {firstPng}");
+                        return;
+                    }
+
+                    using (RasterImage firstImage = (RasterImage)Image.Load(firstPng))
+                    {
+                        int width = firstImage.Width;
+                        int height = firstImage.Height;
+
+                        string apngOutputPath = Path.Combine(outputRoot, sequenceName + ".png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(apngOutputPath));
+
+                        ApngOptions options = new ApngOptions
                         {
-                            // Configure APNG creation options
-                            ApngOptions options = new ApngOptions
-                            {
-                                Source = new FileCreateSource(outputPath, false),
-                                DefaultFrameTime = 100, // 100 ms per frame
-                                ColorType = PngColorType.TruecolorWithAlpha
-                            };
+                            Source = new FileCreateSource(apngOutputPath, false),
+                            DefaultFrameTime = 100,
+                            ColorType = PngColorType.TruecolorWithAlpha
+                        };
 
-                            // Create APNG image canvas
-                            using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
-                            {
-                                // Remove the default single frame
-                                apngImage.RemoveAllFrames();
+                        using (ApngImage apngImage = (ApngImage)Image.Create(options, width, height))
+                        {
+                            apngImage.RemoveAllFrames();
 
-                                // Add multiple frames (e.g., 5 copies of the source)
-                                int frameCount = 5;
-                                for (int i = 0; i < frameCount; i++)
+                            foreach (string pngPath in pngFiles)
+                            {
+                                if (!File.Exists(pngPath))
                                 {
-                                    apngImage.AddFrame(sourceImage);
-                                    // Optional: adjust gamma per frame
-                                    ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                                    frame.AdjustGamma((float)i);
+                                    Console.Error.WriteLine($"File not found: {pngPath}");
+                                    return;
                                 }
 
-                                // Save the APNG file
-                                apngImage.Save();
+                                using (RasterImage frame = (RasterImage)Image.Load(pngPath))
+                                {
+                                    apngImage.AddFrame(frame);
+                                }
                             }
-                        }
 
-                        reportWriter.WriteLine($"{Path.GetFileName(inputPath)} -> {Path.GetFileName(outputPath)}: Success");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
-                        reportWriter.WriteLine($"{Path.GetFileName(inputPath)} -> {Path.GetFileName(outputPath)}: Failed - {ex.Message}");
+                            apngImage.Save();
+                            reportWriter.WriteLine($"{sequenceName}: Success");
+                        }
                     }
                 }
             }
@@ -110,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine a series of PNG frames generated by a game engine into a single animated PNG for web delivery while tracking which files were successfully processed.
- * 2. When an automated build pipeline must create APNG assets from design‑team PNG exports and produce a text report for QA to verify conversion results.
- * 3. When a desktop application processes user‑uploaded PNG image sequences and saves them as APNG files, logging any missing or corrupt files for later troubleshooting.
- * 4. When a server‑side service generates animated stickers from individual PNG layers and records each conversion’s status to a report for monitoring and auditing.
- * 5. When a batch script converts thousands of PNG screenshots into APNG animations for documentation and needs a concise report indicating success or failure of each file.
+ * 1. When you need to automatically turn multiple folders of frame‑by‑frame PNG images into animated PNG files while generating a log of which conversions succeeded or failed.
+ * 2. When an application must create APNG assets for a game or web UI from existing PNG sprite sheets and keep a text report for quality‑assurance tracking.
+ * 3. When a server‑side service processes user‑uploaded PNG sequences in bulk, converts them to a single animated PNG, and records the outcome for auditing purposes.
+ * 4. When a build pipeline has to generate animated PNG previews from design assets and output a summary file that developers can review for errors.
+ * 5. When a digital‑media workflow requires converting large numbers of PNG frames to APNG format and storing a concise success/failure report for downstream processing.
  */
