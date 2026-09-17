@@ -1,41 +1,49 @@
-// HOW-TO: Convert APNG Animation to 256‑Color GIF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert APNG Animation to GIF with 256‑Color Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Verify that the input file exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string inputPath = Path.Combine(inputDirectory, "input.apng");
+            string outputPath = Path.Combine(outputDirectory, "output.gif");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG animation
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF saving options to limit palette to 256 colors
-                var gifOptions = new GifOptions
+                using (GifOptions gifOptions = new GifOptions())
                 {
-                    DoPaletteCorrection = true,   // Analyze source colors and build optimal palette
-                    ColorResolution = 7           // 2^(7+1) = 256 colors
-                };
-
-                // Save the animation as a GIF file
-                image.Save(outputPath, gifOptions);
+                    image.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated PNG on platforms that only support GIF, you can convert it to a GIF with a limited 256‑color palette.
- * 2. When preparing assets for email newsletters where GIF is the only supported animation format, this code transforms APNG files while ensuring compatibility.
- * 3. When optimizing web content for older browsers that cannot render APNG, you can generate a GIF version with controlled color depth to reduce file size.
- * 4. When integrating image processing into a C# application that receives APNG uploads, you can automatically convert them to GIF for storage or further processing.
- * 5. When creating a batch conversion tool to standardize animation formats across a media library, this snippet shows how to load APNG and save it as a 256‑color GIF.
+ * 1. When a web developer needs to serve animated images to browsers that only support GIF, they can convert APNG files to GIF while limiting colors to 256 for compatibility.
+ * 2. When an email marketing system must embed animated graphics that conform to the 256‑color GIF standard, this code transforms APNG assets into compliant GIFs.
+ * 3. When a legacy desktop application only reads GIF animations, developers can use this snippet to import modern APNG animations by converting them to GIF format.
+ * 4. When optimizing file size for mobile apps that require small animated assets, converting APNG to a 256‑color GIF reduces bandwidth while preserving animation.
+ * 5. When a content management workflow automates batch processing of user‑uploaded APNGs, this code enables automatic conversion to GIF for consistent display across all platforms.
  */
