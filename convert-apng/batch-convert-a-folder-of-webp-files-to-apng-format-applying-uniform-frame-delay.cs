@@ -3,44 +3,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\WebpInput";
-            string outputFolder = @"C:\ApngOutput";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Uniform frame delay in milliseconds
-            uint frameDelay = 200; // 200 ms per frame
-
-            // Get all .webp files in the input folder
-            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
-
-            foreach (string inputPath in webpFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.webp");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build output path with same name but .png extension (APNG)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image
-                using (Image image = Image.Load(inputPath))
+                using (WebPImage webp = (WebPImage)Image.Load(inputPath))
                 {
-                    // Save as APNG with uniform frame delay
-                    image.Save(outputPath, new ApngOptions { DefaultFrameTime = frameDelay });
+                    ApngOptions createOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = 100u, // uniform frame delay in milliseconds
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    using (ApngImage apng = (ApngImage)Image.Create(createOptions, webp.Width, webp.Height))
+                    {
+                        apng.RemoveAllFrames();
+                        apng.AddFrame(webp);
+                        apng.Save();
+                    }
                 }
             }
         }
@@ -53,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a collection of animated WebP files into APNGs for browsers that only support PNG animation while keeping a consistent frame speed.
- * 2. When an automated build process must generate lightweight APNG assets from WebP source images for a game’s UI spritesheets.
- * 3. When a server‑side C# service has to batch‑process user‑uploaded WebP animations and store them as APNGs with a uniform 200 ms frame delay for consistent playback.
- * 4. When migrating a legacy design system, you can replace WebP animations with APNG equivalents across a folder to ensure compatibility with older image libraries.
- * 5. When creating a content pipeline that prepares animated icons, you can use this code to read each WebP file, apply the same frame timing, and output ready‑to‑use APNG files.
+ * 1. When you need to convert a collection of animated WebP files into APNGs for browsers that support PNG animation while keeping a consistent frame speed.
+ * 2. When automating the preparation of game assets, turning WebP sprite animations into APNGs with a uniform delay for use in Unity.
+ * 3. When migrating a legacy web gallery, batch converting WebP animations to APNG to ensure compatibility with older image viewers.
+ * 4. When generating email‑friendly animated images, converting WebP to APNG with a fixed frame time to meet email client constraints.
+ * 5. When creating a CI pipeline that processes uploaded WebP animations into APNGs with a standard delay for consistent playback across platforms.
  */
