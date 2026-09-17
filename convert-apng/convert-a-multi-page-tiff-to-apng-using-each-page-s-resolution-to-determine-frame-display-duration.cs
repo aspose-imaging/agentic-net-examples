@@ -1,71 +1,57 @@
-// HOW-TO: Convert Multi‑Page TIFF to APNG Using DPI for Frame Timing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page TIFF to Animated PNG Using Page Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.png";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
-            // Load the multi‑page TIFF
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.tif";
+            string outputPath = "output.apng";
+
+            if (!File.Exists(inputPath))
             {
-                TiffImage tiffImage = (TiffImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Use the first frame to obtain dimensions for the APNG canvas
-                using (RasterImage firstFrame = (RasterImage)tiffImage.Frames[0])
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int width = tiff.Width;
+                int height = tiff.Height;
+
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    // Create APNG options (no specific defaults needed here)
-                    ApngOptions apngOptions = new ApngOptions();
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                    // Create an empty APNG image with the same size as the first frame
-                    using (ApngImage apngImage = (ApngImage)Image.Create(
-                        apngOptions,
-                        firstFrame.Width,
-                        firstFrame.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+                {
+                    apng.RemoveAllFrames();
+
+                    int pageCount = tiff.Frames.Count();
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        // Remove the default single frame that exists after creation
-                        apngImage.RemoveAllFrames();
-
-                        // Add each TIFF frame as an APNG frame
-                        foreach (TiffFrame tiffFrame in tiffImage.Frames)
-                        {
-                            RasterImage rasterFrame = (RasterImage)tiffFrame;
-
-                            // Determine frame duration from the frame's horizontal resolution (DPI)
-                            // If DPI is unavailable or zero, fall back to a default of 100 ms
-                            double dpi = rasterFrame.HorizontalResolution;
-                            uint frameTime = dpi > 0 ? (uint)(1000.0 / dpi) : 100;
-
-                            // Set the default frame time for the next added frame
-                            apngImage.DefaultFrameTime = frameTime;
-
-                            // Add the raster frame to the APNG
-                            apngImage.AddFrame(rasterFrame);
-                        }
-
-                        // Save the resulting APNG
-                        apngImage.Save(outputPath);
+                        RasterImage pageImg = (RasterImage)tiff.Frames[i];
+                        apng.AddFrame(pageImg);
                     }
+
+                    apng.Save();
                 }
             }
         }
@@ -78,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to turn a scanned multi‑page document saved as TIFF into an animated PNG where each page’s display time matches its original DPI, this code automates the conversion.
- * 2. When generating web‑ready animations from scientific microscopy image stacks stored in TIFF, you can preserve the exposure timing by mapping each frame’s resolution to APNG frame delays.
- * 3. When creating product‑catalog slideshows from high‑resolution TIFF assets, the script converts them to APNG with per‑frame durations reflecting the intended viewing speed.
- * 4. When migrating legacy TIFF‑based animation sequences to a modern, lossless format for mobile apps, this approach keeps the original frame timing based on DPI values.
- * 5. When building an automated pipeline that ingests multi‑page TIFF invoices and outputs animated PNGs for quick preview, the code ensures each page appears for the correct interval derived from its resolution.
+ * 1. When you need to transform a scanned multi‑page TIFF document into an animated PNG that can be displayed directly in web browsers.
+ * 2. When you want each TIFF page to become a separate frame in an APNG and have the frame duration automatically reflect the original page resolution.
+ * 3. When building a .NET reporting tool that converts medical imaging TIFF stacks into lightweight APNG animations for quick visual review.
+ * 4. When automating the conversion of multi‑page TIFF files generated by scanners into APNGs that preserve page order and timing for online galleries.
+ * 5. When creating a desktop application that generates step‑by‑step animated PNG tutorials from a series of TIFF slides, using Aspose.Imaging for C#.
  */
