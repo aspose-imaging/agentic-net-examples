@@ -1,10 +1,10 @@
-// HOW-TO: Create Animated APNG from Multi‑Page TIFF with Custom Frame Delays in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page TIFF to Animated APNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,64 +13,50 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/multipage.tif";
             string outputPath = "Output/animated.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
             using (Image tiffImage = Image.Load(inputPath))
             {
-                if (tiffImage is IMultipageImage multipage && multipage.PageCount > 0)
+                TiffImage tiff = (TiffImage)tiffImage;
+                if (tiff.PageCount == 0)
                 {
-                    // Use the first page to determine canvas size
-                    using (RasterImage firstPage = (RasterImage)multipage.Pages[0])
+                    Console.Error.WriteLine("No pages found in the TIFF image.");
+                    return;
+                }
+
+                // Get dimensions from the first page
+                int width, height;
+                using (RasterImage firstRaster = (RasterImage)tiff.Frames[0])
+                {
+                    width = firstRaster.Width;
+                    height = firstRaster.Height;
+                }
+
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+                {
+                    for (int i = 0; i < tiff.PageCount; i++)
                     {
-                        if (!firstPage.IsCached) firstPage.CacheData();
-
-                        // Prepare APNG creation options
-                        ApngOptions createOptions = new ApngOptions
+                        using (RasterImage raster = (RasterImage)tiff.Frames[i])
                         {
-                            Source = new FileCreateSource(outputPath, false),
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-
-                        // Create the APNG image
-                        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstPage.Width, firstPage.Height))
-                        {
-                            // Remove the default empty frame
-                            apngImage.RemoveAllFrames();
-
-                            // Add each TIFF page as a frame with a unique delay
-                            for (int i = 0; i < multipage.PageCount; i++)
-                            {
-                                using (RasterImage page = (RasterImage)multipage.Pages[i])
-                                {
-                                    if (!page.IsCached) page.CacheData();
-
-                                    // Example: delay increases by 100 ms per page
-                                    uint frameDelay = (uint)((i + 1) * 100);
-                                    apngImage.AddFrame(page, frameDelay);
-                                }
-                            }
-
-                            // Save the resulting APNG
-                            apngImage.Save();
+                            apng.AddFrame(raster);
                         }
                     }
-                }
-                else
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage image or contains no pages.");
+
+                    apng.Save();
                 }
             }
         }
@@ -83,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to turn a scanned multi‑page document (TIFF) into a lightweight animated PNG for web preview with per‑page timing.
- * 2. When you want to generate an animated product showcase by converting each layer of a multi‑page TIFF into frames with individual delays using C#.
- * 3. When you have a series of medical imaging slices stored as a TIFF stack and must create an APNG to visualize the sequence with custom frame intervals.
- * 4. When you are building a desktop application that exports user‑created multi‑page drawings as an animated PNG with precise control over each frame’s display time.
- * 5. When you need to automate the conversion of archival TIFF animations into APNG files for compatibility with modern browsers while preserving frame‑by‑frame timing.
+ * 1. When you need to turn a scanned multi‑page TIFF document into a lightweight animated PNG for quick web preview.
+ * 2. When you want to generate an APNG sprite sheet from each page of a TIFF to display step‑by‑step instructions in a desktop application.
+ * 3. When a reporting tool must combine several TIFF chart pages into a single animated image for inclusion in email newsletters.
+ * 4. When you are building a C# service that converts multi‑page medical imaging TIFFs into APNGs with custom frame delays for patient portals.
+ * 5. When you need to programmatically create an animated PNG from TIFF frames to embed in a mobile app without using external tools.
  */
