@@ -6,12 +6,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string inputPath = "Input\\sample.apng";
+            string outputPath = "Output\\result.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -23,8 +23,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                GifOptions options = new GifOptions();
-                image.Save(outputPath, options);
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -36,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated PNG on browsers that only support GIF, you can convert the APNG to a GIF using Aspose.Imaging in a C# application.
- * 2. When a mobile app requires GIF assets for animations but the source files are APNG, this code automates the conversion during the build process.
- * 3. When generating email newsletters that embed animated images, converting APNG to GIF ensures the animation works in most email clients.
- * 4. When creating a game asset pipeline that standardizes all sprite animations to GIF, this snippet can batch‑process APNG files on a server.
- * 5. When archiving user‑uploaded animations in a format with broader tool support, the code converts each APNG to GIF before storing it in the repository.
+ * 1. When you need to display an animated PNG on browsers that only support GIF, you can convert the APNG to a GIF using Aspose.Imaging in C#.
+ * 2. When preparing assets for email newsletters that require GIF animation, you can programmatically transform APNG files to GIF format with C#.
+ * 3. When a mobile app only accepts GIF images for animated stickers, you can use this code to convert APNG resources to GIF on the server side.
+ * 4. When generating legacy reports that embed animated images, converting APNG to GIF ensures compatibility with older PDF viewers via C#.
+ * 5. When automating a batch process that archives animated graphics, converting each APNG to a smaller GIF file simplifies storage and retrieval in .NET applications.
  */
