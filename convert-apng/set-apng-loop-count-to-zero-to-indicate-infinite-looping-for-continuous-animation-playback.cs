@@ -1,40 +1,39 @@
-// HOW-TO: Convert WebP to APNG with Infinite Looping in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Infinite Loop APNG From PNG In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.apng";
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (handles cases with no directory part)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage source = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure APNG options with infinite looping (NumPlays = 0)
-                var apngOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
+                    Source = new FileCreateSource(outputPath, false),
                     NumPlays = 0
                 };
 
-                // Save as APNG using the configured options
-                image.Save(outputPath, apngOptions);
+                using (ApngImage apng = (ApngImage)Aspose.Imaging.Image.Create(options, source.Width, source.Height))
+                {
+                    apng.AddFrame(source);
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform a WebP animation into an APNG that repeats forever for use in web banners or UI components.
- * 2. When building a C# desktop application that displays continuous animated icons and requires setting the APNG loop count to zero.
- * 3. When generating game assets where an animated sprite must loop endlessly without manual frame resetting.
- * 4. When creating marketing emails with animated PNGs that should play continuously across email clients supporting APNG.
- * 5. When automating a batch process that converts multiple WebP files to APNGs with infinite playback for digital signage.
+ * 1. When you need to generate an animated PNG that repeats forever for a website banner using C# and Aspose.Imaging.
+ * 2. When you want to convert a static PNG into an APNG with continuous playback for mobile game UI elements.
+ * 3. When you are building a digital signage system that requires an endlessly looping animation without manually editing frame metadata.
+ * 4. When you need to programmatically set the NumPlays property to zero to indicate infinite looping for an APNG created from existing raster images.
+ * 5. When you automate the creation of looping APNG files for e‑learning tutorials that must play continuously across different browsers.
  */
