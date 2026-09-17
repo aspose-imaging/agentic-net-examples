@@ -1,10 +1,10 @@
-// HOW-TO: Create Animated PNG from SVG with Frame Translation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated PNG from SVG with Moving Elements in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -24,43 +24,43 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            int frameCount = 10;
+            int width, height;
+
             using (Image svgImage = Image.Load(inputPath))
             {
-                int width = svgImage.Width;
-                int height = svgImage.Height;
-
-                const int totalFrames = 10;
-                const int frameDuration = 100; // milliseconds per frame
+                width = svgImage.Width;
+                height = svgImage.Height;
 
                 ApngOptions apngOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = (uint)frameDuration,
+                    DefaultFrameTime = 100,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                 {
-                    apng.RemoveAllFrames();
-
-                    for (int i = 0; i < totalFrames; i++)
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        // Create a blank raster canvas for the current frame
-                        using (RasterImage frame = (RasterImage)Image.Create(
-                            new BmpOptions { Source = new StreamSource(new MemoryStream()) },
-                            width,
-                            height))
+                        string tempPath = Path.Combine(Path.GetTempPath(), $"frame_{i}.png");
+                        Source tempSource = new FileCreateSource(tempPath, false);
+                        PngOptions pngOptions = new PngOptions { Source = tempSource };
+
+                        using (RasterImage frame = (RasterImage)Image.Create(pngOptions, width, height))
                         {
                             Graphics graphics = new Graphics(frame);
                             graphics.Clear(Color.Transparent);
 
-                            // Simple animation: translate the SVG drawing over time
-                            int offsetX = (i * 10) % width;
-                            int offsetY = (i * 5) % height;
-
-                            graphics.DrawImage(svgImage, new Point(offsetX, offsetY));
+                            int offsetX = (width * i) / frameCount;
+                            graphics.DrawImage(svgImage, new Point(offsetX, 0));
 
                             apng.AddFrame(frame);
+                        }
+
+                        if (File.Exists(tempPath))
+                        {
+                            File.Delete(tempPath);
                         }
                     }
 
@@ -77,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector SVG illustration into a looping animated PNG for web banners or UI assets while preserving transparency.
- * 2. When you want to programmatically generate frame‑by‑frame animations from SVG graphics for email newsletters that only support APNG.
- * 3. When you have to create a series of raster frames from a scalable SVG and export them as a single APNG file for mobile game sprites using C#.
- * 4. When you need to apply simple motion effects, such as translating an SVG element over time, and save the result as an APNG without using external animation tools.
- * 5. When you are building an automated pipeline that reads SVG files, animates them with custom frame durations, and outputs high‑quality APNG files for digital signage.
+ * 1. When you need to generate a looping APNG banner that slides an SVG logo across the frame for web advertising.
+ * 2. When you want to programmatically create an animated icon by shifting parts of an SVG over multiple frames in a .NET application.
+ * 3. When you have to export a vector illustration as a high‑quality animated PNG for use in mobile apps without losing transparency.
+ * 4. When you need to automate the production of frame‑by‑frame animations from SVG assets for email newsletters that support APNG.
+ * 5. When you are building a reporting tool that visualizes data trends by moving SVG charts across successive APNG frames.
  */

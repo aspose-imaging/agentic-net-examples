@@ -1,40 +1,46 @@
-// HOW-TO: Convert WebP to APNG with 5 Loops and 100ms Frame Delay in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create APNG With Loop Count 5 And Fixed Frame Delay In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input_animation.webp";
-            string outputPath = "output_animation.png";
+            string inputPath = "input.png";
+            string outputPath = "output\\animation.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (could be animated)
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
             {
-                // Save as APNG with 5 loop cycles and a default frame time of 100 ms
-                var apngOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
-                    NumPlays = 5,               // Loop count
-                    DefaultFrameTime = 100      // Frame duration in milliseconds
+                    Source = new FileCreateSource(outputPath, false),
+                    NumPlays = 5,
+                    DefaultFrameTime = 100
                 };
 
-                image.Save(outputPath, apngOptions);
+                using (ApngImage apng = (ApngImage)Image.Create(options, source.Width, source.Height))
+                {
+                    int frameCount = 5;
+                    for (int i = 0; i < frameCount; i++)
+                    {
+                        apng.AddFrame(source);
+                    }
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an animated image in a web page that repeats exactly five times, you can convert a WebP animation to an APNG with a fixed loop count using C#.
- * 2. When testing how different browsers or image viewers handle APNG playback speed, you can set a consistent 100 ms frame duration and loop count to compare results.
- * 3. When creating a game asset that requires a limited number of animation cycles, you can generate an APNG with a predefined number of plays from an existing WebP file.
- * 4. When preparing marketing GIF alternatives that must comply with APNG specifications and need controlled looping, this code converts and configures the loop count in .NET.
- * 5. When automating a batch process to standardize animated images for an e‑learning platform, you can ensure each APNG repeats five times with uniform frame timing.
+ * 1. When you need to generate an animated PNG that repeats exactly five times for use in web banners or UI animations.
+ * 2. When you want to ensure consistent playback speed across different image viewers by setting a uniform frame delay of 100 ms.
+ * 3. When you are building a C# application that converts a static PNG into a looping APNG for mobile game sprites.
+ * 4. When you must create an APNG with a predefined number of loops to comply with platform guidelines that limit animation repetitions.
+ * 5. When you are testing how various browsers and image viewers handle APNG loop counts and frame timing using Aspose.Imaging for .NET.
  */

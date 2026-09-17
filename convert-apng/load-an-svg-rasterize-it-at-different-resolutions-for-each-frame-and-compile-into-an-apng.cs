@@ -1,9 +1,9 @@
-// HOW-TO: Create Animated PNG from SVG with Multiple Resolutions in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated PNG From SVG At Multiple Resolutions In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
@@ -11,65 +11,74 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.apng";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image svgImage = Image.Load(inputPath))
+            string inputSvg = "input.svg";
+            string outputApng = "output.apng";
+
+            if (!File.Exists(inputSvg))
             {
-                int[] widths = new int[] { 200, 400, 600 };
-                double aspect = (double)svgImage.Height / svgImage.Width;
+                Console.Error.WriteLine($"File not found: {inputSvg}");
+                return;
+            }
 
-                ApngOptions apngCreateOptions = new ApngOptions
+            string outputDir = Path.GetDirectoryName(outputApng);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            var sizes = new (int width, int height)[]
+            {
+                (200, 200),
+                (400, 400),
+                (600, 600)
+            };
+
+            var frames = new List<Aspose.Imaging.RasterImage>();
+
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputSvg))
+            {
+                foreach (var size in sizes)
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 200 // milliseconds per frame
-                };
-
-                using (ApngImage apng = (ApngImage)Image.Create(
-                    apngCreateOptions,
-                    widths[0],
-                    (int)(widths[0] * aspect)))
-                {
-                    apng.RemoveAllFrames();
-
-                    foreach (int w in widths)
+                    using (var ms = new MemoryStream())
                     {
-                        int h = (int)(w * aspect);
-
-                        PngOptions pngOptions = new PngOptions
+                        var pngOptions = new PngOptions
                         {
                             VectorRasterizationOptions = new SvgRasterizationOptions
                             {
-                                PageWidth = w,
-                                PageHeight = h
+                                PageWidth = size.width,
+                                PageHeight = size.height,
+                                BackgroundColor = Aspose.Imaging.Color.White
                             }
                         };
-
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            svgImage.Save(ms, pngOptions);
-                            ms.Position = 0;
-
-                            using (RasterImage raster = (RasterImage)Image.Load(ms))
-                            {
-                                apng.AddFrame(raster);
-                            }
-                        }
+                        vectorImage.Save(ms, pngOptions);
+                        ms.Position = 0;
+                        var raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms);
+                        frames.Add(raster);
                     }
-
-                    apng.Save();
                 }
+            }
+
+            var apngOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputApng, false)
+            };
+
+            using (Aspose.Imaging.Image apngBase = Aspose.Imaging.Image.Create(apngOptions, frames[0].Width, frames[0].Height))
+            {
+                var apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)apngBase;
+                apng.RemoveAllFrames();
+                foreach (var frame in frames)
+                {
+                    apng.AddFrame(frame);
+                }
+                apng.Save();
+            }
+
+            foreach (var frame in frames)
+            {
+                frame.Dispose();
             }
         }
         catch (Exception ex)
@@ -81,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate an animated PNG that shows a logo at several sizes for responsive web design.
- * 2. When you want to convert a vector illustration into a lightweight APNG for use in mobile app splash screens with frame‑by‑frame scaling.
- * 3. When you have to create a multi‑resolution animation for an e‑learning module that displays the same SVG graphic at increasing detail levels.
- * 4. When you need to automate the production of a series of PNG frames from an SVG and bundle them into an APNG for email newsletters.
- * 5. When you are building a C# tool that rasterizes SVG icons at different pixel dimensions and assembles them into a single animated PNG for UI hover effects.
+ * 1. When you need to generate a responsive animated icon that scales smoothly on high‑DPI screens by converting an SVG into an APNG with frames at 200×200, 400×400, and 600×600 pixels.
+ * 2. When a web application must serve a single animated image file that shows the same graphic at increasing sizes for a step‑by‑step tutorial or product showcase.
+ * 3. When you want to create a lightweight animated logo for mobile apps where each frame is a rasterized version of the original vector at a specific resolution to balance quality and file size.
+ * 4. When an e‑learning platform requires an APNG that animates a diagram at different zoom levels, and you need to automate the SVG‑to‑APNG conversion in C# using Aspose.Imaging.
+ * 5. When a game UI needs an animated sprite generated from a vector asset, and you must produce multiple resolution frames in a single APNG to support various screen resolutions without storing separate files.
  */

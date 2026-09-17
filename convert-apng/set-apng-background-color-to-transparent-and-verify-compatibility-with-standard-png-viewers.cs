@@ -1,62 +1,37 @@
-// HOW-TO: Create Transparent Background APNG from PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Set APNG Background Color to Transparent and Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input/input.apng";
+        string outputPath = "output/output.apng";
 
         try
         {
-            // Load source image (single-frame raster image)
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Configure APNG creation options
-                ApngOptions createOptions = new ApngOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (ApngImage apng = (ApngImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                apng.BackgroundColor = Aspose.Imaging.Color.Transparent;
+
+                ApngOptions options = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha // support alpha channel
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Create APNG image with the same dimensions as the source
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    sourceImage.Width,
-                    sourceImage.Height))
-                {
-                    // Set background color to fully transparent
-                    apngImage.BackgroundColor = Color.Transparent;
-                    apngImage.HasBackgroundColor = true;
-
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
-
-                    // Add the source image as the first (and only) frame
-                    apngImage.AddFrame(sourceImage);
-
-                    // Save the APNG file
-                    apngImage.Save();
-                }
+                apng.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -68,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a static PNG into an animated PNG with a fully transparent canvas so it displays correctly in browsers and image viewers.
- * 2. When you want to generate APNG assets for a game UI where the background must be invisible to blend with underlying scenes.
- * 3. When an e‑commerce platform requires product images with transparent animation frames that still open in regular PNG viewers.
- * 4. When automating a build pipeline that creates transparent‑background APNGs from source PNGs for marketing banners.
- * 5. When testing compatibility of APNG files with standard PNG viewers by explicitly setting the background color to transparent using Aspose.Imaging in C#.
+ * 1. When you need to make an existing APNG file have a transparent background so it can be embedded on a website without showing a solid color block, using C# and Aspose.Imaging.
+ * 2. When converting game sprite animations stored as APNGs to transparent backgrounds to allow them to overlay on different game scenes, using Aspose.Imaging in a .NET application.
+ * 3. When preparing marketing assets such as animated banners in APNG format that must appear transparent in email clients, and you want to set the background programmatically with C#.
+ * 4. When generating APNG thumbnails for a photo gallery and need the background to be transparent to match the gallery’s dark or light theme, using Aspose.Imaging’s BackgroundColor property.
+ * 5. When verifying that an APNG saved with a transparent background is displayed correctly in standard PNG viewers and browsers, by loading, modifying, and saving the file with Aspose.Imaging in C#.
  */

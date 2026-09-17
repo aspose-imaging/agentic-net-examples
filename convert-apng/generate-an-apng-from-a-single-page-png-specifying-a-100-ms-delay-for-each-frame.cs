@@ -4,7 +4,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,8 +12,8 @@ class Program
     {
         try
         {
-            const string inputPath = "input.png";
-            const string outputPath = "output.apng";
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
 
             if (!File.Exists(inputPath))
             {
@@ -22,35 +21,21 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100u,
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    DefaultFrameTime = 100u
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    sourceImage.Width,
-                    sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apngImage.RemoveAllFrames();
-
-                    const int frameCount = 5;
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        apngImage.AddFrame(sourceImage, 100u);
-                    }
-
-                    apngImage.Save();
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
                 }
             }
         }
@@ -63,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple looping animation for a web banner by repeating a single PNG image with a consistent 100 ms frame interval using Aspose.Imaging in C#.
- * 2. When you want to programmatically create an APNG file for mobile app assets where each frame shows the same icon for a short duration to meet platform animation guidelines.
- * 3. When you are building a reporting tool that embeds animated PNGs and must produce the animation from a static chart image with a fixed frame delay without external tools.
- * 4. When you need to automate the conversion of a static PNG logo into an animated PNG sprite for game UI, ensuring each frame displays for exactly 0.1 seconds.
- * 5. When you are testing image processing pipelines and require a deterministic APNG with multiple identical frames and a known 100 ms delay to validate rendering performance.
+ * 1. When you need to convert a static PNG into an animated PNG for web banners that require a 100 ms frame interval.
+ * 2. When generating lightweight animated icons for a desktop application that only supports the APNG format.
+ * 3. When creating frame‑by‑frame animations from individual PNG assets for a game UI, ensuring each frame displays for exactly 0.1 seconds.
+ * 4. When automating the production of animated product previews where each frame must have a consistent delay using C# and Aspose.Imaging.
+ * 5. When building a server‑side service that receives a single PNG and returns an APNG with a fixed frame time for use in email newsletters.
  */

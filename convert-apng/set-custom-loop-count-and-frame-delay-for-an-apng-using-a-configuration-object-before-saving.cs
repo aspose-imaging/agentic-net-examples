@@ -1,42 +1,49 @@
-// HOW-TO: Set Custom Loop Count and Frame Delay for APNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create APNG with Custom Loop Count and Frame Delay in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\animated.apng.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Configure APNG options: custom loop count and frame delay
-            ApngOptions apngOptions = new ApngOptions
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Number of times the animation should loop (0 = infinite)
-                NumPlays = 4,
-                // Default frame duration in milliseconds
-                DefaultFrameTime = 150
-            };
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load source image and save as APNG with the configured options
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                image.Save(outputPath, apngOptions);
+                ApngOptions options = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // frame delay in milliseconds
+                    NumPlays = 5, // custom loop count
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                {
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need an animated PNG that repeats a specific number of times instead of looping forever, you can set the NumPlays property with Aspose.Imaging in C#.
- * 2. When creating a web banner where each frame should display for a precise duration, you can define DefaultFrameTime to control the frame delay of the APNG.
- * 3. When generating product showcase animations that must stop after a set number of cycles for compliance reasons, configuring the loop count ensures the animation ends as required.
- * 4. When converting a static PNG into an animated sequence and you want consistent timing across all frames, using ApngOptions lets you apply a uniform frame time before saving.
- * 5. When integrating animated PNGs into a mobile app and need to limit playback to conserve battery, setting a custom loop count and frame delay helps manage resource usage.
+ * 1. When you need to generate an animated PNG that repeats a specific number of times instead of looping forever.
+ * 2. When you want to control the speed of each frame in an APNG by setting a custom delay in milliseconds.
+ * 3. When integrating Aspose.Imaging into a C# application to convert a static PNG into an animated PNG with defined playback settings.
+ * 4. When creating lightweight web animations where precise loop counts and timing are required for user experience or branding guidelines.
+ * 5. When automating batch processing of images to produce APNG files with consistent frame timing and loop behavior for mobile or game assets.
  */

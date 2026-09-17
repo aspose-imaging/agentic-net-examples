@@ -13,54 +13,39 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG file paths
-            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+            string inputPath1 = "frame1.png";
+            string inputPath2 = "frame2.png";
+            string inputPath3 = "frame3.png";
+            string outputPath = "output\\animation.apng";
 
-            // Verify each input file exists
-            foreach (string path in inputPaths)
-            {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-            }
+            if (!File.Exists(inputPath1)) { Console.Error.WriteLine($"File not found: {inputPath1}"); return; }
+            if (!File.Exists(inputPath2)) { Console.Error.WriteLine($"File not found: {inputPath2}"); return; }
+            if (!File.Exists(inputPath3)) { Console.Error.WriteLine($"File not found: {inputPath3}"); return; }
 
-            // Hardcoded output APNG path (ensure it contains a directory)
-            string outputPath = "output\\animation.png";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain canvas dimensions
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            using (RasterImage img3 = (RasterImage)Image.Load(inputPath3))
             {
-                // Configure APNG creation options
-                ApngOptions createOptions = new ApngOptions
+                int width = img1.Width;
+                int height = img1.Height;
+
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // default frame duration in milliseconds
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 3 // custom loop count (0 = infinite)
+                    DefaultFrameTime = 100,
+                    NumPlays = 5,
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstImage.Width, firstImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, width, height))
                 {
-                    // Remove the default single frame
-                    apngImage.RemoveAllFrames();
-
-                    // Add each PNG as a frame
-                    foreach (string path in inputPaths)
-                    {
-                        using (RasterImage frame = (RasterImage)Image.Load(path))
-                        {
-                            apngImage.AddFrame(frame);
-                        }
-                    }
-
-                    // Save the assembled animation (output path already bound via FileCreateSource)
-                    apngImage.Save();
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(img1);
+                    apng.AddFrame(img2);
+                    apng.AddFrame(img3);
+                    apng.Save();
                 }
             }
         }
@@ -73,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge several PNG screenshots into a single APNG file for a product demo using C#.
- * 2. When you want to generate a looping animated PNG banner for a website by programmatically adding PNG frames with a custom loop count.
- * 3. When you have individual sprite PNG images and must create an APNG with a defined number of plays for a game UI.
- * 4. When you must produce an APNG email attachment that plays each frame for a set duration and stops after three repetitions.
- * 5. When you are building a C# desktop utility that converts a folder of PNG icons into an animated PNG with three loops for visual feedback.
+ * 1. When you need to combine a series of PNG screenshots into a single animated APNG for a product tutorial, this code creates the animation and sets it to play a specific number of times.
+ * 2. When generating lightweight animated icons for a desktop application, you can use this snippet to merge individual PNG frames into an APNG with a defined loop count and frame delay.
+ * 3. When building a web‑based slideshow that requires an APNG file instead of GIF for better color depth, the example shows how to load PNG assets and assemble them with custom playback settings in C#.
+ * 4. When automating the creation of animated badges for a CI/CD pipeline, the code demonstrates how to programmatically add PNG frames and control the number of repeats using Aspose.Imaging.
+ * 5. When preparing marketing assets that need a precise number of animation cycles, this sample lets you load PNG images, set the default frame time, and export a looping APNG using .NET.
  */

@@ -1,55 +1,52 @@
-// HOW-TO: Extract APNG Frames to Indexed JPEG Files Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Frames From APNG And Save As Indexed JPEGs In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.apng";
-            string outputDirectory = "output";
+            string outputDir = "output";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the APNG image
-            using (Image image = Image.Load(inputPath))
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames (pages)
-                ApngImage apng = image as ApngImage;
-                if (apng == null)
+                IMultipageImage multipage = apng as IMultipageImage;
+                if (multipage == null)
                 {
-                    Console.Error.WriteLine("The loaded image is not an APNG.");
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
                     return;
                 }
 
-                // Iterate through each frame and save as JPEG
-                for (int i = 0; i < apng.PageCount; i++)
+                int frameCount = multipage.PageCount;
+                for (int i = 0; i < frameCount; i++)
                 {
-                    // Get the frame (page)
-                    var frame = apng.Pages[i];
+                    using (Image frame = (Image)multipage.Pages[i])
+                    {
+                        string outputPath = Path.Combine(outputDir, $"frame_{i}.jpg");
+                        string outDir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrWhiteSpace(outDir))
+                        {
+                            Directory.CreateDirectory(outDir);
+                        }
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the frame as JPEG
-                    frame.Save(outputPath, new JpegOptions());
+                        JpegOptions jpegOptions = new JpegOptions();
+                        frame.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -62,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to break an animated PNG into individual JPEG images for use in a web gallery that only supports static JPEG thumbnails.
- * 2. When a game developer wants to convert each frame of an APNG sprite sheet into separate JPEG assets for faster loading on low‑memory devices.
- * 3. When a reporting tool must embed each animation frame as a JPEG in a PDF document that does not support APNG.
- * 4. When a batch‑processing pipeline extracts frames from user‑uploaded APNG files to generate indexed JPEG files for archival storage.
- * 5. When a mobile app requires frame‑by‑frame JPEG images from an APNG to apply custom filters or overlays in C#.
+ * 1. When you need to break an animated PNG into individual JPEG images for use in a web gallery that only supports static JPEG files.
+ * 2. When a game developer wants to convert each frame of an APNG sprite animation into separate JPEG assets for faster loading on low‑memory devices.
+ * 3. When a reporting tool must embed each frame of an animated chart saved as APNG into PDF pages that only accept JPEG images.
+ * 4. When a batch‑processing script has to archive every frame of an APNG as JPEG thumbnails with sequential filenames for easy indexing.
+ * 5. When a legacy system requires JPEG input, you can extract the APNG frames and rename them with their frame index to feed into the older pipeline.
  */

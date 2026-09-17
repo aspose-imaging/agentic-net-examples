@@ -1,41 +1,59 @@
-// HOW-TO: Convert Animated WebP to APNG with Custom Palette in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated WebP to APNG with Color Inversion in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.webp";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "Input\\animation.webp";
+            string outputPath = "Output\\modified.apng";
+
+            if (!File.Exists(inputPath))
             {
-                ApngOptions options = new ApngOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
+            {
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    Palette = new ColorPalette(new Color[]
-                    {
-                        Color.Red,
-                        Color.Green,
-                        Color.Blue
-                    })
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                image.Save(outputPath, options);
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, webp.Width, webp.Height))
+                {
+                    foreach (RasterImage frame in webp.Pages)
+                    {
+                        Rectangle rect = new Rectangle(0, 0, frame.Width, frame.Height);
+                        int[] pixels = frame.LoadArgb32Pixels(rect);
+                        for (int i = 0; i < pixels.Length; i++)
+                        {
+                            int argb = pixels[i];
+                            int a = (argb >> 24) & 0xFF;
+                            int r = (argb >> 16) & 0xFF;
+                            int g = (argb >> 8) & 0xFF;
+                            int b = argb & 0xFF;
+                            r = 255 - r;
+                            g = 255 - g;
+                            b = 255 - b;
+                            pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                        }
+                        frame.SaveArgb32Pixels(rect, pixels);
+                        apng.AddFrame(frame);
+                    }
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated image on a platform that only supports APNG, you can convert an animated WebP to APNG while applying a limited color palette for smaller file size.
- * 2. When creating a game asset pipeline that requires all sprites to use a specific three‑color palette, you can load animated WebP frames, replace their colors, and export them as APNG for consistent rendering.
- * 3. When optimizing email newsletters that allow animated PNGs but not WebP, you can transform the WebP animation into an APNG with a custom palette to meet the format restrictions and branding colors.
- * 4. When building a cross‑platform UI library that needs a unified animation format, you can programmatically convert user‑provided WebP animations to APNG and enforce a predefined palette to ensure visual consistency.
- * 5. When generating lightweight animated icons for a web dashboard, you can take an existing animated WebP, limit its colors to red, green, and blue, and save it as an APNG to reduce bandwidth while preserving animation.
+ * 1. When you need to display a WebP animation on platforms that only support APNG, you can convert the animated WebP to an APNG while applying a color inversion to match a dark theme.
+ * 2. When creating a visual effect that requires the original colors of an animated WebP to be reversed for a night‑mode UI, this code loads each frame, inverts its palette, and saves the result as an APNG.
+ * 3. When a game engine accepts APNG sprites but your assets are delivered as animated WebP files, you can batch‑process them to APNG with modified colors using Aspose.Imaging in C#.
+ * 4. When generating marketing GIF‑like animations for email newsletters that need transparent background and custom color styling, you can transform animated WebP files into APNG with inverted colors.
+ * 5. When automating a CI pipeline that validates image assets, you might need to convert animated WebP assets to APNG and apply a color shift to ensure they meet branding guidelines.
  */

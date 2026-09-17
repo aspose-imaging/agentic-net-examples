@@ -1,9 +1,10 @@
-// HOW-TO: Convert APNG to Animated GIF with Frame Delays in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert APNG to GIF with Frame Delays in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\animation.apng";
-            string outputPath = "Output\\animation.gif";
+            string inputPath = Path.Combine("Input", "animation.apng");
+            string outputPath = Path.Combine("Output", "animation.gif");
 
             if (!File.Exists(inputPath))
             {
@@ -24,8 +25,7 @@ class Program
 
             using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                GifOptions gifOptions = new GifOptions();
-                apng.Save(outputPath, gifOptions);
+                apng.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -37,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated PNG on platforms that only support GIF, you can convert the APNG to an animated GIF while preserving frame timing using Aspose.Imaging in C#.
+ * 1. When you need to display an animated PNG on platforms that only support GIF, you can convert the APNG to a GIF while preserving the original frame timing.
  * 2. When creating email newsletters that require animated images, you can transform APNG assets into GIFs to ensure compatibility with most email clients.
- * 3. When building a web application that generates user‑uploaded animations, you can standardize the output by converting uploaded APNG files to GIFs for easier browser rendering.
- * 4. When archiving animated graphics for legacy systems, you can use the code to convert APNG sequences to GIFs and embed the original frame delays in the GIF comment extension.
- * 5. When optimizing image pipelines for mobile apps that only decode GIF animations, you can programmatically convert APNG files to GIF format with Aspose.Imaging to maintain animation speed information.
+ * 3. When building a web service that receives APNG uploads and returns GIFs for legacy browsers, this code provides a simple C# conversion routine.
+ * 4. When generating thumbnail previews for an animation library that stores images as APNG, you can produce GIF previews that include the original frame delays.
+ * 5. When integrating animated graphics into a Windows Forms application that only renders GIF animations, you can convert APNG files to GIFs with embedded delay information using Aspose.Imaging.
  */
