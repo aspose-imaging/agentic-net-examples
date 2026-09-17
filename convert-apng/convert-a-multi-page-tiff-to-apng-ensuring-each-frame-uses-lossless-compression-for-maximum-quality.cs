@@ -3,32 +3,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
             string inputPath = "input.tif";
-            string outputPath = "output.apng";
+            string outputPath = "output\\output.apng";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
-            using (Image image = Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                // Save as APNG; PNG compression is lossless by default
-                image.Save(outputPath, new ApngOptions());
+                TiffImage tiff = (TiffImage)tiffImage;
+                TiffFrame firstFrame = tiff.Frames[0];
+                int width = firstFrame.Width;
+                int height = firstFrame.Height;
+
+                ApngOptions options = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage apng = (ApngImage)Image.Create(options, width, height))
+                {
+                    apng.RemoveAllFrames();
+
+                    foreach (TiffFrame frame in tiff.Frames)
+                    {
+                        apng.AddFrame((RasterImage)frame);
+                    }
+
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a scanned document as an animated image on a website without losing any detail, you can convert the multi‑page TIFF into a lossless APNG using C# and Aspose.Imaging.
- * 2. When creating a product catalog that includes high‑resolution page‑by‑page previews, converting the TIFF pages to an APNG ensures smooth animation while preserving original image quality.
- * 3. When archiving medical imaging records that are stored as multi‑page TIFFs, generating a lossless APNG allows easy playback in browsers while maintaining diagnostic fidelity.
- * 4. When developing a desktop application that shows step‑by‑step tutorials from a multi‑page TIFF, converting to APNG provides a lightweight, animated format that retains all pixel data.
- * 5. When preparing animated graphics for mobile apps from multi‑page TIFF source files, using C# to produce a lossless APNG keeps the file size reasonable and ensures crisp visuals on high‑density screens.
+ * 1. When you need to turn a scanned multi‑page document saved as TIFF into a high‑quality animated PNG for web display without losing image detail.
+ * 2. When an application must generate a lossless APNG from a series of TIFF frames for use in mobile games or UI animations.
+ * 3. When you have archival TIFF images and want to create a lightweight, transparent‑background animation for email newsletters.
+ * 4. When a reporting tool requires converting multi‑page TIFF charts into an APNG to embed in HTML dashboards while preserving exact colors.
+ * 5. When automating batch processing of TIFF files to APNG format in a C# service that must retain full resolution and alpha channel information.
  */
