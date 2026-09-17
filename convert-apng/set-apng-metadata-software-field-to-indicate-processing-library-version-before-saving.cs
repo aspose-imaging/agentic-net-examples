@@ -1,42 +1,40 @@
-// HOW-TO: Add Software Metadata to APNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Software Metadata to APNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\input.png";
+        string outputPath = "Output\\output.apng";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.apng";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
             {
                 ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    DefaultFrameTime = 100
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, source.Width, source.Height))
                 {
                     apng.RemoveAllFrames();
-                    apng.AddFrame(sourceImage);
+                    apng.AddFrame(source);
                     apng.Save();
                 }
             }
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed the Aspose.Imaging library version into an APNG file so downstream tools can identify which version generated the animation.
- * 2. When creating animated PNGs from static PNG frames and you want to include a “Software” tag to comply with PNG metadata standards.
- * 3. When generating APNGs in a CI/CD pipeline and must record the build number or library version in the image metadata for audit trails.
- * 4. When delivering APNG assets to clients and want to provide traceability by adding a custom software identifier to the file.
- * 5. When processing large batches of PNGs into APNGs and need to programmatically set the Software metadata field to avoid manual editing.
+ * 1. When you need to embed the library version into an APNG file so downstream tools can identify which software generated the animation.
+ * 2. When converting a PNG sequence to an animated APNG and want to include a “Software” tag for compliance with image metadata standards.
+ * 3. When generating APNGs on a server and must provide traceability by recording the Aspose.Imaging version in the file’s metadata.
+ * 4. When creating animated graphics for a web application and need to ensure the “Software” field is set for debugging or analytics purposes.
+ * 5. When automating image processing pipelines and want each output APNG to carry metadata that indicates the processing library used.
  */
