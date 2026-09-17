@@ -1,39 +1,31 @@
-// HOW-TO: Export APNG to Animated GIF Preserving Frame Order in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert APNG Animation To Animated GIF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output\\output.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG animation
-            using (Image apngImage = Image.Load(inputPath))
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Save as animated GIF, preserving frame order
-                var gifOptions = new GifOptions
-                {
-                    // FullFrame ensures each frame is saved as a full image (optional, but keeps animation correct)
-                    FullFrame = true
-                };
-                apngImage.Save(outputPath, gifOptions);
+                GifOptions options = new GifOptions();
+                apng.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -45,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a web‑optimized APNG sprite animation into a widely supported animated GIF for email newsletters.
- * 2. When an application must generate GIF previews of user‑uploaded APNG files while keeping the original sequence of frames.
- * 3. When a game asset pipeline requires transforming APNG character animations into GIFs for legacy platforms that only read GIF.
- * 4. When a reporting tool needs to embed animated graphics and must convert APNG charts to GIF without losing frame order.
- * 5. When a batch‑processing script has to archive APNG animations as GIFs for long‑term storage while preserving the animation timing.
+ * 1. When you need to display a web‑based APNG animation on platforms that only support animated GIFs, you can use this code to convert the file while keeping the original frame sequence.
+ * 2. When a mobile app requires GIF assets for compatibility with older iOS or Android versions, the snippet lets you transform existing APNG assets into GIFs without losing animation timing.
+ * 3. When automating a batch process that archives user‑uploaded APNG stickers as GIFs for email newsletters, this example shows how to load each APNG and save it as an animated GIF in C#.
+ * 4. When integrating Aspose.Imaging into a server‑side service that generates preview thumbnails, you can first convert the APNG to GIF to simplify further processing or playback.
+ * 5. When migrating a legacy graphics pipeline that only understands GIF animation, the code provides a straightforward way to preserve the original frame order while converting APNG files to GIF format.
  */
