@@ -1,48 +1,71 @@
-// HOW-TO: Batch Convert SVG Files to APNG with Default Frame Delay in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert SVG Files to APNG Animations in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputSvgs";
-            string outputDir = @"C:\OutputApngs";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
-
-            // Default frame delay in milliseconds
-            const uint defaultFrameDelay = 100;
-
-            foreach (string inputPath in svgFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Construct the output file path with .png extension (APNG)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image and save it as an APNG with the default frame time
-                using (Image image = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new ApngOptions() { DefaultFrameTime = defaultFrameDelay });
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        svgImage.Save(ms, new PngOptions());
+                        ms.Position = 0;
+
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            ApngOptions apngOptions = new ApngOptions
+                            {
+                                Source = new FileCreateSource(outputPath, false)
+                            };
+
+                            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
+                            {
+                                apng.RemoveAllFrames();
+                                apng.AddFrame(raster);
+                                apng.Save();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -55,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate animated PNG icons from a collection of SVG assets for a web dashboard.
- * 2. When an automated build process must convert design‑team SVG illustrations into APNGs for mobile app resources.
- * 3. When a reporting tool requires each SVG chart to be saved as an APNG with a consistent frame timing for slide shows.
- * 4. When migrating legacy SVG animations to a format supported by browsers that only display APNG, using C# batch conversion.
- * 5. When creating a sprite sheet of multiple SVG logos as separate APNG files with a uniform default frame delay for game development.
+ * 1. When you need to generate animated PNGs from a collection of vector icons for a web UI, you can batch‑process the SVG assets into APNG files using C# and Aspose.Imaging.
+ * 2. When an application must export user‑drawn SVG diagrams as lightweight animations for email newsletters, this code converts each SVG to an APNG with a default frame delay automatically.
+ * 3. When a game development pipeline requires converting SVG sprites into APNG sequences for in‑game animations, the script processes all files in a folder without manual intervention.
+ * 4. When a CI/CD build step has to transform design‑team SVG assets into APNG assets for mobile apps, the batch conversion ensures consistent frame timing across all images.
+ * 5. When a reporting tool needs to embed animated graphics generated from SVG charts, this code creates individual APNG files from the source SVGs in one go.
  */
