@@ -156,6 +156,8 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
 | 🤖 Agent API | [agent.json](/.well-known/agent.json) |
 
+## Capability Matrix
+
 | Category                              | Examples | Key APIs                                                                                 |
 |---------------------------------------|----------|------------------------------------------------------------------------------------------|
 | conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                |
@@ -199,84 +201,5 @@ The **Vector Formats** section contains a snippet that loads a `MetafileImage` (
 ## Why Aspose.Imaging for .NET
 This library covers 17 real‑world image‑processing scenarios—from format conversion (APNG, CDR, DICOM, EPS, SVG, WebP, WMF/EMF, etc.) to filters, kernel operations, merging and drawing—so you won’t have to stitch together multiple third‑party tools. Because Aspose.Imaging for .NET is a UI‑agnostic backend API, it runs everywhere .NET runs (ASP.NET Core, console apps, Azure Functions, Docker containers) without requiring a display or UI framework. You can get a free temporary license to evaluate it today, and you’ll find production customers and success‑story references on the Aspose website if you need proof of reliability. For organizations that need implementation assistance, paid consulting services are available, making it easier to integrate the library into larger products.
 
-| Category                              | Examples | Key APIs                                                                 |
-|---------------------------------------|----------|--------------------------------------------------------------------------|
-| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                               |
-| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                           |
-| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions          |
-| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions           |
-| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                      |
-| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                       |
-| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics               |
-| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions|
-| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                      |
-| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                       |
-| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                 |
-| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage |
-| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions      |
-| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                      |
-| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions           |
-| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                    |
-| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions            |
-
-| Category                              | Examples | Key APIs                                                                                     |
-|---------------------------------------|----------|----------------------------------------------------------------------------------------------|
-| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                    |
-| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                                                |
-| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions                              |
-| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions                               |
-| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                                          |
-| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                                            |
-| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics                                   |
-| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions                    |
-| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                                           |
-| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                                            |
-| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                                      |
-| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage         |
-| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions                           |
-| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                                           |
-| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions                               |
-| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                                         |
-| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions                                 |
-
-| Category                              | Examples | Key APIs                                                                                 |
-|---------------------------------------|----------|------------------------------------------------------------------------------------------|
-| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                |
-| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                                            |
-| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions                         |
-| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions                           |
-| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                                      |
-| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                                       |
-| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics                               |
-| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions               |
-| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                                      |
-| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                                        |
-| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                                 |
-| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage    |
-| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions                      |
-| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                                      |
-| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions                           |
-| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                                    |
-| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions                            |
-
-| Category                              | Examples | Key APIs                                                                                     |
-|---------------------------------------|----------|----------------------------------------------------------------------------------------------|
-| conversion                            | 162      | ApngFrame, ApngImage, BmpOptions, CdrImage                                                    |
-| convert-apng                          | 51       | ApngFrame, ApngImage, ApngOptions, BmpOptions                                                |
-| convert-cdr                           | 30       | CdrImage, CdrLoadOptions, CdrRasterizationOptions, JpegOptions                              |
-| convert-cmx-images                    | 34       | BmpOptions, CmxImage, CmxLoadOptions, CmxRasterizationOptions                               |
-| convert-dicom-images                  | 30       | ApngOptions, DicomImage, DicomOptions, LoadOptions                                          |
-| convert-eps-images                    | 60       | ApngOptions, BmpOptions, EpsImage, EpsLoadOptions                                            |
-| convert-open-document-graphics        | 120      | BmpImage, BmpOptions, GaussianBlurFilterOptions, Graphics                                   |
-| convert-raster-image                  | 139      | BmpImage, BmpOptions, ConvolutionFilterOptions, GaussianBlurFilterOptions                  |
-| convert-svg-to-raster-images          | 40       | BmpImage, BmpOptions, Graphics, Html5CanvasOptions                                          |
-| convert-webp-images                   | 30       | GifImage, GifOptions, JpegOptions, PdfCoreOptions                                            |
-| converting-wmf-and-emf                | 29       | BmpImage, BmpOptions, EmfImage, EmfRasterizationOptions                                      |
-| image-and-photo-filters               | 148      | AutoMaskingGraphCutOptions, BigTiffImage, BilateralSmoothingFilterOptions, BmpImage        |
-| kernel-filters                        | 465      | ApngFrame, ApngImage, ApngOptions, BilateralSmoothingFilterOptions                           |
-| manipulate-different-image-file-formats| 602     | BigTiffImage, BigTiffOptions, BmpImage, BmpOptions                                           |
-| manipulating-images                   | 425      | ApngFrame, ApngImage, ApngOptions, AutoMaskingGraphCutOptions                               |
-| merge-images                          | 135      | ApngImage, ApngOptions, BigTiffImage, BigTiffOptions                                        |
-| working-with-drawing-images           | 401      | ApngOptions, BmpImage, BmpOptions, ConvolutionFilterOptions                                 |
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*
