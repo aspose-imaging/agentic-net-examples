@@ -1,9 +1,8 @@
-// HOW-TO: Convert Single‑Page CDR to High‑Quality JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Single Page CDR to High Quality JPG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -11,37 +10,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample.jpg";
+            string inputPath = "input.cdr";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cache data to avoid further stream reads
-                cdrImage.CacheData();
-
-                // Get the first (and only) page
-                var page = (CdrImagePage)cdrImage.Pages[0];
-
-                // Configure high‑quality JPEG options
-                var jpegOptions = new JpegOptions
+                var options = new JpegOptions
                 {
-                    Quality = 100 // maximum quality
+                    Quality = 100
                 };
-
-                // Save the page as a JPEG file
-                page.Save(outputPath, jpegOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution JPEG preview of a CorelDRAW (CDR) design for web or print use.
- * 2. When an application must convert legacy single‑page CDR files to JPEG format for inclusion in a photo gallery or CMS.
- * 3. When a reporting system requires embedding a high‑quality image of a CDR page into PDF or Word documents.
- * 4. When a digital asset management workflow needs to create thumbnail JPEGs from single‑page CDR artwork automatically.
- * 5. When a client wants to export a CorelDRAW illustration as a maximum‑quality JPEG for marketing or presentation materials.
+ * 1. When a developer needs to generate a printable JPEG from a CorelDRAW single‑page design for web preview.
+ * 2. When an application must batch‑convert CDR assets to JPEGs with maximum quality for a digital asset management system.
+ * 3. When a reporting tool requires embedding a high‑resolution JPEG version of a CDR diagram into PDF reports.
+ * 4. When a legacy workflow needs to transform a CDR file into a JPEG for email attachment without losing detail.
+ * 5. When a mobile app backend must serve a JPEG thumbnail of a CDR illustration while preserving full color fidelity.
  */
