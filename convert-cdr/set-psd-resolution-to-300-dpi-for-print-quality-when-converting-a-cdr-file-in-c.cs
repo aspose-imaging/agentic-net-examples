@@ -1,4 +1,4 @@
-// HOW-TO: Convert CDR to PSD with 300 DPI Resolution in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CDR to PSD With 300 DPI Resolution In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,33 +9,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.psd";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.cdr");
+            string outputPath = Path.Combine("Output", "sample.psd");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options with 300 DPI resolution
-                PsdOptions psdOptions = new PsdOptions
+                using (PsdOptions options = new PsdOptions())
                 {
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0)
-                };
-
-                // Save as PSD with the specified options
-                cdr.Save(outputPath, psdOptions);
+                    options.ResolutionSettings = new ResolutionSetting(300, 300);
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to export a CorelDRAW (CDR) design to a Photoshop PSD file for print production, setting the resolution to 300 DPI ensures high‑quality output.
- * 2. When automating a workflow that converts client‑provided CDR artwork into PSDs for a pre‑press pipeline, you must preserve print‑ready resolution.
- * 3. When integrating Aspose.Imaging into a C# application that generates marketing materials, you may need to convert vector CDR files to raster PSDs at 300 DPI for accurate color and detail.
- * 4. When creating a batch conversion tool for a design agency, specifying 300 DPI in the PSD options guarantees that all converted files meet standard print specifications.
- * 5. When developing a server‑side service that receives CDR files and returns PSDs for downstream editing, setting the resolution to 300 DPI avoids scaling issues in Photoshop.
+ * 1. When you need to prepare a CorelDRAW (CDR) illustration for high‑quality printing by converting it to a Photoshop PSD file with a 300 DPI resolution using C#.
+ * 2. When an automated workflow must generate print‑ready PSD assets from CDR source files without manual resizing, ensuring the correct DPI for press standards.
+ * 3. When integrating Aspose.Imaging into a .NET application to batch‑process CDR designs and output them as PSDs calibrated for 300 DPI to match corporate branding guidelines.
+ * 4. When a designer wants to preserve vector details from a CDR file while delivering a raster PSD at print‑grade resolution for further editing in Photoshop.
+ * 5. When a server‑side service converts user‑uploaded CDR files to PSD format and must set the resolution to 300 DPI to meet publishing requirements.
  */

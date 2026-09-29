@@ -1,8 +1,8 @@
-// HOW-TO: Convert Multi‑Page CDR to Separate PSD Files with Color Depth in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page CDR to Separate PSD Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
@@ -11,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputDir = "output";
+            string inputPath = "Input\\sample.cdr";
+            string outputDir = "Output";
 
             if (!File.Exists(inputPath))
             {
@@ -22,33 +22,33 @@ class Program
 
             Directory.CreateDirectory(outputDir);
 
-            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int pageIndex = 0;
-                foreach (var pageObj in cdr.Pages)
+                if (image is IMultipageImage multipage)
                 {
-                    var page = (CdrImagePage)pageObj;
-                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.psd");
+                    for (int i = 0; i < multipage.PageCount; i++)
+                    {
+                        var page = multipage.Pages[i] as Image;
+                        if (page == null) continue;
+
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.psd");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        using (var options = new PsdOptions())
+                        {
+                            page.Save(outputPath, options);
+                        }
+                    }
+                }
+                else
+                {
+                    string outputPath = Path.Combine(outputDir, "page_1.psd");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    PsdOptions psdOptions = new PsdOptions
+                    using (var options = new PsdOptions())
                     {
-                        CompressionMethod = CompressionMethod.RLE,
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        }
-                    };
-
-                    int bpp = page.BitsPerPixel;
-                    int channels = bpp == 32 ? 4 : (bpp == 8 ? 1 : 3);
-                    psdOptions.ChannelsCount = (short)channels;
-                    psdOptions.ChannelBitsCount = (short)(bpp / channels);
-                    psdOptions.ColorMode = channels == 1 ? ColorModes.Grayscale : ColorModes.Rgb;
-
-                    page.Save(outputPath, psdOptions);
-                    pageIndex++;
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -61,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a CorelDRAW (CDR) document as a high‑fidelity Photoshop (PSD) file for further editing in Photoshop.
- * 2. When an automated workflow must convert multi‑page CDR designs into separate PSD files while preserving the original bits‑per‑pixel color information.
- * 3. When a batch process has to generate PSD assets from a library of CDR files for a print‑ready pipeline without losing grayscale or RGB color modes.
- * 4. When integrating Aspose.Imaging in a C# application to rasterize vector pages of a CDR into PSD files with RLE compression for reduced file size.
- * 5. When a developer wants to programmatically split a multi‑page CDR into individual PSD files, maintaining the exact color depth and channel count for each page.
+ * 1. When a designer needs to extract each page of a multi‑page CorelDRAW (CDR) file as an individual Photoshop (PSD) document for further editing.
+ * 2. When an automated batch process must convert CDR files into separate PSD files while preserving the original color depth.
+ * 3. When a publishing workflow requires splitting vector CDR artwork into raster PSD pages for print preparation.
+ * 4. When a migration tool has to transform a portfolio of CDR pages into standalone PSD files to integrate with Photoshop‑based pipelines.
+ * 5. When a cloud service processes user‑uploaded CDR files and needs to deliver each page as a separate PSD for downstream image analysis.
  */

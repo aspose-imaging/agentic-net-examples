@@ -1,61 +1,68 @@
-// HOW-TO: Batch Convert CDR Files to JPG With Timestamped Filenames in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to JPG with Timestamped Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
-class Program
+namespace BatchCdrToJpg
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputCdr";
-        string outputDirectory = @"C:\OutputJpg";
-
-        try
+        static void Main()
         {
-            // Get all CDR files in the input directory
-            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-            foreach (string inputPath in cdrFiles)
+            try
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputDirectory = "InputCdrFiles";
+                string outputDirectory = "OutputJpgFiles";
+
+                // Ensure output base directory exists
+                Directory.CreateDirectory(outputDirectory);
+
+                // Get all CDR files in the input directory
+                string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr", SearchOption.TopDirectoryOnly);
+
+                foreach (string inputPath in cdrFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                // Build output file name with timestamp
-                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{timestamp}.jpg";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Build output file name with timestamp
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+                    string outputFileName = $"{fileNameWithoutExt}_{timestamp}.jpg";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-                {
-                    // Save as JPEG
-                    JpegOptions jpegOptions = new JpegOptions();
-                    cdrImage.Save(outputPath, jpegOptions);
+                    // Load CDR and save as JPG
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var jpegOptions = new JpegOptions();
+                        image.Save(outputPath, jpegOptions);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive a folder of CorelDRAW (.cdr) drawings as JPEG images and ensure each file has a unique timestamped name for version tracking.
- * 2. When an automated build process must generate web‑ready thumbnails from CDR assets and store them with timestamps to avoid filename collisions.
- * 3. When a migration script converts legacy CDR design files to JPEG format for a content management system that requires timestamped filenames for audit trails.
- * 4. When a desktop application processes user‑uploaded CDR files in bulk, saving them as JPEGs with timestamps to preserve the original filenames while indicating conversion time.
- * 5. When a scheduled job periodically converts newly added CDR files to JPEG and appends a timestamp to each output to support incremental backups.
+ * 1. When you need to automatically transform a folder of CorelDRAW (.cdr) designs into web‑ready JPEG images for publishing.
+ * 2. When you want each exported JPEG to retain the original name plus a unique timestamp to avoid overwriting previous versions.
+ * 3. When a server‑side C# service must process incoming CDR assets and store them in a separate output directory for downstream workflows.
+ * 4. When you are building a migration script that converts legacy vector files to raster format while preserving file organization.
+ * 5. When you require a simple, exception‑handled batch routine that loads, converts, and saves images using Aspose.Imaging without manual intervention.
  */

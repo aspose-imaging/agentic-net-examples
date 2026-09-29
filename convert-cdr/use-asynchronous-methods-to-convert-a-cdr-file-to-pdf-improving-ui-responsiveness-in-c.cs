@@ -1,53 +1,33 @@
-// HOW-TO: Asynchronously Convert CDR to PDF in C# for Responsive UI (Aspose.Imaging for .NET)
+// HOW-TO: Asynchronously Convert CorelDRAW CDR to PDF in C# for Responsive UI (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "sample.cdr";
-            string outputPath = "sample.pdf";
+            string inputPath = "input.cdr";
+            string outputPath = "output.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Perform the conversion on a background thread to keep UI responsive
             await Task.Run(() =>
             {
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Get the first page (index 0)
-                    var page = (CdrImagePage)cdrImage.Pages[0];
-
-                    // Configure PDF rasterization options
                     var pdfOptions = new PdfOptions();
-                    var rasterOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
-                    };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the page as PDF
-                    page.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
                 }
             });
         }
@@ -60,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows Forms or WPF application needs to let users open CorelDRAW files and export them to PDF without freezing the interface.
- * 2. When a server‑side service processes uploaded CDR designs and generates PDF previews while keeping the request thread free.
- * 3. When a batch‑processing tool converts large numbers of CDR pages to PDF in the background to maintain overall application responsiveness.
- * 4. When a mobile or cross‑platform .NET app must render a specific CDR page as a PDF document while performing other UI tasks.
- * 5. When an automated workflow requires rasterizing a CorelDRAW page with specific rendering options (e.g., no smoothing) and saving it as PDF without blocking the main thread.
+ * 1. When a Windows Forms application needs to load large CorelDRAW files without freezing the interface, this async conversion lets the UI stay responsive while generating a PDF.
+ * 2. When a web service processes user‑uploaded CDR designs and must return PDF previews quickly, the code runs the conversion on a background thread to avoid blocking request threads.
+ * 3. When an automated batch job creates PDF archives from a folder of CDR assets but must continue handling other tasks, the asynchronous pattern ensures the job doesn’t monopolize CPU resources.
+ * 4. When integrating Aspose.Imaging into a WPF editor that lets users edit vector graphics and export them as PDFs, using Task.Run keeps the export operation smooth and cancellable.
+ * 5. When building a mobile‑friendly .NET MAUI app that converts design files to PDF on the device, the async approach prevents the app from becoming unresponsive during the conversion.
  */
