@@ -1,4 +1,4 @@
-// HOW-TO: Convert Multi‑Page CDR to Separate PDF Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Each Page from a Multi‑Page CDR to Separate PDFs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,45 +9,33 @@ class Program
 {
     static void Main()
     {
+        string inputPath = "input.cdr";
+        string outputDirectory = "output";
+
         try
         {
-            // Hardcoded input CDR file path
-            string inputPath = @"C:\Data\sample.cdr";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Iterate through each page in the CDR file
-                for (int i = 0; i < cdrImage.PageCount; i++)
+                if (image is not IMultipageImage multipageImage)
                 {
-                    // Retrieve the specific page
-                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
+                    Console.Error.WriteLine("The loaded file is not a multipage image.");
+                    return;
+                }
 
-                    // Prepare output PDF file path for the current page
-                    string outputPath = $@"C:\Data\output\page{i}.pdf";
-
-                    // Ensure the output directory exists
+                int pageNumber = 0;
+                foreach (var page in multipageImage.Pages)
+                {
+                    pageNumber++;
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.pdf");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set up PDF options with rasterization settings matching the page size
-                    PdfOptions pdfOptions = new PdfOptions();
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
-                    };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the individual page as a PDF
+                    var pdfOptions = new PdfOptions();
                     page.Save(outputPath, pdfOptions);
                 }
             }
@@ -61,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to export each page of a multi‑page CorelDRAW (CDR) document as an individual PDF for client review or printing.
- * 2. When an automated workflow must archive every vector page of a CDR file as separate PDF files for document management systems.
- * 3. When a batch conversion tool has to split a large CDR project into single‑page PDFs to reduce file size for web publishing.
- * 4. When a .NET application needs to generate PDF previews of each CDR page for a preview pane in a custom UI.
- * 5. When a reporting service must extract and rasterize each page of a CDR file into PDFs with exact page dimensions for compliance documentation.
+ * 1. When you need to split a multi‑page CorelDRAW (CDR) document into individual PDF files for separate printing or distribution.
+ * 2. When an automated workflow must convert each vector page of a CDR file into PDFs for downstream processing such as OCR or digital signing.
+ * 3. When a web service receives uploaded CDR files and must store each page as a standalone PDF for easy preview in browsers.
+ * 4. When a desktop application has to archive each page of a complex CDR design as separate PDF pages to meet regulatory document‑management requirements.
+ * 5. When a batch job processes a folder of CDR files and extracts every page into PDFs to integrate with a document‑management system that only accepts PDF format.
  */
