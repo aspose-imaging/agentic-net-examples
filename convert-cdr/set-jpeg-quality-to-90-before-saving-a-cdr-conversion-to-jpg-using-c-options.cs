@@ -3,54 +3,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+namespace CdrToJpgConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.jpg";
-
-        if (!File.Exists(inputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        try
-        {
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            try
             {
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
-                };
+                string inputPath = "input.cdr";
+                string outputPath = "output.jpg";
 
-                cdr.Save(outputPath, jpegOptions);
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = 90
+                    };
+                    image.Save(outputPath, jpegOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to generate web‑ready JPEG previews of CorelDRAW (.cdr) files with a specific compression quality of 90.
- * 2. When an automated build pipeline must batch‑convert CDR assets to JPEGs while preserving the original dimensions and a white background.
- * 3. When a desktop application requires exporting vector drawings to JPEG for email attachment, ensuring consistent visual quality across different devices.
- * 4. When a content management system stores user‑uploaded CorelDRAW files and needs to create thumbnail JPEGs with controlled quality for faster loading.
- * 5. When a reporting tool extracts pages from CDR documents and saves them as high‑quality JPEG images for inclusion in PDF reports.
+ * 1. When you need to generate web‑ready preview images from CorelDRAW files while preserving visual fidelity by setting JPEG quality to 90.
+ * 2. When an automated build pipeline must batch‑convert CDR assets to JPEG for inclusion in a mobile app with consistent compression settings.
+ * 3. When a digital asset management system imports user‑uploaded CDR designs and stores them as high‑quality JPEG thumbnails for quick browsing.
+ * 4. When a reporting tool creates printable PDFs that embed JPEG versions of CDR diagrams, requiring a specific quality level to balance size and clarity.
+ * 5. When a cloud service processes design files on‑the‑fly, converting CDR to JPEG with a predefined quality to meet client‑specified image standards.
  */
