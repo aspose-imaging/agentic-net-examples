@@ -1,34 +1,30 @@
-// HOW-TO: Convert CMX Image From URL To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX Image From Stream To PDF And Write To Response In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Net;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input URL and output file path
-        string inputUrl = "https://example.com/sample.cmx";
-        string outputPath = "C:\\Temp\\output.pdf";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Download the CMX image into a network stream
-            using (WebClient webClient = new WebClient())
-            using (Stream networkStream = webClient.OpenRead(inputUrl))
+            // Placeholder for network stream containing CMX data
+            using (MemoryStream networkStream = new MemoryStream())
             {
-                // Load the image from the network stream
+                // Load CMX image from the stream
                 using (Image image = Image.Load(networkStream))
                 {
-                    // Save the image as PDF to the output file stream
-                    using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
+                    // Prepare PDF options
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        image.Save(outputStream, new PdfOptions());
+                        // Write PDF to response stream (here using standard output as example)
+                        Stream responseStream = Console.OpenStandardOutput();
+                        image.Save(responseStream, pdfOptions);
                     }
                 }
             }
@@ -42,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to download a CMX vector file from a web service and generate a PDF for client download.
- * 2. When integrating legacy CorelDRAW CMX assets into a web application that serves PDFs to users.
- * 3. When automating batch conversion of network‑hosted CMX diagrams to PDF for archival purposes.
- * 4. When building an API endpoint that receives a CMX URL, converts it to PDF, and streams the result back to the caller.
- * 5. When creating a server‑side process that transforms CMX design files into printable PDF documents without saving intermediate files locally.
+ * 1. When a web service receives a CMX drawing over HTTP and must return it as a PDF document to the client.
+ * 2. When an API needs to transform legacy CorelDRAW CMX files stored in a cloud storage stream into PDF for downstream processing.
+ * 3. When generating on‑the‑fly PDF reports from CMX graphics streamed from a remote server without saving intermediate files.
+ * 4. When integrating Aspose.Imaging into an ASP.NET controller to convert uploaded CMX data directly to PDF and send it back in the HTTP response.
+ * 5. When building a microservice that consumes CMX image bytes from a message queue, converts them to PDF, and streams the result to another service.
  */
