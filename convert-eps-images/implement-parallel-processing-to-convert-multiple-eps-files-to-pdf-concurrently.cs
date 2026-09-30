@@ -1,60 +1,52 @@
-// HOW-TO: Convert Multiple EPS Files to PDF Concurrently Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple EPS Files to PDF in Parallel Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of EPS files to convert
-            string[] inputPaths = {
-                "Samples/input1.eps",
-                "Samples/input2.eps",
-                "Samples/input3.eps"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Process each file in parallel
-            Parallel.ForEach(inputPaths, inputPath =>
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.eps", SearchOption.TopDirectoryOnly);
+
+            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path
-                string outputDirectory = "Output";
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image
-                using (var image = (EpsImage)Image.Load(inputPath))
+                using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
                 {
-                    // Set PDF options (optional compliance setting)
-                    var pdfOptions = new PdfOptions
-                    {
-                        PdfCoreOptions = new PdfCoreOptions
-                        {
-                            PdfCompliance = PdfComplianceVersion.PdfA1b
-                        }
-                    };
-
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
+                    PdfOptions pdfOptions = new PdfOptions();
+                    epsImage.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             });
         }
         catch (Exception ex)
@@ -66,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a batch of vector EPS graphics needs to be delivered as PDF documents for printing or archiving, a developer can use this code to convert them in parallel, speeding up the workflow.
- * 2. When an automated server process must generate PDF reports from EPS logos or diagrams while handling many files simultaneously, this example shows how to achieve high throughput with Aspose.Imaging.
- * 3. When a desktop application needs to provide users with a fast “Export all EPS to PDF” feature without freezing the UI, the parallel conversion pattern can be applied.
- * 4. When a cloud‑based microservice processes uploaded EPS files and must store them as PDF/A‑1b compliant PDFs for compliance, this code demonstrates the required steps.
- * 5. When a migration script moves legacy EPS assets to a PDF library and wants to utilize multiple CPU cores to reduce conversion time, the parallel loop offers an efficient solution.
+ * 1. When a design team needs to quickly batch‑convert a large collection of EPS artwork into PDF for client review, this code speeds up the process by using parallel execution.
+ * 2. When an automated build pipeline must generate PDF documentation from EPS diagrams without slowing down the build, the parallel conversion ensures efficient resource utilization.
+ * 3. When a web service receives multiple EPS uploads and must return PDF versions instantly, this snippet demonstrates how to handle the conversions concurrently in C#.
+ * 4. When migrating legacy EPS assets to a PDF‑based archive, the code lets you process thousands of files simultaneously, reducing migration time.
+ * 5. When integrating Aspose.Imaging into a Windows service that monitors an input folder for new EPS files, the parallel loop converts each new file to PDF as soon as it appears.
  */

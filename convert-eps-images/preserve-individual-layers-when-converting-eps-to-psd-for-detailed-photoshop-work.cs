@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS to PSD with Layer Preservation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD with Separate Layers Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,43 +7,42 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\sample.eps";
-        string outputPath = @"C:\temp\sample.psd";
-
         try
         {
-            // Verify that the EPS source file exists
+            string inputPath = Path.Combine("Input", "sample.eps");
+            string outputPath = Path.Combine("Output", "sample.psd");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD saving options – default settings preserve layers
                 var psdOptions = new PsdOptions
                 {
-                    // Example settings (optional, can be adjusted as needed)
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                    Version = 6
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    },
+                    VectorizationOptions = new PsdVectorizationOptions
+                    {
+                        VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
+                    }
                 };
 
-                // Save as PSD, preserving layers
                 image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to import vector artwork from an EPS file into Photoshop while keeping each element as a separate layer for further editing.
- * 2. When an automated build process must batch‑convert EPS assets to PSD files so that downstream graphics pipelines can manipulate layers programmatically.
- * 3. When a web service receives EPS uploads and must deliver PSD versions that retain editable layers for client‑side Photoshop workflows.
- * 4. When a migration script moves legacy EPS resources into a Photoshop‑based asset library without flattening the artwork.
- * 5. When a C# application integrates Aspose.Imaging to preserve layer structure while converting EPS logos to PSD for high‑resolution print preparation.
+ * 1. When you need to edit a vector EPS artwork in Photoshop while keeping each element on its own layer for precise adjustments.
+ * 2. When automating a workflow that converts print‑ready EPS files to layered PSDs for a design team that uses C# and Aspose.Imaging.
+ * 3. When preserving the original vector data as separate PSD layers is required to apply layer‑specific effects or masks in Photoshop.
+ * 4. When generating PSD previews from EPS logos on a server, ensuring each graphic component remains editable in downstream C# applications.
+ * 5. When migrating legacy EPS assets to a layered Photoshop format without flattening, allowing developers to programmatically maintain editability in .NET projects.
  */
