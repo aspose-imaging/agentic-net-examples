@@ -1,47 +1,44 @@
-// HOW-TO: Convert EPS to PSD with Separate Layers Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD With Separate Layers Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.psd";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (var image = (EpsImage)Image.Load(inputPath))
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.psd";
+
+            if (!File.Exists(inputPath))
             {
-                var psdOptions = new PsdOptions();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                var vectorRasterOptions = new VectorRasterizationOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                using (PsdOptions psdOptions = new PsdOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-                psdOptions.VectorRasterizationOptions = vectorRasterOptions;
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
 
-                var vectorizationOptions = new PsdVectorizationOptions
-                {
-                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                };
-                psdOptions.VectorizationOptions = vectorizationOptions;
+                    psdOptions.VectorizationOptions = new PsdVectorizationOptions
+                    {
+                        VectorDataCompositionMode = Aspose.Imaging.FileFormats.Psd.VectorDataCompositionMode.SeparateLayers
+                    };
 
-                image.Save(outputPath, psdOptions);
+                    image.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to import a vector EPS artwork into Photoshop while keeping each element on its own editable layer.
- * 2. When a printing workflow requires converting EPS logos to PSD files so designers can adjust colors and effects without losing vector quality.
- * 3. When automating batch processing of EPS files to PSD format for a web service that offers layer‑by‑layer image editing.
- * 4. When integrating Aspose.Imaging into a C# application to preserve layer structure while rasterizing EPS for further composition in Photoshop.
- * 5. When migrating legacy EPS assets to PSD for a digital asset management system that relies on separate layers for metadata tagging.
+ * 1. When a designer needs to edit an EPS artwork in Photoshop, a developer can convert the EPS to a PSD that retains each vector element as its own layer.
+ * 2. When an automated workflow must prepare print‑ready files, the code can transform EPS logos into layered PSDs for further color correction.
+ * 3. When a web service receives EPS uploads and must provide editable Photoshop files, this snippet creates PSDs with preserved vector layers for downstream editing.
+ * 4. When migrating legacy EPS assets to a modern asset‑management system, developers can use the code to keep the original layer structure intact in the resulting PSDs.
+ * 5. When building a batch conversion tool that processes many EPS files, the example ensures each file is saved as a PSD with separate layers for maximum editing flexibility.
  */
