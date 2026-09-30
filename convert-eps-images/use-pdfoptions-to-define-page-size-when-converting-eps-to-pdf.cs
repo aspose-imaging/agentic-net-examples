@@ -3,37 +3,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load EPS image
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
-            {
-                // Configure PDF options with page size matching the EPS image dimensions
-                var pdfOptions = new PdfOptions
-                {
-                    PageSize = new SizeF(image.Width, image.Height)
-                };
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample.pdf";
 
-                // Save as PDF
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -46,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a vector EPS illustration into a PDF report and must preserve the original dimensions for accurate layout.
- * 2. When an automated document generation system converts EPS logos to PDF files that match the logo’s exact size for printing.
- * 3. When a batch conversion tool processes EPS artwork and requires each PDF page to be sized to the image’s width and height to avoid scaling artifacts.
- * 4. When a web service receives EPS files from users and returns PDF previews that retain the original page size for WYSIWYG preview.
- * 5. When integrating Aspose.Imaging into a C# application to create PDF invoices that include EPS graphics sized precisely to fit designated sections.
+ * 1. When a graphic designer needs to embed an EPS illustration into a PDF report and must set the PDF page dimensions to match the original artwork.
+ * 2. When an automated publishing system converts vector EPS logos to PDF files sized for standard A4 or Letter paper before sending them to a print service.
+ * 3. When a web application generates PDF invoices that include EPS diagrams and requires consistent page sizing for proper layout across browsers.
+ * 4. When a batch processing script converts a library of EPS files to PDF while specifying custom page widths for integration into an e‑book format.
+ * 5. When a document management workflow extracts EPS drawings from CAD exports and saves them as PDFs with predefined page sizes for archival compliance.
  */
