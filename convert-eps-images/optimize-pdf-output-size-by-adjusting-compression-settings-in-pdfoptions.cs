@@ -1,4 +1,4 @@
-// HOW-TO: Reduce PDF File Size from PNG Using Flate Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to Optimized PDF with Document Title in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,39 +7,31 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample_output.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/output.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with compression to reduce file size
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        // Use Flate compression (lossless and generally provides good compression)
-                        Compression = PdfImageCompressionOptions.Flate
-                    }
-                };
-
-                // Save the image as PDF using the configured options
-                image.Save(outputPath, pdfOptions);
+                        Title = "Optimized PDF"
+                    };
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert high‑resolution PNG screenshots to PDF while keeping the resulting file small for email attachments.
- * 2. When generating printable PDFs from product images and want lossless compression to preserve quality without bloating file size.
- * 3. When automating batch processing of PNG assets into PDFs for a web portal that limits upload size.
- * 4. When integrating Aspose.Imaging into a C# application that must store archived PDFs with minimal storage consumption.
- * 5. When creating PDF reports from PNG charts and require Flate compression to meet corporate document size policies.
+ * 1. When you need to generate a PDF from a PNG image for web download while keeping the file size small.
+ * 2. When you want to embed a custom title metadata into a PDF created from an image in a C# application.
+ * 3. When you are building an automated report generator that converts chart screenshots (PNG) into searchable PDF documents.
+ * 4. When you must ensure the output PDF is stored in a specific folder structure and created only if the source image exists.
+ * 5. When you are handling image-to-PDF conversion in a try‑catch block to gracefully log errors in a .NET service.
  */
