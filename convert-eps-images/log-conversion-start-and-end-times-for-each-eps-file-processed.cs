@@ -1,9 +1,9 @@
-// HOW-TO: Log Start and End Times While Converting EPS to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Start and End Times While Converting EPS to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,49 +11,35 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            if (!Directory.Exists(inputDirectory))
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            foreach (string epsFile in epsFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (var filePath in files)
-            {
-                if (!filePath.EndsWith(".eps", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (!File.Exists(filePath))
+                if (!File.Exists(epsFile))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {epsFile}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Console.WriteLine($"Processing {Path.GetFileName(epsFile)} started at {DateTime.Now}");
 
-                Console.WriteLine($"Processing {filePath} started at {DateTime.Now}");
-
-                using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(filePath))
+                using (EpsImage image = (EpsImage)Image.Load(epsFile))
                 {
-                    using (var options = new PngOptions())
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(epsFile) + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (PdfOptions options = new PdfOptions())
                     {
                         image.Save(outputPath, options);
                     }
                 }
 
-                Console.WriteLine($"Processing {filePath} finished at {DateTime.Now}");
+                Console.WriteLine($"Processing {Path.GetFileName(epsFile)} completed at {DateTime.Now}");
             }
         }
         catch (Exception ex)
@@ -65,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a folder of EPS vector files to PNG images while recording the exact processing time for each file for performance monitoring.
- * 2. When an automated image pipeline must generate an audit log of start and finish timestamps for every EPS conversion to meet compliance or debugging requirements.
- * 3. When you want to measure and compare the conversion speed of different EPS files using Aspose.Imaging in a C# application.
- * 4. When a reporting tool requires timestamps of image generation to synchronize graphics with other data sources in a .NET workflow.
- * 5. When you are building a scheduled service that processes incoming EPS assets and needs to log processing durations for alerting on unusually long conversions.
+ * 1. When you need to batch‑convert a folder of EPS illustrations to PDF and record exactly when each file starts and finishes for audit or performance tracking.
+ * 2. When your application must generate a processing log to monitor conversion times of vector graphics for SLA reporting.
+ * 3. When you want to ensure that missing EPS files are detected early and the conversion workflow logs timestamps for troubleshooting.
+ * 4. When integrating Aspose.Imaging into a C# service that converts customer‑uploaded EPS files to PDF and you need timestamped entries for debugging and billing purposes.
+ * 5. When you are building a CI/CD pipeline that validates image conversion speed by logging start and end times for each EPS to PDF conversion step.
  */
