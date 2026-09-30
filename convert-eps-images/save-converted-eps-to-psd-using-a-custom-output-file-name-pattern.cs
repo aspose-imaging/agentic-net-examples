@@ -1,59 +1,47 @@
-// HOW-TO: Convert EPS to PSD with Custom Filename Pattern in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD with Custom Output Filename in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
-class Program
+namespace EpsToPsdConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input EPS file path
-            string inputPath = "sample.eps";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = @"C:\Images\sample.eps";
+                string outputPath = @"C:\Images\sample_converted.psd";
 
-            // Custom output file name pattern: original name + "_converted.psd" in an "output" folder
-            string outputPath = "output\\sample_converted.psd";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PSD saving options
-                PsdOptions psdOptions = new PsdOptions
+                if (!File.Exists(inputPath))
                 {
-                    // Example settings – can be adjusted as needed
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as PSD using the configured options
-                image.Save(outputPath, psdOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var options = new PsdOptions();
+                    image.Save(outputPath, options);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically convert vector EPS artwork into Photoshop PSD files while applying grayscale RLE compression for downstream editing.
- * 2. When an automated workflow must generate PSD versions of EPS logos and store them in a dedicated output folder with a consistent “_converted” naming convention.
- * 3. When integrating Aspose.Imaging into a C# application to transform EPS illustrations into PSD layers for further manipulation in Adobe Photoshop.
- * 4. When building a batch processing tool that reads EPS files, applies specific PSD options, and saves the results using a custom file‑name pattern to avoid overwriting originals.
- * 5. When creating a server‑side service that receives EPS uploads, converts them to PSD format with grayscale color mode, and saves the output to a predefined directory structure.
+ * 1. When a designer needs to batch‑convert EPS artwork to editable Photoshop PSD files while naming the outputs according to a specific pattern.
+ * 2. When an automated build script must generate PSD previews of vector EPS logos for a web‑based asset library.
+ * 3. When a content management system imports EPS files and stores them as PSDs to allow layer‑based editing in downstream tools.
+ * 4. When a Windows service processes incoming EPS files from a scanner and saves them as PSDs in a designated folder with a custom naming convention.
+ * 5. When a migration tool moves legacy EPS graphics to a Photoshop workflow and requires programmatic control over the output file path and format.
  */
