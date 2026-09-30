@@ -1,81 +1,38 @@
-// HOW-TO: Log Aspose Imaging Exceptions When Converting DICOM to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Convert DICOM to PNG and Log Errors in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
-using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputDirectory = "output";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\sample.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Cast to DicomImage to access pages
-                DicomImage dicomImage = image as DicomImage;
-                if (dicomImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a DICOM image.");
-                    return;
-                }
-
-                int pageIndex = 0;
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
-                {
-                    // Build output file path for each page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    try
-                    {
-                        // Save the page as PNG
-                        dicomPage.Save(outputPath, new PngOptions());
-                    }
-                    catch (DicomImageException ex)
-                    {
-                        Console.Error.WriteLine($"DicomImageException on page {pageIndex}: {ex.Message}");
-                    }
-                    catch (ImageSaveException ex)
-                    {
-                        Console.Error.WriteLine($"ImageSaveException on page {pageIndex}: {ex.Message}");
-                    }
-                    catch (PngImageException ex)
-                    {
-                        Console.Error.WriteLine($"PngImageException on page {pageIndex}: {ex.Message}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine($"Unexpected error on page {pageIndex}: {ex.Message}");
-                    }
-
-                    pageIndex++;
-                }
+                PngOptions options = new PngOptions();
+                options.Source = new FileCreateSource(outputPath, false);
+                dicom.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Catch any other unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -83,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert each frame of a DICOM file to separate PNG files while handling corrupted data gracefully.
- * 2. When a batch processing script must verify the existence of DICOM files and create output directories before conversion.
- * 3. When developers want to capture and log specific Aspose.Imaging exceptions such as DicomImageException during page‑wise conversion.
- * 4. When an integration pipeline requires safe fallback behavior if a DICOM page cannot be saved as PNG due to image format issues.
- * 5. When a diagnostic tool needs to continue processing remaining pages after a failure on one page, ensuring partial results are still generated.
+ * 1. When a medical imaging application needs to convert patient DICOM scans to PNG thumbnails while capturing any corruption errors for audit logs.
+ * 2. When a hospital’s PACS integration script must batch‑process DICOM files into web‑friendly PNGs and record failures without crashing the service.
+ * 3. When a diagnostic tool requires safe conversion of DICOM images to PNG for UI display and wants to log exception messages for corrupted files.
+ * 4. When a data migration project moves legacy DICOM archives to PNG format and needs to capture and report conversion errors caused by damaged data.
+ * 5. When a C# backend service generates PNG previews from uploaded DICOM files and must handle and log any read/write exceptions to maintain reliability.
  */

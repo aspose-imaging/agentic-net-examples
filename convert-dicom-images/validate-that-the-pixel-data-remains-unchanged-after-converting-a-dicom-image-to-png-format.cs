@@ -1,85 +1,59 @@
-// HOW-TO: Verify Pixel Data Integrity When Converting DICOM to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Verify Pixel Data Unchanged When Converting DICOM to PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input DICOM file path
-            string inputPath = "input.dcm";
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\sample.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Directory where PNG pages will be saved
-            string outputDir = "output";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDir) ?? ".");
-
-            // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Iterate through each DICOM page
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                Aspose.Imaging.RasterImage dicomRaster = (Aspose.Imaging.RasterImage)dicom;
+                if (!dicomRaster.IsCached) dicomRaster.CacheData();
+                int[] dicomPixels = dicomRaster.LoadArgb32Pixels(dicomRaster.Bounds);
+
+                using (var pngOptions = new PngOptions())
                 {
-                    // Load original ARGB32 pixel data from the DICOM page
-                    int[] originalPixels = dicomPage.LoadArgb32Pixels(dicomPage.Bounds);
+                    dicom.Save(outputPath, pngOptions);
+                }
 
-                    // Build PNG file path for this page
-                    string pngPath = Path.Combine(outputDir, $"page_{dicomPage.Index}.png");
+                using (Aspose.Imaging.RasterImage pngRaster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(outputPath))
+                {
+                    int[] pngPixels = pngRaster.LoadArgb32Pixels(pngRaster.Bounds);
 
-                    // Ensure the directory for the PNG exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath) ?? ".");
-
-                    // Save the DICOM page as PNG
-                    dicomPage.Save(pngPath, new PngOptions());
-
-                    // Load the saved PNG image
-                    using (PngImage pngImage = (PngImage)Image.Load(pngPath))
+                    bool unchanged = dicomPixels.Length == pngPixels.Length;
+                    if (unchanged)
                     {
-                        // Load ARGB32 pixel data from the PNG
-                        int[] pngPixels = pngImage.LoadArgb32Pixels(pngImage.Bounds);
-
-                        // Compare pixel arrays
-                        bool identical = true;
-                        if (originalPixels.Length != pngPixels.Length)
+                        for (int i = 0; i < dicomPixels.Length; i++)
                         {
-                            identical = false;
-                        }
-                        else
-                        {
-                            for (int i = 0; i < originalPixels.Length; i++)
+                            if (dicomPixels[i] != pngPixels[i])
                             {
-                                if (originalPixels[i] != pngPixels[i])
-                                {
-                                    identical = false;
-                                    break;
-                                }
+                                unchanged = false;
+                                break;
                             }
                         }
-
-                        // Report result
-                        if (identical)
-                        {
-                            Console.WriteLine($"Page {dicomPage.Index}: Pixel data unchanged after conversion.");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Page {dicomPage.Index}: Pixel data differs after conversion.");
-                        }
                     }
+
+                    if (unchanged)
+                        Console.WriteLine("Pixel data unchanged after conversion.");
+                    else
+                        Console.WriteLine("Pixel data differs after conversion.");
                 }
             }
         }
@@ -92,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to ensure that converting DICOM scans to PNG for web display does not alter the original pixel values.
- * 2. When a radiology workflow requires automated verification that exported PNG thumbnails match the source DICOM pixel data before archiving.
- * 3. When a developer builds a quality‑control tool that compares ARGB32 pixel arrays to detect any loss during format conversion.
- * 4. When integrating Aspose.Imaging into a C# service that validates image fidelity after saving DICOM pages as PNG files.
- * 5. When performing regression testing to confirm that updates to the Aspose.Imaging library keep pixel data unchanged during DICOM‑to‑PNG conversion.
+ * 1. When a medical imaging application must ensure that converting DICOM scans to PNG for web display does not alter the original pixel values.
+ * 2. When performing automated quality‑control tests on a batch conversion pipeline that transforms DICOM files to PNG and needs to confirm lossless pixel fidelity.
+ * 3. When integrating Aspose.Imaging into a diagnostic tool that stores PNG thumbnails of DICOM images and must verify the thumbnails match the source data.
+ * 4. When developing a regulatory‑compliant workflow that requires pixel‑perfect preservation after format conversion for radiology archives.
+ * 5. When debugging a custom image‑processing routine that caches DICOM raster data and you need to compare it against the resulting PNG pixels.
  */

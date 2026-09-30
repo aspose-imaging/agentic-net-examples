@@ -1,52 +1,37 @@
-// HOW-TO: Convert DICOM to PNG while Preserving XMP Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to PNG while Preserving Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.dcm";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output\\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                PngOptions options = new PngOptions();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Transfer metadata if available
+                options.XmpData = dicom.XmpData;
+                options.ExifData = dicom.ExifData;
 
-            // Load the DICOM image
-            using (Image img = Image.Load(inputPath))
-            {
-                DicomImage dicomImage = img as DicomImage;
-                if (dicomImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load DICOM image.");
-                    return;
-                }
-
-                // Extract XMP metadata from the DICOM image
-                var xmpMetadata = dicomImage.XmpData;
-
-                // Configure PNG options and embed the extracted metadata
-                var pngOptions = new PngOptions
-                {
-                    KeepMetadata = true,
-                    XmpData = xmpMetadata
-                };
-
-                // Save the image as PNG with metadata
-                dicomImage.Save(outputPath, pngOptions);
+                dicom.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -58,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system must export DICOM scans as PNG files for web viewers while keeping the original XMP metadata for audit trails.
- * 2. When a research project needs to convert patient scans to a lightweight format for machine‑learning pipelines but still retain the embedded metadata for later reference.
- * 3. When a hospital’s PACS integration requires generating PNG thumbnails that include the DICOM’s metadata to ensure traceability across different software tools.
- * 4. When a compliance audit demands that any converted image files preserve the source metadata, enabling verification that the PNG originated from a specific DICOM study.
- * 5. When a developer builds a document‑management workflow that stores diagnostic images as PNGs yet must retain the original DICOM tags for regulatory reporting.
+ * 1. When a hospital needs to export DICOM scans as PNG files for web viewing while keeping patient and study information embedded for audit trails.
+ * 2. When a research team converts medical images to PNG for machine‑learning preprocessing but must retain original EXIF/XMP tags to link results back to source data.
+ * 3. When a radiology PACS integration creates thumbnail PNGs for reports and wants the images to carry the original DICOM metadata for regulatory compliance.
+ * 4. When a developer builds a document management system that stores PNG copies of DICOM images and requires embedded metadata to support searchable archives.
+ * 5. When a telemedicine application sends PNG snapshots of DICOM scans to mobile devices and needs the metadata to be preserved for accurate diagnosis verification.
  */

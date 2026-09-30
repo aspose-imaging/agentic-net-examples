@@ -1,4 +1,4 @@
-// HOW-TO: Convert DICOM to Truecolor PNG in C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to Truecolor PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,33 +9,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             string outputDir = Path.GetDirectoryName(outputPath);
             Directory.CreateDirectory(outputDir ?? ".");
 
-            // Configure PNG options with Truecolor color type
-            var pngOptions = new PngOptions
-            {
-                ColorType = PngColorType.Truecolor
-            };
-
-            // Load the DICOM image and save it as PNG using the specified options
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, pngOptions);
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                PngOptions options = new PngOptions
+                {
+                    ColorType = PngColorType.Truecolor
+                };
+
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to export DICOM scans as high‑fidelity PNG files for web viewers or reports.
- * 2. When a radiology workflow requires preserving the full color palette of PET or color Doppler images during format conversion.
- * 3. When a C# service processes DICOM files and must generate truecolor PNG thumbnails for patient portals.
- * 4. When developers need to ensure that no color data is lost while converting DICOM to PNG for archival or AI analysis.
- * 5. When integrating Aspose.Imaging into a .NET project to batch‑convert DICOM studies to PNG with truecolor settings for downstream processing.
+ * 1. When a medical imaging application needs to export DICOM scans as full‑color PNG files for web viewers.
+ * 2. When a radiology workflow requires preserving the original color depth while converting DICOM images to a format supported by standard image editors.
+ * 3. When integrating Aspose.Imaging into a C# service that generates PNG thumbnails of DICOM studies without losing truecolor information.
+ * 4. When building a PACS archive that stores DICOM images as truecolor PNGs for easier sharing with clinicians using non‑DICOM viewers.
+ * 5. When creating a batch conversion tool that transforms large sets of DICOM files to truecolor PNGs for machine‑learning preprocessing.
  */

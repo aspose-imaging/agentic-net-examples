@@ -1,43 +1,40 @@
-// HOW-TO: Resize DICOM Image to Specific Size and Convert to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize DICOM Image to Specific Dimensions and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\resized.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\sample.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Desired dimensions
             int targetWidth = 800;
             int targetHeight = 600;
 
-            // Load the DICOM image, resize, and save as PNG
-            using (DicomImage image = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Resize using nearest neighbour resampling (choose any ResizeType as needed)
-                image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
-
-                // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                dicom.Resize(targetWidth, targetHeight);
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                dicom.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display DICOM scans as smaller PNG thumbnails on a web dashboard.
- * 2. When a radiology workflow requires converting high‑resolution DICOM files to a fixed PNG size for inclusion in patient reports.
- * 3. When a hospital PACS system must generate uniformly sized PNG images for mobile device viewing from original DICOM data.
- * 4. When a developer wants to preprocess DICOM images to a set dimension before applying further image analysis or machine‑learning models that accept PNG input.
- * 5. When an electronic health record (EHR) integration needs to resize and convert DICOM scans to PNG to meet storage or bandwidth constraints.
+ * 1. When a healthcare application needs to generate smaller PNG thumbnails from large DICOM scans for quick preview in a web portal.
+ * 2. When a radiology workflow must convert DICOM files to PNG format with a fixed size to embed them in PDF reports.
+ * 3. When a mobile app requires resized PNG images extracted from DICOM studies to reduce bandwidth and improve loading speed.
+ * 4. When an electronic health record system needs to standardize image dimensions before storing DICOM‑derived PNGs in a database.
+ * 5. When a machine‑learning pipeline preprocesses DICOM images by resizing them to 800×600 pixels and saving as PNG for model training.
  */
