@@ -1,59 +1,42 @@
-// HOW-TO: Merge Multi‑Page CMX Into Single‑Page TIFF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page CMX to Single‑Page TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.cmx";
-            string outputPath = "output.tif";
+            string outputPath = "output.tiff";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Load the multi‑page CMX image
+            using (Image cmxImage = Image.Load(inputPath))
             {
-                int canvasWidth = cmx.Width;
-                int canvasHeight = cmx.Height;
-
-                Source fileSource = new FileCreateSource(outputPath, false);
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = fileSource };
-
-                using (RasterImage canvas = (RasterImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
+                // Prepare TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    foreach (CmxImagePage page in cmx.Pages)
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            PngOptions pngOptions = new PngOptions { Source = new StreamSource(memoryStream) };
-                            page.Save(memoryStream, pngOptions);
-                            memoryStream.Position = 0;
+                    // Export all pages; MultiPageOptions defaults to all pages
+                    MultiPageOptions = new MultiPageOptions()
+                };
 
-                            using (RasterImage pageRaster = (RasterImage)Image.Load(memoryStream))
-                            {
-                                var bounds = new Rectangle(0, 0, pageRaster.Width, pageRaster.Height);
-                                canvas.SaveArgb32Pixels(bounds, pageRaster.LoadArgb32Pixels(pageRaster.Bounds));
-                            }
-                        }
-                    }
-
-                    canvas.Save();
-                }
+                // Save as a single TIFF file containing all pages
+                cmxImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive legacy CorelDRAW CMX drawings as a single TIFF file for long‑term storage or compliance.
- * 2. When a printing workflow requires converting each page of a multi‑page CMX document into one combined TIFF image for batch printing.
- * 3. When a document management system only accepts TIFF files, and you must merge multiple CMX pages into a single uploadable image.
- * 4. When you want to generate a preview thumbnail of a multi‑page CMX file by flattening all pages into one high‑resolution TIFF.
- * 5. When integrating legacy CMX assets into a .NET application that processes TIFF images, you need to programmatically transform and merge the pages.
+ * 1. When you need to archive multi‑page CorelDRAW CMX drawings as a single TIFF file for easy viewing or printing.
+ * 2. When a document management system only accepts TIFF images and you must combine all CMX pages into one file before upload.
+ * 3. When generating a PDF‑like preview of a CMX project and you want to merge its pages into a single raster image for downstream processing.
+ * 4. When automating batch conversion of legacy CMX artwork to a format supported by Windows printers that require single‑page TIFFs.
+ * 5. When integrating CMX files into a medical imaging workflow that expects a single multi‑frame TIFF for analysis.
  */
