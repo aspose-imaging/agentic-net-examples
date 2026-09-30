@@ -1,50 +1,47 @@
-// HOW-TO: Convert Large Multi‑Page CMX to PNG with Low Memory in C# (Aspose.Imaging for .NET)
+// HOW-TO: Stream Large Multi‑Page CMX to PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cmx";
-            string outputDir = "Output";
+            string outputDir = "output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the CMX image with a limited buffer size to reduce memory consumption
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 10 }))
+            using (Image image = Image.Load(inputPath))
             {
-                int pageIndex = 0;
-                foreach (Image page in cmx.Pages)
+                if (image is IMultipageImage multipageImage)
                 {
-                    pageIndex++;
-                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.png");
-
-                    // Ensure the directory for the current output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the current page as PNG
-                    using (page)
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        page.Save(outputPath, new PngOptions());
+                        using (Image page = multipageImage.Pages[i])
+                        {
+                            string pageOutputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+                            var pngOptions = new PngOptions();
+                            page.Save(pageOutputPath, pngOptions);
+                        }
                     }
-
-                    // Release resources after each page to keep memory usage low
-                    GC.Collect();
+                }
+                else
+                {
+                    string outputPath = Path.Combine(outputDir, "output.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -57,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must extract each page of a huge multi‑page CMX drawing and save them as PNGs without exhausting system memory.
- * 2. When processing batch conversions of legacy CorelDRAW CMX files on a server that has limited RAM, requiring page‑by‑page streaming.
- * 3. When generating thumbnails for individual pages of a large CMX document in a web service while keeping the process lightweight.
- * 4. When integrating Aspose.Imaging into a document‑management workflow that needs to archive each CMX page as a separate PNG file with minimal resource usage.
- * 5. When developing a desktop tool that allows users to preview CMX pages one at a time, converting them on demand to PNG to avoid loading the entire file into memory.
+ * 1. When a desktop application must convert a multi‑page CorelDRAW CMX file into separate PNG pages without loading the entire document into memory.
+ * 2. When a server‑side service processes uploaded CMX drawings and needs to generate low‑memory PNG previews for each page on the fly.
+ * 3. When an automated batch job converts thousands of large CMX files into PNG assets while keeping RAM consumption low.
+ * 4. When a mobile or IoT device receives a CMX document and must render each page as a PNG image using limited resources.
+ * 5. When a document management system archives CMX files by extracting each page as a PNG thumbnail without risking out‑of‑memory errors.
  */
