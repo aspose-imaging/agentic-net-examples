@@ -1,9 +1,12 @@
-// HOW-TO: Generate EPS Image Summary Report With Width Height Bounding Box In C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate EPS to PDF and PNG Conversion Report with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,54 +14,57 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            string reportPath = Path.Combine(outputDirectory, "Report.txt");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+            string reportPath = Path.Combine(outputDirectory, "ConversionReport.txt");
 
-            // Ensure output directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            // Get all EPS files in the input directory
             string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            var reportBuilder = new StringBuilder();
+            reportBuilder.AppendLine("FileName,Dimensions,PDFPath,PNGPath");
 
-            // Prepare report lines
-            List<string> reportLines = new List<string>();
-            reportLines.Add("FileName,Width,Height,BoundingBox,PreviewCount");
-
-            foreach (string filePath in epsFiles)
+            foreach (string epsPath in epsFiles)
             {
-                // Verify the input file exists
-                if (!File.Exists(filePath))
+                if (!File.Exists(epsPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {epsPath}");
                     return;
                 }
 
-                // Load the EPS image
-                using (Image image = Image.Load(filePath))
+                string fileName = Path.GetFileNameWithoutExtension(epsPath);
+                string pdfPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                string pngPath = Path.Combine(outputDirectory, fileName + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+
+                using (Image image = Image.Load(epsPath))
                 {
-                    var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
-                    if (epsImage == null)
-                    {
-                        Console.Error.WriteLine($"Not an EPS image: {filePath}");
-                        continue;
-                    }
+                    var epsImage = (EpsImage)image;
+                    epsImage.Save(pdfPath, new PdfOptions());
+                    epsImage.Save(pngPath, new PngOptions());
 
-                    // Extract required details
-                    string fileName = Path.GetFileName(filePath);
-                    int width = epsImage.Width;
-                    int height = epsImage.Height;
-                    string boundingBox = epsImage.BoundingBox.ToString();
-                    int previewCount = epsImage.PreviewImageCount;
-
-                    // Add a line to the report
-                    reportLines.Add($"{fileName},{width},{height},{boundingBox},{previewCount}");
+                    int width = image.Width;
+                    int height = image.Height;
+                    reportBuilder.AppendLine($"{fileName},{width}x{height},{pdfPath},{pngPath}");
                 }
             }
 
-            // Write the report to the output file
-            File.WriteAllLines(reportPath, reportLines);
+            File.WriteAllText(reportPath, reportBuilder.ToString());
         }
         catch (Exception ex)
         {
@@ -69,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process a folder of EPS files and create a CSV‑style report of each image’s dimensions and bounding box for quality‑control purposes.
- * 2. When an automated workflow must verify the number of preview images embedded in EPS documents before publishing them to a print‑ready catalog.
- * 3. When a migration script has to log EPS file metadata such as width, height, and bounding box to compare against a target format’s specifications.
- * 4. When a desktop application wants to display a summary table of all EPS assets in a project directory for quick inventory management.
- * 5. When a CI/CD pipeline requires generating a text report of EPS image properties to ensure assets meet predefined size constraints.
+ * 1. When a developer needs to batch‑convert a folder of EPS artwork into PDF and PNG files while tracking each file’s dimensions and output paths.
+ * 2. When an automated build process must create a printable PDF version and a web‑ready PNG thumbnail for every EPS asset in a design repository.
+ * 3. When a document management system requires a CSV‑style report that lists the original EPS name, image size, and locations of the generated PDF and PNG files.
+ * 4. When a migration script has to ensure output directories exist before saving converted images to avoid runtime errors.
+ * 5. When troubleshooting missing or corrupted EPS files, the code logs a clear error message and stops processing to prevent further failures.
  */
