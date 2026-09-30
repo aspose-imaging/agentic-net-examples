@@ -1,59 +1,52 @@
-// HOW-TO: Convert BMP to PNG and Verify Output Is Viewable in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to PNG and Verify Viewability in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.png";
-
-            // Verify the source file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.jpg";
+                string outputPath = "output.png";
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-            // Load the source image (any supported format)
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save the image as PNG using default PNG options
-                image.Save(outputPath, new PngOptions());
-            }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Validate that the saved PNG can be loaded (viewable in standard viewers)
-            if (Image.CanLoad(outputPath))
-            {
-                Console.WriteLine("PNG file saved and verified successfully.");
+                using (Image image = Image.Load(inputPath))
+                {
+                    PngOptions options = new PngOptions();
+                    image.Save(outputPath, options);
+                }
+
+                using (Image png = Image.Load(outputPath))
+                {
+                    Console.WriteLine("PNG file is viewable.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.Error.WriteLine("Saved PNG file could not be loaded.");
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            // Catch any unexpected errors and report them
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform legacy BMP assets to PNG for web delivery while ensuring the resulting files can be opened by standard image viewers.
- * 2. When an automated batch process must create PNG thumbnails from various source formats and confirm each thumbnail is valid before publishing.
- * 3. When integrating image conversion into a C# application that must guarantee the saved PNG files are not corrupted and can be re‑loaded for further processing.
- * 4. When preparing images for a reporting system that only accepts PNG, and you want to programmatically verify the conversion succeeded.
- * 5. When migrating a file repository from BMP to PNG and you require a quick sanity check that each converted file is readable by typical viewer software.
+ * 1. When a web application needs to generate PNG thumbnails from user‑uploaded JPEG photos and ensure the files open correctly in browsers.
+ * 2. When a batch processing script must convert legacy JPEG assets to lossless PNG format for archival while confirming each output is not corrupted.
+ * 3. When an e‑commerce platform requires PNG images for product listings and wants to automatically test that the conversion succeeded before publishing.
+ * 4. When a desktop utility transforms scanned JPEG documents into PNG for OCR preprocessing and needs to validate the resulting file can be displayed.
+ * 5. When a mobile app backend prepares PNG assets from JPEG sources for cross‑platform compatibility and must verify the images are viewable by standard image viewers.
  */
