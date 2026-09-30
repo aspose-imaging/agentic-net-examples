@@ -1,4 +1,4 @@
-// HOW-TO: Convert JPEG to PNG and Dispose Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to JPEG with Quality Setting in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,31 +8,27 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, convert, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Define save options (PNG in this example)
-                PngOptions saveOptions = new PngOptions();
-
-                // Save the image to the output path
-                image.Save(outputPath, saveOptions);
-            } // Image is disposed here
+                using (JpegOptions jpegOptions = new JpegOptions())
+                {
+                    jpegOptions.Quality = 90;
+                    image.Save(outputPath, jpegOptions);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert user‑uploaded JPEG photos to PNG format for web display while ensuring the Image object is properly disposed to free unmanaged memory.
- * 2. When a desktop application must generate lossless PNG thumbnails from existing JPEG files without leaking resources.
- * 3. When an automated batch job processes a folder of JPEG images and saves them as PNG files, using a using block to guarantee cleanup.
- * 4. When a server‑side API receives a JPEG image, converts it to PNG for downstream processing, and must release the Aspose.Imaging resources promptly.
- * 5. When integrating Aspose.Imaging into a C# utility that validates input files, creates the output directory, and safely converts and saves images with proper disposal.
+ * 1. When you need to generate smaller JPEG thumbnails from high‑resolution PNG assets for web pages.
+ * 2. When you must batch‑process user‑uploaded PNG images and store them as compressed JPEGs to save disk space.
+ * 3. When integrating an image conversion step into a C# service that prepares product photos for e‑commerce platforms.
+ * 4. When converting PNG screenshots to JPEG format before sending them via email to reduce attachment size.
+ * 5. When migrating legacy PNG graphics to JPEG for compatibility with older browsers while controlling output quality.
  */
