@@ -1,52 +1,40 @@
-// HOW-TO: Convert EPS to PDF/A-1b With Custom Metadata In C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom Metadata When Converting EPS to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.eps";
-            string outputPath = @"C:\Output\sample.pdf";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare PDF options with compliance and custom metadata
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    },
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Title = "Converted from EPS",
-                        Author = "Document Tracking System",
+                        Title = "Document Tracking ID: 12345",
+                        Author = "TrackingSystem",
                         Subject = "EPS to PDF conversion",
-                        Keywords = "EPS,PDF,Tracking"
-                    }
-                };
+                        Keywords = "Tracking, EPS, PDF"
+                    };
 
-                // Save as PDF with the specified options
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive EPS artwork in PDF/A‑1b format while embedding tracking information such as title, author, and keywords.
- * 2. When a document management system requires PDFs generated from EPS files to include specific metadata for searchable indexing and compliance.
- * 3. When converting print‑ready EPS files to PDF for regulatory submission and must ensure the output meets PDF/A‑1b standards.
- * 4. When automating batch conversion of EPS graphics to PDFs and need to add custom document properties for later identification.
- * 5. When integrating Aspose.Imaging into a C# workflow to produce PDFs that can be traced back to the original EPS source via embedded metadata.
+ * 1. When a company needs to embed a tracking ID into PDFs generated from EPS artwork for audit trails.
+ * 2. When an automated publishing system converts designer EPS files to PDF and must include author and subject information for cataloging.
+ * 3. When a legal department requires PDF metadata such as keywords and title to be set during batch conversion of EPS contracts.
+ * 4. When a document management solution adds custom PDF metadata to support search indexing after converting EPS diagrams.
+ * 5. When a workflow integrates Aspose.Imaging in C# to convert EPS logos to PDF while preserving metadata for brand compliance.
  */
