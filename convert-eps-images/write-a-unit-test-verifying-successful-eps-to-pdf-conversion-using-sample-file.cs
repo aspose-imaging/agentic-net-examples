@@ -1,47 +1,33 @@
-// HOW-TO: Unit Test EPS to PDF Conversion With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Unit Test EPS To PDF Conversion In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
-
         try
         {
-            // Verify input file exists
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "sample.eps");
+            string outputPath = Path.Combine(baseDir, "Output", "sample.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and convert to PDF
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                using (var options = new PdfOptions
-                {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    }
-                })
-                {
-                    image.Save(outputPath, options);
-                }
+                PdfOptions options = new PdfOptions();
+                epsImage.Save(outputPath, options);
             }
 
-            // Verify conversion succeeded
             if (File.Exists(outputPath))
             {
                 Console.WriteLine("EPS to PDF conversion succeeded.");
@@ -60,9 +46,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert EPS artwork to PDF/A‑1b compliant documents in a C# backend service.
- * 2. When you must verify that an EPS to PDF conversion succeeds as part of a continuous integration pipeline.
- * 3. When your application processes user‑uploaded EPS files and must generate PDF previews for web display.
- * 4. When you require a reliable way to ensure the output PDF file is created before proceeding with further processing.
- * 5. When you want to integrate Aspose.Imaging’s PDF options to enforce PDF/A compliance during batch image conversions.
+ * 1. When you need to automatically verify that EPS artwork is correctly rendered as PDF in a CI pipeline.
+ * 2. When your application must batch‑convert vector EPS files to PDF and ensure each conversion succeeds before publishing.
+ * 3. When you are building a document generation service that accepts EPS uploads and you want to test the conversion logic with sample files.
+ * 4. When you want to validate that the Aspose.Imaging PDF options produce a PDF file that can be opened by standard viewers.
+ * 5. When you are migrating legacy EPS assets to PDF and need a repeatable test to confirm the conversion does not corrupt the graphics.
  */
