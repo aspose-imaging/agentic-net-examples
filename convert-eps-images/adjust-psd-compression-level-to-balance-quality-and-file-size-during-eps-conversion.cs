@@ -1,49 +1,35 @@
-// HOW-TO: Convert EPS to PSD With RLE Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD with RLE Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.eps";
-        string outputPath = @"C:\temp\sample_converted.psd";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.psd";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD saving options
-                PsdOptions psdOptions = new PsdOptions
+                var psdOptions = new PsdOptions
                 {
-                    // Use RLE compression to reduce file size while preserving quality
-                    CompressionMethod = CompressionMethod.RLE,
-                    // Typical settings for color depth and channels
-                    ChannelBitsCount = 8,
-                    ChannelsCount = 4,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                    // Keep default PSD version (6)
-                    Version = 6
+                    CompressionMethod = CompressionMethod.RLE
                 };
-
-                // Save as PSD with the specified options
-                epsImage.Save(outputPath, psdOptions);
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to export vector EPS artwork to a layered PSD file while keeping file size low, this code converts the EPS and applies RLE compression.
- * 2. When an automated build pipeline processes print‑ready EPS files and must generate PSDs compatible with Photoshop without losing color fidelity, the example shows how to set the appropriate color mode and channel depth.
- * 3. When a web service receives EPS uploads and must store them as PSDs with balanced quality and storage costs, the RLE compression option reduces the resulting file size.
- * 4. When migrating legacy EPS assets to a Photoshop workflow, developers can use this code to preserve the RGB color space and PSD version while applying efficient compression.
- * 5. When creating a batch conversion tool that converts multiple EPS files to PSDs in C#, the snippet demonstrates how to configure Aspose.Imaging options for consistent compression across all images.
+ * 1. When a designer needs to export vector EPS artwork to a layered PSD file while keeping file size low by using RLE compression.
+ * 2. When an automated build pipeline processes incoming EPS assets and converts them to PSD for Photoshop editing with balanced quality and storage.
+ * 3. When a web service receives EPS logos and must generate PSD previews that are efficiently compressed for faster download.
+ * 4. When migrating legacy EPS files to a Photoshop‑compatible format in a C# application and you want to control compression to avoid bloated PSD files.
+ * 5. When integrating Aspose.Imaging into a C# workflow to batch‑convert EPS documents to PSD with RLE compression for archival purposes.
  */
