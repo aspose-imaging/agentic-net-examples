@@ -1,11 +1,14 @@
-// HOW-TO: Batch Convert EPS Files to PNG JPG or PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EPS Files to PNG, JPG, PDF or TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -13,54 +16,66 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
+                return;
+            }
 
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
             if (epsFiles.Length == 0)
             {
                 Console.WriteLine("No EPS files found in the Input directory.");
                 return;
             }
 
-            // Prompt user for target format
-            Console.WriteLine("Enter target format (png, jpg, pdf):");
+            Console.WriteLine("Enter target format (png, jpg, pdf, tiff):");
             string format = Console.ReadLine()?.Trim().ToLower();
 
-            foreach (string inputPath in epsFiles)
+            foreach (string epsPath in epsFiles)
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(epsPath);
+                string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}.{format}");
 
-                // Determine output file path based on selected format
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string extension = format == "jpg" ? "jpg" : format;
-                string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}.{extension}");
-
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image and save in the chosen format
-                using (Image image = Image.Load(inputPath))
+                using (EpsImage image = (EpsImage)Image.Load(epsPath))
                 {
                     switch (format)
                     {
                         case "png":
-                            image.Save(outputPath, new PngOptions());
+                            using (var options = new PngOptions())
+                            {
+                                image.Save(outputPath, options);
+                            }
                             break;
                         case "jpg":
                         case "jpeg":
-                            image.Save(outputPath, new JpegOptions());
+                            using (var options = new JpegOptions())
+                            {
+                                image.Save(outputPath, options);
+                            }
                             break;
                         case "pdf":
-                            image.Save(outputPath, new PdfOptions());
+                            using (var options = new PdfOptions())
+                            {
+                                image.Save(outputPath, options);
+                            }
+                            break;
+                        case "tiff":
+                            using (var options = new TiffOptions(TiffExpectedFormat.Default))
+                            {
+                                image.Save(outputPath, options);
+                            }
                             break;
                         default:
                             Console.WriteLine($"Unsupported format: {format}");
@@ -68,7 +83,7 @@ class Program
                     }
                 }
 
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
+                Console.WriteLine($"Converted '{epsPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -80,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs a desktop tool that lets users pick multiple EPS files and export them as PNG, JPEG, or PDF for web or print distribution.
- * 2. When an automated build process must batch‑convert a directory of EPS graphics into raster images to embed them in a reporting dashboard.
- * 3. When a branding workflow requires converting EPS logos into various image formats to satisfy client specifications across different platforms.
- * 4. When a migration utility has to transform legacy EPS artwork into PDF documents for long‑term archival and compliance.
- * 5. When a C# application must generate preview thumbnails from EPS files in several formats for a file‑management user interface.
+ * 1. When you need to let users select a folder of EPS artwork and automatically generate PNG, JPEG, PDF, or TIFF versions for web publishing.
+ * 2. When a desktop application must convert multiple vector EPS logos into raster images for inclusion in a product catalog.
+ * 3. When an automated build script has to transform EPS design files into PDF for print‑ready distribution without manual intervention.
+ * 4. When a migration tool has to batch‑process legacy EPS diagrams into TIFF files for archival in a document management system.
+ * 5. When a reporting service requires on‑the‑fly conversion of EPS charts to JPEG images for embedding in email summaries.
  */
