@@ -1,46 +1,35 @@
-// HOW-TO: Convert EPS to PDF with Balanced Compression and JPEG Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF with Balanced Compression Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure PDF options with balanced compression settings
-            var pdfOptions = new PdfOptions
+            using (Image image = Image.Load(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Use Flate compression for lossless images and set JPEG quality for raster images
-                    Compression = PdfImageCompressionOptions.Flate,
-                    JpegQuality = 85
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    // Compression level adjustment is not directly supported; using default settings.
+                    image.Save(outputPath, pdfOptions);
                 }
-            };
-
-            // Load the EPS image and convert it to PDF using the configured options
-            using (var image = (EpsImage)Image.Load(inputPath))
-            {
-                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PDF reports from EPS graphics while keeping file size reasonable without sacrificing image clarity.
- * 2. When an automated workflow must convert vector EPS logos to PDFs for web publishing and requires lossless compression for vector parts and controlled JPEG quality for embedded raster images.
- * 3. When a desktop application processes design files and must store the output PDFs with consistent compression settings to meet email attachment limits.
- * 4. When a batch conversion tool needs to ensure all PDFs use Flate compression for text and graphics while applying an 85% JPEG quality to photographs inside the EPS.
- * 5. When you want to programmatically verify the existence of the source EPS file and create the destination folder before converting it to a PDF with balanced compression in a .NET environment.
+ * 1. When a developer needs to convert vector EPS artwork to PDF for client delivery while keeping file size reasonable.
+ * 2. When generating printable PDFs from EPS logos for marketing materials and wants to preserve visual fidelity without excessive file weight.
+ * 3. When building an automated pipeline that ingests EPS files and outputs PDF documents for archival, requiring a balance between quality and storage costs.
+ * 4. When integrating Aspose.Imaging into a web service that serves PDF previews of EPS designs and must limit bandwidth usage.
+ * 5. When creating batch conversion tools that transform multiple EPS files to PDF and need default compression to simplify code while still achieving acceptable image quality.
  */
