@@ -1,96 +1,72 @@
-// HOW-TO: Convert Multi‑Page CMX to Single Page PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Flatten Multipage CMX into Single Page PDF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
+using System.Linq;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/output.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cmx";
-            string outputPath = "output.pdf";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image cmxImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Temporary raster canvas file path
-            string tempCanvasPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_canvas.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-
-            // Load CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-            {
-                // Determine canvas size (stack pages vertically)
-                int canvasWidth = 0;
-                int canvasHeight = 0;
-                foreach (Image page in cmx.Pages)
+                var multipage = cmxImage as Aspose.Imaging.IMultipageImage;
+                if (multipage == null)
                 {
-                    if (page.Width > canvasWidth) canvasWidth = page.Width;
-                    canvasHeight += page.Height;
+                    Console.Error.WriteLine("Input image is not a multipage CMX image.");
+                    return;
                 }
 
-                // Create raster canvas bound to temporary file
-                Source canvasSource = new FileCreateSource(tempCanvasPath, false);
-                JpegOptions canvasOptions = new JpegOptions { Source = canvasSource, Quality = 100 };
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
-                {
-                    int offsetY = 0;
-                    foreach (Image page in cmx.Pages)
-                    {
-                        // Rasterize current page to a memory stream
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            JpegOptions pageOptions = new JpegOptions { Source = new StreamSource(ms) };
-                            pageOptions.VectorRasterizationOptions = new CmxRasterizationOptions
-                            {
-                                BackgroundColor = Aspose.Imaging.Color.White
-                            };
-                            page.Save(ms, pageOptions);
-                            ms.Position = 0;
+                List<Aspose.Imaging.Size> pageSizes = new List<Aspose.Imaging.Size>();
+                List<Aspose.Imaging.RasterImage> rasterPages = new List<Aspose.Imaging.RasterImage>();
 
-                            // Load rasterized page
-                            using (RasterImage pageRaster = (RasterImage)Image.Load(ms))
-                            {
-                                // Copy page pixels onto canvas
-                                Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, pageRaster.Width, pageRaster.Height);
-                                canvas.SaveArgb32Pixels(bounds, pageRaster.LoadArgb32Pixels(pageRaster.Bounds));
-                                offsetY += pageRaster.Height;
-                            }
-                        }
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    Aspose.Imaging.Image page = multipage.Pages[i];
+                    using (var ms = new MemoryStream())
+                    {
+                        page.Save(ms, new PngOptions());
+                        ms.Position = 0;
+                        Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms);
+                        rasterPages.Add(raster);
+                        pageSizes.Add(raster.Size);
+                    }
+                }
+
+                int canvasWidth = pageSizes.Max(s => s.Width);
+                int canvasHeight = pageSizes.Sum(s => s.Height);
+
+                PdfOptions pdfOptions = new PdfOptions();
+
+                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pdfOptions, canvasWidth, canvasHeight))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    int offsetY = 0;
+                    foreach (var raster in rasterPages)
+                    {
+                        graphics.DrawImage(raster, new Aspose.Imaging.Point(0, offsetY));
+                        offsetY += raster.Height;
+                        raster.Dispose();
                     }
 
-                    // Save the raster canvas to the temporary file
-                    canvas.Save();
+                    canvas.Save(outputPath, pdfOptions);
                 }
-            }
-
-            // Load the completed raster canvas and save as PDF
-            using (RasterImage finalImage = (RasterImage)Image.Load(tempCanvasPath))
-            {
-                PdfOptions pdfOptions = new PdfOptions();
-                finalImage.Save(outputPath, pdfOptions);
-            }
-
-            // Optionally delete temporary canvas file
-            if (File.Exists(tempCanvasPath))
-            {
-                File.Delete(tempCanvasPath);
             }
         }
         catch (Exception ex)
@@ -102,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive legacy CorelDRAW CMX drawings as a single PDF for easy sharing with clients who only view PDFs.
- * 2. When a print workflow requires merging all pages of a multi‑page CMX file into one PDF page to fit a fixed‑size form or label.
- * 3. When an automated document conversion service must transform CMX files into searchable PDFs without preserving individual page boundaries.
- * 4. When a batch processing tool has to generate a compact PDF preview of a CMX file for web display, stacking pages vertically to keep the layout intact.
- * 5. When integrating Aspose.Imaging into a C# application that consolidates multiple CMX pages into a single PDF report for regulatory compliance documentation.
+ * 1. When you need to archive a multi‑page Corel Metafile (CMX) as a single, compact PDF for easy sharing or storage.
+ * 2. When generating a printable PDF that combines all CMX pages onto one sheet for quick visual review.
+ * 3. When converting legacy CMX design files into a single‑page PDF to embed in technical documentation or reports.
+ * 4. When creating a PDF preview of a CMX drawing set without preserving individual page boundaries, simplifying navigation.
+ * 5. When automating batch processing of CMX files to produce flattened single‑page PDFs for compliance or record‑keeping purposes.
  */

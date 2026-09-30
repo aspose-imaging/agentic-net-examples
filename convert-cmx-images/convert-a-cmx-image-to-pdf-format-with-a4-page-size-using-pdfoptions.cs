@@ -1,8 +1,9 @@
 // HOW-TO: Convert CMX Image to PDF with A4 Page Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -21,17 +22,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage image = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    VectorRasterizationOptions = new CmxRasterizationOptions
-                    {
-                        PageSize = new Aspose.Imaging.SizeF(595, 842) // A4 size in points
-                    }
-                };
-
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed legacy CorelDRAW CMX drawings into a PDF report that must fit standard A4 paper dimensions.
- * 2. When an automated document pipeline converts batch CMX files to searchable PDFs for archiving while preserving vector quality.
- * 3. When a web service receives CMX uploads and returns PDF previews sized for printing on A4 sheets.
- * 4. When integrating Aspose.Imaging into a C# application to transform vector‑based CMX artwork into PDF for cross‑platform distribution.
- * 5. When generating printable PDFs from CMX assets in a Windows desktop tool, ensuring the output matches A4 layout requirements.
+ * 1. When a developer needs to archive legacy CorelDRAW CMX drawings as searchable PDF files for document management systems.
+ * 2. When an application must generate printable PDFs from CMX artwork while preserving the standard A4 page dimensions for consistent printing.
+ * 3. When a batch conversion tool is required to transform multiple CMX files into PDFs for easy distribution to clients who only view PDFs.
+ * 4. When integrating Aspose.Imaging into a C# service that receives CMX uploads and returns PDF previews for web viewers.
+ * 5. When automating the conversion of CMX graphics to PDF to embed them in reports or presentations without manual export steps.
  */

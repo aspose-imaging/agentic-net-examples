@@ -1,46 +1,38 @@
-// HOW-TO: Convert CMX to JPEG with White Background for Transparency in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX to JPEG With White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cmx";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.jpg");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with a background color for transparent regions
-                JpegOptions jpegOptions = new JpegOptions
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    // Set the background color (e.g., white) to fill transparent areas
-                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    }
-                };
-
-                // Save as JPEG
-                cmxImage.Save(outputPath, jpegOptions);
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    image.Save(outputPath, jpegOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy CorelDRAW CMX artwork on the web, converting it to JPEG with a white background prevents transparent‑area artifacts.
- * 2. When generating thumbnails for a document management system, you can rasterize CMX files to JPEG while filling transparent parts with a solid color to keep the images consistent.
- * 3. When automating batch conversion of CMX logos for print catalogs, using Aspose.Imaging in C# ensures each JPEG has a uniform background instead of unwanted gaps.
- * 4. When integrating older CMX graphics into a mobile app, converting them to JPEG with a custom background color avoids visual glitches on devices that don’t support transparency.
- * 5. When preparing CMX illustrations for email newsletters, saving them as JPEG with a defined background eliminates rendering issues in email clients that ignore alpha channels.
+ * 1. When you need to display CorelDRAW CMX vector drawings on web pages that only support JPEG, you can convert them to JPEG with a solid white background to hide transparency.
+ * 2. When generating thumbnails of CMX files for a document management system, you can rasterize the vectors to JPEG while ensuring transparent areas are filled to avoid visual artifacts.
+ * 3. When automating batch processing of legacy CMX assets for a mobile app, you can use C# and Aspose.Imaging to convert each file to JPEG with a custom background color.
+ * 4. When preparing print‑ready previews of CMX designs in a .NET application, you can render the vector image to JPEG and set the background to match the paper color.
+ * 5. When integrating CMX support into an image‑upload workflow, you can convert incoming CMX files to JPEG on the server, applying a white background to maintain consistent appearance across browsers.
  */
