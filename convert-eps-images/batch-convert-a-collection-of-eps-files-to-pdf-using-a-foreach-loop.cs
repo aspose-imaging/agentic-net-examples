@@ -1,69 +1,59 @@
-// HOW-TO: Batch Convert Multiple EPS Files to PDF/A-1b in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EPS Files To PDF Using C# Foreach Loop (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
-class Program
+namespace BatchEpsToPdf
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded collection of EPS files to convert
-            string[] inputFiles = new string[]
+            try
             {
-                @"C:\Images\Sample1.eps",
-                @"C:\Images\Sample2.eps",
-                @"C:\Images\Sample3.eps"
-            };
+                string inputDirectory = "InputEps";
+                string outputDirectory = "OutputPdf";
 
-            foreach (string inputPath in inputFiles)
-            {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                Directory.CreateDirectory(outputDirectory);
+
+                string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+
+                foreach (string inputPath in epsFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Determine output PDF path (same folder, .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load EPS image and convert to PDF with required compliance
-                using (EpsImage image = (EpsImage)Image.Load(inputPath))
-                {
-                    var pdfOptions = new PdfOptions
+                    if (!File.Exists(inputPath))
                     {
-                        PdfCoreOptions = new PdfCoreOptions
-                        {
-                            PdfCompliance = PdfComplianceVersion.PdfA1b
-                        }
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                    image.Save(outputPath, pdfOptions);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var pdfOptions = new PdfOptions();
+                        image.Save(outputPath, pdfOptions);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a set of vector EPS artwork into PDF/A‑1b documents for archival or printing workflows using C#.
- * 2. When a publishing system must generate PDF versions of EPS logos stored in a folder before sending them to a third‑party printer.
- * 3. When a desktop application processes incoming EPS design files and saves them as PDF to ensure compatibility with PDF viewers without manual conversion.
- * 4. When you want to verify each EPS file exists, create the output directory, and convert them to PDF in a single loop to simplify batch processing scripts.
- * 5. When compliance with PDF/A‑1b standards is required for legal or regulatory documents and you need a programmatic way to enforce it during conversion.
+ * 1. When you need to automatically transform a folder of vector EPS artwork into printable PDF documents in a .NET application.
+ * 2. When a publishing workflow requires converting multiple design files to PDF without manual intervention, using Aspose.Imaging in C#.
+ * 3. When you want to generate PDF versions of EPS logos for web or email attachments during a batch processing job.
+ * 4. When an automated build script must ensure all EPS assets are available as PDFs for downstream QA testing.
+ * 5. When a desktop utility must read EPS files from a directory, convert each to PDF, and store them in a separate output folder for archiving.
  */
