@@ -1,19 +1,24 @@
-// HOW-TO: Convert EPS to PSD With RLE Compression And RGB Color Mode In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD with Correct Size and White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.psd";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            string inputPath = Path.Combine(inputDirectory, "sample.eps");
+            string outputPath = Path.Combine(outputDirectory, "sample.psd");
 
             if (!File.Exists(inputPath))
             {
@@ -23,15 +28,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image epsImage = Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
+                using (var psdOptions = new PsdOptions())
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Rgb
-                };
-
-                epsImage.Save(outputPath, psdOptions);
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = epsImage.Width,
+                        PageHeight = epsImage.Height
+                    };
+                    epsImage.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design workflow requires converting vector EPS artwork into layered PSD files for Photoshop editing while preserving RGB colors and reducing file size with RLE compression.
- * 2. When an automated asset pipeline needs to batch‑process EPS logos into PSDs for a web‑based brand‑asset manager that only supports Photoshop files.
- * 3. When a C# application must generate PSD previews of EPS illustrations for a digital asset management system that indexes images by format.
- * 4. When a publishing system converts EPS diagrams to PSD to apply Photoshop filters programmatically using Aspose.Imaging before final print production.
- * 5. When a graphics service needs to ensure consistent color mode (RGB) and lossless compression when transforming EPS files to PSD for downstream editing tools.
+ * 1. When a design pipeline needs to turn vector EPS artwork into layered PSD files for Photoshop editing while preserving the original dimensions.
+ * 2. When an e‑commerce platform must generate PSD previews from EPS logos and ensure a white background for consistent display.
+ * 3. When a digital asset management system requires batch conversion of EPS assets to PSD format with exact page size for cataloging.
+ * 4. When a printing workflow converts EPS illustrations to PSD to apply raster effects in Photoshop, needing the original width and height.
+ * 5. When a C# application automates conversion of client‑provided EPS files to PSD with a solid background to avoid transparency issues.
  */
