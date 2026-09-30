@@ -3,41 +3,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cmx";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.jpg");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image with default load options
-            using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                // Configure JPEG save options for progressive encoding
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
                     CompressionType = JpegCompressionMode.Progressive,
-                    Quality = 90 // optional quality setting
+                    Source = new FileCreateSource(outputPath, false)
                 };
-
-                // Save as progressive JPEG
-                image.Save(outputPath, jpegOptions);
+                cmx.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy CorelDRAW CMX graphics on a website, converting them to progressive JPEG reduces initial load time for users.
- * 2. When a batch processing service must transform archived CMX files into web‑friendly JPEGs with progressive rendering for smoother scrolling in image galleries.
- * 3. When an e‑commerce platform imports product illustrations saved as CMX and requires high‑quality JPEGs that load progressively on mobile devices.
- * 4. When a digital asset management system needs to generate preview thumbnails from CMX drawings and wants the previews to appear quickly using progressive JPEG compression.
- * 5. When a reporting tool creates PDF reports that embed CMX diagrams and must first convert those diagrams to progressive JPEG to keep the final document size low and rendering fast.
+ * 1. When you need to display legacy CorelDRAW CMX artwork on a website, converting it to a progressive JPEG reduces load time for users on slow connections.
+ * 2. When a batch processing service must transform CMX files into web‑friendly JPEGs with progressive rendering for smoother image loading in browsers.
+ * 3. When integrating a .NET application that receives CMX design files and must store them as compressed JPEGs for archival or preview purposes.
+ * 4. When creating thumbnails of CMX drawings for a mobile app, using progressive JPEGs improves perceived performance on cellular networks.
+ * 5. When migrating a digital asset library from CorelDRAW formats to standard image formats, converting CMX to progressive JPEG ensures compatibility with most image viewers.
  */
