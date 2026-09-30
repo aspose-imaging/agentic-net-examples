@@ -1,47 +1,47 @@
-// HOW-TO: Convert CMX to 8‑Bit TIFF with LZW Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX to 8‑Bit TIFF Image in C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.cmx";
-        string outputPath = @"c:\temp\output.tif";
+        string inputPath = "Input\\sample.cmx";
+        string outputPath = "Output\\result.tiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int width = cmx.Width;
+                int height = cmx.Height;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.BitsPerSample = new ushort[] { 8 };
+                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;
+                tiffOptions.Compression = TiffCompressions.None;
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Configure TIFF save options for 8 bits per color component
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                BitsPerSample = new ushort[] { 8, 8, 8 },                     // 8 bits per channel
-                ByteOrder = TiffByteOrder.BigEndian,                         // Motorola byte order
-                Compression = TiffCompressions.Lzw,                         // LZW compression
-                Photometric = TiffPhotometrics.Rgb,                         // RGB photometric
-                PlanarConfiguration = TiffPlanarConfigs.Contiguous          // Single plane
-            };
-
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
-            {
-                // Save as TIFF using the configured options
-                cmxImage.Save(outputPath, tiffOptions);
+                using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Create(tiffOptions, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(tiff);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.DrawImage(cmx, 0, 0, width, height);
+                    tiff.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive legacy CorelDRAW CMX artwork as lossless 8‑bit per channel TIFF files for long‑term storage.
- * 2. When a printing workflow requires converting CMX designs to TIFF with exact 8‑bit RGB color depth and LZW compression before sending to a RIP.
- * 3. When a web service must transform uploaded CMX files into standard TIFF images that can be displayed in browsers or processed by other libraries.
- * 4. When migrating a batch of CMX assets to a TIFF‑based digital asset management system and you need to ensure consistent byte order and planar configuration.
- * 5. When integrating Aspose.Imaging into a C# application to programmatically convert CMX drawings to TIFF while controlling bits per sample and compression settings.
+ * 1. When you need to archive legacy CorelDRAW CMX drawings as lossless 8‑bit TIFF files for long‑term storage.
+ * 2. When a printing workflow requires CMX artwork to be converted to a TIFF format with a specific 8‑bit per pixel depth and no compression.
+ * 3. When integrating Aspose.Imaging into a C# application to batch‑process CMX files and generate TIFFs that preserve exact grayscale values.
+ * 4. When a document management system must display CMX content as TIFF thumbnails while maintaining a consistent photometric setting.
+ * 5. When migrating legacy design assets to a TIFF‑based image repository and you need programmatic control over color depth and background color in C#.
  */
