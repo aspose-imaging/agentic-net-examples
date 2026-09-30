@@ -1,7 +1,6 @@
-// HOW-TO: Convert SVG to PDF with Embedded Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Embed Fonts When Converting EMF to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -10,12 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.pdf";
-        string fontFolderPath = "Fonts";
-
         try
         {
+            string inputPath = Path.Combine("Input", "sample.emf");
+            string outputPath = Path.Combine("Output", "sample.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,41 +22,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(args =>
+            string fontsFolder = "Fonts";
+            if (!Directory.Exists(fontsFolder))
             {
-                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (args.Length > 0)
+                Directory.CreateDirectory(fontsFolder);
+            }
+
+            FontSettings.SetFontsFolders(new string[] { fontsFolder }, true);
+
+            using (Image image = Image.Load(inputPath))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    string fontsPath = args[0]?.ToString() ?? string.Empty;
-                    if (Directory.Exists(fontsPath))
-                    {
-                        foreach (var file in Directory.GetFiles(fontsPath))
-                        {
-                            string name = Path.GetFileNameWithoutExtension(file);
-                            byte[] data = File.ReadAllBytes(file);
-                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                        }
-                    }
+                    image.Save(outputPath, pdfOptions);
                 }
-                return fonts.ToArray();
-            }, fontFolderPath);
-
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                var pdfOptions = new PdfOptions();
-
-                var vectorOpts = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                pdfOptions.VectorRasterizationOptions = vectorOpts;
-
-                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PDF reports from SVG graphics and must ensure that any custom text fonts appear correctly on any viewer.
- * 2. When an application processes user‑uploaded SVG files that reference external fonts and you want the resulting PDF to be self‑contained without missing glyphs.
- * 3. When automating batch conversion of design assets to PDF and the fonts are stored in a separate directory that must be embedded during conversion.
- * 4. When creating printable PDFs from web‑based SVG diagrams where the target audience may not have the original font files installed.
- * 5. When integrating Aspose.Imaging into a C# service that converts SVG logos to PDF and must embed the corporate brand fonts for compliance.
+ * 1. When you need to generate PDF reports from EMF vector diagrams in a C# application and want the text to render correctly on any viewer by embedding the required fonts.
+ * 2. When converting legacy Windows Metafile (EMF) files to PDF for long‑term archival and must ensure custom fonts are included in the PDF.
+ * 3. When building an automated batch process that transforms multiple EMF assets into self‑contained PDFs on a server, embedding fonts to avoid missing‑font errors.
+ * 4. When creating printable PDFs from EMF logos or branding assets in .NET and require the fonts to be embedded so the output looks identical on all platforms.
+ * 5. When developing a document generation service that receives EMF input and outputs PDF files, and you need to guarantee consistent text appearance by embedding the source fonts.
  */
