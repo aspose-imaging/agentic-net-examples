@@ -2,8 +2,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -11,44 +11,33 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputDicom";
-            string outputDirectory = @"C:\OutputPng";
+            string inputDirectory = "InputDicom";
+            string outputDirectory = "OutputPng";
 
-            // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm", SearchOption.TopDirectoryOnly);
 
             foreach (string inputPath in dicomFiles)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Open the DICOM file as a stream
-                using (Stream stream = File.OpenRead(inputPath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Load the DICOM image
-                    using (DicomImage dicomImage = new DicomImage(stream))
-                    {
-                        // Process each page in the DICOM image
-                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
-                        {
-                            // Build the output file name (preserve original name, add page index if multi‑page)
-                            string baseFileName = Path.GetFileNameWithoutExtension(inputPath);
-                            string outputFileName = $"{baseFileName}.{dicomPage.Index}.png";
-                            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                            // Ensure the output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as PNG
-                            dicomPage.Save(outputPath, new PngOptions());
-                        }
-                    }
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -60,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to export a whole folder of DICOM scans as PNG images for integration with a web‑based viewer.
- * 2. When a research project requires converting multi‑frame DICOM series into separate PNG files while keeping the original study identifiers.
- * 3. When an automated pipeline must generate thumbnail PNGs from incoming DICOM files for quick preview in a medical records system.
- * 4. When a developer wants to archive DICOM images as lossless PNGs on a file server without altering the original file names.
- * 5. When a healthcare app needs to batch process patient scans and store each DICOM page as an individual PNG for downstream AI analysis.
+ * 1. When a hospital needs to export a folder of DICOM scans to PNG for easy viewing in web browsers.
+ * 2. When a research lab wants to create thumbnail previews of thousands of DICOM images for a machine‑learning dataset.
+ * 3. When a PACS administrator must archive radiology images as lossless PNG files while keeping the original file names.
+ * 4. When a developer integrates Aspose.Imaging into a C# application to automate conversion of medical images for a reporting tool.
+ * 5. When a QA team validates that all DICOM files in a directory can be successfully rendered as PNG without manual intervention.
  */
