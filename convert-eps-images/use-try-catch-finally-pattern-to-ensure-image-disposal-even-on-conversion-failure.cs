@@ -1,67 +1,60 @@
-// HOW-TO: Convert PNG to JPEG with Safe Disposal and Error Handling in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPG to PNG in C# With Safe Disposal Using Try Catch Finally (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.jpg";
-
-        // Global exception handling
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            Image image = null;
             try
             {
-                // Load the source image
-                image = Image.Load(inputPath);
+                string inputPath = "input.jpg";
+                string outputPath = "output\\output.png";
 
-                // Prepare JPEG save options (adjust quality as needed)
-                var jpegOptions = new JpegOptions
+                if (!File.Exists(inputPath))
                 {
-                    Quality = 90
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image in the desired format
-                image.Save(outputPath, jpegOptions);
-            }
-            finally
-            {
-                // Ensure the image is disposed even if saving fails
-                if (image != null)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                Image image = null;
+                try
                 {
-                    image.Dispose();
+                    image = Image.Load(inputPath);
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Conversion error: {ex.Message}");
+                }
+                finally
+                {
+                    if (image != null)
+                    {
+                        image.Dispose();
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Report any unexpected errors
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert user‑uploaded PNG images to JPEG for web delivery while guaranteeing the image object is always released even if the save fails.
- * 2. When an automated service must generate thumbnail JPEGs from PNG sources and must handle missing files or directory creation errors gracefully.
- * 3. When integrating image conversion into a C# backend that must log errors without crashing the application and ensure resources are cleaned up.
- * 4. When processing images in a Windows service that converts scanned PNG files to compressed JPEGs with a specific quality setting and needs reliable disposal to avoid memory leaks.
- * 5. When building a command‑line tool that transforms PNG assets to JPEG for mobile apps, requiring robust exception handling and proper cleanup of the Aspose.Imaging Image instance.
+ * 1. When you need to batch‑convert user‑uploaded JPEG photos to PNG for web display while guaranteeing the image object is released even if conversion fails.
+ * 2. When an automated service processes scanned documents, converting each JPG file to lossless PNG and handling missing files or I/O errors gracefully.
+ * 3. When integrating image conversion into a Windows service that must not leak memory, using try‑catch‑finally to ensure Image.Dispose runs on every execution.
+ * 4. When building a desktop application that lets users select a JPEG and saves a PNG version in a specific folder, with error messages logged if the source file is absent.
+ * 5. When creating a scheduled task that transforms images for archival, employing nested try blocks to catch conversion exceptions and still clean up resources.
  */
