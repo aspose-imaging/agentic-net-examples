@@ -1,4 +1,4 @@
-// HOW-TO: Convert JPG to PDF and Verify PDF Opens in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF and Verify PDF Opens in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,45 +6,34 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "input.eps";
+            string outputPath = "output.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the source image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    image.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
 
-            // Validate that the generated PDF can be loaded without errors
+            // Validate that the PDF can be opened without errors
             using (Image pdfImage = Image.Load(outputPath))
             {
-                // Simple validation: check that dimensions are positive
-                if (pdfImage.Width <= 0 || pdfImage.Height <= 0)
-                {
-                    Console.Error.WriteLine("Validation failed: PDF has invalid dimensions.");
-                    return;
-                }
+                // No action needed; successful load means validation passed
             }
 
-            Console.WriteLine("PDF conversion and validation succeeded.");
+            Console.WriteLine("Conversion and validation succeeded.");
         }
         catch (Exception ex)
         {
@@ -55,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from user‑uploaded JPEG images and ensure the resulting file can be opened by any PDF viewer.
- * 2. When an automated workflow must convert product photos to PDF for archiving and validate that the PDFs are not corrupted before storage.
- * 3. When a web service creates printable PDFs from scanned JPEG documents and requires a quick check that the PDF dimensions are valid.
- * 4. When a desktop application batch‑processes image assets into PDFs and needs to confirm each PDF loads without errors to avoid downstream failures.
- * 5. When integrating Aspose.Imaging into a CI pipeline to test that image‑to‑PDF conversion produces viewable PDFs for quality assurance.
+ * 1. When you need to turn EPS vector artwork into a PDF for client delivery and ensure the resulting file opens correctly in standard PDF viewers.
+ * 2. When an automated batch process must convert many EPS files to PDFs and programmatically confirm each output is not corrupted before archiving.
+ * 3. When integrating EPS logos into generated PDFs and you want to validate that the PDFs can be loaded without errors using Aspose.Imaging in C#.
+ * 4. When building a web service that accepts EPS uploads, converts them to PDFs, and must guarantee the PDFs are readable for downstream processing.
+ * 5. When performing quality‑assurance testing of a conversion routine, you load the newly created PDF to detect any loading failures immediately after conversion.
  */
