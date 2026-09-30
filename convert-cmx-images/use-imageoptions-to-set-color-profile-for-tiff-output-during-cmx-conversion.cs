@@ -1,10 +1,9 @@
-// HOW-TO: Convert CMX File to TIFF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Set Color Profile for TIFF When Converting CMX in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/output.tif";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "result.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -23,12 +22,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image cmxImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                cmxImage.Save(outputPath, tiffOptions);
+                TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application needs to export legacy CorelDRAW CMX drawings as high‑resolution TIFF images for printing or archival.
- * 2. When a document‑management system must batch‑convert uploaded CMX files to TIFF to ensure compatibility with downstream OCR engines.
- * 3. When a web service receives CMX artwork and must provide a TIFF version for clients that only support raster formats.
- * 4. When a migration script has to transform CMX assets into TIFF while preserving image options using Aspose.Imaging in a .NET environment.
- * 5. When an automated workflow requires converting CMX files to TIFF on a server without installing CorelDRAW, using C# code.
+ * 1. When a publishing workflow requires converting legacy CMX artwork to TIFF while preserving a specific ICC color profile for accurate print reproduction.
+ * 2. When an automated batch process generates high‑resolution TIFF files from CMX designs and needs to embed sRGB or AdobeRGB profiles for downstream web or print services.
+ * 3. When a digital asset management system imports CMX files and must store them as TIFFs with embedded color information to maintain color consistency across devices.
+ * 4. When a graphics application offers users the option to export CMX drawings to TIFF and wants to ensure the exported file includes the chosen color profile for color‑critical workflows.
+ * 5. When a quality‑control script validates that converted TIFF images from CMX contain the correct color profile before they are sent to a pre‑press department.
  */
