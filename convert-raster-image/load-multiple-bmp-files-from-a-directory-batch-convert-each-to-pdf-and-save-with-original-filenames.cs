@@ -1,64 +1,62 @@
-// HOW-TO: Batch Convert BMP Images to PDF with Original Filenames in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple BMP Images to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchBmpToPdf
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\BmpInput";
-            string outputDirectory = @"C:\Images\PdfOutput";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in bmpFiles)
+            try
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputDirectory = "InputBmpFiles";
+                string outputDirectory = "OutputPdfFiles";
+
+                // Get all BMP files in the input directory
+                string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+
+                foreach (string inputPath in bmpFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
 
-                // Construct the output PDF path with the same filename (different extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                    // Build output PDF path with same filename (different extension)
+                    string outputPath = Path.Combine(
+                        outputDirectory,
+                        Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Set up PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
+                    // Load BMP and save as PDF
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath);
+                    }
 
-                    // Save the image as PDF
-                    image.Save(outputPath, pdfOptions);
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDF reports from a collection of scanned BMP diagrams stored in a folder.
- * 2. When an automated workflow must archive legacy BMP assets as PDF files while preserving their original names.
- * 3. When a desktop application has to export user‑uploaded BMP screenshots to PDF for email attachment.
- * 4. When a server‑side service processes incoming BMP files and creates PDF versions for downstream document management systems.
- * 5. When you want to migrate a batch of BMP product images to PDF format for consistent viewing across platforms.
+ * 1. When a developer needs to automatically turn a folder of legacy BMP screenshots into searchable PDF files for archival.
+ * 2. When an application must generate PDF catalogs from a batch of product BMP images without manual intervention.
+ * 3. When a Windows service has to convert scanned BMP documents to PDF for easier email attachment and printing.
+ * 4. When a CI/CD pipeline requires converting generated BMP test output into PDF reports for stakeholder review.
+ * 5. When a developer wants to migrate a legacy BMP asset library to PDF format while preserving original filenames for consistency.
  */
