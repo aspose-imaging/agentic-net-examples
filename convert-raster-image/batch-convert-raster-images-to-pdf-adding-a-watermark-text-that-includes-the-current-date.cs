@@ -1,8 +1,9 @@
-// HOW-TO: Batch Convert Raster Images to PDF with Date Watermark in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Images to PDF with Current Date Watermark in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -11,12 +12,10 @@ class Program
     {
         try
         {
-            // Set up base, input, and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; if not, create it and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -24,57 +23,36 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory);
 
-            foreach (var file in files)
+            foreach (string inputPath in files)
             {
-                string inputPath = file;
-
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Work only with raster images
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
-                        continue; // Skip non‑raster files
-
-                    // Create graphics object for drawing
-                    Graphics graphics = new Graphics(raster);
-
-                    // Prepare watermark text with current date
+                    Graphics graphics = new Graphics(image);
                     string watermarkText = DateTime.Now.ToString("yyyy-MM-dd");
-
-                    // Define font and brush
                     Font font = new Font("Arial", 24);
                     SolidBrush brush = new SolidBrush(Color.Yellow);
+                    float x = image.Width - (font.Size * watermarkText.Length) - 10;
+                    float y = image.Height - font.Size - 10;
+                    graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
 
-                    // Position the watermark near the bottom‑left corner
-                    PointF location = new PointF(10, raster.Height - 30);
-
-                    // Draw the watermark text onto the image
-                    graphics.DrawString(watermarkText, font, brush, location);
-
-                    // Save the result as PDF
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         image.Save(outputPath, pdfOptions);
@@ -91,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive scanned invoices as PDFs and automatically stamp each file with the processing date.
- * 2. When a photographer wants to generate watermarked PDF portfolios from a folder of JPEG or PNG images, adding the current date for copyright tracking.
- * 3. When a legal firm must convert a batch of evidence photos into PDF documents while embedding a date watermark to maintain chain‑of‑custody records.
- * 4. When a marketing team creates PDF catalogs from product images and wants each page to show the generation date for version control.
- * 5. When an automated reporting system converts daily generated charts (PNG, BMP) into PDFs and adds the day's date as a watermark for audit purposes.
+ * 1. When a company needs to archive daily scanned receipts as PDF files and stamp each with the processing date automatically.
+ * 2. When a photographer wants to generate PDF portfolios from a folder of JPEGs while adding a date watermark to protect copyright.
+ * 3. When an invoicing system must convert PNG invoice images to PDF and embed the current date as a verification mark before sending to clients.
+ * 4. When a legal firm needs to batch‑process evidence photos into PDFs and include the capture date as a visible watermark for chain‑of‑custody records.
+ * 5. When a document management workflow requires converting various raster image formats to PDF and tagging each file with the generation date for audit trails.
  */
