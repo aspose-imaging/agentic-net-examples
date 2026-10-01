@@ -6,56 +6,51 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all BMP files in the input folder
-            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
-
-            foreach (string inputPath in bmpFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                if (!string.Equals(Path.GetExtension(inputPath), ".bmp", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
                 }
 
-                // Load the BMP image
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to 1024x768 using the default resampling method
                     image.Resize(1024, 768);
-
-                    // Prepare the output SVG file path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
-
-                    // Ensure the output directory exists (unconditional as required)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Set up SVG rasterization options based on the resized image size
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    using (SvgOptions options = new SvgOptions())
                     {
-                        PageSize = image.Size
-                    };
-
-                    // Configure SVG save options
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    // Save the resized image as SVG
-                    image.Save(outputPath, svgOptions);
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -68,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a large collection of legacy BMP graphics for web display by resizing them to a standard 1024x768 resolution and converting them to lightweight SVG files.
- * 2. When an application must automatically generate scalable vector versions of scanned BMP assets for responsive UI components without manual editing.
- * 3. When a migration script has to process thousands of BMP files in a folder, normalize their dimensions, and output SVGs for use in modern design tools.
- * 4. When a reporting tool requires all input bitmap charts to be resized and stored as SVG to ensure crisp rendering at any zoom level.
- * 5. When a CI/CD pipeline needs to validate image assets by batch converting BMPs to SVG after resizing them to a fixed size for quality checks.
+ * 1. When you need to automatically shrink a collection of legacy BMP graphics to a standard web‑friendly resolution before converting them to scalable SVG files for responsive design.
+ * 2. When a desktop application must process user‑uploaded BMP screenshots, resize them to 1024×768, and store them as SVGs to reduce file size and enable infinite scaling.
+ * 3. When migrating an old asset library of BMP icons to vector format, you can batch resize each icon and save it as SVG for use in modern UI frameworks.
+ * 4. When generating printable PDFs from BMP drawings, you first resize the images to a consistent size and convert them to SVG to preserve quality at any zoom level.
+ * 5. When building an automated build pipeline that prepares BMP assets for a web game, the code resizes each image to the required resolution and outputs SVGs for fast rendering in browsers.
  */
