@@ -1,8 +1,9 @@
-// HOW-TO: Resize BMP, Apply Median Filter, and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP to 300x300, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.bmp";
-            string outputPath = "Output/result.pdf";
+            string inputPath = "Input\\input.bmp";
+            string outputPath = "Output\\output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,10 +24,16 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Resize(300, 300);
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-                raster.Save(outputPath, new PdfOptions());
+                using (RasterImage raster = (RasterImage)image)
+                {
+                    if (!raster.IsCached)
+                        raster.CacheData();
+
+                    raster.Resize(300, 300);
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+
+                    raster.Save(outputPath, new PdfOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -38,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a smaller, noise‑reduced PDF preview from a high‑resolution BMP for web display.
- * 2. When converting scanned BMP documents into PDF files while smoothing speckles using a median filter.
- * 3. When preparing thumbnail PDFs of BMP graphics for inclusion in reports or email attachments.
- * 4. When automating batch processing to downsize BMP images, remove salt‑and‑pepper noise, and archive them as PDFs.
- * 5. When integrating Aspose.Imaging in a C# application to transform BMP assets into compact PDF files with consistent dimensions.
+ * 1. When you need to convert legacy BMP scans into compact PDF documents while standardizing size for a web portal.
+ * 2. When you must preprocess a bitmap image by reducing noise with a median filter before embedding it in a printable PDF report.
+ * 3. When an automated batch job has to resize user‑uploaded BMP avatars to 300 × 300 pixels and store them as PDFs for archival.
+ * 4. When integrating a document management system that only accepts PDF, you can transform BMP diagrams to PDF with consistent dimensions and filtered quality.
+ * 5. When generating PDF catalogs from BMP product photos, applying a median filter ensures smoother edges after resizing to a fixed thumbnail size.
  */
