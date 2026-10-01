@@ -1,50 +1,46 @@
-// HOW-TO: Crop Top Right Quadrant of Image and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Top Right Quadrant of PNG and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\cropped.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access cropping functionality
-                RasterImage raster = (RasterImage)image;
+                if (!image.IsCached)
+                {
+                    image.CacheData();
+                }
 
-                // Define the top‑right quadrant rectangle
-                int rectX = raster.Width / 2;          // start at middle of width
-                int rectY = 0;                         // top edge
-                int rectWidth = raster.Width / 2;      // half the width
-                int rectHeight = raster.Height / 2;    // half the height
-                Rectangle cropArea = new Rectangle(rectX, rectY, rectWidth, rectHeight);
+                int halfWidth = image.Width / 2;
+                int halfHeight = image.Height / 2;
+                int x = halfWidth;
+                int y = 0;
+                int width = halfWidth;
+                int height = halfHeight;
 
-                // Crop the image to the defined rectangle
-                raster.Crop(cropArea);
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(x, y, width, height);
+                image.Crop(cropRect);
 
-                // Prepare PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the cropped image as a PDF document
-                raster.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the top‑right quarter of a PNG screenshot and embed it in a PDF report.
- * 2. When generating a PDF preview of a specific region of a scanned raster image for a document management system.
- * 3. When creating printable PDF handouts that contain only the upper‑right portion of a large product photo.
- * 4. When automating the conversion of a selected image quadrant into a PDF for use in e‑learning slide decks.
- * 5. When developing a web service that returns a PDF containing a cropped area of an uploaded raster image for client‑side display.
+ * 1. When you need to extract the upper‑right quarter of a scanned PNG and embed it in a PDF report.
+ * 2. When generating printable PDFs that contain only a specific region of a large raster image, such as a logo corner.
+ * 3. When creating thumbnails or preview pages by cropping a portion of an image and converting it to PDF for documentation.
+ * 4. When automating the conversion of selected image sections into PDF for archival or compliance purposes.
+ * 5. When building a web service that receives PNG uploads, isolates the top‑right area, and returns a PDF file to the client.
  */
