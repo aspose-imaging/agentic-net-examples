@@ -1,10 +1,11 @@
-// HOW-TO: Convert PNG to PDF with Median Filter and Filename Footer in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Filename Footer to PNG, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,8 +13,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "input.png";
+            string outputPath = "output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,30 +22,26 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Apply median filter with kernel size 5
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-                // Add footer with file name
-                Graphics graphics = new Graphics(image);
-                using (SolidBrush brush = new SolidBrush(Color.Black))
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Black))
                 {
                     Font font = new Font("Arial", 12);
-                    string footer = Path.GetFileName(inputPath);
+                    Graphics graphics = new Graphics(raster);
+                    string fileName = Path.GetFileName(inputPath);
                     float x = 10;
-                    float y = image.Height - 20;
-                    graphics.DrawString(footer, font, brush, new PointF(x, y));
+                    float y = raster.Height - 20;
+                    graphics.DrawString(fileName, font, brush, new Aspose.Imaging.PointF(x, y));
                 }
 
-                // Save as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 pdfOptions.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, pdfOptions);
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you must reduce noise in a PNG screenshot, embed the original file name as a footer, and provide the result as a PDF document for client review.
- * 2. When generating PDF invoices that include product images, you can apply a median filter to improve image quality and automatically add the image filename at the bottom of each page.
- * 3. When creating archival PDFs from a batch of PNG scans, the code cleans the images with a median filter and stamps each page with its source filename for traceability.
- * 4. When building a C# utility that converts user‑uploaded PNG graphics into PDF manuals, the median filter sharpens the visuals while the footer identifies the source file.
- * 5. When preparing documentation PDFs that need consistent branding, you can programmatically add a filename footer to each converted PNG and apply noise reduction before saving as PDF.
+ * 1. When you need to clean up a scanned PNG image with a median filter before archiving it as a PDF that includes the original file name as a footer.
+ * 2. When generating PDF reports from PNG assets and you want each page to display the source image’s filename at the bottom for traceability.
+ * 3. When automating batch conversion of product photos from PNG to PDF while reducing noise and adding a branding label with the file name.
+ * 4. When creating printable PDFs from PNG screenshots and need to embed the screenshot’s filename as a caption for documentation purposes.
+ * 5. When preparing legal‑evidence PDFs from PNG images, applying a median filter to improve clarity and appending the file name as a footer for audit trails.
  */
