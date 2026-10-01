@@ -1,10 +1,9 @@
-// HOW-TO: Batch Convert BMP Images to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to SVG with Custom XML Namespace in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,75 +12,52 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Bmp";
-            string outputDir = @"C:\Images\Svg";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Custom XML namespace to add
+            string customPrefix = "custom";
+            string customNamespace = "http://example.com/custom";
+
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDir, "*.bmp");
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            foreach (string inputPath in bmpFiles)
+            foreach (string bmpPath in bmpFiles)
             {
                 // Verify input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(bmpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
+                    continue;
                 }
 
-                // Determine output SVG path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                // Prepare output SVG path
+                string outputSvgPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(bmpPath) + ".svg");
 
                 // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
 
-                // Load BMP image
-                using (Image image = Image.Load(inputPath))
+                // Load BMP image and save as SVG
+                using (Image image = Image.Load(bmpPath))
                 {
-                    // Prepare SVG rasterization options (use image size)
-                    var vectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-
-                    // Set up SVG save options
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = vectorRasterizationOptions,
-                        // Keep metadata if needed
-                        KeepMetadata = true
-                    };
-
-                    // Save as SVG
-                    image.Save(outputPath, svgOptions);
+                    var svgOptions = new SvgOptions();
+                    image.Save(outputSvgPath, svgOptions);
                 }
 
-                // Add custom XML namespace to the generated SVG
-                try
+                // Load the generated SVG and add the custom namespace
+                XDocument svgDoc = XDocument.Load(outputSvgPath);
+                XElement root = svgDoc.Root;
+                if (root != null)
                 {
-                    XDocument doc = XDocument.Load(outputPath);
-                    XElement root = doc.Root;
-                    if (root != null && root.Name.LocalName == "svg")
-                    {
-                        // Define custom namespace URI
-                        const string customNsUri = "http://example.com/custom";
-                        // Add the namespace declaration if not already present
-                        XAttribute existing = root.Attribute("xmlns:custom");
-                        if (existing == null)
-                        {
-                            root.SetAttributeValue("xmlns:custom", customNsUri);
-                        }
-                        // Save the modified SVG back to disk
-                        doc.Save(outputPath);
-                    }
+                    XNamespace ns = customNamespace;
+                    root.Add(new XAttribute(XNamespace.Xmlns + customPrefix, customNamespace));
                 }
-                catch (Exception nsEx)
-                {
-                    // If namespace injection fails, report but continue processing other files
-                    Console.Error.WriteLine($"Warning: Could not add custom namespace to {outputPath}: {nsEx.Message}");
-                }
+                svgDoc.Save(outputSvgPath);
             }
         }
         catch (Exception ex)
@@ -93,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a legacy collection of BMP files to scalable SVG format for web display using C#.
- * 2. When an automated build process must convert multiple BMP assets into SVG vectors while preserving image dimensions and metadata.
- * 3. When a desktop application has to generate SVG diagrams from user‑uploaded BMP screenshots for further editing in vector tools.
- * 4. When a server‑side service processes incoming BMP uploads and stores them as SVG files to reduce storage size and enable responsive rendering.
- * 5. When a data‑pipeline requires batch conversion of BMP graphics to SVG with consistent page size settings for downstream XML‑based processing.
+ * 1. When you need to convert a large collection of legacy BMP graphics to scalable SVG files for web display while embedding a custom XML namespace for later data extraction.
+ * 2. When an automated build pipeline must generate SVG assets from BMP sources and tag them with a company‑specific namespace to be recognized by downstream XML‑based tools.
+ * 3. When a desktop application processes user‑uploaded BMP images and must output SVGs that include a custom namespace so that a separate reporting module can identify and manipulate those elements.
+ * 4. When migrating a design system from raster to vector format and you require batch conversion with Aspose.Imaging while preserving metadata through a custom XML namespace for integration with a vector editing workflow.
+ * 5. When creating a batch script that prepares SVG icons from BMP files for a mobile app and needs to add a custom namespace so the app’s rendering engine can apply theme‑specific attributes.
  */

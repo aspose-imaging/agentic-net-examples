@@ -3,51 +3,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input/input.png";
+        string outputPath = "Output/resized.svg";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
-
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize using Lanczos resampling (high‑quality)
-                // Example: double the size; adjust as needed
+                if (!image.IsCached)
+                    image.CacheData();
+
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                // Prepare SVG save options with rasterization settings
-                var svgOptions = new SvgOptions();
-                var rasterOptions = new SvgRasterizationOptions
+                using (SvgOptions options = new SvgOptions())
                 {
-                    // Set the page size to match the resized image dimensions
-                    PageSize = new Size(image.Width, image.Height),
+                    options.VectorRasterizationOptions = new SvgRasterizationOptions();
+                    options.VectorRasterizationOptions.PageWidth = image.Width;
+                    options.VectorRasterizationOptions.PageHeight = image.Height;
 
-                    // Optional: improve quality settings
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAlias
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the resized image as SVG
-                image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enlarge a raster PNG for high‑resolution web graphics while preserving detail, you can resize it with Lanczos resampling and save the result as an SVG for scalable display.
- * 2. When generating printable assets from PNG logos, resizing them with a high‑quality filter and exporting to SVG ensures crisp output at any print size.
- * 3. When building a C# application that converts user‑uploaded PNG icons into scalable SVG icons for UI themes, this code provides the necessary resizing and format conversion.
- * 4. When preparing images for responsive mobile apps, you can double the PNG dimensions with Lanczos resampling and embed the result in an SVG to maintain sharpness across screen densities.
- * 5. When automating batch processing of PNG screenshots that must be embedded in vector‑based documentation, this routine resizes each image and outputs SVG files compatible with PDF or HTML reports.
+ * 1. When you need to double the resolution of a PNG logo while preserving sharp edges and then embed it as a scalable SVG in a web page.
+ * 2. When converting raster PNG assets to vector‑friendly SVG files for responsive UI designs without losing detail.
+ * 3. When generating high‑quality printable graphics by upscaling PNG images with Lanczos resampling before saving them as SVG for lossless scaling.
+ * 4. When automating a build pipeline that processes PNG icons, enlarges them, and outputs SVG files for use in multiple screen densities.
+ * 5. When creating a C# tool that prepares PNG illustrations for vector editors by resizing them with high‑quality resampling and exporting to SVG format.
  */

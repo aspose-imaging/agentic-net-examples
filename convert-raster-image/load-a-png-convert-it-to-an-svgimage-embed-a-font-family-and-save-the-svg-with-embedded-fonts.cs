@@ -1,48 +1,50 @@
 // HOW-TO: Convert PNG to SVG with Embedded Fonts Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = "input.png";
+            string outputPath = "output/output.svg";
+            string fontsFolder = "fonts";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(fontsFolder);
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] args) =>
             {
-                // Configure SVG options to embed fonts
-                var svgOptions = new SvgOptions
+                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
-                    TextAsShapes = false,                     // Keep text as text (fonts can be embedded)
-                    Callback = new SvgResourceKeeperCallback() // Handles embedding of resources such as fonts
-                };
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return list.ToArray();
+            }, fontsFolder);
 
-                // Set rasterization options based on the source image size
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save as SVG with embedded fonts
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                var svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -55,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform a raster PNG logo into a scalable SVG while keeping the original text editable by embedding the required font family.
- * 2. When generating web‑ready vector graphics from user‑uploaded PNGs and you must ensure the SVG displays the correct typography across browsers.
- * 3. When creating printable SVG assets from PNG designs and you want the fonts to be self‑contained so the file can be opened on any system without installing the font.
- * 4. When automating a batch conversion pipeline that converts PNG icons to SVGs and requires embedded fonts to maintain brand consistency.
- * 5. When developing a C# application that extracts PNG images and saves them as SVGs with embedded fonts for use in design tools that rely on vector formats.
+ * 1. When you need to generate scalable SVG graphics from raster PNG assets while preserving custom typography for web or print.
+ * 2. When an application must convert user‑uploaded PNG logos into SVG files that include corporate fonts stored in a separate folder.
+ * 3. When creating an automated pipeline that transforms product images into vector SVGs with embedded fonts for consistent rendering across browsers.
+ * 4. When building a reporting tool that exports charts as PNG and then converts them to SVG with embedded typefaces to ensure text looks identical in PDF exports.
+ * 5. When developing a design‑to‑code workflow that requires converting PNG mockups into SVGs with bundled fonts for seamless integration into front‑end projects.
  */

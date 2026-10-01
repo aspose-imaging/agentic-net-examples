@@ -1,7 +1,6 @@
-// HOW-TO: Batch Convert Multiple PNG Images to PDF Using Shared MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple PNG Images to a Single PDF Using MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,60 +10,44 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputPngs";
-            string outputDirectory = @"C:\OutputPdfs";
+            // Hardcoded paths
+            string inputFolder = "input";
+            string outputPdfPath = "output/combined.pdf";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Collect individual PDF streams for later processing
-            List<MemoryStream> pdfStreams = new List<MemoryStream>();
-
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in pngFiles)
+            // Shared memory stream to aggregate PDFs
+            using (MemoryStream aggregatedStream = new MemoryStream())
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Get all PNG files in the input folder
+                string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+
+                foreach (string pngPath in pngFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Prepare PDF options (default settings)
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the image to a shared memory stream as PDF
-                    MemoryStream pdfStream = new MemoryStream();
-                    image.Save(pdfStream, pdfOptions);
-                    pdfStream.Position = 0; // Reset for reading later
-                    pdfStreams.Add(pdfStream);
-
-                    // Determine the output PDF file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure the output directory exists (already created above, but follow rule)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Write the PDF stream to the output file
-                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    // Validate input file existence
+                    if (!File.Exists(pngPath))
                     {
-                        pdfStream.CopyTo(fileStream);
+                        Console.Error.WriteLine($"File not found: {pngPath}");
+                        return;
                     }
 
-                    // Reset the memory stream for potential further use
-                    pdfStream.Position = 0;
+                    // Load PNG image
+                    using (Image image = Image.Load(pngPath))
+                    {
+                        // Save as PDF into the shared memory stream
+                        PdfOptions pdfOptions = new PdfOptions();
+                        image.Save(aggregatedStream, pdfOptions);
+                    }
+                }
+
+                // Write aggregated PDF bytes to the output file
+                aggregatedStream.Position = 0;
+                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
+                {
+                    aggregatedStream.CopyTo(fileStream);
                 }
             }
-
-            // At this point, pdfStreams contains all PDFs in memory for further compression
-            // (Compression logic would be added here as needed)
         }
         catch (Exception ex)
         {
@@ -75,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate individual PDF files from a folder of PNG scans for archival or distribution.
- * 2. When you want to collect PDF streams in memory before applying a single compression step to reduce overall file size.
- * 3. When an automated batch job must convert product‑catalog images to PDFs without writing temporary files to disk.
- * 4. When a web service receives PNG uploads and must return PDF versions while keeping the conversion process efficient.
- * 5. When you are preparing printable PDF documents from PNG assets and need to manage the output paths programmatically.
+ * 1. When you need to merge dozens of product screenshots (PNG) into one searchable PDF report without creating temporary files.
+ * 2. When an automated build process must generate a single PDF portfolio from a folder of PNG assets for archiving or emailing.
+ * 3. When a web service receives multiple PNG uploads and must return a combined PDF to the client while keeping the data in memory for further compression.
+ * 4. When you want to consolidate scanned PNG pages into a single PDF document before applying Aspose.Imaging’s PDF compression features.
+ * 5. When a desktop application needs to batch‑convert user‑selected PNG files into a combined PDF for printing or offline viewing.
  */

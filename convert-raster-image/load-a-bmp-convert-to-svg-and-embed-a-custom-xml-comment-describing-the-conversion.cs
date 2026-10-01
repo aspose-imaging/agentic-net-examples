@@ -1,52 +1,56 @@
-// HOW-TO: Convert BMP to SVG and Add XML Comment in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to SVG and Add Custom XML Comment in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.bmp";
-        string outputPath = @"C:\Images\sample_converted.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.bmp");
+            string outputPath = Path.Combine("Output", "sample.svg");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options matching the source size
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                using (SvgOptions svgOptions = new SvgOptions())
                 {
-                    PageSize = image.Size
-                };
-
-                // Prepare SVG save options
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, svgOptions);
+                }
             }
 
-            // Embed a custom XML comment describing the conversion
-            string comment = $"<!-- Converted from BMP to SVG using Aspose.Imaging on {DateTime.Now:u} -->{Environment.NewLine}";
             string svgContent = File.ReadAllText(outputPath);
-            File.WriteAllText(outputPath, comment + svgContent);
+            string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
+
+            if (svgContent.StartsWith("<?xml"))
+            {
+                int idx = svgContent.IndexOf("?>");
+                if (idx != -1)
+                {
+                    idx += 2;
+                    svgContent = svgContent.Insert(idx, "\n" + comment);
+                }
+                else
+                {
+                    svgContent = comment + "\n" + svgContent;
+                }
+            }
+            else
+            {
+                svgContent = comment + "\n" + svgContent;
+            }
+
+            File.WriteAllText(outputPath, svgContent);
         }
         catch (Exception ex)
         {
@@ -57,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform legacy BMP graphics into scalable SVG files for web display while preserving the original dimensions.
- * 2. When you want to programmatically embed a timestamped XML comment into an SVG to document the conversion process for audit purposes.
- * 3. When an automated build pipeline must convert a batch of BMP assets to SVG format and include conversion metadata for downstream tools.
- * 4. When integrating image conversion into a C# desktop application that requires raster‑to‑vector conversion and custom documentation inside the SVG.
- * 5. When generating SVG assets from BMP sources for responsive design and need to include conversion details for future maintenance.
+ * 1. When you need to transform legacy BMP graphics into scalable SVG files for web display while preserving conversion details in the SVG header.
+ * 2. When generating SVG assets from BMP sources for a reporting system and want to embed a comment that records the conversion method for audit trails.
+ * 3. When automating a batch process that converts BMP icons to SVG vectors and requires an XML comment to identify the tool used, such as Aspose.Imaging.
+ * 4. When creating an export feature in a C# application that outputs SVG diagrams from BMP inputs and includes a custom comment for downstream processing scripts.
+ * 5. When integrating image conversion into a CI pipeline and need to add a recognizable comment to the resulting SVG to verify that the BMP-to-SVG step succeeded.
  */

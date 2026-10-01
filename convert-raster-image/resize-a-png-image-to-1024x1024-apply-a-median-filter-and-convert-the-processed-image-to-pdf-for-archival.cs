@@ -1,18 +1,18 @@
-// HOW-TO: Resize PNG to 1024x1024 Apply Median Filter and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 1024x1024, Apply Median Filter and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/processed.pdf";
+            string inputPath = "input.png";
+            string outputPath = "output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,17 +22,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 1024x1024
                 image.Resize(1024, 1024);
 
-                // Apply median filter with size 5
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                var medianOptions = new MedianFilterOptions(3);
+                image.Filter(image.Bounds, medianOptions);
 
-                // Save as PDF
-                image.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution screenshots as compact PDFs after reducing noise and standardizing them to a 1024×1024 size.
- * 2. When a web service must accept user‑uploaded PNG icons, clean them with a median filter, resize them for uniform display, and store them as PDF records.
- * 3. When generating printable PDFs from scanned PNG documents while removing speckles and ensuring a consistent page dimension.
- * 4. When preparing PNG assets for a digital asset management system that requires all images to be 1024×1024, denoised, and saved in PDF for long‑term preservation.
- * 5. When building an automated pipeline that converts noisy PNG graphics into searchable PDF archives with a fixed resolution.
+ * 1. When you need to archive high‑resolution PNG screenshots as compact PDF files after noise reduction.
+ * 2. When a document management system requires all images to be standardized to 1024 × 1024 pixels and stored in PDF for consistent viewing.
+ * 3. When preparing product catalog images for printing, you may resize, denoise with a median filter, and convert them to PDF for the layout software.
+ * 4. When an automated pipeline processes user‑uploaded PNGs, applying a median filter to remove artifacts before saving them as searchable PDFs.
+ * 5. When creating legal evidence bundles, you might normalize image size, clean visual noise, and embed the result in a PDF for secure archival.
  */

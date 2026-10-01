@@ -1,4 +1,4 @@
-// HOW-TO: Create SVG From PNG With Red Outline Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG From PNG With Red Outline Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,41 +11,45 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG and output SVG paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Verify input file exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string inputPath = "Input\\image.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            string outputPath = "Output\\image.svg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG as a raster image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                RasterImage raster = (RasterImage)image;
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96;
 
-                // Create an SVG canvas with the same dimensions
-                var graphics = new SvgGraphics2D(width, height, dpi);
+                SvgGraphics2D svgGraphics = new SvgGraphics2D(width, height, 96);
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+                svgGraphics.DrawRectangle(new Pen(Color.Red), 0, 0, width, height);
 
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-                // Draw a red outline around the image
-                var redPen = new Pen(Color.Red, 1);
-                graphics.DrawRectangle(redPen, 0, 0, width, height);
-
-                // Finalize and save the SVG
-                using (SvgImage svg = graphics.EndRecording())
+                using (SvgImage svgImage = svgGraphics.EndRecording())
                 {
-                    svg.Save(outputPath);
+                    svgImage.Save(outputPath);
                 }
             }
         }
@@ -58,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a raster PNG into a scalable SVG for web graphics while highlighting its borders with a red stroke.
- * 2. When generating printable assets that require vector format but you only have PNG sources and want a visible red frame for branding.
- * 3. When creating thumbnails for a UI that must be scalable and you want to emphasize the image area with a red outline.
- * 4. When converting product photos to SVG for responsive design and need a red border to indicate selection or focus.
- * 5. When automating batch processing of PNG assets to SVG with consistent red outlines for use in documentation or reports.
+ * 1. When you need to embed a raster PNG into an SVG for web graphics while adding a red border to highlight the image.
+ * 2. When generating scalable vector assets from existing PNG logos and want a colored stroke that matches brand guidelines.
+ * 3. When converting PNG screenshots to printable SVG diagrams and require a visible red outline for emphasis.
+ * 4. When transforming PNG icons into responsive SVG UI elements and need to programmatically add a red border for a selected state.
+ * 5. When automating batch conversion of PNG files to SVG with consistent red outlines for use in documentation or presentations.
  */

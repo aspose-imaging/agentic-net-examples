@@ -1,4 +1,4 @@
-// HOW-TO: Resize PNG with Bicubic Interpolation, Sharpen, and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG With Sharpen Filter And Convert To SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,32 +9,28 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.svg";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outDir ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize using bicubic interpolation (CatmullRom)
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
-                image.Resize(newWidth, newHeight, ResizeType.CatmullRom);
-
-                // Apply sharpening filter
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                // Save as SVG
-                image.Save(outputPath, new SvgOptions());
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                image.Filter(image.Bounds, new SharpenFilterOptions());
+                SvgOptions svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to double the resolution of a PNG logo, enhance its edges, and embed it as a scalable SVG in a web application.
- * 2. When converting high‑detail PNG screenshots to SVG for responsive UI designs while preserving sharpness through bicubic scaling and sharpening.
- * 3. When preparing print‑ready graphics by enlarging PNG artwork, applying a sharpening filter, and exporting to SVG for vector‑based layout tools.
- * 4. When optimizing PNG icons for retina displays, scaling them with Catmull‑Rom interpolation, sharpening, and saving as SVG to reduce file size.
- * 5. When automating a batch process that upscales PNG textures, improves clarity, and stores the results in SVG format for use in game development pipelines.
+ * 1. When you need to double the size of a PNG logo for high‑resolution screens, sharpen the result, and store it as an SVG for scalable web use.
+ * 2. When automating a pipeline that converts raster UI assets into vector format while preserving detail after upscaling.
+ * 3. When preparing print‑ready graphics by enlarging a PNG image, enhancing edge definition with a sharpen filter, and exporting to SVG for lossless scaling.
+ * 4. When migrating a legacy PNG icon set to responsive SVG icons, requiring resizing and sharpening to maintain visual quality.
+ * 5. When building a C# batch process that upscales PNG screenshots, applies sharpening to counteract blur, and saves them as SVG files for further editing.
  */

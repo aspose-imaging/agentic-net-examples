@@ -2,41 +2,33 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\sample.png";
-            string outputPath = "C:\\temp\\output.pdf";
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\image.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)pngImage;
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f));
 
-                // Apply Gaussian blur (radius: 5, sigma: 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the processed image as PDF
-                rasterImage.Save(outputPath, new PdfOptions());
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to blur a PNG logo before embedding it in a PDF report to protect trademark visibility.
- * 2. When generating PDF catalogs from product images and want a soft focus effect on each PNG thumbnail.
- * 3. When preprocessing scanned PNG documents with a Gaussian blur to reduce noise before converting them to searchable PDFs.
- * 4. When creating PDF brochures that require a subtle background blur on PNG graphics for a professional design look.
- * 5. When automating a workflow that converts PNG screenshots into PDF manuals while applying a blur to hide sensitive screen details.
+ * 1. When you need to generate a blurred preview PDF from a high‑resolution PNG for a web catalog.
+ * 2. When you want to obscure sensitive details in a PNG before embedding it in a PDF report.
+ * 3. When you must batch‑process product screenshots, applying a softening filter and packaging them as PDF documentation.
+ * 4. When you are creating printable PDFs that require a subtle blur effect on PNG graphics to reduce visual noise.
+ * 5. When you need to convert scanned PNG images into PDF files while automatically applying a Gaussian blur to improve compression artifacts.
  */

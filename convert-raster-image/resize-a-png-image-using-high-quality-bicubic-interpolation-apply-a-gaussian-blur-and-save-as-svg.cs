@@ -1,19 +1,20 @@
-// HOW-TO: Resize PNG with Bicubic Interpolation, Apply Gaussian Blur, Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG With Lanczos And Gaussian Blur Then Save As SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.svg";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,17 +23,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                int newWidth = raster.Width * 2;
-                int newHeight = raster.Height * 2;
+                var blurOptions = new GaussianBlurFilterOptions(5, 2.0);
+                image.Filter(image.Bounds, blurOptions);
 
-                raster.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                image.Save(outputPath, new SvgOptions());
+                var svgOptions = new SvgOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to upscale a low‑resolution PNG for high‑quality printing while smoothing edges with a Gaussian blur before converting it to a scalable SVG.
- * 2. When generating web‑ready vector graphics from raster icons, you want to double their size using bicubic scaling and add a subtle blur for a modern look.
- * 3. When preparing assets for a responsive UI, you may resize PNG assets, apply a blur effect for a soft‑focus background, and store them as SVG to keep file size low.
- * 4. When automating a batch process that converts scanned PNG diagrams into larger, blurred SVG illustrations for inclusion in documentation.
- * 5. When creating stylized thumbnails where the original PNG is enlarged, blurred, and saved as an SVG to retain crisp vector outlines at any display size.
+ * 1. When creating high‑resolution web graphics, a developer can double the size of a PNG, apply a smooth blur, and export it as scalable SVG for responsive designs.
+ * 2. When preparing icons for retina displays, the code lets you upscale a PNG with Lanczos interpolation, add a subtle Gaussian blur for anti‑aliasing, and save as SVG to keep file size low.
+ * 3. When converting raster artwork into a vector‑compatible format, you can enlarge the image, soften edges with a Gaussian filter, and output an SVG that can be edited in vector editors.
+ * 4. When generating blurred background images for UI overlays, the snippet resizes the source PNG, applies a Gaussian blur, and stores the result as an SVG that scales without pixelation.
+ * 5. When automating a batch process that needs both higher resolution and a soft focus effect before vectorizing, this C# code resizes, blurs, and saves each PNG as an SVG for further processing.
  */

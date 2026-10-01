@@ -1,4 +1,4 @@
-// HOW-TO: Batch Sharpen Multiple Images and Save as PDFs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Sharpen Raster Images and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,56 +7,42 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input image files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\photo1.png",
-                @"C:\Images\photo2.jpg",
-                @"C:\Images\photo3.tif"
-            };
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            // Corresponding output PDF files
-            string[] outputPaths = new string[]
-            {
-                @"C:\Output\photo1.pdf",
-                @"C:\Output\photo2.pdf",
-                @"C:\Output\photo3.pdf"
-            };
+            Directory.CreateDirectory(outputFolder);
 
-            // Process each image
-            for (int i = 0; i < inputPaths.Length; i++)
+            string[] files = Directory.GetFiles(inputFolder);
+            foreach (string inputPath in files)
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering
-                    RasterImage rasterImage = (RasterImage)image;
+                    RasterImage raster = image as RasterImage;
+                    if (raster == null)
+                    {
+                        Console.Error.WriteLine($"Not a raster image: {inputPath}");
+                        continue;
+                    }
 
-                    // Apply sharpen filter (kernel size 5, sigma 4.0) to the whole image
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                    raster.Filter(raster.Bounds, new SharpenFilterOptions());
 
-                    // Prepare PDF save options
                     PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the processed image as PDF
-                    rasterImage.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -69,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process raster images, apply a sharpen filter, and archive the results as PDF files.
- * 2. When an automated workflow must enhance scanned JPEG, PNG, or TIFF pictures and generate PDF reports in C#.
- * 3. When a web API receives user‑uploaded images, sharpens them programmatically, and returns the output as PDFs.
- * 4. When preparing print‑ready PDFs from low‑resolution photos by applying a sharpening filter to improve detail.
- * 5. When migrating a legacy image collection to PDF format while automatically improving image clarity with Aspose.Imaging in .NET.
+ * 1. When you need to improve the clarity of a large set of scanned photos before archiving them as searchable PDFs.
+ * 2. When an e‑commerce platform must automatically enhance product pictures and deliver them to customers in PDF catalogs.
+ * 3. When a medical imaging workflow requires batch sharpening of radiology scans and conversion to PDF for electronic health records.
+ * 4. When a publishing system has to process thousands of bitmap illustrations, apply a sharpening filter, and bundle each into a PDF for print‑ready proofs.
+ * 5. When a document management solution must convert mixed‑format raster files to PDFs while applying a filter to compensate for low‑resolution scans.
  */

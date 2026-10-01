@@ -1,4 +1,4 @@
-// HOW-TO: Batch Resize Multiple Raster Images to 1024x1024 and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Resize Raster Images to 1024x1024 and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,57 +7,61 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // List of raster image file names to process
-            string[] files = new[]
+            if (!Directory.Exists(inputDirectory))
             {
-                "image1.png",
-                "image2.jpg",
-                "image3.bmp"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            foreach (string fileName in files)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Verify input file exists
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load raster image, resize, and save as SVG
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    // Resize to 1024x1024
-                    image.Resize(1024, 1024);
-
-                    // Prepare SVG save options with rasterization settings
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    if (!raster.IsCached)
                     {
-                        PageSize = image.Size // after resize this is 1024x1024
-                    };
+                        raster.CacheData();
+                    }
 
-                    var svgOptions = new SvgOptions
+                    raster.Resize(1024, 1024, ResizeType.NearestNeighbourResample);
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (SvgOptions svgOptions = new SvgOptions())
                     {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
+                        svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = 1024,
+                            PageHeight = 1024
+                        };
 
-                    // Save as SVG
-                    image.Save(outputPath, svgOptions);
+                        raster.Save(outputPath, svgOptions);
+                    }
                 }
             }
         }
@@ -70,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate scalable SVG versions of a set of product photos for a web catalog, resizing each to a uniform 1024×1024 size.
- * 2. When preparing icons for a mobile app, you can batch convert PNG, JPG, and BMP files to SVG while ensuring consistent dimensions.
- * 3. When automating a design workflow that requires raster images to be vectorized for printing, this code resizes and saves each image as an SVG file.
- * 4. When migrating legacy image assets to a responsive UI, you can use the script to standardize size and output SVGs that scale without loss of quality.
- * 5. When building a CI/CD pipeline that processes image assets, the code batch processes multiple formats, resizes them, and stores them as SVGs for downstream consumption.
+ * 1. When you need to convert a folder of JPEG or PNG photos into uniformly sized 1024 × 1024 SVG files for responsive web graphics.
+ * 2. When an e‑commerce platform must generate vector thumbnails from product photos to reduce bandwidth while keeping consistent dimensions.
+ * 3. When a desktop application has to preprocess scanned documents by resizing them and exporting each page as an SVG for further vector editing.
+ * 4. When a batch job must prepare a large set of raster assets for inclusion in an SVG‑based UI theme, ensuring all images share the same size.
+ * 5. When automating the migration of legacy bitmap icons to scalable SVG icons while applying a standard resize to meet design guidelines.
  */

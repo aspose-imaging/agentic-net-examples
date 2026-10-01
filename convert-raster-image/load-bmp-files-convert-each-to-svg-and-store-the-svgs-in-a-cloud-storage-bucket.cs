@@ -1,4 +1,4 @@
-// HOW-TO: Convert Multiple BMP Images to SVG and Upload to Cloud in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to SVG and Upload to Cloud Storage in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,63 +7,50 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory containing BMP files
-            string inputDirectory = @"C:\Images\InputBmp";
-            // Hardcoded output directory (could be a local staging folder before upload)
-            string outputDirectory = @"C:\Images\OutputSvg";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Example list of BMP files to process
-            string[] bmpFiles = new string[]
+            if (!Directory.Exists(inputDirectory))
             {
-                "image1.bmp",
-                "image2.bmp",
-                "image3.bmp"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+                return;
+            }
 
-            foreach (var fileName in bmpFiles)
+            if (!Directory.Exists(outputDirectory))
             {
-                string inputPath = Path.Combine(inputDirectory, fileName);
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputFileName = Path.ChangeExtension(fileName, ".svg");
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
 
-                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare vector rasterization options based on the source image size
-                    var vectorRasterizationOptions = new SvgRasterizationOptions
+                    using (SvgOptions options = new SvgOptions())
                     {
-                        PageSize = image.Size
-                    };
-
-                    // Save as SVG using SvgOptions
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = vectorRasterizationOptions,
-                        Compress = false // No compression for plain SVG
-                    };
-
-                    image.Save(outputPath, svgOptions);
+                        image.Save(outputPath, options);
+                    }
                 }
 
-                // Upload the generated SVG to a cloud storage bucket
-                // Placeholder implementation – replace with actual SDK calls as needed
-                CloudStorageClient.UploadFile(outputPath, "my-bucket-name");
+                // Placeholder: upload outputPath to cloud storage bucket using appropriate SDK
             }
         }
         catch (Exception ex)
@@ -73,23 +60,11 @@ class Program
     }
 }
 
-// Placeholder for a cloud storage client. Replace with actual implementation (e.g., AWS S3, Azure Blob, Google Cloud Storage).
-static class CloudStorageClient
-{
-    public static void UploadFile(string localFilePath, string bucketName)
-    {
-        // Example pseudo-code:
-        // var client = new CloudStorageServiceClient();
-        // client.UploadObject(bucketName, Path.GetFileName(localFilePath), File.OpenRead(localFilePath));
-        Console.WriteLine($"Uploaded '{localFilePath}' to bucket '{bucketName}'.");
-    }
-}
-
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert legacy BMP graphics to scalable SVG files before publishing them on a website.
- * 2. When an application must generate vector versions of bitmap assets for responsive UI designs in C#.
- * 3. When you want to prepare image assets for a cloud‑based storage service that only accepts SVG format.
- * 4. When automating the migration of on‑premise BMP resources to a vector format for better compression and scalability.
- * 5. When integrating image processing into a CI/CD pipeline that transforms BMP files into SVGs for downstream services.
+ * 1. When a web service needs to transform legacy BMP assets into scalable SVG files before publishing them to an Azure Blob container.
+ * 2. When an e‑commerce platform wants to generate lightweight vector icons from uploaded BMP product images and store them in Amazon S3 for fast CDN delivery.
+ * 3. When a GIS application requires batch conversion of raster BMP maps to SVG vectors to enable zoom‑independent rendering in a cloud‑based map viewer.
+ * 4. When a mobile app backend must preprocess user‑submitted BMP screenshots into SVG format and upload them to Google Cloud Storage for further analysis.
+ * 5. When a document management system automates the migration of BMP diagrams to SVG vectors and saves the results in a cloud bucket for archival and sharing.
  */

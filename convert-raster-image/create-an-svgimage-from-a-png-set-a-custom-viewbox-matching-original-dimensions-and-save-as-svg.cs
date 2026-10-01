@@ -1,8 +1,9 @@
-// HOW-TO: Convert PNG to SVG with Exact ViewBox Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to SVG With Original Dimensions Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/result.svg";
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,21 +22,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image loadedImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access dimensions
-                RasterImage raster = (RasterImage)loadedImage;
+                RasterImage raster = (RasterImage)image;
                 int width = raster.Width;
                 int height = raster.Height;
 
-                // Create SVG graphics canvas with matching size
-                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, 96);
+                SvgGraphics2D svgGraphics = new SvgGraphics2D(width, height, 96);
+                svgGraphics.DrawImage(raster, new Point(0, 0));
 
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-                // Finalize SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (SvgImage svgImage = svgGraphics.EndRecording())
                 {
                     svgImage.Save(outputPath);
                 }
@@ -50,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a raster PNG into a scalable SVG for responsive web design while preserving the original pixel dimensions.
- * 2. When generating vector assets from user‑uploaded PNG logos so they can be resized without loss of quality in a C# application.
- * 3. When converting PNG screenshots to SVG files for inclusion in documentation that requires precise viewbox coordinates.
- * 4. When automating batch processing of PNG icons into SVG format to maintain consistent sizing across a UI toolkit using Aspose.Imaging.
- * 5. When creating an SVG placeholder that displays a PNG image at its native resolution for dynamic image rendering in a .NET service.
+ * 1. When you need to embed a raster logo into a scalable vector graphic for responsive web design.
+ * 2. When you want to generate SVG assets from user‑uploaded PNG files while preserving the exact pixel size for print layouts.
+ * 3. When converting icons stored as PNG into SVG to reduce file size and enable CSS styling without losing the original dimensions.
+ * 4. When automating a batch process that transforms product images from PNG to SVG for use in vector‑based reporting tools.
+ * 5. When creating an SVG placeholder that matches a PNG’s width and height for dynamic image replacement in a WPF application.
  */
