@@ -1,4 +1,4 @@
-// HOW-TO: Resize Image for Large Format Printing and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize Image to 2000px Width and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,46 +8,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Images\result.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine target dimensions while preserving aspect ratio
-                const int maxWidth = 2000;
-                int targetWidth = image.Width;
-                int targetHeight = image.Height;
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
-                if (image.Width > maxWidth)
+                if (originalWidth > 2000)
                 {
-                    targetWidth = maxWidth;
-                    targetHeight = (int)(image.Height * (maxWidth / (double)image.Width));
+                    double ratio = 2000.0 / originalWidth;
+                    int newWidth = 2000;
+                    int newHeight = (int)Math.Round(originalHeight * ratio);
+                    image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
                 }
 
-                // Resize only if needed
-                if (targetWidth != image.Width || targetHeight != image.Height)
-                {
-                    image.Resize(targetWidth, targetHeight);
-                }
-
-                // Prepare PDF export options
                 PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the image as a PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -60,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to shrink high‑resolution photos to a printable width of 2000 px while preserving aspect ratio before embedding them in a PDF brochure.
- * 2. When an application must automatically generate PDF files from user‑uploaded JPEGs for large‑format posters without distorting the original image.
- * 3. When a batch‑processing tool has to ensure all images fit within a maximum width limit for consistent printing results and then export them as PDFs.
- * 4. When a web service converts product images to PDF catalogs, resizing them to meet printer specifications and reducing file size.
- * 5. When a desktop utility prepares artwork files for a print shop by resizing them to 2000 px wide and saving them directly as PDF documents.
+ * 1. When a developer needs to shrink high‑resolution photos to a printable width of 2000 pixels while preserving the original aspect ratio before generating a PDF for large‑format prints.
+ * 2. When an e‑commerce platform must automatically convert uploaded product JPEGs into PDF catalogs, ensuring images are not wider than 2000 px to keep file size manageable.
+ * 3. When a printing service processes client‑supplied images and must resize them to fit within a 2000‑pixel limit and output a PDF ready for poster‑size printing.
+ * 4. When a desktop application creates printable PDFs from user‑selected photos, resizing any image exceeding 2000 px width to avoid distortion on large‑format printers.
+ * 5. When a batch‑processing script prepares marketing assets by resizing oversized raster images and bundling them into PDF files for high‑resolution print distribution.
  */
