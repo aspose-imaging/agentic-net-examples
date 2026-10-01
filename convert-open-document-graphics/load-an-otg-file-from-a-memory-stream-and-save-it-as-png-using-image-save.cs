@@ -1,66 +1,51 @@
-// HOW-TO: Convert OTG File to PNG from Memory Stream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Image To PNG From Memory Stream In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OtgToPngConverter
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.otg";
-        string outputPath = "output.png";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.otg";
+                string outputPath = "output/output.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load OTG file into a memory stream
-            byte[] fileBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream memoryStream = new MemoryStream(fileBytes))
-            {
-                // Wrap the memory stream in a StreamContainer required by OtgImage
-                using (StreamContainer streamContainer = new StreamContainer(memoryStream))
+                if (!File.Exists(inputPath))
                 {
-                    // Create OtgImage from the stream container
-                    using (OtgImage otgImage = new OtgImage(streamContainer))
-                    {
-                        // Prepare PNG save options with OTG rasterization settings
-                        PngOptions pngOptions = new PngOptions();
-                        OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
-                        {
-                            PageSize = otgImage.Size
-                        };
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                        // Save the image as PNG
-                        otgImage.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                byte[] fileBytes = File.ReadAllBytes(inputPath);
+                using (MemoryStream memoryStream = new MemoryStream(fileBytes))
+                {
+                    using (Image image = Image.Load(memoryStream))
+                    {
+                        PngOptions pngOptions = new PngOptions();
+                        image.Save(outputPath, pngOptions);
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display or embed an OpenDocument graphic (OTG) in a web page that only supports PNG images, you can load the OTG from a byte array and save it as PNG.
- * 2. When processing uploaded OTG files in an ASP.NET API without writing them to disk, you can read the file into a MemoryStream and convert it to PNG for further processing.
- * 3. When generating thumbnails for OTG documents stored in a database BLOB, you can rasterize the vector content via OtgRasterizationOptions and save the result as a PNG image.
- * 4. When integrating Aspose.Imaging into a background service that converts batch OTG files to PNG for archival or reporting purposes, you can stream each file and use Image.Save to produce the PNG output.
- * 5. When creating a cross‑platform C# utility that converts OTG diagrams to PNG for use in mobile apps, loading the file from memory avoids temporary files and speeds up the conversion.
+ * 1. When you need to display or edit an OTG graphic in a web application that only supports PNG, you can load the OTG file into a MemoryStream and convert it to PNG with Aspose.Imaging.
+ * 2. When processing scanned documents stored as OTG files on a server, you can read the bytes, load them into memory, and save them as PNG for thumbnail generation or archival.
+ * 3. When integrating a legacy OTG image format into a modern C# desktop tool, you can use a memory stream to avoid temporary files and directly save the image as PNG for UI rendering.
+ * 4. When building an automated batch job that receives OTG files via API, you can convert each file from the incoming byte array to PNG without writing the original file to disk.
+ * 5. When creating a cloud function that transforms uploaded OTG images into PNG for downstream image‑processing pipelines, loading the file into a MemoryStream and saving as PNG ensures fast, memory‑only conversion.
  */
