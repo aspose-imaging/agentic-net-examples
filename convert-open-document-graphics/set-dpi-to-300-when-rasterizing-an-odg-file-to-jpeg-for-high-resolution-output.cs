@@ -1,49 +1,37 @@
-// HOW-TO: Rasterize ODG to JPEG with 300 DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rasterize ODG to High Resolution JPEG at 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.odg";
-            string outputPath = @"C:\Output\sample.jpg";
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for ODG
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                JpegOptions jpegOptions = new JpegOptions();
+                jpegOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
                     BackgroundColor = Color.White,
-                    PageSize = image.Size
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Configure JPEG save options with 300 DPI
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                    ResolutionUnit = ResolutionUnit.Inch,
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -56,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an OpenDocument Graphic (ODG) into a high‑resolution JPEG for professional printing at 300 DPI.
- * 2. When generating print‑ready marketing assets from ODG files that must meet standard DPI requirements for brochures.
- * 3. When archiving vector drawings as raster images with consistent resolution for inclusion in PDF reports.
- * 4. When creating high‑quality product images from ODG designs for e‑commerce platforms that require 300 DPI JPEGs.
- * 5. When developing a C# application that batch‑processes ODG files into JPEGs with precise DPI settings for downstream image analysis.
+ * 1. When converting LibreOffice Draw (ODG) diagrams to JPEG for print‑ready brochures, you need 300 DPI high‑resolution images.
+ * 2. When generating thumbnails for a document management system that requires consistent DPI settings, you can rasterize ODG files to JPEG at 300 DPI.
+ * 3. When preparing engineering schematics stored as ODG for inclusion in PDF reports, setting the DPI ensures the JPEG retains detail.
+ * 4. When automating batch conversion of ODG assets for a web‑based catalog that demands high‑quality product images, you use this code to enforce 300 DPI.
+ * 5. When integrating Aspose.Imaging into a C# application that must export vector drawings as JPEGs for archival purposes, setting the resolution guarantees lossless‑looking output.
  */
