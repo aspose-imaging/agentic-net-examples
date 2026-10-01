@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG to PNG with Text Watermark Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PNG With Text Watermark Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.otg";
-        string outputPath = "output\\converted.png";
-
         try
         {
+            string inputPath = "input.otg";
+            string outputPath = "output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,27 +23,18 @@ class Program
 
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                var rasterOptions = new OtgRasterizationOptions
+                PngOptions options = new PngOptions();
+
+                using (Aspose.Imaging.Image outputImage = Aspose.Imaging.Image.Create(options, image.Width, image.Height))
                 {
-                    PageSize = image.Size
-                };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(outputImage);
+                    graphics.DrawImage(image, new Aspose.Imaging.Rectangle(0, 0, image.Width, image.Height));
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 48);
+                    SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White);
+                    graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.Point(10, 10));
 
-                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(memoryStream))
-                    {
-                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(raster);
-                        var font = new Aspose.Imaging.Font("Arial", 48);
-                        var brush = new SolidBrush(Aspose.Imaging.Color.Yellow);
-                        graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.PointF(10, 10));
-
-                        raster.Save(outputPath, new PngOptions());
-                    }
+                    outputImage.Save(outputPath, options);
                 }
             }
         }
@@ -56,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert proprietary OTG vector drawings to PNG thumbnails and embed a branding watermark for online galleries.
- * 2. When generating preview images of engineering schematics stored as OTG files and you want to overlay copyright text before saving.
- * 3. When preparing OTG artwork for a web portal and must add a semi‑transparent watermark to deter unauthorized reuse.
- * 4. When automating a batch job that converts OTG files to PNG format while stamping each image with a project identifier.
- * 5. When integrating Aspose.Imaging in a C# application to display OTG diagrams as PNGs with a custom watermark in a document management system.
+ * 1. When you need to generate printable PNG previews of OTG vector drawings while branding each image with a company logo or text.
+ * 2. When an e‑commerce platform must add a copyright watermark to product diagrams stored as OTG before serving them as PNG thumbnails.
+ * 3. When a document management system converts uploaded OTG files to PNG for web display and requires a visible watermark for security.
+ * 4. When a batch processing script has to automate conversion of OTG artwork to PNG and overlay custom text for client identification.
+ * 5. When a reporting tool creates PNG charts from OTG sources and needs to embed a “Confidential” label directly onto the image.
  */
