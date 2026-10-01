@@ -1,44 +1,37 @@
-// HOW-TO: How to Apply Median Filter, Resize, and Save PNG as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Filtered Thumbnail from JPEG and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.jpg";
+        string outputPath = "output.svg";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering and resizing
-                RasterImage rasterImage = (RasterImage)image;
+                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Apply median filter with size 5
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                int thumbWidth = 150;
+                int thumbHeight = 150;
+                image.Resize(thumbWidth, thumbHeight);
 
-                // Resize to thumbnail size (e.g., 150x150)
-                rasterImage.Resize(150, 150);
-
-                // Save the processed image as SVG
-                image.Save(outputPath, new SvgOptions());
+                SvgOptions options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -50,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noisy PNG screenshots, shrink them to 150 × 150 thumbnails, and store the result as scalable SVG for web dashboards.
- * 2. When generating lightweight vector icons from raster assets, applying a median filter to reduce artifacts before converting to SVG.
- * 3. When preprocessing user‑uploaded images for a mobile app, removing speckle noise, creating a small preview, and saving it in SVG to maintain resolution independence.
- * 4. When automating batch conversion of scanned documents to vector format, smoothing the raster data and resizing it to a standard thumbnail size.
- * 5. When integrating image processing into a C# reporting tool that requires filtered, resized images saved as SVG for inclusion in PDF or HTML reports.
+ * 1. When you need to generate a small, noise‑reduced preview of a JPEG for web pages and deliver it as a scalable SVG graphic.
+ * 2. When you want to preprocess scanned photos by applying a median filter before converting them into vector‑friendly thumbnails for responsive design.
+ * 3. When an application must automatically create lightweight SVG icons from user‑uploaded raster images while preserving visual quality.
+ * 4. When you are building a batch process that converts high‑resolution JPEGs into 150×150 SVG thumbnails for PDF or e‑book embedding.
+ * 5. When you require a C# routine that filters out speckle noise, resizes images, and outputs them in SVG format for cross‑platform UI components.
  */
