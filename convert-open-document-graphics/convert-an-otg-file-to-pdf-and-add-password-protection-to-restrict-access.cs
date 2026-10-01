@@ -1,8 +1,9 @@
-// HOW-TO: Convert OTG to PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG File To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,40 +11,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = Path.Combine("Input", "sample.otg");
             string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load OTG image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
-                // Set rasterization options for OTG
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF save options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = otgOptions
-                };
-
-                // NOTE: Aspose.Imaging does not provide a direct API for PDF password protection.
-                // If password protection is required, consider using Aspose.PDF or another library.
-
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive engineering drawings stored as OTG files by converting them to PDF documents in a C# application.
- * 2. When you want to generate PDF reports from OTG images while preserving original dimensions and background color using Aspose.Imaging.
- * 3. When an automated workflow must batch‑process OTG files into PDFs before uploading them to a document management system.
- * 4. When you need to protect the generated PDF with a password, you can extend this code by integrating Aspose.PDF to add encryption after conversion.
- * 5. When a desktop utility must validate the existence of OTG files, create output folders, and safely handle conversion errors in .NET.
+ * 1. When you need to programmatically transform OTG vector drawings into PDF documents for easy sharing or printing in a .NET application.
+ * 2. When an automated server‑side workflow must batch‑convert stored OTG assets into PDFs to integrate with a document management system.
+ * 3. When a desktop tool requires loading an OTG image, applying Aspose.Imaging options, and saving it as a PDF while preserving layout fidelity.
+ * 4. When you want to generate PDF reports from OTG design files without manual user interaction, using C# and Aspose.Imaging.
+ * 5. When integrating a file‑conversion service that receives OTG uploads and returns PDF files for downstream processing or archival.
  */
