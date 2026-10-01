@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,51 +10,45 @@ class Program
     {
         try
         {
-            // Define input and output directories (relative paths)
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in bmpFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output PDF path
                 string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    BmpImage bmp = image as BmpImage;
-                    if (bmp == null)
-                    {
-                        // Skip non‑BMP files (should not happen due to filter)
-                        continue;
-                    }
+                    RasterImage raster = (RasterImage)image;
+                    raster.CacheData();
 
-                    // Cache image data if not already cached
-                    if (!bmp.IsCached)
-                    {
-                        bmp.CacheData();
-                    }
+                    int width = raster.Width;
+                    int height = raster.Height;
+                    var rect = new Rectangle(0, 0, width, height);
+                    int[] pixels = raster.LoadArgb32Pixels(rect);
 
-                    // Define the full image rectangle
-                    var bounds = new Rectangle(0, 0, bmp.Width, bmp.Height);
-
-                    // Load ARGB pixels
-                    int[] pixels = bmp.LoadArgb32Pixels(bounds);
-
-                    // Apply a custom color matrix transformation (example: color inversion)
                     for (int i = 0; i < pixels.Length; i++)
                     {
                         int argb = pixels[i];
@@ -64,7 +57,6 @@ class Program
                         int g = (argb >> 8) & 0xFF;
                         int b = argb & 0xFF;
 
-                        // Invert colors
                         r = 255 - r;
                         g = 255 - g;
                         b = 255 - b;
@@ -72,11 +64,12 @@ class Program
                         pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                     }
 
-                    // Save modified pixels back to the image
-                    bmp.SaveArgb32Pixels(bounds, pixels);
+                    raster.SaveArgb32Pixels(rect, pixels);
 
-                    // Export the transformed image as PDF
-                    bmp.Save(outputPath, new PdfOptions());
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -89,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you must batch‑convert legacy BMP graphics to PDF documents while applying a custom color matrix, such as inverting colors for printing or branding.
- * 2. When an application needs to generate PDF catalogs from BMP product images and programmatically adjust the color balance before embedding them.
- * 3. When a document‑automation workflow requires converting scanned BMP pages to PDF with a predefined color filter to improve readability or meet compliance standards.
- * 4. When a C# service processes user‑uploaded BMP pictures and stores them as PDF files with a custom color effect for archival or preview purposes.
- * 5. When you are building a reporting tool that transforms BMP charts using a color matrix and exports each chart as a PDF page for distribution.
+ * 1. When you need to batch‑process scanned BMP documents, adjust their colors with a custom matrix, and generate searchable PDF reports in a C# application.
+ * 2. When a legacy system stores graphics as BMP files and you must apply brand‑specific color grading before delivering them as PDFs to clients.
+ * 3. When creating printable PDFs from BMP assets while programmatically correcting color balance or applying artistic filters using Aspose.Imaging in .NET.
+ * 4. When automating the conversion of large collections of BMP images to PDF for archival, with a custom color transformation to meet compliance color standards.
+ * 5. When integrating image‑to‑PDF conversion into a workflow that requires per‑pixel manipulation, such as converting medical BMP scans to PDF with a calibrated color matrix in C#.
  */
