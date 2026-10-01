@@ -1,70 +1,62 @@
-// HOW-TO: Batch Convert Multiple OTG Files to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert OTG Images to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OtgToPdfBatchConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\OtgInput";
-            string outputFolder = @"C:\PdfOutput";
-
-            // Get all OTG files in the input folder
-            string[] otgFiles = Directory.GetFiles(inputFolder, "*.otg");
-
-            foreach (string inputPath in otgFiles)
+            try
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputFolder = @"C:\OTG\Input";
+                string outputFolder = @"C:\OTG\Output";
+
+                // Get all OTG files in the input folder
+                string[] otgFiles = Directory.GetFiles(inputFolder, "*.otg", SearchOption.TopDirectoryOnly);
+
+                foreach (string inputPath in otgFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Build output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the OTG image and convert to PDF
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Set up rasterization options for OTG
-                    OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        PageSize = image.Size
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                    // Set up PDF save options
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Determine output PDF path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load OTG image and save as PDF
+                    using (Image image = Image.Load(inputPath))
                     {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                        image.Save(outputPath, new PdfOptions());
+                    }
 
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a collection of OTG design drawings into searchable PDF documents for archiving or distribution.
- * 2. When a printing workflow requires converting all OTG files in a directory to PDF before sending them to a print service.
- * 3. When you want to generate PDF reports from OTG images produced by an engineering application without manually opening each file.
- * 4. When a migration project moves legacy OTG assets to a PDF‑based documentation system and you need a script to process them in bulk.
- * 5. When a web application must serve OTG content as PDF to browsers, and you need to pre‑convert an entire folder of files on the server.
+ * 1. When you need to transform a large collection of OTG graphics into searchable PDF documents for archiving.
+ * 2. When an automated nightly job must read OTG files from a directory and generate PDF reports without manual intervention.
+ * 3. When a web service receives OTG uploads and must store them as PDFs in a separate folder for downstream processing.
+ * 4. When migrating legacy OTG assets to a PDF‑based workflow and want a simple C# script to handle the bulk conversion.
+ * 5. When integrating Aspose.Imaging into a Windows utility that converts user‑selected OTG images to PDF for printing or sharing.
  */
