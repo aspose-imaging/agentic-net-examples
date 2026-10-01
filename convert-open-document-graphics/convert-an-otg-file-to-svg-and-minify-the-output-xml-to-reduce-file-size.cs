@@ -1,6 +1,8 @@
-// HOW-TO: Convert OTG to SVG with Minified XML in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to Minified SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Text;
+using System.Xml;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -10,37 +12,42 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
+            string inputPath = "input.otg";
+            string outputPath = "output/output.svg";
 
-            // Verify that the input OTG file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
-                var svgOptions = new SvgOptions
+                var options = new SvgOptions();
+                string tempPath = outputPath + ".tmp";
+
+                image.Save(tempPath, options);
+
+                string svgContent = File.ReadAllText(tempPath);
+                var xmlDoc = new XmlDocument { PreserveWhitespace = false };
+                xmlDoc.LoadXml(svgContent);
+
+                var settings = new XmlWriterSettings
                 {
-                    // Enable compression (produces a smaller, minified SVG)
-                    Compress = true,
-                    // Set rasterization options so the SVG matches the source size
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    OmitXmlDeclaration = false,
+                    Indent = false,
+                    NewLineHandling = NewLineHandling.None,
+                    Encoding = new UTF8Encoding(false)
                 };
 
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                using (var writer = XmlWriter.Create(outputPath, settings))
+                {
+                    xmlDoc.Save(writer);
+                }
+
+                File.Delete(tempPath);
             }
         }
         catch (Exception ex)
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed vector graphics from legacy OTG files into a web page and want the SVG markup to be as small as possible.
- * 2. When an automated build pipeline must convert a batch of OTG assets to SVG while minimizing bandwidth for mobile users.
- * 3. When a desktop application generates reports that include OTG diagrams and requires them in SVG format with compressed XML for faster loading.
- * 4. When migrating a design library from proprietary OTG files to a standards‑based SVG format and need to reduce storage costs by minifying the output.
- * 5. When integrating Aspose.Imaging into a C# service that receives OTG uploads and must return lightweight SVG responses to client applications.
+ * 1. When you need to embed vector graphics from an OTG design into a web page and want the smallest possible SVG file size.
+ * 2. When a build pipeline must automatically transform OTG assets into SVG format using Aspose.Imaging in C# while removing unnecessary whitespace.
+ * 3. When a desktop application processes user‑uploaded OTG files and stores them as compact SVG files for faster loading and lower storage costs.
+ * 4. When you are migrating legacy OTG illustrations to a modern SVG‑based reporting system and require clean, minified XML without indentation.
+ * 5. When a CI/CD script generates SVG previews from OTG sources and needs the output to be minified for efficient version‑control diffs.
  */
