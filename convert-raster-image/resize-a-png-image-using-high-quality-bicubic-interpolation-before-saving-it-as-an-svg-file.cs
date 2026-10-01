@@ -1,8 +1,12 @@
-// HOW-TO: Resize PNG with Bicubic Interpolation and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG with High Quality Bicubic Interpolation and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
@@ -10,32 +14,31 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Example resize: reduce dimensions by half
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
+                RasterImage raster = (RasterImage)image;
 
-                // Resize using high‑quality bicubic interpolation
-                image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
+                // Define desired dimensions for resizing
+                int newWidth = 800;
+                int newHeight = 600;
+
+                // Perform high‑quality resize using LanczosResample (bicubic‑like quality)
+                raster.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Save the resized image as SVG
-                image.Save(outputPath, new SvgOptions());
+                SvgOptions svgOptions = new SvgOptions();
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a smaller, high‑quality vector version of a PNG logo for responsive web design.
- * 2. When you must reduce the file size of a raster image before embedding it in an SVG‑based infographic.
- * 3. When an application requires converting user‑uploaded PNG thumbnails into scalable SVG icons while preserving visual fidelity.
- * 4. When automating batch processing of PNG assets to create resized SVG assets for print‑ready PDFs.
- * 5. When integrating Aspose.Imaging in a C# service that resizes product images and outputs them as SVG for cross‑platform rendering.
+ * 1. When you need to generate a scalable SVG version of a large PNG thumbnail for responsive web design, preserving visual quality.
+ * 2. When converting high‑resolution PNG assets to smaller dimensions for mobile apps while keeping crisp edges using bicubic‑like Lanczos resampling.
+ * 3. When preparing print‑ready graphics that must be resized and exported to SVG for vector‑based editing in design tools.
+ * 4. When automating batch processing of PNG logos to fit a fixed 800×600 layout before embedding them in SVG diagrams.
+ * 5. When integrating Aspose.Imaging in a C# backend to dynamically resize user‑uploaded PNG images and serve them as lightweight SVG files.
  */
