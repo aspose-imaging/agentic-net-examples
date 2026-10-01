@@ -2,40 +2,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.png";
-            string outputPath = @"C:\Images\sample_filtered.pdf";
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\result.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Apply a median filter with size 5 to the entire image
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-                // Save the filtered image as a PDF page
-                var pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce salt‑and‑pepper noise in a scanned PNG before embedding it in a PDF report.
- * 2. When you want to programmatically preprocess product photos with a median filter and generate a single‑page PDF catalog.
- * 3. When an application must convert raster images to PDF while applying a smoothing filter to improve visual quality for printing.
- * 4. When you are building an automated workflow that validates image files, applies noise reduction, and stores the result as a PDF document.
- * 5. When you need to integrate Aspose.Imaging in a C# service to filter medical images and archive them in PDF format for compliance.
+ * 1. When you need to reduce salt‑and‑pepper noise in a PNG before embedding it into a PDF report using C#.
+ * 2. When generating printable PDFs from scanned images and want to smooth the raster data with a median filter.
+ * 3. When creating automated document workflows that convert noisy raster graphics to clean PDF pages in a .NET application.
+ * 4. When a web service must accept user‑uploaded images, apply noise reduction, and return a PDF without manual editing.
+ * 5. When building a batch process that cleans up multiple PNG files and consolidates them into PDF files for archiving.
  */
