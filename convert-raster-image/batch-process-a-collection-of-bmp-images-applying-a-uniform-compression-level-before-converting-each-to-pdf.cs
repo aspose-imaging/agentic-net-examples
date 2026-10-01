@@ -1,8 +1,9 @@
-// HOW-TO: Batch Convert Multiple BMP Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -17,7 +18,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -33,7 +34,7 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
@@ -42,12 +43,10 @@ class Program
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -59,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a folder of scanned BMP documents into PDF files for archiving or distribution.
- * 2. When a desktop application must generate PDF reports from BMP charts produced by legacy equipment.
- * 3. When a server‑side service processes user‑uploaded BMP images and returns PDF versions for email attachment.
- * 4. When you want to run a batch job that compresses and bundles BMP graphics into PDFs to reduce storage size.
- * 5. When migrating a legacy image repository from BMP to PDF format to improve compatibility with modern viewers.
+ * 1. When you need to automatically turn a directory of BMP scans into PDF documents in a .NET batch job.
+ * 2. When a legacy application stores screenshots as BMP and you must archive them as PDFs for easier distribution.
+ * 3. When you want to generate PDF catalogs from BMP product mock‑ups without manually converting each file.
+ * 4. When a medical imaging workflow requires BMP X‑ray images to be bundled into PDF reports for electronic records.
+ * 5. When an automated document pipeline must compress and standardize image assets by converting BMP files to PDFs using C#.
  */
