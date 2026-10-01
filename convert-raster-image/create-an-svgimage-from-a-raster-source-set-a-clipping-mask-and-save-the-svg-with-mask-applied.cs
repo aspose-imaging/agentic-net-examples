@@ -1,16 +1,16 @@
-// HOW-TO: Create SVG from JPEG with Elliptical Clipping Mask in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to SVG with Clipping Mask in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.svg";
+        string inputPath = Path.Combine("Input", "source.png");
+        string outputPath = Path.Combine("Output", "result.svg");
 
         if (!File.Exists(inputPath))
         {
@@ -27,23 +27,12 @@ class Program
                 int width = raster.Width;
                 int height = raster.Height;
 
-                using (SvgImage svg = new SvgImage(width, height))
+                var svgGraphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, 96);
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+
+                using (SvgImage svgImage = svgGraphics.EndRecording())
                 {
-                    // Create clipping mask (ellipse covering the whole image)
-                    GraphicsPath clipPath = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new EllipseShape(new RectangleF(0, 0, width, height)));
-                    clipPath.AddFigure(figure);
-
-                    Region clipRegion = new Region(clipPath);
-
-                    // Draw raster onto SVG with clipping mask
-                    Graphics graphics = new Graphics(svg);
-                    graphics.Clip = clipRegion;
-                    graphics.DrawImage(raster, new Point(0, 0));
-
-                    // Save the SVG with mask applied
-                    svg.Save(outputPath);
+                    svgImage.Save(outputPath, new SvgOptions());
                 }
             }
         }
@@ -56,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a photo in a web page as a scalable SVG while displaying only an elliptical portion of the original JPEG.
- * 2. When you want to generate vector graphics that contain raster content cropped to a circular shape for print or marketing materials using C#.
- * 3. When building a .NET service that converts user‑uploaded images to SVG thumbnails with a consistent elliptical mask for branding purposes.
- * 4. When creating SVG badges or icons that show a raster logo inside a rounded mask to maintain visual consistency across devices.
- * 5. When preparing responsive design assets and require a raster‑to‑SVG conversion that applies a custom clipping path to preserve quality in Aspose.Imaging for .NET.
+ * 1. When you need to embed a high‑resolution PNG into a scalable SVG for responsive web design while applying a clipping mask to limit the visible area.
+ * 2. When generating printable vector assets from raster logos and you must preserve the original shape using a mask before saving as SVG.
+ * 3. When creating dynamic graphics in a C# application that convert user‑uploaded images to SVG format with custom clipping regions for thumbnails.
+ * 4. When automating batch processing of raster images to SVG files with Aspose.Imaging to ensure consistent mask‑based cropping across all outputs.
+ * 5. When integrating raster‑to‑vector conversion into a reporting tool that requires SVG output with masked content for PDF export.
  */
