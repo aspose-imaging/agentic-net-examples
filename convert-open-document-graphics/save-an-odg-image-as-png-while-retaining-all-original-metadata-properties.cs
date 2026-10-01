@@ -3,59 +3,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
-class Program
+namespace OdgToPng
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.odg";
+                string outputPath = "output/output.png";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PNG save options to keep original metadata
-                PngOptions pngOptions = new PngOptions
+                if (!File.Exists(inputPath))
                 {
-                    KeepMetadata = true,
-                    // Rasterization options required for vector ODG conversion
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as PNG while preserving metadata
-                image.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate raster PNG previews of OpenDocument graphics for web display while keeping the original author and creation metadata.
- * 2. When a document management system must archive ODG drawings as PNG files without losing embedded metadata for compliance audits.
- * 3. When an automated batch process converts user‑uploaded ODG diagrams to PNG thumbnails and must retain metadata for later search indexing.
- * 4. When a reporting tool exports vector ODG charts to PNG images for inclusion in PDF reports while preserving source metadata.
- * 5. When a migration script moves legacy ODG assets to a PNG‑based asset pipeline and requires metadata to remain intact for asset tracking.
+ * 1. When a developer needs to export an OpenDocument Graphic (ODG) file to a web‑compatible PNG while preserving its original EXIF and custom metadata.
+ * 2. When integrating Aspose.Imaging into a document‑conversion workflow that must retain drawing metadata for downstream indexing and search.
+ * 3. When building a C# desktop application that displays ODG diagrams as PNG thumbnails without losing author or creation information.
+ * 4. When automating batch conversion of ODG assets for a content management system that requires metadata to stay intact for cataloging.
+ * 5. When creating a server‑side service that converts uploaded ODG files to PNG for preview generation while keeping all embedded properties.
  */
