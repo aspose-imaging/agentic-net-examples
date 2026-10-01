@@ -1,49 +1,35 @@
-// HOW-TO: Convert OTG Vector Image To PNG With White Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Vector File to PNG with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.otg";
+        string outputPath = "Output\\result.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Create rasterization options for OTG
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    // Set desired background color
-                    BackgroundColor = Color.White,
-                    // Preserve original page size
-                    PageSize = image.Size
-                };
-
-                // Configure PNG save options and attach rasterization options
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = otgRasterOptions
+                    VectorRasterizationOptions = new OtgRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    }
                 };
 
-                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -56,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OTG vector diagram on a web page that only supports raster PNG files, you can rasterize it with a white background using Aspose.Imaging in C#.
- * 2. When generating printable assets from OTG drawings and the printer requires a PNG with a specific background color, this code converts and sets the background automatically.
- * 3. When automating a batch process that extracts OTG files from a repository and stores them as PNG thumbnails for a gallery, the rasterization options ensure the original page size is kept.
- * 4. When integrating OTG support into a C# desktop application that saves user‑edited vector graphics as PNG for sharing, you can use this snippet to preserve layout and apply a uniform background.
- * 5. When creating a migration tool that moves legacy OTG assets to a modern PNG format while maintaining visual fidelity, the code provides a reliable way to rasterize and save each image.
+ * 1. When you need to display an OTG diagram on a web page that only supports PNG images, you can rasterize it with a white background using C#.
+ * 2. When generating thumbnails for OTG drawings in a document management system, converting them to PNG ensures fast loading and a consistent background.
+ * 3. When integrating vector OTG assets into a reporting tool that expects raster images, you can programmatically set the background color before saving as PNG.
+ * 4. When automating batch conversion of OTG files to PNG for archival purposes, the code lets you control the background color to avoid transparency issues.
+ * 5. When creating printable previews of OTG graphics in a Windows application, converting them to PNG with a solid white background guarantees correct rendering on all printers.
  */
