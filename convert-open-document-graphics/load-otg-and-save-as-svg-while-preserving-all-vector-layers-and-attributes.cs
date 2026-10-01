@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG File To SVG While Preserving Vector Layers In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Vector Graphic to SVG with Layers in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,38 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
+            string inputPath = "input.otg";
+            string outputPath = "output/output.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG rasterization options to preserve vector data
-                var svgRasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Set up SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = svgRasterOptions,
-                    KeepMetadata = true // preserve original metadata
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                var options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to export a multi‑layer OTG illustration to an SVG for web display without losing any vector shapes or metadata.
- * 2. When a graphics pipeline requires converting proprietary OTG assets into scalable SVG files for responsive UI rendering.
- * 3. When automating batch processing of OTG drawings to SVG format to maintain editability in vector editors like Inkscape.
- * 4. When integrating OTG to SVG conversion into a C# application that must keep original metadata for archival or compliance purposes.
- * 5. When generating SVG previews of OTG files for thumbnail generation while preserving the original vector information.
+ * 1. When a developer needs to import an OTG file from a design tool and export it as an SVG for web display while keeping all vector layers intact.
+ * 2. When building a C# batch‑processing utility that converts multiple OTG drawings to scalable SVG files for inclusion in documentation or reports.
+ * 3. When integrating Aspose.Imaging into a server‑side API that receives OTG uploads and returns SVG responses preserving original graphic attributes.
+ * 4. When creating a desktop application that allows users to edit or preview OTG files and then save them as SVG without losing any vector information.
+ * 5. When automating a migration workflow that transforms legacy OTG assets into modern SVG assets for use in responsive UI designs.
  */
