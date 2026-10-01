@@ -1,4 +1,4 @@
-// HOW-TO: Convert ODG to PNG with Progressive Interlacing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to Interlaced PNG for Progressive Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,35 +6,25 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.png";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.png");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set PNG options with progressive (interlaced) encoding
-                var pngOptions = new PngOptions
-                {
-                    Progressive = true
-                };
-
-                // Save the image as PNG with the specified options
-                image.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display OpenDocument graphics on a website and want the image to appear gradually as it loads, you can convert ODG files to interlaced PNGs using C#.
- * 2. When building a document management system that stores drawings as ODG, you may generate preview thumbnails that load progressively in browsers by converting them to progressive PNGs.
- * 3. When creating a reporting tool that embeds vector drawings into PDF or HTML, converting ODG to PNG with progressive encoding reduces perceived load time for end users.
- * 4. When migrating legacy OpenDocument graphics to a modern asset pipeline, automating the conversion to interlaced PNGs improves page rendering performance on low‑bandwidth connections.
- * 5. When developing a mobile app that downloads images over slow networks, converting ODG to a progressive PNG ensures the image becomes visible incrementally as data arrives.
+ * 1. When a web application needs to display vector drawings from OpenDocument Graphics (ODG) files quickly, converting them to interlaced PNG allows browsers to render a low‑resolution preview while the full image loads.
+ * 2. When generating thumbnails for a document management system, using Aspose.Imaging to convert ODG to progressive PNG reduces bandwidth and improves perceived loading speed on mobile devices.
+ * 3. When preparing assets for an e‑learning platform, converting ODG diagrams to interlaced PNG ensures that learners see an immediate preview as the image progressively sharpens.
+ * 4. When integrating ODG content into a .NET reporting tool, saving it as an interlaced PNG enables smooth rendering in PDF or HTML reports without waiting for the entire image to download.
+ * 5. When automating batch conversion of design files on a server, using C# and Aspose.Imaging to produce progressive PNGs from ODG files simplifies downstream image processing pipelines that require web‑friendly formats.
  */
