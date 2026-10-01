@@ -1,49 +1,39 @@
-// HOW-TO: Convert ODG to BMP with White Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to BMP with White Background Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "output.bmp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with a white background
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                BmpOptions options = new BmpOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = image.Size
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
-
-                // Set up BMP save options and attach rasterization options
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized image as BMP
-                image.Save(outputPath, bmpOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a bitmap preview of an OpenDocument graphic for legacy Windows applications that only accept BMP files.
- * 2. When you must embed an ODG illustration into a PDF report that requires a white background to match the document’s page color.
- * 3. When you are creating thumbnails of ODG drawings for a web gallery and need the images saved as BMP with a consistent white canvas.
- * 4. When you are converting user‑uploaded ODG files to BMP for batch processing in a C# image‑processing pipeline that expects raster images.
- * 5. When you need to rasterize vector ODG artwork with a solid white background before performing pixel‑level analysis in .NET.
+ * 1. When you need to generate bitmap thumbnails of ODG drawings for a web gallery and require a solid white background.
+ * 2. When converting LibreOffice Draw files to BMP for legacy Windows applications that only accept BMP images.
+ * 3. When preparing ODG diagrams for printing on devices that support only raster formats and need a consistent white background.
+ * 4. When automating batch conversion of ODG assets to BMP in a C# build pipeline while ensuring transparent areas become white.
+ * 5. When integrating ODG content into a .NET reporting tool that expects BMP images with a white canvas.
  */
