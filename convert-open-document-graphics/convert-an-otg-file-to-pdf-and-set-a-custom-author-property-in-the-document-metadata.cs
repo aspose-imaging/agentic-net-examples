@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG to PDF and Set Custom Author in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PDF and Set Author Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,44 +7,27 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Configure rasterization options for OTG
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = otgRasterOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Author = "Custom Author"
-                    }
-                };
-
-                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from an OTG vector image while preserving the original page size.
- * 2. When you must embed a specific author name into the PDF metadata for compliance or branding purposes.
- * 3. When an automated workflow converts a batch of OTG files to PDFs for archival in a document management system.
- * 4. When a web service receives OTG uploads and returns PDF files with custom metadata for downstream processing.
- * 5. When integrating Aspose.Imaging into a C# application to rasterize OTG graphics into PDF format for printing or distribution.
+ * 1. When you need to archive engineering drawings stored as OTG files into searchable PDF documents while embedding the creator’s name.
+ * 2. When a reporting system must generate PDFs from OTG images and include a custom author field for compliance auditing.
+ * 3. When a web application allows users to upload OTG graphics and automatically converts them to PDFs with personalized author metadata.
+ * 4. When migrating legacy OTG assets to a PDF library and you want to preserve author information for document management.
+ * 5. When creating batch scripts that process multiple OTG files into PDFs and set a consistent author property for branding purposes.
  */
