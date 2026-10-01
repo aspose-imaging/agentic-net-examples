@@ -1,43 +1,46 @@
-// HOW-TO: Convert PNG to SVG With Background Color In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to SVG with White Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\source.png";
+        string outputPath = "Output\\result.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\Images\\source.png";
-            string outputPath = "C:\\Images\\result.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int width = pngImage.Width;
+                int height = pngImage.Height;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image
-            using (Image pngImage = Image.Load(inputPath))
-            {
-                // Create an SVG image with the same dimensions as the PNG
-                using (SvgImage svgImage = new SvgImage(pngImage.Width, pngImage.Height))
+                var fileSource = new FileCreateSource(outputPath, false);
+                using (SvgOptions svgOptions = new SvgOptions())
                 {
-                    // Set background color (example: LightBlue)
-                    svgImage.BackgroundColor = Aspose.Imaging.Color.LightBlue;
-                    svgImage.HasBackgroundColor = true;
+                    svgOptions.Source = fileSource;
 
-                    // Save the SVG image
-                    svgImage.Save(outputPath, new SvgOptions());
+                    using (Image svgImage = Image.Create(svgOptions, width, height))
+                    {
+                        Graphics graphics = new Graphics(svgImage);
+                        graphics.Clear(Aspose.Imaging.Color.White);
+                        graphics.DrawImage(pngImage, new Aspose.Imaging.Point(0, 0));
+
+                        svgImage.Save();
+                    }
                 }
             }
         }
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a PNG graphic into a web page as scalable SVG with a solid background color for consistent rendering across browsers.
- * 2. When generating vector assets from raster logos for print or marketing materials while preserving a specific background hue using C#.
- * 3. When automating batch conversion of product images to SVG format for responsive design, ensuring each SVG has a predefined background shade.
- * 4. When creating SVG placeholders from PNG thumbnails in a .NET application, setting a background color to match the app’s theme.
- * 5. When integrating Aspose.Imaging into a C# service that transforms user‑uploaded PNG files into SVG files with a custom background for further editing in vector editors.
+ * 1. When you need to embed a raster PNG into a scalable SVG for responsive web graphics while ensuring a consistent white canvas.
+ * 2. When you want to programmatically generate SVG icons from existing PNG assets in a .NET batch‑processing pipeline.
+ * 3. When you must convert user‑uploaded PNG files to SVG format for vector‑based printing or laser cutting, preserving background color.
+ * 4. When you are building a C# application that creates SVG placeholders from PNG logos for dynamic PDF or report generation.
+ * 5. When you require automated conversion of PNG screenshots to SVG diagrams for documentation tools that only accept vector images.
  */
