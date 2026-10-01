@@ -1,48 +1,36 @@
-// HOW-TO: Create 200x200 Blurred PDF Thumbnail From JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Blurred 200x200 PNG Thumbnail PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Images\Thumbnail\preview.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\thumbnail.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for processing
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                // Resize to 200x200 pixels
-                rasterImage.Resize(200, 200);
-
-                // Prepare PDF export options
-                var pdfOptions = new PdfOptions();
-
-                // Save the processed image as PDF
-                rasterImage.Save(outputPath, pdfOptions);
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                image.Filter(image.Bounds, blurOptions);
+                image.Resize(200, 200);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a small blurred preview PDF of a high‑resolution JPEG for a document management system.
- * 2. When you want to create uniform 200 × 200 thumbnail PDFs from user‑uploaded photos for a web gallery.
- * 3. When you must apply a Gaussian blur to protect sensitive details before embedding the image in a PDF report.
- * 4. When you require automated batch processing that resizes and converts raster images to PDF thumbnails in a C# backend service.
- * 5. When you need to ensure the output folder exists and handle missing source files while creating PDF previews of product images.
+ * 1. When building a document management system that shows a quick PDF preview of uploaded PNG images, you can use this code to generate a 200 × 200 blurred thumbnail PDF.
+ * 2. When creating a web gallery that displays low‑resolution placeholder images while the full‑size picture loads, the code produces a small blurred PNG thumbnail saved as PDF for fast rendering.
+ * 3. When sending image attachments via email and you need a compact PDF preview to reduce size, this snippet resizes the image, applies a Gaussian blur, and saves it as a tiny PDF thumbnail.
+ * 4. When implementing privacy‑preserving previews where faces or sensitive details must be obscured, the Gaussian blur filter combined with resizing creates a safe PDF thumbnail for user review.
+ * 5. When automating batch processing of product photos to generate uniform PDF thumbnails for catalog listings, the code quickly converts each raster image into a 200 × 200 blurred PDF preview.
  */
