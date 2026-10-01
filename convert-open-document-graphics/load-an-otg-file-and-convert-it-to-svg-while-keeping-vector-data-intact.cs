@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG File to SVG Preserving Vector Data in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Vector Image to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,35 +10,21 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
+            string inputPath = "input.otg";
+            string outputPath = "output/output.svg";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
-                var svgOptions = new SvgOptions();
-
-                // Set vector rasterization options so that vector data is preserved
-                var svgRasterization = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size // preserve original page size
-                };
-                svgOptions.VectorRasterizationOptions = svgRasterization;
-
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                var options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -50,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display or edit a CAD‑like OTG drawing on the web, converting it to SVG keeps the vector shapes editable in browsers.
- * 2. When generating printable graphics from OTG files for high‑resolution output, saving as SVG retains the original dimensions and vector quality.
- * 3. When integrating legacy OTG assets into a modern C# application that uses scalable vector graphics, this code enables seamless import and conversion.
- * 4. When creating responsive UI components that must scale without pixelation, converting OTG to SVG preserves vector data for smooth resizing.
- * 5. When automating a batch process that extracts vector artwork from OTG files for use in documentation or marketing materials, this routine provides reliable C# conversion while maintaining page size.
+ * 1. When you need to display OTG drawings on a website, you can convert them to scalable SVG files using C#.
+ * 2. When integrating legacy OTG assets into a modern UI, converting them to SVG retains crisp vector quality across devices.
+ * 3. When automating batch processing of engineering diagrams stored as OTG, you can generate SVG outputs for cross‑platform compatibility.
+ * 4. When preparing print‑ready artwork that originates as OTG, converting to SVG allows further editing in vector editors without losing detail.
+ * 5. When building a C# service that receives OTG uploads and returns SVG for downstream processing, this code handles the conversion while preserving vector data.
  */
