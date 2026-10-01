@@ -3,52 +3,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = @"C:\Images\input.png";
-            string blurredPngPath = @"C:\Images\blurred.png";
-            string pdfPath = @"C:\Images\preview.pdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Verify input file exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string inputPath = Path.Combine(inputDirectory, "image.png");
+            string outputPath = Path.Combine(outputDirectory, "preview.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredPngPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 1024x768
-                image.Resize(1024, 768);
+                if (!raster.IsCached)
+                    raster.CacheData();
 
-                // Apply Gaussian blur to the entire image
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                raster.Resize(1024, 768, ResizeType.NearestNeighbourResample);
 
-                // Save the blurred PNG
-                raster.Save(blurredPngPath);
-            }
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                raster.Filter(raster.Bounds, blurOptions);
 
-            // Load the blurred image again for PDF conversion
-            using (Image blurredImage = Image.Load(blurredPngPath))
-            {
-                // Prepare PDF options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save as PDF preview
-                blurredImage.Save(pdfPath, pdfOptions);
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a lower‑resolution preview of a high‑resolution PNG with a soft focus effect for a web gallery.
- * 2. When generating a PDF mock‑up of a blurred background image to show designers how the final layout will appear.
- * 3. When preparing thumbnail images for a document management system that requires both a blurred PNG and a PDF version for quick viewing.
- * 4. When automating a batch process that resizes product photos, adds a Gaussian blur for privacy, and saves them as PDFs for client review.
- * 5. When building a reporting tool that embeds a blurred image preview in a PDF report to illustrate image‑processing results.
+ * 1. When you need to generate a low‑resolution PDF preview of a high‑detail PNG with a softened look for design mock‑ups.
+ * 2. When an e‑commerce platform must create blurred thumbnail PDFs of product images to protect copyright while still showing size.
+ * 3. When a reporting tool requires converting resized PNG charts into PDF pages with a Gaussian blur to emphasize background elements.
+ * 4. When a document workflow needs to automatically downscale uploaded PNGs, apply a blur for privacy, and bundle them as PDFs for review.
+ * 5. When a desktop application wants to quickly produce a printable PDF preview of a PNG after resizing and applying a blur effect without using external image editors.
  */
