@@ -1,4 +1,4 @@
-// HOW-TO: Convert BMP Images From Network Share To PDF And Stream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Files to PDF and Stream to Client in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,46 +11,40 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"\\share\images";
-            string outputDirectory = @"C:\temp\pdfs";
+            string inputDirectory = @"\\share\input";
+            string outputDirectory = @"C:\output";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in bmpFiles)
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.bmp"))
             {
-                // Verify input file exists
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 // Determine output PDF path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image
+                // Load BMP and convert to PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PDF options
                     var pdfOptions = new PdfOptions();
-
-                    // Save image as PDF to file
                     image.Save(outputPath, pdfOptions);
+                }
 
-                    // Additionally, stream PDF to a memory stream (e.g., for sending to a client)
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        image.Save(memoryStream, pdfOptions);
-                        // At this point, memoryStream contains the PDF bytes.
-                        // Example: write the size of the streamed PDF.
-                        Console.WriteLine($"Converted '{Path.GetFileName(inputPath)}' to PDF ({memoryStream.Length} bytes).");
-                        // The memoryStream can be sent over a network stream to a client.
-                    }
+                // Stream the generated PDF back to the client (stdout in this example)
+                using (FileStream pdfStream = File.OpenRead(outputPath))
+                {
+                    pdfStream.CopyTo(Console.OpenStandardOutput());
                 }
             }
         }
@@ -63,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to batch‑convert BMP files stored on a file server into PDFs for download by users.
- * 2. When an enterprise application must generate PDF reports from scanned BMP images located on a shared network folder.
- * 3. When a background job has to archive legacy BMP graphics as PDF documents while also sending the PDFs directly to a client over HTTP.
- * 4. When a document management system requires on‑the‑fly conversion of BMP assets to PDF for preview without writing temporary files.
- * 5. When a Windows service processes incoming BMP uploads from a shared drive, saves them as PDFs, and streams the PDF bytes to another system for further processing.
+ * 1. When a web service needs to read BMP images from a network share, convert them to PDF for archival, and send the PDFs directly to the requester.
+ * 2. When an automated batch job must process multiple BMP scans, generate PDF reports, and pipe the results to another system via standard output.
+ * 3. When a desktop application has to transform user‑uploaded BMP pictures into PDF documents and immediately stream them back without saving intermediate files.
+ * 4. When a document management workflow requires converting legacy BMP graphics stored on a file server into searchable PDF files for indexing.
+ * 5. When a cloud function processes BMP assets from a shared folder, creates PDF versions, and returns them to a client application over a network stream.
  */
