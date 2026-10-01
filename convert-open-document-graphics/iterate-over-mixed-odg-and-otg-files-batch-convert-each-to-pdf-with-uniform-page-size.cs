@@ -1,92 +1,52 @@
-// HOW-TO: Batch Convert ODG and OTG Files to PDF with Uniform Page Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert ODG and OTG Files to A4 PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory containing ODG and OTG files
-            string inputDirectory = @"C:\Images\Input";
-            // Hardcoded output directory for generated PDFs
-            string outputDirectory = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
+            Directory.CreateDirectory(inputDirectory);
             Directory.CreateDirectory(outputDirectory);
 
-            // Get all .odg and .otg files in the input directory
-            string[] odgFiles = Directory.GetFiles(inputDirectory, "*.odg");
-            string[] otgFiles = Directory.GetFiles(inputDirectory, "*.otg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".odg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".otg", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
-            // Process ODG files
-            foreach (string inputPath in odgFiles)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                // Ensure the directory for the output file exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure rasterization options for ODG
-                    OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        // Use the source image size as the page size for uniformity
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    };
-
-                    // Set up PDF save options
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
-            }
-
-            // Process OTG files
-            foreach (string inputPath in otgFiles)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Configure rasterization options for OTG
-                    OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
-                    {
-                        // Use the source image size as the page size for uniformity
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    };
-
-                    // Set up PDF save options
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            PageWidth = 595,   // A4 width in points
+                            PageHeight = 842,  // A4 height in points
+                            BackgroundColor = Color.White
+                        };
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -99,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to archive multiple OpenDocument Graphics (ODG) and OpenDocument Templates (OTG) drawings as PDFs with consistent page dimensions for legal compliance.
- * 2. When an automated build pipeline must generate PDF documentation from a folder of ODG/OTG assets without manual intervention.
- * 3. When a web service receives mixed ODG and OTG uploads and must convert them to PDF for previewing in browsers that only support PDF.
- * 4. When a desktop application processes a batch of engineering schematics stored as ODG/OTG files and creates printable PDFs with a uniform page size for batch printing.
- * 5. When a migration script moves legacy ODG and OTG files to a PDF‑based archive, ensuring each PDF matches the original image size to preserve layout fidelity.
+ * 1. When a design team needs to archive multiple OpenDocument graphics (ODG) and OpenDocument templates (OTG) as searchable A4‑sized PDFs using C#.
+ * 2. When an automated build process must convert a folder of mixed ODG/OTG drawings into PDF reports with a consistent page layout.
+ * 3. When a document management system requires batch rasterization of vector drawings to PDF while preserving a white background and uniform page dimensions.
+ * 4. When a Windows service has to process incoming ODG and OTG files and generate PDF invoices or specifications with consistent A4 pages.
+ * 5. When a migration script moves legacy OpenDocument graphics to PDF format for compliance, ensuring each file is saved with the same page size via Aspose.Imaging in .NET.
  */

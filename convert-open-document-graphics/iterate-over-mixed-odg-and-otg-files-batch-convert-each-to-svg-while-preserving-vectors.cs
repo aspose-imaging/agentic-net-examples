@@ -1,86 +1,71 @@
-// HOW-TO: Batch Convert ODG and OTG Files to SVG Preserving Vectors in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert ODG and OTG Files to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchConvert
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure the output base directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Retrieve all files in the input directory
-            string[] allFiles = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
-
-            foreach (string inputPath in allFiles)
+            try
             {
-                // Process only .odg and .otg files (case‑insensitive)
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-                if (ext != ".odg" && ext != ".otg")
-                    continue;
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\Input";
+                string outputDirectory = @"C:\Output";
 
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDirectory);
+
+                // Get all ODG and OTG files in the input directory
+                string[] odgFiles = Directory.GetFiles(inputDirectory, "*.odg", SearchOption.TopDirectoryOnly);
+                string[] otgFiles = Directory.GetFiles(inputDirectory, "*.otg", SearchOption.TopDirectoryOnly);
+
+                string[] allFiles = new string[odgFiles.Length + otgFiles.Length];
+                odgFiles.CopyTo(allFiles, 0);
+                otgFiles.CopyTo(allFiles, odgFiles.Length);
+
+                foreach (string inputPath in allFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Build the output SVG file path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-
-                // Ensure the output directory for this file exists (unconditional per rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the vector image (ODG or OTG)
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Choose appropriate rasterization options based on file type
-                    VectorRasterizationOptions rasterOptions;
-                    if (ext == ".odg")
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        var odgOptions = new OdgRasterizationOptions();
-                        odgOptions.PageSize = image.Size; // preserve original size
-                        rasterOptions = odgOptions;
-                    }
-                    else // .otg
-                    {
-                        var otgOptions = new OtgRasterizationOptions();
-                        otgOptions.PageSize = image.Size; // preserve original size
-                        rasterOptions = otgOptions;
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
                     }
 
-                    // Configure SVG save options with the vector rasterization options
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                    // Determine output path with .svg extension
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
 
-                    // Save the image as SVG, preserving vectors
-                    image.Save(outputPath, svgOptions);
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load the image and save as SVG
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        SvgOptions options = new SvgOptions();
+                        image.Save(outputPath, options);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a collection of LibreOffice Draw (.odg) and OpenDocument Template (.otg) graphics to scalable SVG files for web display.
- * 2. When an automated build process must batch‑convert vector drawings from an assets folder into SVG to keep file sizes low while preserving editability.
- * 3. When a design team wants to generate SVG icons from existing ODG/OTG source files for inclusion in a responsive UI library.
- * 4. When a document‑conversion service has to transform mixed ODG and OTG diagrams into SVG to embed them in PDF reports without rasterizing.
- * 5. When you are archiving legacy vector artwork and require a script that iterates through a directory, converts each file to SVG, and maintains the original dimensions.
+ * 1. When you need to migrate a library of OpenDocument graphics (ODG) and OpenType glyph (OTG) files to scalable SVG for web display.
+ * 2. When an automated build or CI pipeline must generate SVG assets from design files stored in a shared folder.
+ * 3. When a reporting or documentation tool requires vector images in SVG format but the source assets are provided as ODG or OTG.
+ * 4. When you want to preserve vector quality while converting multiple OpenDocument drawings to a format supported by modern browsers.
+ * 5. When a desktop application needs to batch process user‑uploaded ODG/OTG files and store the results as SVG for further editing.
  */

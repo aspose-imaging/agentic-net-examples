@@ -1,6 +1,7 @@
-// HOW-TO: Asynchronously Convert Multiple ODG Files To BMP In C# (Aspose.Imaging for .NET)
+// HOW-TO: Asynchronously Convert Multiple ODG Files to BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -11,28 +12,24 @@ class Program
     {
         try
         {
-            // Hard‑coded list of ODG files to convert
-            string[] inputFiles = new string[]
+            // Hardcoded input and output directories
+            string inputDirectory = "input";
+            string outputDirectory = "output";
+
+            // Get all ODG files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.odg");
+
+            // Create conversion tasks
+            Task[] conversionTasks = inputFiles.Select(inputPath =>
             {
-                @"C:\Images\sample1.odg",
-                @"C:\Images\sample2.odg"
-            };
+                // Determine output path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Hard‑coded output directory
-            string outputDir = @"C:\Images\Converted";
+                return ConvertOdgToBmpAsync(inputPath, outputPath);
+            }).ToArray();
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Process each file asynchronously
-            Task[] conversionTasks = new Task[inputFiles.Length];
-            for (int i = 0; i < inputFiles.Length; i++)
-            {
-                string inputPath = inputFiles[i];
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
-                conversionTasks[i] = ConvertOdgToBmpAsync(inputPath, outputPath);
-            }
-
+            // Await all conversions
             await Task.WhenAll(conversionTasks);
         }
         catch (Exception ex)
@@ -41,27 +38,27 @@ class Program
         }
     }
 
-    static async Task ConvertOdgToBmpAsync(string inputPath, string outputPath)
+    private static async Task ConvertOdgToBmpAsync(string inputPath, string outputPath)
     {
-        // Verify input file exists
+        // Check input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Perform the load‑convert‑save operation on a background thread
         await Task.Run(() =>
         {
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // BMP specific save options (default configuration)
+                // Set BMP options (default)
                 BmpOptions bmpOptions = new BmpOptions();
 
-                // Save the image as BMP
+                // Save as BMP
                 image.Save(outputPath, bmpOptions);
             }
         });
@@ -70,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to process a batch of OpenDocument graphics (ODG) and generate BMP thumbnails without freezing the UI.
- * 2. When a server‑side service must convert user‑uploaded ODG drawings to BMP images in parallel while keeping the request thread responsive.
- * 3. When an automated build pipeline has to transform ODG assets into BMP format for legacy systems that only accept bitmap files.
- * 4. When a cloud function processes large numbers of ODG files and saves the results to a shared folder without blocking other operations.
- * 5. When a migration tool moves graphic resources from ODG to BMP and wants to leverage async/await to improve overall conversion throughput.
+ * 1. When a web application needs to generate BMP thumbnails from many user‑uploaded ODG drawings without blocking the request thread.
+ * 2. When a background service processes a folder of ODG design files overnight and saves them as BMP for legacy systems that only accept bitmap images.
+ * 3. When a desktop utility batch‑converts a large collection of ODG diagrams to BMP for inclusion in a PowerPoint presentation, using async/await to keep the UI responsive.
+ * 4. When a cloud function receives ODG files from a queue and must quickly convert them to BMP for downstream image‑processing pipelines while maximizing throughput.
+ * 5. When an automated testing framework validates that ODG files are correctly rendered by converting them to BMP and comparing pixel data, running conversions in parallel to reduce test time.
  */

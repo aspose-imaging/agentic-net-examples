@@ -1,18 +1,20 @@
-// HOW-TO: Convert OTG to JPEG While Preserving EXIF Orientation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to JPEG While Keeping EXIF Orientation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = Path.Combine("Input", "sample.otg");
+        string outputPath = Path.Combine("Output", "sample.jpg");
+
         try
         {
-            string inputPath = Path.Combine("Input", "sample.otg");
-            string outputPath = Path.Combine("Output", "sample.jpg");
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,11 +23,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
                 var jpegOptions = new JpegOptions
                 {
-                    KeepMetadata = true
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
                 image.Save(outputPath, jpegOptions);
@@ -40,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to batch‑convert OTG raw files to JPEG for web publishing while keeping the original EXIF orientation intact.
- * 2. When a digital asset management system imports legacy OTG images and requires JPEG versions that retain metadata for accurate cataloging.
- * 3. When a mobile application processes OTG photos captured on a device and must output JPEGs that display correctly without manual rotation.
- * 4. When an e‑commerce platform receives product images in OTG format and converts them to JPEG for faster page loads while preserving orientation data.
- * 5. When a migration script archives old OTG files to JPEG format for long‑term storage, ensuring the EXIF orientation metadata is not lost.
+ * 1. When you need to display OTG images on web pages that only support JPEG, preserving the original orientation so they appear correctly.
+ * 2. When migrating a legacy archive of OTG files to a standard JPEG format for compatibility with mobile apps while retaining camera orientation metadata.
+ * 3. When building an automated image processing pipeline that converts raw OTG scans to JPEG thumbnails without losing EXIF rotation information.
+ * 4. When integrating Aspose.Imaging into a C# desktop application that imports OTG files and saves them as JPEG for printing, ensuring the orientation stays accurate.
+ * 5. When creating a batch conversion tool that processes multiple OTG files into JPEG for cloud storage, keeping EXIF orientation for downstream image analysis.
  */

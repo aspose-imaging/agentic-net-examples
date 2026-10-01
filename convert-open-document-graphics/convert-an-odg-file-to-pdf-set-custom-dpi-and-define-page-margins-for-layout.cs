@@ -1,50 +1,38 @@
-// HOW-TO: Convert ODG to PDF with Custom DPI and Page Margins in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF with Custom DPI and Page Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample.pdf";
+        string inputPath = Path.Combine("Input", "sample.odg");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
-        // Validate input file existence
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure rasterization options (margins and background)
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size,
-                    BorderX = 50, // left/right margin in pixels
-                    BorderY = 50  // top/bottom margin in pixels
-                };
-
-                // Configure PDF save options with custom DPI
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300) // DPI X, DPI Y
-                };
-
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable PDFs from OpenDocument graphics while preserving layout by adding white margins and setting a high resolution for crisp output.
- * 2. When an application must batch‑process ODG files into PDF for archival purposes and requires a specific DPI to meet document‑management standards.
- * 3. When a reporting tool creates diagrams in ODG format and the final report must embed those diagrams as PDF pages with consistent margins for a professional look.
- * 4. When a web service receives user‑uploaded ODG drawings and must return a PDF preview that matches screen‑resolution settings and includes a border to avoid clipping.
- * 5. When a CAD‑like workflow converts vector ODG assets to PDF for printing on large‑format printers, needing 300 DPI resolution and defined page borders to align with printer margins.
+ * 1. When you need to generate printable PDF reports from ODG diagrams while preserving the original dimensions.
+ * 2. When you must embed ODG drawings into a PDF document with a specific resolution for high‑quality printing.
+ * 3. When an application has to batch‑convert ODG files to PDFs and control the output DPI to meet corporate standards.
+ * 4. When you want to create PDFs from ODG graphics with a white background to avoid transparency issues in downstream viewers.
+ * 5. When you need to programmatically set the PDF page size to match the ODG canvas so the content fits without scaling.
  */

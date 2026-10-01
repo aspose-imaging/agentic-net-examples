@@ -1,8 +1,8 @@
 // HOW-TO: Convert ODG to PNG with Watermark Text Overlay in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -11,8 +11,11 @@ class Program
     {
         try
         {
-            string inputPath = "input.odg";
-            string outputPath = "output.png";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = Path.Combine(inputDirectory, "sample.odg");
+            string outputPath = Path.Combine(outputDirectory, "sample.png");
 
             if (!File.Exists(inputPath))
             {
@@ -22,39 +25,29 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image odgImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare PNG rasterization options for the ODG vector image
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageSize = odgImage.Size,
-                        BackgroundColor = Color.White
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     }
                 };
+                image.Save(outputPath, pngOptions);
+            }
 
-                // Rasterize ODG to a memory stream as PNG
-                using (var ms = new MemoryStream())
+            using (Aspose.Imaging.Image pngImage = Aspose.Imaging.Image.Load(outputPath))
+            {
+                var graphics = new Aspose.Imaging.Graphics(pngImage);
+                var font = new Aspose.Imaging.Font("Arial", 48);
+                using (var brush = new SolidBrush(Aspose.Imaging.Color.Yellow))
                 {
-                    odgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized PNG for drawing
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        // Draw watermark text
-                        Graphics graphics = new Graphics(raster);
-                        Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 48);
-                        using (SolidBrush brush = new SolidBrush(Color.Yellow))
-                        {
-                            graphics.DrawString("Watermark", font, brush, new PointF(10, 10));
-                        }
-
-                        // Save final PNG with watermark
-                        raster.Save(outputPath, new PngOptions());
-                    }
+                    graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.Point(10, 10));
                 }
+                pngImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -66,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to publish an OpenDocument graphic as a PNG for a web page while branding it with a company logo or text.
- * 2. When an automated report generator must convert ODG diagrams to PNG thumbnails and add a confidential watermark before distribution.
- * 3. When a document management system stores drawings in ODG format and requires watermarked PNG previews for user download.
- * 4. When a batch‑processing tool has to rasterize multiple ODG files to PNG and embed copyright text to protect intellectual property.
- * 5. When a C# application integrates Aspose.Imaging to create watermarked PNG assets from ODG source files for marketing materials.
+ * 1. When you need to generate a PNG preview of an OpenDocument graphic and brand it with a custom watermark before publishing online.
+ * 2. When an automated report system must convert ODG diagrams to PNG thumbnails and embed a copyright notice directly onto the image.
+ * 3. When a document management workflow requires batch processing of ODG files into watermarked PNGs for secure distribution to clients.
+ * 4. When a C# application has to rasterize vector ODG artwork into a raster PNG while adding promotional text for marketing materials.
+ * 5. When you want to programmatically add a visible identifier to ODG‑derived PNGs to prevent unauthorized reuse.
  */

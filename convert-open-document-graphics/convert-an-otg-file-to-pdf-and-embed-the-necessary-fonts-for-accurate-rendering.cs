@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG File to PDF with Embedded Fonts in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PDF with Embedded Fonts in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,47 +7,33 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Data\sample.otg";
-            string outputPath = @"C:\Data\sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for OTG
-                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Preserve original page size
-                    PageSize = image.Size
-                };
-
-                // Set up PDF save options and attach rasterization options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = otgRasterizationOptions,
-                    // Example of setting PDF compliance which can help embed fonts
-                    PdfCoreOptions = new PdfCoreOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    }
-                };
-
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF from an OTG vector graphic for archival or sharing while preserving exact appearance.
- * 2. When a reporting system must embed fonts to meet PDF/A‑1b compliance for long‑term document preservation.
- * 3. When an application processes engineering diagrams stored as OTG and must deliver them as printable PDFs.
- * 4. When you automate batch conversion of OTG assets to PDFs on a server without manual intervention.
- * 5. When a document workflow requires converting OTG images to PDFs that retain original page size and font fidelity.
+ * 1. When you need to generate printable PDF reports from OTG vector drawings while preserving text appearance.
+ * 2. When a web service must convert user‑uploaded OTG files to PDF for downstream processing without losing font information.
+ * 3. When automating batch conversion of design assets stored as OTG into PDF for archival or distribution.
+ * 4. When integrating Aspose.Imaging into a C# application to render OTG diagrams as PDF pages with a white background.
+ * 5. When creating a server‑side workflow that transforms OTG schematics into PDF documents that can be viewed on any device.
  */

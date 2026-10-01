@@ -1,46 +1,30 @@
 // HOW-TO: Convert ODG to BMP with 150 DPI Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample_converted.bmp";
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Save as BMP using BmpOptions
-                BmpOptions bmpOptions = new BmpOptions();
-                odgImage.Save(outputPath, bmpOptions);
-            }
-
-            // Load the newly saved BMP to set custom resolution
-            using (BmpImage bmpImage = (BmpImage)Image.Load(outputPath))
-            {
-                // Set resolution to 150 DPI for both axes
-                bmpImage.SetResolution(150.0, 150.0);
-                // Overwrite the BMP with the new resolution
-                bmpImage.Save(outputPath);
+                var options = new BmpOptions();
+                options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(150, 150);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to import OpenDocument graphics into a Windows application that only supports BMP files and require a specific 150 DPI resolution for accurate on‑screen rendering.
- * 2. When preparing ODG diagrams for high‑quality printing where the printer expects BMP images at a defined DPI setting.
- * 3. When archiving legacy ODG artwork in a BMP format while preserving a consistent resolution for downstream processing pipelines.
- * 4. When converting ODG assets for use in a game engine that loads BMP textures and needs a uniform 150 DPI to match other assets.
- * 5. When automating a batch workflow that transforms ODG files to BMP and sets a custom resolution to ensure correct scaling in PDF reports.
+ * 1. When you need to generate a high‑resolution BMP preview of an ODG diagram for inclusion in a Windows desktop application.
+ * 2. When exporting OpenDocument graphics to BMP for legacy systems that require a fixed 150 DPI raster image.
+ * 3. When preparing ODG drawings for printing on devices that expect BMP files with a specific DPI setting.
+ * 4. When automating batch conversion of ODG files to BMP thumbnails with consistent resolution for a digital asset management workflow.
+ * 5. When integrating Aspose.Imaging in a C# service that converts user‑uploaded ODG files to BMP at 150 DPI for downstream image analysis.
  */

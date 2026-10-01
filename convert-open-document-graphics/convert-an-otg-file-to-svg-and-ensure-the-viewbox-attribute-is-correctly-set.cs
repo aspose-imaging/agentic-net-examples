@@ -1,43 +1,39 @@
-// HOW-TO: Convert OTG to SVG with Correct ViewBox in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to SVG with Proper ViewBox in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG options with proper viewBox (PageSize)
-                var svgOptions = new SvgOptions
+                using (SvgOptions options = new SvgOptions())
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    options.VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        PageSize = image.Size // Sets the viewBox to match the source dimensions
-                    }
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Color.White
+                    };
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to display legacy OTG graphics on a web page, they can convert the file to SVG and preserve the original dimensions using the viewBox attribute.
- * 2. When integrating a document processing pipeline that receives OTG files, converting them to scalable SVG ensures the images remain crisp at any resolution.
- * 3. When creating a batch job that prepares assets for responsive design, the code can automatically set the SVG viewBox to match the source size for proper scaling.
- * 4. When migrating an old CAD or vector drawing library to modern formats, converting OTG to SVG with Aspose.Imaging simplifies the transition while keeping accurate geometry.
- * 5. When building a C# application that generates printable PDFs from vector sources, converting OTG to SVG with a correctly set viewBox allows seamless embedding into PDF pages.
+ * 1. When you need to embed an OTG diagram into a web page and require an SVG with a correctly sized viewBox for responsive scaling.
+ * 2. When a design pipeline receives OTG files from legacy CAD tools and must convert them to SVG for further processing in vector graphics editors.
+ * 3. When generating printable PDFs from OTG assets, you first convert them to SVG with accurate dimensions to preserve layout before PDF conversion.
+ * 4. When building a C# service that transforms user‑uploaded OTG files into web‑friendly SVGs while maintaining the original aspect ratio.
+ * 5. When automating batch conversion of OTG icons to SVG sprites, ensuring each SVG includes the proper viewBox for CSS styling.
  */

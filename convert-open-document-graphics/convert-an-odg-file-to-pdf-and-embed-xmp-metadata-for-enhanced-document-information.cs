@@ -1,8 +1,9 @@
-// HOW-TO: Convert ODG to PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG To PDF With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,24 +11,23 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image and save as PDF
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new PdfOptions());
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -39,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically convert OpenDocument graphics (ODG) files to PDF for cross‑platform viewing in a .NET application.
- * 2. When generating printable reports from ODG diagrams and exporting them as PDF documents on a server.
- * 3. When automating batch conversion of design assets stored as ODG into PDF for archival or distribution.
- * 4. When integrating ODG to PDF conversion into a document management workflow that requires C# code and Aspose.Imaging.
- * 5. When building a web service that receives ODG uploads and returns PDF files without manual user intervention.
+ * 1. When you need to programmatically transform OpenDocument graphics (ODG) files into PDF documents for cross‑platform viewing in a .NET application.
+ * 2. When you want to generate PDF reports from ODG diagrams created in LibreOffice using Aspose.Imaging without manual export.
+ * 3. When an automated workflow must convert user‑uploaded ODG illustrations to PDF for archiving or printing on a server.
+ * 4. When you are building a document conversion service that accepts ODG files and returns PDF files while preserving vector quality in C#.
+ * 5. When you need to batch‑process a folder of ODG assets into PDFs as part of a content‑management pipeline in a Windows environment.
  */

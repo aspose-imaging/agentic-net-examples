@@ -1,6 +1,8 @@
-// HOW-TO: Convert OTG to SVG and Strip Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to SVG and Remove Empty Groups in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,12 +10,12 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.otg";
+            string outputPath = "output/output.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,24 +26,46 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
+            // Load OTG image and save as SVG
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
-                var svgOptions = new SvgOptions
-                {
-                    // Remove metadata to reduce unnecessary elements
-                    KeepMetadata = false,
-                    // Configure rasterization (page size matches source)
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
-                };
-
-                // Save as SVG
+                var svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
+
+            // Load the generated SVG for cleanup
+            XDocument svgDoc = XDocument.Load(outputPath);
+
+            // Remove empty <g> elements (no child elements)
+            var emptyGroups = svgDoc.Descendants()
+                                    .Where(e => e.Name.LocalName == "g" && !e.Elements().Any())
+                                    .ToList();
+            foreach (var g in emptyGroups)
+            {
+                g.Remove();
+            }
+
+            // Flatten groups that contain only a single child group
+            bool changed;
+            do
+            {
+                changed = false;
+                var singleChildGroups = svgDoc.Descendants()
+                    .Where(e => e.Name.LocalName == "g" &&
+                                e.Elements().Count() == 1 &&
+                                e.Elements().First().Name.LocalName == "g")
+                    .ToList();
+
+                foreach (var g in singleChildGroups)
+                {
+                    var child = g.Elements().First();
+                    g.ReplaceWith(child);
+                    changed = true;
+                }
+            } while (changed);
+
+            // Save the cleaned SVG
+            svgDoc.Save(outputPath);
         }
         catch (Exception ex)
         {
@@ -52,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an OTG diagram into a web page, converting it to lightweight SVG while removing metadata reduces file size and improves load times.
- * 2. When automating a batch process that extracts vector graphics from legacy OTG files for use in modern design tools, this code generates clean SVG files ready for editing.
- * 3. When creating printable PDFs from OTG assets, converting to SVG first ensures resolution‑independent graphics and the stripped metadata avoids unnecessary PDF bloat.
- * 4. When integrating OTG images into a mobile app, converting to SVG with Aspose.Imaging in C# provides scalable icons that consume less memory on the device.
- * 5. When preparing OTG artwork for SEO‑friendly web publishing, exporting to SVG and removing group elements simplifies the markup, making it easier for search engines to index.
+ * 1. When you need to embed a vector graphic from an OTG file into a web page, you can convert it to SVG and clean up unnecessary groups.
+ * 2. When optimizing SVG files for faster browser rendering, removing empty and nested groups reduces file size and complexity.
+ * 3. When preparing assets for a design system that requires clean SVG markup, this code transforms OTG drawings into streamlined SVG.
+ * 4. When automating batch conversion of legacy OTG illustrations to modern SVG format for use in responsive UI, the script handles conversion and simplification.
+ * 5. When integrating vector assets into a C# application that manipulates the SVG DOM, you can first convert OTG and prune redundant group elements to simplify further processing.
  */

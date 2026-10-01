@@ -1,9 +1,8 @@
-// HOW-TO: Convert OTG File To PDF With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG File To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.otg";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -24,16 +23,10 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                var vectorOptions = new VectorRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD or engineering application exports drawings as OTG and you need to generate printable PDF reports programmatically in a C# backend.
- * 2. When an automated document pipeline must convert OTG graphics to PDF for archival or sharing while preserving the original dimensions and white background.
- * 3. When a web service receives OTG images from users and must return PDF versions for viewing in standard browsers without requiring client‑side plugins.
- * 4. When you are building a batch conversion tool that processes multiple OTG files into PDFs using Aspose.Imaging’s vector rasterization options in .NET.
- * 5. When integrating OTG to PDF conversion into a C# application to create PDF invoices that embed vector graphics generated from design software.
+ * 1. When a medical imaging system stores scans in OTG format and needs to generate PDF reports for clinicians.
+ * 2. When an e‑learning platform must batch‑convert OTG illustrations into PDF handouts for offline distribution.
+ * 3. When a document management workflow requires embedding OTG graphics into searchable PDF archives for compliance.
+ * 4. When a desktop application needs to let users export OTG design files as PDFs for printing or sharing.
+ * 5. When an automated build process must transform OTG assets into PDF format to include them in generated documentation.
  */

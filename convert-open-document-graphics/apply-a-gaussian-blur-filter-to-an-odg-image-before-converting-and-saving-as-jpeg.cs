@@ -1,61 +1,54 @@
-// HOW-TO: Apply Gaussian Blur to ODG and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to ODG and Convert to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_blur.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/result.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare JPEG options with rasterization settings for the ODG image
-                var jpegOptions = new JpegOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageSize = odgImage.Size
+                        PageWidth = vectorImage.Width,
+                        PageHeight = vectorImage.Height
                     }
                 };
+                vectorImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Rasterize the ODG image into a memory stream
-                using (var memoryStream = new MemoryStream())
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                raster.Filter(raster.Bounds, blurOptions);
+                var jpegOptions = new JpegOptions
                 {
-                    odgImage.Save(memoryStream, jpegOptions);
-                    memoryStream.Position = 0;
-
-                    // Load the rasterized image as a RasterImage
-                    using (Image rasterImageWrapper = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageWrapper;
-
-                        // Apply Gaussian blur filter to the entire image
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the processed image as JPEG
-                        rasterImage.Save(outputPath, jpegOptions);
-                    }
-                }
+                    Quality = 90
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -67,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften the edges of a vector ODG diagram before embedding it in a web page as a JPEG.
- * 2. When you want to reduce visual noise in an ODG illustration prior to printing it as a compressed JPEG file.
- * 3. When an application must convert OpenDocument graphics to raster JPEGs while applying a blur effect for a background placeholder.
- * 4. When generating thumbnail previews of ODG drawings that require a subtle blur to hide details and save bandwidth.
- * 5. When automating batch processing of ODG assets to create blurred JPEG versions for UI overlays or watermarks.
+ * 1. When you need to soften the edges of an ODG diagram before delivering it as a high‑quality JPEG for web publishing.
+ * 2. When an application must convert vector‑based ODG files to raster JPEGs while applying a blur effect for watermarking or aesthetic purposes.
+ * 3. When you want to generate preview thumbnails of ODG drawings with a Gaussian blur to hide sensitive details before saving them as JPEG.
+ * 4. When automating a workflow that rasterizes ODG graphics to PNG, applies a blur filter, and outputs compressed JPEGs for email attachments.
+ * 5. When integrating Aspose.Imaging in a C# service to process ODG artwork, apply Gaussian blur, and store the result as a JPEG with specific quality settings.
  */

@@ -1,52 +1,37 @@
-// HOW-TO: Convert OTG to PDF with Custom Author and Title in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PDF with Author and Title Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.otg";
-            string outputPath = @"C:\output\sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure PDF options with custom metadata
-                PdfOptions pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "John Doe",
-                        Title = "Sample OTG to PDF"
-                    }
-                };
-
-                // Set rasterization options for OTG conversion
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size // preserve original page size
-                };
-                pdfOptions.VectorRasterizationOptions = otgRasterOptions;
-
-                // Save the image as PDF with the specified options
-                image.Save(outputPath, pdfOptions);
+                        Author = "Author Name",
+                        Title = "Document Title"
+                    };
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from an OTG design file while embedding the creator’s name and document title for compliance reporting.
- * 2. When an automated document pipeline must convert multiple OTG images to PDFs and preserve original page dimensions with custom metadata for archival systems.
- * 3. When a web service receives OTG uploads and must return PDFs that include author information for digital rights management.
- * 4. When integrating Aspose.Imaging into a C# application to batch‑process engineering drawings, adding consistent metadata before storing them in a document management repository.
- * 5. When creating printable PDFs from OTG files in a Windows desktop tool and you want the output files to carry specific author and title properties for easy identification.
+ * 1. When a developer needs to generate searchable PDF reports from OTG design files while embedding author and title information for document management systems.
+ * 2. When an application must batch‑convert OTG graphics exported from CAD tools into PDFs and add consistent metadata for archiving and compliance.
+ * 3. When a web service receives OTG images from users and must return PDF versions that include proper author and title fields for downstream indexing.
+ * 4. When integrating Aspose.Imaging into a C# workflow to transform OTG artwork into PDF portfolios with custom document properties for branding purposes.
+ * 5. When automating the creation of PDF documentation from OTG assets and requiring embedded metadata to appear in PDF viewers’ file properties panel.
  */

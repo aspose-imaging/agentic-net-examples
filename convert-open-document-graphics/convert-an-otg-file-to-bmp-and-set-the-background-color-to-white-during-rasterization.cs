@@ -1,47 +1,39 @@
-// HOW-TO: Convert OTG to BMP with White Background Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to BMP with White Background Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.bmp";
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure rasterization options with white background
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = image.Size
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Set up BMP save options and attach rasterization options
-                BmpOptions bmpOptions = new BmpOptions
+                var bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rasterized image as BMP
                 image.Save(outputPath, bmpOptions);
             }
         }
@@ -54,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OpenDocument graphic (OTG) in a Windows application that only supports BMP files, you can rasterize it with a white background using Aspose.Imaging for .NET.
- * 2. When generating printable assets from vector OTG diagrams and require a solid white canvas to avoid transparent areas, this code converts the vector to a BMP raster image.
- * 3. When automating a batch process that converts legacy OTG icons to BMP thumbnails for a file‑explorer UI, the rasterization options ensure consistent background color.
- * 4. When integrating OTG content into a legacy reporting system that only accepts BMP images, you can programmatically load, rasterize with a white background, and save the result in C#.
- * 5. When preparing OTG artwork for a game engine that does not support vector formats, this snippet converts the vector to a BMP with a white background to prevent rendering artifacts.
+ * 1. When you need to display vector OTG graphics in a Windows application that only supports BMP images, you can rasterize them with a white background.
+ * 2. When preparing OTG files for printing on white paper, converting them to BMP ensures the background appears solid white.
+ * 3. When integrating legacy systems that accept BMP files, you can programmatically transform OTG diagrams to BMP while preserving layout.
+ * 4. When creating thumbnails for OTG drawings in a gallery, converting to BMP with a white background provides consistent visual appearance.
+ * 5. When automating batch processing of OTG assets for a game engine that requires BMP textures, this code rasterizes each file with a white backdrop.
  */

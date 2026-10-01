@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG File to BMP While Preserving Original Dimensions in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG File to BMP Image While Preserving Original Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,37 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.bmp";
+            string inputPath = "input.otg";
+            string outputPath = "output/output.bmp";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization to keep the original size
-                var otgRasterizationOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Set up BMP save options with the rasterization settings
-                var bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = otgRasterizationOptions
-                };
-
-                // Save the image as BMP
-                image.Save(outputPath, bmpOptions);
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a vector OTG diagram in a legacy Windows application that only supports BMP images.
- * 2. When you must generate bitmap thumbnails of OTG drawings for printing or reporting while keeping the exact size.
- * 3. When an automated batch process converts OTG assets to BMP for compatibility with third‑party image analysis tools.
- * 4. When you want to preserve the original dimensions of a CAD‑style OTG file while saving it as a raster BMP for archival.
- * 5. When a web service receives OTG uploads and must return BMP files without scaling for downstream processing.
+ * 1. When a developer needs to display or edit an OTG graphic in a Windows application that only supports BMP, they can convert the file while keeping its dimensions.
+ * 2. When integrating legacy printing workflows that require BMP inputs, the code allows automatic conversion from OTG without resizing the image.
+ * 3. When creating thumbnails or previews for a document management system that stores BMP files, developers can load the original OTG and save it as BMP at its native size.
+ * 4. When performing batch processing of OTG assets for a game engine that only accepts BMP textures, this snippet converts each file while preserving the original pixel count.
+ * 5. When migrating archival OTG images to a more universally supported format for backup or sharing, the code ensures the BMP output matches the source image’s resolution.
  */
