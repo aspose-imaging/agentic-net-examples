@@ -1,8 +1,9 @@
-// HOW-TO: Batch Increase BMP Brightness By 10% And Convert To SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Increase Brightness of BMP Images and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -10,7 +11,6 @@ class Program
     {
         try
         {
-            // Set up input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -27,44 +27,42 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files (filter BMP later)
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
-                // Process only BMP files
-                if (!Path.GetExtension(inputPath).Equals(".bmp", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+                if (!Path.GetExtension(inputPath).Equals(".bmp", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
-                // Ensure output directory exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Increase brightness by ~10%
                     RasterImage raster = (RasterImage)image;
-                    raster.AdjustBrightness(25); // 10% of 255 ≈ 25
+                    if (!raster.IsCached) raster.CacheData();
+                    raster.AdjustBrightness(25); // approximate 10% increase
 
-                    // Prepare SVG export options
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    using (SvgOptions svgOptions = new SvgOptions())
                     {
-                        PageSize = image.Size
-                    };
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    image.Save(outputPath, svgOptions);
+                        svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = raster.Width,
+                            PageHeight = raster.Height
+                        };
+                        raster.Save(outputPath, svgOptions);
+                    }
                 }
             }
         }
@@ -77,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically brighten a collection of legacy BMP assets before using them in a modern web application that requires scalable SVG graphics.
- * 2. When you want to preprocess scanned BMP drawings by enhancing their visibility and then convert them to SVG for loss‑less scaling in reports.
- * 3. When a batch of product photos stored as BMP must be lightened slightly and transformed into vector format for inclusion in responsive UI components.
- * 4. When you are migrating an archive of BMP icons, applying a uniform brightness boost to improve contrast, and exporting them as SVG for cross‑platform compatibility.
- * 5. When an automated build pipeline must adjust the brightness of BMP textures and generate SVG versions for use in vector‑based game assets.
+ * 1. When you need to prepare a set of legacy BMP graphics for web display by brightening them and converting them to scalable SVG files.
+ * 2. When an automated build pipeline must enhance the visibility of scanned BMP assets before generating vector versions for responsive UI components.
+ * 3. When a desktop application processes user‑uploaded BMP photos, applies a uniform brightness boost, and saves them as SVG for further editing.
+ * 4. When a reporting tool converts batch BMP charts into SVG while adjusting brightness to match a corporate theme.
+ * 5. When migrating a legacy image library, you want to programmatically increase brightness of each BMP and output SVGs for modern browsers.
  */
