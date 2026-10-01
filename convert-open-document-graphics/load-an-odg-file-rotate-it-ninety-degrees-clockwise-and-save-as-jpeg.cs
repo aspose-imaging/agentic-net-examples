@@ -3,54 +3,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
-class Program
+namespace OdgRotateExample
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.odg";
+                string outputPath = "output/output.jpg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    var jpegOptions = new JpegOptions();
+                    image.Save(outputPath, jpegOptions);
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Cast to OdgImage to access ODG-specific methods
-                OdgImage odgImage = (OdgImage)image;
-
-                // Rotate 90 degrees clockwise
-                odgImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save as JPEG
-                JpegOptions jpegOptions = new JpegOptions();
-                odgImage.Save(outputPath, jpegOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OpenDocument graphic in a web gallery that only supports JPEG, you can rotate the ODG file and convert it to JPEG using C#.
- * 2. When preparing printable assets from ODG drawings that must be oriented correctly for portrait layouts, you can programmatically rotate and save them as JPEGs.
- * 3. When automating batch processing of ODG diagrams for a reporting system that consumes JPEG thumbnails, this code rotates each diagram and creates the required JPEG files.
- * 4. When integrating legacy OpenDocument graphics into a mobile app that only renders JPEG images, you can use this snippet to reorient and convert the files on the server side.
- * 5. When generating image previews for an ODG file viewer that needs the preview rotated to match the original orientation, this C# routine loads, rotates, and saves the image as JPEG.
+ * 1. When you need to convert an ODG diagram to a JPEG thumbnail for quick web preview, you can load the ODG, rotate it, and save it as JPEG using C#.
+ * 2. When a scanned ODG drawing is oriented incorrectly, you can programmatically rotate it ninety degrees clockwise before publishing it as a JPEG image.
+ * 3. When building a batch processor that generates JPEG previews of multiple ODG files, you can rotate each image to the correct orientation during the conversion.
+ * 4. When an email client only accepts JPEG attachments, you can rotate the ODG artwork and save it as a JPEG to ensure proper display in the message.
+ * 5. When integrating ODG support into a .NET application that displays user‑uploaded drawings, you can rotate the image and convert it to JPEG for consistent rendering across browsers.
  */
