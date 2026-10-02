@@ -1,4 +1,4 @@
-// HOW-TO: Create Progressive JPEG From BMP And Reduce File Size In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to Progressive JPEG to Reduce File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,44 +7,30 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_progressive.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output\\output_progressive.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Configure JPEG save options with progressive compression
-                JpegOptions saveOptions = new JpegOptions
-                {
-                    BitsPerChannel = 8,
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 90, // reasonable quality
-                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
-                    ResolutionUnit = ResolutionUnit.Inch
-                };
+                CompressionType = JpegCompressionMode.Progressive
+            };
 
-                // Save the image as progressive JPEG
-                image.Save(outputPath, saveOptions);
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            {
+                image.Save(outputPath, jpegOptions);
             }
-
-            // Report file size of the saved JPEG
-            long fileSize = new FileInfo(outputPath).Length;
-            Console.WriteLine($"Saved progressive JPEG size: {fileSize} bytes");
         }
         catch (Exception ex)
         {
@@ -55,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to serve web images that load gradually, converting BMP files to progressive JPEGs reduces initial download time and improves user experience.
- * 2. When migrating legacy bitmap assets to a smaller, web‑friendly format, you can preserve visual quality while cutting storage space using progressive JPEG compression in C#.
- * 3. When optimizing server storage, generating progressive JPEGs lets you compare file size reductions against baseline JPEGs for bandwidth‑saving decisions.
- * 4. When preparing images for email newsletters, progressive JPEGs display a low‑resolution preview as the message loads, enhancing perceived performance.
- * 5. When building an automated C# image‑processing pipeline, setting the JPEG CompressionType to Progressive standardizes resolution and creates smaller files for faster delivery.
+ * 1. When you need to optimize web‑served photos by converting standard JPEGs to progressive JPEGs to achieve smaller file sizes without losing quality using C# and Aspose.Imaging.
+ * 2. When preparing product catalog images for faster loading on mobile devices, you can re‑save them as progressive JPEGs to reduce bandwidth consumption.
+ * 3. When generating email newsletters, converting attached JPEGs to progressive format helps keep the email size low while preserving visual fidelity.
+ * 4. When building a batch image‑processing pipeline that must standardize all JPEGs to a progressive compression mode for consistent rendering across browsers.
+ * 5. When comparing compression techniques, you can use this code to measure how progressive JPEG compression impacts file size versus baseline JPEGs.
  */
