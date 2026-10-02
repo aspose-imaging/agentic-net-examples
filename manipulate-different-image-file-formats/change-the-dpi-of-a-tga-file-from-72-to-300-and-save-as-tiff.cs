@@ -3,41 +3,32 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tga";
-            string outputPath = "output.tif";
+            string outputPath = "output/output.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image
-            using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Change DPI from 72 to 300
-                tgaImage.HorizontalResolution = 300;
-                tgaImage.VerticalResolution = 300;
+                image.HorizontalResolution = 300;
+                image.VerticalResolution = 300;
 
-                // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Save the image as TIFF
-                tgaImage.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to export high‑resolution textures from TGA files for print‑ready PDFs, they can raise the DPI to 300 and save as TIFF.
- * 2. When a scientific imaging pipeline receives TGA scans at screen resolution and must provide 300 dpi TIFFs for journal submission, this code automates the conversion.
- * 3. When a legacy asset library contains 72 dpi TGA logos that must meet corporate branding guidelines requiring 300 dpi TIFFs, the snippet updates the resolution and format in one step.
- * 4. When an e‑commerce platform processes product images stored as TGA and needs TIFF files with printer‑quality DPI for catalog printing, the code performs the necessary transformation.
- * 5. When an archival system migrates old TGA artwork to a lossless TIFF format while preserving a higher DPI for future scaling, this example shows how to adjust the resolution before saving.
+ * 1. When you need to prepare a low‑resolution TGA asset for high‑quality printing by raising its DPI to 300 and saving it as a TIFF file.
+ * 2. When a game development pipeline requires converting legacy TGA textures to TIFF while standardizing the resolution for texture atlases.
+ * 3. When a medical imaging application must import TGA scans, adjust their pixel density, and store them in a lossless TIFF format for archival.
+ * 4. When an automated batch process must ensure all TGA graphics meet a 300 DPI specification before being used in a publishing workflow.
+ * 5. When a desktop utility needs to read a TGA file, modify its horizontal and vertical resolution, and output a TIFF compatible with Photoshop.
  */
