@@ -1,9 +1,9 @@
-// HOW-TO: Sharpen Indexed PNG With Convolution Filter While Preserving Palette In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Sharpen Kernel to Indexed PNG While Preserving Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,34 +22,69 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                // Preserve original palette (or generate a close palette)
-                var palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(raster, 256, Aspose.Imaging.PaletteMiningMethod.Histogram);
-
-                // Define a 3x3 sharpening kernel
-                double[,] kernel = new double[,]
+                Aspose.Imaging.IColorPalette originalPalette = null;
+                if (img is PngImage pngImg && pngImg.Palette != null)
                 {
-                    { 0, -1,  0 },
-                    { -1, 5, -1 },
-                    { 0, -1,  0 }
+                    originalPalette = pngImg.Palette;
+                }
+
+                Aspose.Imaging.RasterImage raster = img as Aspose.Imaging.RasterImage;
+                int width = raster.Width;
+                int height = raster.Height;
+                int[] pixels = raster.LoadArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height));
+
+                double[,] kernel = new double[,] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } };
+                int kSize = 3;
+                int kHalf = kSize / 2;
+                int[] result = new int[pixels.Length];
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        double a = 0, r = 0, g = 0, b = 0;
+                        for (int ky = 0; ky < kSize; ky++)
+                        {
+                            int py = y + ky - kHalf;
+                            if (py < 0 || py >= height) continue;
+                            for (int kx = 0; kx < kSize; kx++)
+                            {
+                                int px = x + kx - kHalf;
+                                if (px < 0 || px >= width) continue;
+                                double coeff = kernel[ky, kx];
+                                int srcPixel = pixels[py * width + px];
+                                a += ((srcPixel >> 24) & 0xFF) * coeff;
+                                r += ((srcPixel >> 16) & 0xFF) * coeff;
+                                g += ((srcPixel >> 8) & 0xFF) * coeff;
+                                b += (srcPixel & 0xFF) * coeff;
+                            }
+                        }
+                        int ai = Math.Clamp((int)Math.Round(a), 0, 255);
+                        int ri = Math.Clamp((int)Math.Round(r), 0, 255);
+                        int gi = Math.Clamp((int)Math.Round(g), 0, 255);
+                        int bi = Math.Clamp((int)Math.Round(b), 0, 255);
+                        result[y * width + x] = (ai << 24) | (ri << 16) | (gi << 8) | bi;
+                    }
+                }
+
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Apply convolution filter using the kernel
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
-
-                // Save as indexed PNG preserving the palette
-                PngOptions saveOptions = new PngOptions
+                if (originalPalette != null)
                 {
-                    ColorType = PngColorType.IndexedColor,
-                    Palette = palette,
-                    CompressionLevel = 9,
-                    Progressive = true
-                };
+                    options.Palette = originalPalette;
+                }
 
-                image.Save(outputPath, saveOptions);
+                using (Aspose.Imaging.Image outImg = Aspose.Imaging.Image.Create(options, width, height))
+                {
+                    Aspose.Imaging.RasterImage outRaster = (Aspose.Imaging.RasterImage)outImg;
+                    outRaster.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), result);
+                    outImg.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -61,9 +96,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen a PNG or GIF that uses an indexed color palette without altering the original colors.
- * 2. When you want to apply a custom 3×3 convolution kernel to an indexed image and keep the file size low by saving as an indexed PNG with compression.
- * 3. When processing legacy graphics that rely on a specific palette and require post‑processing such as sharpening before publishing on a website.
- * 4. When building a batch image‑processing tool that must maintain exact palette mapping after applying filters to PNG sprites.
- * 5. When generating high‑quality, progressive UI assets where the palette must stay consistent after applying a sharpening filter.
+ * 1. When you need to sharpen a low‑color PNG for a web UI without losing its original palette.
+ * 2. When converting legacy indexed PNG assets for a game and must keep exact color indices after applying a filter.
+ * 3. When performing batch image enhancement on PNG icons while ensuring the file size stays small by preserving the indexed palette.
+ * 4. When integrating custom convolution kernels into an ASP.NET image‑processing pipeline that works with palette‑based PNGs.
+ * 5. When debugging image‑processing code and want to verify that applying a kernel does not corrupt the color table of a PNG.
  */
