@@ -1,44 +1,62 @@
-// HOW-TO: Convert Specific DjVu Pages to Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 5 to 7 Into a Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\sample.djvu";
-            string outputPath = @"C:\Temp\output.tif";
+            string inputPath = "Input\\document.djvu";
+            string outputPath = "Output\\combined.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Configure TIFF save options for multi-page output
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Specify pages 5‑7 (zero‑based indexes 4,5,6)
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
+            int[] pageIndices = { 4, 5, 6 }; // pages 5‑7 (0‑based)
 
-                // Save selected pages as a single multi‑page TIFF file
-                djvuImage.Save(outputPath, tiffOptions);
+            string tempDir = Path.Combine(outputDir ?? "", "temp");
+            Directory.CreateDirectory(tempDir);
+
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            {
+                foreach (int idx in pageIndices)
+                {
+                    string tempPath = Path.Combine(tempDir, $"page{idx + 1}.tif");
+                    TiffOptions tiffOpts = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOpts.MultiPageOptions = new DjvuMultiPageOptions(idx);
+                    djvu.Save(tempPath, tiffOpts);
+                }
+            }
+
+            string firstTemp = Path.Combine(tempDir, $"page{pageIndices[0] + 1}.tif");
+            using (TiffImage combined = (TiffImage)Image.Load(firstTemp))
+            {
+                for (int i = 1; i < pageIndices.Length; i++)
+                {
+                    string tempPath = Path.Combine(tempDir, $"page{pageIndices[i] + 1}.tif");
+                    using (TiffImage pageImg = (TiffImage)Image.Load(tempPath))
+                    {
+                        combined.AddFrame(TiffFrame.CopyFrame(pageImg.ActiveFrame));
+                    }
+                }
+
+                combined.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
             }
         }
         catch (Exception ex)
@@ -50,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a range of pages from a DjVu document and archive them as a single TIFF file for printing or review.
- * 2. When a legal or archival system requires selected DjVu pages to be stored in a lossless, multi‑page TIFF format for compliance.
- * 3. When an application must programmatically convert scanned book sections (pages 5‑7) from DjVu to TIFF to integrate with existing TIFF‑based workflows.
- * 4. When you want to reduce file size by using Deflate compression while preserving multiple pages in one TIFF image.
- * 5. When automating batch processing of DjVu files to create multi‑page TIFFs for downstream image analysis or OCR pipelines.
+ * 1. When you need to extract pages 5‑7 from a DjVu document and bundle them into a single multipage TIFF for archival or printing.
+ * 2. When a legacy system only accepts TIFF files, you can convert selected DjVu pages to a combined TIFF to integrate the content without manual conversion.
+ * 3. When creating a searchable image archive, extracting specific DjVu pages and saving them as a multipage TIFF simplifies indexing and OCR processing.
+ * 4. When generating a compact preview for a legal case, converting the relevant DjVu pages into one TIFF file reduces file handling and sharing overhead.
+ * 5. When automating batch processing of scanned documents, this code lets you programmatically select DjVu pages and produce a multipage TIFF for downstream workflows such as compression or watermarking.
  */
