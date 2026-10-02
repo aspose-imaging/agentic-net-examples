@@ -1,62 +1,64 @@
-// HOW-TO: Generate JSON Kernel Configuration File for Custom Image Filters in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate JSON Kernel Configuration File for Image Filters in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
 
-namespace AsposeImagingKernelConfig
+namespace KernelConfigGenerator
 {
-    // Represents a kernel definition that can be loaded at runtime
-    public class KernelDefinition
+    public class KernelMatrix
     {
         public string Name { get; set; }
-        public double[] Matrix { get; set; }
+        public double[][] Matrix { get; set; }
+    }
+
+    public class Config
+    {
+        public List<KernelMatrix> Kernels { get; set; }
     }
 
     class Program
     {
         static void Main()
         {
-            // Hardcoded paths
-            string outputPath = @"C:\Temp\kernelConfig.json";
-
             try
             {
-                // Ensure the output directory exists
+                // Hardcoded output path
+                string outputPath = "config/kernels.json";
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Define custom kernels
-                var kernels = new List<KernelDefinition>
+                // Define custom kernel matrices
+                var config = new Config
                 {
-                    new KernelDefinition
+                    Kernels = new List<KernelMatrix>
                     {
-                        Name = "CustomSharpen3x3",
-                        Matrix = new double[]
+                        new KernelMatrix
                         {
-                            0, -1, 0,
-                            -1, 5, -1,
-                            0, -1, 0
-                        }
-                    },
-                    new KernelDefinition
-                    {
-                        Name = "CustomBlur5x5",
-                        Matrix = new double[]
+                            Name = "Sharpen",
+                            Matrix = new double[][]
+                            {
+                                new double[] { 0, -1, 0 },
+                                new double[] { -1, 5, -1 },
+                                new double[] { 0, -1, 0 }
+                            }
+                        },
+                        new KernelMatrix
                         {
-                            1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1
+                            Name = "EdgeDetect",
+                            Matrix = new double[][]
+                            {
+                                new double[] { -1, -1, -1 },
+                                new double[] { -1, 8, -1 },
+                                new double[] { -1, -1, -1 }
+                            }
                         }
                     }
                 };
 
-                // Serialize to JSON with indentation for readability
-                var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(kernels, jsonOptions);
-
-                // Write JSON to the output file
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(config, options);
                 File.WriteAllText(outputPath, json);
             }
             catch (Exception ex)
@@ -69,9 +71,9 @@ namespace AsposeImagingKernelConfig
 
 /*
  * Real-World Use Cases:
- * 1. When you need to define custom sharpening or blur kernels once and load them at runtime without recompiling the application.
- * 2. When you want to store image processing filter definitions in a portable JSON file that can be edited by non‑developers.
- * 3. When you are building a plugin system that lets end users add or modify convolution kernels without changing code.
- * 4. When you need to ensure the kernel configuration directory exists before writing the JSON file to avoid runtime errors.
- * 5. When you want to serialize multiple kernel matrices with readable indentation for easy debugging or version control.
+ * 1. When you need to supply custom sharpen and edge‑detect kernels to Aspose.Imaging at runtime without recompiling the application.
+ * 2. When you want to store image processing kernels in a portable JSON file that can be edited by non‑programmers.
+ * 3. When your application must load different convolution matrices based on user selection or configuration.
+ * 4. When you need to ensure the output directory exists before writing the kernel configuration for a CI/CD pipeline.
+ * 5. When you want to serialize a list of named double‑precision matrices to a formatted JSON file for easy debugging.
  */

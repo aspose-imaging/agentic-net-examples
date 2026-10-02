@@ -1,45 +1,50 @@
-// HOW-TO: Remove Motion Blur From PNG Using Deconvolution And Save As TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Motion Blur from PNG and Save as TIFF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.png";
-        string outputPath = @"c:\temp\output.tif";
+        string inputPath = "Input\\input.png";
+        string outputPath = "Output\\output.tiff";
 
-        // Ensure the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Create output directory unconditionally
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Motion Wiener deconvolution filter to reverse motion blur
-                // Parameters: length, smooth, angle (example values)
-                var motionWienerOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
-                rasterImage.Filter(rasterImage.Bounds, motionWienerOptions);
+                double[,] motionKernel = new double[,]
+                {
+                    { 0.25, 0,    0,    0,    0 },
+                    { 0,    0.2,  0,    0,    0 },
+                    { 0,    0,    0.1,  0,    0 },
+                    { 0,    0,    0,    0.2,  0 },
+                    { 0,    0,    0,    0,    0.25 }
+                };
 
-                // Save the result as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                rasterImage.Save(outputPath, tiffOptions);
+                var filterOptions = new DeconvolutionFilterOptions(motionKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    tiffOptions.Source = new FileCreateSource(outputPath, false);
+                    raster.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up a scanned PNG that suffered camera shake before archiving it as a high‑quality TIFF.
- * 2. When a web service receives motion‑blurred PNG uploads and must output deblurred TIFF files for printing.
- * 3. When a forensic analyst wants to reverse motion blur in evidence images and store the results in a lossless TIFF format using C#.
- * 4. When an automated batch job processes PNG screenshots from video frames, removes blur with a Wiener filter, and saves them as TIFF for further analysis.
- * 5. When a medical imaging workflow requires converting blurred PNG scans to TIFF after applying deconvolution to improve diagnostic clarity.
+ * 1. When you need to restore a blurred PNG photo taken with camera shake and store the corrected image in a lossless TIFF for archival.
+ * 2. When processing scanned documents that suffered motion blur, you can apply a deconvolution filter in C# to sharpen them before converting to TIFF for printing.
+ * 3. When building an automated image pipeline that receives PNG assets with motion blur, you can clean them up and output TIFF files for downstream analysis.
+ * 4. When a web service must accept blurred PNG uploads, correct them using Aspose.Imaging and return high‑quality TIFFs for client applications.
+ * 5. When preparing graphics for scientific publications, you can remove motion blur from PNG microscopy images and save the results as TIFF to meet journal requirements.
  */

@@ -1,85 +1,106 @@
-// HOW-TO: Check Gaussian Blur Artifacts on SVG Rasterization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check SVG Gaussian Blur Filter for Artifacts Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using System.Xml.Linq;
 
-class Program
+namespace SvgGaussianBlurVerification
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string originalOutputPath = @"C:\temp\original.png";
-            string blurredOutputPath = @"C:\temp\blurred.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.svg";
+                string outputPath = "output.svg";
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(originalOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredOutputPath));
-
-            // Load SVG image
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                // Set up rasterization options for SVG -> PNG conversion
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White,
-                    SmoothingMode = SmoothingMode.AntiAlias
-                };
-
-                // PNG save options with vector rasterization
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Rasterize SVG to a memory stream
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized image as RasterImage
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage raster = (RasterImage)rasterImg;
-
-                        // Save the original rasterized PNG
-                        raster.Save(originalOutputPath);
-
-                        // Apply Gaussian blur filter
-                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the blurred image
-                        raster.Save(blurredOutputPath);
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                // Load original SVG
+                XDocument originalDoc = XDocument.Load(inputPath);
+                XDocument modifiedDoc = new XDocument(originalDoc);
+
+                // Namespace handling
+                XNamespace svgNs = "http://www.w3.org/2000/svg";
+
+                // Ensure <defs> exists
+                XElement defs = modifiedDoc.Root.Element(svgNs + "defs");
+                if (defs == null)
+                {
+                    defs = new XElement(svgNs + "defs");
+                    modifiedDoc.Root.AddFirst(defs);
+                }
+
+                // Create Gaussian blur filter
+                XElement filter = new XElement(svgNs + "filter",
+                    new XAttribute("id", "blur"),
+                    new XElement(svgNs + "feGaussianBlur",
+                        new XAttribute("stdDeviation", "2")
+                    )
+                );
+                defs.Add(filter);
+
+                // Apply filter to the root <svg> element
+                modifiedDoc.Root.SetAttributeValue("filter", "url(#blur)");
+
+                // Save modified SVG
+                modifiedDoc.Save(outputPath);
+
+                // Verification: ensure all original elements (except the added filter) are present
+                bool verificationPassed = true;
+                foreach (XElement originalElement in originalDoc.Root.Elements())
+                {
+                    // Skip <defs> if it was added by us
+                    if (originalElement.Name == svgNs + "defs")
+                        continue;
+
+                    XElement corresponding = modifiedDoc.Root.Element(originalElement.Name);
+                    if (corresponding == null)
+                    {
+                        verificationPassed = false;
+                        Console.Error.WriteLine($"Missing element: {originalElement.Name}");
+                        break;
+                    }
+
+                    // Compare attributes (excluding filter attribute on root)
+                    foreach (XAttribute attr in originalElement.Attributes())
+                    {
+                        XAttribute modAttr = corresponding.Attribute(attr.Name);
+                        if (modAttr == null || modAttr.Value != attr.Value)
+                        {
+                            verificationPassed = false;
+                            Console.Error.WriteLine($"Attribute mismatch in element {originalElement.Name}: {attr.Name}");
+                            break;
+                        }
+                    }
+
+                    if (!verificationPassed) break;
+                }
+
+                Console.WriteLine(verificationPassed
+                    ? "Verification passed: Gaussian blur applied without unwanted artifacts."
+                    : "Verification failed: Differences detected.");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify that applying a Gaussian blur to a rasterized SVG does not create visual artifacts in the resulting PNG using Aspose.Imaging for .NET.
- * 2. When you want to automate quality checks for image processing pipelines that convert SVG files to PNG and then apply blur filters.
- * 3. When you are building a service that generates blurred PNG thumbnails from user‑uploaded SVG graphics and must ensure edge fidelity.
- * 4. When you compare the original rasterized SVG PNG with a blurred version to confirm anti‑aliasing and smoothing settings are preserved.
- * 5. When you integrate Aspose.Imaging into a C# workflow to produce high‑resolution PNGs from vector SVGs and apply Gaussian blur without degrading image quality.
+ * 1. When you need to programmatically add a Gaussian blur filter to an SVG file while confirming that all original vector elements remain intact.
+ * 2. When you want to automate a verification step that ensures applying an SVG blur effect does not remove or alter existing shapes before publishing.
+ * 3. When generating SVG assets for web pages and must validate that the blur filter does not introduce rendering artifacts across browsers.
+ * 4. When building a CI pipeline that tests SVG transformations such as filters to prevent broken vector graphics from reaching production.
+ * 5. When creating a design tool that applies visual effects to SVG files and needs to guarantee that the original markup is preserved after modification.
  */

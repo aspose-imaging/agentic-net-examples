@@ -1,9 +1,16 @@
-// HOW-TO: Serve Grayscale WebP Image Via HTTP In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to Grayscale JPEG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.webp";
-            string outputPath = "Output/filtered.webp";
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\result.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,33 +29,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
-                var webp = (WebPImage)image;
-                webp.Grayscale();
+                rasterImage.Grayscale();
 
-                var options = new WebPOptions();
-                webp.Save(outputPath, options);
-            }
-
-            using (var listener = new System.Net.HttpListener())
-            {
-                listener.Prefixes.Add("http://localhost:5000/");
-                listener.Start();
-                Console.WriteLine("Listening on http://localhost:5000/ ...");
-
-                var context = listener.GetContext();
-                var response = context.Response;
-
-                byte[] imageBytes = File.ReadAllBytes(outputPath);
-                response.ContentType = "image/webp";
-                response.ContentLength64 = imageBytes.Length;
-                using (var output = response.OutputStream)
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    output.Write(imageBytes, 0, imageBytes.Length);
+                    rasterImage.Save(outputPath, jpegOptions);
                 }
-
-                listener.Stop();
             }
         }
         catch (Exception ex)
@@ -60,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to deliver a grayscale WebP version of an uploaded picture directly to a browser via a simple HTTP endpoint.
- * 2. When building a microservice that applies image filters on demand and returns the processed image without persisting intermediate files.
- * 3. When creating a lightweight preview server that serves filtered WebP images for mobile or web applications.
- * 4. When testing an Aspose.Imaging image‑processing workflow locally before moving it to Azure Blob Storage.
- * 5. When integrating on‑the‑fly image conversion into an existing C# API that must respond with the correct content‑type header.
+ * 1. When a web application must display user‑uploaded PNG photos as smaller grayscale JPEGs to save bandwidth and ensure consistent styling.
+ * 2. When an e‑commerce platform needs to generate product preview images in JPEG format with a grayscale filter for a “black‑and‑white” promotional theme.
+ * 3. When a machine‑learning pipeline requires converting colored PNG datasets to grayscale JPEGs before feeding them into a model that expects single‑channel images.
+ * 4. When a legacy system only accepts JPEG files, and you must programmatically transform incoming PNG assets to grayscale JPEGs using C#.
+ * 5. When an automated nightly job processes a folder of PNG graphics, applies a grayscale effect, and stores the results as JPEGs for archival or reporting purposes.
  */

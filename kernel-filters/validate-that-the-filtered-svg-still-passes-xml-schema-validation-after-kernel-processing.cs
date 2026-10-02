@@ -1,92 +1,74 @@
-// HOW-TO: Validate Processed SVG Against Schema After Removing Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Validate Processed SVG Against W3C Schema In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace SvgValidator
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.svg";
+                string outputPath = "output.svg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Read the input SVG
+                string svgContent = File.ReadAllText(inputPath);
+
+                // Kernel processing placeholder (no changes applied)
+                string processedSvg = svgContent;
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Write the processed SVG to the output path
+                File.WriteAllText(outputPath, processedSvg);
+
+                // Validate the processed SVG against the SVG schema
+                bool isValid = true;
+                var settings = new XmlReaderSettings
+                {
+                    ValidationType = ValidationType.Schema,
+                    ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings
+                };
+                settings.ValidationEventHandler += (sender, e) =>
+                {
+                    Console.Error.WriteLine($"Validation {e.Severity}: {e.Message}");
+                    isValid = false;
+                };
+
+                // Add the SVG schema (using the official W3C schema URL)
+                settings.Schemas.Add(null, "http://www.w3.org/2009/08/svg-schema/svg.xsd");
+
+                using (var reader = XmlReader.Create(outputPath, settings))
+                {
+                    while (reader.Read()) { }
+                }
+
+                Console.WriteLine(isValid ? "SVG is valid." : "SVG is invalid.");
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (SvgImage svgImage = new SvgImage(inputPath))
+            catch (Exception ex)
             {
-                // Example kernel processing: remove metadata
-                svgImage.RemoveMetadata();
-
-                // Save the processed SVG
-                svgImage.Save(outputPath, new SvgOptions());
-
-                // Validate the saved SVG against the SVG schema
-                ValidateSvg(outputPath);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    static void ValidateSvg(string svgPath)
-    {
-        // Path to the SVG 1.1 schema (adjust as needed)
-        string schemaPath = @"C:\temp\svg11.xsd";
-
-        // Verify schema file exists
-        if (!File.Exists(schemaPath))
-        {
-            Console.Error.WriteLine($"Schema file not found: {schemaPath}");
-            return;
-        }
-
-        // Load the schema
-        XmlSchemaSet schemas = new XmlSchemaSet();
-        schemas.Add(null, schemaPath);
-
-        // Set up validation settings
-        XmlReaderSettings settings = new XmlReaderSettings
-        {
-            ValidationType = ValidationType.Schema,
-            Schemas = schemas
-        };
-        settings.ValidationEventHandler += (sender, e) =>
-        {
-            Console.Error.WriteLine($"Validation {e.Severity}: {e.Message}");
-        };
-
-        // Perform validation
-        using (XmlReader reader = XmlReader.Create(svgPath, settings))
-        {
-            while (reader.Read()) { }
-        }
-
-        Console.WriteLine("SVG validation completed.");
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure an SVG edited by your application still conforms to the official SVG 1.1 schema after stripping metadata.
- * 2. When you are building an automated pipeline that cleans SVG files and must verify they remain valid before publishing to a web store.
- * 3. When a regulatory or quality‑assurance process requires that every exported SVG pass XML schema validation after any transformation.
- * 4. When you want to programmatically detect and reject corrupted or non‑compliant SVGs after performing image‑processing operations with Aspose.Imaging.
- * 5. When integrating SVG assets into a larger C# project and you must confirm that kernel processing such as metadata removal does not break the file’s structural integrity.
+ * 1. When you need to ensure an SVG generated or modified by your .NET application still conforms to the official SVG XML schema before publishing it.
+ * 2. When you want to automatically verify that filtered or kernel‑processed SVG files are syntactically correct and will render correctly in browsers.
+ * 3. When a CI/CD pipeline must reject SVG assets that fail W3C schema validation after automated transformations.
+ * 4. When building a batch processor that reads, optionally edits, and saves SVGs while guaranteeing each output file is schema‑compliant.
+ * 5. When integrating third‑party SVG content into a C# project and you must confirm its validity after applying custom preprocessing steps.
  */

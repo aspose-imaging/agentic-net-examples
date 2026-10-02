@@ -1,9 +1,9 @@
-// HOW-TO: Apply Custom 3x3 Convolution Kernel to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Normalized 3x3 Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,7 +12,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,23 +20,18 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
                 double[,] kernel = new double[,]
                 {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
+                    { 1.0 / 16, 2.0 / 16, 1.0 / 16 },
+                    { 2.0 / 16, 4.0 / 16, 2.0 / 16 },
+                    { 1.0 / 16, 2.0 / 16, 1.0 / 16 }
                 };
-                double factor = 1.0;
-                int bias = 0;
 
-                var filterOptions = new ConvolutionFilterOptions(kernel, factor, bias);
-
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
                 raster.Filter(raster.Bounds, filterOptions);
 
                 var saveOptions = new PngOptions();
@@ -52,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance edges in a PNG image for computer‑vision preprocessing using Aspose.Imaging in C#.
- * 2. When you want to apply a custom sharpening filter to a PNG before uploading it to a web service.
- * 3. When you must detect outlines in scanned documents by applying a Laplacian kernel with Aspose.Imaging.
- * 4. When you need to programmatically process a batch of PNG files to highlight details for quality‑control inspection.
- * 5. When you are building a C# application that applies user‑defined convolution filters to images and saves the result as PNG.
+ * 1. When you need to smooth a PNG photo using a Gaussian blur implemented with a normalized 3x3 convolution kernel in C#.
+ * 2. When you want to reduce image noise in a PNG before further analysis by applying a custom filter with Aspose.Imaging.
+ * 3. When you must apply a consistent blur effect across all frames of a PNG sprite sheet using a programmable kernel.
+ * 4. When you are building a .NET service that automatically preprocesses uploaded PNGs with a standard convolution filter for machine‑learning pipelines.
+ * 5. When you need to demonstrate how to load, filter, and save PNG images using Aspose.Imaging’s RasterImage class in a tutorial or proof‑of‑concept project.
  */

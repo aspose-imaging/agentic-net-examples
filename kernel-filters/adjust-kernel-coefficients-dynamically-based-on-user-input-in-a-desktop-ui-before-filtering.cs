@@ -1,8 +1,8 @@
-// HOW-TO: Apply Sharpen Filter With User‑Defined Kernel Size And Sigma In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Custom Convolution Filter with User-Defined Kernel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,48 +10,59 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get dynamic kernel parameters from the user
-            Console.Write("Enter kernel size (odd integer): ");
-            string sizeStr = Console.ReadLine();
-            Console.Write("Enter sigma (positive number): ");
-            string sigmaStr = Console.ReadLine();
-
-            if (!int.TryParse(sizeStr, out int kernelSize) || kernelSize <= 0 || kernelSize % 2 == 0)
+            Console.WriteLine("Enter kernel size (odd integer):");
+            if (!int.TryParse(Console.ReadLine(), out int size) || size <= 0 || size % 2 == 0)
             {
                 Console.Error.WriteLine("Invalid kernel size.");
                 return;
             }
 
-            if (!double.TryParse(sigmaStr, out double sigma) || sigma <= 0)
+            double[,] kernel = new double[size, size];
+            Console.WriteLine($"Enter {size * size} kernel values row by row, separated by spaces:");
+            for (int i = 0; i < size; i++)
             {
-                Console.Error.WriteLine("Invalid sigma value.");
-                return;
+                string line = Console.ReadLine();
+                if (line == null)
+                {
+                    Console.Error.WriteLine("Insufficient input.");
+                    return;
+                }
+                string[] parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != size)
+                {
+                    Console.Error.WriteLine($"Expected {size} values for row {i + 1}.");
+                    return;
+                }
+                for (int j = 0; j < size; j++)
+                {
+                    if (!double.TryParse(parts[j], out double value))
+                    {
+                        Console.Error.WriteLine($"Invalid number at row {i + 1}, column {j + 1}.");
+                        return;
+                    }
+                    kernel[i, j] = value;
+                }
             }
 
-            // Load image, apply sharpen filter with user-defined parameters, and save
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(kernelSize, sigma));
-
-                PngOptions options = new PngOptions();
-                rasterImage.Save(outputPath, options);
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                image.Filter(image.Bounds, filterOptions);
+                image.Save(outputPath, new PngOptions());
             }
+
+            Console.WriteLine("Filtering completed successfully.");
         }
         catch (Exception ex)
         {
@@ -62,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to let users fine‑tune sharpening strength for PNG photos by entering a custom kernel size and sigma.
- * 2. When you want to programmatically enhance scanned documents in C# using Aspose.Imaging while giving end‑users control over the filter parameters.
- * 3. When building a photo‑editing tool that applies a sharpen filter only after validating user‑provided odd kernel dimensions and positive sigma values.
- * 4. When you must ensure the output directory exists and save the processed image with Aspose’s PngOptions after applying a user‑specified filter.
- * 5. When handling image processing errors gracefully in a C# console UI that prompts for filter settings before saving the sharpened result.
+ * 1. When a desktop application needs to let users fine‑tune a convolution filter by entering their own kernel values for PNG images.
+ * 2. When you want to apply a custom blur, sharpen, or edge‑detection effect to an image using Aspose.Imaging based on runtime user input.
+ * 3. When a photo‑editing tool must validate odd‑sized kernels and reject invalid entries before processing the image.
+ * 4. When you need to dynamically generate a filter matrix from a UI form and apply it to a raster image without hard‑coding the coefficients.
+ * 5. When an automated batch process requires reading a user‑specified kernel from the console to produce a filtered output PNG file.
  */

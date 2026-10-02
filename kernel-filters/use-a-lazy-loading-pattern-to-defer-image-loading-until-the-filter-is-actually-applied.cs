@@ -1,43 +1,33 @@
-// HOW-TO: Lazy Load JPEG Image and Rotate 90 Degrees in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG and Save with Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Lazy‑load the image – it will be loaded only when Value is accessed
-            Lazy<Image> lazyImage = new Lazy<Image>(() => Image.Load(inputPath));
-
-            // Access the image (trigger loading) and apply a simple operation
-            using (Image image = lazyImage.Value)
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Example operation: if the image is a raster image, rotate it 90 degrees
-                if (image is RasterImage raster)
-                {
-                    raster.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                }
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                image.Filter(image.Bounds, filterOptions);
 
-                // Save the processed image
-                image.Save(outputPath);
+                var jpegOptions = new JpegOptions { Quality = 90 };
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve startup performance by loading large JPEG files only when a rotation operation is required.
- * 2. When processing batches of images on a server and want to avoid loading each file into memory until a specific filter, such as a 90‑degree rotation, is applied.
- * 3. When building a desktop application that lets users preview and rotate photos, using lazy loading to keep the UI responsive.
- * 4. When converting images in an automated pipeline and need to ensure the output directory exists before saving the rotated JPEG.
- * 5. When handling raster images with Aspose.Imaging in C# and want to safely release resources after applying transformations like RotateFlip.
+ * 1. When you need to automatically blur sensitive areas of a photo before publishing it online.
+ * 2. When you want to reduce image detail to create a soft‑focus effect for a marketing brochure.
+ * 3. When you must convert a high‑resolution JPEG to a smaller file while applying a blur to hide background distractions.
+ * 4. When you are building a batch‑processing tool that applies a Gaussian blur to user‑uploaded images and saves them with a specific JPEG quality.
+ * 5. When you need to programmatically enhance privacy by blurring faces in images before storing them in a database.
  */

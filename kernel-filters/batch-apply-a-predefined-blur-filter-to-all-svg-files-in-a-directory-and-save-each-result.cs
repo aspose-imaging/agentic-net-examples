@@ -1,10 +1,10 @@
-// HOW-TO: Apply Blur Filter to All SVG Files and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Gaussian Blur to All SVG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,59 +12,58 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "C:\\InputSvgs";
-            string outputDir = "C:\\OutputSvgs";
+            string inputDirectory = "input_svgs";
+            string outputDirectory = "output_svgs";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
-
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
             foreach (string inputPath in svgFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output file path (PNG format)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string tempPngPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_temp.png");
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_blur.png");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
-                using (Image vectorImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Rasterize SVG to PNG in memory
-                    using (MemoryStream pngStream = new MemoryStream())
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                        rasterOptions.PageSize = vectorImage.Size;
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height
+                    };
 
-                        PngOptions pngOptions = new PngOptions();
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
 
-                        vectorImage.Save(pngStream, pngOptions);
-                        pngStream.Position = 0;
+                    svgImage.Save(tempPngPath, pngOptions);
+                }
 
-                        // Load the rasterized PNG
-                        using (Image rasterImg = Image.Load(pngStream))
-                        {
-                            RasterImage rasterImage = (RasterImage)rasterImg;
+                using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+                {
+                    var blurOptions = new GaussianBlurFilterOptions
+                    {
+                        Radius = 5,
+                        Sigma = 2.0
+                    };
 
-                            // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    raster.Filter(raster.Bounds, blurOptions);
+                    raster.Save(outputPath);
+                }
 
-                            // Save the blurred image as PNG
-                            rasterImage.Save(outputPath, new PngOptions());
-                        }
-                    }
+                // Optionally delete the temporary PNG
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
                 }
             }
         }
@@ -77,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur and convert a large collection of SVG icons to PNG for use in a web UI.
- * 2. When you want to preprocess vector graphics before uploading them to a content management system that only accepts raster images.
- * 3. When you are generating thumbnail previews of SVG diagrams with a privacy‑preserving blur effect for a reporting dashboard.
- * 4. When you must apply a consistent blur effect to all SVG assets in a design pipeline without manually editing each file.
- * 5. When you are creating a batch job that converts SVG logos to blurred PNGs for use in email newsletters that block vector formats.
+ * 1. When you need to automatically soften vector graphics before publishing them on a website, you can batch blur all SVG assets with this code.
+ * 2. When a design pipeline requires converting SVG icons to raster PNGs, applying a Gaussian blur, and saving the results for use in mobile apps, this script handles the whole process.
+ * 3. When you want to create a consistent blurred background effect for a set of SVG illustrations in a marketing campaign, the code processes every file in a folder without manual editing.
+ * 4. When generating preview thumbnails of SVG diagrams with a subtle blur to protect proprietary details, the program rasterizes, blurs, and stores the images automatically.
+ * 5. When integrating image preprocessing into a CI/CD workflow to ensure all SVG assets meet a blur standard before deployment, this batch routine can be invoked as part of the build script.
  */

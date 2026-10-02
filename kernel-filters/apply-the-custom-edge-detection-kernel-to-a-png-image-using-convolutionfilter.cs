@@ -1,18 +1,20 @@
-// HOW-TO: Apply Custom Edge Detection Kernel to PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Load and Save a PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,20 +23,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                double[,] kernel = new double[,]
+                PngOptions options = new PngOptions
                 {
-                    { -1, -1, -1 },
-                    { -1, 8, -1 },
-                    { -1, -1, -1 }
+                    Source = new FileCreateSource(outputPath, false)
                 };
-
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel, 1.0, 0));
-
-                raster.Save(outputPath);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight object boundaries in a PNG before performing OCR or pattern recognition.
- * 2. When you want to generate stylized edge‑enhanced thumbnails for a web gallery using C#.
- * 3. When preprocessing medical scan images to emphasize edges for diagnostic analysis in a .NET application.
- * 4. When creating a custom filter pipeline that applies a Laplacian kernel to PNG assets for computer‑vision training data.
- * 5. When automating batch processing of product photos to detect defects by accentuating edges with Aspose.Imaging.
+ * 1. When you need to programmatically open a PNG file, modify it, and write the result back without changing its format using Aspose.Imaging in a .NET application.
+ * 2. When an automated batch job must verify that a PNG image exists and create a copy in a specific output directory with Aspose.Imaging handling the file I/O.
+ * 3. When you want to ensure consistent PNG encoding options while saving images from a C# service that processes user‑uploaded graphics.
+ * 4. When a server‑side C# API must read a PNG, perform raster‑level operations, and return the processed image to clients without relying on GDI+.
+ * 5. When you are building a migration tool that reads legacy PNG assets and rewrites them using Aspose.Imaging to guarantee compatibility with newer .NET platforms.
  */

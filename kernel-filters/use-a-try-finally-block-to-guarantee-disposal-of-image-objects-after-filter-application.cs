@@ -1,31 +1,30 @@
-// HOW-TO: Apply Gaussian Blur to PNG and Ensure Proper Disposal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG and Save with Aspose Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output\\output.png";
+        string inputPath = "input/input.jpg";
+        string outputPath = "output/output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
-            {
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                rasterImage.Save(outputPath, new PngOptions());
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -37,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically soften a PNG image with a Gaussian blur while guaranteeing that the image objects are released correctly in a C# application.
- * 2. When building an automated batch process that applies a consistent blur effect to uploaded user photos and must avoid memory leaks by disposing of Aspose.Imaging objects.
- * 3. When integrating image preprocessing into a .NET web service that receives PNG files, applies a blur filter for privacy masking, and requires reliable cleanup of resources.
- * 4. When creating a desktop utility that sharpens screenshots by first blurring them for artistic effect, and you want to ensure the file handles are closed even if an error occurs.
- * 5. When developing a CI pipeline that validates image transformations, such as applying a Gaussian blur to test PNG assets, and you need deterministic disposal of the RasterImage to keep the build stable.
+ * 1. When you need to soften a photo before uploading to a website, you can apply a Gaussian blur filter to a JPEG using Aspose.Imaging in C#.
+ * 2. When automating batch processing of product images, you can load each JPEG, blur it to hide sensitive details, and save the result programmatically.
+ * 3. When creating a preview thumbnail that obscures faces for privacy compliance, you can apply a Gaussian blur to the original image and store the blurred version.
+ * 4. When integrating image editing into a desktop application, you can use Aspose.Imaging to load a user‑selected JPEG, apply a blur effect, and write the edited file back to disk.
+ * 5. When building a server‑side service that sanitizes uploaded images, you can apply a Gaussian blur filter to the JPEG and ensure resources are released with a try‑finally block.
  */

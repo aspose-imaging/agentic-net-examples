@@ -1,4 +1,4 @@
-// HOW-TO: Apply Gaussian Blur to PNG on Blob Upload with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to Uploaded Blob Image with Aspose.Imaging in Azure Function C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,40 +8,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
-        {
-            outputDir = ".";
-        }
-        Directory.CreateDirectory(outputDir);
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
         try
         {
-            // Load the image
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the processed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions
+                {
+                    Sigma = 2.0f,
+                    Size = 5
+                });
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -53,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur user‑uploaded PNG images stored in Azure Blob Storage using an Azure Function written in C#.
- * 2. When you want to protect sensitive details in screenshots by applying a Gaussian blur before saving them back to the cloud.
- * 3. When a content‑moderation pipeline requires a quick, server‑less way to soften image edges for downstream analysis.
- * 4. When you are building a photo‑editing web service that applies a Gaussian blur filter to every new image uploaded to a storage container.
- * 5. When you must integrate Aspose.Imaging’s GaussianBlurFilterOptions into a C# Azure Function to process images without installing additional native libraries.
+ * 1. When you need to automatically blur sensitive parts of photos uploaded to Azure Blob storage before they are served to users.
+ * 2. When you want to create a serverless image‑processing pipeline that applies a Gaussian blur to JPEG or PNG files as soon as they are added to a container.
+ * 3. When you must reduce visual detail of product images for privacy compliance while keeping the original dimensions using Aspose.Imaging in a C# Azure Function.
+ * 4. When you are building a thumbnail generation service that adds a soft blur effect to improve UI aesthetics for images stored in Azure.
+ * 5. When you require a scalable solution to preprocess large batches of uploaded images with a configurable sigma and kernel size without managing dedicated servers.
  */

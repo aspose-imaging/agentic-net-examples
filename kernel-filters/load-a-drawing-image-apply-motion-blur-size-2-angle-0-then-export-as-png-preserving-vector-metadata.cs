@@ -1,47 +1,51 @@
-// HOW-TO: Apply Motion Blur to PNG and Preserve Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur to Drawing and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.drawing";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (Image srcImage = Image.Load(inputPath))
             {
-                // Apply motion blur (size 2, angle 0) if the image is raster
-                if (image is RasterImage rasterImage)
-                {
-                    // MotionWienerFilterOptions can be used to simulate motion blur
-                    rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(2, 1.0, 0.0));
-                }
+                int width = srcImage.Width;
+                int height = srcImage.Height;
 
-                // Prepare PNG save options (metadata is preserved by default)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the processed image as PNG
-                using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
+                PngOptions pngOptions = new PngOptions
                 {
-                    image.Save(outStream, pngOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.DrawImage(srcImage, new Aspose.Imaging.Rectangle(0, 0, width, height));
+
+                    double[,] kernel = ConvolutionFilter.GetBlurMotion(2, 0);
+                    var filterOptions = new ConvolutionFilterOptions(kernel);
+                    canvas.Filter(canvas.Bounds, filterOptions);
+
+                    canvas.Save();
                 }
             }
         }
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a subtle motion‑blur effect to a PNG drawing while keeping its original vector metadata intact for later editing.
- * 2. When an automated graphics pipeline must process user‑uploaded PNG illustrations, apply a consistent blur filter, and output files that remain compatible with vector‑aware applications.
- * 3. When a desktop application generates preview images of technical diagrams and requires the blur to simulate motion without stripping embedded metadata such as DPI or color profile.
- * 4. When a batch‑processing script has to enhance a collection of rasterized drawings with a fixed blur size and angle before archiving them as PNGs that retain their source metadata.
- * 5. When integrating Aspose.Imaging into a C# service that transforms PNG assets for web display, ensuring the motion blur is applied and the images still carry their original metadata for SEO or accessibility purposes.
+ * 1. When you need to add a subtle motion‑blur effect to a vector drawing before converting it to a web‑friendly PNG.
+ * 2. When you must preserve the original drawing’s dimensions while rasterizing it for thumbnail generation.
+ * 3. When an automated pipeline requires converting proprietary .drawing files to PNG with a consistent blur filter applied.
+ * 4. When you want to create a PNG preview of a CAD or illustration file with a fixed blur to hide details.
+ * 5. When you are building a reporting tool that exports vector graphics as PNGs with a motion‑blur watermark for branding.
  */

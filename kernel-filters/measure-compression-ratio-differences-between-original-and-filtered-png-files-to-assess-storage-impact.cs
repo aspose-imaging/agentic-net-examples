@@ -1,88 +1,67 @@
-// HOW-TO: Compare PNG Filter Types Compression Ratio In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Compare Original and Filtered PNG File Sizes and Compression Ratio in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using System.Collections.Generic;
 
-class Program
+namespace CompressionRatioAnalyzer
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.png";
-            string outputDir = @"C:\temp\output\";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths
+                string originalDir = @"C:\Data\OriginalPNGs";
+                string filteredDir = @"C:\Data\FilteredPNGs";
+                string reportPath = @"C:\Data\CompressionReport.txt";
 
-            // Ensure output directory exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDir));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            // Get original file size
-            long originalSize = new FileInfo(inputPath).Length;
+                var reportLines = new List<string>();
+                reportLines.Add("File,OriginalSize,FilteredSize,CompressionRatio");
 
-            // Define filter types to test
-            PngFilterType[] filterTypes = new PngFilterType[]
-            {
-                PngFilterType.None,
-                PngFilterType.Up,
-                PngFilterType.Sub,
-                PngFilterType.Paeth,
-                PngFilterType.Avg,
-                PngFilterType.Adaptive
-            };
-
-            foreach (PngFilterType filterType in filterTypes)
-            {
-                // Load the original image
-                using (Image image = Image.Load(inputPath))
+                var originalFiles = Directory.GetFiles(originalDir, "*.png");
+                foreach (var originalPath in originalFiles)
                 {
-                    // Configure PNG options with the current filter
-                    PngOptions options = new PngOptions
+                    if (!File.Exists(originalPath))
                     {
-                        FilterType = filterType,
-                        CompressionLevel = 9, // maximum compression
-                        Progressive = true   // optional, enables progressive loading
-                    };
+                        Console.Error.WriteLine($"File not found: {originalPath}");
+                        return;
+                    }
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDir, $"sample_{filterType}.png");
+                    string fileName = Path.GetFileName(originalPath);
+                    string filteredPath = Path.Combine(filteredDir, fileName);
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    if (!File.Exists(filteredPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {filteredPath}");
+                        return;
+                    }
 
-                    // Save the image with the specified options
-                    image.Save(outputPath, options);
+                    long originalSize = new FileInfo(originalPath).Length;
+                    long filteredSize = new FileInfo(filteredPath).Length;
+                    double ratio = filteredSize == 0 ? 0 : (double)originalSize / filteredSize;
 
-                    // Measure the size of the filtered PNG
-                    long filteredSize = new FileInfo(outputPath).Length;
-
-                    // Compute compression ratio relative to the original
-                    double ratio = (double)filteredSize / originalSize;
-
-                    Console.WriteLine($"Filter: {filterType}, Size: {filteredSize} bytes, Ratio: {ratio:F3}");
+                    reportLines.Add($"{fileName},{originalSize},{filteredSize},{ratio:F3}");
                 }
+
+                File.WriteAllLines(reportPath, reportLines);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to determine which PNG filter yields the smallest file size for archival storage.
- * 2. When you want to evaluate the impact of different PNG filters on bandwidth usage for web delivery.
- * 3. When you are optimizing image assets for mobile apps and must choose the most space‑efficient filter.
- * 4. When you need to generate a report of compression savings after applying various PNG filters in a batch process.
- * 5. When you are comparing progressive versus non‑progressive PNG outputs to decide on the best format for lazy loading.
+ * 1. When you need to evaluate how much storage space a PNG filtering algorithm saves across a batch of images, you can use this code to calculate original and filtered file sizes and their compression ratios.
+ * 2. When generating a quality‑control report for an image‑processing pipeline, the script provides a CSV‑style list of each PNG’s size before and after applying filters.
+ * 3. When comparing different image‑optimisation settings to choose the most efficient one, the program quantifies the impact by computing the ratio of original to filtered file sizes.
+ * 4. When auditing archival storage to ensure that compressed PNGs meet size‑reduction targets, this utility quickly identifies files that do not achieve the desired compression.
+ * 5. When automating a CI/CD build that includes image assets, the code can be integrated to verify that post‑processing steps do not increase PNG file size beyond acceptable limits.
  */

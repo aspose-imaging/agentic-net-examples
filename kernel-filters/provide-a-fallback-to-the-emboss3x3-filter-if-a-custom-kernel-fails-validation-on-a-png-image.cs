@@ -1,4 +1,4 @@
-// HOW-TO: Apply Custom Convolution Kernel with Emboss Fallback to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Kernel with Emboss Fallback on PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,50 +9,35 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output\\output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-
-                double[,] customKernel = new double[,]
-                {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
-                };
-
-                bool useFallback = false;
-
+                double[,] customKernel = new double[,] { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } };
                 try
                 {
-                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
-                    raster.Filter(raster.Bounds, convOptions);
+                    var customOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
+                    raster.Filter(raster.Bounds, customOptions);
                 }
-                catch (Exception)
+                catch
                 {
-                    useFallback = true;
-                }
-
-                if (useFallback)
-                {
-                    var fallbackOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
                         Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-                    raster.Filter(raster.Bounds, fallbackOptions);
+                    raster.Filter(raster.Bounds, embossOptions);
                 }
 
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen a PNG image using a custom convolution kernel but want a safe fallback if the kernel is invalid.
- * 2. When processing user‑uploaded PNG files and must ensure the filter operation never crashes the application.
- * 3. When you want to automatically apply an emboss effect to images when a custom filter cannot be applied.
- * 4. When building a batch image‑processing pipeline that validates kernels at runtime and substitutes a default filter.
- * 5. When you need to save the filtered result back to PNG format while handling missing files and directory creation.
+ * 1. When you need to enhance a PNG image using a specific convolution filter but want a safe fallback if the filter is invalid.
+ * 2. When processing user‑uploaded PNGs and must ensure the image is still saved even if a custom kernel fails validation.
+ * 3. When building an automated image‑processing pipeline in C# that applies custom sharpening or edge detection and requires a default emboss effect as a backup.
+ * 4. When creating a desktop application that lets developers experiment with different convolution matrices on PNG files without crashing the app.
+ * 5. When integrating Aspose.Imaging into a .NET service that must gracefully handle malformed filter definitions while preserving the original image format.
  */

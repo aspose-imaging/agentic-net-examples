@@ -1,41 +1,37 @@
-// HOW-TO: Apply 10‑Pixel Motion Blur to BMP and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 10 Pixel Motion Blur to BMP and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.jpg";
+        string inputPath = "Input\\sample.bmp";
+        string outputPath = "Output\\result.jpg";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a motion blur filter with length 10 pixels, smooth factor 1.0, angle 90 degrees
-                rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(10, 0);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Save the result as JPEG
-                rasterImage.Save(outputPath, new JpegOptions());
+                raster.Filter(raster.Bounds, filterOptions);
+
+                JpegOptions jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a realistic motion‑blur effect to a scanned BMP diagram before delivering it as a compressed JPEG to a web client.
- * 2. When converting legacy BMP assets from a desktop application into JPEG thumbnails while applying a 10‑pixel vertical blur to hide sensitive details.
- * 3. When preprocessing product photos stored as BMP files by adding motion blur to simulate movement and then saving them as JPEG for faster page loads.
- * 4. When automating a batch job that reads BMP screenshots, applies a consistent motion‑blur filter, and outputs JPEG files for archival storage.
- * 5. When integrating Aspose.Imaging in a C# service that must transform BMP images with a specific blur length into JPEG format for email attachments.
+ * 1. When you need to add a realistic motion effect to a scanned BMP photograph before compressing it to JPEG for web publishing.
+ * 2. When you want to preprocess BMP assets in a game pipeline by blurring motion to reduce visual noise and then convert them to JPEG for faster loading.
+ * 3. When an automated batch job must apply a 10‑pixel motion blur to a collection of BMP images and store the results as JPEG files for archival.
+ * 4. When integrating Aspose.Imaging into a C# service that receives BMP uploads, applies motion blur for privacy or artistic purposes, and returns JPEG thumbnails.
+ * 5. When converting high‑resolution BMP scans to JPEG while adding a motion blur filter to simulate camera movement in a photo‑editing application.
  */

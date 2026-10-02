@@ -2,39 +2,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\input.bmp";
+        string outputPath = "Output\\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Failed to load as RasterImage.");
+                    return;
+                }
 
-                // Apply Gaussian blur with kernel size 3 (odd) and sigma 1.5
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(3, 1.5));
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions
+                {
+                    Radius = 1,
+                    Sigma = 1.5f
+                };
 
-                // Save the result as PNG
-                rasterImage.Save(outputPath);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften the edges of a legacy BMP graphic before converting it to a web‑friendly PNG format.
- * 2. When a desktop application must automatically apply a subtle Gaussian blur (sigma 1.5) to scanned BMP documents for privacy before archiving them as PNG files.
- * 3. When a batch‑processing tool has to enhance BMP screenshots with a blur effect and store the results in lossless PNG for further analysis.
- * 4. When integrating Aspose.Imaging in a C# service that receives BMP uploads, applies a Gaussian blur filter, and returns the processed image as PNG to the client.
- * 5. When preparing BMP assets for a mobile app, you want to apply a consistent blur and convert them to PNG to reduce visual noise and improve rendering speed.
+ * 1. When you need to soften the edges of a scanned BMP photograph before converting it to a web‑friendly PNG format using C#.
+ * 2. When you want to preprocess legacy BMP assets with a 1.5 sigma Gaussian blur for consistent visual style in a .NET application.
+ * 3. When you are building an automated pipeline that applies a subtle blur to BMP screenshots and stores the results as lossless PNG files.
+ * 4. When you must reduce high‑frequency noise in BMP medical images before archiving them as PNGs with Aspose.Imaging in C#.
+ * 5. When you are creating thumbnail previews of BMP graphics and need a quick Gaussian blur effect before saving them as PNGs for faster loading.
  */

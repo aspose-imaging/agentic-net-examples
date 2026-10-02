@@ -1,86 +1,54 @@
-// HOW-TO: Download SVG From API, Apply Gaussian Blur, and Upload PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to SVG from REST API and Post Result in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Net.Http;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using System.Text;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "downloaded.svg";
-            string tempPngPath = "temp.png";
-            string outputPath = "blurred.png";
+            // Hardcoded paths (required by safety rules)
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Download SVG from REST API
-            using (var httpClient = new HttpClient())
-            {
-                var downloadResponse = httpClient.GetAsync("https://example.com/api/svg").Result;
-                if (!downloadResponse.IsSuccessStatusCode)
-                {
-                    Console.Error.WriteLine($"Failed to download SVG: {downloadResponse.StatusCode}");
-                    return;
-                }
-
-                var svgBytes = downloadResponse.Content.ReadAsByteArrayAsync().Result;
-                File.WriteAllBytes(inputPath, svgBytes);
-            }
-
-            // Verify input file exists
+            // Input path check (exactly as specified)
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load SVG and rasterize to PNG
-            using (Image svgImg = Image.Load(inputPath))
+            // Ensure output directory exists (unconditional)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Retrieve SVG from REST API
+            using var client = new HttpClient();
+            string getUrl = "https://example.com/api/svg"; // replace with actual endpoint
+            var getResponse = client.GetAsync(getUrl).Result;
+            if (!getResponse.IsSuccessStatusCode)
             {
-                var svgImage = (SvgImage)svgImg;
-
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                svgImage.Save(tempPngPath, pngOptions);
+                Console.Error.WriteLine($"Failed to retrieve SVG: {getResponse.StatusCode}");
+                return;
             }
+            string svgContent = getResponse.Content.ReadAsStringAsync().Result;
 
-            // Load rasterized PNG, apply Gaussian blur, and save result
-            using (Image rasterImg = Image.Load(tempPngPath))
+            // Apply Gaussian blur to the SVG
+            string blurredSvg = ApplyGaussianBlur(svgContent, 5);
+
+            // Save blurred SVG to output path (optional)
+            File.WriteAllText(outputPath, blurredSvg);
+
+            // Post blurred SVG back to REST API
+            string postUrl = "https://example.com/api/svg"; // replace with actual endpoint
+            var postContent = new StringContent(blurredSvg, Encoding.UTF8, "image/svg+xml");
+            var postResponse = client.PostAsync(postUrl, postContent).Result;
+            if (!postResponse.IsSuccessStatusCode)
             {
-                var raster = (RasterImage)rasterImg;
-
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                raster.Save(outputPath);
-            }
-
-            // Post the blurred image back to the API
-            using (var httpClient = new HttpClient())
-            {
-                var content = new ByteArrayContent(File.ReadAllBytes(outputPath));
-                var uploadResponse = httpClient.PostAsync("https://example.com/api/upload", content).Result;
-                if (!uploadResponse.IsSuccessStatusCode)
-                {
-                    Console.Error.WriteLine($"Failed to upload image: {uploadResponse.StatusCode}");
-                }
+                Console.Error.WriteLine($"Failed to post blurred SVG: {postResponse.StatusCode}");
+                return;
             }
         }
         catch (Exception ex)
@@ -88,13 +56,58 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    static string ApplyGaussianBlur(string svg, double stdDeviation)
+    {
+        const string filterId = "blurFilter";
+        string filterDef = $"<filter id=\"{filterId}\"><feGaussianBlur stdDeviation=\"{stdDeviation}\"/></filter>";
+
+        // Insert filter definition into <defs> or create a new <defs>
+        if (svg.Contains("<defs"))
+        {
+            int defsClose = svg.IndexOf("</defs>", StringComparison.Ordinal);
+            if (defsClose >= 0)
+            {
+                svg = svg.Insert(defsClose, filterDef);
+            }
+            else
+            {
+                int svgClose = svg.IndexOf("</svg>", StringComparison.Ordinal);
+                if (svgClose >= 0)
+                {
+                    svg = svg.Insert(svgClose, $"<defs>{filterDef}</defs>");
+                }
+            }
+        }
+        else
+        {
+            int svgClose = svg.IndexOf("</svg>", StringComparison.Ordinal);
+            if (svgClose >= 0)
+            {
+                svg = svg.Insert(svgClose, $"<defs>{filterDef}</defs>");
+            }
+        }
+
+        // Add filter attribute to the root <svg> element if not already present
+        int svgTagStart = svg.IndexOf("<svg", StringComparison.Ordinal);
+        if (svgTagStart >= 0)
+        {
+            int svgTagEnd = svg.IndexOf('>', svgTagStart);
+            if (svgTagEnd > 0 && !svg.Substring(svgTagStart, svgTagEnd - svgTagStart).Contains("filter="))
+            {
+                svg = svg.Insert(svgTagEnd, $" filter=\"url(#{filterId})\"");
+            }
+        }
+
+        return svg;
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to fetch vector graphics from a web service, rasterize them, and add a soft blur before storing them as PNG files.
- * 2. When an e‑commerce platform wants to generate blurred product thumbnails on the fly by retrieving SVG logos via REST and returning blurred PNGs.
- * 3. When a reporting tool requires blurred background images for PDFs and must download SVG assets, apply Gaussian blur, and upload the processed PNGs to the same API.
- * 4. When a mobile app backend processes user‑submitted SVG icons, adds a Gaussian blur for privacy, and sends the blurred PNG back to the server.
- * 5. When an automated CI pipeline validates image processing by downloading SVG assets, applying a blur filter, and posting the resulting PNG to a test endpoint.
+ * 1. When a web service needs to automatically soften vector graphics before storing them, a developer can fetch the SVG, blur it, and send it back using C#.
+ * 2. When generating thumbnail previews for an online editor, applying a Gaussian blur to the original SVG via a REST call can create a stylized preview.
+ * 3. When integrating a CI pipeline that validates image assets, the code can retrieve SVGs, apply a blur filter, and upload the processed version for further testing.
+ * 4. When building a microservice that sanitizes user‑uploaded SVGs by adding a blur effect, this snippet shows how to pull the file, process it, and return it via HTTP.
+ * 5. When creating a batch job that enhances branding assets with a subtle blur before publishing, the example demonstrates the end‑to‑end C# workflow with HTTP GET/POST.
  */

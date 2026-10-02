@@ -1,8 +1,9 @@
-// HOW-TO: Process Large Batch of High‑Resolution PNGs Without Out‑of‑Memory Errors in C# (Aspose.Imaging for .NET)
+// HOW-TO: Process Large PNG Batch With OutOfMemory Handling In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,12 +11,10 @@ class Program
     {
         try
         {
-            // Define base, input, and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,42 +22,44 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
-                // Verify the input file exists
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output path
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
-
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                try
                 {
-                    // Set a memory limit to avoid out‑of‑memory issues
-                    var saveOptions = new PngOptions
+                    using (Image image = Image.Load(inputPath))
                     {
-                        BufferSizeHint = 100 // limit internal buffers to 100 MB
-                    };
-
-                    // Save the image with the specified options
-                    image.Save(outputPath, saveOptions);
+                        var options = new PngOptions
+                        {
+                            BufferSizeHint = 1024 * 1024
+                        };
+                        image.Save(outputPath, options);
+                    }
+                }
+                catch (OutOfMemoryException)
+                {
+                    Console.Error.WriteLine($"Out of memory processing file: {inputPath}. Skipping.");
+                    GC.Collect();
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error processing file {inputPath}: {ex.Message}");
                 }
             }
         }
@@ -71,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must resize or re‑encode thousands of 8K PNG photographs without crashing due to memory constraints.
- * 2. When an automated server process needs to generate thumbnails from a large collection of high‑resolution PNG assets while staying within limited RAM.
- * 3. When a desktop tool processes user‑uploaded PNG scans in batch and must prevent OutOfMemoryException on machines with modest memory.
- * 4. When a background service converts raw PNG files to optimized PNGs for web delivery and must limit buffer usage to avoid performance degradation.
- * 5. When a migration script moves PNG images between directories and applies Aspose.Imaging options to safely handle very large files.
+ * 1. When you need to convert or re‑save thousands of high‑resolution PNG images on a server without crashing due to memory limits.
+ * 2. When an automated image‑processing pipeline must skip oversized PNG files that exceed available RAM and continue processing the rest.
+ * 3. When you want to apply Aspose.Imaging’s PNG options such as BufferSizeHint to improve streaming performance for large images.
+ * 4. When a desktop application processes user‑uploaded PNG photos and must gracefully recover from OutOfMemoryException.
+ * 5. When a scheduled job generates thumbnails from a massive PNG collection and must free memory after each file to avoid leaks.
  */

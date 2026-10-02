@@ -3,17 +3,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,20 +23,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+                image.Resize(newWidth, newHeight);
 
-                int newWidth = raster.Width / 2;
-                int newHeight = raster.Height / 2;
-                raster.Resize(newWidth, newHeight);
+                image.Filter(image.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-                PngOptions pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller, stylized thumbnails of PNG graphics for a web gallery, you can resize the image and add an emboss effect in a single C# routine.
- * 2. When preparing product images for a mobile app, developers may shrink the original PNG to half its dimensions and apply an emboss filter to enhance visual depth without increasing file size.
- * 3. When creating printable mock‑ups that require a subtle 3‑D look, you can use Aspose.Imaging in C# to downscale a PNG and automatically emboss it before saving.
- * 4. When optimizing assets for an e‑learning platform, you might need to reduce PNG resolution and add a texture‑like emboss effect to improve readability on low‑resolution screens.
- * 5. When building an automated image‑processing pipeline that adds artistic effects, the code lets you batch‑process PNG files by resizing them and applying the Emboss3x3 convolution filter in C#.
+ * 1. When you need to generate smaller, stylized thumbnails of PNG photos for a web gallery, you can resize them and add an emboss effect with Aspose.Imaging in C#.
+ * 2. When preparing product images for an e‑commerce site, you may want to halve the resolution to reduce load time and give a subtle 3‑D look by applying the Emboss3x3 filter.
+ * 3. When creating printable assets that require a consistent size and artistic edge, developers can programmatically shrink PNG files and emboss them before saving.
+ * 4. When automating batch processing of user‑uploaded PNGs, you can use this code to standardize dimensions and enhance visual depth without manual editing.
+ * 5. When building a C# desktop application that previews images with a classic embossed style, the routine resizes the image and applies the filter in real time.
  */

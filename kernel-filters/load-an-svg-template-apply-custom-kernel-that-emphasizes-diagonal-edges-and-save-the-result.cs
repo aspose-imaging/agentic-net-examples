@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -12,7 +14,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output\\result.png";
+            string outputPath = "output/result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,40 +24,35 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                using (MemoryStream ms = new MemoryStream())
+                string tempPath = Path.Combine(Path.GetTempPath(), "tempRaster.png");
+
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Rasterize SVG to PNG in memory
-                    PngOptions pngOptions = new PngOptions();
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        PageSize = vectorImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    vectorImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImg;
-
-                        // Custom kernel emphasizing diagonal edges
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, 0, 1 },
-                            {  0, 0, 0 },
-                            {  1, 0,-1 }
-                        };
-
-                        var convOptions = new ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-                        // Save the filtered raster image
-                        rasterImage.Save(outputPath, new PngOptions());
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
                     }
+                };
+                svgImage.Save(tempPath, pngOptions);
+
+                using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+                {
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, 0, 1 },
+                        { 0, 0, 0 },
+                        { 1, 0, -1 }
+                    };
+
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                    raster.Save(outputPath, new PngOptions());
                 }
+
+                try { File.Delete(tempPath); } catch { }
             }
         }
         catch (Exception ex)
@@ -67,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector logo (SVG) into a raster PNG with a diagonal edge‑highlight effect for use in UI icons.
- * 2. When preprocessing SVG diagrams for a computer‑vision pipeline that requires edge‑enhanced raster images.
- * 3. When generating stylized thumbnails of SVG illustrations where diagonal edges should be emphasized for a graphic design effect.
- * 4. When creating printable assets that need a custom convolution filter applied after rasterizing SVG to PNG to improve visual contrast.
- * 5. When automating batch processing of SVG files to produce PNGs with a specific edge‑detect kernel for machine‑learning training data.
+ * 1. When you need to convert a vector SVG logo into a raster PNG while highlighting diagonal edges for a stylized web banner.
+ * 2. When you want to preprocess SVG illustrations with a custom convolution kernel before embedding them in a PDF report.
+ * 3. When you must generate PNG thumbnails of SVG diagrams that emphasize diagonal lines for better visual contrast in a UI gallery.
+ * 4. When you are building an automated pipeline that applies edge‑enhancement to SVG assets and stores the results as PNG files on a server.
+ * 5. When you require a C# solution to rasterize SVG files, apply a custom filter for edge detection, and save the processed images for machine‑learning training data.
  */

@@ -1,41 +1,36 @@
-// HOW-TO: How To Compare Central Pixel Values Before And After Edge Detection In C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare Center Pixel Before and After Edge Detection on PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.png";
-            string outputPath = "output\\sample_edge.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int width = raster.Width;
+                int height = raster.Height;
+                int centerX = width / 2;
+                int centerY = height / 2;
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
+                var region = new Rectangle(centerX - 1, centerY - 1, 3, 3);
+                int[] originalPixels = raster.LoadArgb32Pixels(region);
+                int beforePixel = originalPixels[4];
 
-                // Determine central pixel coordinates
-                int centerX = raster.Width / 2;
-                int centerY = raster.Height / 2;
-                Rectangle centerRect = new Rectangle(centerX, centerY, 1, 1);
-
-                // Read central pixel before filtering
-                int[] beforePixels = raster.LoadArgb32Pixels(centerRect);
-
-                // Edge‑detection kernel (simple Laplacian)
                 double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
@@ -43,28 +38,45 @@ class Program
                     { -1, -1, -1 }
                 };
 
-                // Apply the convolution filter
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Read central pixel after filtering
-                int[] afterPixels = raster.LoadArgb32Pixels(centerRect);
-
-                // Log the difference
-                if (beforePixels[0] != afterPixels[0])
+                double sumA = 0, sumR = 0, sumG = 0, sumB = 0;
+                for (int ky = 0; ky < 3; ky++)
                 {
-                    Console.WriteLine($"Central pixel changed from 0x{beforePixels[0]:X8} to 0x{afterPixels[0]:X8}");
-                }
-                else
-                {
-                    Console.WriteLine($"Central pixel unchanged: 0x{beforePixels[0]:X8}");
+                    for (int kx = 0; kx < 3; kx++)
+                    {
+                        int srcIdx = ky * 3 + kx;
+                        int argb = originalPixels[srcIdx];
+                        double coeff = kernel[ky, kx];
+
+                        byte a = (byte)((argb >> 24) & 0xFF);
+                        byte r = (byte)((argb >> 16) & 0xFF);
+                        byte g = (byte)((argb >> 8) & 0xFF);
+                        byte b = (byte)(argb & 0xFF);
+
+                        sumA += coeff * a;
+                        sumR += coeff * r;
+                        sumG += coeff * g;
+                        sumB += coeff * b;
+                    }
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int aC = (int)Math.Round(sumA);
+                int rC = (int)Math.Round(sumR);
+                int gC = (int)Math.Round(sumG);
+                int bC = (int)Math.Round(sumB);
 
-                // Save the filtered image as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                aC = Math.Max(0, Math.Min(255, aC));
+                rC = Math.Max(0, Math.Min(255, rC));
+                gC = Math.Max(0, Math.Min(255, gC));
+                bC = Math.Max(0, Math.Min(255, bC));
+
+                int afterPixel = (aC << 24) | (rC << 16) | (gC << 8) | bC;
+
+                Console.WriteLine($"Central pixel before: 0x{beforePixel:X8}");
+                Console.WriteLine($"Central pixel after: 0x{afterPixel:X8}");
+
+                originalPixels[4] = afterPixel;
+                raster.SaveArgb32Pixels(region, originalPixels);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -76,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify that an edge‑detection filter actually modifies a PNG image by checking the central pixel value in a C# program.
- * 2. When debugging a computer‑vision pipeline and you want to log pixel‑level changes after applying a convolution kernel.
- * 3. When creating automated unit tests to ensure a custom Laplacian filter produces the expected result on sample images.
- * 4. When generating a quality‑control report that highlights differences between the original and processed PNG files in a .NET imaging workflow.
- * 5. When building a diagnostic tool that detects the presence of edges by comparing before‑and‑after pixel values of the image’s center.
+ * 1. Use this code to verify that an edge‑detection filter alters the intensity of the central pixel in a PNG image.
+ * 2. Apply it to log pixel‑level differences for debugging image‑processing pipelines in a C# application.
+ * 3. Employ the routine in automated tests that compare original and filtered images for quality assurance.
+ * 4. Extract a 3×3 region around the image center and apply a custom convolution kernel for scientific analysis.
+ * 5. Generate a report of pixel changes after applying sharpening or edge‑enhancement operations in a .NET project.
  */

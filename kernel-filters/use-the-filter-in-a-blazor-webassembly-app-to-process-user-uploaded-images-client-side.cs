@@ -1,34 +1,36 @@
-// HOW-TO: Sharpen PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG Images in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and apply a sharpen filter
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                raster.Save(outputPath);
+                if (!image.IsCached)
+                    image.CacheData();
+
+                image.Filter(image.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+
+                var saveOptions = new JpegOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Blazor WebAssembly app needs to enhance the clarity of user‑uploaded PNG photos on the client side before displaying them.
- * 2. When an e‑commerce site wants to automatically sharpen product PNG images in the browser to improve visual appeal without server processing.
- * 3. When a C#‑based photo‑editing tool must apply a configurable sharpen filter to raster PNG files before saving.
- * 4. When a document management system requires client‑side preprocessing to reduce blur in scanned PNG documents prior to storage.
- * 5. When a progressive web app targeting mobile devices needs to quickly improve image sharpness in the browser using Aspose.Imaging without sending data to a backend.
+ * 1. When a Blazor WebAssembly app needs to let users upload photos and automatically soften them with a Gaussian blur before saving as JPEG.
+ * 2. When you want to perform client‑side image preprocessing in C# to reduce detail for privacy or artistic effect without sending the file to a server.
+ * 3. When an online photo editor requires fast, cached raster image handling and needs to apply a blur filter to large JPEGs directly in the browser.
+ * 4. When you must ensure uploaded images are processed locally, applying a Gaussian blur with specific radius and sigma values before storing them in a cloud bucket.
+ * 5. When a C# web application needs to convert raw user uploads into optimized JPEGs after applying a blur filter for thumbnails or preview images.
  */

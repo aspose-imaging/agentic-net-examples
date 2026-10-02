@@ -1,48 +1,40 @@
-// HOW-TO: Apply Gaussian Blur to PNG Without Color Shift in C# (Aspose.Imaging for .NET)
+// HOW-TO: Save PNG without Color Shift After Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = "Input/input.png";
+        string outputPath = "Output/output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to gain access to filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur without altering color channels (IgnoreAlpha left false)
-                // Size = 5 (kernel size), Sigma = 4.0 (blur intensity)
-                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                // Save the processed image preserving its original color information
-                rasterImage.Save(outputPath);
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -50,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften a product photo in a PNG file while keeping its original colors intact for an e‑commerce website.
- * 2. When preparing UI assets where a subtle blur is required but any color shift would break the design palette.
- * 3. When processing scanned documents saved as PNG and you want to reduce noise without altering the document’s true colors.
- * 4. When creating a blurred background effect for a game sprite stored in PNG format and you must preserve the sprite’s exact hues.
- * 5. When automating batch image enhancements in a C# application and you need to apply Gaussian blur without affecting the PNG’s color fidelity.
+ * 1. When a web application needs to apply a Gaussian blur to user‑uploaded PNG photos and then store them without altering the original colors.
+ * 2. When an e‑commerce platform generates blurred background images for product thumbnails and must preserve accurate brand colors in the saved PNG files.
+ * 3. When a desktop utility processes medical imaging PNG scans with a blur filter and requires the output to retain the exact color information for diagnostic purposes.
+ * 4. When a game developer creates soft‑focus textures from PNG assets and wants to ensure the saved textures do not introduce any hue or saturation changes.
+ * 5. When an automated batch job converts a series of PNG graphics after applying a blur effect and needs to maintain color consistency across all output files.
  */

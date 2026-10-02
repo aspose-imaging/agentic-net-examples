@@ -1,44 +1,41 @@
-// HOW-TO: Apply 5x5 Blur Box Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 5x5 Box Blur to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Hard‑coded input and output paths.
-            string inputPath = Path.Combine("templates", "input.png");
-            string outputPath = Path.Combine("output", "blurred.png");
+            string inputPath = "templates/input.png";
+            string outputPath = "output/blurred.png";
 
-            // Verify that the input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image.
-            using (Image image = Image.Load(inputPath))
+            double[,] blurKernel = new double[,]
             {
-                // Cast to RasterImage to access filtering capabilities.
-                RasterImage rasterImage = (RasterImage)image;
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 }
+            };
 
-                // Apply a 5×5 blur box filter.
-                // Aspose.Imaging does not provide a dedicated box filter, but a Gaussian blur with
-                // a radius of 5 approximates a 5×5 blur effect.
-                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                // Save the processed image.
-                rasterImage.Save(outputPath);
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(blurKernel));
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften edges of a PNG thumbnail before displaying it in a web gallery.
- * 2. When you want to reduce noise in a scanned PNG document by applying a small blur.
- * 3. When you are preparing product images for a mobile app and require a uniform 5×5 blur effect.
- * 4. When you need to create a background blur for overlay graphics in a PNG asset pipeline.
- * 5. When you are building an automated image‑processing service that must read PNG files, apply a box‑style blur, and save the result.
+ * 1. When you need to soften a product photo before uploading it to a web store, you can blur a PNG with a 5x5 box filter in C# using Aspose.Imaging.
+ * 2. When generating thumbnail previews that require a subtle background blur to highlight foreground elements, this code applies a uniform blur to the PNG source.
+ * 3. When preparing images for privacy compliance by obscuring details such as faces or license plates, the 5x5 convolution filter quickly blurs the PNG file.
+ * 4. When creating a custom image processing pipeline that includes a Gaussian‑like blur step, you can replace it with a simple 5x5 box blur using Aspose.Imaging’s ConvolutionFilterOptions.
+ * 5. When automating batch processing of PNG assets to achieve a consistent soft‑focus effect across a catalog, the sample demonstrates loading, filtering, and saving each image programmatically.
  */

@@ -10,8 +10,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = "input/input.svg";
+        string tempPath = "temp/temp.png";
+        string outputPath = "output/output.png";
 
         if (!File.Exists(inputPath))
         {
@@ -19,44 +20,31 @@ class Program
             return;
         }
 
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (MemoryStream ms = new MemoryStream())
+                var pngOptions = new PngOptions();
+                svgImage.Save(tempPath, pngOptions);
+            }
+
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+            {
+                double[,] customKernel = new double[,]
                 {
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                    rasterOptions.PageSize = image.Size;
+                    { 1, 0, 1 },
+                    { 0, 0, 0 },
+                    { 1, 0, 1 }
+                };
 
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                    image.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load rasterized image for filtering
-                    using (Image rasterImageContainer = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Custom kernel to isolate corners (edge detection)
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, -1, -1 },
-                            { -1,  8, -1 },
-                            { -1, -1, -1 }
-                        };
-
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                        // Save filtered result
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
-                }
+                var outOptions = new PngOptions();
+                raster.Save(outputPath, outOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight the edges of vector graphics by converting an SVG to a raster PNG with a corner‑detecting convolution filter.
- * 2. When generating thumbnails that emphasize object outlines from SVG icons for UI previews using Aspose.Imaging in C#.
- * 3. When preprocessing SVG artwork for computer‑vision pipelines that require edge‑enhanced PNG inputs.
- * 4. When creating print‑ready assets where the corners of a logo must be accentuated before exporting to PNG.
- * 5. When building a web service that receives SVG files, applies custom kernel filtering to detect corners, and returns the filtered PNG to clients.
+ * 1. When you need to convert vector SVG graphics to raster PNG files while emphasizing corner features for further analysis.
+ * 2. When you want to preprocess SVG images with a custom convolution kernel to highlight edges before feeding them into a machine‑learning model.
+ * 3. When generating thumbnails of SVG icons that require corner isolation to improve visual contrast in a UI.
+ * 4. When preparing SVG artwork for print or web where a corner‑detect filter helps identify alignment issues.
+ * 5. When automating a batch workflow that transforms SVG assets into PNGs and applies a custom filter to detect corners for quality‑control checks.
  */

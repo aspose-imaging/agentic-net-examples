@@ -1,81 +1,50 @@
-// HOW-TO: Handle ConvolutionFilter Exception for Invalid Kernel on SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Handle Invalid Convolution Filter Kernel When Converting SVG to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string tempPngPath = @"C:\Images\temp.png";
-        string outputPath = @"C:\Images\output.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Ensure directories exist for temporary and final output files
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+            string tempPngPath = "temp.png";
 
-            // Load SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Set up rasterization options for SVG to PNG conversion
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
-
-                // PNG save options with vector rasterization
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Rasterize SVG to a temporary PNG file
-                svgImage.Save(tempPngPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Load the rasterized PNG as a RasterImage
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath) ?? ".");
+
+            using (Image svgImg = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                SvgImage svgImage = (SvgImage)svgImg;
+                svgImage.Save(tempPngPath, new PngOptions());
+            }
 
-                // Create an invalid custom kernel (2x2 matrix, which is not allowed)
-                double[,] invalidKernel = new double[2, 2]
-                {
-                    { 1, 0 },
-                    { 0, 1 }
-                };
-
-                // Initialize ConvolutionFilterOptions with the invalid kernel
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(invalidKernel);
-
-                // Attempt to apply the filter and catch any exceptions
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                double[,] invalidKernel = new double[2, 3];
                 try
                 {
-                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(invalidKernel));
                 }
                 catch (Exception filterEx)
                 {
-                    Console.Error.WriteLine($"Convolution filter error: {filterEx.Message}");
+                    Console.Error.WriteLine($"Filter error: {filterEx.Message}");
                 }
 
-                // Save the (potentially unfiltered) image to the final output path
-                rasterImage.Save(outputPath, new PngOptions());
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -87,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a custom convolution filter to a rasterized SVG and must catch errors caused by unsupported kernel sizes.
- * 2. When converting vector SVG files to PNG and wants to log detailed exceptions if the filter matrix is invalid.
- * 3. When building an automated image‑processing workflow that processes SVG images and requires graceful handling of incorrect filter parameters.
- * 4. When debugging image filter configurations in a C# application and needs clear exception information for non‑conforming kernel dimensions.
- * 5. When creating a web service that accepts SVG uploads, applies convolution filters, and must return meaningful error messages for malformed kernels.
+ * 1. When you need to convert an SVG illustration to a PNG file while safely handling possible errors from an invalid custom convolution filter kernel.
+ * 2. When your image processing pipeline applies user‑defined convolution kernels to rasterized SVGs and you must log filter exceptions without stopping the conversion.
+ * 3. When you are building a C# service that generates PNG assets from SVG sources and want to catch and record filter‑related errors for debugging.
+ * 4. When you want to ensure that missing or malformed kernel dimensions do not break the rendering of SVG graphics in a .NET application.
+ * 5. When you need to create a temporary PNG from an SVG, attempt a convolution operation, and gracefully handle any exception before saving the final image.
  */

@@ -1,51 +1,55 @@
-// HOW-TO: Batch Sharpen PNG Images with 5x5 Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Sharpen PNG Images with 5x5 Filter Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            foreach (string inputPath in pngFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string filePath in files)
+            {
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
                 }
 
-                // Preserve original file name for the output
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image, apply the 5x5 sharpen kernel, and save it
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(filePath))
                 {
-                    RasterImage rasterImage = (RasterImage)image;
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Sharpen5x5));
 
-                    // Apply the Sharpen5x5 convolution kernel to the whole image
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new ConvolutionFilterOptions(ConvolutionFilter.Sharpen5x5));
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileName(filePath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the processed image using the same file name
-                    rasterImage.Save(outputPath);
+                    PngOptions options = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    raster.Save(outputPath, options);
                 }
             }
         }
@@ -58,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically enhance the sharpness of a large set of product photos stored as PNG files before uploading them to an e‑commerce site.
- * 2. When a desktop application must process scanned documents in PNG format and apply a 5×5 sharpening kernel to improve readability without changing the original file names.
- * 3. When a game‑development pipeline requires batch sharpening of texture atlases saved as PNGs while keeping the naming convention for asset management.
- * 4. When a photo‑editing tool wants to apply a consistent sharpen effect to all user‑selected PNG images and save the results in a separate output folder.
- * 5. When an automated build script has to improve the visual quality of PNG icons using Aspose.Imaging’s convolution filter while preserving the original filenames for version control.
+ * 1. When you need to enhance the sharpness of a large set of PNG photos automatically before publishing them on a website.
+ * 2. When you want to apply a 5x5 sharpening convolution to every PNG in a folder while keeping the original filenames for downstream processing.
+ * 3. When you are building a preprocessing pipeline that improves the detail of scanned PNG graphics before they are archived.
+ * 4. When you must batch‑process product‑catalog PNG assets to make edges clearer without manually editing each file.
+ * 5. When you need to integrate a C# routine that reads PNG files, sharpens them, and saves the results to a separate output directory for further analysis.
  */

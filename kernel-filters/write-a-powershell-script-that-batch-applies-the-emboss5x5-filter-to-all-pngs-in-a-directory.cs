@@ -1,59 +1,53 @@
-// HOW-TO: Batch Apply Emboss5x5 Filter to PNG Images with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Emboss 5x5 Filter to PNG Images with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.png");
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
             foreach (string inputPath in files)
             {
-                // Verify each input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build output file path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_embossed.png");
+                string outputPath = Path.Combine(outputDirectory, fileName + "_embossed.png");
 
-                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply Emboss5x5 filter, and save
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
                     raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
                     raster.Save(outputPath);
                 }
+
+                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -65,9 +59,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a 3‑D emboss effect to a large set of product photos stored as PNG files before uploading them to an e‑commerce site.
- * 2. When you want to automatically preprocess scanned documents by applying an emboss filter to enhance edge details for OCR preprocessing.
- * 3. When a game developer must generate stylized texture assets by embossing multiple PNG sprites in a build pipeline.
- * 4. When a marketing team requires a quick way to create embossed versions of logo PNGs for promotional graphics without manual editing.
- * 5. When a desktop application needs to batch convert user‑selected PNG images into embossed variants for a photo‑editing feature.
+ * 1. When you need to automatically add a 3‑D emboss effect to a large set of PNG assets for a game UI.
+ * 2. When you want to preprocess product photos by applying a uniform emboss filter before uploading them to an e‑commerce site.
+ * 3. When a desktop application must generate stylized thumbnails from user‑uploaded PNGs without manual editing.
+ * 4. When a build pipeline should enhance documentation screenshots with an emboss effect as part of automated asset preparation.
+ * 5. When you are creating a batch script to convert raw PNG scans into embossed images for artistic print projects.
  */
