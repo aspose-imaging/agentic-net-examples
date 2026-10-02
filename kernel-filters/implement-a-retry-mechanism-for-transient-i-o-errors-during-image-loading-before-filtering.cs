@@ -1,76 +1,62 @@
-// HOW-TO: Retry Loading Image on Transient I/O Errors in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Retry Loading Image With Transient I/O Errors And Apply Gaussian Blur In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading;
 using Aspose.Imaging;
-using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.jpg";
+        const string inputPath = "input\\input.jpg";
+        const string outputPath = "output\\output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Retry mechanism for transient I/O errors during image loading
-            Image image = null;
-            const int maxRetries = 3;
+            const int maxAttempts = 3;
             int attempt = 0;
-            while (attempt < maxRetries)
+            RasterImage raster = null;
+
+            while (attempt < maxAttempts)
             {
                 try
                 {
-                    image = Image.Load(inputPath);
-                    break; // Loaded successfully
+                    var image = Image.Load(inputPath);
+                    raster = (RasterImage)image;
+                    break;
                 }
-                catch (ImageLoadException ex) // Transient load error
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
                 {
                     attempt++;
-                    if (attempt >= maxRetries)
+                    if (attempt >= maxAttempts)
                     {
-                        Console.Error.WriteLine($"Failed to load image after {maxRetries} attempts: {ex.Message}");
+                        Console.Error.WriteLine($"Failed to load image after {maxAttempts} attempts: {ex.Message}");
                         return;
                     }
-                    Thread.Sleep(500); // Wait before retrying
-                }
-                catch (IOException ex) // Other I/O errors
-                {
-                    attempt++;
-                    if (attempt >= maxRetries)
-                    {
-                        Console.Error.WriteLine($"IO error loading image after {maxRetries} attempts: {ex.Message}");
-                        return;
-                    }
-                    Thread.Sleep(500);
                 }
             }
 
-            if (image == null)
+            if (raster == null)
             {
-                Console.Error.WriteLine("Image could not be loaded.");
+                Console.Error.WriteLine("Unable to load image.");
                 return;
             }
 
-            using (image)
+            using (raster)
             {
-                // Example filter: convert to grayscale (placeholder for actual processing)
-                // image.ConvertToGrayscale(); // Uncomment if method is available
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image
-                image.Save(outputPath);
+                var jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -82,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service intermittently fails to read a JPEG file from disk, you can use this retry logic to ensure the image loads before applying filters.
- * 2. When processing a batch of high‑resolution PNGs on a shared network drive, the code helps recover from temporary I/O timeouts by retrying the load operation.
- * 3. When integrating Aspose.Imaging into an automated photo‑editing pipeline, the retry mechanism prevents the entire workflow from stopping due to occasional file‑access glitches.
- * 4. When deploying a Windows service that monitors a folder for new TIFF images, the sample shows how to handle transient read errors before performing image transformations.
- * 5. When building a desktop C# application that applies filters to user‑selected images, this pattern safeguards against occasional disk‑read failures caused by antivirus scans or network latency.
+ * 1. When a batch job must process user‑uploaded photos that may be temporarily locked, this code retries loading the file, applies a Gaussian blur, and saves the result as a JPEG.
+ * 2. When an automated image‑pipeline runs on a network share prone to occasional access errors, the retry loop ensures the image is loaded before applying a blur filter.
+ * 3. When a desktop application needs to gracefully handle transient I/O failures while reading a JPEG, blur it for privacy, and write the processed image back.
+ * 4. When a server‑side service processes incoming JPG files and must guarantee the filter is applied even if the file is momentarily unavailable due to file‑system latency.
+ * 5. When integrating Aspose.Imaging into a C# workflow that requires robust error handling for unauthorized or locked files before performing Gaussian blur and saving the output.
  */
