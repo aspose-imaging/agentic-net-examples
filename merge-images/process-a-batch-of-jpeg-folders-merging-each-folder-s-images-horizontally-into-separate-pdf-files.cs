@@ -1,4 +1,4 @@
-// HOW-TO: Merge JPEG Images Horizontally from Multiple Folders into PDFs using C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge JPEG Images in Each Folder Horizontally into PDF using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Linq;
@@ -8,67 +8,59 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output root directories
+        string inputRoot = @"C:\InputImages";
+        string outputRoot = @"C:\OutputPdfs";
+
         try
         {
-            string inputRoot = "InputFolders";
-            string outputRoot = "OutputPdfs";
-
-            string[] folders = Directory.GetDirectories(inputRoot);
-            foreach (string folder in folders)
+            // Process each subfolder in the input root
+            foreach (string folderPath in Directory.GetDirectories(inputRoot))
             {
-                string[] jpgFiles = Directory.GetFiles(folder, "*.jpg");
-                string[] jpegFiles = Directory.GetFiles(folder, "*.jpeg");
-                string[] imageFiles = jpgFiles.Concat(jpegFiles).ToArray();
+                // Get all JPEG files in the current folder
+                string[] jpegFiles = Directory.GetFiles(folderPath, "*.jpg");
 
-                if (imageFiles.Length == 0)
-                    continue;
+                if (jpegFiles.Length == 0)
+                    continue; // Skip folders without JPEGs
 
-                List<Size> sizes = new List<Size>();
-                List<string> validFiles = new List<string>();
-
-                foreach (string file in imageFiles)
+                // Load each JPEG image
+                List<Image> loadedImages = new List<Image>();
+                foreach (string jpegPath in jpegFiles)
                 {
-                    if (!File.Exists(file))
+                    if (!File.Exists(jpegPath))
                     {
-                        Console.Error.WriteLine($"File not found: {file}");
+                        Console.Error.WriteLine($"File not found: {jpegPath}");
                         continue;
                     }
 
-                    using (RasterImage img = (RasterImage)Image.Load(file))
-                    {
-                        sizes.Add(img.Size);
-                        validFiles.Add(file);
-                    }
+                    Image img = Image.Load(jpegPath);
+                    loadedImages.Add(img);
                 }
 
-                if (sizes.Count == 0)
-                    continue;
+                if (loadedImages.Count == 0)
+                    continue; // No images successfully loaded
 
-                int newWidth = sizes.Sum(s => s.Width);
-                int newHeight = sizes.Max(s => s.Height);
+                // Create a single PDF containing all images (each image on its own page)
+                PdfOptions pdfOptions = new PdfOptions();
 
-                JpegOptions canvasOptions = new JpegOptions();
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
+                // Ensure the output directory exists
+                string folderName = new DirectoryInfo(folderPath).Name;
+                string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Merge images horizontally into a single PDF page
+                // (Aspose.Imaging merges the images side‑by‑side when using Image.Create with an array)
+                using (Image merged = Image.Create(loadedImages.ToArray()))
                 {
-                    int offsetX = 0;
-                    foreach (string file in validFiles)
-                    {
-                        using (RasterImage img = (RasterImage)Image.Load(file))
-                        {
-                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                            offsetX += img.Width;
-                        }
-                    }
+                    merged.Save(outputPath, pdfOptions);
+                }
 
-                    string folderName = Path.GetFileName(folder);
-                    string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    PdfOptions pdfOptions = new PdfOptions();
-                    canvas.Save(outputPath, pdfOptions);
+                // Dispose loaded images
+                foreach (Image img in loadedImages)
+                {
+                    img.Dispose();
                 }
             }
         }
@@ -81,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine all photos in each client’s folder into a single wide‑format PDF for easy review.
- * 2. When automating the creation of printable catalogs where each product’s images are stored in separate directories.
- * 3. When generating batch reports that require merging scanned JPEG receipts from different days into one PDF per day.
- * 4. When preparing slide‑show handouts by stitching together event photos from each venue folder into a single PDF file.
- * 5. When consolidating image assets for a marketing campaign, turning each folder of JPEGs into a horizontally merged PDF for quick sharing.
+ * 1. When you need to automatically combine all photos from multiple product‑shoot folders into single landscape‑style PDFs for easy client review.
+ * 2. When a digital archiving system must generate a PDF per event folder, placing each JPEG side‑by‑side on one page to preserve the original layout.
+ * 3. When a reporting tool has to batch‑process scanned receipts stored in separate directories and output a consolidated PDF per day without manual intervention.
+ * 4. When a marketing team wants to create printable catalogs by merging promotional JPEGs from each campaign folder into a single PDF page per campaign.
+ * 5. When a document management workflow requires converting groups of JPEG screenshots into PDFs, keeping each group’s images aligned horizontally for consistent presentation.
  */

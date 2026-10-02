@@ -19,11 +19,10 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input and output directories exist
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -32,65 +31,59 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get JPEG files
-            string[] files = Directory.GetFiles(inputDirectory, "*.*")
-                                      .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                                      .ToArray();
-
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
             if (files.Length == 0)
             {
                 Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            // First pass: collect sizes
+            List<RasterImage> images = new List<RasterImage>();
             List<Size> sizes = new List<Size>();
-            foreach (string file in files)
+
+            foreach (string filePath in files)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                using (JpegImage img = (JpegImage)Image.Load(file))
-                {
-                    sizes.Add(new Size(img.Width, img.Height));
-                }
+                RasterImage img = (RasterImage)Image.Load(filePath);
+                img.Grayscale();
+                images.Add(img);
+                sizes.Add(img.Size);
             }
 
             int totalWidth = sizes.Sum(s => s.Width);
             int maxHeight = sizes.Max(s => s.Height);
 
-            // Create a raster canvas (unbound) for merging
-            JpegOptions canvasOptions = new JpegOptions();
-            using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, totalWidth, maxHeight))
+            string tempImagePath = Path.Combine(outputDirectory, "temp.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempImagePath));
+
+            Source source = new FileCreateSource(tempImagePath, false);
+            JpegOptions jpegOptions = new JpegOptions { Source = source };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string file in files)
+                foreach (RasterImage img in images)
                 {
-                    using (JpegImage img = (JpegImage)Image.Load(file))
-                    {
-                        // Convert to grayscale
-                        img.Grayscale();
-
-                        // Copy pixels onto canvas
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-
-                        offsetX += img.Width;
-                    }
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
                 }
 
-                // Prepare PDF output
-                string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                canvas.Save();
 
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    canvas.Save(pdfPath, pdfOptions);
-                }
+                string outputPdfPath = Path.Combine(outputDirectory, "merged.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(outputPdfPath, pdfOptions);
+            }
+
+            foreach (RasterImage img in images)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -102,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a black‑and‑white PDF catalog from a set of color JPEG product photos.
- * 2. When you want to generate a printable report that combines several scanned JPEG pages as a single grayscale PDF.
- * 3. When you must reduce file size for archival by converting color JPEGs to grayscale before merging them into a PDF.
- * 4. When an application requires a side‑by‑side view of multiple images in a PDF without color information for OCR preprocessing.
- * 5. When you are building a document workflow that standardizes incoming JPEGs to grayscale and consolidates them into one PDF file.
+ * 1. When you need to create a printable PDF catalog from a series of color JPEG photos by first converting them to black‑and‑white and placing them side‑by‑side.
+ * 2. When generating a grayscale contact sheet of product images for a marketing brochure, merging the images horizontally before saving as PDF.
+ * 3. When automating archival of scanned receipts where each JPEG must be desaturated and combined into a single PDF document for easy storage.
+ * 4. When building a web service that receives user‑uploaded JPEGs, converts them to grayscale, stitches them into one wide image, and returns a PDF report.
+ * 5. When preparing documentation that requires all screenshots to be in grayscale and displayed in a single horizontal layout inside a PDF file.
  */

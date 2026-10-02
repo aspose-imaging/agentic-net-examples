@@ -1,22 +1,22 @@
-// HOW-TO: Combine Multiple JPEG Images Vertically into a Single JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple JPEG Images Vertically Into a Single JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "combined.jpg";
 
-            // Validate each input file exists
             foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -26,14 +26,9 @@ public class Program
                 }
             }
 
-            // Hardcoded output path
-            string outputPath = "combined.jpg";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            List<Size> sizes = new List<Size>();
             foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -42,20 +37,11 @@ public class Program
                 }
             }
 
-            // Calculate canvas dimensions for vertical arrangement
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (var sz in sizes)
-            {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
-            }
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG options with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-
-            // Create the output canvas bound to the file
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -68,8 +54,6 @@ public class Program
                         offsetY += img.Height;
                     }
                 }
-
-                // Save the combined image
                 canvas.Save();
             }
         }
@@ -82,9 +66,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a photo strip from several portrait JPEG shots for social media or a gallery.
- * 2. When generating a printable catalog page that stacks product JPEG photos one after another.
- * 3. When assembling scanned JPEG pages of a document into a single continuous image for archival.
- * 4. When building a vertical banner from multiple advertisement JPEG images for a website.
- * 5. When merging sequential screenshots saved as JPEGs into one continuous view for debugging.
+ * 1. When you need to create a photo strip from a series of JPEG shots for a printable collage.
+ * 2. When generating a single tall banner image from individual product photos for an e‑commerce catalog.
+ * 3. When assembling scanned document pages saved as JPEGs into one continuous image for archival.
+ * 4. When building a vertical slideshow thumbnail that merges several screenshots into one JPEG file.
+ * 5. When preparing a combined receipt image from multiple JPEG receipts for automated processing.
  */

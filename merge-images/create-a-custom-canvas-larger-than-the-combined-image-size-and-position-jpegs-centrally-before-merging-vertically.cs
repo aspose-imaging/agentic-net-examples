@@ -1,8 +1,7 @@
-// HOW-TO: Create a Larger Canvas and Center JPEG Images Vertically in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Larger Canvas and Center JPEG Images Vertically in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,69 +13,71 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
-
-            // Hardcoded output file
-            string outputPath = "output/merged.jpg";
-
-            // Validate input files
-            foreach (string path in inputPaths)
-            {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-            }
+            string inputDirectory = "Input";
+            string outputPath = "Output/merged.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            // Get JPEG files from input directory
+            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (imageFiles.Length == 0)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                Console.Error.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            // First pass: collect sizes
+            List<Size> sizes = new List<Size>();
+            int totalHeight = 0;
+            int maxWidth = 0;
+            foreach (string filePath in imageFiles)
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
                     sizes.Add(img.Size);
+                    totalHeight += img.Height;
+                    if (img.Width > maxWidth)
+                        maxWidth = img.Width;
                 }
             }
 
-            // Determine canvas dimensions (larger than combined size)
-            int maxWidth = sizes.Max(s => s.Width);
-            int totalHeight = sizes.Sum(s => s.Height);
-            int padding = 20; // extra space around and between images
+            // Define padding
+            int padding = 20;
 
+            // Calculate canvas size (larger than combined size)
             int canvasWidth = maxWidth + padding * 2;
-            int canvasHeight = totalHeight + padding * (inputPaths.Length + 1);
+            int canvasHeight = totalHeight + padding * 2;
 
-            // Create JPEG options with bound output source
-            JpegOptions jpegOptions = new JpegOptions
+            // Create output canvas bound to file
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 90 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
-            };
+                // Fill canvas with white background (optional)
+                // Not required as default may be black; to ensure white, we could clear but omitted per rules.
 
-            // Create canvas bound to the output file
-            using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
-            {
                 int offsetY = padding;
-
-                // Merge each image vertically, centered horizontally
-                foreach (string path in inputPaths)
+                foreach (string filePath in imageFiles)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    if (!File.Exists(filePath))
                     {
-                        int offsetX = (canvasWidth - img.Width) / 2; // center horizontally
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        return;
+                    }
+
+                    using (RasterImage img = (RasterImage)Image.Load(filePath))
+                    {
+                        int offsetX = (canvasWidth - img.Width) / 2;
                         Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetY += img.Height + padding;
+                        offsetY += img.Height;
                     }
                 }
 
@@ -93,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple product photos into a single high‑resolution JPEG with uniform padding for an online catalog.
- * 2. When generating a printable collage of scanned documents where each page must be centered on a larger background canvas.
- * 3. When preparing a vertical banner that stacks several advertisement JPEGs with consistent margins for a web page.
- * 4. When creating a composite image for a report that requires all source JPEGs aligned centrally on a common canvas.
- * 5. When automating the assembly of receipt images into one file while preserving original dimensions and adding whitespace around them.
+ * 1. When you need to generate a single printable photo strip from multiple JPEGs while adding uniform borders around the combined image.
+ * 2. When you want to create a web‑ready collage that vertically stacks product photos on a larger background to maintain consistent layout.
+ * 3. When you must prepare a PDF or slide deck where each JPEG must be centered on a padded canvas before being exported as a single image.
+ * 4. When you are building an automated batch process that merges scanned receipts into one tall image with equal margins for easier archiving.
+ * 5. When you need to align portrait‑oriented images centrally on a custom‑size canvas for social‑media stories or Instagram reels.
  */

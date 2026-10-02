@@ -1,4 +1,4 @@
-// HOW-TO: Add Semi Transparent Watermark to Horizontally Merged JPEG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Semi Transparent Text Watermark to Horizontally Merged JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -6,8 +6,8 @@ using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,35 +15,22 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = { "input1.jpg", "input2.jpg" };
+            string outputPath = "output/merged.jpg";
 
-            // Validate each input file
-            foreach (string inputPath in inputPaths)
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Hardcoded output path
-            string outputPath = "merged_output.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
-
-            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -51,23 +38,16 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas with bound source
             Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = source,
-                Quality = 90
-            };
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
-                // Merge images side by side
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (var path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -77,15 +57,13 @@ class Program
                     }
                 }
 
-                // Add semi‑transparent watermark text
                 Graphics graphics = new Graphics(canvas);
                 Font font = new Font("Arial", 48);
-                SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 255, 255)); // 50% transparent white
-                // Position watermark near bottom‑right corner
-                PointF position = new PointF(canvas.Width - 250, canvas.Height - 70);
-                graphics.DrawString("Sample Watermark", font, brush, position);
+                Color brushColor = Color.FromArgb(128, 255, 255, 255);
+                SolidBrush brush = new SolidBrush(brushColor);
+                string watermark = "Sample Watermark";
+                graphics.DrawString(watermark, font, brush, new PointF(totalWidth - 200, maxHeight - 60));
 
-                // Save the bound image
                 canvas.Save();
             }
         }
@@ -98,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine product photos side‑by‑side and brand them with a translucent logo before publishing online.
- * 2. When generating a single panoramic view from multiple camera shots and want to overlay copyright text without obscuring the image.
- * 3. When creating a printable catalog page that stitches several JPEGs together and requires a faint watermark for intellectual‑property protection.
- * 4. When automating batch processing of scanned documents, merging them horizontally and adding a semi‑transparent disclaimer for compliance.
- * 5. When developing a web service that returns a combined JPEG banner with a subtle watermark to identify the source application.
+ * 1. When you need to combine multiple product photos side‑by‑side and brand the resulting image with a translucent company logo using C#.
+ * 2. When creating a single panoramic view from several JPEG snapshots and want to overlay a semi‑transparent disclaimer or copyright notice.
+ * 3. When generating printable catalogs where each merged image must include a faint “Sample” watermark to prevent unauthorized use.
+ * 4. When automating the preparation of social‑media banners that stitch together promotional JPEGs and add a subtle text overlay for campaign tracking.
+ * 5. When developing a web service that receives separate JPEG uploads, merges them horizontally, and returns the composite with a semi‑transparent watermark for security compliance.
  */
