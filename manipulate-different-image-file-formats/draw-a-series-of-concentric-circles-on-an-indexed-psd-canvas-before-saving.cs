@@ -10,59 +10,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\concentric_circles.psd";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Configure PSD options for an indexed image
-            PsdOptions psdOptions = new PsdOptions();
-            psdOptions.Source = new FileCreateSource(outputPath, false);
-            psdOptions.ColorMode = ColorModes.Indexed;
-            // Simple palette with a few colors
-            psdOptions.Palette = new ColorPalette(new Color[]
-            {
-                Color.Black,
-                Color.White,
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.Yellow,
-                Color.Cyan,
-                Color.Magenta
-            });
-
-            // Canvas size
+            string outputPath = "output.psd";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
             int width = 500;
             int height = 500;
 
-            // Create the PSD image bound to the output file
-            using (Image image = Image.Create(psdOptions, width, height))
+            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[256];
+            for (int i = 0; i < 256; i++)
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                paletteColors[i] = Aspose.Imaging.Color.FromArgb(i, i, i);
+            }
+            ColorPalette palette = new ColorPalette(paletteColors);
 
-                // Center of the canvas
+            PsdOptions options = new PsdOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            options.ColorMode = ColorModes.Indexed;
+            options.Palette = palette;
+
+            using (var psd = Image.Create(options, width, height))
+            {
+                Graphics graphics = new Graphics(psd);
+                graphics.Clear(paletteColors[0]);
+
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(paletteColors[255], 3);
                 int centerX = width / 2;
                 int centerY = height / 2;
+                int maxRadius = Math.Min(width, height) / 2 - 10;
 
-                // Draw concentric circles
-                int numberOfCircles = 5;
-                int step = 30;
-                for (int i = 0; i < numberOfCircles; i++)
+                for (int radius = maxRadius; radius > 0; radius -= 20)
                 {
-                    int radius = (i + 1) * step;
-                    Pen pen = new Pen(Color.Black, 2);
-                    Rectangle rect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    int left = centerX - radius;
+                    int top = centerY - radius;
+                    int diameter = radius * 2;
+                    Rectangle rect = new Rectangle(left, top, diameter, diameter);
                     graphics.DrawEllipse(pen, rect);
                 }
 
-                // Save the PSD (already bound to the file source)
-                image.Save();
+                psd.Save();
             }
         }
         catch (Exception ex)
@@ -74,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a PSD file with a limited color palette for use in a design workflow that requires indexed colors, such as preparing assets for older Photoshop versions.
- * 2. When you want to automate the creation of pattern overlays, like concentric circle guides, directly inside a PSD without manual drawing in Photoshop.
- * 3. When building a server‑side service that produces printable mock‑ups where the background is a PSD with vector‑style circles and a predefined palette for consistent branding colors.
- * 4. When creating test images for image‑processing pipelines that must read indexed PSD files and verify that shape rendering works correctly.
- * 5. When integrating Aspose.Imaging into a C# application to dynamically generate layered PSD files for game UI elements that use simple geometric shapes and a fixed set of colors.
+ * 1. When you need to programmatically generate a PSD file in indexed (grayscale) mode and draw concentric circles as background guides for a printing template.
+ * 2. When an automated workflow must create a raster PSD asset with a custom 256‑color palette and visual markers for alignment in a graphics pipeline.
+ * 3. When a C# application has to produce a lightweight PSD preview that shows radial patterns without using full RGB color data.
+ * 4. When you want to add decorative ring motifs to a PSD canvas for a UI mockup while keeping file size low by using an indexed color mode.
+ * 5. When a batch process creates multiple PSD files with evenly spaced circles for testing image‑processing algorithms that require indexed images.
  */
