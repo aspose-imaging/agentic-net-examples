@@ -1,40 +1,35 @@
-// HOW-TO: Create BMP with Thick Black Border and Red Inner Rectangle in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image with Thick Border and Inset Fill in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
         try
         {
-            string outputPath = @"c:\temp\bordered.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            int width = 500;
-            int height = 400;
-
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            int width = 400;
+            int height = 300;
+            using (Image image = Image.Create(options, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                // Thick outer border
-                graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 10),
-                    new Aspose.Imaging.Rectangle(0, 0, width, height));
-
-                // Inner rectangle
-                int inset = 30;
-                graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 5),
-                    new Aspose.Imaging.Rectangle(inset, inset, width - 2 * inset, height - 2 * inset));
-
-                // Save the image (output already bound)
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                Pen borderPen = new Pen(Color.Black, 10);
+                graphics.DrawRectangle(borderPen, 0, 0, width, height);
+                int inset = 20;
+                using (SolidBrush innerBrush = new SolidBrush(Color.LightGray))
+                {
+                    graphics.FillRectangle(innerBrush, inset, inset, width - 2 * inset, height - 2 * inset);
+                }
                 image.Save();
             }
         }
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP placeholder image with a visible frame for UI mock‑ups.
- * 2. When you want to programmatically add a thick black border around a photo and highlight an inner area with a colored rectangle.
- * 3. When creating printable labels that require a bold outer edge and a contrasting inner box for barcode placement.
- * 4. When producing custom graphics for reports where a defined margin and highlighted content region are required.
- * 5. When automating the creation of game assets that need a solid background with a distinct border and inner panel for icons.
+ * 1. When you need to generate a BMP placeholder image with a visible frame for a PDF report or documentation preview.
+ * 2. When creating custom UI icons or buttons that require a solid background surrounded by a thick black border in a Windows desktop application.
+ * 3. When producing test images for image‑processing algorithms that must contain a known rectangular region and border for validation.
+ * 4. When automating the creation of printable forms where the outer margin is highlighted by a thick border and the inner area is pre‑filled with a light‑gray background.
+ * 5. When building a batch process that adds a uniform border and background to scanned images before they are stored in a BMP archive.
  */
