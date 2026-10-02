@@ -1,18 +1,21 @@
-// HOW-TO: Apply Gauss Wiener Filter to PNG After Background Removal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gauss Wiener Filter After Auto Masking Background Removal in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,25 +24,31 @@ class Program
 
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
+                var maskingOptions = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent
+                };
 
-                // ----- Background removal step (placeholder) -----
-                // TODO: Insert background removal logic here if needed.
-                // Example: rasterImage.RemoveBackground(); // (method depends on actual API)
+                var masking = new ImageMasking(image);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                {
+                    foreground.Filter(foreground.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions());
 
-                // Apply Gauss‑Wiener filter to correct blur
-                var gaussOptions = new GaussWienerFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, gaussOptions);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to deblur product photos that became slightly out of focus after automatically masking the background using Aspose.Imaging in a C# application.
- * 2. When you want to improve the sharpness of scanned documents saved as PNG files after removing their background layers in a .NET image‑processing pipeline.
- * 3. When a batch job must clean up PNG assets for an e‑commerce site by applying a Gauss‑Wiener filter after background extraction to maintain visual quality.
- * 4. When you are building a C# tool that prepares images for OCR and requires a mild blur correction following background removal.
- * 5. When you need to programmatically enhance PNG screenshots taken from a UI test suite after auto‑masking the background to reduce blur artifacts.
+ * 1. When you need to extract a subject from a JPEG photo, make the background transparent, and save the result as a PNG with an alpha channel.
+ * 2. When an automatic graph‑cut masking algorithm leaves slight blur on the foreground and you want to sharpen it using a Gauss‑Wiener filter.
+ * 3. When you are processing batch images in a C# application and require both background removal and post‑processing de‑blurring before storing them in a lossless format.
+ * 4. When you need to replace the original background with transparency for later compositing while preserving image quality in .NET.
+ * 5. When you want to combine Aspose.Imaging’s auto‑masking and advanced filtering features to prepare product photos for e‑commerce catalogs.
  */
