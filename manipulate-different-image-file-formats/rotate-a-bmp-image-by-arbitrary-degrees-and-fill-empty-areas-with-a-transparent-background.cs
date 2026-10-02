@@ -1,47 +1,41 @@
-// HOW-TO: Rotate BMP Image by Arbitrary Degrees with Transparent Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate BMP Image By Arbitrary Angle With Transparent Background In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output_rotated.bmp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the BMP image
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Rotate by arbitrary angle (e.g., 45 degrees) with proportional resize
-                // and transparent background for empty areas
-                float angle = 45f; // change as needed
+                if (!image.IsCached)
+                    image.CacheData();
+
+                float angle = 45f; // arbitrary rotation angle
                 image.Rotate(angle, true, Color.Transparent);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the rotated image preserving transparency (Bitfields compression)
-                var bmpOptions = new BmpOptions
+                BmpOptions options = new BmpOptions()
                 {
-                    // Bitfields compression retains alpha channel
-                    Compression = BitmapCompression.Bitfields
+                    Source = new FileCreateSource(outputPath, false)
                 };
-                image.Save(outputPath, bmpOptions);
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a rotated bitmap in a UI without black corners, you can rotate the BMP and fill empty space with transparency.
- * 2. When generating game sprites that require arbitrary orientation, this code lets you rotate BMP assets while preserving alpha.
- * 3. When preparing images for a PDF or web page where the background must be invisible, you can rotate the BMP and keep a transparent background.
- * 4. When processing scanned documents that need to be aligned at non‑standard angles, the routine rotates the BMP and avoids unwanted background color.
- * 5. When converting legacy BMP graphics for use in modern applications that support alpha channels, this method adds transparency after rotation.
+ * 1. When you need to display a BMP graphic at a custom orientation in a UI while keeping the surrounding area transparent.
+ * 2. When generating thumbnails for a game asset pipeline that require rotated BMP sprites without a solid background.
+ * 3. When processing scanned documents that must be tilted to correct alignment and the empty corners should remain invisible in the final image.
+ * 4. When creating dynamic map overlays where BMP tiles are rotated based on user interaction and the background must stay transparent for layering.
+ * 5. When automating batch image preparation for printing where each BMP file must be rotated by a specific angle and saved with a transparent fill to avoid unwanted borders.
  */
