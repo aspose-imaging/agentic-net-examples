@@ -1,9 +1,11 @@
-// HOW-TO: Extract PDF Vector Map Pages to Individual SVG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PDF Map Pages to Separate SVG Files with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -11,62 +13,42 @@ class Program
     {
         try
         {
-            string inputPath = "input.pdf";
-            string outputDir = "output_svgs";
-
-            Directory.CreateDirectory(outputDir);
-
+            string inputPath = "Input\\map.pdf";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputBaseDir = "Output";
+            Directory.CreateDirectory(outputBaseDir);
+
             using (Image pdfImage = Image.Load(inputPath))
             {
                 if (pdfImage is IMultipageImage multipage)
                 {
-                    int pageCount = multipage.PageCount;
-
-                    for (int i = 0; i < pageCount; i++)
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.svg");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        string outputPath = Path.Combine(outputBaseDir, $"page_{i + 1}.svg");
+                        string outDir = Path.GetDirectoryName(outputPath);
+                        Directory.CreateDirectory(outDir);
 
-                        var rasterOptions = new SvgRasterizationOptions
+                        var svgOptions = new SvgOptions
                         {
-                            BackgroundColor = Color.White,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-
-                        var exportOptions = new SvgOptions
-                        {
-                            VectorRasterizationOptions = rasterOptions,
                             MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
                         };
 
-                        pdfImage.Save(outputPath, exportOptions);
+                        pdfImage.Save(outputPath, svgOptions);
                     }
                 }
                 else
                 {
-                    string outputPath = Path.Combine(outputDir, "page_1.svg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    string outputPath = Path.Combine(outputBaseDir, "page_1.svg");
+                    string outDir = Path.GetDirectoryName(outputPath);
+                    Directory.CreateDirectory(outDir);
 
-                    var rasterOptions = new SvgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-
-                    var exportOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    pdfImage.Save(outputPath, exportOptions);
+                    var svgOptions = new SvgOptions();
+                    pdfImage.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -79,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS application needs each page of a multi‑page PDF map as a separate SVG for web display.
- * 2. When a developer wants to preserve geographic metadata while converting vector maps from PDF to scalable SVG for interactive dashboards.
- * 3. When an automated pipeline must split a PDF atlas into per‑page SVG assets for responsive mobile mapping.
- * 4. When a mapping service requires white‑background SVGs with exact rasterization settings to maintain visual fidelity across browsers.
- * 5. When a data‑visualization tool needs to programmatically export PDF map layers to SVG files for further styling with CSS.
+ * 1. When you need to extract each page of a PDF containing vector maps into individual SVG files for web‑based GIS visualisation.
+ * 2. When a GIS application requires the geographic metadata from a PDF map to be retained while converting pages to scalable SVG graphics.
+ * 3. When automating a batch process that turns multi‑page PDF atlases into separate SVG layers for further editing in vector design tools.
+ * 4. When a server‑side C# service must deliver per‑page SVG representations of a PDF map to client browsers without losing vector quality.
+ * 5. When integrating Aspose.Imaging into a .NET workflow to split a single PDF map document into multiple SVG assets for responsive mobile mapping apps.
  */
