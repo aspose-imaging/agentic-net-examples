@@ -1,54 +1,33 @@
-// HOW-TO: Create PNG Image With Anti-Aliased Graphics Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Anti-Alias Smoothing to BMP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up PNG options with a stream source
-            PngOptions pngOptions = new PngOptions();
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            if (!File.Exists(inputPath))
             {
-                pngOptions.Source = new StreamSource(stream);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Create a new 500x500 image
-                using (Image image = Image.Create(pngOptions, 500, 500))
-                {
-                    // Initialize Graphics from the created image
-                    Graphics graphics = new Graphics(image);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                    // Enable anti-aliasing for smoother edges
-                    graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                    // Clear the background
-                    graphics.Clear(Color.Wheat);
-
-                    // Build a simple rectangle path
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                    path.AddFigure(figure);
-
-                    // Draw the path with a black pen
-                    graphics.DrawPath(new Pen(Color.Black, 2), path);
-
-                    // Save the image to the specified output path
-                    image.Save(outputPath);
-                }
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -60,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a high‑quality PNG thumbnail with smooth vector edges for a web dashboard using C#.
- * 2. When you want to programmatically draw anti‑aliased shapes, such as rectangles, onto a blank image for dynamic report graphics.
- * 3. When you must create a PNG file with a custom background color and precise dimensions without using GDI+.
- * 4. When you are building an automated image‑processing pipeline that requires consistent smoothing settings across all generated graphics.
- * 5. When you need to save a drawing to a stream‑based PNG output while ensuring the edges are rendered without jagged artifacts.
+ * 1. When you need to improve the visual quality of shapes drawn on a BMP image by applying anti‑alias smoothing before saving it in a .NET application.
+ * 2. When generating bitmap thumbnails for a user interface and want smoother edges to eliminate jagged lines.
+ * 3. When adding vector annotations to scanned BMP documents and require anti‑aliased lines to keep the text and graphics crisp.
+ * 4. When creating game sprites or UI assets in BMP format and need smoother outlines for a polished appearance on high‑resolution displays.
+ * 5. When batch‑processing BMP files and want to apply a consistent anti‑alias filter to each image to maintain a uniform visual style.
  */
