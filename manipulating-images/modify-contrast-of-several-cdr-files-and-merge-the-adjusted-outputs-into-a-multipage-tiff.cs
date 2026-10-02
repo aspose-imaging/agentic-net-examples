@@ -1,13 +1,13 @@
-// HOW-TO: Adjust Contrast Of Multiple CDR Files And Combine Into Multi‑Page TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Contrast of Multiple CDR Files and Merge Into Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,18 +15,19 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = {
+            // Hardcoded input CDR file paths
+            List<string> cdrPaths = new List<string>
+            {
                 "input1.cdr",
                 "input2.cdr",
                 "input3.cdr"
             };
 
-            // Hardcoded output TIFF file
-            string outputPath = "output.tif";
+            // Hardcoded output TIFF path (ensure directory part exists)
+            string outputTiffPath = "output\\merged.tif";
 
-            // Verify each input file exists
-            foreach (string path in inputPaths)
+            // Validate input files
+            foreach (var path in cdrPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -36,26 +37,21 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
 
             // List to hold processed raster images
             List<RasterImage> rasterImages = new List<RasterImage>();
 
-            // Process each CDR file: rasterize, adjust contrast, store raster
-            foreach (string cdrPath in inputPaths)
+            // Process each CDR file: rasterize and adjust contrast
+            foreach (var cdrPath in cdrPaths)
             {
                 using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
                 {
-                    // Rasterize CDR to PNG in memory
                     using (MemoryStream ms = new MemoryStream())
                     {
                         PngOptions pngOptions = new PngOptions
                         {
-                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            VectorRasterizationOptions = new CdrRasterizationOptions
                             {
                                 PageWidth = cdr.Width,
                                 PageHeight = cdr.Height
@@ -63,43 +59,44 @@ class Program
                         };
                         cdr.Save(ms, pngOptions);
                         ms.Position = 0;
-
-                        // Load raster image from memory stream
                         RasterImage raster = (RasterImage)Image.Load(ms);
-                        // Adjust contrast (example value: 0.5f)
-                        raster.AdjustContrast(0.5f);
+                        raster.AdjustContrast(30f); // Adjust contrast by 30
                         rasterImages.Add(raster);
                     }
                 }
             }
 
-            // Use dimensions of the first raster image for the TIFF canvas
-            int canvasWidth = rasterImages[0].Width;
-            int canvasHeight = rasterImages[0].Height;
-
-            // Prepare TIFF save options with a bound file source
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            if (rasterImages.Count == 0)
             {
-                Source = new FileCreateSource(outputPath, false),
-                Photometric = TiffPhotometrics.Rgb,
-                BitsPerSample = new ushort[] { 8, 8, 8 }
-            };
-
-            // Create multi-page TIFF canvas
-            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
-            {
-                // Add each processed raster as a new page
-                foreach (RasterImage raster in rasterImages)
-                {
-                    tiff.AddPage(raster);
-                }
-
-                // Save the TIFF (output path already bound)
-                tiff.Save();
+                Console.Error.WriteLine("No images were processed.");
+                return;
             }
 
-            // Dispose raster images after they are no longer needed
-            foreach (RasterImage raster in rasterImages)
+            // Create multipage TIFF
+            int width = rasterImages[0].Width;
+            int height = rasterImages[0].Height;
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+            {
+                // First frame
+                Color[] firstPixels = rasterImages[0].LoadPixels(rasterImages[0].Bounds);
+                tiff.SavePixels(tiff.Bounds, firstPixels);
+
+                // Subsequent frames
+                for (int i = 1; i < rasterImages.Count; i++)
+                {
+                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
+                    tiff.ActiveFrame = tiff.Frames[tiff.Frames.Count() - 1];
+                    Color[] pixels = rasterImages[i].LoadPixels(rasterImages[i].Bounds);
+                    tiff.SavePixels(tiff.ActiveFrame.Bounds, pixels);
+                }
+
+                tiff.Save(outputTiffPath);
+            }
+
+            // Dispose raster images
+            foreach (var raster in rasterImages)
             {
                 raster.Dispose();
             }
@@ -113,9 +110,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process several CorelDRAW (CDR) drawings, increase their contrast and store them as a single multi‑page TIFF for printing or archival.
- * 2. When an application must convert vector CDR files to raster images, apply a contrast boost, and combine the results into one TIFF to reduce file handling overhead.
- * 3. When generating a multi‑page document from individual design assets, you can adjust each CDR page’s contrast for visual consistency before merging them into a TIFF for distribution.
- * 4. When automating the preparation of scanned‑like images from CDR sources, you can programmatically enhance contrast and bundle the pages into a TIFF for use in document management systems.
- * 5. When creating a searchable image archive, you may need to rasterize CDR files, improve their contrast for OCR accuracy, and compile them into a single TIFF file for easier indexing.
+ * 1. When you need to batch‑process CorelDRAW (CDR) drawings, enhance their contrast, and combine them into a single multipage TIFF for archival or printing.
+ * 2. When an application must convert several CDR pages to raster images, apply image‑level adjustments, and output a multi‑page TIFF for use in document management systems.
+ * 3. When a workflow requires automated preparation of high‑contrast preview files from multiple CDR sources before sending them to a print shop that only accepts TIFF.
+ * 4. When you want to programmatically generate a composite TIFF report that includes contrast‑optimized screenshots of different CDR designs using Aspose.Imaging for .NET.
+ * 5. When integrating a C# service that consolidates edited CDR artwork into a single TIFF document for downstream processing such as OCR or digital asset management.
  */
