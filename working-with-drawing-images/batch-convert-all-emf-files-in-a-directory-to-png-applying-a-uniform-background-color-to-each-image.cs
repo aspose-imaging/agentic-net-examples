@@ -1,56 +1,58 @@
 // HOW-TO: Batch Convert EMF Files to PNG with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEmf";
-            string outputDirectory = @"C:\OutputPng";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PNG path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
-                using (Image image = Image.Load(inputPath))
+                using (EmfImage emfImage = (EmfImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Configure rasterization options with a uniform background color
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageSize = image.Size
-                    };
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions();
+                    vectorOptions.BackgroundColor = Aspose.Imaging.Color.White;
+                    vectorOptions.PageWidth = emfImage.Width;
+                    vectorOptions.PageHeight = emfImage.Height;
 
-                    // Set PNG save options and attach the rasterization options
-                    PngOptions pngOptions = new PngOptions
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
+                        pngOptions.VectorRasterizationOptions = vectorOptions;
+                        pngOptions.Source = new FileCreateSource(outputPath, false);
+                        emfImage.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -63,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑ready PNG thumbnails from a collection of EMF vector drawings and ensure a consistent white background.
- * 2. When automating the migration of legacy Windows Metafile assets to a format supported by modern browsers without losing visual fidelity.
- * 3. When preparing print‑ready images from EMF diagrams for inclusion in PDF reports that require a raster background.
- * 4. When building a batch processing tool that standardizes background colors across dozens of EMF logos before uploading them to a content management system.
- * 5. When converting EMF icons stored on a server to PNG for use in a cross‑platform C# application that cannot render vector formats directly.
+ * 1. When you need to generate web‑ready PNG thumbnails from a collection of Windows Metafile (EMF) diagrams and ensure a consistent white canvas behind each image.
+ * 2. When a reporting system exports charts as EMF and you must convert them to PNG for inclusion in PDF or HTML reports without transparent backgrounds.
+ * 3. When migrating legacy design assets stored as EMF to a modern asset pipeline that only accepts PNG files with a solid background.
+ * 4. When automating a build process that pulls EMF icons from a source folder and creates PNG versions for mobile applications that require a fixed background color.
+ * 5. When preparing a batch of EMF logos for an e‑commerce catalog and you need to standardize their size and background before uploading to the storefront.
  */
