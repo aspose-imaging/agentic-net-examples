@@ -1,8 +1,8 @@
-// HOW-TO: Abort Long Running Horizontal JPEG Merge With Cancellation Token In C# (Aspose.Imaging for .NET)
+// HOW-TO: Cancel Long Running Horizontal JPEG Merge With CancellationToken In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -15,70 +15,79 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
-
-            // Hardcoded output path
-            string outputPath = "output/merged.jpg";
-
-            // Validate each input file exists
-            foreach (var path in inputPaths)
-            {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-            }
+            string inputDirectory = "InputImages";
+            string outputPath = "Output/merged.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Cancellation token source for aborting the merge
+            // Prepare cancellation token
             var cts = new CancellationTokenSource();
-
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            Console.CancelKeyPress += (sender, e) =>
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                e.Cancel = true;
+                cts.Cancel();
+                Console.WriteLine("Cancellation requested.");
+            };
+
+            // Get JPEG files
+            if (!Directory.Exists(inputDirectory))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                return;
+            }
+
+            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (imageFiles.Length == 0)
+            {
+                Console.Error.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            // Collect sizes
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string file in imageFiles)
+            {
+                if (!File.Exists(file))
+                {
+                    Console.Error.WriteLine($"File not found: {file}");
+                    return;
+                }
+
+                using (RasterImage img = (RasterImage)Image.Load(file))
                 {
                     sizes.Add(img.Size);
                 }
+
+                if (cts.Token.IsCancellationRequested)
+                {
+                    Console.WriteLine("Operation cancelled before size calculation.");
+                    return;
+                }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG options with bound output source
-            Source src = new FileCreateSource(outputPath, false);
+            // Create JPEG canvas
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = src,
-                Quality = 90
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
             };
 
-            // Create the output canvas bound to the file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-
-                foreach (var path in inputPaths)
+                foreach (string file in imageFiles)
                 {
-                    // Check for cancellation request
                     if (cts.Token.IsCancellationRequested)
                     {
-                        Console.WriteLine("Operation cancelled.");
+                        Console.WriteLine("Operation cancelled during merging.");
                         return;
                     }
 
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(file))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -86,9 +95,11 @@ class Program
                     }
                 }
 
-                // Save the bound image (no path needed)
+                // Save the merged image
                 canvas.Save();
             }
+
+            Console.WriteLine($"Merged image saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -99,9 +110,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application needs to combine several high‑resolution JPEG photos side‑by‑side into a single panorama and must allow the user to cancel the operation if it takes too long.
- * 2. When a server‑side service generates composite product images from multiple JPEG assets and requires a cancellation token to stop processing on timeout or client disconnect.
- * 3. When a desktop tool processes large batches of JPEG screenshots into a horizontal strip for reporting and needs to abort the merge when the user presses a cancel button.
- * 4. When integrating Aspose.Imaging into a web API that stitches user‑uploaded JPEGs together and must respect cancellation requests from ASP.NET request tokens.
- * 5. When performing a long‑running image merge in a background worker and you want to free resources promptly if the operation is cancelled due to low memory or shutdown.
+ * 1. When you need to combine multiple JPEG photos side‑by‑side into a single panoramic image but want the ability to stop the process if it takes too long.
+ * 2. When a server‑side batch job merges large numbers of JPEG files and must respect user‑initiated cancellation to free resources.
+ * 3. When building a desktop utility that creates a wide‑format collage from user‑selected images and needs to handle Ctrl‑C or close requests gracefully.
+ * 4. When processing high‑resolution product images for an e‑commerce catalog and you must abort the merge if the operation exceeds a time budget.
+ * 5. When integrating image merging into a CI/CD pipeline and you want the build to cancel the task on failure or timeout.
  */
