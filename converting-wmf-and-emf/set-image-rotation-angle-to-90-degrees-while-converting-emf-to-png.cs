@@ -5,49 +5,45 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageRotationExample
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.emf";
+                string outputPath = "output.png";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (EmfImage image = (EmfImage)Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Rotate the image 90 degrees clockwise without flipping
-                emfImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save the rotated image as PNG
-                PngOptions pngOptions = new PngOptions();
-                emfImage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows application needs to display vector graphics from legacy EMF files in a web page, rotating them 90° and converting to PNG for browser compatibility.
- * 2. When generating printable reports that require EMF charts to be reoriented and saved as PNG thumbnails for inclusion in PDF documents.
- * 3. When automating a batch process that standardizes the orientation of scanned EMF diagrams before archiving them as lossless PNG files.
- * 4. When a GIS system must align map symbols stored as EMF by rotating them 90 degrees and converting to PNG for use in mobile map tiles.
- * 5. When a document conversion service needs to preserve the visual layout of EMF logos by rotating them and exporting to PNG for email newsletters.
+ * 1. When you need to display a legacy EMF diagram in a web page that only supports PNG, you can rotate it 90° and convert it to PNG using C#.
+ * 2. When generating printable reports that require all graphics to be oriented consistently, you can rotate EMF charts by 90 degrees and save them as PNG files for inclusion.
+ * 3. When automating a batch process that receives EMF icons from a third‑party tool and must output correctly oriented PNG thumbnails for a mobile app.
+ * 4. When fixing orientation issues caused by EMF files created in landscape mode before uploading them to a content management system that expects portrait PNG images.
+ * 5. When integrating Aspose.Imaging into a C# service that converts user‑uploaded EMF files to PNG while ensuring the image is rotated to match the desired layout.
  */
