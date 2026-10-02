@@ -1,8 +1,9 @@
-// HOW-TO: Create BMP With Rectangle And Translated Ellipse Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP With Translated Rectangle Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,33 +12,21 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = @"c:\temp\output.bmp";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // BMP options
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a BMP image
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            int width = 200;
+            int height = 200;
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Graphics object for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Draw a blue rectangle
-                graphics.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(50, 50, 200, 100));
-
-                // Translate the origin
-                graphics.TranslateTransform(100, 50);
-
-                // Draw a red ellipse after translation
-                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(0, 0, 100, 100));
-
-                // Save the image (output path is already bound)
+                graphics.Clear(Aspose.Imaging.Color.White);
+                Pen pen1 = new Pen(Aspose.Imaging.Color.Blue, 3);
+                graphics.DrawRectangle(pen1, new Rectangle(20, 20, 100, 50));
+                graphics.TranslateTransform(30, 40);
+                Pen pen2 = new Pen(Aspose.Imaging.Color.Red, 3);
+                graphics.DrawRectangle(pen2, new Rectangle(20, 20, 100, 50));
                 image.Save();
             }
         }
@@ -50,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP image that contains a highlighted rectangle and a second shape drawn after shifting the coordinate origin.
- * 2. When you want to programmatically add a rectangle and an offset ellipse to a bitmap for a custom UI thumbnail.
- * 3. When you need to create a simple diagram where the second shape is positioned relative to a moved origin, such as an offset map marker.
- * 4. When you are building a batch process that adds annotations or watermarks to BMP files by translating drawing coordinates.
- * 5. When you require a quick way to produce test images with multiple shapes for automated visual testing of graphics pipelines.
+ * 1. When you need to generate a BMP file with multiple shapes positioned relative to a shifted coordinate system for custom UI icons.
+ * 2. When you want to programmatically draw a rectangle and then offset subsequent drawings without recalculating coordinates in a C# imaging application.
+ * 3. When creating a template image where the second shape must be placed at a specific offset from the first, using Aspose.Imaging’s TranslateTransform.
+ * 4. When automating the production of simple graphics for reports or dashboards that require precise placement of elements in a bitmap.
+ * 5. When building a graphics editor that demonstrates coordinate transformation by rendering shapes before and after applying a translation on a BMP canvas.
  */

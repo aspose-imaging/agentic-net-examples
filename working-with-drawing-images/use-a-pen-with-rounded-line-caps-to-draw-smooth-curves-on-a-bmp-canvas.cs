@@ -1,8 +1,9 @@
-// HOW-TO: Draw Smooth Curves on BMP with Rounded Pen Caps in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Smooth Bezier Curve on BMP with Rounded Caps in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,41 +12,30 @@ class Program
     {
         try
         {
-            // Output BMP file path (hard‑coded)
-            string outputPath = @"C:\temp\smooth_curves.bmp";
-
-            // Ensure the output directory exists
+            string outputPath = "output/curves.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            int width = 200;
+            int height = 200;
 
-            // Create a 500x300 BMP canvas
-            using (Image image = Image.Create(bmpOptions, 500, 300))
+            using (Image image = Image.Create(options, width, height))
             {
-                // Initialize graphics for drawing on the canvas
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Clear the canvas with a white background
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
+                pen.StartCap = Aspose.Imaging.LineCap.Round;
+                pen.EndCap = Aspose.Imaging.LineCap.Round;
 
-                // Create a pen with blue color, width 5 and rounded line caps
-                Pen pen = new Pen(Color.Blue, 5f);
-                pen.StartCap = LineCap.Round;
-                pen.EndCap = LineCap.Round;
+                graphics.DrawBezier(
+                    pen,
+                    new Aspose.Imaging.PointF(10, 150),
+                    new Aspose.Imaging.PointF(50, 10),
+                    new Aspose.Imaging.PointF(150, 10),
+                    new Aspose.Imaging.PointF(190, 150));
 
-                // Draw a smooth curve using a set of points
-                graphics.DrawCurve(pen, new[]
-                {
-                    new Point(50, 250),
-                    new Point(150, 50),
-                    new Point(250, 250),
-                    new Point(350, 50),
-                    new Point(450, 250)
-                });
-
-                // Save the bound image (no need to pass path/options again)
                 image.Save();
             }
         }
@@ -58,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP image that visualizes a smooth curve chart using Aspose.Imaging’s Graphics.DrawCurve with a rounded‑cap pen in C#.
- * 2. When you want to create custom icons or UI elements with anti‑aliased, rounded‑cap lines on a bitmap for a Windows desktop application.
- * 3. When you must programmatically draw decorative wave patterns or borders on a BMP canvas using a blue pen with rounded caps.
- * 4. When you need to export hand‑drawn‑style signatures or free‑form paths to a BMP file with smooth, rounded‑cap strokes.
- * 5. When you are building a server‑side service that produces BMP diagrams with smooth curves for embedding in reports or PDFs.
+ * 1. When you need to generate a BMP signature or logo with anti‑aliased curved lines for a desktop application.
+ * 2. When creating custom chart markers or decorative elements that require smooth Bezier curves with rounded ends in a reporting tool.
+ * 3. When programmatically producing game assets such as curved paths or UI elements and saving them as BMP files for legacy compatibility.
+ * 4. When exporting hand‑drawn style diagrams from a C# service where the pen’s rounded caps ensure visually pleasing line terminations.
+ * 5. When automating the creation of printable templates that include smooth curves, and you must control line thickness and cap style using Aspose.Imaging.
  */

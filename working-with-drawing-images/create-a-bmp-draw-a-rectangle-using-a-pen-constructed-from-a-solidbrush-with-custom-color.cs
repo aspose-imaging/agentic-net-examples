@@ -3,44 +3,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string outputPath = @"C:\Temp\output.bmp";
-
         try
         {
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create BMP image options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24
-            };
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new BMP image (200x200 pixels)
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            using (Image image = Image.Create(options, 300, 200))
             {
-                // Initialize graphics object for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create a SolidBrush with a custom color (e.g., semi‑transparent blue)
-                SolidBrush solidBrush = new SolidBrush(Color.FromArgb(255, 0, 128, 255));
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 0, 128, 255)))
+                {
+                    Pen pen = new Pen(brush, 5);
+                    graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 100));
+                }
 
-                // Construct a Pen from the SolidBrush's color
-                Pen pen = new Pen(solidBrush.Color, 5); // 5‑pixel wide pen
-
-                // Draw a rectangle using the pen
-                graphics.DrawRectangle(pen, 20, 20, 160, 160);
-
-                // Save the BMP image to the output path
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -52,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a 200×200 BMP thumbnail with a blue border for a reporting dashboard.
- * 2. When you want to programmatically add a colored rectangle overlay to an existing bitmap for watermarking purposes.
- * 3. When you are building a C# utility that creates simple diagram elements, such as boxes, directly in BMP files without using external editors.
- * 4. When you must produce a BMP file with a custom‑colored outline to highlight regions in image‑processing pipelines.
- * 5. When you are automating the creation of test images that contain precise geometric shapes for computer‑vision algorithm validation.
+ * 1. When you need to generate a BMP thumbnail with a highlighted border for a reporting dashboard.
+ * 2. When you want to programmatically add a colored rectangular overlay to a bitmap for a watermark or UI element.
+ * 3. When you are creating test images with specific dimensions and custom‑colored shapes for automated visual testing.
+ * 4. When you must produce a BMP file with a precise rectangle outline to mark regions of interest in medical imaging software.
+ * 5. When you need to export a diagram as a BMP where the rectangle’s color and thickness are defined by a SolidBrush‑based Pen.
  */

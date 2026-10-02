@@ -1,70 +1,58 @@
-// HOW-TO: Draw a 5‑point Star Overlay on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Red Star Shape PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
+            string outputPath = "output/star.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            PngOptions options = new PngOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            int width = 500;
+            int height = 500;
+
+            using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(options, width, height))
             {
-                // Create graphics object for drawing
-                Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Create a graphics path to hold the figure
-                GraphicsPath graphicPath = new GraphicsPath();
+                float cx = width / 2f;
+                float cy = height / 2f;
+                float outer = 200f;
+                float inner = 80f;
 
-                // Create a figure that will contain the star shape
-                Figure starFigure = new Figure();
-
-                // Define points for a 5‑point star
-                PointF[] starPoints = new PointF[]
+                List<Aspose.Imaging.PointF> points = new List<Aspose.Imaging.PointF>();
+                for (int i = 0; i < 10; i++)
                 {
-                    new PointF(250f, 50f),   // top point
-                    new PointF(300f, 200f),
-                    new PointF(450f, 200f),
-                    new PointF(330f, 300f),
-                    new PointF(380f, 450f),
-                    new PointF(250f, 350f),
-                    new PointF(120f, 450f),
-                    new PointF(170f, 300f),
-                    new PointF(50f, 200f),
-                    new PointF(200f, 200f)
-                };
+                    double angle = Math.PI / 5 * i - Math.PI / 2;
+                    float r = (i % 2 == 0) ? outer : inner;
+                    points.Add(new Aspose.Imaging.PointF(
+                        cx + (float)(r * Math.Cos(angle)),
+                        cy + (float)(r * Math.Sin(angle))
+                    ));
+                }
 
-                // Add a closed polygon shape (the star) to the figure
-                starFigure.AddShape(new PolygonShape(starPoints, true));
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3);
 
-                // Add the figure to the graphics path
-                graphicPath.AddFigure(starFigure);
+                Aspose.Imaging.PointF[] linePoints = new Aspose.Imaging.PointF[points.Count + 1];
+                for (int i = 0; i < points.Count; i++)
+                {
+                    linePoints[i] = points[i];
+                }
+                linePoints[points.Count] = points[0]; // close the star
 
-                // Draw the path with a red pen
-                graphics.DrawPath(new Pen(Aspose.Imaging.Color.Red, 3), graphicPath);
+                graphics.DrawLines(pen, linePoints);
 
-                // Save the modified image to the output path
-                image.Save(outputPath);
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -76,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a decorative star watermark to a BMP photo before publishing it online.
- * 2. When you want to generate custom badge icons by drawing geometric figures directly onto raster images in a C# application.
- * 3. When you are building a game UI and must overlay a star‑shaped marker onto background textures at runtime.
- * 4. When you have to programmatically create printable certificates that include a star‑shaped seal on top of scanned templates.
- * 5. When you need to batch‑process a folder of bitmap assets to add a consistent star‑shaped highlight for branding purposes.
+ * 1. When you need to generate a decorative star overlay on a PNG image for a web banner using Aspose.Imaging in a C# application.
+ * 2. When you want to programmatically draw custom vector shapes such as a star for a game UI asset pipeline in .NET.
+ * 3. When you must create a high‑resolution PNG logo that includes a red star outline without using external design tools.
+ * 4. When you are building an automated report generator that adds a star‑shaped watermark to each page image via C# code.
+ * 5. When you require a repeatable script to produce star‑shaped icons for mobile apps, saving them directly as PNG files.
  */

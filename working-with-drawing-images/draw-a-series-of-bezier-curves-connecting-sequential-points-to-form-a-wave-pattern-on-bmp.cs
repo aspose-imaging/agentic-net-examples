@@ -1,8 +1,11 @@
-// HOW-TO: Create a Wave Pattern with Bezier Curves in BMP using C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Wave Pattern BMP Using Bezier Curves in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,53 +13,43 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output_wave.bmp";
+            string outputPath = "output/wave.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Canvas size
-            int width = 900;
+            int width = 800;
             int height = 200;
 
-            // BMP options
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a blank image
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (RasterImage image = Image.Create(bmpOptions, width, height) as RasterImage)
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Pen for drawing the wave
-                Pen pen = new Pen(Color.Blue, 2);
+                Pen pen = new Pen(Aspose.Imaging.Color.Blue, 2);
 
-                // Points defining a series of cubic Bezier curves (wave pattern)
-                Point[] points = new Point[]
+                List<Point> points = new List<Point>();
+                int waveCount = 5;
+                int segmentWidth = width / waveCount;
+                for (int i = 0; i <= waveCount; i++)
                 {
-                    new Point(0, 100),
-                    new Point(100, 0),
-                    new Point(200, 200),
-                    new Point(300, 100),
+                    int x = i * segmentWidth;
+                    int y = (i % 2 == 0) ? height / 4 : 3 * height / 4;
+                    points.Add(new Point(x, y));
+                }
 
-                    new Point(300, 100),
-                    new Point(400, 0),
-                    new Point(500, 200),
-                    new Point(600, 100),
+                for (int i = 0; i < points.Count - 1; i++)
+                {
+                    Point start = points[i];
+                    Point end = points[i + 1];
+                    int ctrlX = (start.X + end.X) / 2;
+                    Point ctrl1 = new Point(ctrlX, start.Y);
+                    Point ctrl2 = new Point(ctrlX, end.Y);
+                    graphics.DrawBezier(pen, start, ctrl1, ctrl2, end);
+                }
 
-                    new Point(600, 100),
-                    new Point(700, 0),
-                    new Point(800, 200),
-                    new Point(900, 100)
-                };
-
-                // Draw the series of Bezier curves
-                graphics.DrawBeziers(pen, points);
-
-                // Save the image to BMP file
-                image.Save(outputPath, bmpOptions);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -68,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a custom wave‑shaped graphic for a UI element and save it as a BMP file using C#.
- * 2. When you want to programmatically create decorative background patterns for reports or dashboards without relying on external image editors.
- * 3. When you need to produce a series of cubic Bezier curves to visualize signal or audio waveforms in a .NET application.
- * 4. When you require a lightweight, device‑independent bitmap image that can be embedded in legacy systems or printed directly.
- * 5. When you are automating the creation of repeatable wave motifs for branding assets and need precise control over points and colors via Aspose.Imaging.
+ * 1. When you need to generate a decorative wave overlay on a BMP file for a UI background.
+ * 2. When you want to programmatically draw smooth Bezier‑based waveforms for signal‑processing visualizations in a .NET application.
+ * 3. When you must create a series of connected curves to simulate water ripples in a bitmap image for a game asset.
+ * 4. When you are automating the production of printable wave patterns in BMP format for engineering reports.
+ * 5. When you require a simple C# routine that uses Aspose.Imaging to draw scalable vector‑like curves without relying on external graphics libraries.
  */

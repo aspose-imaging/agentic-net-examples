@@ -1,40 +1,29 @@
-// HOW-TO: Draw Inset Aligned Rectangle on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Set Pen Alignment Inset And Draw Rectangle On BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create image canvas
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            var bmpOptions = new BmpOptions
             {
-                // Initialize graphics
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
-
-                // Create pen with Inset alignment
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
-                pen.Alignment = Aspose.Imaging.PenAlignment.Inset;
-
-                // Draw rectangle
-                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(50, 50, 200, 100));
-
-                // Save image
+                Source = new FileCreateSource(outputPath, false)
+            };
+            using (var image = Image.Create(bmpOptions, 300, 250))
+            {
+                var graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                var pen = new Pen(Color.Black, 5);
+                pen.Alignment = PenAlignment.Inset;
+                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
                 image.Save();
             }
         }
@@ -47,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file with a precisely positioned border for UI mockups, you can use an inset‑aligned pen to draw rectangles that stay inside the image edges.
- * 2. When creating technical diagrams where the stroke must not exceed the defined shape bounds, setting PenAlignment to Inset ensures the line stays within the rectangle on a 24‑bit BMP.
- * 3. When testing how different pen alignments affect rendering in Aspose.Imaging, drawing an inset rectangle on a BMP provides a clear visual reference.
- * 4. When exporting thumbnail previews of scanned documents and you want a consistent inner frame without cropping, an inset‑aligned rectangle can be drawn around the content area.
- * 5. When developing a reporting tool that adds blue borders to chart images saved as BMP, using PenAlignment.Inset guarantees the border is fully visible inside the image canvas.
+ * 1. When you need to generate a BMP image with a black rectangle whose border stays inside the shape for precise UI mockups.
+ * 2. When creating printable graphics where the pen stroke must not extend beyond the rectangle edges to avoid clipping.
+ * 3. When testing how different PenAlignment settings affect rectangle rendering using Aspose.Imaging in C#.
+ * 4. When programmatically drawing outlines for image annotations that must remain within the target area.
+ * 5. When automating the creation of simple black‑on‑white diagrams for documentation or reports.
  */

@@ -1,33 +1,33 @@
-// HOW-TO: Create BMP Image With Dark Gray Background And Yellow Diagonal Line In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image with Dark Gray Background and Yellow Diagonal Line in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            var source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
+            var bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 500;
-            int height = 500;
-
-            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.DarkGray);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.FromArgb(255, 64, 64, 64));
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Yellow, 5);
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width - 1, height - 1));
+                Pen pen = new Pen(Color.Yellow, 1);
+                graphics.DrawLine(pen, 0, 0, image.Width - 1, image.Height - 1);
 
-                canvas.Save();
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -39,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a simple placeholder graphic for a Windows desktop application, you can use this code to create a BMP with a dark gray canvas and a bright yellow diagonal line.
- * 2. When preparing test images for image‑processing algorithms that require a known pattern, the snippet quickly produces a BMP with a contrasting line for edge‑detection validation.
- * 3. When automating the creation of custom icons or badges for a reporting tool, you can programmatically draw a colored diagonal line on a BMP background using Aspose.Imaging.
- * 4. When building a batch process that adds a visual watermark to a series of BMP files, the example shows how to clear the image and draw a colored line as a simple watermark.
- * 5. When teaching beginners how to work with the Aspose.Imaging Graphics API in C#, this code demonstrates basic canvas initialization, background clearing, and line drawing on a BMP image.
+ * 1. When you need to generate a simple placeholder BMP file with a custom background color and a visual marker for testing image rendering pipelines.
+ * 2. When creating diagnostic graphics for hardware devices that only support BMP format and require a high‑contrast line to verify display alignment.
+ * 3. When programmatically producing icons or UI elements that need a solid gray canvas with a bright accent line for branding or visual cues.
+ * 4. When automating batch creation of sample images for documentation or tutorials that demonstrate basic drawing operations in Aspose.Imaging.
+ * 5. When building a quick visual indicator in a BMP file to mark coordinates or paths in a computer‑vision preprocessing step.
  */

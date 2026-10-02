@@ -1,10 +1,10 @@
-// HOW-TO: Apply Custom Stroke to SVG Paths and Export as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Stroke Dash Pattern to SVG Paths and Export as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.pdf";
+            string inputPath = "Input\\image.svg";
+            string outputPath = "Output\\styled.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,34 +23,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+            string svgContent = File.ReadAllText(inputPath);
+            string modifiedContent = svgContent.Replace("<path ", "<path stroke-dasharray=\"5,2\" ");
+
+            string tempSvgPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_modified.svg");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
+            File.WriteAllText(tempSvgPath, modifiedContent);
+
+            using (Image svgImage = Image.Load(tempSvgPath))
             {
-                int width = svgImage.Width;
-                int height = svgImage.Height;
-                int dpi = 96;
-
-                // Create a new SVG canvas
-                var graphics = new SvgGraphics2D(width, height, dpi);
-
-                // Define a custom pen (stroke)
-                Aspose.Imaging.Pen customPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                // Custom dash pattern can be set on the pen if needed (e.g., customPen.DashPattern = new float[] {5, 3};)
-
-                // Create a path that covers the whole canvas (example rectangle)
-                var path = new Aspose.Imaging.GraphicsPath();
-                var figure = new Aspose.Imaging.Figure { IsClosed = true };
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(0, 0, width, height)));
-                path.AddFigure(figure);
-
-                // Apply the custom stroke to the path
-                graphics.DrawPath(customPen, path);
-
-                // Finalize SVG with the applied styling
-                using (SvgImage styledSvg = graphics.EndRecording())
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Export the styled SVG as PDF
-                    var pdfOptions = new PdfOptions();
-                    styledSvg.Save(outputPath, pdfOptions);
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height
+                    };
+                    svgImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -63,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a dashed border to every shape in an SVG diagram and deliver the result as a printable PDF using C#.
- * 2. When a reporting tool must programmatically style vector graphics with a specific line thickness before generating PDF reports.
- * 3. When an engineering application requires converting SVG floor plans into PDFs while applying a uniform stroke to highlight walls.
- * 4. When a web service generates custom SVG charts and must embed a consistent stroke style before sending them as PDF attachments.
- * 5. When automating batch processing of SVG assets to ensure all paths have a black 2‑pixel outline and are saved as PDFs for archival.
+ * 1. When you need to programmatically add a dashed outline to every shape in an SVG before generating a printable PDF report.
+ * 2. When a web application must convert user‑uploaded SVG icons into PDFs with consistent stroke styling for branding guidelines.
+ * 3. When automating the creation of PDF catalogs that require all vector graphics to share the same custom stroke pattern without manually editing each SVG.
+ * 4. When integrating Aspose.Imaging into a C# workflow to ensure SVG diagrams retain a specific dash style when rendered as high‑resolution PDFs for documentation.
+ * 5. When batch‑processing multiple SVG files to apply a uniform stroke‑dasharray and export them as PDFs for archival or distribution.
  */

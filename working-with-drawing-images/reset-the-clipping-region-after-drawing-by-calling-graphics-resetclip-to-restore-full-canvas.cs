@@ -1,10 +1,11 @@
-// HOW-TO: How To Reset Clipping Region After Drawing In Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Reset Clipping Region After Drawing with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,36 +13,40 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\clipping_example.png";
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            using (Image image = Image.Load(inputPath))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.LightGray);
 
-                // Set a clipping region
-                graphics.Clip = new Region(new Rectangle(50, 50, 300, 300));
+                // Set clipping region
+                graphics.Clip = new Region(new Rectangle(50, 50, 100, 100));
 
-                // Draw within the clipping region
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillRectangle(brush, new Rectangle(0, 0, 400, 400));
-                }
+                // Draw within clipped area
+                Pen pen = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(pen, new Rectangle(0, 0, 200, 200));
 
-                // Reset clipping region to full canvas
+                // Reset clipping region
                 graphics.Clip = null;
 
-                // Draw after resetting the clip
-                using (SolidBrush brush2 = new SolidBrush(Color.Red))
+                // Draw after resetting clip
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red)))
                 {
-                    graphics.FillEllipse(brush2, new Rectangle(100, 100, 200, 200));
+                    graphics.FillRectangle(brush, new Rectangle(150, 150, 100, 100));
                 }
 
-                image.Save();
+                // Save the modified image
+                BmpOptions saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to draw a shape only inside a specific area of a PNG and then continue drawing on the entire image without the previous clipping constraints.
- * 2. When generating dynamic graphics where a background fill must be limited to a rectangle but subsequent overlays like circles should cover the whole canvas.
- * 3. When creating layered illustrations in C# using Aspose.Imaging and you must clear a previously set clipping region before adding additional elements.
- * 4. When producing a PNG report that requires a masked region for one graphic element and then unmasked drawing for later elements.
- * 5. When implementing custom image processing pipelines that need to temporarily restrict drawing operations and then restore full drawing capability.
+ * 1. When you need to draw a shape only inside a specific area of a BMP and then continue drawing on the full image without the previous clip constraints.
+ * 2. When you want to apply a semi‑transparent overlay after limiting earlier drawing operations to a rectangular region.
+ * 3. When generating a composite bitmap where the first layer is confined to a mask and subsequent layers require the original canvas size.
+ * 4. When creating a template that draws a border inside a defined region and then adds background shading across the entire image.
+ * 5. When processing scanned images and need to annotate a focused region first, then add watermarks that cover the whole picture.
  */

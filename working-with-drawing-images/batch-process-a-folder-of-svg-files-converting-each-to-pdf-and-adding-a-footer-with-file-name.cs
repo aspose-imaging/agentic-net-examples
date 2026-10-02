@@ -1,8 +1,11 @@
-// HOW-TO: Batch Convert SVG Files to PDF with Filename Footer in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple SVG Files to PDF With Filename Footer In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -28,53 +31,54 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (string inputPath in files)
+            foreach (string filePath in files)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-
+                string fileName = Path.GetFileName(filePath);
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(fileName) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image svgImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(filePath))
                 {
-                    using (MemoryStream pngStream = new MemoryStream())
+                    var svg = (SvgImage)svgImage;
+
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        var pngOptions = new PngOptions();
-                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        using (PngOptions pngOptions = new PngOptions())
                         {
-                            BackgroundColor = Color.White,
-                            PageWidth = svgImage.Width,
-                            PageHeight = svgImage.Height
-                        };
-                        svgImage.Save(pngStream, pngOptions);
-                        pngStream.Position = 0;
-
-                        using (RasterImage rasterSvg = (RasterImage)Image.Load(pngStream))
-                        {
-                            var pdfOptions = new PdfOptions();
-                            pdfOptions.Source = new FileCreateSource(outputPath, false);
-                            using (Image pdfImage = Image.Create(pdfOptions, svgImage.Width, svgImage.Height))
+                            svg.Save(ms, pngOptions);
+                            ms.Position = 0;
+                            using (RasterImage raster = (RasterImage)Image.Load(ms))
                             {
-                                Graphics graphics = new Graphics(pdfImage);
-                                graphics.Clear(Color.White);
-                                graphics.DrawImage(rasterSvg, new Point(0, 0));
+                                int width = raster.Width;
+                                int height = raster.Height;
 
-                                Font font = new Font("Arial", 12, FontStyle.Regular);
-                                using (SolidBrush brush = new SolidBrush(Color.Black))
+                                var createSource = new FileCreateSource(outputPath, false);
+                                using (PdfOptions pdfOptions = new PdfOptions())
                                 {
-                                    int footerY = svgImage.Height - 20;
-                                    graphics.DrawString(fileName, font, brush, new Point(10, footerY));
-                                }
+                                    pdfOptions.Source = createSource;
+                                    using (Image pdfImage = Image.Create(pdfOptions, width, height))
+                                    {
+                                        Graphics graphics = new Graphics(pdfImage);
+                                        graphics.Clear(Color.White);
+                                        graphics.DrawImage(raster, new Point(0, 0));
 
-                                pdfImage.Save();
+                                        using (SolidBrush brush = new SolidBrush(Color.Black))
+                                        {
+                                            Font font = new Font("Arial", 12);
+                                            graphics.DrawString(Path.GetFileNameWithoutExtension(fileName), font, brush, new Point(0, height - 20));
+                                        }
+
+                                        pdfImage.Save();
+                                    }
+                                }
                             }
                         }
                     }
@@ -90,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically generate printable PDFs from a collection of SVG icons and include each original file name as a footer for documentation purposes.
- * 2. When a web application must batch‑process user‑uploaded SVG diagrams into PDF reports while labeling each page with the source file name.
- * 3. When a CI/CD pipeline should convert design assets stored as SVG into PDF assets and embed the asset name for version tracking.
- * 4. When an enterprise system has to archive vector graphics as PDFs and add a filename footer to comply with audit‑trail requirements.
- * 5. When a desktop utility must scan a folder of SVG logos, create PDF versions, and append the logo name at the bottom for easy identification.
+ * 1. When you need to generate printable PDFs from a batch of SVG icons and include each original file name as a footer for documentation purposes.
+ * 2. When an automated build process must convert design assets stored as SVG into PDF reports while labeling each page with the source filename.
+ * 3. When a web service exports user‑uploaded SVG diagrams as PDFs and adds a footer so recipients can identify the original file.
+ * 4. When a desktop application prepares a portfolio of vector graphics by converting them to PDF and appending the file name for easy reference.
+ * 5. When a data‑migration script moves SVG assets to a PDF archive and requires a visible filename footer for audit trails.
  */

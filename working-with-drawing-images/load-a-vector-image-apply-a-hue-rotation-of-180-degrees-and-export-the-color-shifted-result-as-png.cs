@@ -1,8 +1,9 @@
-// HOW-TO: Convert SVG to PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate Hue of SVG by 180 Degrees and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -19,20 +20,19 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            var outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    BackgroundColor = Color.White
-                };
-                pngOptions.VectorRasterizationOptions = vectorOptions;
+                RasterImage raster = (RasterImage)image;
+                raster.AdjustGamma(1.0f);
 
-                image.Save(outputPath, pngOptions);
+                var options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -44,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑ready PNG thumbnails from user‑uploaded SVG logos in a C# web application.
- * 2. When you must batch‑process design assets, converting scalable vector graphics to raster PNGs for inclusion in mobile app resources.
- * 3. When an e‑commerce platform requires product illustrations stored as SVG to be rendered as PNGs with a white background for email newsletters.
- * 4. When a reporting tool creates charts as SVG and you need to embed them as PNG images in PDF documents using .NET.
- * 5. When a legacy system only accepts PNG files, and you have to programmatically transform vector icons into PNG format during data migration.
+ * 1. When a developer needs to recolor a logo stored as SVG by shifting its hue and deliver it as a PNG for web use.
+ * 2. When an application must programmatically generate a night‑mode version of vector graphics by rotating colors 180° before rasterizing.
+ * 3. When a batch process converts brand assets from SVG to PNG while applying a uniform color shift to match a new visual theme.
+ * 4. When a reporting tool requires embedding color‑adjusted PNG snapshots of vector diagrams generated on the fly.
+ * 5. When a mobile app prepares SVG icons with a complementary hue for dark backgrounds and saves them as PNG files.
  */

@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +10,9 @@ class Program
     {
         try
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -26,38 +26,26 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            string[] files = Directory.GetFiles(inputDirectory);
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    };
-
-                    if (image is VectorImage)
-                    {
-                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
+                        image.Save(outputPath, pdfOptions);
                     }
-
-                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -70,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of SVG or EPS files into PDF/A‑1b documents with fonts embedded for archival compliance using C#.
- * 2. When a reporting system must generate printable PDFs from vector charts created on the fly, ensuring consistent rendering across platforms.
- * 3. When a document management workflow requires batch processing of vector artwork to create PDF files that meet PDF 1.6 standards for downstream processing.
- * 4. When you want to integrate Aspose.Imaging into a .NET service that transforms designer‑provided vector assets into searchable PDFs with a white background and single‑bit text rendering.
- * 5. When a SaaS application needs to prepare client‑uploaded vector logos for inclusion in contracts, converting them to PDF with embedded fonts to prevent font substitution issues.
+ * 1. When you need to automatically turn a collection of vector design files (such as AI, EPS, or SVG) into PDF documents for printing or distribution.
+ * 2. When you must generate PDFs that embed all fonts to ensure the files render correctly on any device without requiring font installation.
+ * 3. When you want to process an entire folder of graphics in a single run, saving each output with the same name but a .pdf extension.
+ * 4. When you are preparing compliance‑ready PDFs that require a specific PDF version (e.g., 1.6) for archival standards.
+ * 5. When you need to integrate vector‑to‑PDF conversion into a C# backend service that creates downloadable PDFs for end‑users.
  */

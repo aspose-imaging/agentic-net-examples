@@ -1,44 +1,53 @@
-// HOW-TO: Create Custom BMP Logo With Rectangles And Ellipses In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a BMP Logo with Rectangles and Ellipses in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\custom_logo.bmp";
-
         try
         {
-            // Ensure output directory exists
+            string outputPath = "output/logo.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 400x400 BMP image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(options, width, height))
             {
-                // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                // Clear background to white
+                Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Draw a blue rectangle
-                Aspose.Imaging.Pen rectPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawRectangle(rectPen, 50, 50, 300, 200);
+                // Fill background rectangle
+                using (SolidBrush backgroundBrush = new SolidBrush(Aspose.Imaging.Color.LightGray))
+                {
+                    graphics.FillRectangle(backgroundBrush, new Rectangle(20, 20, 160, 160));
+                }
 
-                // Draw a red ellipse inside the rectangle
-                Aspose.Imaging.Pen ellipsePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3);
-                graphics.DrawEllipse(ellipsePen, 100, 100, 200, 150);
+                // Outline rectangle
+                Pen rectPen = new Pen(Aspose.Imaging.Color.Blue, 3);
+                graphics.DrawRectangle(rectPen, new Rectangle(20, 20, 160, 160));
 
-                // Save the image (output path already bound via FileCreateSource)
+                // Fill ellipse
+                using (SolidBrush ellipseBrush = new SolidBrush(Aspose.Imaging.Color.Yellow))
+                {
+                    graphics.FillEllipse(ellipseBrush, new Rectangle(50, 50, 100, 100));
+                }
+
+                // Outline ellipse
+                Pen ellipsePen = new Pen(Aspose.Imaging.Color.Red, 2);
+                graphics.DrawEllipse(ellipsePen, new Rectangle(50, 50, 100, 100));
+
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -51,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple brand logo programmatically as a 24‑bit BMP file using C# and Aspose.Imaging.
- * 2. When an application must create placeholder images with geometric shapes for testing UI layouts.
- * 3. When you want to produce printable graphics, such as badges or certificates, that require precise rectangle and ellipse outlines.
- * 4. When a server‑side service generates custom icons or watermarks on BMP images without relying on external design tools.
- * 5. When you need to automate the creation of diagrammatic illustrations, like flow‑chart symbols, directly from .NET code.
+ * 1. When you need to generate a simple company badge or icon as a BMP file by programmatically drawing shapes with Aspose.Imaging in C#.
+ * 2. When you want to create placeholder graphics for UI prototypes that require rectangles and ellipses without using external design tools.
+ * 3. When an automated report generator must embed a custom logo into a BMP image using .NET drawing APIs.
+ * 4. When a batch process has to produce multiple stamped images with consistent geometric branding elements for a Windows application.
+ * 5. When you are testing image processing pipelines and require a known BMP file containing specific colored shapes for validation.
  */

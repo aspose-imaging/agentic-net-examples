@@ -1,19 +1,13 @@
-// HOW-TO: Batch Convert EPS to PDF with Confidential Watermark in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple EPS Files To PDF In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -32,8 +26,8 @@ class Program
                 Directory.CreateDirectory(outputDir);
             }
 
-            var epsFiles = Directory.GetFiles(inputDir, "*.eps");
-            foreach (var epsPath in epsFiles)
+            string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
+            foreach (string epsPath in epsFiles)
             {
                 if (!File.Exists(epsPath))
                 {
@@ -43,33 +37,11 @@ class Program
 
                 string fileName = Path.GetFileNameWithoutExtension(epsPath);
                 string pdfPath = Path.Combine(outputDir, fileName + ".pdf");
-
-                // Ensure output directory exists before saving PDF
                 Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-                // Convert EPS to PDF
-                using (var epsImage = (EpsImage)Image.Load(epsPath))
+                using (EpsImage epsImage = (EpsImage)Aspose.Imaging.Image.Load(epsPath))
                 {
-                    var pdfOptions = new PdfOptions();
-                    epsImage.Save(pdfPath, pdfOptions);
-                }
-
-                // Load the generated PDF to add watermark
-                using (var pdfImage = Image.Load(pdfPath))
-                {
-                    var raster = (RasterImage)pdfImage;
-
-                    // Draw watermark text
-                    var graphics = new Graphics(raster);
-                    var font = new Font("Arial", 48);
-                    var brush = new SolidBrush(Color.Red);
-                    var position = new PointF(10, 10);
-                    graphics.DrawString("CONFIDENTIAL", font, brush, position);
-
-                    // Ensure output directory exists before saving final PDF
-                    Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-                    var saveOptions = new PdfOptions();
-                    raster.Save(pdfPath, saveOptions);
+                    epsImage.Save(pdfPath, new PdfOptions());
                 }
             }
         }
@@ -82,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive multiple EPS design files as PDF documents while marking them as confidential.
- * 2. When an automated publishing pipeline must transform vector EPS artwork into PDF format and embed a security watermark before distribution.
- * 3. When a legal department wants to batch‑process client‑submitted EPS drawings, convert them to PDF, and label each file as confidential for internal review.
- * 4. When a cloud service generates PDF reports from EPS charts and must add a "Confidential" overlay to comply with data‑privacy policies.
- * 5. When a desktop utility is required to convert a folder of EPS logos into PDFs and apply a watermark to prevent unauthorized reuse.
+ * 1. When you need to automatically convert a folder of vector EPS artwork into PDF documents for client delivery or archival using C#.
+ * 2. When a publishing workflow requires batch processing of EPS files into PDF format before sending them to a print service.
+ * 3. When you want to integrate EPS‑to‑PDF conversion into a .NET backend that generates reports containing embedded vector graphics.
+ * 4. When you must create a script that scans an input directory, converts each EPS file to PDF, and saves the results to a separate output folder for further processing.
+ * 5. When you are building a document management system that needs to standardize incoming EPS files as searchable PDFs without manual intervention.
  */

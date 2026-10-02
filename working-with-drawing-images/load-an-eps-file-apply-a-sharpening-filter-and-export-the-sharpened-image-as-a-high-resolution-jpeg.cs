@@ -5,7 +5,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -14,8 +13,8 @@ class Program
         try
         {
             string inputPath = "input.eps";
-            string tempPngPath = "temp.png";
-            string outputPath = "output.jpg";
+            string outputPath = "output/high_res.jpg";
+            string tempPngPath = "output/temp.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,38 +23,29 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-            // Load EPS and rasterize to a high‑resolution PNG
-            using (Image epsImage = Image.Load(inputPath))
+            var rasterOptions = new EpsRasterizationOptions
             {
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new EpsRasterizationOptions
-                    {
-                        PageWidth = 2000,
-                        PageHeight = 2000
-                    }
-                };
-                epsImage.Save(tempPngPath, pngOptions);
+                PageWidth = 2000,
+                PageHeight = 2000
+            };
+
+            using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            {
+                epsImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = rasterOptions });
             }
 
-            // Load the rasterized PNG, apply sharpening, and save as high‑quality JPEG
-            using (Image pngImage = Image.Load(tempPngPath))
+            using (var raster = (RasterImage)Image.Load(tempPngPath))
             {
-                var raster = (RasterImage)pngImage;
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
                 var jpegOptions = new JpegOptions
                 {
                     Quality = 100
                 };
-                raster.Save(outputPath, jpegOptions);
-            }
 
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -67,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to convert a vector EPS logo to a crisp, sharpened JPEG for web or print catalogs.
- * 2. When an e‑commerce platform must generate high‑resolution product thumbnails from EPS artwork with enhanced edge definition.
- * 3. When a publishing workflow requires rasterizing EPS illustrations, applying a sharpening filter, and saving them as lossless‑quality JPEGs for print‑ready PDFs.
- * 4. When an automated batch process must transform legacy EPS files into sharpened JPEGs for archival or SEO‑friendly image assets.
- * 5. When a mobile app backend needs to serve sharpened, high‑quality JPEG previews of EPS drawings without storing intermediate PNG files.
+ * 1. When you need to convert a vector EPS logo to a crisp, high‑resolution JPEG for web or print, applying a sharpening filter to enhance detail.
+ * 2. When preparing EPS‑based technical diagrams for inclusion in a PDF report, you can rasterize, sharpen, and save them as high‑quality JPEGs.
+ * 3. When creating product images from EPS artwork for an e‑commerce site, sharpening the rasterized image ensures the final JPEG looks sharp on high‑DPI displays.
+ * 4. When a legacy EPS file must be used in a mobile app, you can rasterize it at a large size, apply a sharpen filter, and export a high‑resolution JPEG compatible with the app.
+ * 5. When batch‑processing EPS files for a marketing campaign, this code lets you automate sharpening and high‑resolution JPEG conversion to maintain visual consistency.
  */

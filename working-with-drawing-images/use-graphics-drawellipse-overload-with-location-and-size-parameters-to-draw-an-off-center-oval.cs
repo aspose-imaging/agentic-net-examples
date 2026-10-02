@@ -1,58 +1,37 @@
-// HOW-TO: Draw Off Center Oval on PNG Using Aspose.Imaging Graphics in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw an Off‑Center Oval on a PNG Canvas Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";   // not used in this example but shown for rule compliance
-        string outputPath = @"C:\temp\offcenter_oval.png";
-
         try
         {
-            // Input path validation (if needed)
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                // Continue without loading the input image
-            }
-
-            // Ensure output directory exists
+            string outputPath = "output/oval.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with a stream source pointing to the output file
-            var pngOptions = new PngOptions
+            int canvasWidth = 400;
+            int canvasHeight = 300;
+            var pngOptions = new PngOptions();
+
+            using (Image image = Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Create a new image of size 500x500
-            using (Image image = Image.Create(pngOptions, 500, 500))
-            {
-                // Initialize graphics object for drawing
-                var graphics = new Graphics(image);
+                Pen pen = new Pen(Color.Blue, 5);
+                // Off‑center oval parameters
+                int x = 100; // X coordinate of the top‑left corner
+                int y = 50;  // Y coordinate of the top‑left corner
+                int width = 200;
+                int height = 150;
 
-                // Clear background with a light color
-                graphics.Clear(Color.Wheat);
+                graphics.DrawEllipse(pen, x, y, width, height);
 
-                // Define a pen for the ellipse (red color, 3-pixel width)
-                var pen = new Pen(Color.Red, 3);
-
-                // Draw an off‑center oval using location and size parameters
-                // x = 150, y = 100 positions the bounding rectangle away from the image center
-                // width = 200, height = 100 defines the oval shape
-                graphics.DrawEllipse(pen, 150f, 100f, 200f, 100f);
-
-                // Save the image (the stream source already points to outputPath)
-                image.Save();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG badge with a decorative off‑center oval using Aspose.Imaging for a web dashboard.
- * 2. When creating custom report graphics with Aspose.Imaging that require precise placement of ellipses within a 500×500 canvas.
- * 3. When programmatically adding a highlighted oval watermark to product images with the Graphics.DrawEllipse method without loading an existing file.
- * 4. When building a UI mockup that shows an ellipse positioned away from the center to illustrate layout spacing using C# and Aspose.Imaging.
- * 5. When automating the production of game UI assets where ellipses must be drawn at specific coordinates in a PNG file.
+ * 1. When you need to generate a PNG badge with a decorative off‑center oval using Aspose.Imaging for .NET.
+ * 2. When creating dynamic charts in a web service and you want to highlight a data region by drawing an off‑center oval on a PNG canvas.
+ * 3. When producing printable certificates and you must add an off‑center oval frame to the image with Aspose.Imaging.
+ * 4. When building a game UI and you require an off‑center oval button background rendered to a PNG asset at runtime.
+ * 5. When automating custom thumbnail creation that includes an offset oval overlay to indicate the focus area.
  */

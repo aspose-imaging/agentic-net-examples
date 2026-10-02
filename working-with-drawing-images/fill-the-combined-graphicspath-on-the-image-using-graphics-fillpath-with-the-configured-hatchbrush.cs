@@ -1,4 +1,4 @@
-// HOW-TO: Fill Combined Rectangle and Ellipse with Hatch Brush in C# (Aspose.Imaging for .NET)
+// HOW-TO: Fill Combined Rectangle and Ellipse Path on Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,54 +10,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Initialize graphics for the image
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
                 Graphics graphics = new Graphics(image);
 
-                // Create a graphics path and a figure
                 GraphicsPath path = new GraphicsPath();
+
                 Figure figure = new Figure();
 
-                // Add shapes to the figure
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 200, 150));
+                figure.AddShape(rectShape);
 
-                // Add the figure to the path
+                EllipseShape ellipseShape = new EllipseShape(new RectangleF(300, 100, 150, 100));
+                figure.AddShape(ellipseShape);
+
                 path.AddFigure(figure);
 
-                // Configure a HatchBrush
-                using (HatchBrush hatchBrush = new HatchBrush())
+                using (SolidBrush solidBrush = new SolidBrush(Color.Blue))
                 {
-                    hatchBrush.BackgroundColor = Color.Wheat;
-                    hatchBrush.ForegroundColor = Color.Red;
-                    hatchBrush.HatchStyle = HatchStyle.Horizontal; // Example hatch style
-                    hatchBrush.Opacity = 0.5f; // 50% opacity
-
-                    // Fill the combined path with the hatch brush
-                    graphics.FillPath(hatchBrush, path);
+                    graphics.FillPath(solidBrush, path);
                 }
 
-                // Save the modified image as PNG
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -69,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a semi‑transparent red hatch pattern on specific shapes such as a rectangle and an ellipse inside a PNG image using Aspose.Imaging for .NET.
- * 2. When generating custom graphics for reports or UI elements where combined vector shapes must be filled with a patterned brush before saving as PNG.
- * 3. When creating watermark or decorative effects on existing images by programmatically filling complex paths with configurable hatch styles and opacity.
- * 4. When automating batch processing of images to apply consistent hatch‑filled shapes for branding or visual guidelines across multiple PNG files.
- * 5. When building a graphics editor feature that lets users draw multiple shapes and fill them with a selectable hatch brush, then export the result as a PNG.
+ * 1. When you need to overlay solid colored shapes such as a rectangle and an ellipse onto a JPEG and save the result as a PNG for web graphics.
+ * 2. When generating custom watermarks or badges by programmatically drawing combined geometric paths on product photos using C#.
+ * 3. When creating composite graphics for reports, like highlighting regions of interest with filled shapes on scanned images.
+ * 4. When building a batch image processing tool that adds colored annotations to images before archiving them in loss‑less PNG format.
+ * 5. When developing a C# application that requires drawing multiple shapes as a single GraphicsPath to ensure consistent fill rendering across different image formats.
  */

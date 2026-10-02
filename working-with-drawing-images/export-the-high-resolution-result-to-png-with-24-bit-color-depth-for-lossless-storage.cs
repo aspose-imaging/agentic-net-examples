@@ -1,48 +1,39 @@
-// HOW-TO: Convert JPEG to High‑Resolution 24‑Bit PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert High Resolution TIFF to 24‑Bit PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "Input\\highres.tif";
+            string outputPath = "Output\\result.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for 24‑bit (Truecolor) output
-                PngOptions pngOptions = new PngOptions
+                using (PngOptions options = new PngOptions
                 {
-                    // Truecolor = 24‑bit (8 bits per channel, no alpha)
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.Truecolor,
-                    BitDepth = 8,
-                    // High resolution (e.g., 300 DPI) for high‑resolution result
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                    // Optional: best compression and progressive loading
-                    CompressionLevel = 9,
-                    Progressive = true
-                };
-
-                // Save the image as PNG with the specified options
-                image.Save(outputPath, pngOptions);
+                    BitDepth = 24,
+                    ColorType = PngColorType.Truecolor,
+                    Source = new FileCreateSource(outputPath, false)
+                })
+                {
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive photographic assets as lossless PNG files while preserving the original 300 DPI resolution for printing.
- * 2. When a web application must generate high‑quality PNG thumbnails from user‑uploaded JPEGs without introducing color banding.
- * 3. When a desktop tool converts scanned JPEG documents into true‑color PNGs for archival compliance with industry standards.
- * 4. When an automated pipeline prepares images for GIS or CAD systems that require 24‑bit PNG with exact resolution settings.
- * 5. When you want to reduce JPEG file size by re‑encoding to PNG with maximum compression while keeping full color fidelity for digital catalogs.
+ * 1. When a developer needs to archive high‑resolution scanned documents as lossless PNG files for long‑term storage.
+ * 2. When an application must convert multi‑megapixel TIFF images to 24‑bit PNG for web display without sacrificing color fidelity.
+ * 3. When a printing workflow requires transforming TIFF source files into true‑color PNGs before sending them to a raster image processor.
+ * 4. When a GIS system needs to export detailed TIFF map tiles as PNGs to reduce file size while keeping full 24‑bit color depth.
+ * 5. When a desktop utility must batch‑process user‑uploaded TIFF photos and save them as PNGs for compatibility with downstream .NET image libraries.
  */

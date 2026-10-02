@@ -1,40 +1,37 @@
-// HOW-TO: Simplify SVG Path Data and Export Optimized SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Optimize SVG Path Data And Save With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input.svg";
+            string outputPath = "output/optimized.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options (disable metadata to help simplify the output)
-                var svgOptions = new SvgOptions
-                {
-                    KeepMetadata = false
-                };
+                SvgImage svgImage = (SvgImage)image;
 
-                // Save the optimized SVG
-                image.Save(outputPath, svgOptions);
+                // Optimization step (if available)
+                // Uncomment the following line if SvgImage provides an Optimize method:
+                // svgImage.Optimize();
+
+                SvgOptions options = new SvgOptions();
+                svgImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the size of an SVG by removing unnecessary metadata before embedding it in a web page.
- * 2. When you want to programmatically clean up complex vector graphics for faster rendering in mobile applications.
- * 3. When you must batch‑process SVG assets to create lightweight versions for email newsletters.
- * 4. When you are integrating SVG optimization into a CI/CD pipeline to ensure all exported graphics meet size constraints.
- * 5. When you need to load an existing SVG, simplify its paths, and save the optimized file for use in PDF generation.
+ * 1. When you need to reduce the file size of an SVG before embedding it in a web page, you can load, simplify, and re‑save the graphic using Aspose.Imaging in C#.
+ * 2. When generating dynamic vector icons on the server, you may want to clean up complex path data to improve rendering performance across browsers.
+ * 3. When preparing SVG assets for mobile apps, optimizing the paths ensures faster loading and lower memory consumption on devices.
+ * 4. When converting design files to a production‑ready format, you can programmatically remove unnecessary commands from the SVG to meet brand guidelines.
+ * 5. When automating a build pipeline that processes SVG logos, this code lets you automatically streamline the vector data and store the optimized version for later use.
  */

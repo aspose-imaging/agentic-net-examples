@@ -1,9 +1,8 @@
-// HOW-TO: Draw Path Outline With Black Pen On PNG Image In C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Rectangle Outline With Red Pen On PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -12,35 +11,27 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = @"C:\temp\output.png";
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            var pngOptions = new PngOptions();
+            using (Image image = Image.Create(pngOptions, 400, 300))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                var graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Build a graphics path with some shapes
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                var path = new GraphicsPath();
+                var figure = new Figure();
+
+                var rect = new RectangleF(50, 50, 300, 200);
+                var rectangleShape = new RectangleShape(rect);
+                figure.AddShape(rectangleShape);
                 path.AddFigure(figure);
 
-                // Draw the path outline using a contrasting black pen
-                graphics.DrawPath(new Pen(Color.Black, 3), path);
+                var pen = new Pen(Color.Red, 5);
+                graphics.DrawPath(pen, path);
 
-                // Save the image (output file is already bound via FileCreateSource)
-                image.Save();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG file that highlights combined shapes with a contrasting black outline for UI icons or thumbnails.
- * 2. When creating printable diagrams where overlapping rectangles and ellipses must be clearly distinguished by a bold stroke.
- * 3. When automating the production of vector‑like graphics for reports that require a crisp outline around custom paths.
- * 4. When building a web service that returns dynamically drawn shapes as PNG images with a visible black border for better visibility.
- * 5. When developing a testing tool that visualizes geometric calculations by drawing shapes and outlining them for debugging purposes.
+ * 1. When you need to generate a PNG image with a red rectangle border to highlight a specific area in a UI overlay, this code creates the outline using Aspose.Imaging in C#.
+ * 2. When producing printable reports that require a colored frame around charts or diagrams, the example draws a red rectangular outline on a PNG canvas.
+ * 3. When building a web API that returns images with a highlighted selection region, the code shows how to draw a red pen outline around a rectangle using Aspose.Imaging.
+ * 4. When automating marketing asset creation where a product must be emphasized with a contrasting border, this snippet adds a red rectangle outline to a PNG file.
+ * 5. When developing a computer‑vision debugging tool that visualizes detected objects, the example draws a red rectangle outline around the area of interest on a PNG image.
  */

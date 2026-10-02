@@ -11,31 +11,29 @@ class Program
     {
         try
         {
-            // Output BMP file path
             string outputPath = "output.bmp";
+            string dir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(dir))
+                dir = ".";
+            Directory.CreateDirectory(dir);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
-            // Set up BMP options with a file source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath);
+            int width = 200;
+            int height = 200;
 
-            // Create a new image canvas (200x200 pixels)
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            using (Image image = Image.Create(options, width, height))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Draw a thick red line
                 Pen redPen = new Pen(Color.Red, 10);
                 graphics.DrawLine(redPen, new Point(20, 20), new Point(180, 180));
 
-                // Overlay a thinner black line for contrast
                 Pen blackPen = new Pen(Color.Black, 2);
                 graphics.DrawLine(blackPen, new Point(20, 20), new Point(180, 180));
 
-                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP diagram that highlights a path with a bold red line and a subtle black edge for better visibility in a Windows desktop application.
- * 2. When creating custom icons or UI elements where a thick colored stroke must be outlined with a thinner contrasting line to improve legibility on varied backgrounds.
- * 3. When producing test images for computer‑vision algorithms that require distinct colored lines with contrasting borders to evaluate edge detection performance.
- * 4. When automating the generation of printable schematics in C# where the primary line is emphasized in red and a thin black outline ensures clarity after printing.
- * 5. When building a reporting tool that programmatically draws highlighted trends on a bitmap chart, using a thick red line for the trend and a thin black line for contrast.
+ * 1. When you need to generate a BMP diagram that highlights a path with a bold red line and a subtle black border for better visibility in a .NET reporting tool.
+ * 2. When creating custom icons or UI assets where a thick colored stroke must be emphasized with a thin contrasting outline using Aspose.Imaging in C#.
+ * 3. When producing test images for computer‑vision algorithms that require a clear red line edge highlighted by a black line to evaluate edge detection accuracy.
+ * 4. When automating the preparation of printable schematics that need a prominent red guide line with a black accent to ensure clarity on monochrome printers.
+ * 5. When building a game map editor that programmatically draws highlighted routes on a BMP background, using a thick red line topped with a thin black line for contrast.
  */

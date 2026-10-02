@@ -3,7 +3,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,40 +13,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with anti-aliasing
-                var rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions()
                 {
-                    PageSize = image.Size,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    SmoothingMode = SmoothingMode.AntiAlias
                 };
 
-                // Configure PNG options with 16‑bit depth
-                var pngOptions = new PngOptions
+                var pngOptions = new PngOptions()
                 {
                     BitDepth = 16,
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new FileCreateSource(outputPath, false),
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rasterized PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -57,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate print‑ready 16‑bit PNG assets from SVG logos while preserving smooth edges using anti‑aliasing in a C# application.
- * 2. When a web service must dynamically convert user‑uploaded SVG diagrams to high‑quality PNG thumbnails with accurate color depth for downstream processing.
- * 3. When an automated build pipeline has to rasterize vector icons into 16‑bit PNGs for inclusion in a Windows desktop application that requires lossless image quality.
- * 4. When a reporting tool creates PDF reports and needs to embed SVG charts as crisp 16‑bit PNG images with anti‑aliased rendering to match corporate branding.
- * 5. When a mobile app backend prepares scalable graphics for different screen densities by converting SVG assets to anti‑aliased 16‑bit PNGs before delivery.
+ * 1. When you need to render an SVG logo at its original size into a lossless 16‑bit PNG for print‑ready graphics while preserving smooth edges.
+ * 2. When a web application must generate high‑color‑depth PNG thumbnails from user‑uploaded vector illustrations with anti‑aliasing to avoid jagged lines.
+ * 3. When a desktop tool converts technical diagrams stored as SVG into true‑color PNG files with alpha channel for inclusion in documentation PDFs.
+ * 4. When an automated build pipeline creates asset bundles, converting vector UI assets to 16‑bit PNGs to ensure consistent visual quality across devices.
+ * 5. When a reporting service transforms SVG charts into high‑resolution PNG images for archival storage, requiring precise color depth and smoothing.
  */

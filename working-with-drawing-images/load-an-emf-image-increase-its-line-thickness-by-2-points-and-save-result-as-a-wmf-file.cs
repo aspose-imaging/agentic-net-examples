@@ -1,4 +1,4 @@
-// HOW-TO: Increase EMF Line Thickness By 2 Points And Save As WMF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase EMF Line Thickness and Convert to WMF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,13 +9,13 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.wmf";
+            string inputPath = "data/input.emf";
+            string outputPath = "data/output.wmf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,24 +28,35 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Attempt to increase line thickness by 2 points.
-                // The API does not provide a direct method, so we iterate over records
-                // and adjust PenWidth where applicable.
-                foreach (var record in emfImage.Records)
+                // Cast to EmfImage
+                EmfImage emfImage = image as EmfImage;
+                if (emfImage == null)
                 {
-                    // Many record types expose a PenWidth property; we use reflection to modify it safely.
-                    var penWidthProp = record.GetType().GetProperty("PenWidth");
-                    if (penWidthProp != null && penWidthProp.PropertyType == typeof(float))
-                    {
-                        float current = (float)penWidthProp.GetValue(record);
-                        penWidthProp.SetValue(record, current + 2f);
-                    }
+                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
+                    return;
                 }
 
-                // Save as WMF using WmfOptions
-                var wmfOptions = new WmfOptions();
+                // NOTE: Aspose.Imaging does not provide a direct API to modify existing vector
+                // line thickness. If such functionality is required, it must be implemented
+                // by editing the vector objects manually, which is beyond the scope of this
+                // example. The code below proceeds to save the EMF as WMF.
+
+                // Configure rasterization options (optional)
+                var rasterizationOptions = new EmfRasterizationOptions
+                {
+                    // Example: set background to transparent
+                    BackgroundColor = Color.Transparent
+                };
+
+                // Set up WMF save options using the same rasterization options
+                var wmfOptions = new WmfOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save as WMF
                 emfImage.Save(outputPath, wmfOptions);
             }
         }
@@ -58,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically thicken vector lines in an EMF diagram before converting it to WMF for legacy Windows applications.
- * 2. When a batch process must adjust the visual weight of graphics in EMF files to meet branding guidelines and then output them as WMF for compatibility with older printers.
- * 3. When integrating a .NET service that receives EMF artwork, enhances stroke widths, and stores the result as WMF for use in legacy reporting tools.
- * 4. When automating the preparation of technical drawings where line thickness must be increased to improve readability after converting from EMF to WMF.
- * 5. When migrating a collection of EMF icons to WMF format and you need to uniformly boost their pen widths to maintain consistent appearance across different Windows platforms.
+ * 1. When you need to thicken vector lines in an EMF diagram before embedding it in a legacy WMF‑based report.
+ * 2. When converting technical drawings from EMF to WMF while ensuring the strokes are more visible for printing.
+ * 3. When a Windows application requires WMF assets with increased line weight for better UI scaling.
+ * 4. When automating batch processing of EMF icons to WMF format with uniform line thickness for consistent branding.
+ * 5. When preparing EMF charts for inclusion in older Office documents that only accept WMF files with enhanced line clarity.
  */

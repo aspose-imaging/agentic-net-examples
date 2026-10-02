@@ -1,4 +1,4 @@
-// HOW-TO: Create BMP Image With Outlined Line Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Black Line and White Outline in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,34 +12,28 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = "output/output.bmp";
+            string outputPath = "output.bmp";
+            string dir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            int width = 200;
+            int height = 200;
 
-            // Create a file source bound to the output path
-            Source source = new FileCreateSource(outputPath, false);
-
-            // BMP options with the bound source
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-            // Create a BMP canvas of size 200x200
-            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, 200, 200))
+            using (Image image = Image.Create(options, width, height))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(canvas);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Draw a thick black line
                 Pen blackPen = new Pen(Color.Black, 10);
                 graphics.DrawLine(blackPen, 20, 20, 180, 180);
 
-                // Overlay a thinner white line for outline effect
-                Pen whitePen = new Pen(Color.White, 2);
+                Pen whitePen = new Pen(Color.White, 4);
                 graphics.DrawLine(whitePen, 20, 20, 180, 180);
 
-                // Save the bound image
-                canvas.Save();
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -51,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a BMP diagram that includes a thick black line with a white outline for UI icons or simple graphics.
- * 2. When you want to add a contrasting white border to a black line in a bitmap to improve visibility on dark or colored backgrounds.
- * 3. When creating test images for computer‑vision or OCR systems that require a clear black stroke surrounded by a thin white edge.
- * 4. When producing custom graphics for embedded devices that only support BMP files and need a highlighted line for status indicators.
- * 5. When automating the creation of printable schematics where a white outline emphasizes the primary black line for better print clarity.
+ * 1. When you need to generate a BMP diagram that highlights a path with a thick black line and a contrasting white border for better visibility.
+ * 2. When creating simple vector‑style graphics for reports, such as a highlighted diagonal line on a white background using Aspose.Imaging in C#.
+ * 3. When producing placeholder images for UI testing where a distinct black line with a white outline indicates alignment or spacing.
+ * 4. When automating the creation of custom icons that require a bold line and a thin outline to stand out on different backgrounds.
+ * 5. When exporting engineering sketches to BMP format and you want the main line emphasized with a contrasting outline for print quality.
  */

@@ -1,8 +1,8 @@
-// HOW-TO: Draw Parallel Lines at an Angle on a BMP with C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Parallel Lines At 45 Degrees On A BMP With C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,70 +11,39 @@ class Program
     {
         try
         {
-            // Output BMP path (hard‑coded)
-            string outputPath = @"output.bmp";
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            int width = 500;
+            int height = 500;
 
-            // Canvas size and drawing parameters
-            int width = 800;
-            int height = 600;
-            double angleDegrees = 30.0;          // Angle of the lines
-            int spacing = 20;                    // Distance between parallel lines (pixels)
-            Aspose.Imaging.Color lineColor = Aspose.Imaging.Color.Black;
-            int lineWidth = 2;
-
-            // Prepare BMP options with a file source bound to the output path
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            bmpOptions.Source = new FileCreateSource(outputPath);
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Obtain a Graphics object for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Pen pen = new Pen(Color.Black, 2);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Pre‑compute trigonometric values
-                double angleRad = angleDegrees * Math.PI / 180.0;
+                double angleDeg = 45;
+                double angleRad = angleDeg * Math.PI / 180.0;
                 double cos = Math.Cos(angleRad);
                 double sin = Math.Sin(angleRad);
-                double lineLength = Math.Sqrt(width * width + height * height) * 2.0;
+                int spacing = 20;
 
-                // Number of lines needed to cover the canvas
-                int lineCount = (int)((width + height) / spacing) + 2;
+                double length = Math.Sqrt(width * width + height * height) * 2;
 
-                // Center of the canvas
-                double centerX = width / 2.0;
-                double centerY = height / 2.0;
-
-                // Pen for drawing
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(lineColor, lineWidth);
-
-                // Draw parallel lines
-                for (int i = -lineCount; i <= lineCount; i++)
+                for (int i = -height; i < width + height; i += spacing)
                 {
-                    double offset = i * spacing;
+                    double offset = i;
+                    double x1 = offset * (-sin);
+                    double y1 = offset * cos;
+                    double x2 = x1 + cos * length;
+                    double y2 = y1 + sin * length;
 
-                    // Offset along the perpendicular direction
-                    double cx = centerX + offset * (-sin);
-                    double cy = centerY + offset * cos;
-
-                    // Endpoints of the line
-                    double x1 = cx - (lineLength / 2.0) * cos;
-                    double y1 = cy - (lineLength / 2.0) * sin;
-                    double x2 = cx + (lineLength / 2.0) * cos;
-                    double y2 = cy + (lineLength / 2.0) * sin;
-
-                    graphics.DrawLine(
-                        pen,
-                        (int)Math.Round(x1),
-                        (int)Math.Round(y1),
-                        (int)Math.Round(x2),
-                        (int)Math.Round(y2));
+                    graphics.DrawLine(pen, (int)Math.Round(x1), (int)Math.Round(y1), (int)Math.Round(x2), (int)Math.Round(y2));
                 }
 
-                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -87,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a diagonal hatch pattern as a BMP background for UI components or game textures using C#.
- * 2. When creating custom engineering drawing fills where evenly spaced parallel lines at a specific angle must be saved as a BMP file.
- * 3. When producing printable alignment guides or barcode‑style markers for packaging layouts that require precise line spacing and orientation.
- * 4. When adding a simple security watermark of angled parallel lines to scanned BMP documents to deter unauthorized modifications.
- * 5. When synthesizing training images for computer‑vision models that need controlled line angles and spacing in BMP format.
+ * 1. When you need to generate a patterned background image, such as diagonal hatch lines, for a BMP file in a C# application.
+ * 2. When creating printable engineering drawings that require evenly spaced guide lines at a specific angle using Aspose.Imaging.
+ * 3. When building a custom watermark or security pattern overlay on a bitmap before saving it to disk.
+ * 4. When developing a game or UI asset that uses tiled line textures generated programmatically at runtime.
+ * 5. When automating the production of test images to verify image‑processing algorithms that expect parallel line patterns at a given angle.
  */

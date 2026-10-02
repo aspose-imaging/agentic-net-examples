@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -11,55 +10,31 @@ class Program
     {
         try
         {
-            // Hardcoded input directory and list of WMF files to process
-            string inputDirectory = @"C:\Images\Wmf";
-            string[] wmfFiles = new[]
-            {
-                Path.Combine(inputDirectory, "image1.wmf"),
-                Path.Combine(inputDirectory, "image2.wmf"),
-                Path.Combine(inputDirectory, "image3.wmf")
-            };
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\Png";
-
-            // Uniform background color to replace transparent areas
-            Aspose.Imaging.Color backgroundColor = Aspose.Imaging.Color.White;
+            string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
 
             foreach (string inputPath in wmfFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path with .png extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load WMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare rasterization options with the desired background color
-                    WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                    using (RasterImage raster = (RasterImage)image)
                     {
-                        PageSize = image.Size,
-                        BackgroundColor = backgroundColor
-                    };
+                        raster.BackgroundColor = Color.White;
 
-                    // Prepare PNG save options and attach rasterization options
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                        string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as PNG
-                    image.Save(outputPath, pngOptions);
+                        PngOptions options = new PngOptions();
+                        raster.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -72,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PNG thumbnails from legacy WMF icons and ensure any transparent regions appear on a solid white canvas.
- * 2. When a reporting system must convert multiple WMF charts to PNG for web display while replacing transparency with a uniform background color.
- * 3. When migrating a desktop application’s assets, you require a C# script to batch rasterize WMF drawings into PNG files with a consistent background for consistent UI styling.
- * 4. When automating document preparation, you need to convert WMF logos to PNG and fill transparent areas so they render correctly in PDF generators that do not support WMF transparency.
- * 5. When creating a batch image processing pipeline that standardizes all vector WMF graphics to PNG format with a predefined background to meet branding guidelines.
+ * 1. When you need to generate web‑ready PNG thumbnails from legacy WMF icons and ensure transparent regions appear as white.
+ * 2. When a reporting system must export vector diagrams stored as WMF into PNG for inclusion in PDF reports without losing background consistency.
+ * 3. When an automated build pipeline has to convert a folder of WMF assets to PNG with a uniform background for cross‑platform UI assets.
+ * 4. When migrating a legacy Windows application’s graphics, you can batch replace transparent WMF backgrounds with white and save them as PNG for modern browsers.
+ * 5. When creating printable marketing material, you may need to convert WMF logos to PNG while forcing a white background to avoid unwanted transparency.
  */

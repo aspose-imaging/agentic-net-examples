@@ -1,7 +1,10 @@
 // HOW-TO: Create Multiple BMP Images with Centered Red Circles of Varying Radii in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,57 +13,34 @@ class Program
     {
         try
         {
-            // Define output directory and ensure it exists
-            string outputDir = @"C:\Temp\Circles";
+            string outputDir = "OutputImages";
             Directory.CreateDirectory(outputDir);
 
-            // Canvas size
-            int canvasWidth = 200;
-            int canvasHeight = 200;
-            int centerX = canvasWidth / 2;
-            int centerY = canvasHeight / 2;
-
-            // Radii for distinct circles
-            int[] radii = new int[] { 20, 40, 60, 80 };
-
+            int[] radii = new int[] { 20, 40, 60, 80, 100 };
             foreach (int radius in radii)
             {
-                // Build output file path
+                int width = radius * 2 + 20;
+                int height = width;
                 string outputPath = Path.Combine(outputDir, $"circle_{radius}.bmp");
-
-                // Ensure output directory exists before each save
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with file source
-                var source = new FileCreateSource(outputPath, false);
-                var bmpOptions = new BmpOptions()
-                {
-                    BitsPerPixel = 24,
-                    Source = source
-                };
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source };
 
-                // Create image canvas bound to the file
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, canvasWidth, canvasHeight))
+                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
                 {
-                    // Initialize graphics for drawing
-                    var graphics = new Aspose.Imaging.Graphics(image);
+                    Graphics graphics = new Graphics(canvas);
                     graphics.Clear(Aspose.Imaging.Color.White);
 
-                    // Define pen for the circle outline
-                    var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2);
+                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                    {
+                        int left = (width - radius * 2) / 2;
+                        int top = (height - radius * 2) / 2;
+                        Rectangle rect = new Rectangle(left, top, radius * 2, radius * 2);
+                        graphics.FillEllipse(brush, rect);
+                    }
 
-                    // Rectangle that bounds the circle
-                    var bounds = new Aspose.Imaging.Rectangle(
-                        centerX - radius,
-                        centerY - radius,
-                        radius * 2,
-                        radius * 2);
-
-                    // Draw the centered circle
-                    graphics.DrawEllipse(pen, bounds);
-
-                    // Save the bound image
-                    image.Save();
+                    canvas.Save();
                 }
             }
         }
@@ -73,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a set of placeholder icons for UI testing, you can programmatically create BMP files with centered circles of different sizes using Aspose.Imaging in C#.
- * 2. When preparing sample data for computer‑vision algorithms that detect circular objects, this code quickly produces BMP images containing red circles with known radii.
- * 3. When automating the creation of printable calibration charts for scanners or cameras, you can batch‑save BMP files with centered circles to ensure consistent dimensions.
- * 4. When building a game asset pipeline that requires simple circular sprites in BMP format, this script generates each radius variant without manual editing.
- * 5. When teaching image‑processing concepts, you can demonstrate drawing primitives and file output by creating a series of BMP images with centered colored circles of varying sizes.
+ * 1. When you need to generate a batch of BMP icons that display centered red circles of different sizes for UI testing or prototyping.
+ * 2. When you want to programmatically produce placeholder graphics for documentation that require a simple centered shape in a raster format.
+ * 3. When you are creating game assets where each BMP file represents a target area with a specific radius for level design.
+ * 4. When you need calibration images for computer‑vision algorithms that require circles of known dimensions saved as BMP files.
+ * 5. When you must export simple vector‑like shapes to BMP format for legacy systems that only accept raster images.
  */

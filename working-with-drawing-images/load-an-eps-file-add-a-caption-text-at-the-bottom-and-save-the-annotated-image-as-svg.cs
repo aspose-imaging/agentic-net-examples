@@ -3,61 +3,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.eps";
+        string outputPath = "output/output.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output.svg";
-
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Graphics graphics = new Graphics(image);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                Font font = new Font("Arial", 24);
+                int margin = 10;
+                float x = (image.Width) / 2f;
 
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
-            {
-                using (var memoryStream = new MemoryStream())
+                using (SolidBrush brush = new SolidBrush(Color.Black))
                 {
-                    // Rasterize EPS to PNG in memory
-                    epsImage.Save(memoryStream, new PngOptions());
-                    memoryStream.Position = 0;
-
-                    using (var rasterImage = (RasterImage)Image.Load(memoryStream))
-                    {
-                        int width = epsImage.Width;
-                        int height = epsImage.Height;
-                        int dpi = 96;
-
-                        var graphics = new SvgGraphics2D(width, height, dpi);
-
-                        // Draw the rasterized EPS image onto the SVG canvas
-                        graphics.DrawImage(rasterImage, new Point(0, 0));
-
-                        // Add caption text at the bottom
-                        string caption = "Sample Caption";
-                        var font = new Font("Arial", 24, FontStyle.Regular);
-                        int textX = 10;
-                        int textY = height - 30; // 30 pixels above the bottom edge
-                        graphics.DrawString(font, caption, new Point(textX, textY), Color.Black);
-
-                        // Finalize SVG and save
-                        using (var svgImage = graphics.EndRecording())
-                        {
-                            svgImage.Save(outputPath);
-                        }
-                    }
+                    graphics.DrawString("Caption Text", font, brush, new PointF(x, image.Height - margin - font.Size));
                 }
+
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -69,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to annotate a vector EPS logo with a product name and export it as scalable SVG for web use.
- * 2. When generating printable marketing materials that require adding dynamic text to EPS artwork before converting to SVG for responsive layouts.
- * 3. When automating batch processing of EPS diagrams to include footnotes or timestamps and saving them as lightweight SVG files.
- * 4. When integrating EPS drawings into a C# application that must display them with custom captions in browsers supporting SVG.
- * 5. When converting legacy EPS illustrations to SVG while preserving visual fidelity and adding descriptive labels for accessibility.
+ * 1. When you need to annotate vector artwork from an EPS file with a descriptive label before converting it to SVG for web display.
+ * 2. When generating printable PDFs from EPS sources and you want to embed a footer note that persists after converting to SVG.
+ * 3. When creating a batch process that adds company branding text to multiple EPS logos and saves them as scalable SVG files for responsive UI.
+ * 4. When preparing technical diagrams in EPS format and you must add a caption indicating version or date before exporting to SVG for documentation.
+ * 5. When a design tool exports EPS files and you require a C# script to programmatically add a watermark text at the bottom and output SVG for further editing.
  */

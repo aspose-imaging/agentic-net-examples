@@ -1,83 +1,90 @@
 // HOW-TO: Generate Multiple BMP Images from CSV Dimensions Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-class Program
+namespace BatchImageCreator
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input CSV path
-            string csvPath = @"C:\temp\dimensions.csv";
-
-            // Verify input file exists
-            if (!File.Exists(csvPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {csvPath}");
-                return;
-            }
+                // Hardcoded input CSV and output directory
+                string inputCsvPath = "input.csv";
+                string outputDirectory = "output";
 
-            // Base directory for output BMP files
-            string outputBaseDir = @"C:\temp\output";
-
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputBaseDir);
-
-            using (var reader = new StreamReader(csvPath))
-            {
-                while (!reader.EndOfStream)
+                // Verify input CSV exists
+                if (!File.Exists(inputCsvPath))
                 {
-                    string line = reader.ReadLine();
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
+                    Console.Error.WriteLine($"File not found: {inputCsvPath}");
+                    return;
+                }
 
-                    // Expected CSV format: width,height,filename.bmp
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDirectory);
+
+                // Read all lines from CSV
+                string[] lines = File.ReadAllLines(inputCsvPath);
+                foreach (string rawLine in lines)
+                {
+                    string line = rawLine.Trim();
+                    if (string.IsNullOrEmpty(line))
+                        continue; // skip empty lines
+
+                    // Expect format: width,height
                     string[] parts = line.Split(',');
-                    if (parts.Length < 3)
-                        continue; // skip malformed lines
+                    if (parts.Length != 2)
+                    {
+                        Console.Error.WriteLine($"Invalid line format (expected width,height): {line}");
+                        continue;
+                    }
 
-                    int width = int.Parse(parts[0].Trim());
-                    int height = int.Parse(parts[1].Trim());
-                    string fileName = parts[2].Trim();
+                    if (!int.TryParse(parts[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int width) ||
+                        !int.TryParse(parts[1].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int height))
+                    {
+                        Console.Error.WriteLine($"Invalid dimensions on line: {line}");
+                        continue;
+                    }
 
-                    string outputPath = Path.Combine(outputBaseDir, fileName);
+                    // Prepare output file path
+                    string outputFileName = $"image_{width}x{height}.bmp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                     // Ensure directory for this output file exists
-                    string outputDir = Path.GetDirectoryName(outputPath);
-                    Directory.CreateDirectory(outputDir);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set up BMP options with a file create source
-                    var bmpOptions = new BmpOptions
+                    // Create BMP image
+                    BmpOptions bmpOptions = new BmpOptions
                     {
-                        BitsPerPixel = 24,
-                        Source = new FileCreateSource(outputPath, false)
+                        BitsPerPixel = 24
                     };
 
-                    // Create a blank BMP image with the specified dimensions
                     using (Image image = Image.Create(bmpOptions, width, height))
                     {
-                        // Save the image (the source is already set to the output file)
-                        image.Save();
+                        // Optionally fill with a solid color (white)
+                        image.Save(outputPath);
                     }
+
+                    Console.WriteLine($"Created: {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically create placeholder BMP files for a large set of product images based on size data stored in a CSV file.
- * 2. When a game development pipeline requires generating terrain tiles of specific widths and heights defined in a spreadsheet.
- * 3. When a reporting system must produce blank bitmap canvases for later overlay of charts, using dimensions supplied by a data export.
- * 4. When a batch printing workflow needs pre‑sized BMP files for label templates whose dimensions are maintained in a CSV configuration.
- * 5. When an automated testing suite creates images of exact pixel dimensions to validate image‑processing algorithms.
+ * 1. When you need to create a set of placeholder BMP files with specific widths and heights listed in a CSV for testing UI layouts.
+ * 2. When an automated pipeline must generate device‑specific splash screens from dimension data stored in a spreadsheet.
+ * 3. When a reporting tool requires a batch of blank images sized to match chart dimensions defined in a CSV file.
+ * 4. When a game developer wants to pre‑render texture atlases of exact pixel sizes based on a configuration list.
+ * 5. When a legacy system expects BMP assets named by their dimensions and you must produce them programmatically from a CSV source.
  */
