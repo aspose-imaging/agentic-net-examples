@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -15,71 +14,59 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "merged.pdf";
 
-            // Define output PDF path
-            string outputPath = Path.Combine(outputDirectory, "merged.pdf");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Get JPEG files from input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-            if (files.Length == 0)
+            foreach (string path in inputPaths)
             {
-                Console.Error.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            // Validate each input file exists and collect sizes
-            List<Size> sizes = new List<Size>();
-            List<string> validFiles = new List<string>();
-            foreach (string file in files)
-            {
-                if (!File.Exists(file))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
-                using (RasterImage img = (RasterImage)Image.Load(file))
-                {
-                    sizes.Add(img.Size);
-                }
-                validFiles.Add(file);
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary file for the intermediate JPEG canvas
-            string tempCanvasPath = Path.Combine(outputDirectory, "temp_canvas.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+            foreach (string path in inputPaths)
+            {
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                {
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
+                }
+            }
 
-            // Create JPEG canvas bound to temporary file
-            Source tempSource = new FileCreateSource(tempCanvasPath, true);
+            int totalWidth = widths.Sum();
+            int maxHeight = heights.Max();
+
+            string tempJpegPath = "temp_canvas.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+            FileCreateSource tempSource = new FileCreateSource(tempJpegPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string imgPath in validFiles)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the canvas (writes to temporary JPEG file)
-                canvas.Save();
-
-                // Export the canvas as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 canvas.Save(outputPath, pdfOptions);
+            }
+
+            if (File.Exists(tempJpegPath))
+            {
+                try { File.Delete(tempJpegPath); } catch { }
             }
         }
         catch (Exception ex)
@@ -91,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a single PDF catalog page that shows product photos side‑by‑side from a folder of JPEG files.
- * 2. When you want to generate a printable proof sheet that merges scanned JPEG pages into one horizontal layout before archiving as PDF.
- * 3. When an application must batch‑process user‑uploaded JPEG screenshots and combine them into a single PDF for easy sharing.
- * 4. When you are building a reporting tool that stitches together chart images horizontally and exports the result as a PDF document.
- * 5. When you need to automate the creation of a PDF brochure by concatenating multiple JPEG advertisements in a single row.
+ * 1. When you need to create a single PDF catalog page by stitching product photos stored as JPEGs side‑by‑side.
+ * 2. When generating a printable PDF report that combines scanned receipt images into one horizontal strip.
+ * 3. When building a web service that receives multiple JPEG uploads and returns a merged PDF for easy download.
+ * 4. When automating the creation of a PDF brochure where landscape images must appear in a continuous horizontal layout.
+ * 5. When consolidating security camera snapshots taken at the same moment into a single PDF document for quick review.
  */
