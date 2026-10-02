@@ -1,4 +1,4 @@
-// HOW-TO: Set JPEG Color Type to Grayscale and Save Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG Image To Grayscale And Save With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,41 +7,29 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.jpg";
+            string inputPath = "Input/source.jpg";
+            string outputPath = "Output/grayscale.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Configure JPEG save options with Grayscale color type
-                var saveOptions = new JpegOptions
-                {
-                    ColorType = JpegCompressionColorMode.Grayscale,
-                    // Optional: set quality and other parameters as needed
-                    Quality = 100,
-                    BitsPerChannel = 8,
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
-                    ResolutionUnit = ResolutionUnit.Inch
-                };
+                image.Grayscale();
 
-                // Save the image as a grayscale JPEG
-                image.Save(outputPath, saveOptions);
+                using (JpegOptions options = new JpegOptions())
+                {
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a smaller file size for printing by converting color images to grayscale JPEGs using Aspose.Imaging in a .NET application.
- * 2. When a web service must deliver grayscale thumbnails of uploaded BMP files to reduce bandwidth and improve loading speed.
- * 3. When an archival system requires all stored photos to be in a standard grayscale JPEG format for consistent viewing across devices.
- * 4. When a medical imaging workflow converts scanned documents to grayscale JPEGs to meet DICOM compliance while preserving resolution.
- * 5. When a batch processing script automates conversion of color BMP assets to grayscale JPEGs for use in machine‑learning preprocessing.
+ * 1. When you need to generate black‑and‑white previews of user‑uploaded JPEG photos for a web gallery.
+ * 2. When you must reduce the file size of JPEG images for email attachments by converting them to grayscale.
+ * 3. When preparing scanned color JPEG documents for OCR, converting them to a single‑channel grayscale improves recognition accuracy.
+ * 4. When creating print‑ready assets that require a single‑channel image to meet publishing specifications.
+ * 5. When standardizing a batch of product JPEG images to grayscale before uploading them to an e‑commerce platform.
  */
