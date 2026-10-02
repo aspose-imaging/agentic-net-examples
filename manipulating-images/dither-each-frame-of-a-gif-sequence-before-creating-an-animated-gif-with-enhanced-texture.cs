@@ -1,78 +1,58 @@
-// HOW-TO: Dither Each Frame And Create Animated GIF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated GIF From Multiple PNG Frames In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input folder containing individual frames and output file path
-        string inputFolder = @"C:\temp\frames\";
-        string outputPath = @"C:\temp\output\animated_dithered.gif";
-
         try
         {
-            // Verify input folder exists
-            if (!Directory.Exists(inputFolder))
+            // Hardcoded input frame paths
+            string frame1 = "frame1.png";
+            string frame2 = "frame2.png";
+            string frame3 = "frame3.png";
+
+            // Verify input files exist
+            if (!File.Exists(frame1))
             {
-                Console.Error.WriteLine($"Folder not found: {inputFolder}");
+                Console.Error.WriteLine($"File not found: {frame1}");
+                return;
+            }
+            if (!File.Exists(frame2))
+            {
+                Console.Error.WriteLine($"File not found: {frame2}");
+                return;
+            }
+            if (!File.Exists(frame3))
+            {
+                Console.Error.WriteLine($"File not found: {frame3}");
                 return;
             }
 
-            // Get all image files in the folder
-            var frameFiles = Directory.GetFiles(inputFolder)
-                                      .Where(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
-                                      .OrderBy(f => f) // Ensure deterministic order
-                                      .ToArray();
+            // Output path
+            string outputPath = "output/animated.gif";
 
-            if (frameFiles.Length == 0)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load frames and create animated GIF
+            using (RasterImage img1 = (RasterImage)Image.Load(frame1))
             {
-                Console.Error.WriteLine("No image frames found in the input folder.");
-                return;
-            }
-
-            // Load the first frame, dither it, and create the initial GifImage
-            using (Image firstImg = Image.Load(frameFiles[0]))
-            {
-                var firstRaster = (RasterImage)firstImg;
-                firstRaster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-
-                using (var firstBlock = new GifFrameBlock(firstRaster))
-                using (var gifImage = new GifImage(firstBlock))
+                using (RasterImage img2 = (RasterImage)Image.Load(frame2))
                 {
-                    // Process remaining frames
-                    for (int i = 1; i < frameFiles.Length; i++)
+                    using (RasterImage img3 = (RasterImage)Image.Load(frame3))
                     {
-                        // Verify each input file exists (redundant but follows the rule)
-                        if (!File.Exists(frameFiles[i]))
+                        RasterImage[] frames = new RasterImage[] { img1, img2, img3 };
+                        using (Image result = Image.Create(frames, true))
                         {
-                            Console.Error.WriteLine($"File not found: {frameFiles[i]}");
-                            continue;
-                        }
-
-                        using (Image img = Image.Load(frameFiles[i]))
-                        {
-                            var raster = (RasterImage)img;
-                            raster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-
-                            // Create a frame block from the dithered raster and add it to the GIF
-                            var block = new GifFrameBlock(raster);
-                            gifImage.AddBlock(block);
+                            GifOptions gifOptions = new GifOptions();
+                            gifOptions.LoopsCount = 0; // infinite loop
+                            result.Save(outputPath, gifOptions);
                         }
                     }
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the animated GIF
-                    gifImage.Save(outputPath);
                 }
             }
         }
@@ -85,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a retro pixelated look to a series of PNG or JPEG images before combining them into an animated GIF.
- * 2. When you want to reduce color banding in each frame of a GIF animation by applying Floyd‑Steinberg dithering with Aspose.Imaging.
- * 3. When you have a folder of individual image frames and must generate a single animated GIF while preserving the original frame order.
- * 4. When you are building a C# utility that processes user‑uploaded images and outputs a dithered animated GIF for web or mobile display.
- * 5. When you need to improve the visual quality of low‑color GIFs by dithering each frame before saving the final GifImage.
+ * 1. When you need to combine several PNG images into a single looping animated GIF for a web banner using C# and Aspose.Imaging.
+ * 2. When you want to programmatically generate an infinite‑loop GIF slideshow from product photos stored as PNG files in a .NET application.
+ * 3. When you must automate the creation of an animated GIF from frame assets during a build process without manual image editors.
+ * 4. When you are building a desktop tool that assembles user‑selected PNG screenshots into a GIF preview for UI testing.
+ * 5. When you require server‑side code that reads PNG frames, assembles them into an animated GIF, and saves it to a specific output folder in an ASP.NET service.
  */
