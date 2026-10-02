@@ -1,67 +1,60 @@
-// HOW-TO: Create BMP With Semi Transparent Filled Rectangle In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Semi Transparent Filled Rectangle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Output file path
-            string outputPath = @"c:\temp\output.bmp";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options with 32 bits per pixel to support alpha
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 32;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 200x200 image canvas
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            try
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                string outputPath = "output/output.bmp";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Clear background to white
-                graphics.Clear(Color.White);
+                BmpOptions options = new BmpOptions();
+                options.BitsPerPixel = 32;
+                options.Source = new FileCreateSource(outputPath, false);
 
-                // Define rectangle bounds
-                Rectangle rect = new Rectangle(50, 50, 100, 100);
-
-                // Draw rectangle outline
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawRectangle(pen, rect);
-
-                // Fill rectangle with semi‑transparent blue brush
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                using (Image image = Image.Create(options, 300, 200))
                 {
-                    brush.Opacity = 0.5f; // 50% opacity
-                    graphics.FillRectangle(brush, rect);
-                }
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Save the image (output is already bound to the file)
-                image.Save();
+                    int rectX = 50;
+                    int rectY = 50;
+                    int rectWidth = 200;
+                    int rectHeight = 100;
+
+                    Pen pen = new Pen(Color.Blue, 3);
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                    {
+                        graphics.FillRectangle(brush, rectX, rectY, rectWidth, rectHeight);
+                    }
+                    graphics.DrawRectangle(pen, rectX, rectY, rectWidth, rectHeight);
+
+                    image.Save();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a 32‑bit BMP badge that includes a semi‑transparent overlay for a desktop application UI.
- * 2. When you want to programmatically add a translucent colored rectangle to a bitmap for highlighting regions in a medical imaging report.
- * 3. When you are creating custom map tiles where a semi‑transparent rectangle marks an area of interest on a BMP background.
- * 4. When you need to produce a BMP watermark with adjustable opacity to protect images before publishing them online.
- * 5. When you are building a batch process that draws and fills shapes on BMP files for automated label printing with alpha‑blended graphics.
+ * 1. When you need to generate a 32‑bit BMP report image that highlights a region with a semi‑transparent overlay for visual emphasis.
+ * 2. When creating custom UI assets such as button backgrounds where a translucent colored rectangle must be drawn over a white canvas in C#.
+ * 3. When producing test images for image‑processing pipelines that require alpha‑blended shapes inside a BMP file.
+ * 4. When automating the creation of watermark stamps that use a partially opaque rectangle to mark confidential sections of a document.
+ * 5. When building a graphics‑editing tool that lets users draw and fill shapes with adjustable opacity and then save the result as a BMP file.
  */
