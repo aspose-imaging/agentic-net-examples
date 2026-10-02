@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -9,40 +10,43 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.eps";
+        string outputPath = "output\\modified.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            using (EpsImage eps = (EpsImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Create a Pen with round line join style
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black);
+                pen.LineJoin = Aspose.Imaging.LineJoin.Round;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int width = eps.Width;
+                int height = eps.Height;
 
-            using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
-            {
                 var pngOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
 
-                using (var canvas = Aspose.Imaging.Image.Create(pngOptions, eps.Width, eps.Height))
+                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, width, height))
                 {
-                    var graphics = new Aspose.Imaging.Graphics(canvas);
-
-                    // Set a pen with round line join (not directly applied to EPS content but demonstrates the setting)
-                    var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1)
-                    {
-                        LineJoin = Aspose.Imaging.LineJoin.Round
-                    };
+                    // Clear background
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
 
                     // Draw the EPS image onto the canvas
-                    graphics.DrawImage(eps, 0, 0);
+                    graphics.DrawImage(eps, 0, 0, width, height);
 
-                    // Save the resulting PNG image
+                    // Save the canvas
                     canvas.Save();
                 }
             }
@@ -56,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector EPS artwork on a web page that only supports PNG images, preserving smooth rounded corners.
- * 2. When converting printed logos stored as EPS into PNG thumbnails for a product catalog while ensuring line joins appear rounded.
- * 3. When generating PNG assets from EPS files for mobile apps that require raster images with consistent line join styling.
- * 4. When automating a batch process that transforms EPS diagrams into PNG graphics for inclusion in PDF reports, needing rounded joins for better visual quality.
- * 5. When creating a preview image of an EPS file in a Windows desktop application, and you want the preview to use rounded line joins to match the design guidelines.
+ * 1. When you need to display vector EPS artwork on a web page that only supports PNG images, and you want smooth rounded corners on the lines.
+ * 2. When converting printed logos stored as EPS to PNG thumbnails while ensuring the line joins appear rounded for better visual quality.
+ * 3. When generating PNG assets from EPS files for mobile apps and you must apply a round line join style to match the app’s design guidelines.
+ * 4. When automating a batch process that transforms EPS diagrams into PNG files with consistent rounded line joins for inclusion in PDF reports.
+ * 5. When creating a server‑side service that receives EPS files, modifies their stroke joins to round, and returns PNG images for downstream image‑processing pipelines.
  */
