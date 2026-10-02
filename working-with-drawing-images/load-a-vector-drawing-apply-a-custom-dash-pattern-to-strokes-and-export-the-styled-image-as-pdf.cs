@@ -1,56 +1,34 @@
-// HOW-TO: Apply Custom Dashed Border to SVG and Export as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Dash Pattern To SVG And Export As PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output/output.pdf";
-
         try
         {
-            // Validate input file existence
+            string inputPath = Path.Combine("Input", "vector.svg");
+            string outputPath = Path.Combine("Output", "styled.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector drawing
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Create a PDF canvas with the same dimensions
-                PdfOptions pdfOptions = new PdfOptions();
-                using (Image pdfImage = Image.Create(pdfOptions, width, height))
-                {
-                    // Obtain graphics object for drawing
-                    Graphics graphics = new Graphics(pdfImage);
-                    graphics.Clear(Color.White);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                pen.DashPattern = new float[] { 5, 2 };
+                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(0, 0, image.Width, image.Height));
 
-                    // Render the loaded vector image onto the PDF canvas
-                    graphics.DrawImage(vectorImage, new Rectangle(0, 0, width, height));
-
-                    // Create a pen with a custom dash pattern
-                    Pen dashPen = new Pen(Color.Black, 2);
-                    dashPen.DashPattern = new float[] { 5f, 2f, 1f, 2f }; // dash, space, dash, space
-
-                    // Draw a rectangle border using the custom dashed pen
-                    graphics.DrawRectangle(dashPen, new Rectangle(0, 0, width - 1, height - 1));
-
-                    // Save the styled PDF
-                    pdfImage.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -62,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from an SVG diagram and highlight its edges with a custom dashed border.
- * 2. When you want to programmatically add a stylized rectangle around a vector logo before embedding it in a PDF report.
- * 3. When a web service must convert user‑uploaded SVG files to PDF while applying brand‑specific dash patterns to the artwork.
- * 4. When automating batch processing of engineering drawings, you require a consistent dashed frame around each PDF output for visual reference.
- * 5. When creating PDF invoices that include scalable SVG icons with a custom dash style to match corporate design guidelines.
+ * 1. When you need to add a dashed border around an entire SVG drawing before delivering it as a PDF report.
+ * 2. When you want to programmatically style vector graphics with custom stroke patterns for branding guidelines in a .NET application.
+ * 3. When you must convert scalable vector illustrations to printable PDF files while preserving custom line styles.
+ * 4. When you are generating automated invoices that include vector logos with a specific dash pattern around the page edges.
+ * 5. When you are building a batch process that reads SVG assets, applies consistent stroke styling, and outputs them as PDF for archiving.
  */
