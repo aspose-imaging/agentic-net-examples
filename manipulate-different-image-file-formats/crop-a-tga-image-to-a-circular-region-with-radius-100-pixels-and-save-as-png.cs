@@ -1,46 +1,48 @@
-// HOW-TO: Crop TGA Image To Circular Region And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop TGA Image to Circular Region and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tga";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image as a raster image
-            using (Image img = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)img;
-
-                // Determine center of the image
-                int centerX = raster.Width / 2;
-                int centerY = raster.Height / 2;
                 int radius = 100;
+                int centerX = image.Width / 2;
+                int centerY = image.Height / 2;
 
-                // Create a circular mask and apply it to the raster image
-                CircleMask mask = new CircleMask(centerX, centerY, radius);
-                mask.ApplyTo(raster);
+                MagicWandTool.Select(image, new MagicWandSettings(centerX, centerY))
+                    .Union(new CircleMask(centerX, centerY, radius))
+                    .Invert()
+                    .Apply();
 
-                // Save the result as PNG
-                raster.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a round thumbnail from a TGA sprite sheet for use in a game UI.
- * 2. When preparing circular profile pictures from high‑resolution TGA assets for a web application.
- * 3. When converting legacy TGA graphics into PNG format while masking out everything outside a specific radius.
- * 4. When generating circular masks for scientific visualizations that require precise pixel‑level cropping.
- * 5. When automating batch processing of TGA files to create round icons for mobile app resources.
+ * 1. When you need to extract a round thumbnail from a TGA texture for UI icons.
+ * 2. When converting legacy game assets stored as TGA files to PNG with a transparent circular mask for web display.
+ * 3. When preparing circular profile pictures from high‑resolution TGA scans for mobile applications.
+ * 4. When generating circular cutouts from TGA maps for scientific visualizations that require PNG with an alpha channel.
+ * 5. When automating batch processing of TGA images to create circular overlays for printed materials.
  */
