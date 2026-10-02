@@ -1,9 +1,9 @@
 // HOW-TO: Reduce Emboss Filter Intensity on SVG When Converting to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,45 +12,37 @@ class Program
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                SvgImage svg = (SvgImage)svgImage;
-
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageSize = svg.Size,
-                    BackgroundColor = Color.White
-                };
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                using (MemoryStream rasterStream = new MemoryStream())
-                {
-                    svgImage.Save(rasterStream, pngOptions);
-                    rasterStream.Position = 0;
-
-                    using (Image rasterImg = Image.Load(rasterStream))
+                    var pngOptions = new PngOptions();
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        RasterImage raster = (RasterImage)rasterImg;
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    };
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
+                    using (Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(memoryStream))
+                    {
                         double[,] originalKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
                         int rows = originalKernel.GetLength(0);
                         int cols = originalKernel.GetLength(1);
                         double[,] adjustedKernel = new double[rows, cols];
-
                         for (int i = 0; i < rows; i++)
                         {
                             for (int j = 0; j < cols; j++)
@@ -59,9 +51,11 @@ class Program
                             }
                         }
 
-                        var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(adjustedKernel);
-                        raster.Filter(raster.Bounds, convOptions);
-                        raster.Save(outputPath, new PngOptions());
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(adjustedKernel);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                        var outOptions = new PngOptions();
+                        rasterImage.Save(outputPath, outOptions);
                     }
                 }
             }
@@ -75,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a lighter embossed effect for SVG graphics before exporting them as PNG files in a .NET application.
- * 2. When you want to programmatically adjust convolution kernel values to fine‑tune image filters for web‑ready SVG thumbnails.
- * 3. When you are building an automated pipeline that rasterizes SVG logos and applies a subtle emboss to match a brand’s visual style.
- * 4. When you need to reduce the harshness of an emboss filter to improve readability of text embedded in SVG diagrams after conversion.
- * 5. When you are creating a C# utility that processes multiple SVG assets and requires custom kernel scaling to control the emboss strength uniformly.
+ * 1. When you need to convert an SVG logo to a PNG thumbnail and want a subtle emboss effect for a web UI using Aspose.Imaging in C#.
+ * 2. When rasterizing vector graphics for print and the default emboss is too harsh, so you scale down the kernel to achieve a softer shadow.
+ * 3. When generating icons from SVG files for a mobile app and the built‑in emboss filter creates overly pronounced edges, requiring a reduced intensity.
+ * 4. When processing a batch of SVG assets for a game and you must tone down the emboss to match the game's art style without losing depth.
+ * 5. When creating PDF reports that embed PNG versions of SVG diagrams and you need a gentle emboss to add visual depth without distracting the reader.
  */
