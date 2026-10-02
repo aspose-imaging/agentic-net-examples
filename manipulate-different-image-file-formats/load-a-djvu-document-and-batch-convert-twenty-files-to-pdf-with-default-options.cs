@@ -1,48 +1,51 @@
-// HOW-TO: Batch Convert Multiple DjVu Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Up to 20 DjVu Files to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths for 20 documents
-            string[] inputPaths = new string[20];
-            string[] outputPaths = new string[20];
-            for (int i = 0; i < 20; i++)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                inputPaths[i] = $"C:\\Input\\file{i + 1}.djvu";
-                outputPaths[i] = $"C:\\Output\\file{i + 1}.pdf";
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // Process each file
-            for (int i = 0; i < 20; i++)
+            if (!Directory.Exists(outputDirectory))
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Verify input file exists
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files.Take(20))
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu document and save as PDF
-                using (Stream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                 {
-                    using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        // Save with default PDF options
-                        djvuImage.Save(outputPath, new PdfOptions());
+                        djvu.Save(outputPath, pdfOptions);
                     }
                 }
             }
@@ -56,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive a large set of scanned DjVu documents as searchable PDFs for legal compliance.
- * 2. When a desktop application must automatically convert newly uploaded DjVu files into PDF format for easier viewing by end‑users.
- * 3. When a migration script processes a batch of legacy DjVu manuals, turning each into PDF without custom rendering settings.
- * 4. When an automated workflow generates PDF reports from DjVu source files to integrate with existing PDF‑based document management systems.
- * 5. When a developer wants to ensure all DjVu files in a folder are converted to PDF with default options before sending them to a third‑party service.
+ * 1. When you need to automatically transform a collection of scanned DjVu documents into PDF files for archiving or sharing.
+ * 2. When a migration script must process the first twenty DjVu images in a folder and output PDFs using default settings.
+ * 3. When integrating Aspose.Imaging into a C# backend to generate PDF versions of DjVu manuals for distribution to users.
+ * 4. When building a batch conversion tool that creates PDF equivalents of DjVu files for compatibility with standard PDF viewers.
+ * 5. When automating a document workflow that requires converting multiple DjVu pages to PDF before applying further processing such as OCR.
  */
