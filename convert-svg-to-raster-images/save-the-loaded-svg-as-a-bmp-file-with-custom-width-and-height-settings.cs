@@ -1,19 +1,17 @@
-// HOW-TO: Convert SVG to BMP With Custom Width And Height In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to BMP with Specific Width and Height in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output\\output.bmp";
+            string outputPath = "output/output.bmp";
 
             if (!File.Exists(inputPath))
             {
@@ -23,22 +21,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            var rasterizationOptions = new SvgRasterizationOptions
+            {
+                PageWidth = 800,
+                PageHeight = 600
+            };
+
+            var bmpOptions = new BmpOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
+
             using (Image image = Image.Load(inputPath))
             {
-                var svgImage = image as Aspose.Imaging.FileFormats.Svg.SvgImage;
-                if (svgImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not an SVG.");
-                    return;
-                }
-
-                int newWidth = 800;
-                int newHeight = 600;
-
-                svgImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                BmpOptions bmpOptions = new BmpOptions();
-                svgImage.Save(outputPath, bmpOptions);
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a bitmap thumbnail of an SVG logo at a specific size for a Windows desktop application.
- * 2. When a reporting tool requires BMP images of vector graphics with exact pixel dimensions for legacy printer compatibility.
- * 3. When an automated batch process must convert scalable SVG diagrams into fixed‑size BMP files for inclusion in PDF documents.
- * 4. When a game engine only accepts BMP textures, and you must resize SVG assets to match the engine’s resolution constraints.
- * 5. When migrating web‑based SVG assets to a Windows service that stores images as BMP files with predefined width and height.
+ * 1. When you need to generate a bitmap preview of an SVG logo at a fixed 800×600 size for a Windows desktop application.
+ * 2. When you must embed an SVG diagram into a legacy system that only accepts BMP files and requires exact dimensions for layout consistency.
+ * 3. When creating thumbnails of vector graphics for email attachments, converting the SVG to a BMP with predetermined width and height to meet size constraints.
+ * 4. When preparing assets for a printing workflow that demands BMP format and specific pixel dimensions to match the printer’s resolution settings.
+ * 5. When automating batch conversion of SVG icons to BMPs for a game engine that cannot render SVGs and needs each image at a uniform size.
  */
