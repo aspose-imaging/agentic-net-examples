@@ -1,9 +1,8 @@
-// HOW-TO: Batch Convert CDR Files to High Quality PDF with AntiAlias Text in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to High Quality PDF with AntiAlias Text Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -12,13 +11,14 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add CDR files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -27,7 +27,8 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -36,22 +37,31 @@ class Program
                     return;
                 }
 
+                if (!string.Equals(Path.GetExtension(inputPath), ".cdr", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions();
-                    rasterOptions.TextRenderingHint = TextRenderingHint.AntiAlias;
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    var pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            TextRenderingHint = TextRenderingHint.AntiAlias,
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
+                    };
 
                     image.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to PDF successfully.");
             }
         }
         catch (Exception ex)
@@ -63,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of CorelDRAW (CDR) drawings into PDF documents for archiving or sharing, preserving crisp text with anti‑alias rendering.
- * 2. When a publishing workflow requires batch exporting of design files to PDF while ensuring text appears smooth on high‑resolution prints.
- * 3. When you want to generate PDF reports from multiple CDR assets in a .NET application without manually opening each file.
- * 4. When integrating a document conversion service that must maintain text quality by applying the AntiAlias rendering hint during rasterization.
- * 5. When automating the preparation of CDR‑based marketing materials for client review, converting them to PDF in one step.
+ * 1. When a design studio needs to automatically turn multiple CorelDRAW (.cdr) drawings into printable PDFs with smooth, anti‑aliased text.
+ * 2. When a document management system must batch‑export archived CDR assets to PDF while preserving text clarity using anti‑aliasing.
+ * 3. When an automated build pipeline generates PDF previews of CDR files for web viewers without manual conversion.
+ * 4. When a reporting tool creates high‑resolution PDF reports from a folder of CDR diagrams, ensuring the text looks crisp.
+ * 5. When a migration script moves legacy CDR graphics to PDF format for compliance, applying a white background and anti‑aliased text rendering.
  */
