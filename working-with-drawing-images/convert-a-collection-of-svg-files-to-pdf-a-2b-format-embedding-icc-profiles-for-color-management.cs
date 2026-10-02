@@ -1,12 +1,14 @@
-// HOW-TO: Convert Multiple SVG Files to PDF/A-2b with ICC Profiles in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert SVG to PDF/A-2b with ICC Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
@@ -28,38 +30,37 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
-                if (!inputPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                if (!inputPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    var pdfOptions = new PdfOptions
-                    {
-                        PdfCoreOptions = new PdfCoreOptions(),
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Aspose.Imaging.Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                        }
-                    };
+                    SvgImage svgImage = (SvgImage)image;
 
-                    image.Save(outputPath, pdfOptions);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = svgImage.Width,
+                            PageHeight = svgImage.Height
+                        };
+
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -72,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process vector graphics from a design system and produce archival‑ready PDF/A‑2b documents that preserve exact colors.
- * 2. When an application must generate printable PDFs from SVG logos while embedding an ICC profile to ensure consistent color across different printers.
- * 3. When a web service receives user‑uploaded SVG diagrams and must return PDF/A files that comply with regulatory document standards.
- * 4. When a reporting tool converts chart SVGs into PDF/A‑2b pages for inclusion in long‑term storage archives with proper color management.
- * 5. When a desktop utility automates the conversion of a folder of SVG assets into PDF/A‑2b files for distribution to clients who require PDF/A compliance.
+ * 1. When a publishing system needs to archive vector graphics as PDF/A‑2b compliant files for long‑term preservation.
+ * 2. When an e‑commerce platform must generate printable product catalogs from SVG artwork while preserving color accuracy with embedded ICC profiles.
+ * 3. When a regulatory reporting tool converts SVG diagrams into PDF/A‑2b documents to meet compliance standards for electronic submissions.
+ * 4. When a design workflow automates batch processing of SVG icons into PDF files for inclusion in corporate brand guidelines.
+ * 5. When a document management solution extracts SVG assets and stores them as PDF/A‑2b files with embedded color profiles for consistent viewing across devices.
  */
