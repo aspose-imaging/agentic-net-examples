@@ -1,10 +1,9 @@
-// HOW-TO: Create SVG Diagram With Connectors Programmatically In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG Diagram with Lines and Filled Rectangle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -12,49 +11,26 @@ class Program
     {
         try
         {
-            // Output SVG file path (hard‑coded)
-            string outputPath = "diagram.svg";
+            string outputPath = "output/diagram.svg";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Canvas dimensions
-            int width = 800;
-            int height = 600;
-            int dpi = 96;
-
-            // Create the SVG graphics canvas
-            SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-            // Define pens and brushes
-            Pen nodePen = new Pen(Color.Black, 2);
-            SolidBrush nodeFill = new SolidBrush(Color.LightGray);
-            Pen connectorPen = new Pen(Color.Blue, 2);
-
-            // Draw first node (rectangle)
-            graphics.FillRectangle(nodePen, nodeFill, 100, 100, 150, 100);
-
-            // Draw second node (rectangle)
-            graphics.FillRectangle(nodePen, nodeFill, 550, 350, 150, 100);
-
-            // Compute centers of the rectangles
-            int x1 = 100 + 150 / 2;
-            int y1 = 100 + 100 / 2;
-            int x2 = 550 + 150 / 2;
-            int y2 = 350 + 100 / 2;
-
-            // Draw connector line between the nodes
-            graphics.DrawLine(connectorPen, x1, y1, x2, y2);
-
-            // Add text labels to the nodes
-            Font labelFont = new Font("Arial", 24, FontStyle.Regular);
-            graphics.DrawString(labelFont, "Node A", new Point(120, 130), Color.Black);
-            graphics.DrawString(labelFont, "Node B", new Point(570, 380), Color.Black);
-
-            // Finalize and save the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(new SvgOptions(), 400, 300))
             {
-                svgImage.Save(outputPath);
+                var graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(350, 50));
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(350, 50), new Aspose.Imaging.Point(350, 250));
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(350, 250), new Aspose.Imaging.Point(50, 250));
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(50, 250), new Aspose.Imaging.Point(50, 50));
+
+                using (var brush = new SolidBrush(Aspose.Imaging.Color.LightBlue))
+                {
+                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(100, 100, 200, 100));
+                }
+
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -66,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a flowchart or network diagram on the fly in a web application and embed it as scalable SVG without using external design tools.
- * 2. When an automated reporting system must create labeled nodes with lines to visualize relationships between entities and export them as SVG for responsive web pages.
- * 3. When a SaaS platform wants to render dynamic architecture diagrams in real time, using C# code to draw rectangles, connectors, and text, then serve the SVG to browsers.
- * 4. When you are building a diagramming feature that stores diagram definitions in a database and recreates them as SVG images for download or preview.
- * 5. When you need to programmatically produce lightweight vector graphics for documentation or tutorials, ensuring the output scales cleanly on high‑DPI displays.
+ * 1. When you need to generate a scalable vector diagram on the fly for a web dashboard using C#.
+ * 2. When you want to programmatically draw connector lines and shapes for flowcharts or network maps without using external design tools.
+ * 3. When you must create an SVG file that can be embedded in HTML emails or web pages with precise dimensions and colors.
+ * 4. When you require automated generation of printable schematics or UI mockups directly from server‑side code.
+ * 5. When you need to produce lightweight vector graphics for responsive designs, ensuring they scale without loss of quality across devices.
  */
