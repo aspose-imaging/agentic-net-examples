@@ -1,21 +1,20 @@
-// HOW-TO: Invert Magic Wand Selection And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Invert Magic Wand Selection and Save as PNG Mask in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output\\mask.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,23 +24,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0))
+                    .Invert()
+                    .Apply();
 
-                using (RasterImage maskCanvas = (RasterImage)Image.Create(pngOptions, sourceImage.Width, sourceImage.Height))
-                {
-                    ImageBitMask invertedMask = MagicWandTool
-                        .Select(sourceImage, new MagicWandSettings(0, 0))
-                        .Invert();
-
-                    invertedMask.ApplyTo(maskCanvas);
-                    maskCanvas.Save();
-                }
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
         catch (Exception ex)
@@ -53,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a transparent background mask for a PNG image by selecting the foreground with Magic Wand and then inverting it.
- * 2. When you want to programmatically create a binary mask that isolates the background of an image for further compositing or analysis.
- * 3. When you are building an automated image‑processing pipeline that must export the inverted selection as a true‑color PNG with alpha channel.
- * 4. When you need to replace or remove the original background of photos by saving the inverted mask for use in graphics editors.
- * 5. When you are developing a C# application that must detect edges, invert the selection, and store the result as a separate PNG file for machine‑learning preprocessing.
+ * 1. When you need to isolate the background of a PNG image by inverting a Magic Wand selection and export the resulting mask for further compositing.
+ * 2. When creating transparent overlays where the original foreground must be preserved and the background mask is required for blending.
+ * 3. When preparing assets for game development and you must generate an alpha mask that represents everything except the selected object.
+ * 4. When automating photo editing pipelines that require a binary mask of the non‑selected area to apply batch background removal.
+ * 5. When building a web application that lets users upload images and you need to programmatically produce a PNG mask of the background for CSS masking or SVG clipping.
  */
