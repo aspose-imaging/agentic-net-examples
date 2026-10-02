@@ -4,47 +4,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample_transparent.png";
+        string inputPath = "input.cmx";
+        string outputPath = "output.png";
 
-        // Global exception handling
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                // Configure rasterization options – set transparent background
-                var rasterOptions = new CmxRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    // Preserve original page size
-                    PageSize = cmxImage.Size
-                };
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Configure PNG save options with the rasterization settings
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = cmx.Size
+                    }
                 };
 
-                // Save as PNG with alpha channel
-                cmxImage.Save(outputPath, pngOptions);
+                cmx.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a CorelDRAW CMX illustration on a web page without a solid background, you can rasterize it to a PNG that preserves transparency.
- * 2. When integrating legacy CMX assets into a modern .NET application, converting them to PNG with an alpha channel allows seamless compositing with other UI elements.
- * 3. When preparing print‑ready graphics that require a transparent background for overlay, you can use this code to turn CMX drawings into lossless PNG files.
- * 4. When automating batch processing of CMX files for a digital asset pipeline, the snippet ensures each image is saved with a transparent background for downstream editing tools.
- * 5. When building a C# service that generates thumbnails from CMX drawings, saving them as transparent PNGs maintains visual fidelity and supports overlay effects.
+ * 1. When you need to display a CorelDRAW CMX vector graphic on a website and require a PNG with a transparent background so it blends with the page design.
+ * 2. When you are generating thumbnails of CMX drawings for a mobile app and want the images to retain alpha transparency for overlay effects.
+ * 3. When you are converting legacy CMX assets to a modern format for a UI that supports PNG with alpha, ensuring the original background color does not obscure underlying elements.
+ * 4. When you automate batch processing of CMX files to create transparent PNG icons for a software product’s toolbar.
+ * 5. When you integrate Aspose.Imaging into a C# service that receives CMX files and must return PNGs with transparent backgrounds for downstream image‑processing pipelines.
  */
