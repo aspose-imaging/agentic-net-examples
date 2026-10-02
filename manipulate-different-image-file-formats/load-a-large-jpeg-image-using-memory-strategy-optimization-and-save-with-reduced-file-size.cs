@@ -1,51 +1,42 @@
-// HOW-TO: Load Large JPEG with Memory Buffer Hint and Save Optimized Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Optimize Large JPEG Loading and Reduce File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\large.jpg";
-        string outputPath = @"C:\temp\large_optimized.jpg";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "Input\\large.jpg";
+            string outputPath = "Output\\large_optimized.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG with a memory‑usage hint (e.g., 100 MB buffer limit)
-            var loadOptions = new LoadOptions { BufferSizeHint = 100 };
+            var loadOptions = new LoadOptions { BufferSizeHint = 10 * 1024 * 1024 };
 
-            using (Image image = Image.Load(inputPath, loadOptions))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath, loadOptions))
             {
-                // Configure JPEG save options to reduce file size
-                var saveOptions = new JpegOptions
+                using (var jpegOptions = new JpegOptions())
                 {
-                    // Lower quality (1‑100) reduces size; 60 is a typical trade‑off
-                    Quality = 60,
-                    // Use progressive compression for better web loading
-                    CompressionType = JpegCompressionMode.Progressive
-                };
-
-                // Save the optimized image
-                image.Save(outputPath, saveOptions);
+                    jpegOptions.Quality = 75;
+                    jpegOptions.CompressionType = JpegCompressionMode.Baseline;
+                    image.Save(outputPath, jpegOptions);
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -53,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a high‑resolution photo on a website but must keep the download size low, you can load the JPEG with a buffer limit and save it with reduced quality and progressive compression.
- * 2. When processing large image files on a server with limited RAM, the memory‑usage hint prevents out‑of‑memory errors while still allowing you to create a smaller version for thumbnails.
- * 3. When preparing images for email attachments, this code lets you shrink the JPEG file size without changing the format, ensuring the attachment stays under size limits.
- * 4. When automating a batch job that converts legacy high‑quality JPEGs to web‑friendly versions, the approach guarantees consistent quality settings and efficient memory handling.
- * 5. When integrating image optimization into a C# desktop application that uploads photos to a cloud service, the code reduces bandwidth by saving a compressed JPEG with progressive encoding.
+ * 1. When a web application must display high‑resolution photos but needs to limit memory consumption while loading them on the server.
+ * 2. When a batch‑processing tool has to shrink large JPEG assets for faster download without noticeably degrading visual quality.
+ * 3. When an e‑commerce platform wants to generate thumbnail‑ready images from original product photos while keeping the process memory‑efficient.
+ * 4. When a mobile backend service processes user‑uploaded pictures and must store them with reduced file size to save storage costs.
+ * 5. When a digital asset management system needs to re‑encode legacy JPEG files with a lower quality setting and baseline compression to ensure compatibility across devices.
  */
