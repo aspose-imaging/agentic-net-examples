@@ -1,12 +1,12 @@
 // HOW-TO: Validate PNG Pixel Values After Applying Custom Convolution Kernel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -21,40 +21,44 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                double[,] kernel = new double[,]
+                double[,] customKernel = new double[,]
                 {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
+                    { -2, -1, 0 },
+                    { -1, 1, 1 },
+                    { 0, 1, 2 }
                 };
 
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                var filterOptions = new ConvolutionFilterOptions(customKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
                 int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-                bool allValid = true;
-                for (int i = 0; i < pixels.Length; i++)
+                bool allInRange = true;
+                foreach (int argb in pixels)
                 {
-                    int argb = pixels[i];
                     int a = (argb >> 24) & 0xFF;
                     int r = (argb >> 16) & 0xFF;
                     int g = (argb >> 8) & 0xFF;
                     int b = argb & 0xFF;
                     if (a < 0 || a > 255 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
                     {
-                        allValid = false;
-                        Console.WriteLine($"Pixel out of range at index {i}: A={a}, R={r}, G={g}, B={b}");
+                        allInRange = false;
                         break;
                     }
                 }
 
-                Console.WriteLine(allValid ? "All pixel values are within 0-255." : "Some pixel values are out of range.");
+                if (!allInRange)
+                {
+                    Console.Error.WriteLine("Pixel values out of 0-255 range detected.");
+                }
+                else
+                {
+                    Console.WriteLine("All pixel values are within the 0-255 range.");
+                }
 
-                PngOptions options = new PngOptions();
-                raster.Save(outputPath, options);
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +70,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a PNG image processed with a custom edge‑detection kernel does not produce overflow or underflow pixel values before saving it with Aspose.Imaging in C#.
- * 2. When you want to verify that applying any convolution filter (sharpen, blur, emboss) to a raster image keeps all ARGB components within the 0‑255 range to avoid corrupted output files.
- * 3. When building an automated image‑processing pipeline that must detect out‑of‑range pixel values after transformations to maintain compatibility with downstream systems.
- * 4. When debugging a C# application that uses Aspose.Imaging’s Filter method and you need to log the first pixel that exceeds valid color bounds.
- * 5. When creating a quality‑control step for batch‑processed PNG files to confirm that custom kernels do not introduce invalid color data before archiving or publishing.
+ * 1. When you need to ensure that a PNG image processed with a custom convolution filter does not produce out‑of‑range color values that could corrupt the file.
+ * 2. When you want to verify that applying edge‑enhancement or sharpening kernels to raster images in a C# application keeps all ARGB components within the 0‑255 range.
+ * 3. When building an automated image‑processing pipeline that must detect and reject images with invalid pixel data after applying user‑defined filters.
+ * 4. When debugging a graphics algorithm that modifies pixel intensities and you need a quick check that the resulting PNG can be displayed correctly in browsers.
+ * 5. When integrating Aspose.Imaging into a .NET service that processes uploaded PNGs and must guarantee safe pixel values before saving them to storage.
  */
