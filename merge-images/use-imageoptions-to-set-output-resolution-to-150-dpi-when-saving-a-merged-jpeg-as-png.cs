@@ -1,46 +1,82 @@
-// HOW-TO: Save JPEG As PNG With 150 DPI Resolution Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Save Merged JPEG Images as PNG with 150 DPI Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged.png";
+
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (string inputPath in inputPaths)
             {
-                // Configure PNG save options with 150 DPI resolution
-                PngOptions saveOptions = new PngOptions
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
-                    ResolutionSettings = new ResolutionSetting(150.0, 150.0)
-                };
+                    sizes.Add(img.Size);
+                }
+            }
 
-                // Save the image as PNG using the configured options
-                image.Save(outputPath, saveOptions);
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
+
+            // Prepare PNG options with 150 DPI resolution
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions()
+            {
+                Source = src,
+                ResolutionSettings = new ResolutionSetting(150, 150)
+            };
+
+            // Create canvas bound to output file
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (string inputPath in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+
+                // Save the bound canvas
+                canvas.Save();
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -48,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a high‑resolution JPEG photograph to a PNG file for lossless web display while preserving a specific print‑ready DPI of 150.
- * 2. When generating PNG assets for a desktop publishing workflow that requires a fixed 150 DPI resolution to ensure consistent layout across different printers.
- * 3. When processing scanned JPEG images in a batch job and saving them as PNG with a set DPI so that downstream OCR or PDF creation tools interpret the image size correctly.
- * 4. When creating thumbnails or preview images from JPEG sources where the PNG output must maintain a known DPI for accurate scaling in design software.
- * 5. When integrating Aspose.Imaging into a C# application that must export user‑uploaded JPEGs as PNGs with a defined 150 DPI to meet corporate branding guidelines.
+ * 1. When you need to combine several JPEG photos into a single wide PNG for web galleries while ensuring the output has a fixed 150 DPI resolution.
+ * 2. When generating print‑ready composite images from multiple source JPEGs and must set the DPI to meet publishing standards.
+ * 3. When creating a high‑resolution PNG sprite sheet from individual JPEG assets for a game or UI and want to control the output resolution programmatically.
+ * 4. When automating a batch process that merges scanned JPEG pages into a single PNG document with a specific DPI for archival purposes.
+ * 5. When developing a C# service that receives JPEG uploads, stitches them side‑by‑side, and saves the result as a PNG with 150 DPI for downstream image‑analysis pipelines.
  */
