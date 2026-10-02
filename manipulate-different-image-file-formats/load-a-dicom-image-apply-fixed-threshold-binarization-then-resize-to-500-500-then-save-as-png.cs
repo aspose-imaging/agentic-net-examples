@@ -3,55 +3,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.dicom";
-            string outputPath = @"c:\temp\result.png";
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            try
             {
-                DicomImage dicomImage = (DicomImage)image;
-
-                // Apply fixed threshold binarization (threshold value 127)
-                dicomImage.BinarizeFixed(127);
-
-                // Resize to 500x500 using Bilinear resampling
-                dicomImage.Resize(500, 500, ResizeType.BilinearResample);
-
-                // Save the processed image as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                using (var dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+                {
+                    dicom.BinarizeFixed(128);
+                    dicom.Resize(500, 500, ResizeType.NearestNeighbourResample);
+                    var pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    dicom.Save(outputPath, pngOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preprocess radiology DICOM files by binarizing and resizing them before feeding them into a diagnostic AI model.
- * 2. When you want to create web‑friendly PNG thumbnails of DICOM scans with a fixed threshold for clear black‑and‑white contrast.
- * 3. When you must convert DICOM images to PNG format for inclusion in electronic health record reports while standardizing the size to 500 × 500 pixels.
- * 4. When you are archiving medical images and need a lightweight binary PNG version that preserves essential details after thresholding.
- * 5. When you are building a desktop C# application that extracts DICOM data, applies fixed‑threshold binarization, and outputs a resized PNG for further image analysis.
+ * 1. When a medical imaging application needs to transform high‑resolution DICOM scans into smaller, black‑and‑white PNG thumbnails for quick web preview.
+ * 2. When a radiology workflow requires converting DICOM files to PNG while applying a fixed threshold to highlight bone structures before archiving.
+ * 3. When a healthcare data pipeline must standardize images by resizing DICOM images to 500 × 500 pixels and saving them as PNG for machine‑learning model input.
+ * 4. When a developer wants to generate printable PNG copies of DICOM X‑ray images with consistent binarization for diagnostic reports.
+ * 5. When integrating Aspose.Imaging in a C# service that extracts DICOM images, applies binary thresholding, resizes them, and stores the results as PNG for cross‑platform viewing.
  */
