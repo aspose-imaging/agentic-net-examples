@@ -1,11 +1,10 @@
-// HOW-TO: Create PNG With Gradient Filled Rectangle Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Gradient Filled Rectangle in PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,49 +12,27 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = @"output.png";
-
-            // Ensure output directory exists
+            string outputPath = "output/output.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with file source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            PngOptions options = new PngOptions();
 
-            // Create a new image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (RasterImage image = (RasterImage)Image.Create(options, 400, 300))
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Create a graphics path and a figure
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-
-                // Add a rectangle shape to the figure
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 300f)));
-
-                // Add the figure to the path
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 300, 200));
+                figure.AddShape(rectShape);
                 path.AddFigure(figure);
 
-                // Create a linear gradient brush
-                using (LinearGradientBrush brush = new LinearGradientBrush(
-                    new PointF(0f, 0f),
-                    new PointF(500f, 0f),
-                    Color.Blue,
-                    Color.Red))
+                using (LinearGradientBrush brush = new LinearGradientBrush(new RectangleF(50, 50, 300, 200), Color.Blue, Color.Red, 0, false))
                 {
-                    // Fill the path with the gradient brush
                     graphics.FillPath(brush, path);
                 }
 
-                // Optionally draw the outline
-                graphics.DrawPath(new Pen(Color.Black, 2), path);
-
-                // Save the image
-                image.Save();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -67,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG banner with a blue‑to‑red gradient rectangle for a website header using Aspose.Imaging in C#.
- * 2. When you want to programmatically create a gradient‑filled button background in a Windows Forms or WPF application.
- * 3. When you must produce a printable flyer image that contains a smooth linear gradient rectangle for marketing material.
- * 4. When you are building a chart or infographic and require a gradient‑shaded rectangle as a legend or highlight area.
- * 5. When you automate thumbnail creation that adds a gradient rectangle overlay to indicate status or category.
+ * 1. When you need to generate a PNG badge with a blue‑to‑red gradient rectangle using Aspose.Imaging in C#.
+ * 2. When creating dynamic report graphics that require a gradient‑filled rectangular background drawn with a GraphicsPath.
+ * 3. When producing custom UI icons where a LinearGradientBrush is used to fill a rectangle shape in a PNG file.
+ * 4. When automating marketing banners that need a gradient rectangle overlay on a blank canvas via Aspose.Imaging.
+ * 5. When building a server‑side image service that returns PNG images with gradient shapes for PDFs or email templates.
  */
