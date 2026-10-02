@@ -2,45 +2,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\input\";
-            string outputDir = @"C:\output\";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all JPEG2000 files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output path with .jpg extension
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                if (ext != ".jp2" && ext != ".j2k" && ext != ".jpx" && ext != ".jpf")
+                {
+                    continue;
+                }
 
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load JPEG2000 image and save as JPEG with quality 80
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    JpegOptions jpegOptions = new JpegOptions
+                    using (JpegOptions jpegOptions = new JpegOptions())
                     {
-                        Quality = 80
-                    };
-                    jpeg2000Image.Save(outputPath, jpegOptions);
+                        jpegOptions.Quality = 80;
+                        image.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -53,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of a large collection of JPEG2000 photos for web publishing by converting them to JPEG with a fixed 80% compression quality.
- * 2. When a digital archive requires all JPEG2000 scans to be transformed into standard JPEG files so that legacy applications can display them without special codec support.
- * 3. When an automated workflow must process incoming JP2 files from a scanner and output JPEGs with consistent quality for downstream image analysis pipelines.
- * 4. When a content management system stores images in JPEG2000 format but the front‑end expects JPEG, you can batch convert them while preserving visual fidelity using a set quality level.
- * 5. When you want to migrate a photo library from JP2 to JPEG on a Windows server, ensuring each file is saved with the same 80% quality to maintain uniform appearance across the collection.
+ * 1. When you need to migrate a legacy archive of JPEG2000 files to standard JPEG format for compatibility with web browsers, you can use this code to convert them in bulk with a consistent 80% quality setting.
+ * 2. When preparing high‑resolution medical or satellite images stored as JP2 for faster preview thumbnails, the batch conversion to JPEG reduces file size while preserving acceptable visual quality.
+ * 3. When automating a nightly build that packages image assets, this script can transform all incoming JPEG2000 assets into JPEGs with uniform compression, ensuring the output folder contains ready‑to‑use files.
+ * 4. When integrating Aspose.Imaging into a C# application that receives user‑uploaded JPX or J2K files, you can instantly re‑encode them to JPEG with a predefined quality to simplify downstream processing.
+ * 5. When creating a migration tool to move digital assets from a content management system that stores JPEG2000 to one that only supports JPEG, the code provides a simple way to batch convert and preserve naming conventions.
  */
