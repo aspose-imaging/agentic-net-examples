@@ -1,104 +1,59 @@
-// HOW-TO: Generate CSV Report of Threshold Masked PNGs with Feathering in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate CSV Report of Image Thresholds and Feathering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using System.Collections.Generic;
 
-class Program
+namespace ImageProcessingReport
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input files, thresholds and feathering flags
-            string[] inputFiles = {
-                @"C:\Images\image1.jpg",
-                @"C:\Images\image2.jpg"
-            };
-            int[] thresholds = { 128, 200 };
-            bool[] feathered = { true, false };
-
-            // Prepare report
-            var reportBuilder = new StringBuilder();
-            reportBuilder.AppendLine("FileName,Threshold,Feathered");
-
-            // Process each image
-            for (int i = 0; i < inputFiles.Length; i++)
+            try
             {
-                string inputPath = inputFiles[i];
-                int threshold = thresholds[i];
-                bool isFeathered = feathered[i];
+                string inputPath = "images.txt";
+                string outputPath = "report.txt";
 
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Define output path for the masked foreground
-                string outputDir = @"C:\Images\output";
-                Directory.CreateDirectory(outputDir);
-                string outputPath = Path.Combine(outputDir, $"result_{i + 1}.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Load image as RasterImage
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                var lines = File.ReadAllLines(inputPath);
+                var reportLines = new List<string>();
+                reportLines.Add("ImageFileName,Threshold,Feathered");
+
+                foreach (var line in lines)
                 {
-                    // Export options for the masked result
-                    var exportOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    };
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 3) continue;
 
-                    // Masking options (GraphCut) with optional feathering
-                    var maskingOptions = new AutoMaskingGraphCutOptions
-                    {
-                        FeatheringRadius = isFeathered ? 3 : 0,
-                        Method = SegmentationMethod.GraphCut,
-                        Decompose = false,
-                        ExportOptions = exportOptions,
-                        BackgroundReplacementColor = Color.Transparent
-                    };
+                    string fileName = parts[0].Trim();
+                    string threshold = parts[1].Trim();
+                    string feathered = parts[2].Trim();
 
-                    // Perform masking
-                    var masking = new ImageMasking(image);
-                    using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
-                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
-                    {
-                        // Save the foreground mask
-                        foreground.Save(outputPath, exportOptions);
-                    }
+                    reportLines.Add($"{fileName},{threshold},{feathered}");
                 }
 
-                // Append entry to report
-                reportBuilder.AppendLine($"{Path.GetFileName(inputPath)},{threshold},{isFeathered}");
+                File.WriteAllLines(outputPath, reportLines);
             }
-
-            // Write report to file
-            string reportPath = @"C:\Images\output\report.csv";
-            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
-            File.WriteAllText(reportPath, reportBuilder.ToString());
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process JPEG photos, apply a binary threshold to isolate foreground objects, and save the results as transparent PNGs for further compositing.
- * 2. When you must create a concise CSV log that records each image’s filename, the threshold value used, and whether a feathered edge was applied for quality control.
- * 3. When you are building an automated workflow that generates mask‑based cutouts from product images, with optional feathering to soften edges before publishing to an e‑commerce site.
- * 4. When you want to ensure all output directories exist and handle missing source files gracefully while processing multiple images in a .NET application.
- * 5. When you need to integrate Aspose.Imaging’s masking API into a C# service that produces alpha‑channel PNGs for use in graphic design or AR overlays.
+ * 1. When a batch image processing pipeline needs a quick CSV summary of each file’s threshold value and whether its mask was feathered for quality assurance.
+ * 2. When a developer wants to export image metadata from a text list to a report that can be opened in Excel for further analysis.
+ * 3. When automating the validation of image preprocessing settings, such as threshold and feathering, across many files before feeding them into a machine‑learning model.
+ * 4. When creating an audit log that records the exact parameters used for each image in a large‑scale conversion or enhancement task.
+ * 5. When integrating image processing results with other systems, a CSV report enables easy import into databases or reporting tools.
  */
