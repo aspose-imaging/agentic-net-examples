@@ -1,55 +1,51 @@
-// HOW-TO: Convert JPEG to CMYK JPEG in C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to CMYK Color Space in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output.cmyk.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "Input\\sample.jpg";
+                string outputPath = "Output\\sample_cmyk.jpg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
-            {
-                // Set up save options to convert to CMYK
-                JpegOptions saveOptions = new JpegOptions
+                if (!File.Exists(inputPath))
                 {
-                    ColorType = JpegCompressionColorMode.Cmyk
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image with CMYK color type
-                image.Save(outputPath, saveOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (JpegOptions options = new JpegOptions())
+                    {
+                        options.ColorType = JpegCompressionColorMode.Cmyk;
+                        image.Save(outputPath, options);
+                    }
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a JPEG for professional printing that requires CMYK color space.
- * 2. When converting images from screen RGB to CMYK to ensure color consistency across print workflows.
- * 3. When a web service must receive a JPEG, change its color mode to CMYK, and return the modified file.
- * 4. When validating that a JPEG’s color profile has been correctly changed before sending it to a publisher.
- * 5. When automating batch processing of photos to meet a printer’s CMYK JPEG specifications using C#.
+ * 1. When preparing images for professional printing, you may need to convert RGB JPEG files to CMYK to ensure accurate color reproduction.
+ * 2. When integrating a C# web service that generates print‑ready assets, you can use this code to change the JPEG color mode to CMYK before delivering the file.
+ * 3. When migrating a legacy catalog of JPEG photos to a workflow that requires CMYK color profiles, the snippet automates the batch conversion.
+ * 4. When validating that a JPEG image meets a printer’s CMYK specifications, you can load the file, set the color type, and save it to verify the conversion.
+ * 5. When building a desktop application that lets users export their photos for offset printing, this example shows how to switch the JPEG’s color space using Aspose.Imaging in .NET.
  */
