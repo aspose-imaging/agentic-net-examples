@@ -1,96 +1,75 @@
-// HOW-TO: Batch Convert BMP Files to PNG with 10 Pixel Crop in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Folder to PNG with 10‑Pixel Crop in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace BatchConvert
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputFolder = "C:\\Images\\Input";
+                string outputFolder = "C:\\Images\\Output";
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+                Directory.CreateDirectory(outputFolder);
 
-            // Get all BMP files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in files)
-            {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp", SearchOption.TopDirectoryOnly);
+                foreach (string inputPath in bmpFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                // Prepare output path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure output directory exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the BMP image
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Cast to RasterImage for cropping
-                    using (RasterImage raster = (RasterImage)image)
+                    if (!File.Exists(inputPath))
                     {
-                        // Cache data if not already cached
-                        if (!raster.IsCached)
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var raster = image as RasterImage;
+                        if (raster == null)
                         {
-                            raster.CacheData();
+                            Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                            continue;
                         }
 
-                        // Calculate crop rectangle (10-pixel border)
-                        int cropX = 10;
-                        int cropY = 10;
-                        int cropWidth = raster.Width - 20;
-                        int cropHeight = raster.Height - 20;
-
-                        // Ensure dimensions are valid
-                        if (cropWidth > 0 && cropHeight > 0)
+                        int newWidth = raster.Width - 20;
+                        int newHeight = raster.Height - 20;
+                        if (newWidth <= 0 || newHeight <= 0)
                         {
-                            raster.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+                            Console.Error.WriteLine($"Image too small to crop: {inputPath}");
+                            continue;
                         }
 
-                        // Save as PNG with default options
-                        raster.Save(outputPath, new PngOptions());
+                        var cropRect = new Rectangle(10, 10, newWidth, newHeight);
+                        raster.Crop(cropRect);
+
+                        var pngOptions = new PngOptions();
+                        raster.Save(outputPath, pngOptions);
                     }
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a set of legacy BMP assets for a web site by converting them to PNG and removing a uniform 10‑pixel border around each image.
- * 2. When an automated build pipeline must process scanned documents stored as BMP, trim unwanted edges, and output optimized PNG files for downstream OCR.
- * 3. When a desktop application must migrate user‑generated BMP screenshots to PNG format while consistently cropping the outer margin for a cleaner UI.
- * 4. When a server‑side service has to batch‑process product photos saved as BMP, apply a fixed border crop, and store them as PNG for faster loading on e‑commerce pages.
- * 5. When a migration script needs to read BMP files from a folder, trim a 10‑pixel frame, and save them as PNG using Aspose.Imaging in C# without manual intervention.
+ * 1. When you need to prepare a large set of legacy BMP screenshots for a web gallery by removing a uniform border and converting them to PNG for smaller file size.
+ * 2. When an automated build process must generate PNG assets from BMP design files while trimming a 10‑pixel margin to align with UI layout requirements.
+ * 3. When a migration script has to replace BMP icons with lossless PNG equivalents and ensure each image is cropped consistently before deployment.
+ * 4. When a data‑import routine reads BMP scans, removes the outer edge, and stores the result as PNG for downstream image‑analysis tools.
+ * 5. When a desktop application must batch‑process user‑uploaded BMP photos, crop a fixed border, and save them as PNG for consistent cross‑platform display.
  */
