@@ -3,58 +3,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Wmf.Consts;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\hatch.bmp";
-
-            // Ensure the output directory exists
+            string outputPath = "output/hatch.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            int width = 200;
+            int height = 200;
 
-            // Create a 400x400 BMP image
-            using (Image image = Image.Create(bmpOptions, 400, 400))
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.FromArgb(255, 255, 240)); // ivory background
 
-                // Clear background to ivory
-                graphics.Clear(Color.Ivory);
-
-                // Pen for drawing diagonal lines
-                Pen linePen = new Pen(Color.Black, 1f);
-
+                Pen pen = new Pen(Color.Black, 1);
                 int step = 20;
-                int width = image.Width;
-                int height = image.Height;
 
-                // Draw diagonal lines from the top and left edges
                 for (int i = 0; i <= width; i += step)
                 {
-                    graphics.DrawLine(linePen, new Point(i, 0), new Point(0, i));
+                    graphics.DrawLine(pen, new Point(i, 0), new Point(width - 1, height - 1 - i));
+                    graphics.DrawLine(pen, new Point(0, i), new Point(width - 1 - i, height - 1));
                 }
 
-                // Draw diagonal lines from the right and bottom edges
-                for (int i = 0; i <= height; i += step)
-                {
-                    graphics.DrawLine(linePen, new Point(width, i), new Point(i, height));
-                }
-
-                // Save the image to the specified path
                 image.Save();
             }
         }
@@ -67,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a printable template that requires a solid ivory canvas with a diagonal hatch overlay, you can use this code to produce a BMP file programmatically.
- * 2. When creating placeholder images for UI mockups that need a simple patterned background without external assets, the snippet quickly draws a hatch pattern on a BMP.
- * 3. When building a batch process that adds a watermark‑style grid to existing images, you can adapt this example to draw diagonal lines on each BMP before further processing.
- * 4. When developing a game or simulation that needs tiled texture files with a consistent ivory base and hatch texture, this code automates the creation of those BMP tiles.
- * 5. When testing image‑processing pipelines that require a known BMP with specific dimensions, color, and line pattern, the example provides a reproducible source image.
+ * 1. When you need to generate a lightweight BMP placeholder image with an ivory background for UI mockups.
+ * 2. When you want to programmatically add a diagonal hatch texture to a bitmap for printing cross‑hatch shading.
+ * 3. When a reporting tool requires a simple patterned background behind charts and you must create it on the fly in C#.
+ * 4. When you need to produce a tiled background image for a game level that uses diagonal lines for visual distinction.
+ * 5. When an automated document generator must embed a BMP with a custom hatch pattern as a watermark or background element.
  */
