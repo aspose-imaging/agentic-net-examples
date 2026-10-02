@@ -1,48 +1,38 @@
-// HOW-TO: Save WebP as PDF while Keeping EXIF Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Preserve WebP EXIF Metadata When Converting to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.pdf";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the WebP image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.webp";
+            string outputPath = "output.pdf";
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare PDF options
-                var pdfOptions = new PdfOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (WebPImage image = (WebPImage)Image.Load(inputPath))
+            {
+                ExifData exif = image.ExifData;
+
+                PdfOptions options = new PdfOptions
                 {
-                    // Preserve original metadata
-                    KeepMetadata = true
+                    ExifData = exif
                 };
 
-                // Transfer EXIF data from the WebP image to PDF options, if present
-                if (image is WebPImage webPImage && webPImage.ExifData != null)
-                {
-                    pdfOptions.ExifData = webPImage.ExifData;
-                }
-
-                // Save as PDF with the prepared options
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -54,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application needs to generate PDF reports from user‑uploaded WebP photos and retain the original camera details for auditing.
- * 2. When a digital asset management system converts WebP images to PDF for archival while preserving EXIF data for future search.
- * 3. When a photo‑sharing website offers downloadable PDFs of WebP images and wants to keep GPS coordinates and timestamps embedded.
- * 4. When a document‑generation service merges WebP screenshots into PDFs and must maintain metadata for compliance tracking.
- * 5. When a mobile app exports captured WebP pictures to PDF and requires the EXIF information to be available for downstream processing.
+ * 1. When a photographer needs to archive WebP photos as PDFs while keeping camera details like exposure and GPS coordinates.
+ * 2. When a document management system converts user‑uploaded WebP images to PDF and must retain the original EXIF information for compliance.
+ * 3. When a mobile app generates PDF reports from WebP screenshots and wants to embed the source image’s metadata for later analysis.
+ * 4. When a legal workflow requires converting WebP evidence files to PDF without losing metadata that proves authenticity.
+ * 5. When a batch processing tool migrates a WebP image library to PDF format and needs to preserve EXIF tags for searchable metadata.
  */
