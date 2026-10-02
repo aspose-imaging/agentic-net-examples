@@ -1,63 +1,51 @@
-// HOW-TO: Convert PDF Vector Artwork to Editable SVG with Layers in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PDF With Vector Layers To SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace PdfToSvgConverter
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.pdf";
-        string outputPath = @"C:\Temp\output.svg";
-
-        try
+        static void Main()
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.pdf";
+                string outputPath = "output.svg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var svgOptions = new SvgOptions();
+                    image.Save(outputPath, svgOptions);
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PDF document (vector image)
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Configure rasterization options for SVG export
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Preserve original page size
-                    PageSize = image.Size
-                };
-
-                // Configure SVG export options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    // Render text as shapes to keep editability
-                    TextAsShapes = true
-                };
-
-                // Save the PDF as SVG, preserving layer hierarchy
-                image.Save(outputPath, svgOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to transform a multi‑page PDF containing vector graphics into an SVG file that retains the original layer structure for further editing in tools like Adobe Illustrator or Inkscape.
- * 2. When building an automated workflow that extracts scalable artwork from PDF brochures and converts it to SVG so web designers can reuse the graphics on responsive websites.
- * 3. When migrating legacy design assets from PDF to a modern vector format while keeping text editable as shapes for precise typography adjustments in downstream applications.
- * 4. When creating a batch conversion utility that prepares PDF schematics for inclusion in documentation systems that only accept SVG, ensuring the visual fidelity and layer hierarchy remain intact.
- * 5. When integrating PDF‑to‑SVG conversion into a C# application that generates printable marketing materials, allowing designers to fine‑tune individual layers after conversion.
+ * 1. When a developer needs to export a multi‑layer PDF brochure into an editable SVG for further refinement in Illustrator or Inkscape.
+ * 2. When an automated build process must transform PDF schematics into scalable SVG graphics for web display without losing vector quality.
+ * 3. When a reporting tool generates PDF charts and the application must convert them to SVG to enable interactive zoom and styling in a web dashboard.
+ * 4. When a migration script has to preserve the original PDF layer hierarchy while converting architectural drawings to SVG for CAD integration.
+ * 5. When a content management system stores PDFs and requires on‑the‑fly conversion to SVG to support responsive design and client‑side editing.
  */
