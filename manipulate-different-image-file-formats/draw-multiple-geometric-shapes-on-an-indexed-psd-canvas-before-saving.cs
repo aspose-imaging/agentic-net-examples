@@ -1,11 +1,11 @@
-// HOW-TO: Create Indexed PSD With Shapes Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Indexed PSD with Shapes Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,67 +13,56 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\output.psd";
-
+            string outputPath = "output.psd";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure PSD options for an indexed image
-            PsdOptions psdOptions = new PsdOptions();
-            psdOptions.Source = new FileCreateSource(outputPath, false);
-            psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.CompressionMethod = CompressionMethod.RLE;
-            psdOptions.Version = 5;
+            int width = 800;
+            int height = 600;
 
-            // Define a simple palette (max 256 colors)
-            Color[] paletteColors = new Color[]
+            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[256];
+            for (int i = 0; i < 256; i++)
             {
-                Color.Black,
-                Color.White,
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.Yellow,
-                Color.Cyan,
-                Color.Magenta
-            };
-            psdOptions.Palette = new ColorPalette(paletteColors);
+                byte v = (byte)i;
+                paletteColors[i] = Aspose.Imaging.Color.FromArgb(255, v, v, v);
+            }
+            var palette = new ColorPalette(paletteColors);
 
-            // Create the PSD canvas
-            using (Image image = Image.Create(psdOptions, 500, 500))
+            PsdOptions options = new PsdOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            options.ColorMode = ColorModes.Indexed;
+            options.Palette = palette;
+            options.ChannelsCount = (short)1;
+            options.ChannelBitsCount = (short)8;
+            options.Version = 5;
+
+            using (var psd = Image.Create(options, width, height) as RasterImage)
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+                Graphics graphics = new Graphics(psd);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Rectangle outline
-                graphics.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(50, 50, 200, 150));
+                Pen penRect = new Pen(Aspose.Imaging.Color.Red, 3);
+                graphics.DrawRectangle(penRect, new Rectangle(50, 50, 200, 150));
 
-                // Filled ellipse
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                using (var brushEllipse = new SolidBrush(Aspose.Imaging.Color.Blue))
                 {
-                    graphics.FillEllipse(brush, new Rectangle(300, 50, 150, 100));
+                    graphics.FillEllipse(brushEllipse, new Rectangle(300, 100, 200, 150));
                 }
 
-                // Diagonal line
-                graphics.DrawLine(new Pen(Color.Green, 3), new Point(100, 300), new Point(400, 300));
+                Pen penLine = new Pen(Aspose.Imaging.Color.Green, 2);
+                graphics.DrawLine(penLine, new Point(100, 300), new Point(700, 500));
 
-                // Polygon
                 Point[] polygonPoints = new Point[]
                 {
-                    new Point(250, 350),
-                    new Point(300, 400),
-                    new Point(350, 350),
-                    new Point(300, 300)
+                    new Point(400, 300),
+                    new Point(500, 350),
+                    new Point(450, 450),
+                    new Point(350, 450),
+                    new Point(300, 350)
                 };
-                graphics.DrawPolygon(new Pen(Color.Purple, 2), polygonPoints);
+                Pen penPoly = new Pen(Aspose.Imaging.Color.Yellow, 2);
+                graphics.DrawPolygon(penPoly, polygonPoints);
 
-                // Filled rectangle
-                using (SolidBrush fillBrush = new SolidBrush(Color.Orange))
-                {
-                    graphics.FillRectangle(fillBrush, new Rectangle(50, 350, 100, 100));
-                }
-
-                // Save the PSD (output path already bound)
-                image.Save();
+                psd.Save();
             }
         }
         catch (Exception ex)
@@ -85,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PSD file with a limited 256‑color palette for a web‑based design tool that draws rectangles, ellipses, lines, and polygons programmatically in C#.
- * 2. When an automated report generator must embed simple vector graphics into an indexed Photoshop document for consistent branding across multiple pages.
- * 3. When a game asset pipeline requires creating thumbnail PSDs with basic shapes while keeping file size low using RLE compression and indexed colors.
- * 4. When a batch‑processing script has to add geometric annotations to existing PSD layers without converting the image to full‑color mode.
- * 5. When a digital publishing system needs to produce PSD templates with predefined shapes that can later be edited by designers in Photoshop.
+ * 1. When you need to generate a PSD file with a limited color palette for web‑compatible mockups that include rectangles, ellipses and lines.
+ * 2. When you want to programmatically add vector‑style graphics to an indexed Photoshop document for automated report generation.
+ * 3. When a batch process must create thumbnail previews with simple geometric annotations inside a PSD that uses 8‑bit indexed colors.
+ * 4. When integrating a design workflow that requires drawing shapes on a PSD canvas before exporting to other Adobe tools.
+ * 5. When building a C# application that produces layered PSD assets with custom palettes for game UI assets or marketing banners.
  */
