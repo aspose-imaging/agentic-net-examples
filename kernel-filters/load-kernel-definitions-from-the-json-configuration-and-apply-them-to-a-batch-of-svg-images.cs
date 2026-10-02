@@ -1,11 +1,11 @@
-// HOW-TO: Apply JSON Kernel Settings to Batch Convert SVG to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply JSON Defined Convolution Kernel to Multiple SVG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,31 +13,75 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string configPath = "config.json";
-            string inputDir = "input_svgs";
-            string outputDir = "output";
+            string inputDirectory = "InputSvgs";
+            string outputDirectory = "OutputSvgs";
+            string configPath = "kernels.json";
 
-            // Validate config file
             if (!File.Exists(configPath))
             {
                 Console.Error.WriteLine($"File not found: {configPath}");
                 return;
             }
 
-            // Read and deserialize configuration
-            string json = File.ReadAllText(configPath);
-            Config config = JsonSerializer.Deserialize<Config>(json);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get SVG files
-            if (!Directory.Exists(inputDir))
+            // Parse kernel matrix from JSON (simple numeric extraction)
+            string json = File.ReadAllText(configPath);
+            List<double> numbers = new List<double>();
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            bool inNumber = false;
+            foreach (char c in json)
             {
-                Console.Error.WriteLine($"File not found: {inputDir}");
+                if (char.IsDigit(c) || c == '-' || c == '.' || c == 'e' || c == 'E')
+                {
+                    sb.Append(c);
+                    inNumber = true;
+                }
+                else
+                {
+                    if (inNumber)
+                    {
+                        if (double.TryParse(sb.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
+                        {
+                            numbers.Add(val);
+                        }
+                        sb.Clear();
+                        inNumber = false;
+                    }
+                }
+            }
+            if (inNumber && sb.Length > 0)
+            {
+                if (double.TryParse(sb.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
+                {
+                    numbers.Add(val);
+                }
+            }
+
+            if (numbers.Count == 0)
+            {
+                Console.Error.WriteLine("No kernel data found in configuration.");
                 return;
             }
 
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
+            int size = (int)Math.Sqrt(numbers.Count);
+            if (size * size != numbers.Count)
+            {
+                Console.Error.WriteLine("Kernel matrix is not square.");
+                return;
+            }
 
+            double[,] kernel = new double[size, size];
+            int index = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    kernel[i, j] = numbers[index++];
+                }
+            }
+
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
             foreach (string inputPath in svgFiles)
             {
                 if (!File.Exists(inputPath))
@@ -46,87 +90,32 @@ class Program
                     continue;
                 }
 
-                // Load SVG vector image
-                using (Image vectorImage = Image.Load(inputPath))
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + "_filtered.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load SVG and rasterize to temporary PNG
+                string tempPng = Path.Combine(outputDirectory, Guid.NewGuid().ToString() + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPng));
+
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Rasterization options for SVG
-                    VectorRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = vectorImage.Size
-                    };
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions();
+                    svgImage.Save(tempPng, pngOptions);
+                }
 
-                    // Rasterize SVG to PNG in memory
-                    using (MemoryStream rasterStream = new MemoryStream())
-                    {
-                        PngOptions pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = rasterOptions
-                        };
-                        vectorImage.Save(rasterStream, pngOptions);
-                        byte[] rasterBytes = rasterStream.ToArray();
+                // Load raster image, apply convolution filter, and save result
+                using (RasterImage raster = (RasterImage)Image.Load(tempPng))
+                {
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, filterOptions);
+                    raster.Save(outputPath);
+                }
 
-                        // Apply each filter defined in the configuration
-                        foreach (FilterDefinition filterDef in config.Filters)
-                        {
-                            // Prepare a fresh raster image for each filter
-                            using (MemoryStream ms = new MemoryStream(rasterBytes))
-                            using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
-                            {
-                                // Create appropriate filter options
-                                FilterOptionsBase filterOptions = null;
-                                string filterType = filterDef.Type?.Trim().ToLowerInvariant();
-
-                                if (filterType == "sharpen")
-                                {
-                                    filterOptions = new SharpenFilterOptions(
-                                        filterDef.Size ?? 5,
-                                        filterDef.Sigma ?? 1.0);
-                                }
-                                else if (filterType == "gaussianblur")
-                                {
-                                    filterOptions = new GaussianBlurFilterOptions(
-                                        filterDef.Size ?? 5,
-                                        filterDef.Sigma ?? 1.0);
-                                }
-                                else if (filterType == "bilateralsmoothing")
-                                {
-                                    filterOptions = new BilateralSmoothingFilterOptions(
-                                        filterDef.Size ?? 5);
-                                }
-                                else if (filterType == "gausswiener")
-                                {
-                                    filterOptions = new GaussWienerFilterOptions(
-                                        filterDef.Size ?? 5,
-                                        filterDef.Sigma ?? 1.0);
-                                }
-                                else if (filterType == "motionwiener")
-                                {
-                                    filterOptions = new MotionWienerFilterOptions(
-                                        filterDef.Length ?? 10,
-                                        filterDef.Smooth ?? 1.0,
-                                        filterDef.Angle ?? 0.0);
-                                }
-                                else
-                                {
-                                    // Unsupported filter type; skip
-                                    continue;
-                                }
-
-                                // Apply filter to the entire image
-                                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                                // Prepare output path
-                                string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{filterDef.Type}.png";
-                                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                                // Ensure output directory exists
-                                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                                // Save filtered image as PNG
-                                rasterImage.Save(outputPath, new PngOptions());
-                            }
-                        }
-                    }
+                // Clean up temporary file
+                if (File.Exists(tempPng))
+                {
+                    File.Delete(tempPng);
                 }
             }
         }
@@ -135,29 +124,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Configuration classes for JSON deserialization
-    private class Config
-    {
-        public List<FilterDefinition> Filters { get; set; }
-    }
-
-    private class FilterDefinition
-    {
-        public string Type { get; set; }
-        public int? Size { get; set; }
-        public double? Sigma { get; set; }
-        public int? Length { get; set; }
-        public double? Smooth { get; set; }
-        public double? Angle { get; set; }
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to read custom rasterization parameters from a JSON file and automatically convert dozens of SVG icons to PNG for a web project.
- * 2. When a build pipeline must apply the same image filter settings stored in a configuration file to all vector assets before publishing.
- * 3. When you want to programmatically rasterize SVG logos with consistent page size and output format using Aspose.Imaging in a C# console application.
- * 4. When an e‑commerce platform requires bulk conversion of product SVG illustrations to PNG thumbnails while preserving settings defined by designers in JSON.
- * 5. When a desktop tool has to validate the existence of input SVG files, load them, and generate PNG previews based on configurable kernel options.
+ * 1. When you need to batch‑process SVG icons with a custom blur or sharpen filter defined in a JSON kernel file using Aspose.Imaging for .NET.
+ * 2. When you want to automate the application of a user‑provided convolution matrix to a collection of vector graphics before converting them to raster formats.
+ * 3. When a graphics pipeline requires loading filter parameters from a configuration file and applying the same effect to every SVG asset in a folder.
+ * 4. When you are building a CI/CD step that validates visual consistency by applying a predefined kernel to all SVG diagrams stored in source control.
+ * 5. When you need to read numeric kernel values from a JSON file and programmatically apply the filter to multiple SVG images without manual editing.
  */
