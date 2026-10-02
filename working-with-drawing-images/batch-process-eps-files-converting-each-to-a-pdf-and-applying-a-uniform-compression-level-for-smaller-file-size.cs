@@ -1,56 +1,52 @@
-// HOW-TO: Batch Convert Multiple EPS Files to Compressed PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EPS Files to PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded list of EPS files to process
-            string[] inputFiles = {
-                @"C:\Images\Sample1.eps",
-                @"C:\Images\Sample2.eps",
-                @"C:\Images\Sample3.eps"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
+            {
+                if (!Path.GetExtension(inputPath).Equals(".eps", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue; // Skip to next file
+                    continue;
                 }
 
-                // Determine output PDF path (same folder, same name, .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Ensure the output directory exists
-                string? outputDir = Path.GetDirectoryName(outputPath);
-                Directory.CreateDirectory(outputDir ?? ".");
-
-                // Configure PDF options with uniform compression
-                var pdfOptions = new PdfOptions
+                using (Image image = Image.Load(inputPath))
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        Compression = PdfImageCompressionOptions.Flate
-                    }
-                };
-
-                // Load the EPS image and save as PDF using the configured options
-                using (var epsImage = (EpsImage)Image.Load(inputPath))
-                {
-                    epsImage.Save(outputPath, pdfOptions);
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -62,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller PDF reports from a collection of EPS graphics for faster email delivery.
- * 2. When an automated build pipeline must transform design assets (EPS) into PDF documents with uniform compression for archiving.
- * 3. When a web service receives multiple EPS uploads and must return compressed PDF versions for previewing in browsers.
- * 4. When a desktop application processes a batch of EPS logos and saves them as PDF files to meet print‑ready size constraints.
- * 5. When migrating legacy EPS artwork to PDF format while ensuring consistent file‑size reduction across all files.
+ * 1. When you need to automatically turn a folder of EPS artwork into PDF documents for distribution.
+ * 2. When a printing workflow requires converting vector EPS files to PDF while keeping file size low.
+ * 3. When you want to integrate EPS‑to‑PDF conversion into a C# backend service that processes user‑uploaded graphics.
+ * 4. When you must generate PDF versions of legacy EPS assets for archival or compliance purposes.
+ * 5. When you are building a batch job that standardizes all EPS files in a directory into PDFs for downstream processing.
  */
