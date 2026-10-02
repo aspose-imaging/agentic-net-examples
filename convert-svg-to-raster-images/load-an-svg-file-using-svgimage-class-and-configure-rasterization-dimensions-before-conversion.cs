@@ -1,57 +1,49 @@
-// HOW-TO: Convert SVG to PNG with Custom Dimensions Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to PNG with Custom Width and Height in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\test.svg";
-        string outputPath = @"C:\temp\test.output.png";
+        string inputPath = Path.Combine("Input", "example.svg");
+        string outputPath = Path.Combine("Output", "example.png");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify that the input SVG file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image from the file system
-            using (SvgImage svgImage = new SvgImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options (set desired output dimensions)
+                SvgImage svgImage = (SvgImage)image;
+
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // Example: rasterize to 800 × 600 pixels
-                    PageSize = new Size(800, 600),
-
-                    // Optional: adjust scaling factors if needed
-                    // ScaleX = 1.0f,
-                    // ScaleY = 1.0f
+                    PageWidth = 800,
+                    PageHeight = 600,
+                    BackgroundColor = Color.White
                 };
 
-                // Prepare PNG save options and attach the rasterization settings
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rasterized image as PNG
-                svgImage.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Any unexpected error is reported without crashing the program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -59,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create 800 × 600 PNG thumbnails from SVG icons for a web gallery using C# and Aspose.Imaging.
- * 2. When an automated report generator must embed high‑resolution PNG versions of SVG logos into PDFs, requiring custom rasterization dimensions.
- * 3. When a batch‑processing service converts user‑uploaded SVG files into uniformly sized PNG assets for a mobile app with C# code.
- * 4. When a CI pipeline validates that SVG assets render correctly by rasterizing them to PNG at a fixed pixel size during build.
- * 5. When a desktop application previews SVG drawings as raster images with exact width and height before printing or saving.
+ * 1. When you need to generate thumbnail PNG images from scalable SVG logos at a fixed 800×600 size for a web gallery.
+ * 2. When you must embed SVG icons into a PDF report that only supports raster images, requiring conversion to PNG with a white background.
+ * 3. When an e‑commerce platform stores product illustrations as SVG and you need to create high‑resolution PNG previews for email newsletters.
+ * 4. When a mobile app consumes PNG assets and you need to pre‑render SVG artwork at specific dimensions during the build process.
+ * 5. When automating batch processing of SVG diagrams to PNG files with consistent sizing for documentation or training materials.
  */
