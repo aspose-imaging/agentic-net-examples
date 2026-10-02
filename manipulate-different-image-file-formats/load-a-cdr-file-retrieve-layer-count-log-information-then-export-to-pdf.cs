@@ -1,60 +1,39 @@
-// HOW-TO: Convert Multi‑Page CDR to Separate PDF Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PDF with Exact Page Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Data\sample.cdr";
-            string outputDirectory = @"C:\Data\PdfOutput";
+            string inputPath = Path.Combine("Input", "sample.cdr");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Log page (layer) count
-                int pageCount = cdrImage.PageCount;
-                Console.WriteLine($"Cdr file contains {pageCount} page(s).");
-
-                // Export each page to a separate PDF file
-                for (int i = 0; i < pageCount; i++)
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Get the specific page
-                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
-
-                    // Prepare output PDF path
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.pdf");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Set up PDF export options with rasterization settings
-                    PdfOptions pdfOptions = new PdfOptions();
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
                     };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the page as PDF
-                    page.Save(outputPath, pdfOptions);
-                    Console.WriteLine($"Exported page {i} to {outputPath}");
+                    cdr.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -67,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically extract each layer of a CorelDRAW (CDR) document and save them as individual PDF files for printing or archiving.
- * 2. When an automated workflow must verify the number of pages in a CDR file before converting it to PDFs for downstream processing.
- * 3. When a .NET application has to generate PDF previews of each CDR page with specific rasterization settings like no smoothing and single‑bit text rendering.
- * 4. When you want to batch‑convert multiple CDR files into PDFs and store the results in a predefined folder structure.
- * 5. When integrating Aspose.Imaging into a document management system to preserve the original dimensions of CDR pages while exporting them to PDF format.
+ * 1. When you need to programmatically convert a CorelDRAW CDR design into a PDF for printing or sharing while preserving the original dimensions.
+ * 2. When an automated workflow must verify that a CDR file exists before processing and create the output folder if it doesn’t already exist.
+ * 3. When you want to ensure the PDF background is white and matches the CDR canvas size to avoid scaling issues in downstream applications.
+ * 4. When you need to handle conversion errors gracefully in a .NET application by logging missing files or exceptions.
+ * 5. When integrating Aspose.Imaging into a batch job that converts multiple CDR files to PDFs without manual intervention.
  */
