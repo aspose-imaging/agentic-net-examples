@@ -3,51 +3,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\blurred.svg";
-            string intermediatePath = @"C:\Images\temp.png";
-            string outputPath = @"C:\Images\restored.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure directories for intermediate and final output exist
-            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image and rasterize it to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                SvgImage svgImage = image as SvgImage;
+                if (svgImage == null)
                 {
-                    PageSize = svgImage.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                svgImage.Save(intermediatePath, pngOptions);
-            }
+                    Console.Error.WriteLine("Input file is not a valid SVG image.");
+                    return;
+                }
 
-            // Load the rasterized PNG, apply a deconvolution (Gauss-Wiener) filter, and save the result
-            using (Image rasterImg = Image.Load(intermediatePath))
-            {
-                RasterImage rasterImage = (RasterImage)rasterImg;
-                var deconvOptions = new GaussWienerFilterOptions(5, 4.0); // radius=5, sigma=4.0
-                rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-                rasterImage.Save(outputPath);
+                string tempPngPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+
+                PngOptions pngOptions = new PngOptions();
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageWidth = svgImage.Width;
+                rasterOptions.PageHeight = svgImage.Height;
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                svgImage.Save(tempPngPath, pngOptions);
+
+                using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+                {
+                    int size = 3;
+                    double sigma = 1.0;
+                    DeconvolutionFilterOptions deconvOptions = new DeconvolutionFilterOptions(ConvolutionFilter.GetGaussian(size, sigma));
+                    rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+                    rasterImage.Save(outputPath);
+                }
+
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen a blurred SVG logo before embedding it in a web page.
- * 2. When converting vector graphics to a raster PNG and want to improve clarity after compression artifacts.
- * 3. When processing scanned SVG diagrams that appear out of focus and require detail restoration.
- * 4. When automating a batch job that cleans up blurry SVG icons for a mobile app’s asset pipeline.
- * 5. When preparing SVG illustrations for print and need to apply a Gauss‑Wiener deconvolution to meet quality standards.
+ * 1. When you need to sharpen a blurry SVG logo before embedding it in a PDF, you can rasterize the SVG and apply a deconvolution filter with Aspose.Imaging in C#.
+ * 2. When a web application must convert user‑uploaded SVG diagrams to high‑quality PNG thumbnails while restoring lost details, this code provides an automated solution.
+ * 3. When a batch process has to improve the readability of scanned vector graphics that were saved as SVGs with motion blur, the deconvolution filter can recover edges programmatically.
+ * 4. When generating print‑ready assets from SVG artwork, you may need to enhance fine lines after rasterization to meet DPI requirements, using Aspose’s Gaussian deconvolution in C#.
+ * 5. When a digital asset management system requires restoring clarity to blurred SVG icons before storing them as PNGs, this approach applies a convolution‑based deconvolution filter automatically.
  */
