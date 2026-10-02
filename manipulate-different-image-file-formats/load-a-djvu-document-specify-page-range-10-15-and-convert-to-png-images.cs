@@ -1,8 +1,9 @@
-// HOW-TO: Extract DjVu Pages 10 to 15 As PNG Images In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 10 to 15 to PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
@@ -11,37 +12,36 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = "sample.djvu";
+            string inputPath = "input.djvu";
+            string outputDir = "output";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory for PNG files
-            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
 
-            // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Iterate through pages and export pages 10 to 15 as PNG
-                foreach (DjvuPage page in djvuImage.Pages)
+                int startPage = 10;
+                int endPage = 15;
+
+                int pageCount = djvu.Pages.Length;
+                if (startPage < 1) startPage = 1;
+                if (endPage > pageCount) endPage = pageCount;
+
+                for (int i = startPage; i <= endPage; i++)
                 {
-                    int pageNumber = page.PageNumber;
-                    if (pageNumber >= 10 && pageNumber <= 15)
+                    var page = djvu.Pages[i - 1];
+                    string outputPath = Path.Combine(outputDir, $"page_{i}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (PngOptions options = new PngOptions())
                     {
-                        // Construct output file path
-                        string outputPath = Path.Combine(outputDir, $"page_{pageNumber}.png");
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
-                        page.Save(outputPath, new PngOptions());
+                        options.Source = new FileCreateSource(outputPath, false);
+                        page.Save(outputPath, options);
                     }
                 }
             }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate preview thumbnails for specific pages of a multi‑page DjVu document in a web application.
- * 2. When you want to archive only a subset of pages from a large DjVu file as high‑quality PNG files for printing or review.
- * 3. When a document processing pipeline must convert selected DjVu pages to PNG to feed into OCR or image analysis tools.
- * 4. When a desktop utility must extract pages 10‑15 from scanned manuals stored as DjVu and save them as separate PNG images for distribution.
- * 5. When automating batch conversion of particular DjVu pages to PNG for inclusion in a PowerPoint presentation or report.
+ * 1. When you need to extract a specific range of pages from a multi‑page DjVu document and save each page as a high‑quality PNG for web preview.
+ * 2. When you want to automate batch conversion of selected DjVu pages to PNG files in a .NET application without manual editing.
+ * 3. When you are building a document‑processing pipeline that requires converting only pages 10‑15 of a scanned DjVu archive into PNG thumbnails.
+ * 4. When you must generate separate PNG images for a subset of DjVu pages to feed into OCR or image‑analysis tools.
+ * 5. When you need to programmatically create PNG assets from a DjVu file for inclusion in a mobile app’s asset bundle, limiting the conversion to a defined page range.
  */
