@@ -1,9 +1,11 @@
-// HOW-TO: Change Gamma Of CDR Image, Check Alpha, Save As GIF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Gamma of CDR Image, Check Alpha, Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -18,29 +20,33 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         try
         {
-            using (var cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Rasterize CDR to GIF format in memory
-                    cdr.Save(ms, new GifOptions());
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (GifImage gif = (GifImage)Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Verify alpha channel presence
-                        bool hasAlpha = gif.HasAlpha;
-                        Console.WriteLine($"Has Alpha: {hasAlpha}");
+                        raster.AdjustGamma(0.8f);
+                        bool hasAlpha = raster.HasAlpha;
+                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
 
-                        // Adjust gamma
-                        gif.AdjustGamma(2.2f);
-
-                        // Save adjusted image as GIF
-                        gif.Save(outputPath, new GifOptions());
+                        GifOptions gifOptions = new GifOptions();
+                        raster.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a CorelDRAW (CDR) vector file to a GIF while adjusting its brightness through gamma correction.
- * 2. When you must verify whether the GIF produced from a CDR file contains an alpha channel before using it in further image processing.
- * 3. When an application requires on‑the‑fly rasterization of CDR files to GIF format for web‑compatible output with consistent color rendering.
- * 4. When you are building a .NET service that programmatically modifies image gamma and validates alpha channels using Aspose.Imaging.
- * 5. When you want to automate batch processing of CDR assets, applying gamma correction and saving the results as optimized GIF files.
+ * 1. When you need to darken or lighten a CorelDRAW (CDR) illustration before converting it to a web‑friendly GIF, you can adjust its gamma and preserve transparency information using Aspose.Imaging for .NET.
+ * 2. When a batch process must verify whether a rasterized CDR page contains an alpha channel before exporting it to GIF for use in animated UI elements.
+ * 3. When integrating a design workflow that converts high‑resolution CDR graphics to GIF while applying gamma correction to match a specific display profile.
+ * 4. When troubleshooting color consistency, you can programmatically read a CDR file, modify its gamma, check for alpha, and output a GIF to compare against original assets.
+ * 5. When building a .NET service that receives CDR uploads, adjusts their brightness via gamma, confirms transparency, and returns optimized GIFs for email newsletters.
  */
