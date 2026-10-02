@@ -1,46 +1,57 @@
-// HOW-TO: Remove Background From Vector PNG And Save As Transparent PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Image Background and Save as PNG via Command Line in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\result.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the image (vector or raster)
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // If the image is a vector image, remove its background
-                if (image is VectorImage vectorImg)
-                {
-                    // Use the parameterless overload for default background removal
-                    vectorImg.RemoveBackground();
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the processed image as PNG
-                var pngOptions = new PngOptions
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent
                 };
-                image.Save(outputPath, pngOptions);
+
+                var masking = new ImageMasking(image);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                {
+                    var saveOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+                    foreground.Save(outputPath, saveOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically strip the background from SVG or EPS files and output a transparent PNG for web thumbnails.
- * 2. When a desktop application must convert user‑uploaded vector graphics to PNG with an alpha channel without manual editing.
- * 3. When a build pipeline requires a lightweight command‑line utility to prepare assets by removing backgrounds before packaging.
- * 4. When an e‑commerce platform wants to generate product images with clean transparent backgrounds from supplier vector files.
- * 5. When a reporting service needs to ensure all exported charts are saved as PNGs with preserved transparency for PDF embedding.
+ * 1. When you need to automatically strip the background from product photos and generate transparent PNGs for e‑commerce listings.
+ * 2. When you want to integrate a batch‑processing CLI into a CI pipeline to convert scanned documents with unwanted backgrounds into clean PNG assets.
+ * 3. When you are building a desktop utility that lets users select an image file and instantly obtain a cut‑out foreground for graphic design work.
+ * 4. When you need to preprocess images for machine‑learning models by removing backgrounds and preserving alpha channels in PNG format.
+ * 5. When you require a scriptable solution to generate transparent PNG thumbnails from user‑uploaded JPEGs on a web server.
  */
