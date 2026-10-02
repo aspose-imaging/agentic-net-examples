@@ -6,44 +6,31 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole process to catch unexpected errors
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.gif";
+            string inputPath = Path.Combine("Input", "input.emf");
+            string outputPath = Path.Combine("Output", "output.gif");
 
-            // Verify that the source EMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF saving options with a limited 256‑color palette
-                GifOptions gifOptions = new GifOptions
+                using (GifOptions gifOptions = new GifOptions())
                 {
-                    // Enable palette correction to build the best matching 256‑color palette
-                    DoPaletteCorrection = true,
-                    // Set color resolution (bits per primary color minus 1). 7 => 8 bits per channel.
-                    ColorResolution = 7
-                };
-
-                // Save the image as GIF using the configured options
-                image.Save(outputPath, gifOptions);
+                    image.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed vector EMF graphics into a web page that only supports GIF images with a 256‑color limit.
- * 2. When converting legacy Windows Metafile reports to GIF for email attachments that must stay under size restrictions.
- * 3. When generating thumbnails from EMF diagrams for a mobile app that requires GIF format with a fixed palette.
- * 4. When preparing EMF icons for a content management system that only accepts GIF files with palette correction.
- * 5. When automating batch conversion of EMF assets to GIF to ensure compatibility with older browsers that cannot render more than 256 colors.
+ * 1. When you need to embed a vector EMF logo into a web page that only supports GIF images.
+ * 2. When you must reduce the file size of an EMF diagram for email attachments by converting it to a 256‑color GIF.
+ * 3. When a legacy reporting system requires charts in GIF format but your source graphics are stored as EMF.
+ * 4. When you want to generate web‑friendly frames from an EMF illustration for use in a GIF slideshow.
+ * 5. When you are building a batch conversion tool that transforms multiple EMF files into GIFs with a limited color palette.
  */
