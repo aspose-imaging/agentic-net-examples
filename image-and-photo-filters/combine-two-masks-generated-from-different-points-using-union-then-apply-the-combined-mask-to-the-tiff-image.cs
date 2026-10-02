@@ -1,48 +1,41 @@
-// HOW-TO: Combine Multiple Magic Wand Selections into One Mask for TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple Magic Wand Masks and Apply to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputImagePath = "input.tif";
-            string outputImagePath = "output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputImagePath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the TIFF image
-            using (RasterImage image = (RasterImage)Image.Load(inputImagePath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create first mask using magic wand at point (100, 100)
-                ImageMask mask1 = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
+                var settings1 = new MagicWandSettings(100, 100);
+                var settings2 = new MagicWandSettings(200, 200);
 
-                // Create second mask using magic wand at point (200, 200)
-                ImageMask mask2 = MagicWandTool.Select(image, new MagicWandSettings(200, 200));
+                MagicWandTool.Select(image, settings1)
+                    .Union(MagicWandTool.Select(image, settings2))
+                    .Apply();
 
-                // Combine masks using Union
-                ImageMask combinedMask = mask1.Union(mask2);
-
-                // Apply the combined mask to the image
-                combinedMask.ApplyTo(image);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputImagePath));
-
-                // Save the modified image
-                image.Save(outputImagePath);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove or edit two separate regions of a large TIFF scan by selecting them with a magic wand and applying a single combined mask.
- * 2. When automating preprocessing of scanned documents to hide watermarks located at different coordinates before archiving them as TIFF files.
- * 3. When creating a composite mask to protect sensitive information in multiple areas of a medical image before sharing it with collaborators.
- * 4. When developing a batch tool that isolates and modifies distinct background sections of a high‑resolution TIFF map using C# and Aspose.Imaging.
- * 5. When implementing a workflow that selects two color‑based objects in a TIFF photograph, merges the selections, and applies the mask to adjust their transparency.
+ * 1. When you need to merge selections from two different points in a scanned document and apply the combined mask to a TIFF file using Aspose.Imaging in C#.
+ * 2. When you want to programmatically remove or highlight overlapping regions in a multi‑page TIFF by uniting two magic wand selections.
+ * 3. When you are building an automated preprocessing step that creates a single mask from separate color thresholds before saving the result as a TIFF image.
+ * 4. When you must apply a composite selection to a raster image for batch editing of large TIFF files in a .NET application.
+ * 5. When you need to combine region‑of‑interest masks generated at different coordinates and export the masked TIFF for further analysis or archiving.
  */
