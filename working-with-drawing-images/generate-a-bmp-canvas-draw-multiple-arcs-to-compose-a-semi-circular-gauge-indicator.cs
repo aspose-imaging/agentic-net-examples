@@ -1,4 +1,4 @@
-// HOW-TO: Create BMP Gauge Indicator with Multiple Arcs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Gauge Indicator With Multiple Arcs In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,46 +9,47 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/gauge.bmp";
         try
         {
-            // Output BMP file path
-            string outputPath = @"C:\temp\gauge.bmp";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            int width = 400;
+            int height = 200;
 
-            // Create a file source for the BMP image
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-
-            // Set BMP options
-            BmpOptions options = new BmpOptions()
+            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
-                Source = source,
-                BitsPerPixel = 24
-            };
-
-            // Create a BMP canvas (width: 400, height: 200)
-            using (Image canvas = Image.Create(options, 400, 200))
-            {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(canvas);
-
-                // Clear background
                 graphics.Clear(Color.White);
 
-                // Draw background semi‑circular arc (light gray)
-                Pen backgroundPen = new Pen(Color.LightGray, 10);
-                graphics.DrawArc(backgroundPen, new Rectangle(50, 50, 300, 300), 180, -180);
+                Pen pen = new Pen(Color.Blue, 5);
 
-                // Draw gauge range arc (green)
-                Pen rangePen = new Pen(Color.Green, 10);
-                graphics.DrawArc(rangePen, new Rectangle(70, 70, 260, 260), 180, -180);
+                int centerX = width / 2;
+                int centerY = height;
 
-                // Draw indicator arc (red)
-                Pen indicatorPen = new Pen(Color.Red, 10);
-                graphics.DrawArc(indicatorPen, new Rectangle(90, 90, 220, 220), 180, -180);
+                Rectangle outerRect = new Rectangle(centerX - 150, centerY - 150, 300, 300);
+                graphics.DrawArc(pen, outerRect, 180, 180);
 
-                // Save the image (bound to the file source)
+                Rectangle middleRect = new Rectangle(centerX - 120, centerY - 120, 240, 240);
+                graphics.DrawArc(pen, middleRect, 180, 180);
+
+                Rectangle innerRect = new Rectangle(centerX - 90, centerY - 90, 180, 180);
+                graphics.DrawArc(pen, innerRect, 180, 180);
+
+                Pen tickPen = new Pen(Color.Black, 2);
+                for (int angle = 180; angle <= 360; angle += 30)
+                {
+                    double rad = angle * Math.PI / 180.0;
+                    int rOuter = 150;
+                    int rInner = 130;
+                    int x1 = centerX + (int)(rOuter * Math.Cos(rad));
+                    int y1 = centerY + (int)(rOuter * Math.Sin(rad));
+                    int x2 = centerX + (int)(rInner * Math.Cos(rad));
+                    int y2 = centerY + (int)(rInner * Math.Sin(rad));
+                    graphics.DrawLine(tickPen, x1, y1, x2, y2);
+                }
+
                 canvas.Save();
             }
         }
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a semi‑circular gauge image as a BMP file for dashboards or reports.
- * 2. When you want to programmatically draw custom arcs to represent ranges and pointers in a speedometer‑style visualization.
- * 3. When you must create a high‑resolution BMP canvas and clear the background before adding vector graphics in a .NET application.
- * 4. When you are building an automated system that outputs gauge indicators for IoT device status without using external design tools.
- * 5. When you require a simple way to save drawn graphics directly to a file source using Aspose.Imaging’s BmpOptions in C#.
+ * 1. When you need to programmatically generate a BMP speedometer or gauge image for a Windows desktop dashboard.
+ * 2. When you want to draw custom semi‑circular meter graphics with tick marks for a monitoring application.
+ * 3. When you must create a lightweight BMP file containing multiple concentric arcs for printing or embedded UI components.
+ * 4. When you require a reproducible gauge illustration that can be saved directly to disk without using external drawing tools.
+ * 5. When you are building a C# reporting tool that needs to render circular progress indicators as BMP assets on the fly.
  */
