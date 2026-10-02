@@ -1,11 +1,19 @@
-// HOW-TO: Create Multi‑Frame TIFF With Custom Photometric And LZW Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom Photometric TIFF Frame and Save Multi‑Frame Image with LZW in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,59 +21,41 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output.tif";
+            string inputPath = "input\\input.tif";
+            string outputPath = "output\\output.tif";
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(outputDir);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // First frame: RGB photometric
-            TiffOptions frameOptions1 = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions1.BitsPerSample = new ushort[] { 8, 8, 8 };
-            frameOptions1.Compression = TiffCompressions.Lzw;
-            frameOptions1.Photometric = TiffPhotometrics.Rgb;
-            frameOptions1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            TiffFrame frame1 = new TiffFrame(frameOptions1, 100, 100);
-            LinearGradientBrush brush1 = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(frame1.Width, frame1.Height),
-                Color.Blue,
-                Color.Yellow);
-            Graphics graphics1 = new Graphics(frame1);
-            graphics1.FillRectangle(brush1, frame1.Bounds);
-
-            // Second frame: custom photometric (MinIsBlack)
-            TiffOptions frameOptions2 = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions2.BitsPerSample = new ushort[] { 1 };
-            frameOptions2.Compression = TiffCompressions.Lzw;
-            frameOptions2.Photometric = TiffPhotometrics.MinIsBlack;
-            frameOptions2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-            TiffFrame frame2 = new TiffFrame(frameOptions2, 100, 100);
-            LinearGradientBrush brush2 = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(frame2.Width, frame2.Height),
-                Color.Black,
-                Color.White);
-            Graphics graphics2 = new Graphics(frame2);
-            graphics2.FillRectangle(brush2, frame2.Bounds);
-
-            // Create multi‑frame TIFF image
-            using (TiffImage tiffImage = new TiffImage(new TiffFrame[] { frame1, frame2 }))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Save options for the TIFF file
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Compression = TiffCompressions.Lzw;
-                saveOptions.Photometric = TiffPhotometrics.Rgb;
-                saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                saveOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                int width = tiffImage.ActiveFrame.Width;
+                int height = tiffImage.ActiveFrame.Height;
 
-                tiffImage.Save(outputPath, saveOptions);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Lzw;
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+
+                TiffFrame newFrame = new TiffFrame(tiffOptions, width, height);
+
+                using (RasterImage raster = (RasterImage)newFrame)
+                {
+                    Aspose.Imaging.Color[] whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White, width * height).ToArray();
+                    raster.SavePixels(new Aspose.Imaging.Rectangle(0, 0, width, height), whitePixels);
+                }
+
+                if (newFrame.ExifData is Aspose.Imaging.Exif.JpegExifData jpegExif)
+                {
+                    jpegExif.PhotometricInterpretation = 2;
+                }
+
+                tiffImage.AddFrame(newFrame);
+                tiffImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -77,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a multi‑page TIFF document where each page uses a different color interpretation, such as RGB for a color page and MinIsBlack for a monochrome page, and you want the file size reduced with LZW compression.
- * 2. When you are building a C# application that must export scanned images as a single TIFF file containing both color and black‑and‑white frames for archival or printing workflows.
- * 3. When you need to programmatically create a TIFF file with custom photometric settings to ensure compatibility with legacy imaging systems that expect specific TIFF tags.
- * 4. When you want to combine gradient graphics into separate TIFF frames and save them efficiently using lossless LZW compression for later processing or analysis.
- * 5. When you are automating the creation of multi‑frame medical or scientific images where each slice may require a different bit depth and photometric interpretation while keeping the file size manageable.
+ * 1. When you need to create a multi‑page TIFF document where each page has a specific photometric interpretation, such as converting a blank page to white and preserving color information.
+ * 2. When you must append a new frame to an existing TIFF file and ensure the entire file uses lossless LZW compression to reduce size without quality loss.
+ * 3. When generating archival TIFF images that require custom EXIF photometric interpretation values for compatibility with legacy imaging systems.
+ * 4. When automating batch processing of scanned documents and need to add blank pages programmatically while maintaining consistent RGB photometric settings.
+ * 5. When building a C# application that manipulates TIFF files with Aspose.Imaging and must save the result as a multi‑frame TIFF with specific compression and photometric options.
  */
