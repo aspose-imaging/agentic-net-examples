@@ -1,72 +1,67 @@
-// HOW-TO: Sharpen Each Page of Multi‑Page SVG and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Sharpen 3x3 Filter to All SVG Frames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Svg;
+using System.Xml.Linq;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
+
+            if (!File.Exists(inputPath))
             {
-                if (!(image is IMultipageImage multipage))
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage vector image.");
-                    return;
-                }
-
-                List<RasterImage> frames = new List<RasterImage>();
-
-                for (int i = 0; i < multipage.PageCount; i++)
-                {
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
-                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    };
-
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        RasterImage raster = (RasterImage)Image.Load(ms);
-                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                        frames.Add(raster);
-                    }
-                }
-
-                using (Image result = Image.Create(frames.ToArray(), true))
-                {
-                    result.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
-                }
-
-                foreach (var frame in frames)
-                {
-                    frame.Dispose();
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+            XDocument doc = XDocument.Load(inputPath);
+            XNamespace ns = "http://www.w3.org/2000/svg";
+
+            // Ensure <defs> exists
+            XElement defs = doc.Root.Element(ns + "defs");
+            if (defs == null)
+            {
+                defs = new XElement(ns + "defs");
+                doc.Root.AddFirst(defs);
+            }
+
+            // Add sharpen filter if not already present
+            const string filterId = "sharpen3x3";
+            XElement existingFilter = defs.Element(ns + "filter");
+            if (existingFilter == null || (string)existingFilter.Attribute("id") != filterId)
+            {
+                XElement filter = new XElement(ns + "filter",
+                    new XAttribute("id", filterId),
+                    new XElement(ns + "feConvolveMatrix",
+                        new XAttribute("order", "3"),
+                        new XAttribute("kernelMatrix", "0 -1 0 -1 5 -1 0 -1 0"),
+                        new XAttribute("divisor", "1"),
+                        new XAttribute("bias", "0"),
+                        new XAttribute("preserveAlpha", "true")
+                    )
+                );
+                defs.Add(filter);
+            }
+
+            // Apply filter to each top-level <svg> element (including root)
+            foreach (XElement svgElem in doc.Descendants(ns + "svg"))
+            {
+                svgElem.SetAttributeValue("filter", $"url(#{filterId})");
+            }
+
+            // Also apply to the root if it's an <svg>
+            if (doc.Root.Name == ns + "svg")
+            {
+                doc.Root.SetAttributeValue("filter", $"url(#{filterId})");
+            }
+
+            doc.Save(outputPath);
         }
         catch (Exception ex)
         {
@@ -77,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the visual sharpness of every layer in a multi‑page SVG before converting it to a high‑resolution TIFF for printing.
- * 2. When an application must batch‑process vector diagrams, applying a 3×3 sharpen filter to each page and exporting them as a single multipage TIFF for archival.
- * 3. When you want to programmatically improve the clarity of SVG icons embedded in a document and store the result as a TIFF for compatibility with legacy systems.
- * 4. When generating thumbnails of each SVG page with increased edge definition and compiling them into a TIFF slideshow using C# and Aspose.Imaging.
- * 5. When converting a multi‑page SVG chart into a TIFF while automatically applying a sharpen filter to ensure details remain crisp after rasterization.
+ * 1. When you need to enhance the visual clarity of each page in a multi‑page SVG before embedding it in a web report.
+ * 2. When you want to programmatically add a sharpening effect to all layers of an SVG generated by a CAD tool.
+ * 3. When you must ensure consistent image sharpness across all frames of an animated SVG used in a UI animation.
+ * 4. When you are automating a batch process that improves the detail of SVG icons stored in a design system.
+ * 5. When you need to insert a custom SVG filter and apply it to every SVG element in a document for print‑ready graphics.
  */
