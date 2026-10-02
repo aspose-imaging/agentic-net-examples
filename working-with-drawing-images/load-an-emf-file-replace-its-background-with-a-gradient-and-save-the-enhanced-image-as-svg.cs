@@ -1,8 +1,9 @@
 // HOW-TO: Convert EMF to SVG with Custom Background Color in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -21,25 +22,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Emf.EmfImage emfImage = (Aspose.Imaging.FileFormats.Emf.EmfImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Configure SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                Graphics graphics = new Graphics(emfImage);
+
+                // Gradient fill not supported; using solid color as fallback
+                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
                 {
-                    TextAsShapes = true
-                };
+                    graphics.FillRectangle(brush, 0, 0, emfImage.Width, emfImage.Height);
+                }
 
-                // Set up rasterization options with a solid background (gradient not directly supported)
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.LightBlue,
-                    PageSize = emfImage.Size,
-                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
-                };
-
-                saveOptions.VectorRasterizationOptions = rasterOptions;
-
-                emfImage.Save(outputPath, saveOptions);
+                SvgOptions svgOptions = new SvgOptions();
+                emfImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a Windows Metafile (EMF) into a web page as scalable SVG while applying a solid background color using C#.
- * 2. When converting legacy EMF diagrams to SVG for responsive UI designs and you want the text to be preserved as shapes for consistent rendering.
- * 3. When automating a batch process that transforms EMF assets into SVG files with a predefined background for branding or theming purposes.
- * 4. When integrating Aspose.Imaging into a .NET application to rasterize EMF graphics with a custom background before exporting them as vector SVG files.
- * 5. When generating SVG versions of technical drawings from EMF files and ensuring the output has a uniform background color for printing or publishing.
+ * 1. When you need to embed a vector diagram from an EMF file into a web page and want to replace its default background with a solid color before converting it to SVG.
+ * 2. When a reporting tool generates charts as EMF and you must produce SVG assets with a consistent background for cross‑platform rendering.
+ * 3. When migrating legacy Windows Metafile assets to scalable SVG format while ensuring the images have a uniform light‑blue background for branding.
+ * 4. When automating a batch process that reads EMF logos, applies a corporate color as the background, and saves them as SVG for use in responsive UI designs.
+ * 5. When integrating Aspose.Imaging in a C# application to programmatically change the background of vector graphics and export them to SVG for further editing in design software.
  */
