@@ -1,11 +1,9 @@
-// HOW-TO: Generate 300 DPI PNG with Vector Shapes Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create High Resolution BMP With Vector Shapes In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,44 +11,37 @@ class Program
     {
         try
         {
-            string outputPath = "output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            int width = 800;
+            int height = 600;
 
-            var pngOptions = new PngOptions
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, width, height))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            using (Image image = Image.Create(pngOptions, 1200, 800))
-            {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Pen penBlue = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
+                graphics.DrawRectangle(penBlue, 50, 50, 200, 150);
 
-                Pen blackPen = new Pen(Color.Black, 5);
-                graphics.DrawRectangle(blackPen, new Rectangle(100, 100, 400, 300));
-
-                using (SolidBrush redBrush = new SolidBrush(Color.Red))
+                using (SolidBrush redBrush = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    graphics.FillRectangle(redBrush, new Rectangle(150, 150, 300, 200));
+                    graphics.FillEllipse(redBrush, 100, 100, 150, 100);
                 }
 
-                Pen bluePen = new Pen(Color.Blue, 3);
-                graphics.DrawEllipse(bluePen, new Rectangle(200, 200, 200, 150));
+                Aspose.Imaging.Pen penGreen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 3);
+                graphics.DrawLine(penGreen, 0, 0, width, height);
 
-                Pen greenPen = new Pen(Color.Green, 2);
-                graphics.DrawLine(greenPen, new Point(100, 500), new Point(1100, 500));
-
-                Pen purplePen = new Pen(Color.Purple, 4);
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new PolygonShape(new PointF[]
+                Aspose.Imaging.Point[] points = new Aspose.Imaging.Point[]
                 {
-                    new PointF(600, 100),
-                    new PointF(800, 100),
-                    new PointF(700, 300)
-                }));
-                path.AddFigure(figure);
-                graphics.DrawPath(purplePen, path);
+                    new Aspose.Imaging.Point(10, 10),
+                    new Aspose.Imaging.Point(200, 20),
+                    new Aspose.Imaging.Point(150, 200)
+                };
+                graphics.DrawPolygon(penBlue, points);
 
                 image.Save();
             }
@@ -64,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically create a high‑resolution PNG for print‑ready graphics such as brochures or flyers while drawing crisp vector shapes in C#.
- * 2. When you want to generate dynamic diagrams like rectangles, ellipses, lines, and polygons on the server side for reporting dashboards without losing quality at 300 DPI.
- * 3. When an application must produce custom UI assets such as icons or badges that require precise vector drawing and a white background for consistent branding.
- * 4. When you need to automate the creation of printable certificates or tickets that include colored shapes and lines, ensuring they remain sharp after scaling.
- * 5. When you are building a batch process that creates annotated images (e.g., highlighting areas with rectangles and ellipses) for medical or engineering documents where resolution matters.
+ * 1. To programmatically generate a blank BMP file and draw basic vector shapes such as rectangles, ellipses, lines, and polygons for dynamic graphics in a C# application.
+ * 2. To create a high‑resolution image that can be saved directly to disk without intermediate files, useful for automated report generation or batch image processing.
+ * 3. To render crisp, scalable graphics on a bitmap when preparing assets for printing or exporting to other formats like PNG or PDF.
+ * 4. To integrate custom drawing logic into a server‑side service that produces on‑the‑fly diagrams or charts for web APIs.
+ * 5. To replace manual design tools with code‑driven drawing for consistent branding elements across multiple generated images.
  */
