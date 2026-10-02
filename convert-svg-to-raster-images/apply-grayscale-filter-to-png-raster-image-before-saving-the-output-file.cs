@@ -1,49 +1,56 @@
-// HOW-TO: Apply Grayscale Filter to PNG Image and Save with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Convert PNG To Grayscale Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace GrayscaleExample
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\sample.grayscale.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.png";
+                string outputPath = "output.png";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    if (image is RasterImage rasterImage)
+                    {
+                        rasterImage.Grayscale();
+
+                        var options = new PngOptions();
+                        rasterImage.Save(outputPath, options);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("The loaded image is not a raster image.");
+                    }
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image, apply grayscale, and save the result
-            using (PngImage pngImage = new PngImage(inputPath))
+            catch (Exception ex)
             {
-                pngImage.Grayscale();               // Convert to grayscale
-                pngImage.Save(outputPath);          // Save the processed image
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            // Report any unexpected errors
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert color PNG graphics to grayscale for a print‑ready PDF workflow in a C# application.
- * 2. When you want to preprocess user‑uploaded PNG photos to a single‑channel format before storing them in a database.
- * 3. When you are generating grayscale icons from original PNG assets for a dark‑mode UI using Aspose.Imaging.
- * 4. When you must prepare PNG images for OCR engines that require a grayscale input in a .NET service.
- * 5. When you are creating low‑contrast PNG placeholders for performance testing of web pages in C#.
+ * 1. When you need to generate black‑and‑white versions of product photos in PNG format for an e‑commerce catalog using C#.
+ * 2. When you must reduce the size of PNG assets by stripping color information before uploading them to a mobile app.
+ * 3. When you want to preprocess images for OCR by converting raster PNGs to grayscale with Aspose.Imaging in a .NET application.
+ * 4. When you are creating stylized thumbnails that require a grayscale look for a website gallery using C# code.
+ * 5. When you need to comply with a printing workflow that only accepts grayscale PNG files and you want to automate the conversion in .NET.
  */
