@@ -1,7 +1,9 @@
-// HOW-TO: Create a BMP Checkerboard Pattern with Alternating Rectangles in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Checkerboard BMP Image with Alternating Black Squares in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
@@ -11,47 +13,38 @@ class Program
     {
         try
         {
-            string outputPath = "output/checkerboard.bmp";
+            string outputPath = "checkerboard.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create BMP options with a file stream source
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            int rows = 8;
+            int cols = 8;
+            int squareSize = 50;
+            int width = cols * squareSize;
+            int height = rows * squareSize;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(stream);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                int cellSize = 50;
-                int rows = 8;
-                int cols = 8;
-                int width = cellSize * cols;
-                int height = cellSize * rows;
-
-                // Create the image canvas
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+                for (int y = 0; y < rows; y++)
                 {
-                    // Initialize graphics for drawing
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                    // Prepare brushes
-                    using (SolidBrush whiteBrush = new SolidBrush(Aspose.Imaging.Color.White))
-                    using (SolidBrush blackBrush = new SolidBrush(Aspose.Imaging.Color.Black))
+                    for (int x = 0; x < cols; x++)
                     {
-                        for (int y = 0; y < rows; y++)
+                        if ((x + y) % 2 == 0)
                         {
-                            for (int x = 0; x < cols; x++)
+                            using (SolidBrush brush = new SolidBrush(Color.Black))
                             {
-                                Aspose.Imaging.Brushes.SolidBrush brush = ((x + y) % 2 == 0) ? whiteBrush : blackBrush;
-                                graphics.FillRectangle(brush,
-                                    new Aspose.Imaging.Rectangle(x * cellSize, y * cellSize, cellSize, cellSize));
+                                graphics.FillRectangle(brush, x * squareSize, y * squareSize, squareSize, squareSize);
                             }
                         }
                     }
-
-                    // Save the image
-                    image.Save();
                 }
+
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -63,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a chessboard‑style BMP image for a game UI or visual test using Aspose.Imaging in C#.
- * 2. When you want to produce a tiled black‑and‑white background for a Windows Forms or WPF application by drawing filled rectangles programmatically.
- * 3. When you require a simple high‑contrast pattern to calibrate or validate image‑processing and computer‑vision algorithms.
- * 4. When you are creating sample images for documentation or tutorials that demonstrate drawing primitives and brush usage with Aspose.Imaging.
- * 5. When you need an automated way to generate printable checkerboard patterns for scanner or printer calibration tasks.
+ * 1. When you need to generate a printable chessboard pattern for a game board mock‑up as a BMP file using C#.
+ * 2. When you want to create a high‑contrast test image for calibrating image‑processing algorithms that require alternating black and white squares.
+ * 3. When you are building a UI component that displays a tiled background and need to produce the pattern programmatically without external assets.
+ * 4. When you need to produce a BMP sprite sheet for a retro‑style game where each tile is a solid color square.
+ * 5. When you are automating the creation of sample images for documentation or unit tests that demonstrate drawing operations with Aspose.Imaging.
  */
