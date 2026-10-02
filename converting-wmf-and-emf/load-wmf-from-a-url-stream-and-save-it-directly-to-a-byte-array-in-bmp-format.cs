@@ -1,7 +1,7 @@
-// HOW-TO: Load WMF From URL and Convert To BMP Byte Array In C# (Aspose.Imaging for .NET)
+// HOW-TO: Download WMF from URL and Convert to BMP Byte Array in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Net.Http;
+using System.Net;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,29 +11,32 @@ class Program
     {
         try
         {
-            // URL of the WMF image
-            string wmfUrl = "https://example.com/sample.wmf";
+            // Hardcoded paths (required by priority rules)
+            string inputUrl = "https://example.com/sample.wmf";
+            string outputPath = "output.bmp";
 
-            // Download WMF data into a memory stream
-            using (HttpClient httpClient = new HttpClient())
-            using (Stream wmfStream = httpClient.GetStreamAsync(wmfUrl).Result)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Download WMF data from URL
+            using (WebClient client = new WebClient())
             {
-                // Load the WMF image from the stream
-                using (Image image = Image.Load(wmfStream))
+                byte[] wmfData = client.DownloadData(inputUrl);
+                using (MemoryStream wmfStream = new MemoryStream(wmfData))
                 {
-                    // Prepare BMP save options (default options are sufficient)
-                    BmpOptions bmpOptions = new BmpOptions();
-
-                    // Save the image to a memory stream in BMP format
-                    using (MemoryStream bmpStream = new MemoryStream())
+                    // Load WMF image
+                    using (Image image = Image.Load(wmfStream))
                     {
-                        image.Save(bmpStream, bmpOptions);
+                        // Save image to BMP format in a memory stream
+                        using (MemoryStream bmpStream = new MemoryStream())
+                        {
+                            BmpOptions bmpOptions = new BmpOptions();
+                            image.Save(bmpStream, bmpOptions);
+                            byte[] bmpBytes = bmpStream.ToArray();
 
-                        // Convert the memory stream to a byte array
-                        byte[] bmpBytes = bmpStream.ToArray();
-
-                        // Example usage: write the size of the BMP byte array to the console
-                        Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
+                            // Example usage: output the size of the BMP byte array
+                            Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
+                        }
                     }
                 }
             }
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to download a WMF vector graphic from a web service and store it as a BMP byte array for embedding in a PDF document.
- * 2. When you want to convert legacy WMF icons retrieved over HTTP into BMP data to send to a client‑side canvas without writing temporary files.
- * 3. When an API requires image data in BMP format but the source image is only available as a WMF stream from a remote server.
- * 4. When you are building a thumbnail generator that fetches WMF files from URLs and needs the BMP bytes to feed into a caching layer.
- * 5. When you must serialize a WMF image into a byte array for database storage or transmission in a message queue while keeping the conversion entirely in memory.
+ * 1. When you need to fetch a vector WMF graphic from a web service and embed it as a BMP byte array in a PDF or email attachment.
+ * 2. When you want to convert online WMF icons to BMP for use in a Windows Forms application without writing to disk.
+ * 3. When a cloud function must download a WMF logo, transform it to BMP, and store the resulting bytes in a database.
+ * 4. When generating thumbnails for WMF files in a web API that returns the image data as a byte array.
+ * 5. When integrating legacy WMF assets into a modern C# service that requires BMP data for further processing like OCR or printing.
  */
