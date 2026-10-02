@@ -1,9 +1,8 @@
-// HOW-TO: Batch Convert Multiple SVG Files to BMP Using Shared Raster Options in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple SVG Files to BMP with Shared Rasterization Options in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,18 +10,23 @@ class Program
     {
         try
         {
-            // Hardcoded input SVG files (modify as needed)
-            string[] inputFiles = new[]
+            // Hardcoded input and output directories
+            string inputDirectory = "InputSvgs";
+            string outputDirectory = "OutputBmps";
+
+            // Create a single SvgRasterizationOptions instance
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                @"C:\Images\sample1.svg",
-                @"C:\Images\sample2.svg",
-                @"C:\Images\sample3.svg"
+                // Example settings; adjust as needed
+                PageWidth = 800,
+                PageHeight = 600,
+                BackgroundColor = Color.White
             };
 
-            // Create a single SvgRasterizationOptions instance to be reused
-            var rasterOptions = new SvgRasterizationOptions();
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (var inputPath in inputFiles)
+            foreach (string inputPath in svgFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -31,24 +35,25 @@ class Program
                     return;
                 }
 
-                // Determine output BMP path (same folder, .bmp extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".bmp");
+                // Determine output BMP path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
+                // Load SVG and save as BMP using the shared rasterization options
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure BMP options with the shared rasterization options
                     var bmpOptions = new BmpOptions
                     {
-                        VectorRasterizationOptions = rasterOptions
+                        VectorRasterizationOptions = rasterizationOptions
                     };
 
-                    // Save as BMP
                     image.Save(outputPath, bmpOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -60,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate bitmap thumbnails from a set of SVG icons for a Windows desktop application.
- * 2. When you must prepare BMP assets for legacy hardware that only supports raster images, converting many SVG logos at once.
- * 3. When automating a build pipeline that transforms design SVG files into BMP resources for a game engine.
- * 4. When creating printable BMP versions of vector diagrams in bulk for a reporting system that only accepts BMP input.
- * 5. When migrating a web project's SVG assets to BMP format for compatibility with a third‑party imaging service that requires raster files.
+ * 1. When you need to generate bitmap thumbnails for a large collection of SVG icons in a C# application.
+ * 2. When you want to prepare high‑resolution BMP assets from SVG designs for legacy Windows software that only supports BMP.
+ * 3. When you must apply the same page size and background color to every SVG before converting them to BMP for consistent printing output.
+ * 4. When an automated build pipeline has to convert all SVG diagrams in a folder to BMP files for documentation generation.
+ * 5. When you are optimizing a server‑side service that processes many SVG uploads and stores them as BMP images using a single rasterization configuration.
  */
