@@ -1,19 +1,17 @@
-// HOW-TO: Apply Custom Emboss Sharpen Filter to PNG Image with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Sharpen Kernel to PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,16 +20,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                double[,] kernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1, 9, -1 },
+                    { -1, -1, -1 }
+                };
 
-                // Obtain the emboss kernel (3x3) and use it as a custom sharpen kernel
-                double[,] embossKernel = ConvolutionFilter.Emboss3x3;
-                var filterOptions = new ConvolutionFilterOptions(embossKernel);
-
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
                 raster.Filter(raster.Bounds, filterOptions);
-                raster.Save(outputPath);
+                var options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the edge detail of a PNG graphic by applying a custom sharpen effect derived from an emboss kernel.
- * 2. When an application must programmatically process uploaded PNG files to give them a stylized embossed look without using external image editors.
- * 3. When a batch job has to convert a collection of PNG assets into a more visually striking version for game UI textures using Aspose.Imaging’s convolution filter.
- * 4. When a web service wants to automatically improve the perceived sharpness of user‑submitted PNG avatars while preserving transparency.
- * 5. When a reporting tool requires on‑the‑fly image preprocessing to highlight features in PNG charts before embedding them into PDF documents.
+ * 1. When you need to programmatically enhance the details of a PNG photograph in a .NET application.
+ * 2. When you want to replace a built‑in sharpening filter with a custom convolution matrix for precise image sharpening.
+ * 3. When you are processing batches of PNG files on a server and must apply the same sharpen effect to each image automatically.
+ * 4. When you need to integrate image sharpening into an automated workflow that also checks for file existence and creates output directories.
+ * 5. When you are building a desktop tool that improves the clarity of screenshots before saving them as PNG files.
  */
