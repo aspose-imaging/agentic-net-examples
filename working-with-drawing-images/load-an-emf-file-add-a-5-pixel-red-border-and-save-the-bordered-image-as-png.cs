@@ -1,42 +1,52 @@
-// HOW-TO: Add a 5 Pixel Red Border to EMF and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Red Border to EMF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            string inputPath = "input.emf";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Load existing EMF records into a graphics object
-                EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Draw a 5‑pixel red border around the image
-                graphics.DrawRectangle(new Pen(Color.Red, 5), 0, 0, emfImage.Width, emfImage.Height);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Finalize the recording to obtain a new EMF image with the border
-                using (EmfImage borderedEmf = graphics.EndRecording())
+            using (Aspose.Imaging.Image emfImage = Aspose.Imaging.Image.Load(inputPath))
+            {
+                EmfImage emf = emfImage as EmfImage;
+                int origWidth = emf.Width;
+                int origHeight = emf.Height;
+                int border = 5;
+                int newWidth = origWidth + border * 2;
+                int newHeight = origHeight + border * 2;
+
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Save the result as PNG
-                    PngOptions pngOptions = new PngOptions();
-                    borderedEmf.Save(outputPath, pngOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (Aspose.Imaging.Image pngImage = Aspose.Imaging.Image.Create(pngOptions, newWidth, newHeight))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(pngImage);
+                    using (SolidBrush redBrush = new SolidBrush(Aspose.Imaging.Color.Red))
+                    {
+                        graphics.FillRectangle(redBrush, new Aspose.Imaging.Rectangle(0, 0, newWidth, newHeight));
+                    }
+                    graphics.DrawImage(emf, new Aspose.Imaging.Point(border, border));
+                    pngImage.Save();
                 }
             }
         }
@@ -49,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight the edges of a vector graphic (EMF) before converting it to a raster format for web display.
- * 2. When generating printable assets where a colored border is required around the original EMF artwork and the final output must be a PNG.
- * 3. When automating a batch process that adds a consistent red frame to legacy EMF icons before embedding them in a C# application UI.
- * 4. When preparing EMF diagrams for inclusion in documentation and you want a visible border to separate them from surrounding text after saving as PNG.
- * 5. When creating thumbnails of EMF files with a decorative border to improve visual distinction in a gallery view.
+ * 1. When you need to embed a vector EMF logo in a web page that only supports PNG, you can add a colored border and convert it to PNG.
+ * 2. When preparing print‑ready assets, you may want to highlight an EMF diagram with a red frame before exporting it as a raster PNG for the printer.
+ * 3. When generating thumbnails for a document management system, adding a border helps distinguish the image, so you load the EMF, draw a red border, and save it as PNG.
+ * 4. When integrating legacy Windows Metafile graphics into a modern .NET application, you can wrap the EMF with a red margin and convert it to PNG for UI display.
+ * 5. When creating batch‑processed reports that require each EMF chart to have a consistent red outline, this code programmatically adds the border and outputs PNG files.
  */
