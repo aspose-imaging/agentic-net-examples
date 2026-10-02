@@ -1,10 +1,9 @@
-// HOW-TO: How To Render SVG As Anti-Aliased GIF In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: How To Apply Anti-Alias Smoothing To GIFs In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.Sources;
+using System.Drawing.Drawing2D;
 
 class Program
 {
@@ -12,46 +11,28 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.gif";
+            string inputPath = "input.gif";
+            string outputPath = "output/output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure vector rasterization options with smoothing (anti-aliasing)
-                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                var saveOptions = new GifOptions
                 {
-                    // Use the original SVG size
-                    PageSize = svgImage.Size,
-                    // Apply anti-aliasing to reduce pixelation
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // Optional: set background color if needed
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        SmoothingMode = SmoothingMode.AntiAlias
+                    }
                 };
 
-                // Set up GIF save options and attach rasterization options
-                GifOptions gifOptions = new GifOptions
-                {
-                    VectorRasterizationOptions = rasterOptions,
-                    // Enable palette correction for better color quality (optional)
-                    DoPaletteCorrection = true,
-                    // Enable interlacing for smoother progressive display (optional)
-                    Interlaced = true
-                };
-
-                // Save the image as GIF with the specified options
-                svgImage.Save(outputPath, gifOptions);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector SVG graphics to animated GIFs while preserving smooth edges and avoiding pixelated artifacts in a C# application.
- * 2. When generating web‑ready GIF previews of SVG icons and want anti‑aliasing to improve visual quality on high‑resolution displays.
- * 3. When creating a batch process that converts a folder of SVG files to GIFs with consistent background color and palette correction using Aspose.Imaging.
- * 4. When developing a reporting tool that embeds SVG charts as GIF animations and requires interlaced output for progressive rendering in browsers.
- * 5. When optimizing GIF assets for email newsletters by applying smoothing mode to reduce jagged lines and ensure the animation looks professional across email clients.
+ * 1. When you need to reduce pixelation in animated GIFs generated from vector graphics by applying anti‑alias smoothing during saving with Aspose.Imaging in C#.
+ * 2. When creating a web‑ready GIF slideshow and want smoother transitions between frames without manually editing each image.
+ * 3. When converting high‑resolution vector drawings to GIF format and require the output to retain visual quality on low‑resolution displays.
+ * 4. When optimizing GIF assets for mobile apps where anti‑aliased rendering improves perceived animation smoothness.
+ * 5. When automating a batch process that re‑saves existing GIF files with enhanced smoothing to meet branding guidelines for crisp visuals.
  */
