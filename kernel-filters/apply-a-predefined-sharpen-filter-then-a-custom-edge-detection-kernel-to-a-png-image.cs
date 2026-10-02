@@ -1,48 +1,48 @@
-// HOW-TO: Apply Sharpen Then Emboss Edge Detection to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Sharpen Then Edge Detection Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                // Apply predefined Sharpen filter
+                raster.Filter(raster.Bounds, new SharpenFilterOptions());
 
-                // Apply a Sharpen filter (kernel size 5, sigma 4.0) to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new SharpenFilterOptions(5, 4.0));
+                // Apply custom edge‑detection kernel
+                double[,] edgeKernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(edgeKernel));
 
-                // Apply a custom edge‑detection kernel (Emboss 3x3) to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Save the result as PNG
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the details of a product photo by sharpening it and then highlight its edges for a catalog generated in a C# application.
- * 2. When preparing PNG assets for a game, you can use this code to sharpen textures and add an emboss effect to give them a more pronounced 3‑D appearance.
- * 3. When building an automated image‑processing pipeline that receives scanned documents as PNG files, applying a sharpen filter followed by edge detection helps improve readability before OCR.
- * 4. When creating visual thumbnails for a web gallery, the code can sharpen the image and apply an emboss kernel to make the thumbnails stand out with a subtle depth effect.
- * 5. When developing a C# desktop tool that lets users batch‑process PNG screenshots, this snippet provides a simple way to apply both sharpening and custom convolution filters in one pass.
+ * 1. When you need to enhance the details of a scanned PNG document by sharpening it and highlighting edges before OCR processing.
+ * 2. When preparing product photos for an e‑commerce site and want to make edges pop while keeping the image in PNG format.
+ * 3. When creating visual assets for a game and require a custom edge‑detection kernel to generate stylized outlines after sharpening.
+ * 4. When processing medical imaging scans saved as PNG and need to emphasize structural boundaries for better visual analysis.
+ * 5. When automating a batch workflow that improves the clarity of PNG screenshots by applying a sharpen filter followed by edge detection.
  */
