@@ -6,52 +6,45 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.djvu";
-            string outputPath = "output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "Input\\document.djvu";
+                string outputPath = "Output\\document.pdf";
 
-            // Ensure the output directory exists (creates if null/empty safely)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
-
-            // Load the DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-            {
-                // Prepare PDF options with custom author metadata
-                var pdfOptions = new PdfOptions
+                if (!File.Exists(inputPath))
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Export all pages to PDF (default behavior)
-                djvu.Save(outputPath, pdfOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                {
+                    PdfOptions pdfOptions = new PdfOptions();
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" };
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive scanned DjVu files as PDFs while embedding the author’s name for document management.
- * 2. When a publishing workflow requires converting multi‑page DjVu illustrations into a single PDF and setting author metadata for copyright tracking.
- * 3. When integrating Aspose.Imaging into a C# application that processes user‑uploaded DjVu files and outputs PDFs with consistent author information.
- * 4. When automating batch conversion of DjVu manuals to PDFs for distribution, ensuring each PDF contains the correct author tag for compliance reporting.
- * 5. When creating a digital library that stores original DjVu scans but provides PDF versions with author metadata for easier indexing and retrieval.
+ * 1. When a developer needs to archive scanned books stored as DjVu files and wants the resulting PDFs to include the author's name for proper cataloging.
+ * 2. When integrating a document‑management system that receives DjVu uploads and must output searchable PDFs with consistent metadata.
+ * 3. When building a batch conversion tool that transforms multiple DjVu pages into a single PDF while embedding custom author information for compliance reports.
+ * 4. When creating a digital library where each PDF must carry author metadata to improve search engine indexing and user discovery.
+ * 5. When a publishing workflow requires converting DjVu illustrations to PDF and setting the author field programmatically to match the original creator.
  */
