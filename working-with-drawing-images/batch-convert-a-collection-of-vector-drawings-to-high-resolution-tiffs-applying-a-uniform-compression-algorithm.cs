@@ -1,67 +1,50 @@
-// HOW-TO: Batch Convert SVG EMF CDR to High‑Resolution LZW TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Vector Drawings to High‑Resolution TIFF with LZW Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded collection of vector input files
-            var inputFiles = new List<string>
-            {
-                @"C:\VectorImages\drawing1.svg",
-                @"C:\VectorImages\drawing2.emf",
-                @"C:\VectorImages\drawing3.cdr"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Corresponding output TIFF files (same folder, .tif extension)
-            var outputFiles = new List<string>
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\ConvertedTiffs\drawing1.tif",
-                @"C:\ConvertedTiffs\drawing2.tif",
-                @"C:\ConvertedTiffs\drawing3.tif"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            for (int i = 0; i < inputFiles.Count; i++)
+            if (!Directory.Exists(outputDirectory))
             {
-                string inputPath = inputFiles[i];
-                string outputPath = outputFiles[i];
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Input file existence check
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".tif");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the vector image
                 using (Image image = Image.Load(inputPath))
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb))
                 {
-                    // Prepare TIFF save options with uniform compression (LZW)
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Lzw,
-                        // High‑resolution rasterization settings
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            // Define a large page size for high resolution (e.g., 3000x3000 pixels)
-                            PageSize = new Size(3000, 3000),
-                            // Optional: improve quality
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        }
-                    };
-
-                    // Save as TIFF
                     image.Save(outputPath, tiffOptions);
                 }
             }
@@ -75,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive a set of design files (SVG, EMF, CDR) as lossless, high‑resolution TIFFs for printing or long‑term storage while reducing file size with LZW compression.
- * 2. When a document‑management system must automatically convert incoming vector drawings to TIFFs so they can be displayed in web viewers that only support raster images.
- * 3. When a batch processing pipeline has to generate printable TIFFs from vector assets for a publishing workflow, ensuring consistent resolution and compression across all pages.
- * 4. When a GIS or CAD integration requires converting multiple vector map layers into a single TIFF format for compatibility with legacy analysis tools.
- * 5. When a cloud service needs to pre‑process user‑uploaded vector graphics into compressed TIFF thumbnails for fast preview generation without losing detail.
+ * 1. When you need to archive a large set of SVG or AI files as lossless, high‑resolution TIFFs for printing while keeping file size low with LZW compression.
+ * 2. When a document management system must automatically convert incoming vector artwork into TIFF images for consistent viewing across platforms.
+ * 3. When a GIS application requires batch transformation of vector map layers into tiled TIFF files for raster analysis.
+ * 4. When a medical imaging workflow converts vector diagrams into TIFF format to embed them in DICOM reports with efficient storage.
+ * 5. When a web service generates printable TIFF previews of user‑uploaded vector designs and wants to store them compactly on the server.
  */
