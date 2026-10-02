@@ -1,64 +1,50 @@
-// HOW-TO: Crop A 200x200 Area From A TIFF And Get PNG In Memory C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop a 200x200 Area from a TIFF Image and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input file path
-            string inputPath = "input.tif";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the TIFF image from a file stream
-            using (FileStream inputStream = File.OpenRead(inputPath))
-            using (Image image = Image.Load(inputStream))
-            {
-                // Cast to TiffImage to access TIFF-specific methods
-                TiffImage tiffImage = (TiffImage)image;
-
-                // Define a 200x200 rectangle starting at the top‑left corner
-                Rectangle cropArea = new Rectangle(0, 0, 200, 200);
-
-                // Crop the image
-                tiffImage.Crop(cropArea);
-
-                // Save the cropped image to a memory stream (PNG format used as an example)
-                using (MemoryStream outputStream = new MemoryStream())
+                string inputPath = "input.tif";
+                if (!File.Exists(inputPath))
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    tiffImage.Save(outputStream, pngOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // The memory stream now contains the cropped image data
-                    // For demonstration, output the size of the resulting stream
-                    Console.WriteLine($"Cropped image size in bytes: {outputStream.Length}");
+                string outputPath = "output/output.tif";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
+                    Rectangle cropRect = new Rectangle(0, 0, 200, 200);
+                    raster.Crop(cropRect);
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    raster.Save(outputPath, tiffOptions);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a thumbnail from a large multi‑page TIFF without writing intermediate files.
- * 2. When a web service must return a cropped portion of a TIFF as a PNG byte array.
- * 3. When processing scanned documents and you want to isolate a specific 200 × 200 region for OCR.
- * 4. When generating preview images for a PDF generator that only accepts PNG data from a memory stream.
- * 5. When building a Windows desktop app that loads TIFFs from a network stream, crops them, and displays the result directly from memory.
+ * 1. When you need to extract a specific 200 × 200 pixel region from a multi‑page TIFF for thumbnail generation in a C# web service.
+ * 2. When a desktop application must trim the edges of scanned documents stored as TIFF files before archiving them.
+ * 3. When an automated batch job processes incoming TIFF scans, crops a fixed area, and saves the result for downstream OCR analysis.
+ * 4. When a cloud function receives a TIFF stream, removes unwanted margins by cropping, and returns the cropped image as a new TIFF.
+ * 5. When a reporting tool requires a small, uniformly sized TIFF snippet to embed in PDF reports generated with .NET.
  */
