@@ -1,11 +1,10 @@
-// HOW-TO: Batch Apply Custom Convolution Kernel to PNG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Custom Convolution Kernel To PNG Images In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -13,9 +12,8 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -31,7 +29,7 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -41,28 +39,27 @@ class Program
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileName + "_filtered.png");
-
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
-
                     double[,] kernel = new double[,]
                     {
-                        { 0.1, 0.1, 0.1 },
-                        { 0.1, 0.2, 0.1 },
-                        { 0.1, 0.1, 0.0 }
+                        { 0, -0.1, 0 },
+                        { -0.1, 1.3, -0.1 },
+                        { 0, -0.1, 0 }
                     };
-                    double factor = 1.0 / 0.9; // Normalize kernel sum to 1
 
-                    var filterOptions = new ConvolutionFilterOptions(kernel, factor, 0);
+                    var filterOptions = new ConvolutionFilterOptions(kernel);
+
                     raster.Filter(raster.Bounds, filterOptions);
 
-                    using (var options = new PngOptions { Source = new FileCreateSource(outputPath, false) })
+                    var options = new PngOptions
                     {
-                        raster.Save(outputPath, options);
-                    }
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    raster.Save(outputPath, options);
                 }
             }
         }
@@ -75,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically apply a custom edge‑enhancement convolution filter to a folder of PNG files and save the filtered results.
- * 2. When you must keep image brightness consistent after filtering by normalizing a kernel whose sum is less than one.
- * 3. When you are preparing PNG assets for a machine‑learning pipeline and require the same convolution operation on every image.
- * 4. When you want to generate stylized versions of PNG icons for different UI themes without editing each file manually.
- * 5. When you are building an automated workflow that applies a custom blur or sharpen effect to a batch of PNG graphics in C#.
+ * 1. When you need to sharpen a collection of PNG photos automatically before uploading them to a web gallery.
+ * 2. When you want to reduce noise in scanned PNG documents by applying a custom edge‑enhancing kernel across all files in a folder.
+ * 3. When you must preprocess PNG assets for a game engine, applying a specific convolution filter and saving the results with a consistent naming scheme.
+ * 4. When you are building a server‑side service that normalizes image intensity and applies a custom filter to every PNG uploaded by users.
+ * 5. When you need to batch‑convert PNG screenshots to a filtered version for visual analysis without manually editing each file.
  */
