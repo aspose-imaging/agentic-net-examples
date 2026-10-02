@@ -1,9 +1,10 @@
-// HOW-TO: Convert DjVu to PDF with Metadata Preservation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document to PDF with Metadata Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
@@ -11,8 +12,9 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/result.pdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "sample.djvu");
+            string outputPath = Path.Combine(baseDir, "Output", "result.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -22,22 +24,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvu = (DjvuImage)Aspose.Imaging.Image.Load(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                string identifier = djvu.Identifier.ToString();
-                int pageCount = djvu.PageCount;
-                string xmpData = djvu.XmpData?.ToString() ?? string.Empty;
-
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Title = "Converted from DjVu",
-                        Author = "Aspose.Imaging",
-                        Subject = $"DjVu Identifier: {identifier}",
-                        Keywords = $"Pages={pageCount}"
-                    };
-
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
                     djvu.Save(outputPath, pdfOptions);
                 }
             }
@@ -51,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive scanned DjVu documents as searchable PDFs while keeping original identifiers and page counts in the PDF metadata.
- * 2. When a digital library wants to batch‑convert DjVu files to PDF and embed author and subject information for cataloguing.
- * 3. When an application must extract XMP data from a DjVu image and store it in the resulting PDF’s metadata for compliance reporting.
- * 4. When you are building a document workflow that transforms legacy DjVu manuals into PDF format and preserves keywords for SEO indexing.
- * 5. When a C# service processes user‑uploaded DjVu files and generates PDFs that include custom title and author fields for downstream processing.
+ * 1. When you need to archive scanned books stored as DjVu files while keeping their title, author, and creation date information in a searchable PDF.
+ * 2. When a document management system must ingest DjVu submissions and convert them to PDF for downstream workflows without losing embedded metadata.
+ * 3. When generating PDF reports from legacy DjVu technical manuals and preserving the original metadata for compliance auditing.
+ * 4. When building a C# web service that receives DjVu uploads and returns PDF files that retain the source file’s metadata for indexing.
+ * 5. When migrating a digital library from DjVu to PDF format and requiring the metadata to be transferred automatically during conversion.
  */
