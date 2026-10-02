@@ -1,42 +1,44 @@
-// HOW-TO: Draw a Floating Point Rectangle on PNG Canvas Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Floating Point Rectangle on BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output path
-            string outputPath = @"C:\temp\output.png";
+            string outputPath = "output.bmp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Set up PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Image image = Image.Create(pngOptions, 400, 300))
+            // Create a new BMP image with 32 bits per pixel
+            var options = new BmpOptions
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                BitsPerPixel = 32
+            };
+            using (var image = Image.Create(options, 200, 200))
+            {
+                // Initialize graphics object
+                var graphics = new Graphics(image);
 
-                // Define pen and floating-point rectangle
-                Pen pen = new Pen(Color.Blue, 2);
-                RectangleF rectF = new RectangleF(50.5f, 30.5f, 200.2f, 150.8f);
+                // Set background color to Yellow
+                graphics.Clear(Color.Yellow);
 
-                // Draw rectangle using RectangleF overload
-                graphics.DrawRectangle(pen, rectF);
+                // Define a blue pen
+                var pen = new Pen(Color.Blue);
 
-                // Save the image (output is already bound to the file)
-                image.Save();
+                // Define a floating-point rectangle
+                var rect = new RectangleF(20.5f, 30.5f, 100.0f, 50.0f);
+
+                // Draw the rectangle
+                graphics.DrawRectangle(pen, rect);
+
+                // Save the image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG image with precisely positioned vector shapes, such as a rectangle defined by sub‑pixel coordinates, for high‑resolution reports or UI mockups.
- * 2. When creating dynamic graphics for a web service that overlays bounding boxes on photos, using floating‑point values to align with scaled image dimensions.
- * 3. When building a CAD‑like preview where rectangle dimensions must reflect real‑world measurements, requiring the RectangleF overload to preserve decimal accuracy.
- * 4. When automating the production of printable assets that require exact margin calculations, drawing rectangles with fractional pixel offsets to avoid visual artifacts.
- * 5. When developing a diagnostic tool that marks regions of interest on screenshots, using a blue pen and floating‑point rectangle to highlight areas without losing precision.
+ * 1. When you need to generate a BMP thumbnail with a precisely positioned blue outline around a specific area.
+ * 2. When you want to create a custom diagram where rectangle dimensions are defined with sub‑pixel accuracy for high‑resolution printing.
+ * 3. When you are building a reporting tool that overlays floating‑point rectangles on a solid‑color background to highlight data regions.
+ * 4. When you need to programmatically add a semi‑transparent rectangular border to an image before saving it as a 32‑bit BMP.
+ * 5. When you are automating the creation of UI mockups that require exact pixel‑fraction placement of shapes using Aspose.Imaging in C#.
  */
