@@ -1,60 +1,41 @@
-// HOW-TO: Increase DNG Image Contrast By 30 Percent And Save As TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust DNG Contrast by 30 Percent and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dng;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/input.dng";
-        string outputPath = "output/output.tif";
+        string inputPath = "input.dng";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (DngImage dng = (DngImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DNG image
-            using (Image loadedImage = Image.Load(inputPath))
-            {
-                DngImage dng = (DngImage)loadedImage;
-
-                int width = dng.Width;
-                int height = dng.Height;
-
-                // Load pixel data from DNG
-                Color[] pixels = dng.LoadPixels(dng.Bounds);
-
-                // Prepare TIFF options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Create a new TIFF canvas
-                using (Image tiffImageBase = Image.Create(tiffOptions, width, height))
+                RasterImage raster = (RasterImage)dng;
+                if (!raster.IsCached)
                 {
-                    TiffImage tiff = (TiffImage)tiffImageBase;
-
-                    // Write pixel data to TIFF
-                    tiff.SavePixels(tiff.Bounds, pixels);
-
-                    // Adjust contrast by 30%
-                    tiff.AdjustContrast(30f);
-
-                    // Save the result as TIFF
-                    tiff.Save(outputPath, tiffOptions);
+                    raster.CacheData();
                 }
+
+                raster.AdjustContrast(0.3f);
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the contrast of a raw DNG photo by 30 % before converting it to a high‑resolution TIFF for printing or archival.
- * 2. When a workflow requires automatic adjustment of DNG files’ contrast and saving the results as TIFFs for downstream processing in .NET applications.
- * 3. When you are building a C# tool that prepares camera raw images for medical imaging analysis by increasing contrast and exporting them to TIFF format.
- * 4. When you want to improve the visual clarity of DNG images before performing computer‑vision tasks, using Aspose.Imaging to adjust contrast and output TIFF files.
- * 5. When you need to generate TIFF previews with boosted contrast from DNG assets for web galleries or client review using C# code.
+ * 1. When a photographer needs to increase the contrast of a raw DNG file before archiving it as a high‑resolution TIFF for print production.
+ * 2. When a scientific imaging application must enhance the visibility of details in a DNG capture and store the result in a lossless TIFF for downstream analysis.
+ * 3. When a mobile app backend processes raw camera uploads, applies a 30 % contrast boost, and converts them to TIFF for compatibility with legacy image pipelines.
+ * 4. When a digital asset management system requires automated conversion of raw DNG assets to TIFF while standardizing contrast across the collection.
+ * 5. When a developer builds a batch‑processing tool that reads DNG files, adjusts their contrast using Aspose.Imaging, and saves the edited images as TIFF for archival storage.
  */
