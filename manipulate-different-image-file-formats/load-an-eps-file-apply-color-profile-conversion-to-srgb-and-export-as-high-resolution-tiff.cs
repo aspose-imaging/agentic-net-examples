@@ -4,6 +4,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -13,7 +14,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.eps";
-            string outputPath = "Output/output.tif";
+            string outputPath = "Output/sample.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -25,9 +26,23 @@ class Program
 
             using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
+                int highResWidth = epsImage.Width * 2;
+                int highResHeight = epsImage.Height * 2;
+
+                var rasterOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = highResWidth,
+                    PageHeight = highResHeight
+                };
+
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    ResolutionSettings = new ResolutionSetting(300, 300)
+                    Compression = TiffCompressions.Lzw,
+                    ResolutionUnit = TiffResolutionUnits.Inch,
+                    Xresolution = new TiffRational(300),
+                    Yresolution = new TiffRational(300),
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 epsImage.Save(outputPath, tiffOptions);
@@ -42,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow requires converting vector EPS artwork to a 300 dpi sRGB TIFF for accurate color reproduction in downstream raster pipelines.
- * 2. When a web service must generate high‑resolution preview images from uploaded EPS files while ensuring the output uses the standard sRGB color space.
- * 3. When a desktop application needs to batch‑process design files, turning EPS logos into TIFFs suitable for inclusion in PDF reports that expect raster images.
- * 4. When an e‑commerce platform wants to display product illustrations by converting supplier‑provided EPS files to TIFFs with consistent color and resolution for thumbnails and print catalogs.
- * 5. When a digital asset management system must ingest EPS assets and store them as TIFFs with a fixed DPI and sRGB profile to maintain compatibility with legacy imaging tools.
+ * 1. When you need to turn a vector EPS artwork into a printable 300 dpi TIFF for a publishing workflow using C#.
+ * 2. When a graphics pipeline requires converting EPS files to sRGB color space TIFFs with loss‑less LZW compression for archival storage.
+ * 3. When an automated batch process must rasterize EPS logos at double the original size to preserve detail in high‑resolution scans.
+ * 4. When a .NET application has to generate white‑background TIFFs from EPS files for inclusion in PDF reports or catalogs.
+ * 5. When you want to programmatically ensure EPS images are saved as TIFFs with proper resolution units and DPI settings for print‑ready output.
  */
