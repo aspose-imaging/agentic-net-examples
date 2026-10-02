@@ -1,9 +1,7 @@
-// HOW-TO: Batch Convert WMF Files to BMP with Original Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WMF Files to BMP While Preserving Dimensions in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -11,46 +9,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output folders
+            // Hardcoded input and output directories
             string inputFolder = @"C:\InputWmf";
             string outputFolder = @"C:\OutputBmp";
 
             // Get all WMF files in the input folder
             string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
 
-            foreach (string inputPath in wmfFiles)
+            foreach (string wmfPath in wmfFiles)
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Validate input file existence
+                if (!File.Exists(wmfPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {wmfPath}");
                     return;
                 }
 
-                // Build the output BMP path preserving the original file name
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".bmp");
+                // Determine output BMP path
+                string outputFileName = Path.GetFileNameWithoutExtension(wmfPath) + ".bmp";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the output directory exists (unconditional)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WMF image
-                using (Image image = Image.Load(inputPath))
+                // Load WMF image
+                using (Image image = Image.Load(wmfPath))
                 {
-                    // Set rasterization options to keep original dimensions
-                    var rasterOptions = new WmfRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-
-                    // Configure BMP save options with the rasterization settings
-                    var bmpOptions = new BmpOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save as BMP
-                    image.Save(outputPath, bmpOptions);
+                    // Save as BMP preserving original dimensions
+                    image.Save(outputPath);
                 }
             }
         }
@@ -63,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legacy Windows application requires BMP icons instead of WMF vectors, you can batch convert the WMF assets while keeping their original dimensions.
- * 2. When preparing a set of technical diagrams for a PDF report that only supports raster images, you can transform all WMF files to BMP at their native size.
- * 3. When a game engine imports only bitmap textures, you can automatically convert a folder of WMF sprites to BMP without scaling them.
- * 4. When archiving design assets for a compliance audit, you can preserve the exact visual size by converting each WMF file to a BMP copy in bulk.
- * 5. When a printing workflow demands BMP files for high‑resolution output, you can use this code to batch process WMF files while retaining their original pixel dimensions.
+ * 1. When you need to migrate a legacy collection of vector WMF icons to raster BMP files for use in a Windows application that only supports bitmap resources.
+ * 2. When an automated build pipeline must generate BMP thumbnails from a folder of WMF diagrams while keeping the original size for accurate printing.
+ * 3. When a document conversion service processes user‑uploaded WMF graphics in bulk and stores them as BMP images to ensure compatibility with older imaging libraries.
+ * 4. When you are preparing assets for a game engine that requires BMP textures, and you want to batch‑convert all WMF art assets without scaling them.
+ * 5. When a legacy reporting tool expects BMP images, and you need a C# script to read multiple WMF charts from a directory and save them unchanged in BMP format.
  */
