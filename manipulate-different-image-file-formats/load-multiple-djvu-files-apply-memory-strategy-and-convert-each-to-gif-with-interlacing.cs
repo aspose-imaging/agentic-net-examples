@@ -1,62 +1,53 @@
-// HOW-TO: Convert Multiple DjVu Pages To Interlaced GIFs With Memory Limit In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert DjVu Files to Interlaced GIFs with Memory Optimization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input DjVu files
-            string[] inputFiles = new string[]
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Images\sample1.djvu",
-                @"C:\Images\sample2.djvu"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Images\Output";
-
-            // Memory strategy: limit internal buffers to 2 MB
-            LoadOptions loadOptions = new LoadOptions();
-            loadOptions.BufferSizeHint = 2 * 1024 * 1024;
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.djvu", SearchOption.TopDirectoryOnly);
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Open the DjVu file stream
-                using (Stream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 1024 * 1024 }))
                 {
-                    // Load DjVu document with memory options
-                    using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".gif");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (GifOptions gifOptions = new GifOptions())
                     {
-                        // Process each page
-                        foreach (DjvuPage page in djvuImage.Pages)
-                        {
-                            // Build output file name (e.g., sample1_page1.gif)
-                            string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                            string outputPath = Path.Combine(outputDir, $"{baseName}_page{page.PageNumber}.gif");
-
-                            // Ensure the output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save page as GIF with interlacing enabled
-                            GifOptions gifOptions = new GifOptions
-                            {
-                                Interlaced = true
-                            };
-                            page.Save(outputPath, gifOptions);
-                        }
+                        gifOptions.Interlaced = true;
+                        djvu.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -70,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert scanned DjVu documents into web‑ready interlaced GIF images while keeping RAM usage low.
- * 2. When a server‑side application must process large DjVu files page by page without exhausting memory.
- * 3. When you want to generate separate GIF previews of each DjVu page for a document viewer or archive.
- * 4. When you have to automate the conversion of multiple DjVu files in a folder into individual GIF files for sharing or publishing.
- * 5. When you require GIF output with interlacing to improve progressive loading on slow network connections.
+ * 1. When you need to generate web‑ready interlaced GIF previews from a collection of scanned DjVu documents while keeping memory usage low.
+ * 2. When an archival system must automatically transform uploaded DjVu files into animated GIFs for compatibility with legacy browsers.
+ * 3. When a desktop application processes large DjVu image batches and requires efficient loading using BufferSizeHint to avoid out‑of‑memory errors.
+ * 4. When you want to create a folder of GIF assets from DjVu source files for use in email newsletters that require interlaced images for progressive rendering.
+ * 5. When a server‑side service converts user‑submitted DjVu files to interlaced GIFs in bulk to reduce bandwidth and improve loading speed on mobile devices.
  */
