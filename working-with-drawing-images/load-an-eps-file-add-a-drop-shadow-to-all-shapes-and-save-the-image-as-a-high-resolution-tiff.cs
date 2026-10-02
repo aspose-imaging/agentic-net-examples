@@ -1,12 +1,11 @@
-// HOW-TO: Add Drop Shadow to EPS Shapes and Save as High‑Resolution TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Drop Shadow to EPS Shapes and Save as High-Resolution TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,76 +13,60 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.eps";
-            string outputPath = "output.tif";
+            string outputPath = "output/output.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary raster file path
-            string tempPngPath = "temp.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-            // Load EPS and export to a high‑resolution PNG
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = Image.Load(inputPath))
             {
+                string tempPng = Path.Combine(Path.GetTempPath(), "temp_eps.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPng));
+
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        // Double the original size for higher resolution
-                        PageWidth = epsImage.Width * 2,
-                        PageHeight = epsImage.Height * 2
+                        PageWidth = 2000,
+                        PageHeight = 2000,
+                        BackgroundColor = Color.White
                     }
                 };
-                epsImage.Save(tempPngPath, pngOptions);
-            }
+                epsImage.Save(tempPng, pngOptions);
 
-            // Load the rasterized PNG
-            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-            {
-                int shadowOffset = 10; // Offset for drop shadow
-                int canvasWidth = raster.Width + shadowOffset;
-                int canvasHeight = raster.Height + shadowOffset;
-
-                // Prepare TIFF options with direct file binding
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                using (var raster = (RasterImage)Image.Load(tempPng))
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    int shadowOffset = 10;
+                    int canvasWidth = raster.Width + shadowOffset;
+                    int canvasHeight = raster.Height + shadowOffset;
 
-                // Create a blank TIFF canvas
-                using (Image tiffCanvas = Image.Create(tiffOptions, canvasWidth, canvasHeight))
-                {
-                    var graphics = new Graphics(tiffCanvas);
-                    graphics.Clear(Color.White); // White background
-
-                    // Draw semi‑transparent black rectangle as shadow
-                    using (var shadowBrush = new SolidBrush(Color.FromArgb(128, Color.Black)))
+                    var bmpOptions = new BmpOptions
                     {
-                        graphics.FillRectangle(shadowBrush, shadowOffset, shadowOffset, raster.Width, raster.Height);
+                        BitsPerPixel = 24,
+                        Source = new FileCreateSource(Path.Combine(Path.GetTempPath(), "canvas.bmp"), false)
+                    };
+
+                    using (var canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
+                    {
+                        Graphics graphics = new Graphics(canvas);
+                        using (var shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
+                        {
+                            graphics.FillRectangle(shadowBrush, 0, 0, raster.Width, raster.Height);
+                        }
+                        graphics.DrawImage(raster, shadowOffset, shadowOffset);
+
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        canvas.Save(outputPath, tiffOptions);
                     }
-
-                    // Draw the raster image on top of the shadow
-                    graphics.DrawImage(raster, 0, 0);
-
-                    // Save the final TIFF image
-                    tiffCanvas.Save();
                 }
-            }
 
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
+                try { File.Delete(tempPng); } catch { }
             }
         }
         catch (Exception ex)
@@ -95,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EPS artwork into a print‑ready high‑resolution TIFF while applying a drop‑shadow effect to all graphic elements.
- * 2. When a desktop publishing workflow requires rasterizing EPS logos, enhancing them with a shadow, and exporting them for inclusion in high‑quality PDFs or print jobs.
- * 3. When an e‑commerce platform must generate product images from EPS designs with a consistent shadow style for catalog thumbnails saved as TIFF files.
- * 4. When a reporting tool has to embed EPS diagrams into TIFF reports and wants the diagrams to appear with depth by adding a drop shadow automatically.
- * 5. When automating batch processing of EPS files to produce shadowed, high‑resolution TIFF assets for archival or digital asset management systems.
+ * 1. When a printing service needs to convert vector EPS artwork into a high‑resolution TIFF with a subtle drop shadow for catalog pages.
+ * 2. When a desktop publishing application must render EPS logos, apply a shadow effect, and export them as TIFF files for print‑ready PDFs.
+ * 3. When an e‑commerce platform wants to generate product preview images from EPS designs, adding depth with a drop shadow before storing them as TIFFs.
+ * 4. When a batch‑processing tool automates the conversion of multiple EPS files to TIFF while enhancing visual appeal with a shadow for marketing materials.
+ * 5. When a scientific reporting workflow requires rasterizing EPS diagrams, applying a drop shadow, and saving them as high‑quality TIFF images for inclusion in research papers.
  */
