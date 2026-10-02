@@ -1,47 +1,45 @@
-// HOW-TO: Restore Blurred JPEG Image Using Gauss Wiener Deconvolution in C# (Aspose.Imaging for .NET)
+// HOW-TO: Deconvolution Filter to Sharpen Blurred JPEG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\blurred.jpg";
-            string outputPath = @"C:\Images\restored.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int size = 3;
+                double sigma = 1.0;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.DeconvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(size, sigma));
 
-            // Load the blurred JPEG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                image.Filter(image.Bounds, deconvOptions);
 
-                // Create Gauss-Wiener deconvolution filter options (radius, sigma)
-                var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
-                // Optional: adjust additional parameters
-                deconvOptions.Brightness = 1.15; // default recommended
-                deconvOptions.Snr = 0.007;       // default recommended
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                // Apply the deconvolution filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-
-                // Save the restored image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to automatically sharpen user‑uploaded blurry JPEG photos before displaying them as high‑quality PNG thumbnails.
- * 2. When a desktop tool must batch‑process scanned documents that suffered motion blur, restoring readability and saving the results in lossless PNG format.
- * 3. When an e‑commerce platform wants to improve product images that were compressed as JPEG and appear out of focus, using a Gauss‑Wiener filter to enhance them for catalog listings.
- * 4. When a medical imaging system receives JPEG scans with slight blur and requires deconvolution to recover diagnostic details while preserving the image as PNG for further analysis.
- * 5. When a digital archivist needs to restore aged JPEG photographs with blur artifacts and store the cleaned versions as PNG files for long‑term preservation.
+ * 1. When you need to restore details in a JPEG photo that was blurred during capture and output a loss‑less PNG for further editing.
+ * 2. When processing a batch of scanned documents where each JPEG suffers from motion blur and you must apply a deconvolution filter before archiving them as PNG files.
+ * 3. When building a C# web service that receives blurred JPEG uploads, sharpens them using a Gaussian deconvolution filter, and returns high‑quality PNG thumbnails.
+ * 4. When integrating image enhancement into a desktop application that corrects blurry JPEG screenshots and saves the corrected images in PNG format for reporting.
+ * 5. When automating a workflow that converts low‑resolution, blurred JPEG assets into sharpened PNG assets for use in print‑ready graphics.
  */
