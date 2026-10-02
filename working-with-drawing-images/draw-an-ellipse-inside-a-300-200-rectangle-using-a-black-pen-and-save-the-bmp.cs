@@ -1,8 +1,8 @@
-// HOW-TO: Create a 300x200 BMP with Black Ellipse Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image With Black Ellipse Inside 300x200 Rectangle In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,17 +11,21 @@ class Program
     {
         try
         {
-            string outputPath = @"c:\temp\ellipse.bmp";
+            string outputPath = "output/ellipse.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            var source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, 300, 200))
+
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(bmpOptions, 300, 200))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawEllipse(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1),
-                    new Aspose.Imaging.Rectangle(0, 0, 300, 200));
+
+                Pen pen = new Pen(Aspose.Imaging.Color.Black);
+                Rectangle rect = new Rectangle(0, 0, 300, 200);
+                graphics.DrawEllipse(pen, rect);
+
                 image.Save();
             }
         }
@@ -34,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple placeholder image with an ellipse for a report or UI mockup in BMP format.
- * 2. When a server‑side application must programmatically create a black‑outlined ellipse inside a fixed‑size bitmap for printing or legacy systems.
- * 3. When you want to automate the production of diagram assets, such as icons or badges, by drawing vector shapes onto a BMP file using C#.
- * 4. When integrating with a workflow that requires BMP images, and you must draw geometric shapes without using GDI+.
- * 5. When creating test images for image‑processing algorithms that expect a 300 × 200 BMP containing a single ellipse.
+ * 1. When you need to generate a simple BMP placeholder graphic with a centered ellipse for a report or UI mock‑up in a .NET application.
+ * 2. When you want to programmatically create a black‑outlined shape on a white background for printing or archival purposes using Aspose.Imaging.
+ * 3. When an automated testing suite requires a consistent 300 × 200 bitmap containing an ellipse to validate image‑processing algorithms.
+ * 4. When a desktop application must export a diagram element, such as an ellipse, to BMP format for compatibility with legacy systems.
+ * 5. When you are building a batch process that draws basic geometric figures into BMP files for use in documentation or training materials.
  */
