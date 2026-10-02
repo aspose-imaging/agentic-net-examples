@@ -1,7 +1,8 @@
-// HOW-TO: Convert Animated WebP to GIF While Preserving All Frames in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated WebP to GIF While Preserving Frames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -10,32 +11,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\animation_input.webp";
-            string outputPath = @"C:\temp\animation_output.gif";
+            string inputPath = "input.webp";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP image (preserves all frames)
-            using (Image image = Image.Load(inputPath))
+            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
             {
-                // Configure GIF options to keep all frames
-                var gifOptions = new GifOptions
-                {
-                    // FullFrame ensures each frame is saved as a full image rather than a delta
-                    FullFrame = true
-                };
-
-                // Save as animated GIF, preserving animation frames
-                image.Save(outputPath, gifOptions);
+                GifOptions gifOptions = new GifOptions();
+                webpImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated WebP banner on a website that only supports GIF, you can convert it while keeping the animation intact.
- * 2. When exporting a series of WebP frames from a mobile app to a GIF for inclusion in an email newsletter, preserving each frame ensures the animation looks correct.
- * 3. When migrating legacy assets from a WebP‑based design system to a GIF‑compatible platform, you must retain all frames to avoid losing motion details.
- * 4. When generating GIF previews of user‑uploaded animated WebP files in a C# backend, preserving frames provides an accurate representation of the original animation.
- * 5. When creating cross‑platform game sprites that require GIF format, converting animated WebP while keeping every frame guarantees consistent animation across devices.
+ * 1. When you need to display an animated WebP advertisement on a website that only supports GIF, you can convert it while keeping the animation intact.
+ * 2. When a mobile app receives user‑generated animated WebP stickers but the platform only renders GIFs, this code transforms the stickers without losing frames.
+ * 3. When archiving animated WebP assets for legacy systems that require GIF format, the conversion preserves the original motion for accurate playback.
+ * 4. When generating email newsletters that embed animated images, converting WebP to GIF ensures compatibility with email clients while retaining the animation.
+ * 5. When processing batch image pipelines that ingest WebP animations and output GIFs for social media APIs, this snippet handles the format change without dropping frames.
  */
