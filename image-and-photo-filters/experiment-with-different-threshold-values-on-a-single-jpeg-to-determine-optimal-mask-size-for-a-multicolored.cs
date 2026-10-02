@@ -1,10 +1,16 @@
-// HOW-TO: Find Optimal Threshold for JPEG Binarization and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Find Optimal Binarization Threshold for JPEG to PNG Masks in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-29
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,34 +18,38 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.jpg";
-            string outputDirectory = "Output";
-
+            string inputPath = "Input\\image.jpg";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputDirectory = "Output";
             Directory.CreateDirectory(outputDirectory);
 
-            int[] thresholds = new int[] { 50, 100, 150, 200 };
+            byte[] thresholds = new byte[] { 50, 100, 150, 200 };
 
-            foreach (int threshold in thresholds)
+            foreach (byte threshold in thresholds)
             {
-                string outputPath = Path.Combine(outputDirectory, $"masked_{threshold}.png");
+                string outputPath = Path.Combine(outputDirectory, $"mask_{threshold}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (RasterCachedImage img = (RasterCachedImage)Image.Load(inputPath))
                 {
-                    image.BinarizeFixed((byte)threshold);
+                    if (!img.IsCached) img.CacheData();
+                    img.BinarizeFixed(threshold);
 
-                    PngOptions saveOptions = new PngOptions
+                    var rect = new Rectangle(0, 0, img.Width, img.Height);
+                    int[] pixels = img.LoadArgb32Pixels(rect);
+                    long whiteCount = 0;
+                    foreach (int pixel in pixels)
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    image.Save(outputPath, saveOptions);
+                        if ((uint)pixel == 0xFFFFFFFF) whiteCount++;
+                    }
+                    Console.WriteLine($"Threshold {threshold}: White pixels = {whiteCount}");
+
+                    img.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -52,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a colorful JPEG photograph into a high‑contrast black‑and‑white mask and compare several threshold levels to choose the best one for a multicolored background.
- * 2. When you want to generate a series of PNG images with alpha channel from a single JPEG to test how different binarization thresholds affect the size and quality of the resulting mask.
- * 3. When you are building an automated preprocessing step that extracts foreground objects from JPEGs by applying fixed thresholds before feeding the images into a computer‑vision pipeline.
- * 4. When you must evaluate the impact of various threshold values on the compression ratio of PNG masks created from a JPEG source with complex colors.
- * 5. When you are creating a batch tool in C# that experiments with threshold settings to fine‑tune the mask generation for graphic design or OCR preprocessing tasks.
+ * 1. When you need to generate binary mask images from a JPEG with varying thresholds to evaluate which threshold best isolates a multicolored background.
+ * 2. When you want to count white pixels after binarization to measure how much of the image is foreground for quality analysis.
+ * 3. When you are creating pre‑processing steps for OCR or computer‑vision pipelines that require a black‑and‑white mask of a JPEG source.
+ * 4. When you need to batch‑process a single JPEG with multiple threshold values and automatically save each resulting mask as a PNG file.
+ * 5. When you are debugging image segmentation by comparing the effect of different fixed thresholds on the same picture.
  */
