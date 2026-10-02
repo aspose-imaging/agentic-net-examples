@@ -1,4 +1,4 @@
-// HOW-TO: Rotate CDR Image 90 Degrees and Convert to Vector PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate CorelDRAW CDR and Convert to Vector PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,43 +7,36 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.cdr";
-        string outputPath = "sample.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/result.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Apply rotation (e.g., 90 degrees)
-                image.Rotate(90);
+                cdr.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Prepare PDF save options with vector rasterization settings
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        Positioning = PositioningTypes.DefinedByDocument
-                    }
-                };
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    };
 
-                // Save as PDF while preserving vector quality
-                image.Save(outputPath, pdfOptions);
+                    cdr.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to programmatically rotate a CorelDRAW file and export it as a high‑quality PDF for printing.
- * 2. When an automated workflow must convert legacy CDR assets to PDF while keeping vector fidelity for downstream editing.
- * 3. When a web service generates PDFs from uploaded CDR files and must ensure the orientation matches user specifications.
- * 4. When a batch process needs to rotate multiple CDR drawings and save them as searchable PDFs without rasterizing the graphics.
- * 5. When a document management system requires preserving vector data while converting rotated CDR diagrams to PDF for archival.
+ * 1. When a C# application must take a CorelDRAW (.cdr) design, rotate it 90°, and output a high‑quality PDF that retains the vector data for printing or sharing.
+ * 2. When you need to programmatically generate PDF catalogs from rotated CDR artwork without rasterizing the graphics, using Aspose.Imaging in .NET.
+ * 3. When an automated workflow has to validate that a CDR file exists, apply a specific orientation, and convert it to a PDF for archival while preserving exact dimensions.
+ * 4. When a desktop tool must batch‑process CorelDRAW files, apply a uniform rotation, and produce PDF files that keep the original page width and height for layout consistency.
+ * 5. When integrating CorelDRAW assets into a .NET reporting system, you need to rotate the image and embed it as a vector PDF to ensure crisp rendering on all devices.
  */
