@@ -1,52 +1,52 @@
 // HOW-TO: Reduce Contrast of CDR Image, Check Transparency and Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cdr";
             string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Rasterize the vector CDR image to a PNG stored in memory
-                using (MemoryStream pngStream = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    cdrImage.Save(pngStream, new PngOptions());
-                    pngStream.Position = 0; // Reset stream for reading
-
-                    // Load the rasterized image
-                    using (RasterCachedImage rasterImage = (RasterCachedImage)Image.Load(pngStream))
+                    PngOptions pngOptions = new PngOptions
                     {
-                        // Simple transparency check based on pixel format (32 bpp implies alpha channel)
-                        bool hasTransparency = rasterImage.BitsPerPixel == 32;
-                        Console.WriteLine($"Transparency detected: {hasTransparency}");
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                        // Reduce contrast (negative value lowers contrast)
-                        rasterImage.AdjustContrast(-30f);
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                    {
+                        raster.AdjustContrast(-0.5f);
 
-                        // Save the result as a GIF
+                        bool hasTransparency = raster.HasAlpha;
+                        Console.WriteLine($"Transparency present: {hasTransparency}");
+
                         GifOptions gifOptions = new GifOptions();
-                        rasterImage.Save(outputPath, gifOptions);
+                        raster.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a CorelDRAW (CDR) vector file to a GIF for web use while ensuring any alpha channel is preserved.
- * 2. When you want to programmatically lower the contrast of a CDR‑derived image to create a muted visual effect before publishing.
- * 3. When you must verify whether a rasterized CDR image contains transparency before applying further processing steps.
- * 4. When an automated workflow requires converting CDR files to a GIF format that supports animation or limited color palettes.
- * 5. When you are building a batch image‑processing tool that adjusts contrast and outputs GIFs from multiple CDR sources.
+ * 1. When you need to lower the contrast of a CorelDRAW (CDR) file before converting it to a web‑friendly GIF while preserving any alpha channel.
+ * 2. When an application must verify whether a rasterized CDR image contains transparency before deciding how to handle the output format.
+ * 3. When you want to programmatically convert a multi‑page CDR document to a single‑frame GIF after applying image‑processing adjustments in a .NET service.
+ * 4. When you are building a batch‑processing tool that extracts CDR graphics, reduces their contrast for a muted visual style, and saves them as animated‑compatible GIFs.
+ * 5. When you need to use Aspose.Imaging in C# to rasterize vector CDR content to PNG in memory, adjust its contrast, check the alpha flag, and directly output a GIF without creating intermediate files.
  */
