@@ -1,46 +1,49 @@
-// HOW-TO: Extract EXIF Metadata From TGA Image To JSON In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EXIF Metadata From TGA Image And Save As JSON In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text.Json;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.tga";
-        string outputPath = "output.json";
+        string outputPath = "output\\metadata.json";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string json;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the TGA image
-            using (TgaImage image = (TgaImage)Image.Load(inputPath))
-            {
-                // Extract EXIF data
-                var exifData = image.ExifData;
-
-                // Serialize EXIF data to JSON (null handling)
-                string json = JsonSerializer.Serialize(exifData, new JsonSerializerOptions
+                if (image is JpegImage jpegImg && jpegImg.ExifData != null)
                 {
-                    WriteIndented = true,
-                    // Ignore cycles or unsupported members
-                    IgnoreReadOnlyProperties = true,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
+                    var exif = jpegImg.ExifData;
+                    json = $"{{\"Exif\":\"{exif.ToString().Replace("\\", "\\\\").Replace("\"", "\\\"")}\"}}";
+                }
+                else if (image is TiffImage tiffImg && tiffImg.ExifData != null)
+                {
+                    var exif = tiffImg.ExifData;
+                    json = $"{{\"Exif\":\"{exif.ToString().Replace("\\", "\\\\").Replace("\"", "\\\"")}\"}}";
+                }
+                else
+                {
+                    json = "{}";
+                }
 
-                // Write JSON to output file
                 File.WriteAllText(outputPath, json);
             }
         }
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to read camera and creation details from a TGA file and store them in a JSON file for cataloging or search indexing.
- * 2. When you want to export EXIF tags from TGA images to JSON so a web service can consume the metadata for image management.
- * 3. When you are auditing a batch of TGA assets and require a machine‑readable JSON report of all embedded EXIF information.
- * 4. When you need to migrate legacy TGA metadata into a database and use JSON as the intermediate format for easy parsing in C#.
- * 5. When you are building a photo‑metadata viewer that loads TGA files and displays their EXIF data by first serializing it to JSON.
+ * 1. When you need to read camera and capture information embedded in a TGA file and export it for analysis or reporting.
+ * 2. When a photo‑management application must ingest TGA images and store their EXIF tags in a searchable JSON database.
+ * 3. When building a migration tool that converts legacy TGA assets into format‑agnostic metadata files for archival purposes.
+ * 4. When a web service receives TGA uploads and must validate or log the embedded EXIF data without processing the image itself.
+ * 5. When you want to compare EXIF data across JPEG, TIFF, and TGA images by extracting it into a common JSON structure.
  */
