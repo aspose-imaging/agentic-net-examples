@@ -1,101 +1,80 @@
-// HOW-TO: Merge JPEG Images From Network Stream And Return Combined JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images From URLs Into a Single Vertical JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
+using System.Net.Http;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded default paths (required by the safety rules)
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            // Verify input file existence
-            if (!File.Exists(inputPath))
+            // Hardcoded input URLs and output path
+            string[] imageUrls = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "http://example.com/image1.jpg",
+                "http://example.com/image2.jpg",
+                "http://example.com/image3.jpg"
+            };
+            string outputPath = "output/merged.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up a TCP listener to receive JPEG images
-            const int port = 5000;
-            TcpListener listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
-            Console.WriteLine($"Listening on port {port}...");
+            // List to hold loaded images
+            List<RasterImage> loadedImages = new List<RasterImage>();
 
-            using (TcpClient client = listener.AcceptTcpClient())
-            using (NetworkStream netStream = client.GetStream())
+            // Load images from network streams
+            using (HttpClient client = new HttpClient())
             {
-                // Read the number of images (Int32, little‑endian)
-                byte[] intBuf = new byte[4];
-                netStream.Read(intBuf, 0, 4);
-                int imageCount = BitConverter.ToInt32(intBuf, 0);
-
-                var loadedImages = new List<Image>();
-
-                // Load each JPEG image from the stream
-                for (int i = 0; i < imageCount; i++)
+                foreach (string url in imageUrls)
                 {
-                    // Read length of the current image
-                    netStream.Read(intBuf, 0, 4);
-                    int length = BitConverter.ToInt32(intBuf, 0);
-
-                    // Read the image bytes
-                    byte[] imgData = new byte[length];
-                    int read = 0;
-                    while (read < length)
+                    using (Stream stream = client.GetStreamAsync(url).Result)
                     {
-                        int bytesRead = netStream.Read(imgData, read, length - read);
-                        if (bytesRead == 0) break;
-                        read += bytesRead;
+                        RasterImage img = (RasterImage)Image.Load(stream);
+                        loadedImages.Add(img);
                     }
-
-                    // Load JPEG from memory stream using the JpegImage(Stream) constructor
-                    using (MemoryStream ms = new MemoryStream(imgData))
-                    {
-                        var jpeg = new JpegImage(ms);
-                        loadedImages.Add(jpeg);
-                    }
-                }
-
-                // Determine dimensions for the vertically merged image
-                int maxWidth = loadedImages.Max(img => img.Width);
-                int totalHeight = loadedImages.Sum(img => img.Height);
-
-                // Create a blank JPEG canvas with the calculated size
-                var createOptions = new JpegOptions();
-                using (RasterImage merged = (RasterImage)Image.Create(createOptions, maxWidth, totalHeight))
-                {
-                    var graphics = new Graphics(merged);
-                    int yOffset = 0;
-
-                    // Draw each loaded image onto the canvas
-                    foreach (var img in loadedImages)
-                    {
-                        graphics.DrawImage(img, new Rectangle(0, yOffset, img.Width, img.Height));
-                        yOffset += img.Height;
-                        img.Dispose();
-                    }
-
-                    // Save the merged image back to the network stream as JPEG
-                    var saveOptions = new JpegOptions();
-                    merged.Save(netStream, saveOptions);
                 }
             }
 
-            listener.Stop();
+            if (loadedImages.Count == 0)
+            {
+                Console.Error.WriteLine("No images were loaded.");
+                return;
+            }
+
+            // Calculate canvas size for vertical merge
+            int canvasWidth = loadedImages.Max(img => img.Width);
+            int canvasHeight = loadedImages.Sum(img => img.Height);
+
+            // Create JPEG canvas bound to output file
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                int offsetY = 0;
+                foreach (RasterImage img in loadedImages)
+                {
+                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetY += img.Height;
+                }
+
+                // Save the bound image
+                canvas.Save();
+            }
+
+            // Dispose loaded images
+            foreach (RasterImage img in loadedImages)
+            {
+                img.Dispose();
+            }
         }
         catch (Exception ex)
         {
@@ -106,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to receive multiple JPEG photos uploaded over a TCP connection, combine them vertically, and send back a single JPEG for display in a gallery.
- * 2. When building a remote printing solution that streams scanned page images as JPEGs to a server, merges them into one continuous image, and returns the merged file for printing.
- * 3. When creating a surveillance system that collects sequential camera snapshots over a network, stitches them top‑to‑bottom, and provides the combined JPEG to a monitoring dashboard.
- * 4. When developing a mobile app backend that uploads user‑taken screenshots as separate JPEGs, merges them into a single image for easier sharing, and returns the result to the client.
- * 5. When implementing an IoT device that streams sensor‑captured JPEG frames to a central server, concatenates them vertically for a composite view, and sends the final JPEG back for storage.
+ * 1. When a web service needs to combine user‑uploaded photos hosted on different URLs into one tall image for a printable collage.
+ * 2. When an e‑commerce platform wants to create a single product‑detail image by stacking several JPEG screenshots of a product from a CDN.
+ * 3. When a reporting tool must fetch chart images from a remote server and merge them vertically before embedding the result in a PDF.
+ * 4. When a mobile app backend assembles a continuous scrolling banner by concatenating remote JPEG banners into one image.
+ * 5. When an automated email generator pulls promotional JPEGs from marketing URLs and merges them into a single image to reduce attachment size.
  */
