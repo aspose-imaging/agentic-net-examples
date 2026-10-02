@@ -1,20 +1,28 @@
-// HOW-TO: Extract Third Frame From GIF and Save As Lossless WebP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Third Frame from GIF and Save as Lossless WebP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.gif";
-        string outputPath = "Output/frame3.webp";
-
         try
         {
+            string inputPath = "input.gif";
+            string outputPath = "output\\frame3.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,29 +31,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image img = Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                GifImage gif = img as GifImage;
-                if (gif == null)
+                if (gif.PageCount <= 2)
                 {
-                    Console.Error.WriteLine("Input file is not a GIF image.");
+                    Console.Error.WriteLine("The GIF does not contain a third frame.");
                     return;
                 }
 
-                if (gif.PageCount < 3)
-                {
-                    Console.Error.WriteLine("GIF does not contain at least three frames.");
-                    return;
-                }
-
-                // Set the active frame to the third frame (index 2)
                 gif.ActiveFrame = (GifFrameBlock)gif.Pages[2];
 
-                using (RasterImage frame = (RasterImage)gif.ActiveFrame)
+                WebPOptions options = new WebPOptions
                 {
-                    var webpOptions = new WebPOptions { Lossless = true };
-                    frame.Save(outputPath, webpOptions);
-                }
+                    Lossless = true
+                };
+
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -57,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a specific animation frame as a high‑quality static image for thumbnails or previews.
- * 2. When converting a GIF’s individual frame to a lossless WebP to reduce file size while preserving visual fidelity.
- * 3. When extracting a particular frame from an animated GIF for use in a PDF or report that only supports static images.
- * 4. When preparing assets for a web page that requires WebP support and you must isolate a single GIF frame for responsive design.
- * 5. When processing user‑uploaded GIFs and you want to store the third frame in a lossless WebP format for archival or further editing.
+ * 1. When you need to isolate a specific animation frame from a GIF for use in a high‑quality web asset, you can extract the third frame and convert it to a lossless WebP with Aspose.Imaging in C#.
+ * 2. When generating thumbnails or preview images from animated GIFs, extracting a particular frame and saving it as a WebP reduces file size while preserving visual fidelity.
+ * 3. When creating a sprite sheet or UI element that requires a single frame from an animated GIF, converting that frame to lossless WebP ensures fast loading on modern browsers.
+ * 4. When processing user‑uploaded GIFs to extract a key frame for machine‑learning analysis, saving the frame as lossless WebP maintains pixel‑perfect data for accurate results.
+ * 5. When migrating legacy GIF animations to a modern image format, extracting individual frames and storing them as lossless WebP files simplifies the transition while keeping the original quality.
  */
