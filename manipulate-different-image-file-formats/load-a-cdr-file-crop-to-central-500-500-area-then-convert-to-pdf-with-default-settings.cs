@@ -1,56 +1,45 @@
-// HOW-TO: Crop Central 500x500 Area From CDR And Save As PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Central 500x500 Area from CDR and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/output.pdf";
+            string inputPath = "input.cdr";
+            string outputPath = "output/output.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Determine central 500x500 rectangle
                 int cropWidth = 500;
                 int cropHeight = 500;
-                int left = Math.Max((cdr.Width - cropWidth) / 2, 0);
-                int top = Math.Max((cdr.Height - cropHeight) / 2, 0);
-                Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
 
-                // Crop the image
-                cdr.Crop(cropRect);
+                int left = (image.Width - cropWidth) / 2;
+                int top = (image.Height - cropHeight) / 2;
 
-                // Prepare PDF options with default rasterization settings
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                if (left < 0) left = 0;
+                if (top < 0) top = 0;
+                if (cropWidth > image.Width) cropWidth = image.Width;
+                if (cropHeight > image.Height) cropHeight = image.Height;
 
-                // Save the cropped image as PDF
-                cdr.Save(outputPath, pdfOptions);
+                var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
+                image.Crop(cropRect);
+
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific central region of a CorelDRAW file and deliver it as a PDF report.
- * 2. When automating batch processing to generate PDFs that only contain the most important part of each CDR artwork.
- * 3. When integrating Aspose.Imaging into a web service that receives CDR uploads and returns a cropped PDF preview.
- * 4. When creating thumbnails or printable sections from large CDR designs without manually opening the file in CorelDRAW.
- * 5. When converting legacy CDR assets to PDF while ensuring the output matches a fixed 500‑pixel square area for consistency.
+ * 1. When you need to extract the main part of a CorelDRAW (CDR) illustration and deliver it as a PDF report.
+ * 2. When an automated workflow must generate a thumbnail‑like 500×500 PDF from large CDR files for preview purposes.
+ * 3. When a document management system requires converting cropped sections of vector drawings into searchable PDF documents.
+ * 4. When batch processing of CDR assets is required to produce uniformly sized PDF pages for printing or archiving.
+ * 5. When integrating Aspose.Imaging into a C# application to programmatically trim and export CDR graphics without manual editing.
  */
