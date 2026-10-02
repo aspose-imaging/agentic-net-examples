@@ -1,9 +1,9 @@
-// HOW-TO: Convert CDR to PDF with ClearType Text Rendering in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PDF with ClearType Text Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Drawing.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -11,34 +11,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cdr";
-            string outputPath = "output.pdf";
+            string outputPath = "output/output.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with ClearType text rendering
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                var pdfOptions = new PdfOptions();
+                var vectorOptions = new VectorRasterizationOptions
                 {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.ClearTypeGridFit,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    Positioning = PositioningTypes.DefinedByDocument
+                    TextRenderingHint = TextRenderingHint.ClearTypeGridFit
                 };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                pdfOptions.VectorRasterizationOptions = vectorOptions;
 
-                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -51,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF from a CorelDRAW file while preserving sharp, ClearType‑rendered text for high‑quality print or on‑screen viewing.
- * 2. When an application must batch‑process CDR documents and output PDFs that retain the original text clarity without manual rasterization settings.
- * 3. When you are building a document‑conversion service that requires anti‑aliased vector rendering and precise text positioning defined by the source CDR file.
- * 4. When you want to ensure that the converted PDF displays readable text on Windows devices that rely on ClearType font smoothing.
- * 5. When you need to programmatically verify the existence of the source CDR file and create the output folder before performing the conversion in a .NET environment.
+ * 1. When you need to generate PDF reports from CorelDRAW designs and want crisp, screen‑optimized text.
+ * 2. When converting legacy CDR artwork to PDF for web preview while preserving ClearType text clarity.
+ * 3. When automating batch processing of CDR files to PDFs in a C# application and require high‑quality text rendering.
+ * 4. When integrating CorelDRAW assets into a document workflow that demands PDF output with sharp, readable fonts.
+ * 5. When creating printable PDFs from vector graphics and want the text to appear smoother on Windows displays.
  */
