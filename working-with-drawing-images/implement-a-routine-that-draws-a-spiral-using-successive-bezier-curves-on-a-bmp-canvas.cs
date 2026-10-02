@@ -1,91 +1,86 @@
-// HOW-TO: Create a Spiral BMP Image Using Bezier Curves in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Spiral Drawing With Bezier Curves On BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string outputPath = "output/spiral.bmp";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up BMP options with a file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-            int width = 800;
-            int height = 800;
-
-            // Create a BMP canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+            try
             {
-                // Initialize graphics and clear background
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
-
-                Pen pen = new Pen(Color.Black, 2);
-
-                // Spiral parameters
-                double centerX = width / 2.0;
-                double centerY = height / 2.0;
-                double radius = 300;
-                double angle = 0;
-                double angleStep = Math.PI / 4; // 45 degrees per segment
-                int segments = 12;
-
-                for (int i = 0; i < segments; i++)
+                string outputPath = "spiral.bmp";
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
                 {
-                    double startAngle = angle;
-                    double endAngle = angle + angleStep;
-
-                    // Start and end points of the Bezier curve
-                    int x1 = (int)(centerX + radius * Math.Cos(startAngle));
-                    int y1 = (int)(centerY + radius * Math.Sin(startAngle));
-                    int x4 = (int)(centerX + radius * Math.Cos(endAngle));
-                    int y4 = (int)(centerY + radius * Math.Sin(endAngle));
-
-                    // Control points for smooth curvature
-                    double ctrlRadius = radius * 0.7;
-                    int x2 = (int)(centerX + ctrlRadius * Math.Cos(startAngle + angleStep / 3));
-                    int y2 = (int)(centerY + ctrlRadius * Math.Sin(startAngle + angleStep / 3));
-                    int x3 = (int)(centerX + ctrlRadius * Math.Cos(startAngle + 2 * angleStep / 3));
-                    int y3 = (int)(centerY + ctrlRadius * Math.Sin(startAngle + 2 * angleStep / 3));
-
-                    // Draw the Bezier segment
-                    graphics.DrawBezier(pen,
-                        new Point(x1, y1),
-                        new Point(x2, y2),
-                        new Point(x3, y3),
-                        new Point(x4, y4));
-
-                    // Reduce radius for the next segment to create a spiral effect
-                    radius *= 0.85;
-                    angle += angleStep;
+                    Directory.CreateDirectory(outputDir);
                 }
 
-                // Save the image
-                canvas.Save();
+                int width = 800;
+                int height = 800;
+
+                var bmpOptions = new BmpOptions();
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+                using (var image = (RasterImage)Image.Create(bmpOptions, width, height))
+                {
+                    var graphics = new Graphics(image);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+
+                    var pen = new Pen(Aspose.Imaging.Color.Blue, 2);
+
+                    double a = 0;
+                    double b = 5;
+                    double deltaTheta = Math.PI / 4;
+                    int segments = 20;
+
+                    for (int i = 0; i < segments; i++)
+                    {
+                        double theta0 = i * deltaTheta;
+                        double theta1 = (i + 1) * deltaTheta;
+
+                        double r0 = a + b * theta0;
+                        double r1 = a + b * theta1;
+
+                        double x0 = width / 2 + r0 * Math.Cos(theta0);
+                        double y0 = height / 2 + r0 * Math.Sin(theta0);
+                        double x3 = width / 2 + r1 * Math.Cos(theta1);
+                        double y3 = height / 2 + r1 * Math.Sin(theta1);
+
+                        double thetaC1 = theta0 + deltaTheta / 3;
+                        double rC1 = a + b * thetaC1;
+                        double x1 = width / 2 + rC1 * Math.Cos(thetaC1);
+                        double y1 = height / 2 + rC1 * Math.Sin(thetaC1);
+
+                        double thetaC2 = theta0 + 2 * deltaTheta / 3;
+                        double rC2 = a + b * thetaC2;
+                        double x2 = width / 2 + rC2 * Math.Cos(thetaC2);
+                        double y2 = height / 2 + rC2 * Math.Sin(thetaC2);
+
+                        graphics.DrawBezier(pen, (float)x0, (float)y0, (float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3);
+                    }
+
+                    image.Save();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a decorative spiral pattern programmatically for a BMP background in a Windows desktop application.
- * 2. When you want to create vector‑like smooth curves on a raster canvas for scientific visualizations or logo designs using Aspose.Imaging.
- * 3. When you must export a custom spiral illustration to a BMP file for printing or embedding in legacy systems that only support BMP.
- * 4. When you are building a procedural art generator that draws complex shapes with Bezier curves without relying on external drawing libraries.
- * 5. When you need to automate the creation of test images with predictable geometry to validate image‑processing algorithms.
+ * 1. When you need to generate a procedural spiral pattern for a background image or texture in a Windows desktop application.
+ * 2. When you want to create a BMP file that visualizes mathematical curves, such as an Archimedean spiral, for educational or scientific reports.
+ * 3. When you need to programmatically draw smooth vector-like graphics using Bezier segments without relying on external design tools.
+ * 4. When you are building a custom chart or logo that requires precise control over line thickness and color on a raster canvas.
+ * 5. When you must export dynamically generated graphics to a BMP format for compatibility with legacy systems or hardware.
  */
