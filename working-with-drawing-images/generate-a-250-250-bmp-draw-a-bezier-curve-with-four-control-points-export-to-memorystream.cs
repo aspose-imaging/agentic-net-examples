@@ -1,4 +1,4 @@
-// HOW-TO: Create 250x250 BMP with Bezier Curve and Save to MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 250x250 BMP With Bezier Curve And Save To MemoryStream In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,41 +11,22 @@ class Program
     {
         try
         {
-            // Create a memory stream to hold the BMP data
-            using (var memoryStream = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
-                // Set up BMP options with the stream as the destination
-                var bmpOptions = new BmpOptions
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(ms);
+                using (Image image = Image.Create(bmpOptions, 250, 250))
                 {
-                    Source = new StreamSource(memoryStream)
-                };
-
-                // Create a 250x250 BMP image
-                using (var image = Image.Create(bmpOptions, 250, 250))
-                {
-                    // Initialize graphics for drawing
-                    var graphics = new Graphics(image);
-
-                    // Define a blue pen for the Bezier curve
-                    var pen = new Pen(Color.Blue, 2);
-
-                    // Draw a Bezier curve with four control points
-                    graphics.DrawBezier(
-                        pen,
-                        new Point(20, 200),   // start point
-                        new Point(80, 20),    // first control point
-                        new Point(170, 230),  // second control point
-                        new Point(230, 50)    // end point
-                    );
-
-                    // Save the image into the memory stream
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
+                    Point p0 = new Point(20, 200);
+                    Point p1 = new Point(70, 20);
+                    Point p2 = new Point(180, 20);
+                    Point p3 = new Point(230, 200);
+                    graphics.DrawBezier(pen, p0, p1, p2, p3);
                     image.Save();
-
-                    // Reset stream position if further processing is needed
-                    memoryStream.Position = 0;
-
-                    // Example output: length of the generated BMP data
-                    Console.WriteLine($"MemoryStream length: {memoryStream.Length} bytes");
+                    Console.WriteLine($"BMP size in bytes: {ms.Length}");
                 }
             }
         }
@@ -58,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail with a custom Bezier overlay for a web API without writing to disk.
- * 2. When you want to create an in‑memory bitmap for dynamic email attachments that include vector‑style curves.
- * 3. When a reporting tool must render a scalable curve on a fixed‑size image before streaming it to a client.
- * 4. When you are building a game asset pipeline that programmatically draws paths onto BMP sprites stored in a memory buffer.
- * 5. When you need to benchmark Aspose.Imaging’s drawing performance by drawing a Bezier curve onto a 250 × 250 BMP held in a MemoryStream.
+ * 1. When you need to generate a bitmap thumbnail that contains a custom Bezier‑shaped logo entirely in memory for a web API response.
+ * 2. When you want to programmatically create a 250 × 250 BMP background and draw a smooth curve for a diagram or UI element without writing intermediate files to disk.
+ * 3. When you are building a reporting tool that embeds vector‑style curves into BMP images and streams them directly to a client application.
+ * 4. When you need to test image‑processing pipelines by producing a known BMP image with a specific Bezier pattern for automated validation.
+ * 5. When you are converting drawing commands into a BMP stream for use in email attachments or database storage where only a byte array is required.
  */
