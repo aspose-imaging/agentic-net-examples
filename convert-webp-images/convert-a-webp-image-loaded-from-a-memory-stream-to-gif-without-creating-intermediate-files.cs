@@ -2,36 +2,33 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.webp";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Load WebP image from a memory stream
-            byte[] webpData = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(webpData))
-            using (WebPImage webPImage = new WebPImage(ms))
+            byte[] fileBytes = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(fileBytes))
             {
-                // Save as GIF
-                webPImage.Save(outputPath, new GifOptions());
+                using (Image image = Image.Load(memoryStream))
+                {
+                    var gifOptions = new GifOptions();
+                    image.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a WebP graphic on a legacy website that only supports GIF, you can convert the image directly from a byte array in memory using C#.
- * 2. When processing uploaded user images in a web API, you can transform WebP uploads to GIF for email attachments without writing temporary files to disk.
- * 3. When generating animated thumbnails from WebP sources in a server‑side batch job, you can load the data into a MemoryStream and save it as GIF to reduce I/O overhead.
- * 4. When integrating with a third‑party service that returns WebP data via a stream, you can instantly convert that stream to a GIF for compatibility with older mobile apps.
- * 5. When building a desktop utility that batch‑converts WebP files to GIF while preserving folder structure, using a memory‑stream conversion avoids cluttering the filesystem with intermediate files.
+ * 1. When you need to display a WebP graphic in a legacy browser that only supports GIF, you can convert the image in memory without writing temporary files.
+ * 2. When processing user‑uploaded WebP avatars on a server and storing them as animated GIFs for email newsletters, this code performs the conversion directly from the uploaded byte array.
+ * 3. When building a cloud function that receives WebP data via an API and must return a GIF response, the memory‑stream approach avoids disk I/O and speeds up the service.
+ * 4. When generating GIF previews of WebP thumbnails in a Windows service that runs with limited file‑system permissions, you can load the image from a byte array and save it as GIF.
+ * 5. When creating a batch job that reads WebP files from a database BLOB column and writes GIF files to a network share, this snippet handles the conversion without creating intermediate files on the local disk.
  */
