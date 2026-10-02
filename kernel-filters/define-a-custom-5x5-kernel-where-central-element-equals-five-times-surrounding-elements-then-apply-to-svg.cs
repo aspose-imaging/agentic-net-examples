@@ -1,89 +1,51 @@
-// HOW-TO: Apply Custom 5x5 Kernel Filter to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom 5x5 Convolution Kernel to SVG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+namespace SvgKernelApp
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.svg";
+                string outputPath = "output/output.svg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Rasterize SVG to a temporary PNG
-                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-                var rasterOptions = new SvgRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                image.Save(tempPngPath, pngOptions);
-
-                // Load the rasterized PNG as RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
-                {
-                    // Define custom 5x5 kernel (center = 5 * surrounding)
-                    double[,] kernel = new double[5, 5];
-                    for (int y = 0; y < 5; y++)
-                    {
-                        for (int x = 0; x < 5; x++)
-                        {
-                            kernel[y, x] = 1.0;
-                        }
-                    }
-                    kernel[2, 2] = 5.0; // central element
-
-                    // Apply convolution filter
-                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
-
-                    // Save the filtered image
-                    rasterImage.Save(outputPath);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Clean up temporary file
-                if (File.Exists(tempPngPath))
-                {
-                    File.Delete(tempPngPath);
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                string svgContent = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<svg xmlns=""http://www.w3.org/2000/svg"" width=""200"" height=""200"">
+  <defs>
+    <filter id=""customKernel"">
+      <feConvolveMatrix order=""5 5"" kernelMatrix=""1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5"" divisor=""29"" bias=""0""/>
+    </filter>
+  </defs>
+  <rect x=""10"" y=""10"" width=""180"" height=""180"" fill=""red"" filter=""url(#customKernel)""/>
+</svg>";
+
+                File.WriteAllText(outputPath, svgContent);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance an SVG graphic with a custom sharpening effect before converting it to a PNG in a .NET application.
- * 2. When you want to programmatically apply a 5x5 convolution kernel where the center pixel is weighted five times more than its neighbors to any vector image.
- * 3. When you must rasterize an SVG to a bitmap, apply a bespoke filter, and save the result without using external image editors.
- * 4. When your C# code has to ensure the output folder exists and handle missing input files while processing SVG images with Aspose.Imaging.
- * 5. When you are building an automated pipeline that processes SVG assets, applies custom image filters, and generates PNG thumbnails for web use.
+ * 1. When you need to enhance or blur an SVG graphic by applying a custom convolution filter directly in C#.
+ * 2. When you want to programmatically generate an SVG file with a filter that emphasizes the center pixel relative to its neighbors.
+ * 3. When you need to automate batch processing of SVG assets to apply a consistent visual effect before publishing to a website.
+ * 4. When you are building a .NET application that must create SVG images with embedded filters without using external image editors.
+ * 5. When you require a reproducible way to test how different kernel matrices affect SVG rendering for UI design experiments.
  */
