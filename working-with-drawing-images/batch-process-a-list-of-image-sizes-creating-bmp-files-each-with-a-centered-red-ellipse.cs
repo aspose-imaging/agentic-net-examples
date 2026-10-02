@@ -1,7 +1,11 @@
-// HOW-TO: Create BMP Images with Centered Red Ellipse for Multiple Sizes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate BMP Images with Centered Red Ellipse for Multiple Sizes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,34 +14,42 @@ class Program
     {
         try
         {
-            var sizes = new (int width, int height)[]
+            string outputFolder = "OutputImages";
+            Directory.CreateDirectory(outputFolder);
+
+            var sizes = new List<(int width, int height)>
             {
                 (200, 200),
                 (300, 150),
-                (400, 300)
+                (400, 400)
             };
 
-            foreach (var size in sizes)
+            foreach (var (width, height) in sizes)
             {
-                string outputPath = $"output_{size.width}x{size.height}.bmp";
+                string outputPath = Path.Combine(outputFolder, $"ellipse_{width}x{height}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                var source = new FileCreateSource(outputPath, false);
-
-                BmpOptions options = new BmpOptions()
+                var bmpOptions = new BmpOptions
                 {
-                    Source = source,
-                    BitsPerPixel = 24
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, size.width, size.height))
+                using (Image image = Image.Create(bmpOptions, width, height))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                    Graphics graphics = new Graphics(image);
                     graphics.Clear(Aspose.Imaging.Color.White);
-                    graphics.DrawEllipse(
-                        new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3),
-                        new Aspose.Imaging.Rectangle(0, 0, size.width, size.height));
+
+                    int ellipseWidth = width / 2;
+                    int ellipseHeight = height / 2;
+                    int x = (width - ellipseWidth) / 2;
+                    int y = (height - ellipseHeight) / 2;
+                    var rect = new Aspose.Imaging.Rectangle(x, y, ellipseWidth, ellipseHeight);
+
+                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                    {
+                        graphics.FillEllipse(brush, rect);
+                    }
+
                     image.Save();
                 }
             }
@@ -51,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a set of placeholder BMP files of different dimensions with a visible red ellipse for UI mock‑ups or testing image‑loading routines.
- * 2. When an automated build creates sample graphics for documentation, showing how varying image sizes affect a centered shape using Aspose.Imaging in C#.
- * 3. When a desktop application must pre‑create icons of several resolutions, each containing a red circular badge, before packaging them into a resource file.
- * 4. When a QA team requires a batch of BMP screenshots with a consistent red ellipse to verify that image‑processing pipelines preserve vector drawing fidelity across sizes.
- * 5. When a game developer wants to quickly produce background tiles of multiple resolutions with a centered red marker to align level‑design assets.
+ * 1. When you need to automatically create a set of BMP thumbnails each containing a centered red ellipse for different device resolutions.
+ * 2. When generating placeholder graphics for UI mockups where each image size must match specific layout dimensions.
+ * 3. When preparing test images for computer vision algorithms that require a consistent red ellipse shape across varied image sizes.
+ * 4. When producing batch assets for a printing workflow that demands BMP files with a centered red ellipse as a branding mark.
+ * 5. When scripting the creation of sample images for documentation or tutorials that illustrate Aspose.Imaging drawing capabilities in C#.
  */
