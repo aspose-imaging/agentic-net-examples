@@ -3,55 +3,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.svg";
-            string outputPath = "Output\\sample.png";
+            string inputPath = "Input/input.svg";
+            string outputPath = "Output/output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG from file stream
-            using (FileStream inputStream = File.OpenRead(inputPath))
-            using (SvgImage svgImage = new SvgImage(inputStream))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                using (var pngOptions = new PngOptions())
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
-
-                // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save rasterized PNG
-                svgImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
+                }
             }
 
-            // Placeholder for Amazon S3 upload logic
-            // The PNG file at 'outputPath' should be uploaded to the desired S3 bucket here.
-            // Implementation would typically use AWS SDK or a presigned URL with HttpClient,
-            // but external libraries are not permitted in this example.
+            // Placeholder for S3 upload - not supported in this example
+            throw new NotSupportedException("Uploading to Amazon S3 is not supported in this example.");
         }
         catch (Exception ex)
         {
@@ -62,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives vector graphics from users and needs to generate raster PNG thumbnails for display.
- * 2. When an e‑commerce platform must transform customer‑uploaded SVG logos into PNG files before saving them to a cloud storage bucket.
- * 3. When a reporting service converts scalable diagrams into PNG images to embed them in PDF reports stored on Amazon S3.
- * 4. When a content‑management system processes SVG icons uploaded via a form and archives the rasterized PNG versions in an S3 bucket for CDN delivery.
- * 5. When a mobile backend receives SVG assets, rasterizes them to PNG for compatibility, and uploads the results to S3 for later retrieval by client apps.
+ * 1. When a web API receives an SVG file from a user (IFormFile) and needs to generate a PNG thumbnail for display on a website.
+ * 2. When a backend service must convert vector graphics to raster format before storing them in an Amazon S3 bucket for CDN delivery.
+ * 3. When an e‑commerce platform wants to transform vendor‑provided SVG logos into PNG images to ensure compatibility with email newsletters.
+ * 4. When a mobile app uploads SVG assets to a .NET server that must compress them as PNGs and archive the results in S3 for later retrieval.
+ * 5. When a document‑generation system requires converting scalable diagrams to PNG so they can be embedded in PDF reports stored in S3.
  */
