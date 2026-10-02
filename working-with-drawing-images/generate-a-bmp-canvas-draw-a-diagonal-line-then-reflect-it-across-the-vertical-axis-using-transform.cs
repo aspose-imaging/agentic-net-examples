@@ -1,47 +1,41 @@
-// HOW-TO: Create BMP Image and Mirror Diagonal Line Using Transform in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Canvas Draw Diagonal Line And Reflect Vertically In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = "c:\\temp\\reflected.bmp";
-
         try
         {
-            // Ensure output directory exists
+            string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            BmpOptions bmpOptions = new BmpOptions();
+            Source source = new FileCreateSource(outputPath, false);
+            bmpOptions.Source = source;
 
             int width = 200;
             int height = 200;
 
-            // Create a BMP canvas
-            using (BmpImage bmp = new BmpImage(width, height))
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics object
-                Graphics graphics = new Graphics(bmp);
-                graphics.Clear(Color.White);
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Draw original diagonal line
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawLine(pen, 0, 0, width, height);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                graphics.DrawLine(pen, 0, 0, width - 1, height - 1);
 
-                // Apply horizontal reflection transform (vertical axis)
-                Matrix reflect = new Matrix(-1, 0, 0, 1, width, 0);
-                graphics.Transform = reflect;
+                // Reflect across vertical axis
+                graphics.TranslateTransform(width, 0);
+                graphics.ScaleTransform(-1, 1);
+                graphics.DrawLine(pen, 0, 0, width - 1, height - 1);
 
-                // Draw the same line; it will appear reflected
-                graphics.DrawLine(pen, 0, 0, width, height);
-
-                // Reset transform (optional)
-                graphics.Transform = new Matrix();
-
-                // Save the resulting image
-                bmp.Save(outputPath);
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -54,8 +48,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to generate a BMP file with a simple geometric pattern for testing image rendering pipelines.
- * 2. When you want to programmatically create a mirrored version of a line or shape without manually calculating pixel positions.
- * 3. When you are building a graphics editor that supports real‑time reflection of drawing strokes on a bitmap canvas.
- * 4. When you need to produce a symmetric design for UI icons or placeholders by reflecting existing graphics.
- * 5. When you are benchmarking Aspose.Imaging transformation performance on BMP images in a .NET application.
+ * 2. When you want to programmatically create a mirrored diagonal line to illustrate symmetry in educational graphics.
+ * 3. When building a custom watermark that requires a reflected line across the vertical axis in a bitmap.
+ * 4. When preparing sample assets for a UI component that demonstrates transformation functions like TranslateTransform and ScaleTransform.
+ * 5. When automating the creation of diagnostic images to verify that graphics transformations are applied correctly in a .NET application.
  */
