@@ -1,45 +1,32 @@
-// HOW-TO: Export Second Page of Multipage TIFF to PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Second Page from Multipage TIFF to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\multipage.tif";
-            string outputPath = @"C:\Images\page2.png";
+            string inputPath = "Input\\multipage.tif";
+            string outputPath = "Output\\second_page.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF image
             using (Image image = Image.Load(inputPath))
+            using (PngOptions options = new PngOptions())
             {
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // If the image supports multiple pages and has at least two pages,
-                // configure MultiPageOptions to export only the second page (index 1)
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage != null && multipage.PageCount > 1)
-                {
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new int[] { 1 });
-                }
-
-                // Save the selected page as PNG
-                image.Save(outputPath, pngOptions);
+                options.MultiPageOptions = new MultiPageOptions(new IntRange(2, 1));
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -51,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a single page from a multi‑page scanned TIFF document and save it as a PNG for web preview.
- * 2. When generating a thumbnail of a specific page in a multi‑page fax TIFF to embed in an email attachment.
- * 3. When converting a particular frame of a multi‑page medical image stored as TIFF to PNG for analysis in a .NET application.
- * 4. When isolating a page from a multi‑page invoice TIFF to feed into an OCR engine that only accepts PNG input.
- * 5. When creating a printable PNG of a selected page from a multi‑page blueprint TIFF for inclusion in a CAD report.
+ * 1. When you need to generate a preview image of a specific page from a multi‑page scanned TIFF for display on a web page.
+ * 2. When extracting a single page from a multi‑page medical imaging TIFF to a PNG for inclusion in a patient report.
+ * 3. When converting the second page of a multi‑page fax TIFF into a lossless PNG to archive it separately.
+ * 4. When processing a multi‑page TIFF of engineering drawings and you only require the second sheet as a PNG for a CAD review.
+ * 5. When creating thumbnails for individual pages of a multi‑page TIFF and you want to isolate page two using Aspose.Imaging in a C# application.
  */
