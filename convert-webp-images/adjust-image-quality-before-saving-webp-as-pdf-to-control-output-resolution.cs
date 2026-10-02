@@ -1,59 +1,46 @@
-// HOW-TO: Convert PNG to WebP with Quality and Export PDF at 300 DPI C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust WebP Image Quality and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string webpPath = @"C:\temp\output.webp";
-            string pdfPath = @"C:\temp\output.pdf";
+            string inputPath = "Input\\sample.webp";
+            string outputPath = "Output\\result.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(webpPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // -----------------------------------------------------------------
-            // Step 1: Convert the source image to WebP with a specific quality
-            // -----------------------------------------------------------------
-            var webpOptions = new WebPOptions
+            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
             {
-                Lossless = false,   // lossy compression
-                Quality = 80f        // adjust quality (0‑100)
-            };
+                var webpOptions = new WebPOptions
+                {
+                    Quality = 80,
+                    Lossless = false
+                };
 
-            using (Image srcImage = Image.Load(inputPath))
-            {
-                srcImage.Save(webpPath, webpOptions);
-            }
+                using (var memoryStream = new MemoryStream())
+                {
+                    webpImage.Save(memoryStream, webpOptions);
+                    memoryStream.Position = 0;
 
-            // -----------------------------------------------------------------
-            // Step 2: Load the generated WebP and save it as PDF with resolution
-            // -----------------------------------------------------------------
-            var pdfOptions = new PdfOptions
-            {
-                // Set desired resolution (dots per inch) for the PDF output
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0)
-            };
-
-            using (Image webpImage = Image.Load(webpPath))
-            {
-                webpImage.Save(pdfPath, pdfOptions);
+                    using (Image reloadedImage = Image.Load(memoryStream))
+                    {
+                        var pdfOptions = new PdfOptions();
+                        reloadedImage.Save(outputPath, pdfOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -65,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to compress a PNG image to a smaller WebP file while controlling visual quality before embedding it in a PDF document.
- * 2. When you must generate a PDF that contains images at a specific resolution (e.g., 300 dpi) for printing or archival purposes.
- * 3. When an application processes user‑uploaded images, converts them to WebP for web delivery, and then creates a PDF report with consistent DPI.
- * 4. When you want to automate batch conversion of high‑resolution PNGs to WebP and combine them into PDFs with standardized output size.
- * 5. When you are building a .NET service that must reduce file size with lossy WebP compression and ensure the final PDF meets exact resolution requirements.
+ * 1. When you need to reduce the file size of a WebP image before embedding it in a PDF report.
+ * 2. When you want to control the visual quality of a WebP image while generating a PDF document in a C# application.
+ * 3. When you must ensure a PDF generated from a WebP source meets specific resolution or compression requirements for web publishing.
+ * 4. When you are building an automated pipeline that converts user‑uploaded WebP pictures to PDFs with consistent quality settings.
+ * 5. When you need to validate the existence of a WebP file, adjust its quality, and save the result as a PDF without intermediate disk files.
  */

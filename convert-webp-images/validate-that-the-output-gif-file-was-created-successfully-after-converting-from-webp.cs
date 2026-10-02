@@ -1,60 +1,57 @@
-// HOW-TO: Convert WebP To GIF And Verify Output File In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to GIF and Verify Output File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
 
-class Program
+namespace WebPToGifConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.gif";
+            string inputPath = "input.webp";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
-            {
-                // Save the image as GIF using default GifOptions
-                webPImage.Save(outputPath, new GifOptions());
-            }
+                using (Image image = Image.Load(inputPath))
+                {
+                    var gifOptions = new GifOptions();
+                    image.Save(outputPath, gifOptions);
+                }
 
-            // Validate that the GIF file was created
-            if (File.Exists(outputPath))
-            {
-                Console.WriteLine($"GIF file created successfully: {outputPath}");
+                if (File.Exists(outputPath))
+                {
+                    Console.WriteLine("GIF file created successfully.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Failed to create GIF file.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.Error.WriteLine($"Failed to create GIF file: {outputPath}");
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a WebP image on platforms that only support GIF, you can convert it to GIF using Aspose.Imaging in C# and confirm the file was created.
- * 2. When automating a batch process that extracts WebP assets from a repository and generates GIF previews for a web gallery, this code ensures each conversion succeeds.
- * 3. When integrating image conversion into a .NET service that receives user‑uploaded WebP files and must store them as GIFs for email attachments, the validation step guarantees the output exists before sending.
- * 4. When migrating legacy content from a WebP‑based CMS to a GIF‑compatible system, the snippet provides a quick way to convert individual images and verify the conversion result.
- * 5. When writing unit tests for an image‑processing pipeline that transforms WebP to GIF, this example demonstrates how to programmatically check that the GIF file is generated successfully.
+ * 1. When you need to batch‑convert user‑uploaded WebP images to GIFs for compatibility with older browsers in a .NET web application.
+ * 2. When you must generate animated GIF previews from WebP assets and confirm the files were saved correctly on the server.
+ * 3. When integrating Aspose.Imaging into a C# service that transforms product photos from WebP to GIF while checking for successful file creation.
+ * 4. When automating a migration of a media library from WebP to GIF format and need to log any conversion failures.
+ * 5. When building a desktop utility that converts single WebP files to GIF and validates the output before further processing.
  */

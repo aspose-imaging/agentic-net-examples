@@ -1,59 +1,32 @@
-// HOW-TO: Save GIF With Custom Color Depth And Floyd Steinberg Dithering In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Save GIF With Custom Color Depth And Dithering In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.gif";
-            string outputPath = @"C:\Images\Result\output.gif";
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // If the image is a GIF, apply dithering for quality control
-                if (image is GifImage gifImage)
-                {
-                    // Apply Floyd‑Steinberg dithering with a 4‑bit palette
-                    gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-                }
-
-                // Configure GIF saving options
-                GifOptions saveOptions = new GifOptions
-                {
-                    // Set color depth (bits per primary color minus 1). 7 => 8 bits per channel.
-                    ColorResolution = 7,
-                    // Enable palette correction for better color matching
-                    DoPaletteCorrection = true,
-                    // Save as interlaced GIF (optional)
-                    Interlaced = true,
-                    // Use lossy compression with a moderate max difference
-                    MaxDiff = 80
-                };
-
-                // Save the image as GIF using the configured options
-                image.Save(outputPath, saveOptions);
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
-
-            Console.WriteLine("GIF saved successfully.");
         }
         catch (Exception ex)
         {
@@ -64,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of an animated GIF while preserving visual quality by controlling the palette and applying dithering.
- * 2. When you want to ensure consistent colors across different browsers by correcting the GIF palette during export.
- * 3. When you need to create interlaced GIFs that load progressively on slow connections.
- * 4. When you are generating GIFs with a specific bits‑per‑channel setting (e.g., 8‑bit per channel) for compatibility with legacy systems.
- * 5. When you must apply lossy compression with a defined maximum color difference to balance quality and compression for web delivery.
+ * 1. When you need to reduce the file size of an animated GIF while preserving visual quality by adjusting its color depth and dithering in a C# application.
+ * 2. When you are building a web service that converts uploaded GIFs to a standardized palette for consistent display across browsers using Aspose.Imaging.
+ * 3. When you want to re‑encode existing GIF animations with a specific dithering algorithm to meet branding color guidelines in a .NET backend.
+ * 4. When you have to preprocess GIF assets for a mobile app, ensuring they use a limited number of colors to improve loading speed on low‑end devices.
+ * 5. When you are automating batch processing of GIF files to enforce a uniform color depth before publishing them to a digital asset management system.
  */

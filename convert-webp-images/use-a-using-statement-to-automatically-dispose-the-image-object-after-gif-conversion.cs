@@ -1,49 +1,47 @@
-// HOW-TO: Convert GIF to PNG with Automatic Disposal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to GIF in C# with Automatic Image Disposal (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output.png";
-
-        try
+        static void Main()
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.png";
+                string outputPath = "output.gif";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var options = new GifOptions();
+                    image.Save(outputPath, options);
+                }
             }
-
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF image; the using statement disposes it automatically
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Save the image as PNG using default PNG options
-                image.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            // Report any runtime errors without crashing
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a GIF file to a PNG image in a C# application while ensuring the Image object is released automatically to prevent memory leaks.
- * 2. When building a server‑side image processing service that receives GIF uploads and stores them as PNGs for faster delivery.
- * 3. When creating a desktop utility that batch‑converts user‑selected GIFs to PNGs and must clean up resources after each conversion.
- * 4. When integrating Aspose.Imaging into a .NET workflow that transforms animated GIFs into static PNGs for inclusion in PDF reports.
- * 5. When developing a background job that processes temporary GIF files and saves the results as PNGs, using a using block to guarantee proper disposal even on errors.
+ * 1. When a web application needs to generate animated or smaller GIF thumbnails from user‑uploaded PNG files while ensuring the Image object is released promptly.
+ * 2. When a desktop utility batch‑processes PNG assets into GIF format for compatibility with legacy systems and wants to avoid memory leaks by using a using block.
+ * 3. When an e‑learning platform converts high‑resolution PNG diagrams to GIF for faster loading in browsers and requires deterministic disposal of the image resource.
+ * 4. When a server‑side service creates GIF previews of PNG product images for email newsletters and must guarantee the image is disposed after saving.
+ * 5. When a mobile backend transforms PNG icons to GIF sprites for cross‑platform UI and needs automatic cleanup of the Aspose.Imaging Image instance.
  */

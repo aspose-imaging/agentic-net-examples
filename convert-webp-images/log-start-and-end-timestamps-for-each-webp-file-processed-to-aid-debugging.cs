@@ -1,53 +1,43 @@
-// HOW-TO: Log Timestamps While Converting Multiple WebP Files to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Processing Times for WebP Images While Converting in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string[] inputPaths = {
-                @"c:\temp\test1.webp",
-                @"c:\temp\test2.webp"
-            };
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            string[] outputPaths = {
-                @"c:\temp\test1.output.png",
-                @"c:\temp\test2.output.png"
-            };
+            Directory.CreateDirectory(inputFolder);
+            Directory.CreateDirectory(outputFolder);
 
-            for (int i = 0; i < inputPaths.Length; i++)
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
+            foreach (string inputPath in webpFiles)
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName);
 
-                // Verify input file exists
+                Console.WriteLine($"Processing {fileName} started at {DateTime.Now:O}");
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Log start timestamp
-                Console.WriteLine($"Processing started: {inputPath} at {DateTime.Now:O}");
-
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load WebP image and save as PNG
-                using (WebPImage webPImage = new WebPImage(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    webPImage.Save(outputPath, new PngOptions());
+                    image.Save(outputPath);
                 }
 
-                // Log end timestamp
-                Console.WriteLine($"Processing completed: {outputPath} at {DateTime.Now:O}");
+                Console.WriteLine($"Processing {fileName} finished at {DateTime.Now:O}");
             }
         }
         catch (Exception ex)
@@ -59,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert WebP images to PNG and keep a start‑and‑end log for each file to troubleshoot performance issues.
- * 2. When your application must verify that source WebP files exist before processing to avoid runtime errors.
- * 3. When you want to automatically create missing output directories while converting images in a C# service.
- * 4. When you require detailed timestamps in the console to monitor how long each WebP‑to‑PNG conversion takes.
- * 5. When you are using Aspose.Imaging for .NET to handle WebP files and need simple error handling that reports conversion failures.
+ * 1. When you need to audit how long each WebP file takes to load and save during a batch conversion using Aspose.Imaging in a .NET console app.
+ * 2. When debugging performance bottlenecks in an image processing pipeline that handles multiple WebP files and you want start‑and‑end timestamps for each operation.
+ * 3. When you want a simple console log that records the exact timestamp of when each WebP image processing begins and finishes to verify processing order.
+ * 4. When integrating Aspose.Imaging into a scheduled server job and you must record timestamps for compliance or monitoring of WebP image handling.
+ * 5. When creating a script to copy WebP images to another folder while tracking the processing duration of each file for reporting or optimization purposes.
  */
