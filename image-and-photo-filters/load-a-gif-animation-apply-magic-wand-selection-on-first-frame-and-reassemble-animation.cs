@@ -1,4 +1,4 @@
-// HOW-TO: Apply Magic Wand Selection to First Frame of GIF and Reassemble Animation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Magic Wand Selection to First Frame of GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,66 +8,53 @@ using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputPath = "input.gif";
-            string outputPath = "output.gif";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.gif";
+                string outputPath = "output.gif";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load original GIF to retrieve all frames
-            using (GifImage originalGif = (GifImage)Image.Load(inputPath))
-            {
-                // Load first frame as RasterImage for Magic Wand processing
-                using (RasterImage firstFrame = (RasterImage)Image.Load(inputPath))
+                if (!File.Exists(inputPath))
                 {
-                    // Apply Magic Wand selection on the first frame
-                    MagicWandTool
-                        .Select(firstFrame, new MagicWandSettings(10, 10) { Threshold = 100 })
-                        .Apply();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Create a GifFrameBlock from the processed first frame
-                    using (GifFrameBlock firstBlock = new GifFrameBlock(firstFrame))
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (GifImage gif = (GifImage)Image.Load(inputPath))
+                {
+                    if (gif.PageCount > 0)
                     {
-                        // Create a new GIF image with the processed first frame
-                        using (GifImage newGif = new GifImage(firstBlock))
+                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+                        using (RasterImage frame = (RasterImage)gif.ActiveFrame)
                         {
-                            // Append remaining frames from the original GIF
-                            for (int i = 1; i < originalGif.PageCount; i++)
-                            {
-                                GifFrameBlock block = (GifFrameBlock)originalGif.Pages[i];
-                                newGif.AddBlock(block);
-                            }
-
-                            // Save the reassembled GIF animation
-                            newGif.Save(outputPath, new GifOptions());
+                            MagicWandTool.Select(frame, new MagicWandSettings(10, 10))
+                                .Apply();
                         }
                     }
+
+                    gif.Save(outputPath, new GifOptions());
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically isolate a region in the first frame of an animated GIF using a tolerance‑based selection and keep the rest of the animation unchanged.
- * 2. When you want to create a custom thumbnail or highlight effect on the initial frame of a GIF without losing subsequent frames.
- * 3. When you are building a web service that processes user‑uploaded GIFs to apply selective masking before storing or streaming them.
- * 4. When you need to batch‑process animated stickers, applying a Magic Wand cut‑out to the first frame while preserving the original animation timing.
- * 5. When you are developing a desktop tool that lets designers quickly remove background colors from the first frame of a GIF while keeping the animation intact.
+ * 1. When you need to automatically remove or highlight a specific color region in the first frame of an animated GIF before saving it back.
+ * 2. When you want to create a GIF thumbnail where the background is selected and made transparent using the Magic Wand tool.
+ * 3. When processing user‑uploaded GIFs to isolate and edit objects on the initial frame for branding or watermarking purposes.
+ * 4. When building a C# application that batch‑processes GIF animations and applies a tolerance‑based selection to the first frame for further image analysis.
+ * 5. When integrating Aspose.Imaging into a workflow that requires preserving the original animation while modifying only the first frame’s pixel mask.
  */
