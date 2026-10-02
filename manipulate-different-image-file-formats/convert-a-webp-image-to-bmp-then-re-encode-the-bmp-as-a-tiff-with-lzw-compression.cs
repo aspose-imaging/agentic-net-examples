@@ -1,60 +1,56 @@
-// HOW-TO: Convert WebP Image to BMP and Then to LZW‑Compressed TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to BMP and then to LZW TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded paths
-            string inputWebP = @"C:\temp\input.webp";
-            string bmpPath   = @"C:\temp\intermediate.bmp";
-            string tiffPath  = @"C:\temp\output.tif";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
-            // Verify input file exists
-            if (!File.Exists(inputWebP))
+            Directory.CreateDirectory(outputDir);
+
+            string inputPath = Path.Combine(inputDir, "image.webp");
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputWebP}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
+            string bmpPath = Path.Combine(outputDir, "image.bmp");
             Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tiffPath));
-
-            // Load WebP image
-            using (WebPImage webP = new WebPImage(inputWebP))
+            using (Image webpImage = Image.Load(inputPath))
             {
-                // Convert to BMP (24‑bpp, RGB compression)
-                using (BmpImage bmp = new BmpImage(webP, 24, BitmapCompression.Rgb, 96.0, 96.0))
-                {
-                    // Save intermediate BMP file
-                    bmp.Save(bmpPath);
-                }
+                BmpOptions bmpOptions = new BmpOptions();
+                webpImage.Save(bmpPath, bmpOptions);
             }
 
-            // Load the BMP we just saved
-            using (Image bmpLoaded = Image.Load(bmpPath))
+            if (!File.Exists(bmpPath))
             {
-                // Prepare TIFF options with LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Lzw,
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    Photometric = TiffPhotometrics.Rgb,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                };
+                Console.Error.WriteLine($"File not found: {bmpPath}");
+                return;
+            }
 
-                // Save as TIFF
-                bmpLoaded.Save(tiffPath, tiffOptions);
+            string tiffPath = Path.Combine(outputDir, "image.tiff");
+            Directory.CreateDirectory(Path.GetDirectoryName(tiffPath));
+            using (Image bmpImage = Image.Load(bmpPath))
+            {
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                bmpImage.Save(tiffPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive web‑optimized WebP photos in a lossless TIFF format for long‑term storage or compliance, this code converts them through BMP and applies LZW compression.
- * 2. When a printing workflow only accepts BMP or TIFF files, you can use this snippet to transform incoming WebP assets into a BMP intermediate and finally into a printer‑ready LZW‑compressed TIFF.
- * 3. When migrating a legacy system that stores images as BMP but now requires compact TIFF files, the example shows how to read a WebP, save a BMP, and re‑encode it as a smaller TIFF with LZW.
- * 4. When creating a document‑generation pipeline that embeds high‑quality images, you can convert WebP graphics to BMP for pixel‑perfect handling and then to TIFF to embed with lossless compression.
- * 5. When developing a cross‑platform image‑processing service that receives WebP uploads and must deliver TIFF files compatible with GIS or medical imaging tools, this code provides the necessary conversion steps.
+ * 1. When you need to display a WebP image in a legacy Windows application that only supports BMP, you can convert it to BMP first.
+ * 2. When archiving scanned documents, you may convert high‑resolution WebP graphics to BMP and then compress them into LZW‑encoded TIFF files for lossless storage.
+ * 3. When a printing workflow requires TIFF with LZW compression but the source images are in WebP, this code transforms the files accordingly.
+ * 4. When integrating with a third‑party system that accepts only BMP and TIFF formats, you can use the conversion chain to meet its input requirements.
+ * 5. When performing batch image processing on a server, you can automate the conversion from WebP to BMP and subsequently to LZW TIFF to reduce file size while preserving quality.
  */
