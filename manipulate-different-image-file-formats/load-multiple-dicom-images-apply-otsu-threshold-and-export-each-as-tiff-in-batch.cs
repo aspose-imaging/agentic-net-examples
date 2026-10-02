@@ -1,9 +1,12 @@
 // HOW-TO: Batch Convert DICOM to TIFF with Otsu Threshold in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,13 +14,25 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            foreach (string inputPath in dicomFiles)
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -25,21 +40,21 @@ class Program
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tiff";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tiff");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
+                using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
                 {
-                    // Apply Otsu threshold binarization
-                    dicomImage.BinarizeOtsu();
+                    RasterCachedImage rci = dicom as RasterCachedImage;
+                    if (rci != null)
+                    {
+                        if (!rci.IsCached) rci.CacheData();
+                        rci.BinarizeOtsu();
+                    }
 
-                    // Save as TIFF
                     using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                     {
-                        dicomImage.Save(outputPath, tiffOptions);
+                        dicom.Save(outputPath, tiffOptions);
                     }
                 }
             }
@@ -53,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to process a folder of DICOM scans, apply automatic Otsu binarization, and store the results as TIFF files for archival or further analysis.
- * 2. When a radiology workflow requires converting raw DICOM images to a widely supported format like TIFF while enhancing contrast through thresholding for downstream AI models.
- * 3. When a developer builds a batch processing tool that reads multiple DICOM files from a directory, applies binary segmentation, and outputs ready‑to‑print TIFF images for reporting.
- * 4. When integrating Aspose.Imaging into a C# application to automate the transformation of DICOM datasets into TIFF for compatibility with legacy PACS viewers that only support TIFF.
- * 5. When creating a script to ensure all DICOM images in a study are uniformly thresholded and saved as lossless TIFFs for regulatory compliance and long‑term storage.
+ * 1. When a hospital needs to preprocess a series of DICOM scans for archival storage as binary TIFF files.
+ * 2. When a medical imaging researcher wants to apply Otsu binarization to multiple DICOM images before feeding them into a machine‑learning model.
+ * 3. When a radiology software vendor must convert patient DICOM files to TIFF for integration with a legacy PACS that only supports TIFF.
+ * 4. When a developer automates batch processing of DICOM images to generate high‑contrast TIFFs for printing or reporting.
+ * 5. When a health‑tech startup needs to generate lightweight, thresholded TIFF thumbnails from DICOM datasets for web preview.
  */
