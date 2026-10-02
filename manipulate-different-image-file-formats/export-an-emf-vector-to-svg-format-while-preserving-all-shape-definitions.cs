@@ -1,57 +1,31 @@
-// HOW-TO: Convert EMF Vector File to SVG Preserving Shapes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF Vector to SVG with Shape Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\test.emf";
-        string outputPath = @"c:\temp\test.output.svg";
+        string inputPath = "input.emf";
+        string outputPath = "output/output.svg";
 
-        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
-                {
-                    TextAsShapes = true // Preserve text as vector shapes
-                };
-
-                // Configure rasterization options for EMF
-                EmfRasterizationOptions rasterizationOptions = new EmfRasterizationOptions
-                {
-                    BackgroundColor = Color.WhiteSmoke,
-                    PageSize = emfImage.Size,
-                    RenderMode = EmfRenderMode.Auto,
-                    // Optional margins; can be omitted if not needed
-                    BorderX = 0,
-                    BorderY = 0
-                };
-
-                // Attach rasterization options to SVG options
-                saveOptions.VectorRasterizationOptions = rasterizationOptions;
-
-                // Save as SVG
-                emfImage.Save(outputPath, saveOptions);
+                SvgOptions options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -63,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display Windows Metafile (EMF) graphics on the web, you can convert them to scalable SVG files while keeping all vector shapes intact.
- * 2. When generating printable reports that contain EMF logos, you can export the logos to SVG to ensure they remain resolution‑independent in PDF or HTML outputs.
- * 3. When migrating a legacy desktop application that stores diagrams as EMF, you can batch‑convert the files to SVG for use in modern browsers or mobile apps.
- * 4. When creating an automated build pipeline that processes design assets, you can use this code to transform EMF icons into SVG sprites without losing text as vector shapes.
- * 5. When integrating with a GIS system that requires SVG overlays, you can convert EMF map symbols to SVG while preserving their exact geometry and styling.
+ * 1. When a developer needs to embed Windows Metafile graphics into a web page that only supports SVG, they can use this code to convert the EMF file while keeping all vector shapes intact.
+ * 2. When a design workflow requires exporting legacy EMF icons to scalable SVG assets for responsive UI design, this snippet automates the conversion in a .NET application.
+ * 3. When a reporting system generates charts as EMF files but the final PDF must contain SVG for better compression and editability, the code enables seamless format transformation.
+ * 4. When a batch processing tool must migrate a library of EMF diagrams to SVG for use in modern vector editors, the example provides a reliable C# method to preserve shape definitions.
+ * 5. When an automation script needs to convert EMF logos to SVG for inclusion in mobile apps that rely on vector drawables, this approach ensures the original shapes are retained without rasterization.
  */
