@@ -1,45 +1,40 @@
-// HOW-TO: Convert DjVu Document to Multi‑Page Deflate Compressed TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document Pages To Deflate Compressed TIFF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output\\output.tif";
-
         try
         {
-            // Validate input file existence
+            string inputPath = "Input\\document.djvu";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Configure TIFF save options with Deflate compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
+                for (int i = 0; i < djvu.Pages.Length; i++)
+                {
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tiff");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Export all pages
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save as TIFF
-                djvuImage.Save(outputPath, tiffOptions);
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb))
+                    {
+                        tiffOptions.Compression = TiffCompressions.Deflate;
+                        djvu.Pages[i].Save(outputPath, tiffOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive scanned DjVu files as lossless TIFFs for long‑term storage while reducing file size with Deflate compression.
- * 2. When a document management system requires all pages of a DjVu document to be converted to a single multi‑page TIFF for compatibility with legacy printers.
- * 3. When you are building a batch conversion tool that extracts every page from DjVu ebooks and saves them as compressed TIFF images for downstream OCR processing.
- * 4. When integrating Aspose.Imaging into a C# application to transform DjVu blueprints into TIFF format that can be opened by standard image viewers without losing detail.
- * 5. When you must programmatically convert DjVu reports into TIFF files with Deflate compression to meet email attachment size limits.
+ * 1. When you need to archive scanned DjVu files as separate TIFF images with Deflate compression to reduce storage size while preserving image quality.
+ * 2. When a legacy document workflow requires each page of a DjVu document to be saved as an individual TIFF for compatibility with older systems.
+ * 3. When preparing DjVu pages for an OCR engine that only accepts TIFF input, using Deflate compression to speed up processing and lower memory usage.
+ * 4. When generating printable TIFF files from DjVu source material while keeping color information and minimizing file size for faster web delivery.
+ * 5. When converting multi‑page DjVu manuals into individual TIFF pages for integration into a .NET reporting tool that consumes TIFF images.
  */
