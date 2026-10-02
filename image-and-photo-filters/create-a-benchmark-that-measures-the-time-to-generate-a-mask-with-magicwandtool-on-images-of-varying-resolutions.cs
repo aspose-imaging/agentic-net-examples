@@ -1,68 +1,57 @@
-// HOW-TO: Benchmark Time to Create Magic Wand Masks on Different Resolution PNGs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Measure Magic Wand Mask Generation Time for Different Image Sizes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths for images of different resolutions
-        string[] inputPaths = new string[]
-        {
-            @"C:\Benchmark\Images\low_res.png",
-            @"C:\Benchmark\Images\medium_res.png",
-            @"C:\Benchmark\Images\high_res.png"
-        };
-
-        string[] outputPaths = new string[]
-        {
-            @"C:\Benchmark\Results\low_res_masked.png",
-            @"C:\Benchmark\Results\medium_res_masked.png",
-            @"C:\Benchmark\Results\high_res_masked.png"
-        };
-
         try
         {
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+            int[] sizes = new int[] { 256, 512, 1024, 2048 };
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
 
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+            foreach (int size in sizes)
+            {
+                string tempInputPath = Path.Combine(Path.GetTempPath(), $"temp_{size}.bmp");
+
+                using (Image img = Image.Create(new BmpOptions { Source = new FileCreateSource(tempInputPath, false) }, size, size))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    img.Save();
+                }
+
+                if (!File.Exists(tempInputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {tempInputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Measure time to generate mask and save the image
-                Stopwatch sw = Stopwatch.StartNew();
-
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(tempInputPath))
                 {
-                    // Create a mask using MagicWandTool with a reference point (10,10) and a threshold
-                    var mask = MagicWandTool.Select(image, new MagicWandSettings(10, 10) { Threshold = 100 });
+                    Stopwatch sw = Stopwatch.StartNew();
+                    MagicWandTool.Select(raster, new MagicWandSettings(size / 2, size / 2))
+                        .Apply();
+                    sw.Stop();
 
-                    // Apply the mask to the image
-                    mask.Apply();
+                    string outputPath = Path.Combine(outputDir, $"masked_{size}.bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    raster.Save(outputPath, new BmpOptions());
 
-                    // Save the resulting image with alpha channel support
-                    image.Save(outputPath, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    });
+                    Console.WriteLine($"Size {size}x{size}: {sw.ElapsedMilliseconds} ms");
                 }
 
-                sw.Stop();
-                Console.WriteLine($"Processed '{Path.GetFileName(inputPath)}' in {sw.ElapsedMilliseconds} ms");
+                if (File.Exists(tempInputPath))
+                {
+                    File.Delete(tempInputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -74,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to compare how quickly the MagicWandTool can generate masks for low, medium, and high‑resolution PNG images in a C# application.
- * 2. When you want to profile the performance impact of applying a mask with a threshold on large raster images before integrating the feature into a photo‑editing workflow.
- * 3. When you are optimizing batch image processing and need to ensure that mask creation and saving with alpha channel stays within acceptable time limits for different image sizes.
- * 4. When you are troubleshooting slow image‑masking operations and require precise timing data to identify bottlenecks in the Aspose.Imaging MagicWand implementation.
- * 5. When you are building a benchmark suite to demonstrate the scalability of Aspose.Imaging’s MagicWandTool across various resolutions for documentation or client presentations.
+ * 1. When you need to benchmark the performance of Aspose.Imaging's MagicWandTool on BMP images of various resolutions to ensure acceptable processing speed.
+ * 2. When you want to automatically generate and save masks for dynamically created bitmap files in a temporary folder before further image analysis.
+ * 3. When you are evaluating memory and CPU impact of mask creation on large raster images in a .NET application.
+ * 4. When you need to compare processing times across multiple image sizes to decide the optimal resolution for a real‑time segmentation feature.
+ * 5. When you are building a CI test that validates that MagicWandTool mask generation stays within a defined time threshold for different image dimensions.
  */
