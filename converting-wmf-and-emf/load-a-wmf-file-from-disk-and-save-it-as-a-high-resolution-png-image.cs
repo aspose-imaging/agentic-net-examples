@@ -1,50 +1,41 @@
-// HOW-TO: Convert WMF to High Resolution PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WMF to High Resolution PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.wmf";
+        string outputPath = "Output\\sample.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.wmf";
-            string outputPath = @"C:\Images\sample.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to WmfImage to access size
-                WmfImage wmfImage = (WmfImage)image;
-
-                // Set up PNG save options with vector rasterization for high resolution
-                PngOptions pngOptions = new PngOptions
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    VectorRasterizationOptions = new WmfRasterizationOptions
-                    {
-                        // Use the original WMF size; you can adjust DPI or page size here for higher resolution
-                        PageSize = wmfImage.Size,
-                        // Example of increasing resolution (optional)
-                        // DpiX = 300,
-                        // DpiY = 300
-                    }
+                    PageWidth = image.Width * 2,
+                    PageHeight = image.Height * 2,
+                    BackgroundColor = Color.White
                 };
 
-                // Save as PNG
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -57,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy WMF vector graphics on web pages that only support raster formats like PNG.
- * 2. When you must generate printable PNG assets from WMF files at a specific DPI for high‑quality print output.
- * 3. When a batch conversion tool has to preserve the original dimensions of WMF drawings while converting them to PNG for archival.
- * 4. When an application imports WMF icons and needs to render them as PNG thumbnails for UI galleries.
- * 5. When a reporting system extracts WMF charts from old documents and converts them to PNG to embed in PDF reports.
+ * 1. When you need to display legacy WMF vector graphics on modern web pages that only support raster PNG images.
+ * 2. When generating printable marketing materials that require WMF logos to be converted to high‑resolution PNGs for accurate scaling.
+ * 3. When automating a batch process that extracts WMF icons from a legacy application and saves them as PNG thumbnails with doubled pixel density.
+ * 4. When integrating a document conversion service that must preserve the visual fidelity of WMF drawings by rasterizing them at higher resolution before storing as PNG.
+ * 5. When creating a C# utility to convert user‑uploaded WMF files into PNGs for preview in a mobile app that cannot render WMF directly.
  */

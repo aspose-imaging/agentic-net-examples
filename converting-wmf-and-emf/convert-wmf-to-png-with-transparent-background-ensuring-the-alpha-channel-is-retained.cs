@@ -3,45 +3,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.wmf";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.wmf";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with a transparent background
                 var rasterOptions = new WmfRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.Transparent
+                    BackgroundColor = Color.Transparent,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Set PNG options and attach the rasterization options
                 var pngOptions = new PngOptions
                 {
+                    ColorType = PngColorType.TruecolorWithAlpha,
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the image as PNG preserving the alpha channel
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy WMF icons on a modern web page that requires PNG images with transparent backgrounds.
- * 2. When generating PDF reports that embed vector graphics converted to PNG while preserving alpha for overlay effects in a C# application.
- * 3. When creating thumbnails of WMF drawings for a gallery where the background must remain invisible to blend with different UI themes.
- * 4. When automating a batch conversion of corporate WMF logos to PNG assets for use in mobile apps that need proper transparency.
- * 5. When processing user‑uploaded WMF files in a .NET service and saving them as PNGs so they can be composited over other images without a solid background.
+ * 1. When you need to embed vector WMF icons into a web page that requires PNG images with transparency.
+ * 2. When converting legacy WMF diagrams to PNG for use in mobile apps that support alpha channels.
+ * 3. When generating transparent PNG assets from WMF files for PDF reports that overlay graphics.
+ * 4. When automating batch processing of WMF logos to PNG format while preserving transparent backgrounds in a C# build pipeline.
+ * 5. When preparing WMF illustrations for email newsletters that require PNG images with proper alpha blending.
  */

@@ -1,80 +1,46 @@
-// HOW-TO: Convert Multipage EMF Document to Separate PNG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi-Page EMF to Separate PNG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Input\MultipageDocument.emf";
-        string outputDirectory = @"C:\Output";
-
-        // Ensure the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Wrap the whole process in a try/catch to handle unexpected errors gracefully
         try
         {
-            // Load the EMF document
+            string inputPath = "input.emf";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare base name for output files
-                string baseName = Path.GetFileNameWithoutExtension(inputPath);
-
-                // Ensure the output directory exists (unconditional as required)
-                Directory.CreateDirectory(outputDirectory);
-
-                // Try to treat the image as a multipage image
-                if (image is IMultipageImage multipage && multipage.PageCount > 1)
+                if (image is IMultipageImage multipage)
                 {
-                    // Iterate over each page and save it as a separate PNG
-                    for (int pageIndex = 0; pageIndex < multipage.PageCount; pageIndex++)
+                    int pageCount = multipage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        string outputPath = Path.Combine(outputDirectory, $"{baseName}_page{pageIndex + 1}.png");
-
-                        // Ensure the directory for this output file exists
+                        string outputPath = Path.Combine("output", $"page_{i + 1}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Configure PNG options with vector rasterization (required for EMF)
-                        var pngOptions = new PngOptions
+                        PngOptions options = new PngOptions
                         {
-                            VectorRasterizationOptions = new EmfRasterizationOptions
-                            {
-                                PageSize = image.Size
-                            },
-                            // Export only the current page
-                            MultiPageOptions = new MultiPageOptions(new IntRange(pageIndex, pageIndex + 1))
+                            MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
                         };
-
-                        // Save the current page as PNG
-                        image.Save(outputPath, pngOptions);
+                        image.Save(outputPath, options);
                     }
                 }
                 else
                 {
-                    // Single‑page EMF: save directly as PNG
-                    string outputPath = Path.Combine(outputDirectory, $"{baseName}.png");
-
-                    // Ensure the directory for this output file exists
+                    string outputPath = Path.Combine("output", "page_1.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
-                    };
-
-                    image.Save(outputPath, pngOptions);
+                    PngOptions options = new PngOptions();
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -87,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a vector‑based EMF report as individual PNG images for web preview.
- * 2. When generating thumbnails for every page of a multi‑page EMF diagram to display in a gallery.
- * 3. When converting a multi‑page EMF file into PNGs to feed into a PDF‑creation workflow that only accepts raster images.
- * 4. When automating the batch processing of EMF drawings so each page can be printed or edited in bitmap‑only tools.
- * 5. When preparing separate PNG assets from a multi‑page EMF blueprint for inclusion in a mobile app that cannot render EMF directly.
+ * 1. When you need to extract each page of a vector EMF report as individual PNG images for web preview.
+ * 2. When you want to generate thumbnail PNGs from a multi-page EMF diagram to display in a file manager.
+ * 3. When a reporting system stores charts as EMF and you must convert them to raster PNGs for email attachments.
+ * 4. When you are building a document conversion service that splits a multi-page EMF into separate PNG pages for downstream processing.
+ * 5. When you need to archive each page of an EMF blueprint as lossless PNG files for archival compliance.
  */
