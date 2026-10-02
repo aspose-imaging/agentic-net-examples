@@ -1,46 +1,53 @@
-// HOW-TO: Resize Large SVG and Apply Gaussian Blur in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize SVG to PNG and Apply Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large.svg";
-        string outputPath = @"C:\Images\processed.png";
+        string inputPath = "input.svg";
+        string outputPath = "output/output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Resize to a smaller raster size (e.g., half the original dimensions)
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight);
+                int targetWidth = 800;
+                int targetHeight = 600;
 
-                // Cast to RasterImage to apply raster filters
-                RasterImage raster = (RasterImage)image;
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = targetWidth,
+                    PageHeight = targetHeight,
+                    BackgroundColor = Color.White
+                };
 
-                // Apply Gaussian blur filter to the entire image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        var blurOptions = new GaussianBlurFilterOptions(5, 1.0);
+                        raster.Filter(raster.Bounds, blurOptions);
+                        raster.Save(outputPath);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a thumbnail of a high‑resolution SVG with a soft focus effect for a web gallery.
- * 2. When you want to reduce the file size of an SVG by rasterizing it to a smaller PNG while smoothing edges with a Gaussian blur.
- * 3. When you are preparing SVG assets for a mobile app and need both scaling and a blur filter to match the UI design.
- * 4. When you must batch‑process vector logos into blurred raster images for use in marketing banners.
- * 5. When you require a quick C# solution to resize a vector illustration and apply a blur before uploading to a content management system.
+ * 1. When you need to convert a high‑resolution SVG logo into a smaller PNG thumbnail and soften its edges with a Gaussian blur for web display.
+ * 2. When generating preview images of vector graphics for a mobile app, you can rasterize the SVG to a specific size and apply blur to create a background‑blur effect.
+ * 3. When preparing assets for a PDF report, you may resize the SVG to fit the page layout and add a subtle blur to match the document’s visual style.
+ * 4. When building an automated pipeline that processes user‑uploaded SVG icons, you can rasterize them to a fixed PNG size and apply a blur filter to reduce visual noise.
+ * 5. When creating stylized map markers, you can downscale the SVG map symbol to a PNG and apply Gaussian blur to produce a soft shadow effect.
  */
