@@ -1,44 +1,32 @@
-// HOW-TO: Apply Emboss Filter to PNG Texture in Unity C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Filter to PNG Texture at Runtime in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
-class EmbossTextureProcessor
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "Assets/Textures/input.png";
-        string outputPath = "Assets/Textures/output_emboss.png";
+        string outputPath = "Assets/Textures/output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply the 3x3 emboss kernel to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3)
-                );
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +38,9 @@ class EmbossTextureProcessor
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a stylized raised‑edge effect to a PNG sprite at runtime in a Unity game, this code shows how to emboss the texture using Aspose.Imaging.
- * 2. When you want to preprocess game assets during development by converting flat textures into embossed versions for a hand‑painted aesthetic, the example demonstrates the required C# steps.
- * 3. When a procedural terrain generator requires dynamic embossing of height‑map images to enhance visual depth, you can apply the same filter to the generated PNG files.
- * 4. When creating a UI overlay that highlights icons with a 3‑D embossed look, this snippet provides a quick way to apply the effect without external tools.
- * 5. When debugging visual shaders and need a reference image with clear edge contrast, the code lets you generate an embossed PNG to compare against shader output.
+ * 1. When you need to add a real‑time embossed effect to a character’s skin texture in a Unity game.
+ * 2. When you want to preprocess UI button images with an emboss filter before saving them as PNG assets.
+ * 3. When you must generate stylized terrain tiles on the fly by embossing height‑map textures during gameplay.
+ * 4. When you are creating a dynamic post‑processing step that applies a 3×3 emboss convolution to any loaded sprite.
+ * 5. When you need to automate the conversion of raw PNG assets into embossed versions for a retro‑style visual theme.
  */
