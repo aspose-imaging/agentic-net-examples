@@ -1,58 +1,49 @@
-// HOW-TO: Check Image Dimensions Remain Same After Gaussian Blur In C# (Aspose.Imaging for .NET)
+// HOW-TO: Check Image Dimensions Remain Same After Applying Convolution Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\filtered.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Store original dimensions
-                int originalWidth = rasterImage.Width;
-                int originalHeight = rasterImage.Height;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Apply a convolution filter (Gaussian blur in this example)
-                var filterOptions = new GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Verify dimensions after filtering
-                int newWidth = rasterImage.Width;
-                int newHeight = rasterImage.Height;
-
-                if (originalWidth != newWidth || originalHeight != newHeight)
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                if (image is Aspose.Imaging.RasterImage raster)
                 {
-                    Console.WriteLine("Dimensions changed after applying the filter!");
+                    int originalWidth = raster.Width;
+                    int originalHeight = raster.Height;
+
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+
+                    if (raster.Width == originalWidth && raster.Height == originalHeight)
+                    {
+                        Console.WriteLine("Dimensions unchanged after filter.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Dimensions changed after filter.");
+                    }
+
+                    raster.Save(outputPath, new JpegOptions());
                 }
                 else
                 {
-                    Console.WriteLine("Image dimensions remain unchanged after applying the filter.");
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
                 }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the filtered image
-                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -64,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply a Gaussian blur to a PNG without altering its width and height.
- * 2. When validating that image processing operations in a .NET application preserve original dimensions for downstream layout calculations.
- * 3. When automating batch image filtering and you must ensure the filtered files can replace the originals without breaking UI constraints.
- * 4. When debugging custom filter pipelines and you want a quick console check that the filter does not resize the raster.
- * 5. When integrating Aspose.Imaging into a C# service that processes user‑uploaded images and you must guarantee size consistency after applying any convolution filter.
+ * 1. When you need to apply an emboss convolution filter to a JPEG while ensuring the original width and height are preserved for downstream layout calculations.
+ * 2. When validating that a raster image processed with Aspose.Imaging does not change dimensions before uploading to a content management system that expects fixed‑size assets.
+ * 3. When creating a batch image processing pipeline that applies filters but must keep the original dimensions for consistent thumbnail generation.
+ * 4. When debugging a custom image filter implementation and want to confirm that the filter operation does not unintentionally resize the image.
+ * 5. When integrating Aspose.Imaging into a C# application that applies artistic effects but must maintain the original canvas size for UI overlay alignment.
  */
