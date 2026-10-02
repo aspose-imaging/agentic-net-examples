@@ -1,4 +1,4 @@
-// HOW-TO: Embed and Verify Password Protected Digital Signature in JPEG Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Embed and Verify Password Protected Digital Signature in JPEG with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,44 +7,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-        string password = "mySecretPassword";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output_signed.jpg";
+            string password = "mySecret";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load JPEG image from a file stream
-            using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-            using (Image image = Image.Load(inputStream))
+            string outDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outDir);
+
+            using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             {
-                // Ensure the loaded image is a raster image
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                using (RasterImage image = (RasterImage)Image.Load(fs))
                 {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                    return;
+                    image.EmbedDigitalSignature(password);
+                    image.Save(outputPath);
                 }
+            }
 
-                // Embed digital signature using the provided password
-                raster.EmbedDigitalSignature(password);
-
-                // Verify that the image is digitally signed
-                bool isSigned = raster.IsDigitalSigned(password);
-                Console.WriteLine($"Digital signature embedded. Verification result: {isSigned}");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Save the signed image
-                raster.Save(outputPath);
+            using (RasterImage signedImage = (RasterImage)Image.Load(outputPath))
+            {
+                bool isSigned = signedImage.IsDigitalSigned(password);
+                Console.WriteLine(isSigned ? "Signature verified." : "Signature verification failed.");
             }
         }
         catch (Exception ex)
@@ -56,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a tamper‑evident signature to a JPEG before sending it to a client.
- * 2. When a system must ensure that an image file has not been altered by verifying a password‑protected digital signature.
- * 3. When an application stores confidential photos and wants to embed authentication data without changing the visual content.
- * 4. When integrating image security into a workflow that reads JPEGs from streams and saves the signed version to disk.
- * 5. When building a compliance solution that requires proof of origin for raster images using Aspose.Imaging in .NET.
+ * 1. When you need to protect a JPEG photo from unauthorized changes by embedding a password‑protected digital signature before sending it to clients.
+ * 2. When your application must confirm that an uploaded JPEG has not been altered by verifying its embedded digital signature using a known password.
+ * 3. When you want to store confidential branding or watermark information inside a JPEG file without visible changes, using a password‑secured signature for later validation.
+ * 4. When integrating Aspose.Imaging into a C# workflow that archives medical or legal images, ensuring each file is signed and can be programmatically verified for integrity.
+ * 5. When building a secure image‑sharing service that signs JPEGs on upload and checks the signature on download to prevent tampering.
  */
