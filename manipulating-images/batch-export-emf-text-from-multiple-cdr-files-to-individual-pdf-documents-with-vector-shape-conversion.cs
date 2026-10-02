@@ -1,83 +1,63 @@
-// HOW-TO: Batch Export CDR Text to PDF With Vector Shapes In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple CDR Files to PDF with Vector Shapes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
-class Program
+namespace CdrToPdfBatch
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded list of input CDR files
-            string[] inputFiles = new[]
+            try
             {
-                @"C:\Data\sample1.cdr",
-                @"C:\Data\sample2.cdr"
-            };
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\InputCdrFiles";
+                string outputDirectory = @"C:\OutputPdfFiles";
 
-            // Output directory for generated PDFs
-            string outputDir = @"C:\Data\PdfOutput";
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDirectory);
 
-            // Ensure the output directory exists (unconditional as per rules)
-            Directory.CreateDirectory(outputDir);
+                // Get all CDR files in the input directory
+                string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
-            foreach (string inputPath in inputFiles)
-            {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in cdrFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-                {
-                    // Iterate through all pages of the CDR document
-                    for (int pageIndex = 0; pageIndex < cdrImage.Pages.Length; pageIndex++)
+                    if (!File.Exists(inputPath))
                     {
-                        var page = (CdrImagePage)cdrImage.Pages[pageIndex];
-
-                        // Prepare PDF options with vector rasterization settings
-                        PdfOptions pdfOptions = new PdfOptions();
-                        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                        {
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        };
-                        pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                        // Build output file path for the current page
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.pdf";
-                        string outputPath = Path.Combine(outputDir, outputFileName);
-
-                        // Ensure the directory for the output file exists (unconditional)
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as a PDF document
-                        page.Save(outputPath, pdfOptions);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        PdfOptions pdfOptions = new PdfOptions();
+                        image.Save(outputPath, pdfOptions);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to convert multiple CorelDRAW (CDR) files containing EMF text into separate PDF documents while preserving vector quality for printing.
- * 2. When an automated build process must generate PDFs from a batch of CDR assets without rasterizing the text, ensuring the text remains selectable and scalable.
- * 3. When a web service receives CDR uploads and must return PDF versions with exact page dimensions and vector shapes for downstream editing.
- * 4. When a migration tool moves legacy CDR artwork to a PDF archive and requires the text to be rendered with single‑bit per pixel hinting for crisp edges.
- * 5. When a QA script validates that each page of several CDR files is correctly exported to PDF with no loss of vector information.
+ * 1. When you need to automatically convert a folder of CorelDRAW (CDR) drawings into separate PDF files while keeping text as scalable vector shapes.
+ * 2. When a print shop wants to generate print‑ready PDFs from multiple CDR designs without rasterizing the artwork.
+ * 3. When a document management system must ingest CDR assets and store them as searchable PDF documents in bulk.
+ * 4. When a CI/CD pipeline has to transform newly added CDR resources into PDFs for downstream reporting or archiving.
+ * 5. When a Windows service processes incoming CDR files and creates PDF versions that preserve exact layout and vector quality for downstream editing.
  */

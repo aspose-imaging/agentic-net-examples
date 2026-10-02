@@ -1,38 +1,49 @@
 // HOW-TO: How To Deskew A GIF Image And Save As New GIF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.gif";
+            string inputPath = "input\\sample.gif";
             string outputPath = "output\\deskewed.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
-            using (GifImage image = (GifImage)Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Deskew the image without resizing, using a light gray background
-                image.NormalizeAngle(false, Color.LightGray);
+                if (gif.Pages.Count() == 0)
+                {
+                    Console.Error.WriteLine("No frames found in the GIF.");
+                    return;
+                }
 
-                // Save the corrected image as GIF
-                image.Save(outputPath, new GifOptions());
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+                RasterImage raster = (RasterImage)gif.ActiveFrame;
+
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
+                raster.NormalizeAngle(false, Aspose.Imaging.Color.White);
+
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -45,8 +56,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you receive scanned animated GIFs that are slightly rotated and need to be straightened before displaying on a website.
- * 2. When an automated batch job must correct the orientation of user‑uploaded GIF stickers without changing their dimensions.
- * 3. When you want to preprocess GIF frames for OCR or computer‑vision pipelines by removing skew while preserving the original palette.
- * 4. When a legacy system stores screenshots as GIFs with a gray background and you need to normalize their angle for consistent reporting.
- * 5. When creating a thumbnail generator that first deskews each GIF to ensure the thumbnail shows the image upright.
+ * 2. When an application must automatically correct the orientation of user‑uploaded GIF stickers for a messaging app.
+ * 3. When a batch job processes legacy GIF assets and requires deskewing each file to improve OCR accuracy.
+ * 4. When you need to normalize the angle of the first frame of a multi‑frame GIF while preserving the original animation.
+ * 5. When a .NET service generates thumbnails from rotated GIF screenshots and must save the corrected image as a new GIF file.
  */

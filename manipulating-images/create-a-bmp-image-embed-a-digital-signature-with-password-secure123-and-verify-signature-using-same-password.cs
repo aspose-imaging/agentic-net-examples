@@ -11,38 +11,43 @@ class Program
     {
         try
         {
-            // Define paths
-            string outputPath = "output.bmp";
+            // Hardcoded paths
+            string outputDirectory = "output";
+            string bmpPath = Path.Combine(outputDirectory, "signed_image.bmp");
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
 
-            // Create a new BMP image (100x100 pixels)
-            var bmpOptions = new BmpOptions
+            // Create a blank BMP image (100x100) with white background
+            using (var image = Image.Create(
+                new BmpOptions { BitsPerPixel = 24 },
+                100, 100))
             {
-                BitsPerPixel = 24
-            };
-            using (Image image = Image.Create(bmpOptions, 100, 100))
-            {
-                // Cast to RasterImage to access digital signature methods
-                var rasterImage = (RasterImage)image;
-
-                // Embed digital signature with the specified password
-                rasterImage.EmbedDigitalSignature("Secure123");
-
-                // Save the signed image
-                image.Save(outputPath);
+                // Fill with white (optional, default is black)
+                image.Save(bmpPath);
             }
 
-            // Load the saved image to verify the signature
-            using (Image loadedImage = Image.Load(outputPath))
+            // Verify the created file exists
+            if (!File.Exists(bmpPath))
             {
-                var rasterLoaded = (RasterImage)loadedImage;
+                Console.Error.WriteLine($"File not found: {bmpPath}");
+                return;
+            }
 
-                // Verify the digital signature using the same password
-                bool isSigned = rasterLoaded.IsDigitalSigned("Secure123");
+            // Load the image as RasterImage and embed digital signature
+            using (var raster = (RasterImage)Image.Load(bmpPath))
+            {
+                string password = "Secure123";
+                raster.EmbedDigitalSignature(password);
+                raster.Save(bmpPath);
+            }
 
-                Console.WriteLine($"Signature verification result: {isSigned}");
+            // Load again to verify the signature
+            using (var raster = (RasterImage)Image.Load(bmpPath))
+            {
+                string password = "Secure123";
+                bool isSigned = raster.IsDigitalSigned(password);
+                Console.WriteLine(isSigned ? "Signature verified." : "Signature verification failed.");
             }
         }
         catch (Exception ex)
@@ -54,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to protect a BMP file from unauthorized changes by adding a password‑protected digital signature in a C# application.
- * 2. When you must ensure the integrity of a generated image before sending it to a client, by embedding and later verifying a signature using Aspose.Imaging.
- * 3. When a document management system stores raster images and requires cryptographic verification of each BMP to meet compliance standards.
- * 4. When an automated reporting tool creates charts as BMPs and you want to embed a secret password signature to detect tampering later.
- * 5. When a security‑focused workflow signs images with a known password and later validates them during batch processing in .NET.
+ * 1. When you need to protect a BMP file from tampering by embedding a password‑protected digital signature before distributing it to clients.
+ * 2. When an application must confirm the authenticity of a received BMP image by verifying its digital signature using the same password.
+ * 3. When you want to automate the creation of blank BMP canvases and secure them with a signature as part of a document‑generation workflow.
+ * 4. When regulatory compliance requires that raster images be signed and later validated without altering the visual content.
+ * 5. When integrating Aspose.Imaging into a C# service that stores medical or legal BMP scans and needs to ensure they remain unchanged and traceable.
  */

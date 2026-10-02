@@ -1,47 +1,59 @@
-// HOW-TO: Create BMP Image, Crop Inset, Rotate 90 Degrees, Embed Digital Signature in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Crop Inset Rotate 90° and Add Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string outputPath = "output.bmp";
-
         try
         {
-            // Create a BMP image with minimum size for digital signature (200x200)
-            using (BmpImage bmp = new BmpImage(200, 200))
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create a BMP image if it does not exist
+            if (!File.Exists(inputPath))
             {
-                // Fill the image with white color
-                for (int y = 0; y < bmp.Height; y++)
+                int width = 200;
+                int height = 200;
+                var bmpOptions = new BmpOptions
                 {
-                    for (int x = 0; x < bmp.Width; x++)
-                    {
-                        bmp.SetPixel(x, y, Color.White);
-                    }
-                }
-
-                // Apply a 20-pixel inset crop (left, right, top, bottom)
-                bmp.Crop(20, 20, 20, 20);
-
-                // Rotate the image 90 degrees clockwise
-                bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Embed a digital signature with a valid password
-                bmp.EmbedDigitalSignature("secure123");
-
-                // Ensure the output directory exists
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
+                    BitsPerPixel = 24
+                };
+                using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
                 {
-                    Directory.CreateDirectory(outputDir);
+                    // Fill with white background
+                    image.Save(inputPath);
                 }
+            }
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Apply a 20-pixel inset crop
+                image.Crop(20, 20, 20, 20);
+
+                // Rotate 90 degrees clockwise
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Embed digital signature with a password
+                string password = "pass1234";
+                image.EmbedDigitalSignature(password);
 
                 // Save the processed image
-                bmp.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -53,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blank BMP canvas and embed a password‑protected digital signature using Aspose.Imaging in C#.
- * 2. When you must apply a 20‑pixel inset crop to a BMP before rotating it for a consistent layout in a reporting system.
- * 3. When an application requires a 90‑degree clockwise rotation of a cropped BMP to match printer orientation.
- * 4. When you want to create a small (200×200) signature image that can be validated later with a digital signature.
- * 5. When you need to automate batch processing of BMP files that include cropping, rotation, and embedded signatures in a C# workflow.
+ * 1. When you need to generate a blank BMP file, crop a border, rotate it, and protect it with a password‑protected digital signature for secure document workflows.
+ * 2. When an application must preprocess scanned forms by trimming edges, aligning orientation, and embedding a signature to verify authenticity before archival.
+ * 3. When a reporting tool creates chart images in BMP, requires a uniform 20‑pixel margin removal, rotates the chart for landscape layout, and signs the file to prevent tampering.
+ * 4. When a batch job prepares product label images, crops unnecessary whitespace, rotates them to match printing direction, and adds a digital signature to comply with regulatory traceability.
+ * 5. When a security‑focused system needs to programmatically create a placeholder BMP, apply geometric transformations, and embed a password‑protected signature for later validation.
  */

@@ -1,6 +1,7 @@
-// HOW-TO: Rotate JPEG Image 120 Degrees with White Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate JPEG Image 120 Degrees With White Background Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
@@ -10,31 +11,28 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
             string inputPath = "input.jpg";
             string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image from a file stream
-            using (Stream inputStream = File.OpenRead(inputPath))
-            using (JpegImage jpegImage = new JpegImage(inputStream))
+            using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             {
-                // Rotate 120 degrees, resize canvas, fill background with white
-                jpegImage.Rotate(120f, true, Aspose.Imaging.Color.White);
-
-                // Save the rotated image to an output stream with default JPEG options
-                using (Stream outputStream = File.Open(outputPath, FileMode.Create, FileAccess.Write))
+                using (RasterImage image = (RasterImage)Image.Load(inputStream))
                 {
-                    jpegImage.Save(outputStream, new JpegOptions());
+                    image.Rotate(120f, true, Aspose.Imaging.Color.White);
+
+                    using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        JpegOptions jpegOptions = new JpegOptions();
+                        image.Save(outputStream, jpegOptions);
+                    }
                 }
             }
         }
@@ -47,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically rotate a user‑uploaded JPEG by a specific angle while filling the empty canvas area with a white background for consistent web display.
- * 2. When processing scanned photos that were captured upside‑down and must be corrected to a 120° orientation before archiving them as JPEG files.
- * 3. When generating thumbnails for a mobile app that require a uniform orientation and a solid white background to avoid transparent edges.
- * 4. When integrating an image‑processing pipeline that reads JPEGs from a stream, applies a 120° rotation, and writes the result to another stream for downstream services.
- * 5. When automating batch preparation of JPEG images for printing, ensuring each picture is rotated and padded with white space to meet layout specifications.
+ * 1. When you need to programmatically rotate a JPEG photo by a non‑right angle and fill the empty corners with white before saving it to another stream.
+ * 2. When an application processes uploaded images from a web request, rotates them 120° to correct orientation, and returns the modified JPEG to the client.
+ * 3. When a batch job reads JPEG files from a file system, applies a custom rotation with a white background to match a printing layout, and writes the results back to disk.
+ * 4. When you want to integrate Aspose.Imaging in a C# service that streams JPEG data from a database, rotates it, and stores the transformed image without creating temporary files.
+ * 5. When a desktop tool must load a JPEG from a memory stream, rotate it for a slideshow effect, and export the rotated image using JPEG options.
  */

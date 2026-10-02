@@ -1,4 +1,4 @@
-// HOW-TO: Crop, Resize PNG And Embed Digital Signature In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop, Resize PNG to 400x400 and Add Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,11 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.png";
-        string outputPath = "Output/processed.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,15 +22,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (PngImage image = (PngImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var cropRect = new Rectangle(0, 0, image.Width / 2, image.Height / 2);
+                // Crop using a rectangle
+                Rectangle cropRect = new Rectangle(50, 50, 200, 200);
                 image.Crop(cropRect);
-                image.Resize(400, 400);
-                image.EmbedDigitalSignature("secure123");
 
-                var saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                // Resize to 400x400
+                image.Resize(400, 400, ResizeType.NearestNeighbourResample);
+
+                // Embed digital signature
+                image.EmbedDigitalSignature("myPassword");
+
+                // Save as PNG
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -42,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a thumbnail of a PNG by cropping the top‑left quadrant and resizing it to a fixed 400 × 400 size while adding a tamper‑evident digital signature.
- * 2. When an e‑commerce platform must prepare product images that are uniformly sized and securely signed before uploading to a CDN.
- * 3. When a document management system extracts a portion of a scanned PNG, standardizes its dimensions, and embeds a signature to verify authenticity.
- * 4. When a mobile app creates profile picture previews from user‑uploaded PNGs, ensuring the image is cropped, resized, and cryptographically signed for later validation.
- * 5. When a compliance tool processes PNG screenshots, crops sensitive areas, resizes them for storage efficiency, and embeds a digital signature to meet audit requirements.
+ * 1. When you need to extract a specific region from a PNG, scale it to a standard thumbnail size, and protect it with a digital signature for secure distribution.
+ * 2. When generating product catalog images that must be uniformly 400 × 400 pixels and include a cryptographic signature to verify authenticity.
+ * 3. When preparing user‑uploaded PNG avatars for a web application, cropping the face area, resizing it, and embedding a signature to prevent tampering.
+ * 4. When creating compliance‑ready screenshots that require a defined crop, fixed dimensions, and a password‑protected signature for audit trails.
+ * 5. When automating batch processing of PNG assets to enforce consistent size, remove unwanted borders, and embed a digital signature for copyright enforcement.
  */

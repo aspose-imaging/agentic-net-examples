@@ -1,69 +1,54 @@
-// HOW-TO: Create BMP Image from Raw ARGB Byte Array in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image from Raw Pixel Byte Array in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.raw";
-            string outputPath = @"C:\temp\output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Input file existence check
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Read raw pixel data (expected 4 bytes per pixel: ARGB)
-            byte[] rawBytes = File.ReadAllBytes(inputPath);
-
-            // Define image dimensions (must match the raw data size)
             int width = 100;
             int height = 100;
-            int bytesPerPixel = 4; // ARGB
+            byte[] rawData = new byte[width * height * 4];
 
-            if (rawBytes.Length < width * height * bytesPerPixel)
+            for (int y = 0; y < height; y++)
             {
-                Console.Error.WriteLine("Insufficient pixel data in input file.");
-                return;
+                for (int x = 0; x < width; x++)
+                {
+                    int idx = (y * width + x) * 4;
+                    rawData[idx] = (byte)(x % 256);       // Blue
+                    rawData[idx + 1] = (byte)(y % 256);   // Green
+                    rawData[idx + 2] = 0;                 // Red
+                    rawData[idx + 3] = 255;               // Alpha
+                }
             }
 
-            // Convert byte array to int[] where each int represents a pixel (ARGB)
-            int[] pixels = new int[width * height];
-            for (int i = 0; i < width * height; i++)
+            Color[] colors = new Color[width * height];
+            for (int i = 0; i < colors.Length; i++)
             {
-                int offset = i * bytesPerPixel;
-                // Assemble ARGB (assuming input order is A,R,G,B)
-                int a = rawBytes[offset];
-                int r = rawBytes[offset + 1];
-                int g = rawBytes[offset + 2];
-                int b = rawBytes[offset + 3];
-                pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                int baseIdx = i * 4;
+                byte b = rawData[baseIdx];
+                byte g = rawData[baseIdx + 1];
+                byte r = rawData[baseIdx + 2];
+                byte a = rawData[baseIdx + 3];
+                colors[i] = Color.FromArgb(a, r, g, b);
             }
 
-            // Prepare BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24, // 24‑bpp BMP
-                Compression = BitmapCompression.Rgb
-            };
+            Source src = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = src };
 
-            // Create the image from raw pixel data
-            using (Image image = Image.Create(bmpOptions, width, height, pixels))
+            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the BMP image
-                image.Save(outputPath);
+                canvas.SavePixels(new Rectangle(0, 0, width, height), colors);
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -75,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you receive sensor data as a raw ARGB byte stream and need to generate a BMP file for visualization or archival in a .NET application.
- * 2. When converting proprietary raw image formats from legacy equipment into standard BMP files for compatibility with Windows imaging tools.
- * 3. When generating thumbnail previews from raw pixel buffers in memory without writing intermediate files, using Aspose.Imaging to create the BMP directly.
- * 4. When building a custom graphics pipeline that assembles pixel values programmatically and must output a 24‑bpp BMP for further processing or printing.
- * 5. When migrating raw video frame data to bitmap images for frame‑by‑frame analysis in C# using Aspose.Imaging’s Image.Create method.
+ * 1. When you need to generate a BMP file from sensor data that provides pixel values as a byte array, you can use this code to build the image directly in C#.
+ * 2. When converting procedural graphics or algorithm‑generated color maps into a standard BMP file for legacy applications, this approach lets you write the pixel buffer without intermediate image libraries.
+ * 3. When exporting a frame from a video decoding routine that supplies RGBA bytes, you can create a BMP snapshot using Aspose.Imaging’s Image.Create and SavePixels methods.
+ * 4. When building a custom thumbnail generator that assembles pixel data on the fly and must save it as a BMP for compatibility with older Windows tools, this code provides a straightforward solution.
+ * 5. When integrating a medical imaging device that streams raw pixel data, you can turn the byte stream into a BMP image for quick visual inspection or archival using the Aspose.Imaging API.
  */

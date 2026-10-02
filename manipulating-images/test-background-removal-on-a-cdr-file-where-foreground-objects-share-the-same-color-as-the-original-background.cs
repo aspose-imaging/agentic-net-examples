@@ -1,46 +1,46 @@
-// HOW-TO: Remove Background From CDR File When Objects Match Original Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background from CorelDRAW CDR and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr; // Namespace for CDR support (if needed)
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample_no_background.cdr";
+            string inputPath = "input.cdr";
+            string outputPath = "output\\result.png";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                // Cast to VectorImage (CDR files are vector images)
-                if (image is VectorImage vectorImage)
+                var pngOptions = new PngOptions
                 {
-                    // Remove the background using default settings
-                    vectorImage.RemoveBackground();
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
+                };
 
-                    // Save the result
-                    vectorImage.Save(outputPath);
-                }
-                else
+                var vectorImage = image as VectorImage;
+                if (vectorImage != null)
                 {
-                    Console.Error.WriteLine("The loaded file is not a vector image.");
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
                 }
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically delete a solid background from a CorelDRAW (CDR) illustration that has foreground shapes the same color as the original canvas.
- * 2. When preparing CDR artwork for web publishing and you must ensure the background is transparent without manually editing each object.
- * 3. When batch‑processing a collection of CDR files to create logo assets with no background for use in presentations or marketing materials.
- * 4. When integrating Aspose.Imaging into a C# application that receives user‑uploaded CDR files and must strip the background before further image manipulation.
- * 5. When converting CDR designs to other formats and you need the background removed first to avoid unwanted color artifacts in the final output.
+ * 1. When you need to extract foreground objects from a CorelDRAW CDR file that shares the same color as the original background and output them as a transparent PNG for web use.
+ * 2. When automating a workflow that converts vector CDR designs into PNG assets with an alpha channel for inclusion in UI mockups.
+ * 3. When preparing product catalog images by removing the background from CDR logos that have no distinct color separation.
+ * 4. When integrating Aspose.Imaging into a C# application to batch‑process CDR files and generate transparent PNG thumbnails for a digital asset management system.
+ * 5. When creating printable stickers or decals where the design originates in CDR and must be saved as a PNG with no background to avoid unwanted color bleed.
  */

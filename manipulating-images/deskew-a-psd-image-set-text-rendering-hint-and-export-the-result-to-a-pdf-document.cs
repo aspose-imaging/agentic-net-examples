@@ -1,16 +1,18 @@
-// HOW-TO: Export PSD to PDF with Single Bit Text Rendering in C# (Aspose.Imaging for .NET)
+// HOW-TO: Deskew PSD Image, Set Text Rendering Hint, Export to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input/sample.psd";
-            string outputPath = "Output/result.pdf";
+            string inputPath = Path.Combine("Input", "sample.psd");
+            string outputPath = Path.Combine("Output", "result.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -20,23 +22,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Deskew operation is not directly supported for PSD images.
-                // Placeholder for any required deskew logic.
-
-                PdfOptions pdfOptions = new PdfOptions
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
-                    }
-                };
+                    if (!raster.IsCached) raster.CacheData();
+                    raster.NormalizeAngle(false, Color.LightGray);
+                }
 
-                image.Save(outputPath, pdfOptions);
+                Graphics graphics = new Graphics(image);
+                graphics.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
+
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from a Photoshop PSD file while ensuring crisp, single‑bit text rendering for high‑contrast documents.
- * 2. When an application must convert layered PSD artwork into a flat PDF for archiving or sharing with users who do not have Photoshop.
- * 3. When you want to preserve the original PSD dimensions and background color when exporting to PDF in a .NET service.
- * 4. When you need to programmatically create PDFs from PSD files in a batch process, handling missing files and creating output folders automatically.
- * 5. When you require a simple C# solution that loads a PSD, optionally applies deskew logic, and saves it as a PDF with specific rasterization options.
+ * 1. When you need to correct a scanned Photoshop PSD file that is slightly rotated before generating a printable PDF report.
+ * 2. When you want to ensure crisp, single‑bit text rendering in a PDF created from a PSD layer using Aspose.Imaging for .NET.
+ * 3. When an automated workflow must convert multiple PSD assets to PDF while automatically normalizing their orientation.
+ * 4. When a web service receives user‑uploaded PSD files and must return a deskewed PDF with optimized text clarity.
+ * 5. When integrating Aspose.Imaging into a desktop application to batch‑process design files, applying deskew and custom text rendering before saving as PDF.
  */

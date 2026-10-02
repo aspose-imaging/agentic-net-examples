@@ -5,63 +5,36 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.tiff";
+
         try
         {
-            // Output file path
-            string outputPath = "output\\highres.tif";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Source source = new FileCreateSource(outputPath, false);
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = source };
+            int width = 2000;
+            int height = 2000;
+            string password = "Secret123";
 
-            // Configure TIFF options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
             {
-                BitsPerSample = new ushort[] { 8, 8, 8 },
-                Compression = TiffCompressions.Lzw,
-                Photometric = TiffPhotometrics.Rgb,
-                PlanarConfiguration = TiffPlanarConfigs.Contiguous
-            };
-
-            int width = 1000;
-            int height = 1000;
-
-            // Create a new TIFF image
-            using (Image image = Image.Create(tiffOptions, width, height))
-            {
-                // Set resolution to 300 DPI
-                ((RasterImage)image).SetResolution(300, 300);
-
-                // Fill the canvas with white
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                // Embed a digital signature with a valid password
-                ((RasterCachedImage)image).EmbedDigitalSignature("secure123");
-
-                // Save the image
-                image.Save(outputPath);
+                tiffImage.HorizontalResolution = 300;
+                tiffImage.VerticalResolution = 300;
+                ((RasterImage)tiffImage).EmbedDigitalSignature(password);
+                tiffImage.Save();
             }
 
-            // Verify the digital signature
-            string inputPath = outputPath;
-            if (!File.Exists(inputPath))
+            using (RasterImage loadedImage = (RasterImage)Image.Load(outputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (Image loadedImage = Image.Load(inputPath))
-            {
-                bool isSigned = ((RasterCachedImage)loadedImage).IsDigitalSigned("secure123", 80);
-                Console.WriteLine($"Signature verification (valid password): {isSigned}");
-
-                bool isSignedInvalid = ((RasterCachedImage)loadedImage).IsDigitalSigned("123", 80);
-                Console.WriteLine($"Signature verification (invalid password): {isSignedInvalid}");
+                bool isSigned = loadedImage.IsDigitalSigned(password);
+                Console.WriteLine($"Signature verification: {(isSigned ? "Valid" : "Invalid")}");
             }
         }
         catch (Exception ex)
@@ -73,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable 300 DPI TIFF for archival documents and ensure its authenticity with a password‑protected digital signature.
- * 2. When a medical imaging system must produce high‑resolution TIFF scans and embed a signature to comply with regulatory audit trails.
- * 3. When a publishing workflow requires creating large TIFF images for print and later verifying that the files have not been tampered with.
- * 4. When a legal document management app creates TIFF evidence files and needs to embed and later confirm a digital signature for court admissibility.
- * 5. When an automated batch process generates high‑quality TIFF assets and must programmatically check the embedded signature before distribution.
+ * 1. When you need to generate a high‑resolution 300 DPI TIFF for printing and ensure its authenticity by embedding a password‑protected digital signature.
+ * 2. When a medical imaging application must create diagnostic TIFF files that can be verified later to prevent tampering.
+ * 3. When an archival system stores scanned documents as TIFFs and requires a built‑in signature to prove the files haven’t been altered.
+ * 4. When a GIS tool exports large raster maps to TIFF and wants to embed a signature so downstream users can confirm the source.
+ * 5. When a legal document workflow creates TIFF evidence files and needs to programmatically sign and later validate them in C#.
  */

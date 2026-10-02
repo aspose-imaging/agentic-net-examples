@@ -1,25 +1,20 @@
-// HOW-TO: Convert PSD EMF Text to Vector Shapes and Export as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PSD with Embedded EMF Text to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string intermediateSvgPath = @"C:\Images\temp_output.svg";
-        string outputPath = @"C:\Images\output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.psd";
+            string outputPath = "output.tiff";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,37 +22,15 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(intermediateSvgPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the PSD image
-            using (Image psdImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options with text rendered as shapes
-                var svgOptions = new SvgOptions
-                {
-                    TextAsShapes = true,
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageSize = psdImage.Size,
-                        RenderMode = EmfRenderMode.Auto
-                    }
-                };
-
-                // Save PSD as SVG (text becomes vector shapes)
-                psdImage.Save(intermediateSvgPath, svgOptions);
-            }
-
-            // Load the generated SVG
-            using (Image svgImage = Image.Load(intermediateSvgPath))
-            {
-                // Prepare TIFF save options
+                // Save as TIFF, rasterizing any vector content (including EMF text)
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Save the SVG as TIFF
-                svgImage.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve editable vector text from a Photoshop PSD that contains EMF objects while generating a high‑resolution TIFF for printing.
- * 2. When a workflow requires converting embedded EMF annotations in a PSD into true vector shapes so they remain sharp after rasterizing to TIFF.
- * 3. When automating batch processing of design assets, you can turn PSD files with EMF text into TIFFs without losing vector quality using C#.
- * 4. When a client requests a TIFF delivery but the source PSD includes EMF text that must be converted to paths for compatibility with downstream GIS or CAD tools.
- * 5. When building a .NET service that extracts vector information from PSD layers and outputs a TIFF for archival or compliance purposes.
+ * 1. When you need to generate a print‑ready TIFF from a Photoshop PSD that contains EMF text layers, preserving the visual layout as rasterized vector graphics.
+ * 2. When an automated workflow must convert design assets with embedded vector annotations into a single‑page TIFF for archival or downstream processing.
+ * 3. When a web service receives PSD files with EMF captions and must output a TIFF that can be displayed in browsers without requiring vector support.
+ * 4. When migrating legacy Photoshop documents to a format compatible with document management systems that only accept TIFF images.
+ * 5. When creating thumbnails or previews of PSD files containing EMF text for a C# application that only handles raster image formats.
  */

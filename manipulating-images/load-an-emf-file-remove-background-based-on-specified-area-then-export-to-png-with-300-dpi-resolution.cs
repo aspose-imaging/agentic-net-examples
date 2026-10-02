@@ -1,49 +1,46 @@
-// HOW-TO: Remove Background from EMF and Export to 300 DPI PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to Transparent PNG with 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output/output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to VectorImage and remove background if possible
-                if (image is VectorImage vectorImage)
+                VectorImage vectorImage = image as VectorImage;
+                if (vectorImage != null)
                 {
                     vectorImage.RemoveBackground(new RemoveBackgroundSettings());
                 }
 
-                // Configure PNG export options with 300 DPI resolution
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     ResolutionSettings = new ResolutionSetting(300, 300),
-                    Source = new FileCreateSource(outputPath, false)
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
                 };
 
-                // Save the result as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EMF drawings to high‑resolution PNGs for web publishing while stripping unwanted background layers.
- * 2. When generating printable assets from legacy EMF logos and require a 300 DPI PNG with transparent background for design tools.
- * 3. When automating batch processing of EMF diagrams to produce DPI‑specific PNG thumbnails without background artifacts.
- * 4. When integrating a C# service that receives EMF files from users and must deliver clean PNG images for mobile apps.
- * 5. When preparing EMF‑based technical schematics for inclusion in PDF reports and need lossless PNG output at print‑ready resolution.
+ * 1. When you need to embed a vector graphic from an EMF file into a web page without a background and at print‑ready 300 DPI resolution.
+ * 2. When generating high‑resolution PNG assets from legacy Windows Metafile diagrams for inclusion in PDF reports.
+ * 3. When creating transparent icons from EMF logos for use in mobile or desktop applications that require 300 DPI raster images.
+ * 4. When preprocessing EMF drawings for a printing workflow that demands a background‑free PNG at a specific DPI.
+ * 5. When automating batch conversion of EMF files to PNG with transparent backgrounds for a digital asset management system.
  */

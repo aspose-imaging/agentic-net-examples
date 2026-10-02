@@ -1,14 +1,14 @@
-// HOW-TO: Convert DetectedObjectList To AssumedObjectData For Graph Cut Segmentation In C# (Aspose.Imaging for .NET)
+// HOW-TO: Perform Graph Cut Segmentation with Assumed Objects and Export PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -29,13 +29,11 @@ class Program
         {
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
-                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
-                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Other, new Rectangle(300, 200, 80, 120)));
+                var assumedObjects = new List<AssumedObjectData>();
+                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(50, 50, 200, 200)));
 
-                AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
-                    AssumedObjects = assumedObjects,
                     CalculateDefaultStrokes = true,
                     FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
@@ -45,15 +43,14 @@ class Program
                         ColorType = PngColorType.TruecolorWithAlpha,
                         Source = new StreamSource(new MemoryStream())
                     },
-                    BackgroundReplacementColor = Color.Transparent
+                    BackgroundReplacementColor = Color.Transparent,
+                    AssumedObjects = assumedObjects
                 };
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(options))
+                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                    {
-                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -66,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically separate foreground objects like people from a JPEG photo and export the result as a transparent PNG using Graph Cut segmentation.
- * 2. When you want to provide custom object hints (human, other) to improve mask accuracy for image masking in a .NET application.
- * 3. When you are building a photo‑editing tool that replaces the background of raster images with transparency while preserving edge quality.
- * 4. When you require programmatic generation of assumed object data from detection results to feed Aspose.Imaging’s AutoMaskingGraphCutOptions.
- * 5. When you need to process large images and calculate an appropriate feathering radius automatically for smooth mask edges.
+ * 1. When you need to isolate a human figure from a JPEG photo and save the cutout as a transparent PNG using graph cut segmentation in C#.
+ * 2. When you want to provide the masking algorithm with known object locations (assumed objects) to improve segmentation accuracy on raster images.
+ * 3. When you require automatic stroke generation and feathering based on image size for seamless foreground extraction in .NET applications.
+ * 4. When you need to replace the background with transparency while preserving the original colors and alpha channel for further compositing.
+ * 5. When you are building a batch processing tool that extracts foreground objects from various JPEG files and outputs high‑quality PNG assets.
  */

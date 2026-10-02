@@ -1,56 +1,37 @@
-// HOW-TO: Create High Resolution TIFF with Digital Signature and Confidence Analysis in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create High Resolution TIFF with Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            string outputPath = "output/output.tif";
+            string outputPath = "output\\highres.tiff";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure TIFF options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.ByteOrder = TiffByteOrder.BigEndian;
-            tiffOptions.Compression = TiffCompressions.Lzw;
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-            int width = 2000;
+            int width = 3000;
             int height = 2000;
 
-            // Create a TIFF frame
-            TiffFrame frame = new TiffFrame(tiffOptions, width, height);
-
-            // Fill the frame with a gradient
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-                new Aspose.Imaging.Point(0, 0),
-                new Aspose.Imaging.Point(frame.Width, frame.Height),
-                Aspose.Imaging.Color.Blue,
-                Aspose.Imaging.Color.Yellow))
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(frame);
-                graphics.FillRectangle(brush, frame.Bounds);
-            }
+                RasterImage raster = (RasterImage)tiffImage;
+                int[] whitePixels = new int[width * height];
+                for (int i = 0; i < whitePixels.Length; i++)
+                {
+                    whitePixels[i] = unchecked((int)0xFFFFFFFF);
+                }
+                raster.SaveArgb32Pixels(raster.Bounds, whitePixels);
 
-            // Create the TIFF image
-            using (TiffImage tiffImage = new TiffImage(frame))
-            {
-                // Embed a digital signature
-                tiffImage.EmbedDigitalSignature("secure123");
+                string password = "secure123";
+                raster.EmbedDigitalSignature(password);
 
-                // Analyze signature confidence
-                double confidence = tiffImage.AnalyzePercentageDigitalSignature("secure123");
-                Console.WriteLine($"Signature confidence: {confidence}%");
-
-                // Save the image
                 tiffImage.Save(outputPath);
             }
         }
@@ -63,9 +44,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to generate a lossless TIFF scan and verify its authenticity with a digital signature.
- * 2. When a document management application must embed a secure watermark into high‑resolution TIFF files and later confirm the signature’s integrity.
- * 3. When a GIS platform creates large raster maps in TIFF format and wants to ensure the map data has not been tampered with by analyzing signature confidence.
- * 4. When a digital archiving solution stores scanned photographs as TIFF and requires a programmatic way to sign and validate each image for compliance audits.
- * 5. When a printing workflow produces high‑quality TIFF proofs and needs to embed a client’s approval code and check its confidence before sending to press.
+ * 1. When you need to generate a large‑format TIFF for printing and protect it from tampering by embedding a password‑protected digital signature.
+ * 2. When a document management system must store scanned documents as high‑resolution TIFF files and ensure authenticity using Aspose.Imaging’s signature feature.
+ * 3. When an archival workflow requires creating white‑background TIFF canvases of specific dimensions and embedding a cryptographic signature for later verification.
+ * 4. When a medical imaging application needs to produce DICOM‑compatible TIFF images and attach a secure digital signature to meet compliance standards.
+ * 5. When a legal software solution must programmatically create high‑quality TIFF evidence files and embed a signer’s password to prove integrity.
  */

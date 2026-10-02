@@ -1,70 +1,72 @@
-// HOW-TO: Apply Gaussian Blur to CDR Image, Check Transparency, Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to CDR Image and Save as Transparent GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample_blurred.gif";
+            string inputCdrPath = "input.cdr";
+            string outputGifPath = "output.gif";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputCdrPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputCdrPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputCdrPath))
             {
-                // Cast to RasterImage to apply raster filters
-                RasterImage rasterImage = image as RasterImage;
-                if (rasterImage == null)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Console.Error.WriteLine("Failed to convert CDR image to raster format.");
-                    return;
-                }
-
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Verify transparency: check if any pixel has alpha < 255
-                bool hasTransparency = false;
-                int[] argbPixels = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
-                foreach (int pixel in argbPixels)
-                {
-                    int alpha = (pixel >> 24) & 0xFF;
-                    if (alpha < 255)
+                    var pngOptions = new PngOptions
                     {
-                        hasTransparency = true;
-                        break;
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        var blurOptions = new GaussianBlurFilterOptions
+                        {
+                            Radius = 5,
+                            Sigma = 1.5f
+                        };
+                        raster.Filter(raster.Bounds, blurOptions);
+
+                        int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                        bool hasTransparency = false;
+                        foreach (int pixel in pixels)
+                        {
+                            int alpha = (pixel >> 24) & 0xFF;
+                            if (alpha != 255)
+                            {
+                                hasTransparency = true;
+                                break;
+                            }
+                        }
+
+                        Console.WriteLine(hasTransparency ? "Image has transparency." : "Image is opaque.");
+
+                        raster.Save(outputGifPath, new GifOptions());
                     }
                 }
-
-                Console.WriteLine(hasTransparency
-                    ? "The image contains transparent pixels."
-                    : "The image does not contain transparent pixels.");
-
-                // Save the blurred image as GIF with palette correction
-                var gifOptions = new GifOptions
-                {
-                    DoPaletteCorrection = true
-                };
-
-                rasterImage.Save(outputPath, gifOptions);
-                Console.WriteLine($"Blurred GIF saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -76,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically soften a CorelDRAW (CDR) illustration while preserving any transparent areas before converting it to a GIF for web use.
- * 2. When you must verify that a CDR file contains alpha channel data after processing, ensuring that the resulting GIF will retain intended transparency effects.
- * 3. When automating a batch workflow that converts multiple CDR designs into blurred GIF thumbnails for preview galleries in a .NET application.
- * 4. When integrating image preprocessing steps such as Gaussian blur into a C# service that prepares graphics for email newsletters, requiring GIF output with correct transparency handling.
- * 5. When building a desktop tool that allows users to apply custom blur radius and sigma values to vector drawings, then export the result as a GIF while confirming transparent pixel integrity.
+ * 1. When you need to add a soft blur effect to a CorelDRAW (CDR) illustration before converting it to a GIF for web display.
+ * 2. When you must preserve the original transparency of a CDR file after applying image filters and saving it as a GIF.
+ * 3. When you want to rasterize a vector CDR file in memory, apply a Gaussian blur, and output a lightweight GIF without creating intermediate files on disk.
+ * 4. When you are automating a batch process that blurs multiple CDR assets and generates GIF previews for a content management system.
+ * 5. When you need to check pixel‑level alpha values after blurring to ensure no unintended opacity was introduced before publishing the image.
  */

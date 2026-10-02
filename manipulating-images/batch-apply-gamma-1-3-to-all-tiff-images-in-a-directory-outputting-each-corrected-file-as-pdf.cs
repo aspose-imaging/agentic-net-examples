@@ -1,48 +1,56 @@
-// HOW-TO: Batch Apply Gamma Correction to TIFFs and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Gamma 1.3 to TIFF Images and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Process each TIFF file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.tif"))
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory);
+            foreach (string inputPath in files)
+            {
+                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                if (ext != ".tif" && ext != ".tiff")
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the TIFF image, apply gamma correction, and save as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    TiffImage tiffImage = (TiffImage)image;
-                    tiffImage.AdjustGamma(1.3f);
+                    RasterImage raster = (RasterImage)image;
+                    raster.AdjustGamma(1.3f);
 
-                    // Save the corrected image as PDF
-                    tiffImage.Save(outputPath, new PdfOptions());
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -55,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the brightness of a large set of scanned TIFF documents before archiving them as searchable PDFs.
- * 2. When a medical imaging workflow requires applying a consistent gamma adjustment to radiology TIFF files and delivering the results in PDF format for reporting.
- * 3. When an e‑commerce platform wants to automatically enhance product scan TIFFs and generate PDF catalogs without manual editing.
- * 4. When a legal firm must batch‑process courtroom TIFF evidence images, correct their exposure, and store them as PDFs for case files.
- * 5. When a publishing system needs to convert a folder of high‑resolution TIFF illustrations with gamma correction into PDF pages for print layout.
+ * 1. When you need to correct the brightness of scanned TIFF documents before archiving them as searchable PDFs.
+ * 2. When a medical imaging workflow requires batch gamma correction of radiology TIFF files and conversion to PDF for electronic health records.
+ * 3. When a publishing system must normalize the contrast of high‑resolution TIFF artwork and output each file as a PDF for proofing.
+ * 4. When an automated document processing pipeline has to apply a consistent gamma level to all TIFF images in a folder and generate PDF versions for downstream OCR.
+ * 5. When a legacy archive contains TIFF scans that need batch gamma adjustment and conversion to PDF to reduce storage size and improve viewing compatibility.
  */

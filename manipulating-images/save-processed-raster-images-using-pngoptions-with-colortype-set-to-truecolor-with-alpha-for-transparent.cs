@@ -1,4 +1,4 @@
-// HOW-TO: Save JPEG as PNG with Truecolor Alpha Transparency in C# (Aspose.Imaging for .NET)
+// HOW-TO: Save PNG With Truecolor With Alpha Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,39 +9,31 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Hard‑coded input and output file paths.
-            string inputPath = @"C:\Images\sample.jpg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
 
-            // Verify that the input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image.
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Configure PNG save options with Truecolor with Alpha (supports transparency).
-                PngOptions pngOptions = new PngOptions
+                PngOptions options = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Save the image as PNG using the configured options.
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime exception without crashing.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a JPEG photo to a PNG that retains transparent areas for web graphics.
- * 2. When generating thumbnails that require an alpha channel so they can be overlaid on different backgrounds.
- * 3. When preparing UI assets where truecolor PNGs with alpha are required for smooth gradients and effects.
- * 4. When processing scanned documents and saving them as lossless PNGs with transparency for later PDF composition.
- * 5. When exporting chart images from a reporting tool and need the PNG to preserve semi‑transparent elements.
+ * 1. When you need to preserve full RGBA transparency while re‑encoding PNG images for web delivery using Aspose.Imaging in C#.
+ * 2. When converting legacy PNG files to a format that guarantees truecolor with alpha for consistent rendering across browsers.
+ * 3. When processing scanned graphics that require lossless saving with 24‑bit color and an 8‑bit alpha channel using Aspose.Imaging.
+ * 4. When generating thumbnails of PNG assets and must keep transparent backgrounds intact during the save operation.
+ * 5. When building an image pipeline that stores PNGs with TruecolorWithAlpha to ensure compatibility with design tools expecting 32‑bit PNGs.
  */

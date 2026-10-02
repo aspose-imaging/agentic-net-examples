@@ -1,43 +1,67 @@
-// HOW-TO: Deskew TIFF Image, Check Transparency, and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Deskew A TIFF And Save As PNG With Transparency Check In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = "input.tif";
+        string outputPath = "output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.tif";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load image as RasterImage
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Deskew the image
+                rasterImage.NormalizeAngle();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Verify transparency
+                bool hasTransparency = false;
 
-            // Load the TIFF image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Deskew the image (normalize angle) without resizing, using LightGray background
-                image.NormalizeAngle(false, Color.LightGray);
+                // Prefer built‑in property if available
+                var hasAlphaProp = rasterImage.GetType().GetProperty("HasAlpha");
+                if (hasAlphaProp != null && hasAlphaProp.PropertyType == typeof(bool))
+                {
+                    hasTransparency = (bool)hasAlphaProp.GetValue(rasterImage);
+                }
+                else
+                {
+                    // Fallback: scan pixels for any alpha < 255
+                    for (int y = 0; y < rasterImage.Height && !hasTransparency; y++)
+                    {
+                        for (int x = 0; x < rasterImage.Width && !hasTransparency; x++)
+                        {
+                            var color = rasterImage.GetPixel(x, y);
+                            if (color.A < 255)
+                                hasTransparency = true;
+                        }
+                    }
+                }
 
-                // Verify transparency (alpha channel)
-                bool hasTransparency = image.HasAlpha;
-                Console.WriteLine($"Image has transparency: {hasTransparency}");
+                Console.WriteLine($"Transparency detected: {hasTransparency}");
 
-                // Save the result as PNG
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save as PNG with alpha support
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+                rasterImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the rotation of scanned TIFF documents before converting them to web‑friendly PNG files.
- * 2. When you must ensure a scanned image retains its alpha channel information so transparent regions are preserved during format conversion.
- * 3. When an automated batch process has to normalize the angle of TIFF images from a scanner and output them as PNG for downstream graphics pipelines.
- * 4. When a document management system requires deskewed TIFF pages with verified transparency before storing them as lossless PNG assets.
- * 5. When integrating Aspose.Imaging in a C# application to preprocess TIFF files—removing skew, checking for transparency, and saving the result as PNG for UI display.
+ * 1. When you need to correct the rotation of scanned TIFF documents before converting them to web‑friendly PNGs.
+ * 2. When you must ensure that a TIFF image contains an alpha channel before exporting it as a PNG for overlay purposes.
+ * 3. When processing batch scans where each file may be slightly skewed and you need an automated C# routine to normalize orientation and preserve transparency.
+ * 4. When integrating Aspose.Imaging into a document‑management system that stores original TIFFs but serves PNG thumbnails with correct alignment.
+ * 5. When building a C# utility that validates whether a source image has any transparent pixels before deciding how to handle PNG compression.
  */

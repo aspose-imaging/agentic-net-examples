@@ -1,63 +1,56 @@
-// HOW-TO: Apply Gamma Correction to Multiple PSD Files and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Gamma Correction to PSD Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = @"C:\Images\Input\";
-            string outputDir = @"C:\Images\Output\";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // List of PSD files to process
-            string[] files = new string[]
+            if (!Directory.Exists(inputDirectory))
             {
-                "image1.psd",
-                "image2.psd",
-                "image3.psd"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PSD files and rerun.");
+                return;
+            }
 
-            // Gamma coefficient to apply to all images
-            float gamma = 2.0f;
-
-            foreach (string fileName in files)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Build full input path and verify existence
-                string inputPath = Path.Combine(inputDir, fileName);
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PNG path
-                string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PSD image
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access AdjustGamma
-                    if (image is RasterImage rasterImage)
+                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                    if (!raster.IsCached)
                     {
-                        // Apply gamma correction
-                        rasterImage.AdjustGamma(gamma);
-
-                        // Save as PNG
-                        rasterImage.Save(outputPath, new PngOptions());
+                        raster.CacheData();
                     }
-                    else
+
+                    raster.AdjustGamma(2.2f);
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (var pngOptions = new PngOptions())
                     {
-                        Console.Error.WriteLine($"Unsupported image type for file: {inputPath}");
-                        return;
+                        raster.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -71,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process a set of Photoshop PSD layers to brighten or darken them uniformly before publishing them as web‑ready PNGs.
- * 2. When an automated build pipeline must convert design assets from PSD to PNG while applying a specific gamma value to ensure consistent visual appearance across devices.
- * 3. When a digital‑printing workflow requires adjusting the gamma of multiple source PSD files to match print color profiles and then exporting them as lossless PNGs for proofing.
- * 4. When a content‑management system imports user‑uploaded PSD files and you must normalize their brightness via gamma correction before storing them as PNG thumbnails.
- * 5. When creating a photo‑editing tool that lets developers programmatically apply the same gamma correction to several PSD images and save the results in PNG format for further processing.
+ * 1. When you need to correct the brightness of a large set of Photoshop PSD layers for web publishing, you can batch‑adjust gamma and export them as PNGs using C# and Aspose.Imaging.
+ * 2. When an automated build pipeline must convert design assets from PSD to PNG while applying a 2.2 gamma curve to match monitor standards, this code provides the required processing.
+ * 3. When a digital asset management system requires all incoming PSD files to be normalized for consistent visual appearance before storage, the script applies gamma correction and saves the result as PNG.
+ * 4. When a game development workflow needs to prepare texture atlases by converting multiple PSD source files to gamma‑corrected PNGs for use in Unity, this example handles the conversion programmatically.
+ * 5. When a photo‑editing SaaS platform wants to offer users a one‑click export that adjusts image luminance and outputs PNG files from uploaded PSDs, the code demonstrates the necessary steps in C#.
  */

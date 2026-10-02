@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,40 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string outputPath = "output.png";
+            string outputPath = "output\\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for processing
-                RasterImage raster = (RasterImage)image;
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                // Resize using Lanczos algorithm (example size 800x600)
-                raster.Resize(800, 600, ResizeType.LanczosResample);
+                if (image is RasterImage raster)
+                {
+                    string password = "myPassword";
+                    raster.EmbedDigitalSignature(password);
+                }
 
-                // Embed digital signature with a valid password
-                raster.EmbedDigitalSignature("secure123");
-
-                // Prepare PNG save options
                 PngOptions pngOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-
-                // Save the processed image as PNG
-                raster.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink a high‑resolution JPEG for web display while preserving quality with Lanczos resampling and then protect the image by embedding a password‑protected digital signature before converting it to PNG.
- * 2. When an e‑commerce platform must generate thumbnail PNGs from product JPEG photos, ensuring the thumbnails are resized accurately and tamper‑evident by adding a secure signature.
- * 3. When a document management system archives scanned JPEG documents as PNG files and requires each file to carry a cryptographic signature that can only be verified with a known password.
- * 4. When a mobile app uploads user‑provided JPEG images, resizes them to a standard size using Lanczos, embeds a signature to prevent unauthorized modifications, and stores them as PNG for consistent rendering.
- * 5. When a legal compliance tool needs to convert client‑submitted JPEG evidence into PNG, resize it to fit reporting templates, and embed a password‑protected digital signature to guarantee integrity.
+ * 1. When you need to create a smaller, high‑quality PNG preview of a large JPEG for a web gallery while ensuring the image cannot be altered without the correct password.
+ * 2. When you must embed a tamper‑evident digital signature into a raster image before archiving it in a secure document management system.
+ * 3. When an e‑commerce platform requires product photos to be resized using Lanczos resampling and saved as PNG with a password‑protected signature for brand protection.
+ * 4. When a mobile app generates thumbnail PNGs from user‑uploaded JPEGs and wants to guarantee authenticity by adding a password‑protected digital signature.
+ * 5. When a legal or medical workflow needs to downscale diagnostic JPEG scans, convert them to lossless PNG, and embed a password‑protected signature to comply with data integrity regulations.
  */

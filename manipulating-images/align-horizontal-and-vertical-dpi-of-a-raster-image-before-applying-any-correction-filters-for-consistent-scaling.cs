@@ -1,54 +1,34 @@
-// HOW-TO: Align Horizontal and Vertical DPI of TIFF and Raster Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Align Horizontal and Vertical DPI of JPEG with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Align DPI for TIFF images using the built‑in helper
-                if (image is TiffImage tiffImage)
-                {
-                    tiffImage.AlignResolutions();
-                }
-                // Align DPI for other raster images
-                else if (image is RasterImage rasterImage)
-                {
-                    double hDpi = rasterImage.HorizontalResolution;
-                    double vDpi = rasterImage.VerticalResolution;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                    if (hDpi != vDpi)
-                    {
-                        // Use the larger DPI to avoid down‑scaling
-                        double targetDpi = Math.Max(hDpi, vDpi);
-                        rasterImage.SetResolution(targetDpi, targetDpi);
-                    }
-                }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save the processed image
-                image.Save(outputPath);
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                double targetDpi = Math.Max(image.HorizontalResolution, image.VerticalResolution);
+                image.HorizontalResolution = targetDpi;
+                image.VerticalResolution = targetDpi;
+
+                JpegOptions options = new JpegOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -60,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure a scanned TIFF document prints at the correct size by making its X and Y DPI identical before further processing.
- * 2. When a batch job must normalize the resolution of mixed‑format raster images (PNG, JPEG, BMP) so that scaling operations produce consistent results.
- * 3. When a medical imaging workflow requires matching horizontal and vertical DPI of DICOM‑converted TIFF files to avoid distortion during analysis.
- * 4. When preparing images for a GIS application that expects square pixels, you align DPI to prevent geographic coordinate errors.
- * 5. When applying correction filters (sharpen, de‑noise) you first align DPI to prevent uneven filter strength caused by differing pixel densities.
+ * 1. When you need to ensure a JPEG photo prints at the correct size by making its horizontal and vertical DPI identical.
+ * 2. When preparing images for a web gallery that requires consistent scaling across devices, you must normalize the DPI before applying any correction filters.
+ * 3. When a batch processing pipeline must standardize image resolution to avoid distortion after resizing or rotating operations.
+ * 4. When integrating Aspose.Imaging into a C# application that imports scanned documents with mismatched DPI values and needs uniform resolution for OCR.
+ * 5. When converting images from various sources to a single DPI setting to maintain aspect‑ratio consistency in a PDF generation workflow.
  */

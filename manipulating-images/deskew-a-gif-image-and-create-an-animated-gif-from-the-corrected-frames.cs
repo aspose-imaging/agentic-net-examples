@@ -1,4 +1,4 @@
-// HOW-TO: How to Deskew an Animated GIF and Save Corrected Frames in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Deskew Each Frame of an Animated GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,41 +12,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.gif";
-            string outputPath = "output\\deskewed.gif";
+            string outputPath = "output.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
             using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Process each frame to deskew
                 for (int i = 0; i < gif.PageCount; i++)
                 {
-                    // Set the active frame
                     gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                    // Determine skew angle
-                    double skewAngle = gif.GetSkewAngle();
-
-                    // Rotate to correct the skew (if any)
-                    if (Math.Abs(skewAngle) > 0.01)
+                    RasterImage frameRaster = (RasterImage)gif.ActiveFrame;
+                    if (!frameRaster.IsCached)
                     {
-                        gif.Rotate((float)skewAngle, true, Color.White);
+                        frameRaster.CacheData();
                     }
+                    frameRaster.NormalizeAngle(false, Aspose.Imaging.Color.White);
                 }
 
-                // Save the corrected animated GIF
-                gif.Save(outputPath);
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -58,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you receive scanned animated GIFs that are tilted and need to be straightened before displaying on a website.
- * 2. When an automated pipeline must correct the orientation of each frame in a GIF to improve OCR accuracy.
- * 3. When you want to rotate and deskew every frame of a GIF captured from a camera to create a smooth, level animation.
- * 4. When a mobile app processes user‑uploaded GIF stickers that may be skewed and requires a corrected animated output.
- * 5. When a batch job cleans up legacy GIF assets by removing skew and saving the result as a new animated GIF file.
+ * 1. When you need to correct the tilt of scanned animated GIFs before publishing them on a website.
+ * 2. When an e‑commerce platform wants to automatically straighten product animation frames uploaded by sellers.
+ * 3. When a digital archivist must normalize the orientation of legacy animated GIFs for consistent viewing.
+ * 4. When a mobile app generates animated GIFs from camera captures and requires deskewed frames for better user experience.
+ * 5. When a marketing tool creates animated GIF ads and needs to ensure each frame is level to avoid visual distortion.
  */

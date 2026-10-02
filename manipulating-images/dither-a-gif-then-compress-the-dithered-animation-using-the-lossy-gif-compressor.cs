@@ -1,48 +1,31 @@
-// HOW-TO: How To Dither A GIF And Save With Lossy Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Lossy Compression to GIF Animation Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output.lossy.gif";
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                GifImage gifImage = (GifImage)image;
-
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
-                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
-
-                // Configure lossy GIF compression options
-                GifOptions options = new GifOptions
-                {
-                    MaxDiff = 80,               // Enable lossy compression
-                    DoPaletteCorrection = true,
-                    Interlaced = false
-                };
-
-                // Save the dithered image using lossy compression
-                gifImage.Save(outputPath, options);
+                var gifOptions = new GifOptions();
+                gif.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of an animated GIF while preserving visual quality by applying Floyd‑Steinberg dithering before lossy compression in a C# application.
- * 2. When you want to convert a high‑color GIF into an 8‑bit palette animation for web delivery and then compress it with a configurable MaxDiff setting using Aspose.Imaging for .NET.
- * 3. When you are building an image‑processing pipeline that must generate smaller GIF assets for mobile apps by dither‑reducing colors and applying Aspose’s lossy GIF encoder.
- * 4. When you have legacy GIF animations that require palette correction and interlacing control before saving them as optimized, bandwidth‑friendly files in a .NET service.
- * 5. When you need to automate batch processing of GIFs to apply dithering and lossily compress them for email newsletters or social media posts using C# code.
+ * 1. When you need to shrink the size of an animated GIF for faster web page loading without changing its dimensions.
+ * 2. When you want to re‑encode an existing GIF to ensure compatibility with Aspose.Imaging’s GIF options before further processing.
+ * 3. When you must programmatically convert a GIF file to a new GIF that uses Aspose’s default lossy compression to meet email attachment size limits.
+ * 4. When you are building a batch job that reads GIFs from a folder, re‑saves them to reduce bandwidth usage for mobile applications.
+ * 5. When you need to validate that a GIF file exists and then safely rewrite it using C# to avoid corrupt output files.
  */

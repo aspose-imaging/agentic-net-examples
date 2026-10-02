@@ -1,4 +1,4 @@
-// HOW-TO: Apply Gaussian Blur to Multiple CDR Files and Merge into Multipage TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to Multiple CDR Files and Merge into TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -17,84 +16,82 @@ class Program
         try
         {
             // Hardcoded input CDR file paths
-            string inputPath1 = "input1.cdr";
-            string inputPath2 = "input2.cdr";
-            string inputPath3 = "input3.cdr";
+            string[] cdrPaths = new string[]
+            {
+                "input1.cdr",
+                "input2.cdr",
+                "input3.cdr"
+            };
 
             // Hardcoded output TIFF path
-            string outputPath = "merged_output.tif";
+            string outputTiffPath = "output\\merged.tif";
 
             // Verify input files exist
-            if (!File.Exists(inputPath1))
+            foreach (var path in cdrPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-            if (!File.Exists(inputPath3))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath3}");
-                return;
-            }
-
-            // Prepare list to hold TIFF frames
-            List<TiffFrame> frames = new List<TiffFrame>();
-
-            // Process each CDR file
-            string[] inputs = { inputPath1, inputPath2, inputPath3 };
-            foreach (string inputPath in inputs)
-            {
-                // Load CDR vector image
-                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+                if (!File.Exists(path))
                 {
-                    // Rasterize CDR to PNG in memory
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
+            // Prepare list for blurred raster images
+            List<RasterImage> blurredImages = new List<RasterImage>();
+
+            // Process each CDR file: rasterize, blur, store
+            foreach (var cdrPath in cdrPaths)
+            {
+                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+                {
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        cdr.Save(ms, new PngOptions());
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new CdrRasterizationOptions
+                            {
+                                PageWidth = cdr.Width,
+                                PageHeight = cdr.Height
+                            }
+                        };
+                        cdr.Save(ms, pngOptions);
                         ms.Position = 0;
 
-                        // Load rasterized image
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            // Apply Gaussian blur
-                            var blurOptions = new GaussianBlurFilterOptions { Radius = 5 };
-                            raster.Filter(raster.Bounds, blurOptions);
-
-                            // Create TIFF frame from blurred raster
-                            TiffFrame frame = new TiffFrame(raster);
-                            frames.Add(frame);
-                        }
+                        RasterImage raster = (RasterImage)Image.Load(ms);
+                        var blurOptions = new GaussianBlurFilterOptions(5, 1.5f);
+                        raster.Filter(raster.Bounds, blurOptions);
+                        blurredImages.Add(raster);
                     }
                 }
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
 
-            // Create TIFF options for the multipage TIFF
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Compression = TiffCompressions.Lzw;
-
-            // Build multipage TIFF
-            using (TiffImage tiffImage = new TiffImage(frames[0]))
+            // Create multipage TIFF and add blurred frames
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, blurredImages[0].Width, blurredImages[0].Height))
             {
-                for (int i = 1; i < frames.Count; i++)
+                // First frame
+                tiff.SavePixels(tiff.Bounds, blurredImages[0].LoadPixels(blurredImages[0].Bounds));
+
+                // Additional frames
+                for (int i = 1; i < blurredImages.Count; i++)
                 {
-                    tiffImage.AddFrame(frames[i]);
+                    var frame = new TiffFrame(tiffOptions, blurredImages[i].Width, blurredImages[i].Height);
+                    tiff.AddFrame(frame);
+                    tiff.ActiveFrame = frame;
+                    tiff.ActiveFrame.SavePixels(tiff.ActiveFrame.Bounds, blurredImages[i].LoadPixels(blurredImages[i].Bounds));
                 }
 
                 // Save the multipage TIFF
-                tiffImage.Save(outputPath, tiffOptions);
+                tiff.Save(outputTiffPath);
+            }
+
+            // Dispose blurred raster images
+            foreach (var img in blurredImages)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -106,9 +103,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to batch‑process CorelDRAW (CDR) artwork, apply a soft blur effect, and combine the results into a single multi‑page TIFF for printing or archiving.
- * 2. When an application must convert vector CDR drawings to raster images, apply a Gaussian filter for visual smoothing, and store them as pages of a TIFF document for PDF generation.
- * 3. When a workflow requires automatically generating blurred previews of several CDR files and packaging them into one TIFF file for quick review in document management systems.
- * 4. When a developer wants to create a multi‑page TIFF slideshow where each slide is a blurred version of a different CDR illustration, without writing intermediate files to disk.
- * 5. When a server‑side service needs to rasterize multiple CDR assets, apply image‑processing effects, and deliver the combined TIFF to clients for further analysis or printing.
+ * 1. When you must generate a soft‑focused multipage TIFF preview of several CorelDRAW (CDR) drawings for a client presentation using C#.
+ * 2. When an automated workflow requires rasterizing CDR artwork, applying a Gaussian blur filter, and storing the results as a single multipage TIFF for archival purposes.
+ * 3. When a document processing system needs to combine blurred versions of multiple vector designs into one TIFF file to reduce file size and simplify distribution.
+ * 4. When you want to programmatically apply a consistent blur effect to a batch of CDR files before printing to ensure uniform background smoothing across all pages.
+ * 5. When integrating Aspose.Imaging into a C# application to convert vector CDR files to raster images, apply image filters, and output a multi‑page TIFF for use in scanning or OCR pipelines.
  */

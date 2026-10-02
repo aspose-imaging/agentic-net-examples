@@ -1,9 +1,11 @@
+// HOW-TO: Batch Remove Background from CDR Files and Convert to Compressed PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,34 +13,55 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    cdr.RemoveBackground(new RemoveBackgroundSettings());
+                    VectorImage vector = cdr as VectorImage;
+                    if (vector != null)
+                    {
+                        vector.RemoveBackground(new RemoveBackgroundSettings());
+                    }
 
-                    PngOptions pngOptions = new PngOptions
+                    var pngOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
                         PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        Source = new FileCreateSource(outputPath, false),
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            PageSize = cdr.Size,
-                            BackgroundColor = Aspose.Imaging.Color.Transparent
+                            BackgroundColor = Color.Transparent,
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
                         }
                     };
 
@@ -55,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to convert a large collection of CorelDRAW (.cdr) illustrations into web‑ready PNGs with transparent backgrounds and maximum zip compression, they can use this C# batch‑processing code.
- * 2. When an e‑commerce platform wants to automatically strip the background from vendor‑supplied CDR product mockups and generate lightweight PNG thumbnails for catalog pages, this script provides the needed image‑processing pipeline.
- * 3. When a document management system must archive legacy CDR files as lossless PNG assets while preserving vector quality through rasterization and removing unwanted backgrounds, developers can employ this code.
- * 4. When a marketing automation tool has to prepare a series of promotional graphics by converting CDR source files to PNG with transparent backgrounds and high compression before emailing them, the example offers a ready‑to‑use solution.
- * 5. When a cloud‑based image‑conversion service needs to process multiple CDR files in one run, apply background removal, rasterize each page to the original size, and output compressed PNGs for downstream analytics, this C# implementation fulfills the requirement.
+ * 1. When you need to automatically strip logos or watermarks from a collection of CorelDRAW (.cdr) designs before publishing them as web‑ready PNG images.
+ * 2. When a printing service must prepare client‑provided CDR artwork for e‑commerce catalogs by removing backgrounds and delivering high‑compression PNG thumbnails.
+ * 3. When a desktop application processes user‑uploaded CDR files, cleans the canvas, and stores lightweight PNG previews for fast loading in a gallery view.
+ * 4. When a batch conversion tool is required to convert legacy CDR assets to transparent PNGs with maximum zip compression for mobile app assets.
+ * 5. When an automated build pipeline needs to generate optimized PNG sprites from multiple CDR source files while eliminating background layers.
  */

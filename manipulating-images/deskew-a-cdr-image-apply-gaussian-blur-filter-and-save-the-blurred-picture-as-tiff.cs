@@ -1,43 +1,59 @@
-// HOW-TO: Deskew CDR Image, Apply Gaussian Blur, and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Deskew CDR Image, Apply Gaussian Blur, Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.cdr";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.NormalizeAngle(false, Color.White);
 
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage for processing
-                RasterImage raster = (RasterImage)image;
+                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions
+                        {
+                            Radius = 5,
+                            Sigma = 1.5f
+                        };
+                        raster.Filter(raster.Bounds, blurOptions);
 
-                // Deskew the image
-                raster.NormalizeAngle();
-
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the processed image as TIFF
-                raster.Save(outputPath);
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        raster.Save(outputPath, tiffOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the orientation of a scanned CorelDRAW (CDR) file before applying a softening effect for print‑ready TIFF output.
- * 2. When automating a workflow that converts vector CDR artwork into a blurred raster TIFF for use as a background image in a web application.
- * 3. When preprocessing CDR graphics to remove skew and add Gaussian blur so they meet the input requirements of a machine‑learning model that expects TIFF images.
- * 4. When generating preview thumbnails of CDR designs with a consistent blurred look and storing them as high‑quality TIFF files for archival purposes.
- * 5. When integrating Aspose.Imaging in a C# service that normalizes skewed CDR drawings, applies a blur filter, and saves the result as a TIFF for downstream PDF conversion.
+ * 1. When a developer needs to correct the rotation of a CorelDRAW (CDR) file and then create a blurred version for a print‑ready TIFF archive.
+ * 2. When converting legacy CDR artwork to TIFF for OCR processing while smoothing edges with a Gaussian blur.
+ * 3. When generating preview thumbnails of vector drawings where the image must be deskewed and blurred before being saved as a high‑resolution TIFF.
+ * 4. When preparing CDR graphics for a document workflow that requires a normalized orientation and a soft‑focus effect in TIFF format.
+ * 5. When building an automated pipeline that ingests CDR files, removes skew, applies a blur filter, and stores the result as a TIFF for downstream imaging applications.
  */

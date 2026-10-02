@@ -1,4 +1,4 @@
-// HOW-TO: Create PNG With Alpha Channel And Embed Digital Signature In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG with Alpha Channel and Digital Signature Verification in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,46 +10,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
+            string outputPath = "Output/output.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
 
             int width = 200;
             int height = 200;
+            string password = "SecretPwd";
 
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (PngImage png = new PngImage(width, height, PngColorType.TruecolorWithAlpha))
             {
-                PngImage pngImage = (PngImage)image;
+                png.EmbedDigitalSignature(password);
 
-                Graphics graphics = new Graphics(pngImage);
-                graphics.Clear(Color.Transparent);
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                RasterImage raster = (RasterImage)pngImage;
-                raster.EmbedDigitalSignature("secure123");
-
-                pngImage.Save();
+                png.Save(outputPath, options);
             }
 
-            using (Image loadedImage = Image.Load(outputPath))
+            using (RasterImage loaded = (RasterImage)Image.Load(outputPath))
             {
-                RasterImage rasterLoaded = (RasterImage)loadedImage;
-                bool isSigned = rasterLoaded.IsDigitalSigned("secure123");
-                Console.WriteLine($"Signature valid: {isSigned}");
+                bool isSigned = loaded.IsDigitalSigned(password);
+                Console.WriteLine($"Signature verification: {(isSigned ? "Valid" : "Invalid")}");
             }
         }
         catch (Exception ex)
@@ -61,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a transparent PNG thumbnail and ensure its authenticity by embedding a digital signature that can be verified later.
- * 2. When a web application must produce PNG assets with alpha transparency and protect them against tampering using Aspose.Imaging’s digital signing feature.
- * 3. When a document management system stores PNG images and requires a built‑in signature to confirm the source before allowing downloads.
- * 4. When an e‑commerce platform creates product images with transparent backgrounds and wants to embed a secret key to detect unauthorized modifications.
- * 5. When a secure reporting tool saves charts as PNG files with alpha channels and needs to validate the signature confidence after the file is written.
+ * 1. When you need to generate a transparent PNG for a web UI and ensure its authenticity with a password‑protected digital signature.
+ * 2. When you want to embed a secure watermark in PNG assets used in a mobile app and later verify that the image hasn't been tampered with.
+ * 3. When you are building a document management system that stores PNG thumbnails and requires cryptographic proof of origin for each file.
+ * 4. When you need to programmatically create PNG graphics for e‑commerce product images and guarantee they are signed before uploading to a CDN.
+ * 5. When you are implementing compliance logging that saves PNG screenshots with an embedded signature and later checks the signature confidence during audits.
  */

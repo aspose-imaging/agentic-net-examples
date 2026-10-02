@@ -3,55 +3,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input PSD files
-            string[] inputPaths = {
-                @"C:\Images\image1.psd",
-                @"C:\Images\image2.psd"
-            };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\Output";
-
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to adjust brightness
-                    RasterImage raster = image as RasterImage;
-                    if (raster != null)
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
                     {
-                        // Increase brightness uniformly (value range -255 to 255)
-                        raster.AdjustBrightness(50);
+                        raster.CacheData();
+                    }
 
-                        // Save the brightened image as PNG
-                        raster.Save(outputPath, new PngOptions());
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine($"Unsupported image type (not raster): {inputPath}");
-                    }
+                    raster.AdjustBrightness(50);
+
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.Source = new FileCreateSource(outputPath, false);
+                    raster.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -64,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process Photoshop PSD layers to make them uniformly brighter before publishing them as web‑ready PNGs.
- * 2. When an automated build script must convert a set of design assets from PSD to PNG while applying a fixed brightness boost for consistent visual appearance.
- * 3. When a photo‑editing application requires programmatic adjustment of image exposure across multiple PSD files without manual Photoshop interaction.
- * 4. When a digital asset pipeline needs to ensure all PSD source files meet a minimum brightness level before being uploaded to a content management system as PNG.
- * 5. When you want to integrate Aspose.Imaging into a C# service that validates and enhances incoming PSD uploads by increasing brightness and saving them in PNG format.
+ * 1. When you need to batch‑brighten a collection of Photoshop PSD layers for a marketing campaign and deliver the results as web‑ready PNGs using C#.
+ * 2. When an automated build process must normalize the lighting of product mockups stored as PSD files before publishing them to an e‑commerce site.
+ * 3. When a desktop application has to convert user‑uploaded PSD artwork to PNG while applying a consistent brightness boost for better visibility on mobile devices.
+ * 4. When a digital asset management system requires a script to preprocess PSD assets by increasing their brightness and storing the edited versions in a PNG cache folder.
+ * 5. When a photo‑editing workflow needs to quickly apply the same brightness level to dozens of PSD files and export them as lossless PNGs without manual intervention.
  */

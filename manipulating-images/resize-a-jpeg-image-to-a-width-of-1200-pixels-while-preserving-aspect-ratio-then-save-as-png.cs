@@ -1,43 +1,43 @@
-// HOW-TO: Resize JPEG to 1200px Width and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize JPEG to 1200px Width and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "c:\\temp\\sample.jpg";
-            string outputPath = "c:\\temp\\sample_resized.png";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image using the JpegImage constructor
-            using (JpegImage jpegImage = new JpegImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Desired width
+                RasterImage raster = (RasterImage)image;
+
                 int newWidth = 1200;
-                // Compute height to preserve aspect ratio
-                int newHeight = (int)Math.Round((double)jpegImage.Height * newWidth / jpegImage.Width);
+                int newHeight = (int)(raster.Height * (newWidth / (double)raster.Width));
 
-                // Resize the image (default resampling)
-                jpegImage.Resize(newWidth, newHeight);
+                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                // Save the resized image as PNG
-                jpegImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑optimized thumbnails from high‑resolution JPEG photos while preserving their original proportions.
- * 2. When converting user‑uploaded JPEGs to lossless PNGs for archival or further image processing in a .NET application.
- * 3. When preparing product images for an e‑commerce site that requires a maximum width of 1200 pixels to ensure fast page loads.
- * 4. When standardizing image dimensions across a batch of photos before applying watermarking or other graphic overlays.
- * 5. When integrating image resizing into a server‑side API that receives JPEGs and returns PNGs at a consistent size for mobile apps.
+ * 1. When you need to generate web‑optimized thumbnails from high‑resolution JPEG photos while keeping the original aspect ratio and delivering them as PNG files for lossless display.
+ * 2. When an e‑commerce platform must resize product photos to a uniform 1200‑pixel width and convert them to PNG to ensure consistent image quality across browsers.
+ * 3. When a content management system processes user‑uploaded JPEG images, scaling them down for faster page loads and storing the results in PNG format for transparent backgrounds.
+ * 4. When a digital asset pipeline requires batch conversion of large JPEG images to a standard width and PNG format before archiving or further editing.
+ * 5. When a mobile app backend needs to prepare JPEG screenshots for responsive design by resizing them to 1200 px wide and saving as PNG to preserve visual fidelity.
  */

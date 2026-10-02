@@ -1,19 +1,19 @@
 // HOW-TO: Rotate BMP Image 120 Degrees with Custom Background Color in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
         try
         {
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,14 +22,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                image.Rotate(120f, true, Aspose.Imaging.Color.FromArgb(255, 200, 200, 200));
+                Color backgroundColor = Color.FromArgb(255, 255, 0, 0);
+                image.Rotate(120f, true, backgroundColor);
 
-                FileCreateSource source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
-
-                image.Save(outputPath, options);
+                BmpOptions saveOptions = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a BMP graphic at a non‑standard angle and want the empty corners filled with a specific color to match your UI theme.
- * 2. When generating thumbnails for a game asset pipeline where BMP sprites are rotated and the background must remain consistent.
- * 3. When processing scanned documents saved as BMP files that require a 120° rotation and a neutral background to avoid black corners in printed output.
- * 4. When creating custom map tiles in a GIS application that rotate BMP layers and need a defined background color to blend with adjacent tiles.
- * 5. When automating batch image preparation for a legacy system that only accepts BMP files, and each image must be rotated and padded with a chosen color before upload.
+ * 1. When you need to rotate a BMP graphic by a non‑right‑angle and fill the empty corners with a specific color, such as red, to maintain a consistent background.
+ * 2. When preparing legacy BMP assets for a game UI that requires a 120° orientation while preserving a solid background to avoid transparent gaps.
+ * 3. When converting scanned BMP documents that must be displayed at an angle and need a uniform background color for printing or PDF generation.
+ * 4. When creating custom thumbnails for a photo‑gallery where BMP images are rotated and the empty space must match the site’s branding color.
+ * 5. When processing BMP files in an automated pipeline that applies a fixed rotation and ensures the resulting image has a defined background for downstream image‑analysis tools.
  */

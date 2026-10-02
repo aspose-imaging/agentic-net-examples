@@ -1,60 +1,66 @@
-// HOW-TO: Batch Remove Background from SVGs and Convert to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Remove Background From SVG and Convert To PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputSvgs";
-        string outputDirectory = @"C:\OutputPngs";
-
         try
         {
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+            string inputDir = "input_svgs";
+            string outputDir = "output_pngs";
+
+            if (!Directory.Exists(inputDir))
+            {
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
 
             foreach (string inputPath in svgFiles)
             {
-                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine the output PNG path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG, remove background, rasterize to PNG, and save
-                using (SvgImage svgImage = new SvgImage(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Remove any background from the SVG
-                    svgImage.RemoveBackground();
-
-                    // Set up rasterization options (use the original SVG size)
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    var vectorImage = image as VectorImage;
+                    if (vectorImage != null)
                     {
-                        PageSize = svgImage.Size
+                        vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                    }
+
+                    var pngOptions = new PngOptions()
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        VectorRasterizationOptions = new VectorRasterizationOptions()
+                        {
+                            BackgroundColor = Color.Transparent,
+                            PageSize = image.Size
+                        }
                     };
 
-                    // Set up PNG save options with the rasterization settings
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    // Save the rasterized image as PNG
-                    svgImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -67,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up a large set of SVG icons by removing their backgrounds before converting them to PNGs for use in a web application.
- * 2. When you want to automate the preparation of SVG logos for inclusion in PDF reports, ensuring they are rasterized to PNG with transparent backgrounds.
- * 3. When an e‑commerce platform requires product vector images to be batch‑converted to PNG thumbnails without any background to improve page load speed.
- * 4. When a mobile app development workflow demands converting SVG assets to PNG format while stripping backgrounds for consistent UI rendering.
- * 5. When a CI/CD pipeline must process design assets, removing backgrounds from SVG files and rasterizing them to PNGs for deployment to a content delivery network.
+ * 1. When you need to automatically strip unwanted backgrounds from a large set of SVG icons before using them on a transparent web UI.
+ * 2. When you want to generate high‑quality PNG assets from vector SVG logos for inclusion in mobile apps that require raster images.
+ * 3. When a CI/CD pipeline must process design files, removing backgrounds and converting them to PNGs for automated documentation builds.
+ * 4. When you are preparing product catalog images by converting vendor‑supplied SVG drawings to PNG thumbnails with transparent backgrounds.
+ * 5. When you need to batch‑process SVG diagrams for email newsletters, ensuring they render correctly as PNGs without any background color.
  */

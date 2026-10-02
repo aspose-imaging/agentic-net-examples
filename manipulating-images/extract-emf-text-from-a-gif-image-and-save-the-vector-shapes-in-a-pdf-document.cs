@@ -1,73 +1,73 @@
-// HOW-TO: Convert GIF to Vector PDF via EMF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert GIF to Vector PDF via EMF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace EmfFromGifToPdf
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.gif";
-            string tempEmfPath = "Output/temp.emf";
-            string outputPdfPath = "Output/result.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Hardcoded paths
+                string inputPath = "input.gif";
+                string tempEmfPath = "temp.emf";
+                string outputPath = "output.pdf";
+
+                // Validate input file existence
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure directories exist for temporary EMF and final PDF
+                Directory.CreateDirectory(Path.GetDirectoryName(tempEmfPath) ?? string.Empty);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                // Load GIF and convert to EMF
+                using (Image gifImage = Image.Load(inputPath))
+                {
+                    var emfOptions = new EmfOptions();
+                    gifImage.Save(tempEmfPath, emfOptions);
+                }
+
+                // Load the generated EMF and save as PDF
+                using (Image emfImage = Image.Load(tempEmfPath))
+                {
+                    var pdfOptions = new PdfOptions();
+                    emfImage.Save(outputPath, pdfOptions);
+                }
+
+                // Optionally clean up temporary EMF file
+                if (File.Exists(tempEmfPath))
+                {
+                    try
+                    {
+                        File.Delete(tempEmfPath);
+                    }
+                    catch
+                    {
+                        // Ignore any errors during cleanup
+                    }
+                }
             }
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempEmfPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
-
-            // Convert GIF to EMF with vector rasterization options
-            using (Image gif = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                var emfRasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = gif.Size
-                };
-                var emfOptions = new EmfOptions
-                {
-                    VectorRasterizationOptions = emfRasterOptions
-                };
-                gif.Save(tempEmfPath, emfOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-
-            // Load the generated EMF and save as PDF with vector rasterization options
-            using (Image emf = Image.Load(tempEmfPath))
-            {
-                var pdfVectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = emf.Width,
-                    PageHeight = emf.Height
-                };
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = pdfVectorOptions
-                };
-                emf.Save(outputPdfPath, pdfOptions);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an animated GIF into a PDF as scalable vector shapes for high‑resolution printing.
- * 2. When you must extract vector data from a GIF and save it in a PDF to reduce file size while preserving visual quality.
- * 3. When generating PDF reports that include GIF illustrations and you require them to be vectorized for crisp zoom‑in clarity.
- * 4. When converting legacy GIF assets to PDF format for compliance with document management systems that only accept vector PDFs.
- * 5. When automating a workflow that transforms user‑uploaded GIFs into searchable PDF documents with vector graphics for better accessibility.
+ * 1. When you need to preserve the quality of animated GIF graphics as scalable vector shapes inside a PDF report.
+ * 2. When a legacy workflow requires extracting vector data from GIFs to embed in printable PDF documents.
+ * 3. When automating batch conversion of GIF assets to PDF for a documentation pipeline using C# and Aspose.Imaging.
+ * 4. When you want to create a PDF that contains editable EMF vector objects generated from GIF images.
+ * 5. When cleaning up temporary files after converting GIF to EMF and then to PDF in a server‑side image processing service.
  */

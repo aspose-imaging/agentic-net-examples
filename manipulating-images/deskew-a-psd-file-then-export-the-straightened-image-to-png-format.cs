@@ -3,8 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
@@ -12,34 +10,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.psd";
             string outputPath = "output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to use NormalizeAngle (deskew)
                 if (image is RasterImage rasterImage)
                 {
-                    // Deskew without resizing, using LightGray as background
-                    rasterImage.NormalizeAngle(false, Color.LightGray);
+                    rasterImage.NormalizeAngle();
                 }
 
-                // Prepare PNG save options (default options are sufficient)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the straightened image as PNG
+                var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -52,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you receive scanned Photoshop PSD files that are slightly rotated and need a correctly oriented PNG for web display.
- * 2. When an automated batch job must correct the tilt of PSD layers before converting them to PNG thumbnails.
- * 3. When a document management system stores original PSD artwork and you need to generate straightened PNG previews for quick viewing.
- * 4. When a digital asset pipeline requires deskewed PNG exports from PSD sources to maintain consistent layout in mobile apps.
- * 5. When you want to programmatically remove skew from a PSD image and save the result as a lossless PNG without resizing.
+ * 1. When you need to correct a tilted Photoshop PSD before publishing it as a web‑ready PNG.
+ * 2. When an automated pipeline must straighten scanned mockups saved as PSD files and output them in lossless PNG format.
+ * 3. When a desktop application processes user‑uploaded PSD layers and requires a deskewed PNG preview.
+ * 4. When batch converting a collection of misaligned PSD assets to correctly oriented PNGs for a game UI.
+ * 5. When integrating Aspose.Imaging in a C# service that normalizes image angles and saves the result as PNG for downstream analytics.
  */

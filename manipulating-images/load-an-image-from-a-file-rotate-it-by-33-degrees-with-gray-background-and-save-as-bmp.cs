@@ -1,14 +1,17 @@
-// HOW-TO: Rotate JPEG by 33 Degrees with Gray Background and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate JPEG By 33 Degrees With Gray Background And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.jpg";
-        string outputPath = "output\\rotated.bmp";
+        string outputPath = "output/output.bmp";
 
         try
         {
@@ -20,10 +23,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                image.Rotate(33f, true, Aspose.Imaging.Color.Gray);
-                image.Save(outputPath, new BmpOptions());
+                if (!image.IsCached)
+                    image.CacheData();
+
+                image.Rotate(33f, true, Color.FromArgb(255, 128, 128, 128));
+
+                BmpOptions options = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -35,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a rotated thumbnail of a JPEG for a web gallery while preserving a neutral gray fill and outputting a BMP for legacy systems.
- * 2. When a desktop application must reorient scanned photos by a specific angle and store them in BMP for compatibility with older Windows imaging tools.
- * 3. When an automated batch process has to rotate product images by 33 degrees and convert them to BMP to meet a printing pipeline’s file requirements.
- * 4. When you are preparing assets for a game engine that only accepts BMP files and requires a consistent background color after rotation.
- * 5. When a document management system must normalize image orientation and convert various formats to BMP with a gray background for archival consistency.
+ * 1. When you need to display a rotated version of a photo in a desktop application that only supports BMP files.
+ * 2. When preparing images for a legacy printing system that requires BMP format and a specific background color after rotation.
+ * 3. When generating thumbnails for a catalog where each image must be rotated by a custom angle and saved with a uniform gray canvas.
+ * 4. When converting user‑uploaded JPEGs to BMP for a game engine that cannot handle JPEG metadata and needs a solid background.
+ * 5. When automating batch processing of scanned documents that must be rotated to correct orientation and stored as BMP for OCR tools.
  */
