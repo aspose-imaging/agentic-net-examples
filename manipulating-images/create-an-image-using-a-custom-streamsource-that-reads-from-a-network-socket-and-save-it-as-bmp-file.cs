@@ -1,44 +1,36 @@
-// HOW-TO: Create BMP Image From TCP Socket Stream Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Load Image From Network Socket And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output BMP file path
-            string outputPath = Path.Combine("Output", "image.bmp");
+            // Hardcoded paths
+            string outputPath = "output/output.bmp";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Network source (replace with actual host and port)
-            string host = "example.com";
+            // Network socket parameters
+            string host = "localhost";
             int port = 12345;
 
-            // Connect to the remote socket and obtain the stream
-            using (var client = new System.Net.Sockets.TcpClient(host, port))
-            using (var networkStream = client.GetStream())
+            // Connect to the socket and read image data
+            using (TcpClient client = new TcpClient(host, port))
+            using (NetworkStream networkStream = client.GetStream())
             {
-                // Wrap the network stream in a StreamSource for Aspose.Imaging
-                var source = new StreamSource(networkStream, true);
-
-                // Configure BMP options with the custom source
-                var bmpOptions = new BmpOptions
+                // Load image from the network stream
+                using (Image image = Image.Load(networkStream))
                 {
-                    Source = source
-                };
-
-                // Create an image from the stream (size can be adjusted as needed)
-                using (Image image = Image.Create(bmpOptions, 500, 500))
-                {
-                    // Save the created image to the BMP file
-                    image.Save(outputPath);
+                    // Save as BMP
+                    var bmpOptions = new BmpOptions();
+                    image.Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -51,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file from image data received over a live network connection, such as a remote camera feed.
- * 2. When integrating a server application that receives raw pixel data via TCP and must store it as a BMP for later processing.
- * 3. When building a cross‑platform service that captures screenshots from a client device and saves them locally as BMP using Aspose.Imaging.
- * 4. When converting streamed image data from a custom protocol into a standard BMP format without first writing the stream to disk.
- * 5. When developing a diagnostic tool that reads image bytes from a socket, creates an image object, and writes it to a BMP file for debugging.
+ * 1. When you need to receive raw image bytes from a live camera feed over TCP and store them as BMP files for further analysis.
+ * 2. When a server application streams screenshots to a client and the client must convert the incoming stream into a BMP image for archival.
+ * 3. When integrating a legacy system that sends image data through a socket and you must persist the images in a format compatible with Windows applications.
+ * 4. When building a monitoring tool that captures thumbnails sent over the network and saves them as BMP to ensure lossless quality.
+ * 5. When developing a cross‑platform service that reads image data from a socket using Aspose.Imaging and writes it to disk as BMP for later processing.
  */
