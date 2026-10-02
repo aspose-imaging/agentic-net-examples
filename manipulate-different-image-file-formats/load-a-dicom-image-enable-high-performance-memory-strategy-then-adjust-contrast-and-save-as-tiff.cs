@@ -1,49 +1,36 @@
-// HOW-TO: Load DICOM Image with High Performance Memory, Adjust Contrast, Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load DICOM, Adjust Contrast, and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dcm";
         string outputPath = "output.tif";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            var loadOptions = new LoadOptions { BufferSizeHint = 1024 };
+            using (var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath, loadOptions))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var raster = (RasterImage)dicomImage;
+                raster.AdjustContrast(50f);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Open input DICOM file with a high-performance memory strategy
-            using (FileStream stream = File.OpenRead(inputPath))
-            {
-                var loadOptions = new LoadOptions
-                {
-                    // Example buffer size hint (256 KB)
-                    BufferSizeHint = 256 * 1024
-                };
-
-                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                {
-                    // Adjust contrast (value range: -100 to 100)
-                    dicomImage.AdjustContrast(50f);
-
-                    // Save as TIFF
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dicomImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to quickly load large DICOM files, modify their contrast for better visualization, and export the result as a TIFF for archiving or further analysis.
- * 2. When a radiology workflow requires converting DICOM scans to a universally viewable format while applying contrast enhancement to highlight details, using a memory‑efficient loading strategy in C#.
- * 3. When a research project processes thousands of DICOM images on limited hardware and must adjust brightness levels before saving them as high‑resolution TIFFs for publication.
- * 4. When a healthcare software integrates Aspose.Imaging to read DICOM streams, apply contrast adjustments on the fly, and generate TIFF files for compatibility with legacy PACS systems.
- * 5. When a developer wants to implement a batch job that reads DICOM files, uses a custom buffer size for performance, enhances image contrast, and stores the output as TIFF for downstream image‑processing pipelines.
+ * 1. When a radiology software needs to convert DICOM scans to TIFF for archival while enhancing image contrast for better visual inspection.
+ * 2. When a medical imaging workflow requires fast, low‑memory loading of large DICOM files before exporting them to a format compatible with standard picture viewers.
+ * 3. When a developer builds a C# service that processes DICOM images, adjusts contrast to highlight details, and stores the result as TIFF for downstream analysis.
+ * 4. When integrating Aspose.Imaging into a PACS system to batch‑convert DICOM studies to high‑resolution TIFFs with optimized memory usage.
+ * 5. When creating a diagnostic reporting tool that reads DICOM, applies a contrast boost, and saves the output as TIFF for inclusion in PDF reports.
  */
