@@ -1,66 +1,63 @@
-// HOW-TO: How To Save BMP As High Compression JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Estimate JPEG Quality Loss After High Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        // Wrap the whole logic to catch unexpected exceptions
-        try
+        static void Main(string[] args)
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output_high_compression.jpg";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.jpg";
+                string outputPath = "output.jpg";
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure JPEG save options for high compression (low quality)
-                JpegOptions saveOptions = new JpegOptions
+                if (!File.Exists(inputPath))
                 {
-                    // Very low quality value (1‑100) results in strong compression
-                    Quality = 10,
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Use progressive compression to further reduce size (optional)
-                    CompressionType = JpegCompressionMode.Progressive,
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir ?? ".");
 
-                    // Keep other defaults (bits per channel, resolution, etc.)
-                };
+                long originalSize = new FileInfo(inputPath).Length;
 
-                // Save the image with the specified JPEG options
-                image.Save(outputPath, saveOptions);
+                using (Image image = Image.Load(inputPath))
+                {
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 10,
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    image.Save(outputPath, jpegOptions);
+                }
+
+                long compressedSize = new FileInfo(outputPath).Length;
+                double reductionPercent = (originalSize - compressedSize) * 100.0 / originalSize;
+
+                Console.WriteLine($"Original size: {originalSize} bytes");
+                Console.WriteLine($"Compressed size: {compressedSize} bytes");
+                Console.WriteLine($"Size reduction: {originalSize - compressedSize} bytes ({reductionPercent:0.##}% )");
             }
-
-            // Inform the user that the operation completed
-            Console.WriteLine($"Image saved with high compression to: {outputPath}");
-        }
-        catch (Exception ex)
-        {
-            // Report any runtime errors without crashing
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of large BMP screenshots for faster web page loading, you can convert them to a low‑quality JPEG using Aspose.Imaging in C#.
- * 2. When preparing product images for email newsletters where bandwidth is limited, this code lets you compress BMP files into small JPEG attachments.
- * 3. When archiving legacy BMP assets on a server with storage constraints, you can shrink them by saving as high‑compression JPEGs programmatically.
- * 4. When generating thumbnails for a mobile app that requires minimal data transfer, the snippet converts BMP source images to progressive JPEGs with low quality.
- * 5. When automating batch processing of scanned documents to meet upload size limits of a cloud service, the example shows how to apply aggressive JPEG compression in C#.
+ * 1. When you need to reduce JPEG file size for faster web page loading while measuring how much quality is lost.
+ * 2. When you want to batch‑process photos before uploading to a cloud service and need to log the percentage of size reduction.
+ * 3. When you are building a desktop app that lets users save images with a specific compression level and display the resulting file size.
+ * 4. When you must verify that a high‑compression setting (quality = 10) meets storage‑budget constraints for a digital asset management system.
+ * 5. When you are creating automated tests for image‑processing pipelines and need to compare original and compressed JPEG sizes using Aspose.Imaging in C#.
  */
