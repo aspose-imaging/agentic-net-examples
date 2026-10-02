@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -14,7 +16,6 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -22,7 +23,6 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
@@ -31,27 +31,32 @@ class Program
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
             int index = 1;
 
-            foreach (var inputPath in files)
+            foreach (var file in files)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {file}");
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, $"image_{index}.png");
+                string outputPath = Path.Combine(outputDirectory, $"{index}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(file))
                 {
-                    var pngOptions = new PngOptions
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        pngOptions.Source = new FileCreateSource(outputPath, false);
+                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            PageSize = image.Size
-                        }
-                    };
-                    image.Save(outputPath, pngOptions);
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
 
                 index++;
@@ -66,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to process a folder of vector EMF drawings and generate numbered PNG thumbnails for a web gallery.
- * 2. When an automated build script must rename and rasterize EMF icons into PNG assets with consistent naming for a mobile app.
- * 3. When migrating legacy EMF reports to a modern system that only accepts PNG images and requires sequential file names.
- * 4. When creating batch image conversion tools that read EMF files from an input directory and output PNGs for further processing in machine‑learning pipelines.
- * 5. When preparing documentation assets by converting multiple EMF diagrams to PNG format and naming them automatically for inclusion in PDF manuals.
+ * 1. When you need to process a large set of vector EMF drawings and generate numbered PNG thumbnails for a web gallery.
+ * 2. When an automated build creates EMF reports that must be renamed and converted to PNG for inclusion in PDF documentation.
+ * 3. When a migration script must replace legacy EMF assets with PNG images while preserving order for a mobile app.
+ * 4. When a server‑side service has to read EMF files from an input folder, rasterize them, and save them as sequentially numbered PNG files for downstream processing.
+ * 5. When a desktop utility must batch rename and convert EMF icons into PNG sprites with consistent naming for a game UI.
  */
