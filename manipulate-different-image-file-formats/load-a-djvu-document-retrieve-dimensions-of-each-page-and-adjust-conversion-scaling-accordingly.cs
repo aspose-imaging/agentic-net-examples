@@ -1,9 +1,10 @@
-// HOW-TO: Resize DjVu Pages to Fixed Width and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages to Scaled PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,48 +12,50 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
-            string outputDirectory = "output";
+            string inputPath = "input.djvu";
+            string outputDir = "output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load DjVu document from file stream
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Target width for scaling each page
-                int targetWidth = 1240;
-
-                foreach (DjvuPage page in djvuImage.Pages)
+                int pageCount = djvu.Pages.Length;
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // Retrieve original dimensions
-                    int originalWidth = page.Width;
-                    int originalHeight = page.Height;
+                    int pageWidth = djvu.Pages[i].Width;
+                    int pageHeight = djvu.Pages[i].Height;
+                    Console.WriteLine($"Page {i + 1}: {pageWidth}x{pageHeight}");
 
-                    // Calculate scaling factor and target height while preserving aspect ratio
-                    double scale = (double)targetWidth / originalWidth;
-                    int targetHeight = (int)(originalHeight * scale);
+                    const int maxWidth = 1000;
+                    double scale = pageWidth > maxWidth ? (double)maxWidth / pageWidth : 1.0;
+                    int newWidth = (int)(pageWidth * scale);
+                    int newHeight = (int)(pageHeight * scale);
 
-                    // Resize the page
-                    page.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+                    string tempPngPath = Path.Combine(outputDir, $"temp_page_{i}.png");
+                    var pngOptions = new PngOptions();
+                    djvu.Pages[i].Save(tempPngPath, pngOptions);
 
-                    // Prepare output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                    using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+                    {
+                        if (scale != 1.0)
+                        {
+                            raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                        }
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        string finalPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                        raster.Save(finalPath, pngOptions);
+                    }
 
-                    // Save the resized page as PNG
-                    page.Save(outputPath, new PngOptions());
+                    if (File.Exists(tempPngPath))
+                    {
+                        File.Delete(tempPngPath);
+                    }
                 }
             }
         }
@@ -65,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert each page of a multi‑page DjVu document into uniformly sized PNG images for web thumbnails.
- * 2. When you must preserve the original aspect ratio while scaling DjVu pages to a specific pixel width for consistent layout in a mobile app.
- * 3. When processing scanned books stored as DjVu, you want to extract pages, resize them, and store them in a folder structure for further OCR processing.
- * 4. When generating preview images from large DjVu files, you need to read the document, determine each page’s dimensions, and produce scaled‑down PNGs to reduce bandwidth.
- * 5. When automating a batch job that reads DjVu files from a directory, resizes pages to a target width, and saves the results as PNGs for archival or publishing pipelines.
+ * 1. When you need to batch‑convert a multi‑page DjVu document into individual PNG files that fit within a specific width for web display.
+ * 2. When you want to preserve the original aspect ratio of each DjVu page while automatically resizing large pages to a maximum pixel width.
+ * 3. When an application must read the dimensions of each DjVu page to decide whether scaling is required before saving as PNG.
+ * 4. When you are integrating Aspose.Imaging into a C# service that generates thumbnail‑size PNG previews from high‑resolution DjVu scans.
+ * 5. When you have to programmatically extract and resize DjVu pages for inclusion in a PDF or HTML report without manual image editing.
  */
