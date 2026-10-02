@@ -3,60 +3,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string tempPngPath = "temp.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load SVG and rasterize to PNG
+            using (Image image = Image.Load(inputPath))
+            {
+                SvgImage svgImage = (SvgImage)image;
+                var pngOptions = new PngOptions();
+                using (FileStream fs = new FileStream(tempPngPath, FileMode.Create))
                 {
-                    PageSize = svgImage.Size
-                };
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        // Apply vertical Sobel kernel using convolution filter
-                        double[,] sobelKernel = new double[,]
-                        {
-                            { -1, 0, 1 },
-                            { -2, 0, 2 },
-                            { -1, 0, 1 }
-                        };
-
-                        ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(sobelKernel);
-                        raster.Filter(raster.Bounds, convOptions);
-
-                        // Save the processed image
-                        raster.Save(outputPath, new PngOptions());
-                    }
+                    svgImage.Save(fs, pngOptions);
                 }
+            }
+
+            // Load rasterized image and apply vertical Sobel kernel
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                double[,] sobelKernel = new double[,]
+                {
+                    { -1, 0, 1 },
+                    { -2, 0, 2 },
+                    { -1, 0, 1 }
+                };
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var outOptions = new PngOptions();
+                raster.Save(outputPath, outOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract vertical edges from a vector logo (SVG) to create a high‑contrast PNG for printing or UI icons.
- * 2. When performing automated quality checks on SVG diagrams by detecting edge patterns and saving the results as raster images.
- * 3. When generating edge‑enhanced thumbnails of SVG illustrations for web galleries using C# and Aspose.Imaging.
- * 4. When converting SVG floor plans into PNG maps with vertical edge emphasis for GIS or navigation applications.
- * 5. When building a computer‑vision preprocessing pipeline that rasterizes SVG assets and applies Sobel filtering before further analysis.
+ * 1. When you need to extract vertical edges from a vector logo (SVG) to create a high‑contrast PNG for printing or UI overlays.
+ * 2. When you want to preprocess SVG diagrams for computer‑vision algorithms by converting them to raster format and applying a Sobel filter.
+ * 3. When generating thumbnail previews that highlight structural outlines of SVG icons for a web gallery.
+ * 4. When performing quality‑control checks on SVG assets by detecting missing strokes or broken paths through edge analysis.
+ * 5. When integrating Aspose.Imaging into a C# batch job that converts multiple SVG files to edge‑detected PNGs for machine‑learning training data.
  */
