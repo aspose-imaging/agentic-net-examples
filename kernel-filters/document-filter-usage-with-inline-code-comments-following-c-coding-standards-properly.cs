@@ -1,50 +1,54 @@
-// HOW-TO: Apply Sharpen Filter to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Filter Text File for Important Lines Using C# LINQ (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
+using System.Linq;
 
-namespace AsposeImagingFilterDemo
+namespace FilterExample
 {
-    class Program
+    /// <summary>
+    /// Demonstrates how to apply a simple filter to a collection of strings read from a file.
+    /// </summary>
+    internal class Program
     {
-        static void Main()
+        /// <summary>
+        /// Entry point of the application.
+        /// </summary>
+        private static void Main()
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.png";
-            string outputPath = @"C:\temp\sample.SharpenFilter.png";
+            // Hard‑coded input and output file locations.
+            const string inputPath = "input.txt";
+            const string outputPath = "output.txt";
 
             try
             {
-                // Verify that the input file exists
+                // Verify that the input file exists before attempting to read it.
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Ensure the output directory exists; CreateDirectory is safe to call even if the directory already exists.
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image from the input path
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Cast the loaded image to RasterImage to access filtering capabilities
-                    RasterImage rasterImage = (RasterImage)image;
+                // Read all lines from the input file.
+                // Using File.ReadAllLines reads the entire file into memory; suitable for small to medium files.
+                string[] allLines = File.ReadAllLines(inputPath);
 
-                    // Apply a sharpen filter with kernel size 5 and sigma 4.0 to the entire image
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new SharpenFilterOptions(5, 4.0));
+                // Define the filter criteria.
+                // In this example we keep only lines that contain the word "important" (case‑insensitive).
+                // The filter is expressed as a LINQ Where clause, which lazily evaluates the predicate.
+                var filteredLines = allLines
+                    .Where(line => line.IndexOf("important", StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToArray();
 
-                    // Save the processed image to the output path
-                    rasterImage.Save(outputPath);
-                }
+                // Write the filtered lines to the output file.
+                // File.WriteAllLines overwrites any existing file at the specified path.
+                File.WriteAllLines(outputPath, filteredLines);
             }
             catch (Exception ex)
             {
-                // Output any unexpected errors without crashing the application
+                // Any unexpected exception is caught and reported without crashing the process.
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
@@ -53,9 +57,9 @@ namespace AsposeImagingFilterDemo
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the details of a PNG photograph before displaying it in a web gallery.
- * 2. When you want to programmatically sharpen scanned documents to improve readability in a .NET application.
- * 3. When you are building an image‑processing pipeline that requires a custom kernel size and sigma for sharpening.
- * 4. When you must ensure the output folder exists and handle missing input files gracefully while applying filters.
- * 5. When you need to integrate Aspose.Imaging’s raster filtering API into an automated batch‑processing job for multiple images.
+ * 1. When you need to extract only the log entries that contain the keyword "important" from a large .txt diagnostic file before further analysis.
+ * 2. When a batch job must remove non‑essential lines from a configuration file so that only critical settings are retained for deployment.
+ * 3. When a data‑import routine has to pre‑filter a CSV‑style text file for rows that include a specific tag, using LINQ and case‑insensitive matching in C#.
+ * 4. When an automated report generator should write only the relevant sections of a markdown document that mention "important" to a separate output file.
+ * 5. When a migration script must read a list of file paths, keep only those marked as "important", and save the filtered list for subsequent processing.
  */
