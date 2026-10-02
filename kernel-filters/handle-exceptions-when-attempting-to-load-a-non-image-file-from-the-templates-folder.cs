@@ -1,44 +1,35 @@
-// HOW-TO: How To Handle ImageLoadException When Loading Non‑Image Files In C# (Aspose.Imaging for .NET)
+// HOW-TO: Handle Exception When Loading Non‑Image File With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"templates\sample.txt";
-        string outputPath = @"output\result.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("templates", "nonimage.txt");
+            string outputPath = Path.Combine("Output", "result.png");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Attempt to load the file as an image
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image to the output path (e.g., convert to PNG)
-                image.Save(outputPath);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
-        }
-        catch (ImageLoadException ile)
-        {
-            // Handle loading of a non‑image file
-            Console.Error.WriteLine($"Unable to load image: {ile.Message}");
         }
         catch (Exception ex)
         {
-            // General error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert user‑uploaded documents to PNG but needs to gracefully skip or report files that are not valid images.
- * 2. When processing a batch of files from a templates folder, you want to ensure missing files or unsupported formats do not crash the program.
- * 3. When generating thumbnails from a mixed collection of image and text files, you need exception handling for ImageLoadException to avoid runtime errors.
- * 4. When automating image conversion in a server‑side service, you must verify the input path, create the output directory, and catch loading errors for non‑image inputs.
- * 5. When building a document‑to‑image pipeline, you need to detect and log attempts to load non‑image files such as .txt or .pdf to maintain audit trails.
+ * 1. When you need to safely attempt to convert a user‑uploaded text file to PNG without crashing the application.
+ * 2. When processing batch jobs that read files from a templates folder and you must log errors for unsupported formats.
+ * 3. When building a web service that accepts arbitrary file paths and you want to return a clear error if the file is not a valid image.
+ * 4. When automating document generation and you need to verify that each source file is an image before applying PNG options.
+ * 5. When integrating Aspose.Imaging into a legacy system and you must gracefully handle cases where the expected image file is missing or corrupted.
  */
