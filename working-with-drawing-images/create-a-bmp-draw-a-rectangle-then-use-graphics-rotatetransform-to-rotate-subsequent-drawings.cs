@@ -1,4 +1,4 @@
-// HOW-TO: Create BMP With Rotated Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP and Draw Rotated Rectangle with Graphics in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,36 +11,29 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output\\output.bmp";
-
-            // Ensure output directory exists
+            string outputPath = "Output/output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create image canvas
-            using (Image image = Image.Create(bmpOptions, 400, 400))
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Draw first rectangle
-                Pen pen1 = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(pen1, new Rectangle(50, 50, 200, 150));
+                Pen pen = new Pen(Color.Blue, 3);
+                Rectangle rect1 = new Rectangle(20, 20, 100, 80);
+                graphics.DrawRectangle(pen, rect1);
 
-                // Rotate subsequent drawings
                 graphics.RotateTransform(45);
 
-                // Draw second rectangle after rotation
-                Pen pen2 = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(pen2, new Rectangle(50, 50, 200, 150));
+                Rectangle rect2 = new Rectangle(20, 20, 100, 80);
+                graphics.DrawRectangle(pen, rect2);
 
-                // Save the image
                 image.Save();
             }
         }
@@ -53,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file with custom graphics, such as drawing shapes and applying rotation, for reports or thumbnails.
- * 2. When you want to programmatically add a rotated rectangle overlay to an existing image canvas in a .NET application.
- * 3. When creating technical documentation that requires precise, rotated annotations saved as a 24‑bit BMP.
- * 4. When building a server‑side image service that produces BMP images with multiple layered drawings at different angles.
- * 5. When automating the creation of printable graphics where the rotation of elements must be controlled before saving the BMP.
+ * 1. When you need to generate a BMP file with a rotated shape for a custom UI icon in a C# desktop application.
+ * 2. When you want to programmatically create a diagram that shows before‑and‑after rotation of a rectangle for documentation or tutorials.
+ * 3. When you are building a report that requires overlaying rotated graphics on a bitmap background using Aspose.Imaging.
+ * 4. When you need to produce test images with known rotation angles to validate image‑processing algorithms.
+ * 5. When you are automating the creation of simple game assets, such as rotated tiles, directly from C# code.
  */
