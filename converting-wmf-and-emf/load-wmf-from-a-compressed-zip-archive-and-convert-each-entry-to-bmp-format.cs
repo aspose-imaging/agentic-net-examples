@@ -1,4 +1,4 @@
-// HOW-TO: Convert WMF Images Inside Zip to BMP Files Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract WMF Images From Zip And Convert To BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -11,42 +11,40 @@ class Program
     {
         try
         {
-            // Hardcoded input zip file and output directory
-            string zipPath = @"C:\Input\images.zip";
-            string outputDir = @"C:\Output\BmpImages";
+            string inputPath = "input.zip";
+            string outputDir = "output";
 
-            // Verify the zip file exists
-            if (!File.Exists(zipPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {zipPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Open the zip archive for reading
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            using (FileStream zipStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    // Process only WMF files
-                    if (!entry.Name.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    // Build output BMP file path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(entry.Name);
-                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".bmp");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load WMF image from the zip entry stream and save as BMP
-                    using (Stream entryStream = entry.Open())
-                    using (Image image = Image.Load(entryStream))
+                    if (string.Equals(Path.GetExtension(entry.FullName), ".wmf", StringComparison.OrdinalIgnoreCase))
                     {
-                        BmpOptions bmpOptions = new BmpOptions();
-                        image.Save(outputPath, bmpOptions);
+                        string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(entry.FullName) + ".bmp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        using (Stream entryStream = entry.Open())
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            entryStream.CopyTo(ms);
+                            ms.Position = 0;
+
+                            using (Image image = Image.Load(ms))
+                            {
+                                BmpOptions options = new BmpOptions();
+                                options.BitsPerPixel = 24;
+                                image.Save(outputPath, options);
+                            }
+                        }
                     }
                 }
             }
@@ -60,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert legacy WMF drawings stored in a zip package to BMP for legacy Windows applications.
- * 2. When an automated import pipeline must extract vector icons from a compressed archive and save them as raster BMPs for printing.
- * 3. When a document management system receives zipped WMF assets and you must generate BMP thumbnails for preview.
- * 4. When migrating old CAD symbols packaged in zip files to a format supported by a .NET reporting engine that only accepts BMP.
- * 5. When creating a backup script that unpacks WMF files from archives and stores them as BMP to ensure compatibility with older image viewers.
+ * 1. When you receive a zip package containing WMF vector graphics and need to generate BMP raster files for legacy Windows applications.
+ * 2. When automating a batch process that extracts each WMF from an archive and saves it as a 24‑bit BMP for printing or further image analysis.
+ * 3. When integrating Aspose.Imaging into a C# service that converts user‑uploaded WMF files inside zip uploads to BMP thumbnails.
+ * 4. When migrating old WMF assets stored in compressed archives to BMP format to ensure compatibility with systems that only support bitmap images.
+ * 5. When creating a command‑line tool that reads a zip file, filters WMF entries, and outputs BMP files to a specified output directory.
  */
