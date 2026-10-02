@@ -1,53 +1,44 @@
-// HOW-TO: Align SVG DPI Before Rasterizing to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set SVG Resolution to 300 DPI When Converting to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "Input\\sample.svg";
+            string outputPath = "Output\\sample.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options to align DPI (use same scale for X and Y)
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Preserve original size
-                    PageSize = svgImage.Size,
-                    // Ensure uniform scaling (same DPI for both axes)
-                    ScaleX = 1.0f,
-                    ScaleY = 1.0f,
-                    // Optional: set background color if needed
-                    BackgroundColor = Color.White
-                };
+                var svgImage = (SvgImage)image;
 
-                // Prepare PNG save options and attach rasterization settings
-                PngOptions pngOptions = new PngOptions
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
+                    };
 
-                // Save the rasterized PNG
-                svgImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo to a PNG thumbnail while preserving the original DPI for consistent display on web pages.
- * 2. When generating print‑ready PNG assets from vector diagrams and must ensure both X and Y axes have the same resolution.
- * 3. When automating batch processing of SVG icons to PNG format in a CI pipeline and want uniform scaling across all images.
- * 4. When embedding SVG graphics into a PDF and require a rasterized PNG version with matching DPI to avoid blurry output.
- * 5. When creating responsive UI assets where the PNG must match the SVG’s size and DPI to maintain visual fidelity across devices.
+ * 1. When you need to generate high‑resolution PNG thumbnails from SVG logos for print‑ready marketing materials.
+ * 2. When a web service must deliver PNG images with a consistent 300 DPI for PDF embedding.
+ * 3. When an automated build pipeline converts SVG icons to PNG assets while preserving exact dimensions and DPI.
+ * 4. When a desktop application rasterizes user‑uploaded SVG diagrams to PNG for accurate on‑screen display at a specific resolution.
+ * 5. When batch processing a folder of SVG files to produce PNGs that match a predefined printing resolution.
  */
