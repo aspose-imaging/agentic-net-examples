@@ -1,10 +1,14 @@
-// HOW-TO: Convert DjVu Pages 4 To 6 To BMP And Merge Into PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 4 to 6 to BMP and Merge into PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,62 +16,90 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.djvu";
-            string outputDir = "output";
-            string[] bmpPaths = {
-                Path.Combine(outputDir, "page4.bmp"),
-                Path.Combine(outputDir, "page5.bmp"),
-                Path.Combine(outputDir, "page6.bmp")
-            };
-            string pdfPath = Path.Combine(outputDir, "combined.pdf");
+            // Hardcoded paths
+            string inputDjvuPath = "input.djvu";
+            string bmpOutputFolder = "bmp_pages";
+            string outputPdfPath = "combined.pdf";
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Validate input DjVu file
+            if (!File.Exists(inputDjvuPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputDjvuPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directories exist
+            Directory.CreateDirectory(bmpOutputFolder);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Load DjVu document and export pages 4‑6 as BMP
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvu = new DjvuImage(stream))
+            // List to hold BMP file paths
+            List<string> bmpPaths = new List<string>();
+
+            // Load DjVu document and extract pages 4-6 as BMP
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputDjvuPath))
             {
-                int[] pageIndices = { 3, 4, 5 }; // zero‑based indices for pages 4‑6
-                for (int i = 0; i < pageIndices.Length; i++)
+                for (int i = 3; i <= 5 && i < djvu.Pages.Length; i++)
                 {
-                    DjvuPage page = (DjvuPage)djvu.Pages[pageIndices[i]];
-                    page.Save(bmpPaths[i], new BmpOptions());
+                    string bmpPath = Path.Combine(bmpOutputFolder, $"page_{i + 1}.bmp");
+                    // Save page as BMP
+                    djvu.Pages[i].Save(bmpPath, new BmpOptions());
+                    bmpPaths.Add(bmpPath);
                 }
             }
 
-            // Load BMP images
-            List<Image> bmpImages = new List<Image>();
-            foreach (var bmpPath in bmpPaths)
+            // Collect sizes of BMP images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string bmpPath in bmpPaths)
             {
                 if (!File.Exists(bmpPath))
                 {
                     Console.Error.WriteLine($"File not found: {bmpPath}");
-                    foreach (var img in bmpImages) img.Dispose();
                     return;
                 }
-                bmpImages.Add(Image.Load(bmpPath));
+                using (RasterImage img = (RasterImage)Image.Load(bmpPath))
+                {
+                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                }
             }
 
-            // Combine BMPs into a single PDF
-            using (Image pdf = Image.Create(bmpImages.ToArray(), true))
+            // Calculate canvas size (vertical stacking)
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
+
+            // Create temporary canvas file
+            string tempCanvasPath = Path.Combine(bmpOutputFolder, "canvas_temp.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+            Source canvasSource = new FileCreateSource(tempCanvasPath, false);
+            BmpOptions canvasOptions = new BmpOptions() { Source = canvasSource };
+            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
             {
-                pdf.Save(pdfPath, new PdfOptions());
+                int offsetY = 0;
+                foreach (string bmpPath in bmpPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(bmpPath))
+                    {
+                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetY += img.Height;
+                    }
+                }
+                // Save the bound canvas BMP
+                canvas.Save();
             }
 
-            // Dispose loaded BMP images
-            foreach (var img in bmpImages)
+            // Load the merged canvas and save as PDF
+            if (!File.Exists(tempCanvasPath))
             {
-                img.Dispose();
+                Console.Error.WriteLine($"File not found: {tempCanvasPath}");
+                return;
             }
+            using (RasterImage merged = (RasterImage)Image.Load(tempCanvasPath))
+            {
+                merged.Save(outputPdfPath, new PdfOptions());
+            }
+
+            // Optional: clean up temporary files
+            // File.Delete(tempCanvasPath);
         }
         catch (Exception ex)
         {
@@ -78,9 +110,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract specific pages from a multi‑page DjVu file and save them as high‑resolution BMP images for further processing or archival.
- * 2. When you must create a PDF that contains only selected pages of a DjVu document, such as pages 4‑6, for sharing with users who only have PDF viewers.
- * 3. When a workflow requires converting DjVu pages to a raster format before applying image‑based analysis or OCR tools that accept BMP input.
- * 4. When you are building a document‑conversion service that needs to split a DjVu file, generate intermediate bitmap files, and then combine them into a single PDF report.
- * 5. When you need to automate batch processing of DjVu files, extracting particular pages, converting them to BMP, and packaging them into PDFs for compliance or record‑keeping purposes.
+ * 1. When you need to extract specific pages from a multi‑page DjVu file and save them as high‑resolution BMP images for further processing or analysis.
+ * 2. When you must create a printable PDF that contains only selected DjVu pages, converting them to BMP first to preserve image quality before merging.
+ * 3. When an archival workflow requires converting scanned DjVu documents into BMP thumbnails and then bundling those thumbnails into a single PDF report.
+ * 4. When a desktop application needs to programmatically generate PDF previews of particular DjVu pages for user review without loading the entire document.
+ * 5. When automating batch conversion of DjVu chapters into BMP files and consolidating them into one PDF for distribution or e‑learning material.
  */
