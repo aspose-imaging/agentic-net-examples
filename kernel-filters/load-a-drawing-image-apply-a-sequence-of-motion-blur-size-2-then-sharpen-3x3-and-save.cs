@@ -1,45 +1,64 @@
-// HOW-TO: Apply Motion Blur Followed by Sharpen Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur and Sharpen to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (var sourceImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage rasterImage = null;
+                string tempPath = null;
 
-                // Apply motion blur (length 2, smooth 1.0, angle 0 degrees)
-                var motionOptions = new MotionWienerFilterOptions(2, 1.0, 0.0);
-                rasterImage.Filter(rasterImage.Bounds, motionOptions);
+                if (sourceImage is RasterImage ri)
+                {
+                    rasterImage = ri;
+                }
+                else if (sourceImage is VectorImage vi)
+                {
+                    tempPath = Path.Combine(Path.GetDirectoryName(outputPath) ?? "", "temp_raster.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+                    vi.Save(tempPath, new PngOptions());
+                    rasterImage = (RasterImage)Image.Load(tempPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Unsupported image type.");
+                    return;
+                }
 
-                // Apply sharpen filter (kernel size 3, sigma 1.0)
-                var sharpenOptions = new SharpenFilterOptions(3, 1.0);
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(2, 0)));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3));
+
+                rasterImage.Save(outputPath, new PngOptions());
+
+                if (tempPath != null)
+                {
+                    rasterImage.Dispose();
+                    try { File.Delete(tempPath); } catch { }
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a scanned PNG before OCR by first softening motion blur and then enhancing edges with a sharpen filter.
- * 2. When preparing product photos for an e‑commerce site, applying a subtle motion blur to smooth background artifacts and then sharpening details to make the item stand out.
- * 3. When creating visual effects for a game asset pipeline, you can programmatically add a slight motion blur and sharpen the result using Aspose.Imaging in C#.
- * 4. When automating batch processing of screenshots, you may want to apply a 2‑pixel motion blur to simulate motion and then sharpen to retain readability before saving.
- * 5. When integrating image preprocessing into a C# desktop application, this code demonstrates how to load a PNG, apply sequential filters, and save the enhanced image with Aspose.Imaging.
+ * 1. When you need to convert an SVG illustration to a high‑quality PNG while adding a subtle motion‑blur effect followed by sharpening to enhance edge definition.
+ * 2. When preparing graphics for web thumbnails that require a consistent blur‑then‑sharpen filter chain to improve visual appeal without manual editing.
+ * 3. When automating batch processing of vector assets for a game UI, applying motion blur to simulate movement and then sharpening to retain crisp details before saving as PNG.
+ * 4. When integrating image preprocessing into a C# reporting tool that receives SVG charts, adds a motion‑blur filter to soften lines, sharpens them, and outputs PNG for PDF embedding.
+ * 5. When building a server‑side service that rasterizes uploaded SVG logos, applies a 2‑pixel motion blur and a 3×3 sharpen filter to meet brand style guidelines, and returns the result as a PNG file.
  */
