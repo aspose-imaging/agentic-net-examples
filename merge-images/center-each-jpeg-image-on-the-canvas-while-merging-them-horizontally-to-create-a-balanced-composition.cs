@@ -1,8 +1,8 @@
 // HOW-TO: Merge Multiple JPEGs Horizontally With Centered Alignment In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,19 +14,10 @@ class Program
     {
         try
         {
-            // Hard‑coded input JPEG files
-            string[] inputPaths = new[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "merged.jpg";
 
-            // Hard‑coded output file
-            string outputPath = "output.jpg";
-
-            // Validate each input file
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -35,12 +26,8 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // First pass – collect sizes to determine canvas dimensions
             List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -48,35 +35,27 @@ class Program
                 }
             }
 
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
 
-            // Prepare JPEG options with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = source,
-                Quality = 100
-            };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create the canvas image (bound to the output file)
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            Source outSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outSource, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-
-                // Second pass – load each image, center it vertically, and copy pixels onto the canvas
-                foreach (string path in inputPaths)
+                foreach (var path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        int offsetY = (canvasHeight - img.Height) / 2;
+                        int offsetY = (maxHeight - img.Height) / 2;
                         Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the bound canvas (no path needed because source is already bound)
                 canvas.Save();
             }
         }
@@ -89,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine product photos side‑by‑side into a single banner while keeping each JPEG vertically centered on the canvas.
- * 2. When creating a composite image for a web gallery that displays several JPEGs in a horizontal strip with uniform height.
- * 3. When generating printable marketing material that merges multiple high‑resolution JPEGs into one balanced layout.
- * 4. When building a slideshow thumbnail that stitches several JPEG frames together without cropping any image.
- * 5. When automating the preparation of side‑by‑side before‑and‑after comparison JPEGs for a medical or engineering report.
+ * 1. When you need to create a single panoramic banner from several product photos, preserving each image’s original size and vertically centering them on a common canvas.
+ * 2. When generating a side‑by‑side comparison chart of before‑and‑after JPEG screenshots for documentation or marketing materials.
+ * 3. When building a photo collage for a web gallery where each picture must be aligned in the middle of the row to maintain a balanced visual layout.
+ * 4. When automating the preparation of printable marketing flyers that combine multiple JPEG ads into one horizontally aligned image.
+ * 5. When developing a desktop application that stitches together scanned JPEG pages into a single continuous strip while keeping each page centered vertically.
  */
