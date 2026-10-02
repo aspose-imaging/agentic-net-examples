@@ -1,38 +1,30 @@
-// HOW-TO: Convert JPEG to TIFF with Error Handling in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to PNG with Error Handling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.jpg";
-        string outputPath = "Output/sample.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the source image
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
             using (Image image = Image.Load(inputPath))
             {
-                // Set TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Save the image as TIFF
-                image.Save(outputPath, tiffOptions);
+                var options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -44,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive user‑uploaded JPEG photos as lossless TIFF files for long‑term storage while ensuring any file‑system or conversion errors are logged.
- * 2. When a desktop application must batch‑process images from a folder, converting each JPEG to TIFF and gracefully handling missing files or permission issues.
- * 3. When integrating Aspose.Imaging into a C# service that receives JPEG images via API and must return TIFF responses without crashing on unexpected runtime exceptions.
- * 4. When preparing images for print production, converting high‑resolution JPEGs to TIFF with proper error handling to avoid halting the workflow if a file is corrupted.
- * 5. When migrating legacy image assets to a TIFF‑based workflow and you need a simple C# script that validates paths, creates output directories, and catches conversion errors.
+ * 1. When you need to batch‑convert user‑uploaded JPEG photos to PNG for web display while ensuring missing files are reported gracefully.
+ * 2. When an automated image pipeline must create output folders on the fly before saving converted PNGs to avoid path errors.
+ * 3. When you want to protect a desktop application from crashing by catching exceptions during image loading or saving with Aspose.Imaging.
+ * 4. When a server‑side service processes incoming JPEGs and must log clear error messages if the conversion fails.
+ * 5. When you are integrating Aspose.Imaging into a C# project and require a simple try‑catch pattern to handle unexpected runtime issues during format conversion.
  */
