@@ -1,41 +1,38 @@
-// HOW-TO: Sharpen a PNG Template with 5x5 Filter Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Sharpen a PNG Image Using Aspose.Imaging Convolution Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\template.png";
-            string outputPath = @"C:\Images\template_sharpened.png";
+            string inputPath = "template.png";
+            string outputPath = "output/sharpened.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filter
-                RasterImage rasterImage = (RasterImage)pngImage;
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Sharpen5x5));
 
-                // Apply a 5x5 sharpen filter
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                // Save the processed image
-                pngImage.Save(outputPath);
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the sharpness of a product label PNG before printing in a C# application.
- * 2. When generating thumbnails for a web gallery and want to apply a 5x5 sharpen filter to improve detail.
- * 3. When processing scanned documents stored as PNG files and require a quick edge‑enhancement step in .NET.
- * 4. When creating a batch job that loads a PNG template, sharpens it, and saves the result while ensuring resources are released.
- * 5. When integrating Aspose.Imaging into an image‑editing tool to let users apply a high‑intensity sharpen effect to PNG assets.
+ * 1. When you need to enhance the clarity of a product photo stored as PNG before publishing it on a website.
+ * 2. When an automated batch job must apply a 5×5 sharpening filter to template images for a printing workflow.
+ * 3. When a desktop application requires real‑time sharpening of user‑uploaded PNG graphics while ensuring memory is released promptly.
+ * 4. When you generate sharpened thumbnails from PNG assets for a mobile app and want to use Aspose.Imaging’s convolution filter.
+ * 5. When a server‑side service processes PNG templates, sharpens them for better OCR accuracy, and must clean up image resources to avoid leaks.
  */
