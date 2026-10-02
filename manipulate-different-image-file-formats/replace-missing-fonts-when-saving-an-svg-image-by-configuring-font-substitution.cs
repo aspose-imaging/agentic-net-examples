@@ -1,36 +1,47 @@
-// HOW-TO: Replace Missing Fonts When Saving SVG with Font Substitution in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Substitute Missing Fonts When Saving SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Configure font substitution: use a default font and allow system alternatives
-            FontSettings.DefaultFontName = "Arial";
-            FontSettings.GetSystemAlternativeFont = true;
+            string inputPath = "input.svg";
+            string outputPath = "output/output.svg";
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG image; missing fonts will be substituted according to the settings above
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] fontArgs) =>
+            {
+                string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
+                var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                {
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return fontList.ToArray();
+            }, "fonts");
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
                 image.Save(outputPath);
             }
         }
@@ -43,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating SVG reports on a server that lacks the original fonts, you can substitute missing fonts to ensure the SVG renders correctly.
- * 2. When converting user‑uploaded SVG files to a standardized format in a web application, you need to replace unavailable fonts with a default like Arial.
- * 3. When automating batch processing of SVG assets for a mobile app, font substitution prevents rendering errors caused by missing typefaces.
- * 4. When rendering SVG diagrams in a CI/CD pipeline on build agents without custom fonts, configuring Aspose.Imaging font settings guarantees consistent output.
- * 5. When creating SVG thumbnails for a catalog where the source files reference fonts not installed on the host machine, you can use font substitution to maintain visual fidelity.
+ * 1. When an SVG file references fonts that are not installed on the server, a developer can load the SVG with a custom font source and save it so the text renders correctly.
+ * 2. When generating SVG reports from a web application that uses corporate brand fonts, the code ensures the output SVG includes those fonts even if they are missing on the client machine.
+ * 3. When batch‑processing a folder of SVG assets for a mobile app, the developer can provide a directory of font files to replace missing fonts before saving the images.
+ * 4. When converting user‑uploaded SVG graphics to another format later, configuring font substitution prevents loss of text appearance during the initial load.
+ * 5. When automating SVG rendering in a CI/CD pipeline, the script guarantees consistent typography by loading custom fonts from a specified path before saving the SVG.
  */
