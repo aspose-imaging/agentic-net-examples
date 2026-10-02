@@ -1,6 +1,7 @@
-// HOW-TO: Create a BMP Grid Image With Equal Cells Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a 10x10 Grid BMP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -11,33 +12,43 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\grid.bmp";
+            string outputPath = "output/grid.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int canvasWidth = 800;
-            int canvasHeight = 600;
             int cellSize = 50;
+            int rows = 10;
+            int cols = 10;
+            int width = cols * cellSize;
+            int height = rows * cellSize;
 
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            using (RasterImage image = (RasterImage)Image.Create(options, width, height))
             {
+                // Fill background with white
+                int[] whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White.ToArgb(), width * height).ToArray();
+                var rect = new Aspose.Imaging.Rectangle(0, 0, width, height);
+                image.SaveArgb32Pixels(rect, whitePixels);
+
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 1);
 
-                Pen pen = new Pen(Color.Black, 1);
-
-                for (int x = 0; x <= canvasWidth; x += cellSize)
+                // Draw vertical lines
+                for (int c = 0; c <= cols; c++)
                 {
-                    graphics.DrawLine(pen, x, 0, x, canvasHeight);
+                    int x = c * cellSize;
+                    graphics.DrawLine(pen, x, 0, x, height);
                 }
 
-                for (int y = 0; y <= canvasHeight; y += cellSize)
+                // Draw horizontal lines
+                for (int r = 0; r <= rows; r++)
                 {
-                    graphics.DrawLine(pen, 0, y, canvasWidth, y);
+                    int y = r * cellSize;
+                    graphics.DrawLine(pen, 0, y, width, y);
                 }
 
+                // Save the image (output already bound)
                 image.Save();
             }
         }
@@ -50,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable graph paper background as a BMP for a drawing application.
- * 2. When you want to create a tiled game board image for a 2‑D board game prototype in C#.
- * 3. When you must produce a layout reference image for UI mock‑ups that requires evenly spaced grid lines.
- * 4. When you need to export a simple spreadsheet‑style cell diagram to BMP for documentation or reporting.
- * 5. When you are building a custom image processing pipeline that requires a baseline grid overlay for alignment testing.
+ * 1. When you need to generate a printable graph‑paper background as a BMP file for a Windows desktop application.
+ * 2. When you want to create a game board such as chess or Sudoku dynamically at runtime without external image assets.
+ * 3. When you must produce a tiled layout for a UI mock‑up or PDF overlay where each cell size is configurable.
+ * 4. When you require a simple way to export a coordinate grid for scientific data visualization or calibration tools.
+ * 5. When you need to programmatically draw a spreadsheet‑style grid for automated report generation in a .NET service.
  */
