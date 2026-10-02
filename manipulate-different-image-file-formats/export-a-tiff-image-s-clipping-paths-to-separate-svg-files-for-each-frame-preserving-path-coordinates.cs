@@ -1,13 +1,18 @@
-// HOW-TO: Export TIFF Frame Clipping Paths To Separate SVG Files In C# (Aspose.Imaging for .NET)
+// HOW-TO: Export TIFF Clipping Paths to Separate SVG Files per Frame in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.PathResources;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,29 +27,39 @@ class Program
                 return;
             }
 
-            string outputDir = "output_paths";
+            string outputBaseDir = "output";
 
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                TiffFrame[] frames = tiff.Frames;
-                for (int i = 0; i < frames.Length; i++)
+                for (int frameIndex = 0; frameIndex < tiff.Frames.Count(); frameIndex++)
                 {
-                    List<PathResource> pathResources = frames[i].PathResources;
+                    tiff.ActiveFrame = tiff.Frames[frameIndex];
+                    var frame = tiff.ActiveFrame;
+                    var size = frame.Size;
+
+                    var pathResources = frame.PathResources;
                     if (pathResources == null || pathResources.Count == 0)
                         continue;
 
-                    GraphicsPath graphicsPath = PathResourceConverter.ToGraphicsPath(
-                        pathResources.ToArray(),
-                        frames[i].Size);
-
-                    SvgGraphics2D svgGraphics = new SvgGraphics2D(frames[i].Width, frames[i].Height, 96);
-                    svgGraphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
-
-                    using (SvgImage svgImage = svgGraphics.EndRecording())
+                    int pathIndex = 0;
+                    foreach (var pathRes in pathResources)
                     {
-                        string outputPath = Path.Combine(outputDir, $"frame_{i}.svg");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        svgImage.Save(outputPath);
+                        string svgPath = Path.Combine(outputBaseDir, $"frame{frameIndex}_path{pathIndex}.svg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(svgPath));
+
+                        FileCreateSource source = new FileCreateSource(svgPath, false);
+                        SvgOptions svgOptions = new SvgOptions { Source = source };
+                        using (Image svgImage = Image.Create(svgOptions, size.Width, size.Height))
+                        {
+                            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(svgImage);
+                            var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
+                                new[] { pathRes }, size);
+                            Pen pen = new Pen(Color.Black);
+                            graphics.DrawPath(pen, graphicsPath);
+                            svgImage.Save();
+                        }
+
+                        pathIndex++;
                     }
                 }
             }
@@ -58,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract vector clipping paths from each page of a multi‑page TIFF and save them as individual SVG files for further editing or web display.
- * 2. When a printing workflow requires converting TIFF spot‑color or vector cut‑out information into SVG to be used by cutting plotters or design software.
- * 3. When you want to preserve the exact coordinates of a TIFF image’s paths while generating scalable graphics for responsive UI components.
- * 4. When automating batch processing of scanned documents that contain embedded paths, and you must separate those paths per frame into reusable SVG assets.
- * 5. When integrating Aspose.Imaging in a C# application to convert proprietary TIFF path resources into standard SVG format for cross‑platform compatibility.
+ * 1. When you need to extract vector clipping paths from each page of a multi‑page TIFF and save them as individual SVG files for further editing in design tools.
+ * 2. When a publishing workflow requires converting TIFF image masks into scalable SVG outlines to preserve exact coordinates for print layout.
+ * 3. When an e‑commerce platform wants to generate separate SVG cut‑out shapes from product TIFF scans for dynamic image rendering.
+ * 4. When a GIS application must isolate region boundaries stored as TIFF path resources and export them to SVG for overlay on web maps.
+ * 5. When a digital archiving system needs to preserve the original vector paths of scanned documents by exporting them from TIFF frames to SVG for long‑term vector storage.
  */
