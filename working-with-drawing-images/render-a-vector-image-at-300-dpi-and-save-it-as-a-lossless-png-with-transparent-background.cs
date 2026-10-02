@@ -1,48 +1,41 @@
-// HOW-TO: Render SVG to 300 DPI Transparent PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Render SVG to Transparent PNG at 300 DPI Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output\\result.png";
+        string inputPath = "Input/vector.svg";
+        string outputPath = "Output/rendered.png";
 
         try
         {
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options: transparent background and page size matching the SVG
-                var rasterOptions = new SvgRasterizationOptions
+                PngOptions options = new PngOptions
                 {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
-
-                // Configure PNG options: 300 DPI resolution and attach rasterization options
-                var pngOptions = new PngOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized image as a lossless PNG with transparent background
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert scalable vector graphics into high‑resolution PNGs for print‑ready assets while preserving transparency.
- * 2. When generating thumbnails or previews of SVG icons at 300 DPI for UI designs that require lossless quality.
- * 3. When exporting SVG diagrams to PNG for inclusion in PDF reports where exact dimensions and a transparent background are required.
- * 4. When automating a build pipeline that rasterizes vector logos into 300 DPI PNGs to meet branding guidelines.
- * 5. When creating web‑ready images from SVG illustrations that must retain transparency and meet specific DPI specifications.
+ * 1. When you need to display scalable vector graphics on a website that only supports raster PNG images with a transparent background.
+ * 2. When generating high‑resolution product thumbnails from SVG logos for print‑ready catalogs that require 300 DPI images.
+ * 3. When converting user‑uploaded SVG icons into lossless PNG assets for a mobile app that demands a fixed DPI and alpha channel.
+ * 4. When preparing transparent PNG overlays from vector diagrams for video compositing or slide presentations.
+ * 5. When automating batch processing of SVG assets to create consistent 300 DPI PNG files for a digital asset management system.
  */
