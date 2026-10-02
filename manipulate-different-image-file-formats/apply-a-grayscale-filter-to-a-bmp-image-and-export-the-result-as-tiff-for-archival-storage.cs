@@ -3,49 +3,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            string inputPath = Path.Combine("Input", "sample.bmp");
+            string outputPath = Path.Combine("Output", "sample.tiff");
+
+            if (!File.Exists(inputPath))
             {
-                // Save as TIFF (initial conversion)
-                bmpImage.Save(outputPath, new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Ensure output directory exists again (unconditional as required)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the newly created TIFF image
-            using (Image tiffBase = Image.Load(outputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access Grayscale method
-                TiffImage tiffImage = (TiffImage)tiffBase;
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+                raster.Grayscale();
 
-                // Convert to grayscale
-                tiffImage.Grayscale();
-
-                // Save the grayscale TIFF (overwrites the previous file)
-                tiffImage.Save(outputPath);
+                using (TiffOptions options = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    raster.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -57,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive legacy BMP scans as lossless grayscale TIFF files for long‑term storage.
- * 2. When a document management system requires all incoming images to be in a single grayscale TIFF format.
- * 3. When you must convert color BMP screenshots to grayscale TIFF to reduce file size while preserving detail for legal records.
- * 4. When integrating a C# batch job that standardizes various bitmap assets into archival‑ready TIFF images.
- * 5. When preparing medical or engineering drawings originally in BMP for compliance with TIFF‑only archival standards.
+ * 1. When you need to archive legacy BMP scans as lossless grayscale TIFF files to reduce file size while preserving image quality.
+ * 2. When a document management system requires all incoming bitmap images to be converted to a standard grayscale TIFF format for consistent indexing.
+ * 3. When preparing medical or engineering drawings for long‑term storage, converting them from BMP to grayscale TIFF ensures compatibility with archival standards.
+ * 4. When automating a batch process that reads BMP files, applies a grayscale filter, and saves them as TIFF using Aspose.Imaging in a .NET application.
+ * 5. When you must ensure the BMP image data is cached before manipulation to avoid memory issues during grayscale conversion and TIFF export.
  */
