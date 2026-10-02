@@ -1,10 +1,8 @@
-// HOW-TO: Create JPEG2000 Image From Raw Pixels With Specified Bit Depth In C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate JPEG2000 Image From ARGB Pixel Array In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,29 +10,30 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
             string outputPath = "output.jp2";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Image dimensions and bits per sample
-            int width = 100;
-            int height = 100;
-            int bitsPerSample = 8; // bits count per pixel
-
-            // Create a JPEG2000 image with specified bits per sample
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(width, height, bitsPerSample))
+            int width = 256;
+            int height = 256;
+            int[] pixels = new int[width * height];
+            for (int y = 0; y < height; y++)
             {
-                // Draw onto the image
-                Graphics graphics = new Graphics(jpeg2000Image);
-                using (SolidBrush brush = new SolidBrush(Color.Red))
+                for (int x = 0; x < width; x++)
                 {
-                    graphics.FillRectangle(brush, jpeg2000Image.Bounds);
+                    byte r = (byte)(x * 255 / (width - 1));
+                    byte g = (byte)(y * 255 / (height - 1));
+                    byte b = 0;
+                    int argb = (255 << 24) | (r << 16) | (g << 8) | b;
+                    pixels[y * width + x] = argb;
                 }
+            }
 
-                // Save the image
-                jpeg2000Image.Save(outputPath);
+            var options = new Jpeg2000Options();
+
+            using (var canvas = new Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image(width, height, options))
+            {
+                canvas.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), pixels);
+                canvas.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a JPEG2000 file from generated pixel data in a C# application, such as creating a thumbnail or preview for a medical imaging workflow.
- * 2. When you must control the bit depth of each sample (e.g., 8‑bit or 16‑bit) to meet compression or quality requirements for archival image storage.
- * 3. When you want to programmatically fill a JPEG2000 canvas with a solid color or custom graphics before saving, using Aspose.Imaging’s drawing API.
- * 4. When integrating image generation into a server‑side service that outputs JPEG2000 files for web or cloud delivery, ensuring the output directory is created automatically.
- * 5. When testing or prototyping color space handling by creating a JPEG2000 image with a known bits‑per‑sample value to verify downstream processing pipelines.
+ * 1. When you need to programmatically create a high‑resolution JPEG2000 file from a custom‑generated ARGB bitmap for medical imaging or satellite data pipelines.
+ * 2. When you must export raw pixel buffers produced by a rendering engine into a lossless JPEG2000 format for archival storage while controlling bits‑per‑sample and color space.
+ * 3. When integrating Aspose.Imaging into a C# application to convert procedural graphics into JPEG2000 for web‑based viewers that require JP2 support.
+ * 4. When building a batch process that transforms dynamically created pixel arrays into JPEG2000 files to meet industry standards for digital publishing.
+ * 5. When testing image‑processing algorithms and need to save the resulting pixel matrix as a JPEG2000 image to verify compression and color fidelity.
  */
