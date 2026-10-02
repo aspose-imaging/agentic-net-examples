@@ -2,64 +2,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input PSD files and corresponding sigma values
-            string[] inputPaths = new string[]
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Images\Input\image1.psd",
-                @"C:\Images\Input\image2.psd",
-                @"C:\Images\Input\image3.psd"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            double[] sigmaValues = new double[] { 2.0, 4.5, 6.0 };
-
-            // Ensure the arrays have the same length
-            int count = Math.Min(inputPaths.Length, sigmaValues.Length);
-
-            for (int i = 0; i < count; i++)
+            if (!Directory.Exists(outputDirectory))
             {
-                string inputPath = inputPaths[i];
-                double sigma = sigmaValues[i];
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Verify input file exists
+            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the PSD image
-                using (Image image = Image.Load(inputPath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply filters
-                    RasterImage rasterImage = image as RasterImage;
-                    if (rasterImage == null)
-                    {
-                        Console.Error.WriteLine($"Unable to process non-raster image: {inputPath}");
-                        continue;
-                    }
+                    var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0);
+                    raster.Filter(raster.Bounds, blurOptions);
 
-                    // Apply Gaussian blur with radius 5 and the specified sigma
-                    int radius = 5;
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(radius, sigma));
-
-                    // Prepare output PNG path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_blurred.png";
-                    string outputPath = Path.Combine(@"C:\Images\Output", outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PNG using default options
-                    rasterImage.Save(outputPath, new PngOptions());
+                    var pngOptions = new PngOptions();
+                    raster.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -72,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process Photoshop PSD layers by applying a custom Gaussian blur to each file before publishing them as web‑ready PNGs.
- * 2. When an automated pipeline must soften product mockups with different blur intensities (sigma values) and output PNG thumbnails for a catalog.
- * 3. When you want to prepare PSD assets for machine‑learning training by reducing detail with varying blur levels and saving them in a lossless format.
- * 4. When a desktop application requires converting multiple PSD designs into blurred PNG previews with specific sigma settings for UI display.
- * 5. When a server‑side service generates blurred background images from PSD sources, using Aspose.Imaging to apply per‑image sigma values and store the results as PNG files.
+ * 1. When you need to batch‑process a folder of Photoshop PSD layers to create softened preview thumbnails in PNG format for a web gallery.
+ * 2. When an e‑commerce site requires automatically blurring product mockups stored as PSDs before publishing them as PNGs to protect proprietary designs.
+ * 3. When a digital‑asset‑management system must generate low‑resolution, blurred PNG copies of high‑detail PSD artwork for quick loading in mobile apps.
+ * 4. When a marketing automation workflow needs to apply a consistent Gaussian blur to client‑provided PSD files and export them as PNGs for social‑media posting.
+ * 5. When a desktop application has to convert a collection of PSD files into PNGs while adding a custom blur effect to meet branding guidelines.
  */
