@@ -1,47 +1,36 @@
-// HOW-TO: Convert BMP to Grayscale PSD with RLE Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to PSD With RLE Compression And Grayscale In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = Path.Combine("Input", "sample.bmp");
+            string outputPath = Path.Combine("Output", "sample.psd");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options: RLE compression and Grayscale color mode
-                var psdOptions = new PsdOptions
+                using (PsdOptions psdOptions = new PsdOptions())
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Grayscale
-                };
-
-                // Save the image as PSD with the specified options
-                image.Save(outputPath, psdOptions);
+                    image.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a BMP image for Photoshop workflows that require a grayscale PSD with lossless RLE compression.
- * 2. When automating batch conversion of legacy BMP assets into PSD files for designers while preserving a smaller file size.
- * 3. When creating print‑ready or thumbnail files where the source is BMP but the target must be a grayscale PSD for compatibility.
- * 4. When integrating image processing into a .NET application that must output PSD files with specific compression to meet Photoshop import standards.
- * 5. When migrating a catalog of BMP images to a grayscale PSD format to reduce color information and ensure consistent layering in Photoshop.
+ * 1. When a developer needs to transform legacy BMP assets into Photoshop PSD files while preserving file size using RLE compression.
+ * 2. When an application must generate grayscale PSD layers from bitmap images for batch processing in a graphics pipeline.
+ * 3. When a .NET service converts user‑uploaded BMP pictures into PSD format for compatibility with Adobe Photoshop editing tools.
+ * 4. When automating the preparation of print‑ready files, developers require BMP to PSD conversion with lossless compression to maintain image quality.
+ * 5. When integrating image conversion into a workflow that stores source images as BMP and needs them in PSD format for further manipulation in design software.
  */
