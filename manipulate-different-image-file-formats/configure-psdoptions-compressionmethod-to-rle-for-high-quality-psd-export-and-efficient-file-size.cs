@@ -1,41 +1,37 @@
-// HOW-TO: How To Export BMP To PSD With RLE Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Export PNG to PSD with RLE Compression Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\output.psd";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/result.psd";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options with RLE compression
-                PsdOptions psdOptions = new PsdOptions
+                using (PsdOptions options = new PsdOptions())
                 {
-                    CompressionMethod = CompressionMethod.RLE
-                };
-
-                // Save the image as PSD using the configured options
-                image.Save(outputPath, psdOptions);
+                    options.CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE;
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a bitmap image to a Photoshop PSD file while keeping lossless quality and reducing file size using RLE compression.
- * 2. When automating a batch process that generates PSD files from source images for a design workflow and you want efficient storage.
- * 3. When integrating Aspose.Imaging into a C# application that must produce PSDs compatible with Photoshop’s RLE compression for archival purposes.
- * 4. When building a server‑side service that receives BMP uploads and returns compressed PSDs to clients to save bandwidth.
- * 5. When creating a desktop utility that prepares high‑resolution assets for Photoshop editors, ensuring the PSDs use RLE to balance quality and size.
+ * 1. When you need to convert high‑resolution PNG assets to Photoshop PSD files while keeping lossless quality and reducing file size with RLE compression.
+ * 2. When automating a batch workflow that prepares design files for Photoshop by exporting PNGs to PSDs with efficient RLE compression in a .NET application.
+ * 3. When integrating image export functionality into a web service that delivers PSD files optimized for storage and bandwidth using Aspose.Imaging’s RLE compression.
+ * 4. When preserving layer‑compatible PSD output from PNG sources for downstream editing in Photoshop, and you want to minimize the PSD’s disk footprint.
+ * 5. When building a desktop tool that lets users save edited PNG graphics as PSDs with lossless RLE compression to meet Adobe file standards.
  */
