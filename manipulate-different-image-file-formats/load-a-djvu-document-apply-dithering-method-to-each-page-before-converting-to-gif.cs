@@ -1,12 +1,16 @@
-// HOW-TO: Convert DjVu To GIF With Floyd Steinberg Dithering In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages to Animated GIF with Dithering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -19,19 +23,43 @@ public class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrWhiteSpace(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            List<RasterImage> frames = new List<RasterImage>();
+
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                DjvuImage djvu = (DjvuImage)image;
-
-                foreach (DjvuPage page in djvu.Pages)
+                foreach (var page in djvu.Pages)
                 {
-                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
+                    RasterImage raster = (RasterImage)page;
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        raster.Save(ms, new PngOptions());
+                        ms.Position = 0;
+                        RasterImage clone = (RasterImage)Image.Load(ms);
+                        frames.Add(clone);
+                    }
                 }
+            }
 
+            Image[] images = new Image[frames.Count];
+            for (int i = 0; i < frames.Count; i++)
+            {
+                images[i] = frames[i];
+            }
+
+            using (Image result = Image.Create(images, true))
+            {
                 GifOptions gifOptions = new GifOptions();
-                djvu.Save(outputPath, gifOptions);
+                result.Save(outputPath, gifOptions);
+            }
+
+            foreach (var frame in frames)
+            {
+                frame.Dispose();
             }
         }
         catch (Exception ex)
@@ -43,9 +71,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display DjVu files in browsers that only support GIF, this code converts each page to a dithered GIF to preserve visual quality.
- * 2. When creating thumbnails or previews of DjVu books for mobile devices, applying Floyd‑Steinberg dithering before saving as GIF reduces file size while keeping detail.
- * 3. When archiving scanned documents and you want a lossless‑looking GIF representation, the code loads each DjVu page, dithers it, and outputs a GIF for easy viewing.
- * 4. When building an e‑learning platform that bundles DjVu lecture notes into GIF slideshows, this routine ensures each slide is dithered for consistent color rendering.
- * 5. When automating batch conversion of DjVu archives to GIF for email distribution, the snippet processes all pages, applies dithering, and saves a single GIF file.
+ * 1. When you need to display a multi‑page DjVu document as an animated GIF on a website.
+ * 2. When you want to preserve the visual fidelity of scanned DjVu pages while reducing file size for email attachments.
+ * 3. When you have to batch‑process DjVu files and generate GIF previews for a document management system.
+ * 4. When you need to convert DjVu pages to a format supported by legacy applications that only read GIF images.
+ * 5. When you are creating a slideshow of DjVu pages and require dithering to improve color representation in the GIF output.
  */
