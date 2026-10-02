@@ -1,4 +1,11 @@
-// HOW-TO: How to Load WebP Image from Stream and Get Frame Count in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load WebP Image From Stream And Get Frame Count In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,33 +13,29 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"c:\temp\test.webp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Open a file stream and load the image using Image.Load
-            using (FileStream stream = File.OpenRead(inputPath))
+            using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             {
-                Image image = Image.Load(stream);
+                using (Image image = Image.Load(fs))
+                {
+                    int frameCount = 1;
+                    if (image is IMultipageImage multipage)
+                    {
+                        frameCount = multipage.PageCount;
+                    }
 
-                // Cast to WebPImage to access PageCount (frame count)
-                if (image is WebPImage webPImage)
-                {
-                    Console.WriteLine($"Frame count: {webPImage.PageCount}");
-                }
-                else
-                {
-                    Console.WriteLine("The loaded image is not a WebP image.");
+                    Console.WriteLine($"Frame count: {frameCount}");
                 }
             }
         }
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify the number of frames in an animated WebP file before processing or converting it.
- * 2. When building a server‑side service that reads uploaded WebP images via streams and logs their animation length for analytics.
- * 3. When creating a batch tool that scans a directory of WebP assets to ensure each file contains the expected frame count for quality control.
- * 4. When integrating Aspose.Imaging into a C# application that must read WebP images from a network stream without loading the whole file into memory.
- * 5. When debugging image‑processing pipelines and you want to output the frame count of a WebP image to confirm correct loading.
+ * 1. When you need to determine the number of frames in an animated WebP file by loading it from a FileStream.
+ * 2. When you want to read a WebP image using a stream to minimize memory usage while extracting its page count.
+ * 3. When building a logging or reporting utility that records the frame count of each WebP image processed.
+ * 4. When you must differentiate between single‑frame and multi‑page WebP images to apply separate processing logic.
+ * 5. When debugging image import issues by printing the detected frame count to the console for verification.
  */
