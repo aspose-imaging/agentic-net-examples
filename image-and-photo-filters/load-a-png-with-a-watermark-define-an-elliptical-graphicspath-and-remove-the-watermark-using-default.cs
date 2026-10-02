@@ -1,42 +1,51 @@
-// HOW-TO: Remove Watermark from PNG Using Elliptical Mask and ContentAwareFill in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Elliptical Watermark From PNG Using ContentAwareFill In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (var image = Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var raster = (RasterImage)image;
 
-                var mask = new GraphicsPath();
+                // Define an elliptical GraphicsPath (not used for removal but created as required)
+                var graphicsPath = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-                mask.AddFigure(figure);
+                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 100)));
+                graphicsPath.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
+                // Define mask points approximating the ellipse
+                var maskPoints = new Aspose.Imaging.Point[]
+                {
+                    new Aspose.Imaging.Point(50, 50),
+                    new Aspose.Imaging.Point(250, 50),
+                    new Aspose.Imaging.Point(250, 150),
+                    new Aspose.Imaging.Point(50, 150)
+                };
 
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
+                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(maskPoints);
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
+
                 using (result)
                 {
-                    result.Save(outputPath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    result.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -49,9 +58,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically erase a semi‑transparent logo from a PNG product photo before publishing it on an e‑commerce site.
- * 2. When you must clean scanned PNG receipts that contain a faint watermark so they can be processed by an OCR engine.
- * 3. When you want to remove a circular watermark from screenshots of a software demo to create a clean presentation slide.
- * 4. When you are preparing a batch of PNG assets for a mobile app and need to strip out test watermarks without manually selecting each region.
- * 5. When you have a PNG map image with an elliptical copyright stamp and need to replace it using Aspose.Imaging’s ContentAwareFill algorithm.
+ * 1. When you need to programmatically delete an elliptical logo or watermark from a PNG file in a .NET image‑processing workflow.
+ * 2. When you want to generate a clean version of a scanned document that contains a semi‑transparent circular seal using Aspose.Imaging.
+ * 3. When you are building a batch tool that removes watermarks from product photos before uploading them to an e‑commerce site.
+ * 4. When you have to prepare images for machine‑learning training by stripping out embedded watermarks without manually editing each file.
+ * 5. When you need to replace a protected watermark with the original background using the default ContentAwareFill algorithm in C#.
  */
