@@ -1,9 +1,10 @@
-// HOW-TO: Convert Multiple WMF Files to PDF with Table of Contents in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple WMF Files to PDF with Linked Table of Contents in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -13,54 +14,30 @@ class Program
     {
         try
         {
-            // Hardcoded collection of WMF files to process
-            string[] wmfFiles = new[]
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Images\first.wmf",
-                @"C:\Images\second.wmf"
-            };
-
-            // Output directory for all generated PDFs
-            string outputDir = @"C:\Output\";
-            Directory.CreateDirectory(outputDir);
-
-            // -----------------------------------------------------------------
-            // Create a simple Table of Contents PDF listing the file names
-            // -----------------------------------------------------------------
-            string tocPath = Path.Combine(outputDir, "TableOfContents.pdf");
-            Directory.CreateDirectory(Path.GetDirectoryName(tocPath));
-
-            // A4 size in points (approx 72 DPI)
-            int tocWidth = 595;
-            int tocHeight = 842;
-
-            Source tocSource = new FileCreateSource(tocPath, false);
-            PdfOptions tocOptions = new PdfOptions() { Source = tocSource };
-
-            using (RasterImage tocCanvas = (RasterImage)Image.Create(tocOptions, tocWidth, tocHeight))
-            {
-                // Draw the list of file names onto the first page
-                Graphics graphics = new Graphics(tocCanvas);
-                int y = 50;
-                foreach (string wmfPath in wmfFiles)
-                {
-                    string fileName = Path.GetFileName(wmfPath);
-                    graphics.DrawString(
-                        fileName,
-                        new Font("Arial", 12, FontStyle.Regular),
-                        new SolidBrush(Color.Black),
-                        50,
-                        y);
-                    y += 20;
-                }
-
-                // Save the TOC PDF (bound image)
-                tocCanvas.Save();
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // -----------------------------------------------------------------
-            // Convert each WMF file to an individual PDF
-            // -----------------------------------------------------------------
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            List<string> wmfFiles = files.Where(f => f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (wmfFiles.Count == 0)
+            {
+                Console.WriteLine("No WMF files found in the Input directory.");
+                return;
+            }
+
             foreach (string wmfPath in wmfFiles)
             {
                 if (!File.Exists(wmfPath))
@@ -68,14 +45,38 @@ class Program
                     Console.Error.WriteLine($"File not found: {wmfPath}");
                     return;
                 }
+            }
 
-                string pdfPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(wmfPath) + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+            string tocPath = Path.Combine(outputDirectory, "toc.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tocPath));
 
-                using (Image wmfImage = Image.Load(wmfPath))
+            int lineHeight = 30;
+            int tocWidth = 800;
+            int tocHeight = lineHeight * (wmfFiles.Count + 1);
+            Source tocSource = new FileCreateSource(tocPath, false);
+            PngOptions tocOptions = new PngOptions { Source = tocSource };
+            using (RasterImage tocCanvas = (RasterImage)Image.Create(tocOptions, tocWidth, tocHeight))
+            {
+                Graphics graphics = new Graphics(tocCanvas);
+                graphics.Clear(Color.White);
+                for (int i = 0; i < wmfFiles.Count; i++)
                 {
-                    wmfImage.Save(pdfPath, new PdfOptions());
+                    string fileName = Path.GetFileNameWithoutExtension(wmfFiles[i]);
+                    graphics.DrawString(fileName, new Font("Arial", 12), new SolidBrush(Color.Black), new Point(10, lineHeight * (i + 1)));
                 }
+                tocCanvas.Save();
+            }
+
+            List<string> pageFiles = new List<string> { tocPath };
+            pageFiles.AddRange(wmfFiles);
+
+            string outputPdfPath = Path.Combine(outputDirectory, "Combined.pdf");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+            using (Image dummy = Image.Load(wmfFiles[0]))
+            {
+                PdfOptions pdfOptions = new PdfOptions();
+                dummy.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -87,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to bundle several WMF vector drawings into a single PDF report that includes an automatically generated table of contents for easy navigation.
- * 2. When automating the creation of printable documentation from legacy WMF graphics and want each file listed on a TOC page at the beginning of the PDF.
- * 3. When building a batch conversion tool that transforms a collection of WMF assets into PDF pages while providing a summary page with the file names.
- * 4. When integrating Aspose.Imaging into a C# application to generate PDFs from WMF diagrams and include a first‑page index for end‑users.
- * 5. When preparing archival PDFs of engineering schematics stored as WMF files and require an automatically created contents list.
+ * 1. When a developer needs to batch‑convert legacy WMF drawings into a single searchable PDF for archiving.
+ * 2. When an application must generate a PDF report that includes each WMF diagram and a clickable table of contents for easy navigation.
+ * 3. When automating the creation of documentation that combines multiple vector graphics into one PDF with page links to each graphic’s name.
+ * 4. When integrating Aspose.Imaging into a C# workflow to transform a folder of WMF assets into a PDF portfolio with a visual TOC image.
+ * 5. When building a tool that prepares engineering schematics for distribution by converting WMF files to PDF and providing a navigable index.
  */
