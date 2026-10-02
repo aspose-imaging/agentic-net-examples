@@ -1,4 +1,4 @@
-// HOW-TO: Create BMP With Diagonal Line And Horizontal Mirror In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Diagonal Mirror Using Graphics ScaleTransform in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,39 +11,27 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output.bmp";
+            string outputPath = Path.Combine("Output", "output.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
-
-            // Image dimensions
             int width = 200;
             int height = 200;
 
-            // Set up BMP options with a file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Create graphics object for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Draw a diagonal line from top-left to bottom-right
                 Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+                graphics.DrawLine(pen, 0, 0, width - 1, height - 1);
 
-                // Apply horizontal mirror transformation
-                graphics.TranslateTransform(width, 0);
                 graphics.ScaleTransform(-1, 1);
+                graphics.TranslateTransform(-width, 0);
+                graphics.DrawLine(pen, 0, 0, width - 1, height - 1);
 
-                // Draw the mirrored diagonal line
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-
-                // Save the image (output path already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -56,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a BMP icon that contains a diagonal line and its mirrored counterpart for UI elements.
- * 2. When creating test images to verify image processing pipelines that require both original and horizontally flipped graphics.
- * 3. When producing simple patterned textures for games or simulations where a mirrored diagonal line adds visual symmetry.
- * 4. When automating the creation of printable diagrams that must include a line and its mirror without manually editing the file.
- * 5. When building a batch tool that adds a mirrored watermark line to existing BMP files using Aspose.Imaging in C#.
+ * 1. When you need to generate a BMP placeholder image that includes a mirrored diagonal line for UI testing or documentation.
+ * 2. When you want to programmatically draw a symmetric pattern by drawing a line and reflecting it across the vertical axis in a .NET application.
+ * 3. When you need to add a simple mirrored watermark or logo effect to an image without using external graphic design tools.
+ * 4. When you are building custom charts or diagrams that require a reflected line for visual emphasis and need to create them on the fly.
+ * 5. When you are automating the creation of mirrored sprite assets for a game and want to produce the BMP files directly in C#.
  */
