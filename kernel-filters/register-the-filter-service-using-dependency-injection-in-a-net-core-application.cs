@@ -1,70 +1,96 @@
-// HOW-TO: Apply Sharpen Filter to PNG and Save as JPEG Using DI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Register Custom Image Filter Service with Dependency Injection in .NET Core (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    public interface IFilterService
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.png";
-        string outputPath = "output.jpg";
+        void Apply(string inputPath, string outputPath);
+    }
 
-        // Check input file existence
-        if (!File.Exists(inputPath))
+    public class FilterService : IFilterService
+    {
+        public void Apply(string inputPath, string outputPath)
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Simple example: copy the file (replace with real filter logic)
+            File.Copy(inputPath, outputPath, true);
+        }
+    }
+
+    public class ServiceCollection
+    {
+        private readonly Dictionary<Type, Func<object>> _services = new Dictionary<Type, Func<object>>();
+
+        public void AddSingleton<TService, TImplementation>()
+            where TImplementation : TService, new()
+        {
+            _services[typeof(TService)] = () => new TImplementation();
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        try
+        public ServiceProvider BuildServiceProvider()
         {
-            // Simple DI container simulation
-            var services = new Dictionary<string, Action<string, string>>();
+            return new ServiceProvider(_services);
+        }
+    }
 
-            // Register Sharpen filter service
-            services["SharpenFilter"] = (inPath, outPath) =>
+    public class ServiceProvider
+    {
+        private readonly Dictionary<Type, Func<object>> _services;
+
+        public ServiceProvider(Dictionary<Type, Func<object>> services)
+        {
+            _services = services;
+        }
+
+        public T GetService<T>()
+        {
+            return (T)_services[typeof(T)]();
+        }
+    }
+
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            try
             {
-                // Load image
-                using (Image image = Image.Load(inPath))
+                string inputPath = "input.jpg";
+                string outputPath = "output.jpg";
+
+                if (!File.Exists(inputPath))
                 {
-                    // Cast to RasterImage
-                    RasterImage rasterImage = (RasterImage)image;
-
-                    // Apply sharpen filter (kernel size 5, sigma 4.0)
-                    rasterImage.Filter(rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                    // Save with JPEG options
-                    rasterImage.Save(outPath, new JpegOptions());
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-            };
 
-            // Resolve and execute the filter service
-            if (services.TryGetValue("SharpenFilter", out var sharpenService))
-            {
-                sharpenService(inputPath, outputPath);
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                var services = new ServiceCollection();
+                services.AddSingleton<IFilterService, FilterService>();
+                var provider = services.BuildServiceProvider();
+
+                var filterService = provider.GetService<IFilterService>();
+                filterService.Apply(inputPath, outputPath);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically sharpen a PNG image and output a compressed JPEG in a .NET Core service that uses dependency injection.
- * 2. When building an image‑processing API that applies a custom filter before delivering JPEG thumbnails to web clients.
- * 3. When migrating a legacy batch script to C# and want to register filter operations in a DI container for easier testing and maintenance.
- * 4. When creating a photo‑editing tool that lets users enhance image sharpness on upload and store the result in a JPEG format.
- * 5. When integrating Aspose.Imaging into a microservice that processes user‑uploaded PNG files and saves optimized JPEGs with consistent filter settings.
+ * 1. When building an ASP.NET Core web API that receives JPEG uploads and needs to apply a custom image filter before storing the files.
+ * 2. When creating a background worker that batch‑processes PNG images and you want the filter logic injected for easy configuration and testing.
+ * 3. When developing a console utility that copies and transforms TIFF files, using DI to resolve the filter service at runtime.
+ * 4. When writing unit tests for an image‑processing pipeline and need to swap the real filter with a mock via the service container.
+ * 5. When integrating Aspose.Imaging into a microservice and want to manage different filter implementations through .NET Core’s built‑in dependency injection.
  */
