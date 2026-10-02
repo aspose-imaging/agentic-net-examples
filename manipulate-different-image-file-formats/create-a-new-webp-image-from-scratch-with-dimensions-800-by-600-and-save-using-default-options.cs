@@ -1,29 +1,25 @@
-// HOW-TO: Create Blank 800x600 WebP Image and Save in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Blank 800x600 WebP Image and Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Output file path (hard‑coded)
             string outputPath = "output.webp";
-
-            // Ensure the output directory exists (creates current directory if none)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Default WebP options
-            WebPOptions options = new WebPOptions();
+            Source source = new FileCreateSource(outputPath, false);
+            WebPOptions options = new WebPOptions() { Source = source };
 
-            // Create a blank WebP image of 800x600 pixels
-            using (WebPImage webPImage = new WebPImage(800, 600, options))
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 800, 600))
             {
-                // Save the image using default options
-                webPImage.Save(outputPath);
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -35,9 +31,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a placeholder WebP image of a specific size for UI testing without using existing files.
- * 2. When you want to programmatically create a blank canvas to draw graphics or add watermarks before exporting to WebP.
- * 3. When an automated image pipeline requires a default‑sized WebP file as a fallback for missing assets.
- * 4. When building a web service that returns a dynamically sized WebP placeholder for responsive design.
- * 5. When setting up unit tests that need a known‑size WebP image to verify image processing functions.
+ * 1. When you need to generate a placeholder WebP image of a specific size for a web page without loading an existing file.
+ * 2. When you want to create a blank canvas to draw graphics programmatically before adding custom drawings or text.
+ * 3. When an automated report generator must produce a WebP thumbnail of a fixed dimension as part of its output.
+ * 4. When a server‑side service creates empty WebP files to reserve space for later image processing in a pipeline.
+ * 5. When testing image‑processing code you require a known‑size WebP file without relying on external assets.
  */
