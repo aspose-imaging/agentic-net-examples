@@ -1,32 +1,28 @@
-// HOW-TO: Combine Multiple BMP Files Into a Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple BMP Files into a Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input BMP files
+            // Hardcoded input BMP file paths
             string[] inputPaths = new string[]
             {
-                @"c:\temp\image1.bmp",
-                @"c:\temp\image2.bmp",
-                @"c:\temp\image3.bmp"
+                "Input\\image1.bmp",
+                "Input\\image2.bmp",
+                "Input\\image3.bmp"
             };
 
-            // Hard‑coded output TIFF file
-            string outputPath = @"c:\temp\output.tif";
-
             // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -35,57 +31,53 @@ class Program
                 }
             }
 
-            // Ensure the output directory exists
+            // Hardcoded output TIFF path
+            string outputPath = "Output\\merged.tif";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP images and create corresponding TiffFrames
-            List<TiffFrame> frames = new List<TiffFrame>();
-            int firstWidth = 0;
-            int firstHeight = 0;
-
-            foreach (var inputPath in inputPaths)
+            // Load first image to obtain dimensions
+            using (Image firstImg = Image.Load(inputPaths[0]))
             {
-                using (Image bmpImage = Image.Load(inputPath))
+                int width = firstImg.Width;
+                int height = firstImg.Height;
+
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    // Capture dimensions from the first image (used for creating the base TIFF)
-                    if (frames.Count == 0)
+                    using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
                     {
-                        firstWidth = bmpImage.Width;
-                        firstHeight = bmpImage.Height;
+                        // Copy pixels from first image to the first frame
+                        using (RasterImage rasterFirst = (RasterImage)firstImg)
+                        {
+                            Color[] pixelsFirst = rasterFirst.LoadPixels(firstImg.Bounds);
+                            tiff.ActiveFrame.SavePixels(tiff.ActiveFrame.Bounds, pixelsFirst);
+                        }
+
+                        // Process remaining images
+                        for (int i = 1; i < inputPaths.Length; i++)
+                        {
+                            using (Image img = Image.Load(inputPaths[i]))
+                            {
+                                int srcWidth = img.Width;
+                                int srcHeight = img.Height;
+
+                                // Add a new frame with source dimensions
+                                tiff.AddFrame(new TiffFrame(tiffOptions, srcWidth, srcHeight));
+                                tiff.ActiveFrame = tiff.Frames[tiff.Frames.Count() - 1];
+
+                                using (RasterImage raster = (RasterImage)img)
+                                {
+                                    Color[] pixels = raster.LoadPixels(img.Bounds);
+                                    tiff.ActiveFrame.SavePixels(tiff.ActiveFrame.Bounds, pixels);
+                                }
+                            }
+                        }
+
+                        // Save the multi-page TIFF
+                        tiff.Save(outputPath);
                     }
-
-                    // Create a TiffFrame from the loaded raster image
-                    TiffFrame frame = new TiffFrame((RasterImage)bmpImage);
-                    frames.Add(frame);
                 }
-            }
-
-            // Configure TIFF creation options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-            // Create a base TIFF image (contains a default frame)
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, firstWidth, firstHeight))
-            {
-                // Add all frames to the TIFF image
-                foreach (var frame in frames)
-                {
-                    tiffImage.AddFrame(frame);
-                }
-
-                // Remove the initial default frame
-                TiffFrame activeFrame = tiffImage.ActiveFrame;
-                if (tiffImage.Frames.Length > 1)
-                {
-                    tiffImage.ActiveFrame = tiffImage.Frames[1];
-                    tiffImage.RemoveFrame(0);
-                }
-                activeFrame.Dispose();
-
-                // Save the multi‑page TIFF
-                tiffImage.Save();
             }
         }
         catch (Exception ex)
@@ -97,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive a series of scanned BMP pages as a single multi‑page TIFF document for easy distribution.
- * 2. When a batch process must convert daily generated BMP screenshots into a multi‑page TIFF for inclusion in a report.
- * 3. When an application has to merge individual BMP assets, such as map tiles, into one TIFF file for GIS analysis.
- * 4. When a medical imaging workflow requires stacking BMP scans of tissue samples into a multi‑frame TIFF for archival compliance.
- * 5. When a printing system must combine separate BMP artwork layers into a single multi‑page TIFF before sending to a printer.
+ * 1. When you need to merge scanned BMP pages into a single multi‑page TIFF for easy viewing or printing.
+ * 2. When an application must archive a series of BMP screenshots as a compact, paginated TIFF document.
+ * 3. When converting BMP assets from a legacy system into a multi‑page TIFF to be imported into a document management workflow.
+ * 4. When generating a multi‑page TIFF report that combines multiple BMP charts or diagrams generated by a C# service.
+ * 5. When preparing a batch of BMP medical images for storage in a single TIFF file to simplify retrieval and compliance.
  */
