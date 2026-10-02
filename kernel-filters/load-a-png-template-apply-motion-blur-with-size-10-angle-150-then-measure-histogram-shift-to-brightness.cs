@@ -2,50 +2,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\template.png";
-            string outputPath = @"C:\Images\output_motion_blur.png";
+            string inputPath = "template.png";
+            string outputPath = "output\\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel access and filtering
-                RasterImage raster = (RasterImage)image;
+                int[] pixelsBefore = raster.LoadArgb32Pixels(raster.Bounds);
+                double avgBrightnessBefore = ComputeAverageBrightness(pixelsBefore);
 
-                // Compute average brightness before applying the filter
-                double avgBefore = ComputeAverageBrightness(raster);
+                var kernel = ConvolutionFilter.GetBlurMotion(10, 150);
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Apply motion blur using MotionWienerFilterOptions (size=10, brightness=1.0, angle=150)
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 150.0));
+                int[] pixelsAfter = raster.LoadArgb32Pixels(raster.Bounds);
+                double avgBrightnessAfter = ComputeAverageBrightness(pixelsAfter);
 
-                // Compute average brightness after applying the filter
-                double avgAfter = ComputeAverageBrightness(raster);
+                double brightnessShift = avgBrightnessAfter - avgBrightnessBefore;
+                Console.WriteLine($"Brightness shift after motion blur: {brightnessShift}");
 
-                // Calculate histogram shift (brightness change)
-                double brightnessShift = avgAfter - avgBefore;
-                Console.WriteLine($"Brightness shift: {brightnessShift:F4}");
-
-                // Save the processed image
-                raster.Save(outputPath);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -54,30 +52,26 @@ class Program
         }
     }
 
-    // Helper method to compute average brightness of a raster image
-    private static double ComputeAverageBrightness(RasterImage raster)
+    static double ComputeAverageBrightness(int[] argbPixels)
     {
-        // Load all ARGB pixels for the whole image
-        int[] argbPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-        long total = 0;
-        foreach (int pixel in argbPixels)
+        double total = 0;
+        foreach (int argb in argbPixels)
         {
-            // Extract RGB components
-            int r = (pixel >> 16) & 0xFF;
-            int g = (pixel >> 8) & 0xFF;
-            int b = pixel & 0xFF;
-            // Simple luminance approximation
-            total += (r + g + b) / 3;
+            byte r = (byte)((argb >> 16) & 0xFF);
+            byte g = (byte)((argb >> 8) & 0xFF);
+            byte b = (byte)(argb & 0xFF);
+            double lum = 0.299 * r + 0.587 * g + 0.114 * b;
+            total += lum;
         }
-        return (double)total / argbPixels.Length;
+        return total / argbPixels.Length;
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to simulate camera shake on a PNG template and evaluate how the blur affects overall image brightness.
- * 2. When creating automated tests that compare pre‑ and post‑filter brightness levels for quality‑control pipelines.
- * 3. When generating motion‑blurred assets for games or UI mockups while tracking the histogram shift to maintain visual consistency.
- * 4. When processing scanned documents to add a realistic motion effect and measuring the resulting brightness change for OCR preprocessing.
- * 5. When building a batch image‑processing tool that applies a specific motion‑blur angle and size, then logs the brightness difference for analytics.
+ * 1. When you need to simulate camera shake on a PNG template and evaluate how the motion blur affects overall image brightness.
+ * 2. When generating visual effects for games or UI assets and you want to quantify the brightness change caused by a 10‑pixel, 150‑degree motion blur.
+ * 3. When performing automated quality checks on processed images and need to compare pre‑ and post‑blur average brightness using Aspose.Imaging.
+ * 4. When creating a batch workflow that applies a specific motion‑blur kernel to product photos and logs the brightness shift for analytics.
+ * 5. When developing a photo‑editing tool that lets users preview motion blur on PNG files and see the exact change in image luminance.
  */
