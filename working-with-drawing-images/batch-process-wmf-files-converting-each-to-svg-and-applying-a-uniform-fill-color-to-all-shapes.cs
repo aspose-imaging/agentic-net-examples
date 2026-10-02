@@ -1,63 +1,59 @@
-// HOW-TO: Batch Convert WMF to SVG With Uniform Fill Color In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WMF to SVG with Uniform Fill Color in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputWmf";
-            string outputDir = @"C:\OutputSvg";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all WMF files in the input directory
-            string[] wmfFiles = Directory.GetFiles(inputDir, "*.wmf");
-
-            foreach (string inputPath in wmfFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build the output SVG file path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".svg");
+                string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WMF image
-                using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set up SVG save options
-                    SvgOptions saveOptions = new SvgOptions
+                    var svgOptions = new SvgOptions
                     {
-                        TextAsShapes = true
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.Blue,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
                     };
 
-                    // Configure rasterization options with a uniform fill color
-                    WmfRasterizationOptions rasterizationOptions = new WmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.Blue, // uniform fill color for shapes/background
-                        PageSize = wmfImage.Size,
-                        RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-                    };
-
-                    saveOptions.VectorRasterizationOptions = rasterizationOptions;
-
-                    // Save the image as SVG
-                    wmfImage.Save(outputPath, saveOptions);
+                    image.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -70,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a legacy library of Windows Metafile (WMF) icons to scalable SVG graphics for responsive web pages, applying a consistent color theme.
- * 2. When generating SVG assets from multiple WMF diagrams for documentation, and you want all shapes to share the same fill color to match corporate branding.
- * 3. When automating the conversion of batch‑processed WMF floor plans into SVG files for integration with mapping software, ensuring a uniform background color.
- * 4. When preparing vector illustrations originally stored as WMF for printing, converting them to SVG while setting a single fill color to simplify downstream color adjustments.
- * 5. When building a C# tool that processes many WMF files at once, converting each to SVG and applying a standard fill color to meet accessibility contrast requirements.
+ * 1. When you need to transform a collection of legacy WMF drawings into scalable SVG files while applying the same fill color to all shapes for consistent branding.
+ * 2. When an automated build process must generate web‑ready vector graphics from WMF assets and ensure every graphic uses a predefined background color.
+ * 3. When a reporting tool requires converting multiple WMF icons to SVG format and wants a uniform color theme without manually editing each file.
+ * 4. When migrating a desktop application’s UI assets from WMF to SVG for responsive design and you need to apply a single fill color across all converted images.
+ * 5. When creating a batch script that prepares WMF illustrations for print‑to‑screen conversion, saving them as SVG with a consistent color to match corporate style guidelines.
  */
