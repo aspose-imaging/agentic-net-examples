@@ -1,41 +1,37 @@
-// HOW-TO: Convert DICOM to PNG with Otsu Binarization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to PNG with Otsu Threshold Binarization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.dicom";
-        string outputPath = @"C:\temp\sample.BinarizeOtsu.png";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                // Cast the generic Image to DicomImage
-                DicomImage dicomImage = (DicomImage)image;
+                image.BinarizeOtsu();
 
-                // Apply Otsu threshold binarization
-                dicomImage.BinarizeOtsu();
-
-                // Save the binarized image as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to extract binary masks from DICOM scans for analysis, developers can load the DICOM, apply Otsu thresholding, and save the result as a PNG.
- * 2. When integrating DICOM data into a web portal that only supports PNG images, developers can convert and binarize the image in one step.
- * 3. When preparing DICOM images for machine‑learning preprocessing, developers may need a clean black‑and‑white PNG representation created via Otsu binarization.
- * 4. When generating printable reports that require high‑contrast images, developers can transform DICOM files into binarized PNGs for better readability.
- * 5. When automating a batch workflow that extracts regions of interest from radiology files, developers can use this code to threshold and export each DICOM as a PNG mask.
+ * 1. When a medical imaging application needs to turn grayscale DICOM scans into high‑contrast black‑and‑white PNGs for web display.
+ * 2. When a radiology workflow requires automated binarization of DICOM images to highlight regions of interest before archiving them as PNG files.
+ * 3. When a research project converts DICOM datasets into PNG format for use with machine‑learning models that expect binary images.
+ * 4. When a hospital information system generates printable PNG reports from DICOM scans by applying Otsu’s threshold to improve readability.
+ * 5. When a developer integrates Aspose.Imaging into a C# service that processes incoming DICOM files and outputs PNG thumbnails with automatic thresholding.
  */

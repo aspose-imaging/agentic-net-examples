@@ -1,10 +1,9 @@
-// HOW-TO: Convert Multi‑Page DjVu to Separate PNG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Each DjVu Page to Separate PNG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
@@ -23,18 +22,24 @@ class Program
 
             Directory.CreateDirectory(outputDirectory);
 
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                int pageCount = djvuImage.Pages.Length;
-                for (int i = 0; i < pageCount; i++)
+                for (int i = 0; i < djvu.Pages.Length; i++)
                 {
-                    DjvuPage page = (DjvuPage)djvuImage.Pages[i];
-                    using (page)
+                    using (RasterImage page = (RasterImage)djvu.Pages[i])
                     {
-                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                        if (!page.IsCached)
+                        {
+                            page.CacheData();
+                        }
+
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        page.Save(outputPath, new PngOptions());
+
+                        using (PngOptions options = new PngOptions())
+                        {
+                            page.Save(outputPath, options);
+                        }
                     }
                 }
             }
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu document as high‑quality PNG images for web preview or further processing.
- * 2. When an archival system stores scanned books in DjVu format and you must generate PNG thumbnails for a searchable catalog.
- * 3. When a document‑management workflow requires converting DjVu pages to PNG to apply OCR or other image‑analysis tools that only support PNG.
- * 4. When a desktop application must batch‑convert a folder of DjVu files into individual PNG pages for printing or editing in graphic software.
- * 5. When integrating Aspose.Imaging in a C# service that receives DjVu uploads and needs to serve each page as a PNG to client browsers.
+ * 1. When you need to extract each page of a multi‑page DjVu document as separate PNG images for web publishing.
+ * 2. When a document conversion service must generate PNG previews of DjVu files for thumbnail galleries.
+ * 3. When an archival workflow converts DjVu scans into PNG files to ensure compatibility with modern image viewers.
+ * 4. When an OCR pipeline requires DjVu pages to be saved as PNG before text recognition.
+ * 5. When a batch job processes a folder of DjVu files, converting all pages to PNG for downstream processing.
  */

@@ -4,46 +4,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.eps";
-            string outputPath = "output.jpg";
+            string outputPath = "output\\scaled.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Calculate new dimensions with a scaling factor of 1.5
-                int newWidth = (int)Math.Round(image.Width * 1.5);
-                int newHeight = (int)Math.Round(image.Height * 1.5);
-
-                // Resize using a high‑quality resampling method
-                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-                // Prepare high‑quality JPEG options
-                var jpegOptions = new JpegOptions
+                float scale = 1.5f;
+                var rasterOptions = new EpsRasterizationOptions
                 {
-                    Quality = 100 // maximum quality
+                    PageWidth = epsImage.Width * scale,
+                    PageHeight = epsImage.Height * scale
                 };
 
-                // Save as JPEG
-                image.Save(outputPath, jpegOptions);
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 100,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                epsImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enlarge a vector EPS logo to fit a larger layout while preserving detail and then deliver it as a high‑resolution JPEG for web or print.
- * 2. When a printing workflow requires converting EPS artwork to JPEG with a custom 1.5× scale to match a specific DPI requirement.
- * 3. When an e‑commerce platform must generate product thumbnails from EPS source files at a larger size with maximum JPEG quality for product pages.
- * 4. When a desktop application automates batch processing of EPS diagrams, scaling each by 150 % and saving them as lossless‑quality JPEGs for archival.
- * 5. When a reporting tool needs to embed EPS charts into PDF reports by first scaling them and converting to high‑quality JPEG images for compatibility.
+ * 1. When you need to enlarge a vector EPS logo to 150 % and deliver it as a high‑resolution JPEG for web or print using C#.
+ * 2. When a printing workflow requires converting EPS artwork to a JPEG thumbnail with a custom scale to preview the final size.
+ * 3. When an e‑commerce platform must generate product images from EPS source files at a larger size while preserving maximum JPEG quality.
+ * 4. When a document automation system has to rasterize scaled EPS diagrams into JPEGs for inclusion in PDF reports.
+ * 5. When a legacy design asset in EPS format must be up‑scaled and saved as a JPEG for compatibility with image‑processing libraries that only support raster formats.
  */

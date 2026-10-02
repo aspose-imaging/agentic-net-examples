@@ -1,50 +1,42 @@
-// HOW-TO: Render EMF to PNG Bitmap Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF Vector Image to PNG Bitmap with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.emf";
-            string outputPath = "Output/sample.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access size
-                EmfImage emfImage = (EmfImage)image;
-
-                // Set up rasterization options for EMF
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                var vectorOptions = new VectorRasterizationOptions
                 {
-                    PageSize = emfImage.Size,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
                     BackgroundColor = Color.White
                 };
 
-                // Configure PNG save options with vector rasterization
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = vectorOptions,
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save the rendered bitmap as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -58,8 +50,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to display a Windows Metafile (EMF) on a web page that only supports PNG images.
- * 2. When converting vector-based EMF icons into raster PNG files for use in mobile applications.
- * 3. When generating thumbnail previews of EMF documents for a document management system.
- * 4. When batch‑processing EMF reports to create high‑quality PNG assets for email newsletters.
- * 5. When preserving the original EMF dimensions while rasterizing it to a PNG for printing workflows.
+ * 2. When generating thumbnail previews of vector diagrams for reporting tools that require raster formats.
+ * 3. When converting printed vector assets into lossless PNG files for inclusion in PDF documents.
+ * 4. When automating batch processing of EMF icons to PNG for mobile app resources.
+ * 5. When preserving the original dimensions and white background of an EMF while exporting it to a PNG for archival purposes.
  */

@@ -1,50 +1,40 @@
-// HOW-TO: Convert DjVu Pages to Interlaced GIF Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document Pages to Interlaced GIF Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDir = @"C:\temp\output";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "document.djvu");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Load the DjVu document from a file stream
-            using (FileStream inputStream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(inputStream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Iterate through each page and save as an interlaced GIF
-                foreach (DjvuPage page in djvuImage.Pages)
+                for (int i = 0; i < djvu.Pages.Length; i++)
                 {
-                    string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.gif");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure GIF options with interlacing enabled
-                    GifOptions gifOptions = new GifOptions
+                    using (RasterImage pageImage = (RasterImage)djvu.Pages[i])
                     {
-                        Interlaced = true
-                    };
+                        string outputPath = Path.Combine("Output", $"page_{i + 1}.gif");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as a GIF file
-                    page.Save(outputPath, gifOptions);
+                        GifOptions gifOptions = new GifOptions
+                        {
+                            Interlaced = true
+                        };
+
+                        pageImage.Save(outputPath, gifOptions);
+                    }
                 }
             }
         }
@@ -57,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu document and save them as web‑friendly interlaced GIFs for faster progressive loading.
- * 2. When generating thumbnail previews of DjVu files for a web gallery that requires GIF format with interlacing to improve perceived load time.
- * 3. When converting scanned archival DjVu files into GIF images for legacy applications that only support GIF and benefit from interlaced rendering.
- * 4. When creating a batch process that reads DjVu reports and outputs each page as an interlaced GIF to be embedded in email newsletters.
- * 5. When preparing DjVu e‑books for platforms that accept only GIF images, ensuring each page is saved with interlacing to reduce bandwidth usage.
+ * 1. When you need to extract each page of a multi‑page DjVu file and create web‑friendly interlaced GIFs for faster progressive loading.
+ * 2. When a digital archive requires converting scanned DjVu documents into animated‑compatible GIF frames while preserving page quality.
+ * 3. When building a C# application that generates thumbnail previews of DjVu pages as interlaced GIFs for email attachments.
+ * 4. When migrating legacy DjVu manuals to a format that can be displayed on browsers without plug‑ins by saving each page as an interlaced GIF.
+ * 5. When automating a batch process that reads DjVu files and outputs interlaced GIFs for use in slide shows or presentations.
  */

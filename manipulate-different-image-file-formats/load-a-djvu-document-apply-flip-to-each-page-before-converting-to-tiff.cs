@@ -4,7 +4,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -13,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "sample.djvu";
-            string outputDirectory = "output";
+            string inputPath = "input.djvu";
+            string outputPath = "output\\output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,19 +21,17 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                foreach (var page in djvu.Pages)
                 {
                     page.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.tiff");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    page.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
                 }
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process scanned DjVu documents, flip each page for correct orientation and archive them as high‑quality TIFF files using C#.
- * 2. When preparing DjVu files for OCR engines that require left‑to‑right page layout, you can horizontally flip the pages before converting them to TIFF.
- * 3. When migrating legacy DjVu archives to a TIFF‑based workflow, this code lets you automatically correct mirrored pages during the conversion.
- * 4. When building a document‑viewing application that displays pages in TIFF format, you may need to flip DjVu pages to match the viewer’s coordinate system.
- * 5. When creating print‑ready TIFF images from DjVu sources that were originally scanned upside‑down, the code ensures each page is mirrored correctly before saving.
+ * 1. When you need to prepare scanned DjVu documents for printing by mirroring each page and saving them as a multi‑page TIFF file.
+ * 2. When a workflow requires converting archived DjVu files into TIFF format while applying a horizontal flip to correct page orientation.
+ * 3. When integrating document processing that must transform DjVu pages for compatibility with software that only reads TIFF images.
+ * 4. When automating batch conversion of DjVu manuals into TIFF for inclusion in a PDF generation pipeline, ensuring pages are flipped correctly.
+ * 5. When developing a C# application that extracts DjVu pages, mirrors them, and stores the result as a single TIFF file for archival purposes.
  */

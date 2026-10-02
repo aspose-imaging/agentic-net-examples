@@ -1,63 +1,64 @@
-// HOW-TO: Batch Convert Multiple CDR Files to LZW Compressed TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to LZW Compressed TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Input\file1.cdr",
-                @"C:\Input\file2.cdr",
-                @"C:\Input\file3.cdr"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Output\";
-
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
+                if (!Path.GetExtension(inputPath).Equals(".cdr", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output file path (same name with .tif extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load CDR image with default load options
-                using (FileStream stream = File.OpenRead(inputPath))
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    var loadOptions = new CdrLoadOptions();
-                    using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                    tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        // Set up TIFF save options with LZW compression
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                        {
-                            Compression = TiffCompressions.Lzw,
-                            BitsPerSample = new ushort[] { 8, 8, 8 },
-                            ByteOrder = Aspose.Imaging.FileFormats.Tiff.Enums.TiffByteOrder.BigEndian,
-                            Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb,
-                            PlanarConfiguration = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPlanarConfigs.Contiguous
-                        };
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    };
 
-                        // Save as TIFF
-                        cdrImage.Save(outputPath, tiffOptions);
-                    }
+                    cdr.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -70,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to archive a collection of CorelDRAW drawings as lossless TIFF files for long‑term storage.
- * 2. When an automated build pipeline must generate print‑ready TIFF images from CDR source files before sending them to a publishing system.
- * 3. When a document management system imports CDR artwork and stores it in a standardized TIFF format with LZW compression to reduce file size.
- * 4. When a batch conversion tool is required to process dozens of CDR files at once, ensuring each output TIFF uses the same compression settings.
- * 5. When a developer wants to integrate CDR‑to‑TIFF conversion into a C# application that validates file existence and creates output directories automatically.
+ * 1. When a design studio needs to archive multiple CorelDRAW (.cdr) drawings as lossless TIFF images for long‑term storage.
+ * 2. When an automated workflow must convert a folder of CDR files to TIFF with LZW compression before uploading to a document management system.
+ * 3. When a printing service requires batch conversion of vector CDR artwork to raster TIFF files with a white background for pre‑press processing.
+ * 4. When a migration script needs to replace legacy CDR assets with TIFF equivalents that preserve image quality while reducing file size.
+ * 5. When a .NET application must process a batch of CDR files and generate LZW‑compressed TIFFs for use in medical imaging or GIS systems.
  */

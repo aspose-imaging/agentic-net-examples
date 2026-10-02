@@ -1,66 +1,60 @@
-// HOW-TO: Batch Convert HTML5 Canvas Files to Uniform JPEG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Images to JPEG with Fixed Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure the output base directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // List of HTML5 Canvas files to process (hard‑coded)
-            string[] inputFiles = new string[]
-            {
-                Path.Combine(inputDir, "canvas1.html"),
-                Path.Combine(inputDir, "canvas2.html"),
-                Path.Combine(inputDir, "canvas3.html")
-            };
-
-            // Desired uniform dimensions for all JPEGs
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
             int targetWidth = 800;
             int targetHeight = 600;
 
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] inputFiles = Directory.GetFiles(inputDirectory);
             foreach (string inputPath in inputFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the Canvas image (Aspose.Imaging supports loading from HTML5 Canvas files)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to the uniform dimensions if necessary
-                    if (image.Width != targetWidth || image.Height != targetHeight)
+                    if (!image.IsCached)
+                        image.CacheData();
+
+                    image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+
+                    JpegOptions jpegOptions = new JpegOptions()
                     {
-                        image.Resize(targetWidth, targetHeight);
-                    }
-
-                    // Prepare output file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure JPEG save options
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
+                        Source = new FileCreateSource(outputPath, false),
                         Quality = 90
                     };
 
-                    // Save the image as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -74,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate thumbnail JPEGs from a set of HTML5 Canvas drawings stored as .html files for a web gallery.
- * 2. When an e‑learning platform must convert user‑created canvas sketches into uniformly sized JPEGs for PDF report generation.
- * 3. When a marketing automation tool processes batch canvas advertisements and requires consistent JPEG dimensions for email campaigns.
- * 4. When a legacy system only accepts JPEG images, and you must transform canvas‑based graphics into the required format while resizing them to a standard size.
- * 5. When a desktop application needs to archive canvas artwork by converting multiple HTML5 Canvas files to JPEGs with the same width and height for storage efficiency.
+ * 1. When you need to generate thumbnails of user‑uploaded pictures for a web gallery by resizing them to a standard width and height and saving them as JPEGs.
+ * 2. When you have a folder of raw canvas screenshots that must be compressed into smaller JPEG files for faster page load times.
+ * 3. When an automated build process must convert a batch of PNG or BMP assets into uniform‑size JPEGs for inclusion in a mobile app.
+ * 4. When you want to archive a collection of images with consistent dimensions and JPEG quality to meet a third‑party API’s image specifications.
+ * 5. When a server‑side service processes incoming image files, resizes them to 800×600, and stores the results as JPEGs for downstream reporting.
  */

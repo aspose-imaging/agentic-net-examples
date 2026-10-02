@@ -1,46 +1,49 @@
-// HOW-TO: Read JPEG EXIF Camera Make and Model and Log with C# (Aspose.Imaging for .NET)
+// HOW-TO: Read EXIF Camera Make and Model from JPEG Batch in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\exif_log.txt";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string inputDirectory = "InputImages";
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
 
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            foreach (var filePath in jpegFiles)
             {
-                // Access EXIF data
-                JpegExifData jpegExif = image.ExifData as JpegExifData;
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
+                }
 
-                // Prepare log content
-                string make = jpegExif?.Make ?? "Unknown";
-                string model = jpegExif?.Model ?? "Unknown";
-                string logLine = $"Camera Make: {make}, Model: {model}";
-
-                // Write to console
-                Console.WriteLine(logLine);
-
-                // Append to log file
-                File.AppendAllText(outputPath, logLine + Environment.NewLine);
+                using (JpegImage image = (JpegImage)Image.Load(filePath))
+                {
+                    var exif = image.ExifData;
+                    if (exif != null)
+                    {
+                        Console.WriteLine($"{Path.GetFileName(filePath)}: EXIF data present.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{Path.GetFileName(filePath)}: No EXIF data.");
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a report of camera models used for a photo shoot by extracting EXIF data from JPEG files with Aspose.Imaging in C#.
- * 2. When an application must verify that uploaded JPEG images come from approved camera manufacturers before further processing.
- * 3. When building a digital asset management system that catalogs images based on their make and model metadata extracted via Aspose.Imaging.
- * 4. When troubleshooting image quality issues by logging the camera make and model of each JPEG in a batch job.
- * 5. When creating an audit trail for compliance that records the source device information of stored JPEG images.
+ * 1. When you need to generate a report of camera models used in a collection of JPEG photos for digital asset management.
+ * 2. When you want to verify that uploaded images contain EXIF metadata before publishing them on a website.
+ * 3. When you are building a photo‑organizing tool that groups images by camera make for easier browsing.
+ * 4. When you must audit image files for compliance by confirming that each JPEG includes manufacturer information.
+ * 5. When you are creating a migration script that extracts EXIF details to populate a database of image metadata.
  */

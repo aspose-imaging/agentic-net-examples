@@ -1,9 +1,8 @@
-// HOW-TO: Batch Convert Multiple CDR Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -11,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded list of input CDR files
+            // Hardcoded input file paths
             string[] inputPaths = new string[]
             {
                 @"C:\Input\file1.cdr",
@@ -21,37 +20,26 @@ class Program
 
             foreach (string inputPath in inputPaths)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Derive output PDF path (same folder, same name with .pdf)
+                // Determine output path (same folder, .pdf extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
-                using (CdrImage image = (CdrImage)Image.Load(inputPath))
+                // Load CDR and save as PDF with default settings
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Use the first page for conversion
-                    var page = (CdrImagePage)image.Pages[0];
-
-                    // Prepare PDF options with rasterization settings matching the page size
-                    PdfOptions pdfOptions = new PdfOptions();
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
-                    };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the page as PDF
-                    page.Save(outputPath, pdfOptions);
+                    PdfOptions options = new PdfOptions();
+                    image.Save(outputPath, options);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -63,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a collection of CorelDRAW (.cdr) drawings into searchable PDF documents for archiving or distribution.
- * 2. When a desktop application must process user‑uploaded CDR files in bulk and generate PDF versions without manual intervention.
- * 3. When a server‑side service has to convert multiple design files to PDF to integrate with a document‑management workflow.
- * 4. When you want to ensure each CDR page retains its original dimensions during conversion by using Aspose.Imaging’s rasterization options.
- * 5. When you are building a migration tool that reads CDR assets from a folder structure and outputs matching PDF files for cross‑platform compatibility.
+ * 1. When you need to automate the conversion of several CorelDRAW (.cdr) drawings into PDF documents for archiving or sharing without manually opening each file.
+ * 2. When a desktop application must generate PDFs from a list of CDR files supplied by the user, ensuring the output files are saved in the same folder.
+ * 3. When a server‑side service processes uploaded CDR assets in bulk and creates PDF versions for preview in a web portal.
+ * 4. When you want to integrate Aspose.Imaging into a build script that converts design files to PDF as part of a continuous‑integration pipeline.
+ * 5. When an internal tool has to verify that each CDR file exists before converting it to PDF, creating the necessary output directories automatically.
  */

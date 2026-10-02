@@ -3,36 +3,32 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.bmp";
-            string outputPath = "C:\\temp\\output.webp";
+            string inputPath = Path.Combine(Directory.GetCurrentDirectory(), "Input", "sample.bmp");
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "Output", "sample.webp");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (BmpImage bmpImage = new BmpImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set WebP options for lossless compression
-                var webpOptions = new WebPOptions { Lossless = true };
-
-                // Save the image as WebP
-                bmpImage.Save(outputPath, webpOptions);
+                using (WebPOptions options = new WebPOptions())
+                {
+                    options.Lossless = true;
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -44,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of BMP graphics while preserving pixel‑perfect quality for web delivery.
- * 2. When an application must batch‑process legacy BMP assets and store them in the modern WebP format for faster page loads.
- * 3. When you want to generate lossless WebP thumbnails from BMP sources in a C# service without external tools.
- * 4. When integrating Aspose.Imaging into a .NET workflow to convert user‑uploaded BMP files to WebP for storage optimization.
- * 5. When preparing images for a mobile app that requires lossless WebP but receives BMP files from legacy systems.
+ * 1. When you need to reduce the file size of legacy BMP graphics while preserving pixel‑perfect quality for web delivery, you can convert them to lossless WebP using C# and Aspose.Imaging.
+ * 2. When building an automated pipeline that processes user‑uploaded BMP screenshots and stores them as WebP to save storage costs without sacrificing visual fidelity.
+ * 3. When migrating a desktop application’s assets from BMP to a modern web‑friendly format, you can programmatically convert each image to lossless WebP in .NET.
+ * 4. When creating a batch job that prepares images for responsive websites, converting BMP files to lossless WebP ensures fast loading times and smaller bandwidth usage.
+ * 5. When integrating image conversion into a CI/CD workflow to validate that all BMP resources are correctly transformed to lossless WebP before deployment.
  */

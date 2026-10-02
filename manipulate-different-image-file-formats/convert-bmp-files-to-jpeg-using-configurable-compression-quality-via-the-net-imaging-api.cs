@@ -1,57 +1,51 @@
-// HOW-TO: Convert BMP to JPEG with Adjustable Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to JPEG with Adjustable Quality Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.jpg";
-
-            // Configurable JPEG quality (1-100)
-            int jpegQuality = 85;
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.bmp";
+                string outputPath = "output/output.jpg";
+                int quality = 90;
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Set JPEG save options, including quality
-                JpegOptions saveOptions = new JpegOptions
+                if (!File.Exists(inputPath))
                 {
-                    Quality = jpegQuality
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as JPEG
-                image.Save(outputPath, saveOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = quality
+                    };
+                    image.Save(outputPath, jpegOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink large BMP files for faster web page loading by converting them to JPEG with a specific compression quality.
- * 2. When migrating legacy BMP assets to a modern format for compatibility with browsers and mobile devices while controlling image fidelity.
- * 3. When generating email attachments in C# and want to reduce attachment size by saving BMP screenshots as JPEG with a chosen quality level.
- * 4. When building an automated image processing pipeline that requires consistent JPEG output from BMP sources for downstream analytics or machine‑learning models.
- * 5. When preparing print‑ready images in a .NET application and must balance file size and visual quality by setting the JPEG quality parameter during conversion.
+ * 1. When a developer needs to reduce the file size of high‑resolution BMP screenshots for web upload by saving them as JPEG with a specific quality setting.
+ * 2. When integrating a .NET application that receives BMP images from legacy hardware and must store them as compressed JPEGs for archival storage.
+ * 3. When building an automated pipeline that converts user‑uploaded BMP avatars to JPEG thumbnails while preserving visual fidelity through configurable compression.
+ * 4. When migrating a document management system from BMP‑based assets to JPEG to improve loading speed, and the conversion quality must be tuned per project requirements.
+ * 5. When creating a desktop utility that allows end‑users to select a BMP file and export it as a JPEG with a chosen quality level for printing or sharing.
  */

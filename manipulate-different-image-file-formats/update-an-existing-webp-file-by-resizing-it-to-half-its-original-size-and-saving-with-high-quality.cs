@@ -7,43 +7,35 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output_resized.webp";
+        string inputPath = "input.webp";
+        string outputPath = "output\\resized.webp";
 
         try
         {
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image from the file
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (WebPImage image = (WebPImage)Image.Load(inputPath))
             {
-                // Compute half of the original dimensions
-                int newWidth = webPImage.Width / 2;
-                int newHeight = webPImage.Height / 2;
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
 
-                // Resize using bilinear resampling (good quality)
-                webPImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
 
-                // Prepare high‑quality WebP save options
-                var saveOptions = new WebPOptions
+                WebPOptions options = new WebPOptions
                 {
-                    Lossless = false,   // lossy compression with high quality
-                    Quality = 100f      // maximum quality
+                    Lossless = false,
+                    Quality = 100
                 };
 
-                // Save the resized image
-                webPImage.Save(outputPath, saveOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller thumbnail versions of WebP photos for faster web page loading while preserving visual quality.
- * 2. When an e‑commerce platform must reduce the dimensions of product WebP images to meet a mobile‑friendly size limit without noticeable loss.
- * 3. When a content management system automatically creates optimized WebP previews for uploaded high‑resolution pictures.
- * 4. When a mobile app processes user‑captured WebP files to halve their resolution before uploading to conserve bandwidth.
- * 5. When a batch‑processing script updates existing WebP assets to a consistent half‑size for uniform display across a website.
+ * 1. When you need to generate a smaller, high‑quality version of an existing WebP photo for responsive web design.
+ * 2. When a mobile app must downscale user‑uploaded WebP images to reduce bandwidth while preserving visual fidelity.
+ * 3. When an e‑commerce platform wants to create half‑size product thumbnails from original WebP assets without losing quality.
+ * 4. When a content management system automatically resizes WebP graphics before storing them to save disk space yet keep sharpness.
+ * 5. When a batch‑processing script must update legacy WebP files to a standardized size for consistent display across browsers.
  */

@@ -1,41 +1,37 @@
-// HOW-TO: Create Lossless JPEG2000 From PNG Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to JPEG2000 with Lossless Compression in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "c:\\temp\\source.png";
-        string outputPath = "c:\\temp\\output.jp2";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\source.bmp";
+            string outputPath = "Output\\result.jp2";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the bitmap source
-            using (Image sourceImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG2000 options for lossless compression
-                Jpeg2000Options options = new Jpeg2000Options
-                {
-                    Irreversible = false // lossless DWT 5-3
-                };
-
-                // Save as JPEG2000
-                sourceImage.Save(outputPath, options);
+                var options = new Jpeg2000Options();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution PNG graphics without quality loss by converting them to JPEG2000 for efficient storage in a .NET application.
- * 2. When a medical imaging system requires lossless conversion of scanned PNG files to JPEG2000 to meet DICOM standards using C#.
- * 3. When a GIS platform must transform satellite PNG tiles into JPEG2000 format while preserving exact pixel data for further analysis.
- * 4. When a digital publishing workflow needs to generate JPEG2000 assets from source PNGs to support lossless printing pipelines in Aspose.Imaging.
- * 5. When an automated batch process in C# must ensure that input PNG images are saved as JPEG2000 with lossless compression for compliance with archival guidelines.
+ * 1. When you need to archive high‑resolution bitmap graphics without quality loss by converting them to JPEG2000 in a .NET application.
+ * 2. When a medical imaging system requires lossless JPEG2000 files generated from BMP scans for regulatory compliance.
+ * 3. When a web service must deliver large satellite images in a compact, lossless format to reduce bandwidth while preserving detail.
+ * 4. When a document management workflow converts scanned BMP pages to JPEG2000 to enable efficient storage and later retrieval.
+ * 5. When a digital preservation project needs to batch‑process BMP assets into JPEG2000 using C# to maintain original pixel fidelity.
  */

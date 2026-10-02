@@ -1,43 +1,47 @@
-// HOW-TO: Resize EPS Image to 2000 Pixels Width and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize EPS to 2000px Width and Convert to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\source.eps";
-            string outputPath = @"C:\Images\ResizedResult.jpg";
+            string inputPath = "input.eps";
+            string outputPath = "output/output.jpg";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Calculate new height to keep aspect ratio
+                int originalWidth = epsImage.Width;
+                int originalHeight = epsImage.Height;
+
                 int targetWidth = 2000;
-                int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+                int targetHeight = (int)Math.Round((double)originalHeight * targetWidth / originalWidth);
 
-                // Resize using a high‑quality interpolation method
-                image.Resize(targetWidth, targetHeight, ResizeType.Mitchell);
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = targetWidth,
+                    PageHeight = targetHeight
+                };
 
-                // Save as JPEG
-                var jpegOptions = new JpegOptions();
-                image.Save(outputPath, jpegOptions);
+                var jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                epsImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing system needs to generate web‑ready JPEG thumbnails from high‑resolution EPS logos while preserving the original proportions.
- * 2. When an e‑commerce platform must convert vector product illustrations to fixed‑width JPEGs for faster page loading.
- * 3. When a print‑to‑web workflow requires scaling EPS artwork to a 2000‑pixel width before embedding it in HTML emails.
- * 4. When a desktop application automates batch processing of EPS files, resizing them to a standard width and saving them as JPEG for archival.
- * 5. When a content management system needs to display user‑uploaded EPS diagrams as JPEG previews without distorting their aspect ratio.
+ * 1. When a designer provides vector EPS logos that need to be displayed on a website as optimized JPEG thumbnails of a fixed width.
+ * 2. When an e‑commerce platform must generate product images from EPS artwork, scaling them to 2000 px wide while preserving proportions for high‑resolution displays.
+ * 3. When a print‑to‑web workflow requires converting multi‑page EPS files to single‑page JPEGs with consistent width for email newsletters.
+ * 4. When a batch‑processing script needs to downsize large EPS diagrams to a manageable size before uploading them to a content‑management system.
+ * 5. When a mobile app backend must rasterize EPS illustrations to JPEG at a specific width to ensure fast loading on devices with limited bandwidth.
  */

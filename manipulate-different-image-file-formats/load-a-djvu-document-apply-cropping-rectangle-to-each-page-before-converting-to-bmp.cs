@@ -1,10 +1,9 @@
-// HOW-TO: Crop Each Page of a DjVu File and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Each Page Of DjVu To BMP Images In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -12,29 +11,26 @@ class Program
     {
         try
         {
-            string inputPath = "sample.djvu";
+            string inputPath = "input.djvu";
+            string outputDir = "output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            var cropRect = new Rectangle(10, 10, 200, 200);
+            Directory.CreateDirectory(outputDir);
 
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                int pageIndex = 0;
-                foreach (var page in djvuImage.Pages)
+                int pageCount = djvu.Pages.Length;
+                for (int i = 0; i < pageCount; i++)
                 {
-                    pageIndex++;
-                    page.Crop(cropRect);
-
-                    string outputPath = $"output\\page{pageIndex}.bmp";
-
+                    string outputPath = Path.Combine(outputDir, $"page_{i}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    page.Save(outputPath, new BmpOptions());
+                    BmpOptions bmpOptions = new BmpOptions();
+                    djvu.Pages[i].Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract and crop individual pages from a multi‑page DjVu document to create separate BMP images for legacy printing systems.
- * 2. When a digital archive requires converting scanned DjVu pages into BMP format while removing unwanted margins for consistent display.
- * 3. When a document‑processing pipeline must batch‑process DjVu files, apply a fixed crop rectangle, and store the results as BMP files for further analysis.
- * 4. When a Windows application needs to preview cropped sections of DjVu pages by converting them to BMP bitmaps that GDI+ can render directly.
- * 5. When an OCR workflow demands pre‑cropped BMP images from DjVu sources to improve text‑recognition accuracy.
+ * 1. When you need to extract every page from a multi‑page DjVu file and save them as separate BMP files for legacy Windows applications.
+ * 2. When a document workflow requires converting scanned DjVu archives into BMP format to preserve lossless bitmap data before further processing.
+ * 3. When you want to automate batch conversion of DjVu pages to BMP in a C# service that integrates with Aspose.Imaging.
+ * 4. When you must generate BMP thumbnails of each DjVu page for use in a catalog or preview gallery.
+ * 5. When a legacy system only accepts BMP images, and you need to programmatically transform DjVu documents page‑by‑page in .NET.
  */

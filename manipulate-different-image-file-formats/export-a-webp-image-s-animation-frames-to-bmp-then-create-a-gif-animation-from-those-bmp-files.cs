@@ -1,12 +1,17 @@
-// HOW-TO: Extract WebP Animation Frames To BMP And Create GIF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract WebP Animation Frames to BMP and Create GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
@@ -14,95 +19,51 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "input.webp";
-            string bmpOutputDir = "frames";
-            string outputGifPath = "output.gif";
+            string inputWebP = "input.webp";
+            string bmpFolder = "bmp_frames";
+            string outputGif = "output.gif";
 
-            // Validate input file
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputWebP))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputWebP}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(bmpOutputDir);
-            string outputGifDir = Path.GetDirectoryName(outputGifPath);
-            if (!string.IsNullOrWhiteSpace(outputGifDir))
+            Directory.CreateDirectory(bmpFolder);
+
+            List<Image> bmpImages = new List<Image>();
+
+            using (WebPImage webp = (WebPImage)Image.Load(inputWebP))
             {
-                Directory.CreateDirectory(outputGifDir);
-            }
-
-            // Load the animated WebP image
-            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
-            {
-                IMultipageImage multipage = webp as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The input file is not a multipage WebP image.");
-                    return;
-                }
-
-                int frameCount = multipage.PageCount;
-                var bmpPaths = new List<string>();
-
-                // Extract each frame to BMP
+                int frameCount = webp.PageCount;
                 for (int i = 0; i < frameCount; i++)
                 {
                     RasterImage frame = (RasterImage)webp.Pages[i];
-                    string bmpPath = Path.Combine(bmpOutputDir, $"frame_{i}.bmp");
-                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-
-                    using (frame)
-                    {
-                        frame.Save(bmpPath, new BmpOptions());
-                    }
-
-                    bmpPaths.Add(bmpPath);
+                    string bmpPath = Path.Combine(bmpFolder, $"frame{i}.bmp");
+                    frame.Save(bmpPath, new BmpOptions());
+                    Image bmpImg = Image.Load(bmpPath);
+                    bmpImages.Add(bmpImg);
                 }
+            }
 
-                // Load BMP frames for GIF creation
-                var bmpFrames = new List<RasterImage>();
-                foreach (var path in bmpPaths)
+            if (bmpImages.Count > 0)
+            {
+                string outputDir = Path.GetDirectoryName(outputGif);
+                if (!string.IsNullOrWhiteSpace(outputDir))
                 {
-                    RasterImage img = (RasterImage)Image.Load(path);
-                    bmpFrames.Add(img);
+                    Directory.CreateDirectory(outputDir);
                 }
 
-                if (bmpFrames.Count == 0)
+                using (Image gifImage = Image.Create(bmpImages.ToArray(), true))
                 {
-                    Console.Error.WriteLine("No frames were extracted.");
-                    return;
+                    GifOptions gifOptions = new GifOptions();
+                    gifImage.Save(outputGif, gifOptions);
                 }
+            }
 
-                // Create GIF animation from BMP frames
-                RasterImage first = bmpFrames[0];
-                using (GifImage gif = new GifImage(new GifFrameBlock((ushort)first.Width, (ushort)first.Height)))
-                {
-                    // Draw first frame onto the initial GIF frame
-                    Graphics g0 = new Graphics(gif.ActiveFrame);
-                    g0.DrawImage(first, new Rectangle(0, 0, first.Width, first.Height));
-
-                    // Add remaining frames
-                    for (int i = 1; i < bmpFrames.Count; i++)
-                    {
-                        RasterImage frameImg = bmpFrames[i];
-                        GifFrameBlock block = new GifFrameBlock((ushort)frameImg.Width, (ushort)frameImg.Height);
-                        Graphics g = new Graphics(block);
-                        g.DrawImage(frameImg, new Rectangle(0, 0, frameImg.Width, frameImg.Height));
-                        gif.AddBlock(block);
-                    }
-
-                    // Save the GIF animation
-                    gif.Save(outputGifPath, new GifOptions());
-                }
-
-                // Dispose BMP frames
-                foreach (var img in bmpFrames)
-                {
-                    img.Dispose();
-                }
+            foreach (var img in bmpImages)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -114,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an animated WebP advertisement into a series of BMP frames for legacy Windows applications that only support BMP.
- * 2. When you must generate a GIF preview from a WebP animation to embed in email newsletters that do not support WebP.
- * 3. When you want to extract individual frames from a WebP sprite sheet to edit them separately in a graphics editor that reads BMP files.
- * 4. When you are building a server‑side service that receives WebP animations and returns GIFs for browsers lacking WebP support.
- * 5. When you need to archive WebP animation frames as lossless BMP files before applying custom watermarking or processing pipelines.
+ * 1. When you need to convert an animated WebP file into a GIF for browsers that only support GIF animations.
+ * 2. When you want to extract each frame of a WebP animation as separate BMP images for editing in Windows‑based graphics tools.
+ * 3. When you must generate a GIF slideshow from BMP frames extracted from a WebP animation to embed in presentations or email newsletters.
+ * 4. When you are building a server‑side service that receives WebP animations and outputs GIFs for legacy mobile devices using Aspose.Imaging for .NET.
+ * 5. When you need to archive the individual frames of a WebP animation in lossless BMP format before applying custom watermarking or frame‑by‑frame analysis.
  */

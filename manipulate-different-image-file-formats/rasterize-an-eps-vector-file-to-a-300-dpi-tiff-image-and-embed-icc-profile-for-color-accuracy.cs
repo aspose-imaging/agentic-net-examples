@@ -1,4 +1,11 @@
-// HOW-TO: Convert EPS to 300 DPI TIFF with Rasterization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rasterize EPS to 300 DPI TIFF with ICC Profile in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -24,27 +31,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                double widthInches = image.SizeF.Width;
-                double heightInches = image.SizeF.Height;
-                const int dpi = 300;
-                int pixelWidth = (int)(widthInches * dpi);
-                int pixelHeight = (int)(heightInches * dpi);
-
-                var rasterOptions = new EpsRasterizationOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = pixelWidth,
-                    PageHeight = pixelHeight
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height,
+                    BackgroundColor = Color.White
                 };
 
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    VectorRasterizationOptions = rasterOptions,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                })
+                {
+                    string iccPath = "profile.icc";
+                    if (File.Exists(iccPath))
+                    {
+                        byte[] iccData = File.ReadAllBytes(iccPath);
+                        tiffOptions.IccProfile = new MemoryStream(iccData);
+                    }
 
-                image.Save(outputPath, tiffOptions);
+                    epsImage.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution printable TIFFs from EPS artwork for a publishing workflow using C#.
- * 2. When a desktop application must convert vector logos stored as EPS into 300 DPI raster images for inclusion in PDFs.
- * 3. When an automated build process has to batch‑process EPS files into TIFFs with exact pixel dimensions for a digital asset management system.
- * 4. When a web service receives EPS files and must return TIFF thumbnails at print quality for preview in a .NET backend.
- * 5. When you need to preserve color consistency by rasterizing EPS to TIFF at 300 DPI before applying an ICC profile in a later step.
+ * 1. When you need to convert a print‑ready EPS artwork into a high‑resolution 300 DPI TIFF for pre‑press workflows while preserving color accuracy with an embedded ICC profile.
+ * 2. When a desktop application must display or archive vector graphics as raster images that match the original size and background, using C# and Aspose.Imaging.
+ * 3. When generating thumbnails or PDFs from EPS files for a digital asset management system that requires TIFF output at a specific resolution and embedded color profile.
+ * 4. When automating batch processing of EPS logos to create print‑ready TIFF files for a publishing pipeline that demands consistent DPI and color management.
+ * 5. When integrating a C# service that receives EPS files and needs to deliver them as TIFFs suitable for high‑quality printing, ensuring the correct resolution and ICC profile are applied.
  */

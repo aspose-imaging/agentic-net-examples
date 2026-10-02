@@ -1,49 +1,45 @@
-// HOW-TO: Convert a Single GIF Frame to Lossless WebP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert a GIF Frame to Lossless WebP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output_frame.webp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "Input/sample.gif";
+            string outputPath = "Output/frame.webp";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to GifImage to access GIF-specific features
-                GifImage gif = (GifImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Index of the frame to convert (0‑based)
-                int frameIndex = 0;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure WebP options with lossless compression
-                WebPOptions webpOptions = new WebPOptions
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            {
+                int frameIndex = 0; // specify the frame index to convert
+                if (frameIndex < 0 || frameIndex >= gif.PageCount)
                 {
-                    Lossless = true,
-                    // Export only the specified frame
-                    MultiPageOptions = new MultiPageOptions(new IntRange(frameIndex, frameIndex + 1))
-                };
+                    Console.Error.WriteLine($"Invalid frame index: {frameIndex}");
+                    return;
+                }
 
-                // Save the selected frame as a WebP image
-                gif.Save(outputPath, webpOptions);
+                gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[frameIndex];
+                RasterImage frame = gif.ActiveFrame;
+
+                using (WebPOptions options = new WebPOptions())
+                {
+                    options.Lossless = true;
+                    frame.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first frame of an animated GIF and store it as a high‑quality, lossless WebP image for web optimization.
- * 2. When you want to generate thumbnails from specific GIF frames without sacrificing visual fidelity, using C# and Aspose.Imaging.
- * 3. When a mobile app requires a single GIF frame in WebP format to reduce bandwidth while preserving exact pixel data.
- * 4. When converting legacy GIF assets to modern WebP files for a content management system, selecting only the required frame to save storage.
- * 5. When automating a batch process that extracts a chosen frame from multiple GIFs and saves each as lossless WebP for archival purposes.
+ * 1. When you need to extract a single animation frame from a GIF and store it as a high‑quality, lossless WebP image for use on modern web pages.
+ * 2. When an e‑commerce platform wants to generate thumbnail previews from animated product GIFs without sacrificing visual fidelity, converting each frame to WebP.
+ * 3. When a mobile app requires lightweight assets and you must convert specific GIF frames to lossless WebP to reduce file size while preserving transparency.
+ * 4. When automating a batch process that extracts key frames from GIF stickers and saves them as WebP for faster loading in chat applications.
+ * 5. When integrating Aspose.Imaging in a C# service that needs to serve individual GIF frames as lossless WebP images for SEO‑friendly image indexing.
  */

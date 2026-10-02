@@ -1,41 +1,46 @@
-// HOW-TO: Increase Brightness of DNG Image and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust DNG Brightness By 20% And Convert To JPEG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dng";
-        string outputPath = "output\\result.jpg";
+        string outputPath = "output/output.jpg";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image
-            using (DngImage dng = (DngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Increase brightness by ~20% (51 out of 255)
-                dng.AdjustBrightness(51);
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
+                // Increase brightness by approximately 20%
+                raster.AdjustBrightness(51);
 
-                // Save as JPEG
-                dng.Save(outputPath, jpegOptions);
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to batch‑process raw DNG files, brighten them by about 20 % and deliver the results as JPEGs for web galleries.
- * 2. When an e‑commerce platform receives product photos in DNG format and wants to improve visibility by adjusting brightness before converting them to JPEG for faster page loads.
- * 3. When a mobile app backend must convert user‑uploaded raw DNG images to JPEG while applying a brightness boost to compensate for underexposed shots.
- * 4. When a digital archivist wants to preserve raw DNG scans but also create brighter JPEG previews for quick browsing.
- * 5. When a scientific imaging workflow requires enhancing the brightness of raw sensor data in DNG files and exporting the adjusted images as JPEG for reporting.
+ * 1. When a photographer needs to quickly brighten raw DNG files and deliver them as smaller JPEGs for web galleries.
+ * 2. When an e‑commerce platform processes product photos captured in DNG format, enhancing visibility before storing them as JPEG thumbnails.
+ * 3. When a mobile app backend receives raw camera images, applies a 20% brightness boost, and converts them to JPEG for faster client download.
+ * 4. When a digital archiving system standardizes legacy DNG scans by adjusting exposure and saving them in a widely supported JPEG format.
+ * 5. When a batch script automates post‑processing of raw images, increasing brightness and compressing them to JPEG for email distribution.
  */

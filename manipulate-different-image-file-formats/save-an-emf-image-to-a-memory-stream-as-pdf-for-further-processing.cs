@@ -3,45 +3,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\sample.emf";
+            string inputPath = "Input\\sample.emf";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the EMF image
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Set up vector rasterization options for EMF
-                var emfRasterOptions = new EmfRasterizationOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageSize = image.Size
-                };
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
 
-                // Configure PDF save options
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = emfRasterOptions
-                };
+                        image.Save(ms, pdfOptions);
+                    }
 
-                // Save to a memory stream as PDF
-                using (MemoryStream pdfStream = new MemoryStream())
-                {
-                    image.Save(pdfStream, pdfOptions);
-
-                    // Example of further processing: output the size of the PDF data
-                    Console.WriteLine($"PDF size in bytes: {pdfStream.Length}");
+                    Console.WriteLine($"PDF saved to memory stream, size: {ms.Length} bytes.");
                 }
             }
         }
@@ -54,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector EMF graphic into a PDF document without writing intermediate files.
- * 2. When you want to generate a PDF from an EMF image for sending over a web API that expects a byte array.
- * 3. When you must rasterize an EMF at its original size before converting it to PDF for printing workflows.
- * 4. When you need to measure or log the size of a PDF generated from an EMF before storing it in a database.
- * 5. When you are building a server‑side service that converts uploaded EMF files to PDF streams for further processing.
+ * 1. When you need to embed a vector EMF logo into a PDF report without writing intermediate files.
+ * 2. When a web service must convert uploaded EMF diagrams to PDF bytes for downstream APIs.
+ * 3. When generating PDF invoices that include scalable EMF graphics directly from a C# backend.
+ * 4. When processing batch EMF files in memory to create PDF thumbnails for a document management system.
+ * 5. When performing server‑side conversion of EMF drawings to PDF for digital signatures without touching the file system.
  */

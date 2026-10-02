@@ -1,8 +1,17 @@
-// HOW-TO: Convert Multi‑Page TIFF to Separate WebP Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page TIFF to Separate WebP Files with Page Numbers in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,45 +19,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/multipage.tif";
-            string outputDir = "Output";
+            string outputDirectory = "Output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load the multi‑page TIFF image
-            using (Image tiffImage = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Cast to multipage interface
-                IMultipageImage multipage = tiffImage as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The input image is not a multipage image.");
-                    return;
-                }
-
                 int pageIndex = 0;
-                foreach (Image page in multipage.Pages)
+                foreach (TiffFrame frame in tiffImage.Frames)
                 {
-                    // Build output file path with page number
-                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.webp");
+                    tiffImage.ActiveFrame = frame;
 
-                    // Ensure the directory for this output file exists
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a WebP image
-                    page.Save(outputPath, new WebPOptions());
-
-                    // Dispose the page image
-                    page.Dispose();
+                    using (WebPOptions webpOptions = new WebPOptions())
+                    {
+                        ((RasterImage)tiffImage).Save(outputPath, webpOptions);
+                    }
 
                     pageIndex++;
                 }
@@ -63,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a scanned multipage TIFF document and serve them as lightweight WebP images on a website.
- * 2. When an application must generate thumbnails for every page of a multi‑page TIFF for a gallery view, using WebP to reduce bandwidth.
- * 3. When a document‑management system converts archival TIFF files into individual WebP files for easier indexing and retrieval.
- * 4. When a batch‑processing script has to split a multi‑page TIFF into separate images for further per‑page analysis or OCR, preferring WebP for its compression.
- * 5. When a mobile app requires each page of a TIFF to be delivered as a WebP asset to improve loading speed on low‑bandwidth connections.
+ * 1. When you need to extract each page of a scanned multi‑page TIFF and save them as lightweight WebP images for faster web loading.
+ * 2. When you want to generate individual WebP thumbnails from a multi‑page document to display in a gallery or preview pane.
+ * 3. When you must convert archival TIFF files into a modern format while preserving page order by naming each output with its page index.
+ * 4. When you are building a server‑side service that receives multi‑page TIFF uploads and returns separate WebP files for downstream image processing pipelines.
+ * 5. When you need to automate batch conversion of TIFF reports into WebP assets for inclusion in mobile applications with limited bandwidth.
  */

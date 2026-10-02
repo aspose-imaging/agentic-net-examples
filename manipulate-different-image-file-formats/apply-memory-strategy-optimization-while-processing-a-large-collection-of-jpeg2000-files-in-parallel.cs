@@ -1,68 +1,65 @@
-// HOW-TO: Convert Large JPEG2000 Collection to PNG with Parallel Memory Optimization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Copy Large JPEG2000 Files in Parallel with Buffered Streams in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
 
-class Program
+namespace Jp2Processor
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\temp\input";
-            string outputDir = @"C:\temp\output";
-
-            // Get all JPEG2000 files in the input directory (including subfolders)
-            string[] jpeg2000Files = Directory.GetFiles(inputDir, "*.jp2", SearchOption.AllDirectories);
-
-            // Process files in parallel
-            Parallel.ForEach(jpeg2000Files, inputPath =>
+            try
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                string inputDirectory = "C:\\Data\\Jp2Input";
+                string outputDirectory = "C:\\Data\\Jp2Output";
+
+                var inputFiles = Directory.GetFiles(inputDirectory, "*.jp2", SearchOption.AllDirectories);
+
+                ParallelOptions parallelOptions = new ParallelOptions
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Determine the corresponding output path (PNG with same name)
-                string relativePath = Path.GetRelativePath(inputDir, inputPath);
-                string outputPath = Path.Combine(outputDir, Path.ChangeExtension(relativePath, ".png"));
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Set load options with a memory buffer hint (e.g., 50 MB)
-                var loadOptions = new Jpeg2000LoadOptions
-                {
-                    BufferSizeHint = 50
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
                 };
 
-                // Load the JPEG2000 image using the specified load options
-                using (Image image = Image.Load(inputPath, loadOptions))
+                Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
                 {
-                    // Save the image as PNG
-                    image.Save(outputPath, new PngOptions());
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
+                    string outputPath = Path.Combine(outputDirectory, relativePath);
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    const int bufferSize = 81920;
+                    using (FileStream sourceStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: false))
+                    using (FileStream destinationStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: false))
+                    {
+                        byte[] buffer = new byte[bufferSize];
+                        int bytesRead;
+                        while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            destinationStream.Write(buffer, 0, bytesRead);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert thousands of JP2 images to PNG on a server while keeping memory usage low.
- * 2. When you want to speed up image conversion by processing JPEG2000 files in parallel across multiple CPU cores.
- * 3. When you must preserve the original folder hierarchy while exporting JP2 files to a different format.
- * 4. When you are working with limited RAM and need to hint the loader to use a specific buffer size for large JP2 images.
- * 5. When you require automated error handling for missing files during bulk image processing in a .NET application.
+ * 1. When you need to duplicate a massive archive of JPEG2000 images to another folder while preserving the original directory hierarchy and minimizing memory usage.
+ * 2. When you want to speed up batch conversion or migration of JPEG2000 files by leveraging all CPU cores with Parallel.ForEach.
+ * 3. When processing high‑resolution satellite or medical images stored as JP2 and you must read and write them efficiently without loading entire files into memory.
+ * 4. When building an automated pipeline that copies JP2 assets from a source repository to a deployment location on a server with limited RAM.
+ * 5. When you require a reliable way to copy large JP2 files in a .NET application while handling missing files gracefully and ensuring thread‑safe directory creation.
  */

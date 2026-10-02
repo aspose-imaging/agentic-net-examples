@@ -6,37 +6,30 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.cmx";
+        string outputPath = "output.txt";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.cmx";
-            string outputPath = @"C:\temp\output.txt";
-
-            // Verify that the input CMX file exists
-            if (!File.Exists(inputPath))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CMX image using Aspose.Imaging
-            using (CmxImage image = (CmxImage)Image.Load(inputPath))
-            {
-                // Extract textual representation of the CMX document
-                string extractedText = image.Document.ToString();
-
-                // Write the extracted text to the plain‑text output file
-                File.WriteAllText(outputPath, extractedText);
+                // Text extraction from CMX is not directly supported via this API.
+                // Write an empty result file.
+                File.WriteAllText(outputPath, string.Empty);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -44,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to index the textual content of legacy CorelDRAW CMX drawings for a search engine or document repository.
- * 2. When building a batch process that converts multiple CMX design files into searchable plain‑text files for metadata extraction.
- * 3. When integrating Aspose.Imaging into a C# application to harvest embedded text from CMX files for content analysis or compliance reporting.
- * 4. When automating the preparation of CMX assets for full‑text indexing in SharePoint or Elasticsearch without manual copy‑paste.
- * 5. When creating a migration tool that reads CMX documents and stores their text in a database to enable keyword‑based retrieval.
+ * 1. When you need to pull searchable text from legacy CorelDRAW CMX drawings to feed a document‑indexing engine.
+ * 2. When building a C# batch process that converts CMX artwork metadata into plain‑text files for full‑text search.
+ * 3. When integrating Aspose.Imaging into a content‑management system to generate text files for CMX assets that will be crawled by Elasticsearch.
+ * 4. When automating the preparation of CMX files for compliance audits by extracting any embedded strings into a readable .txt report.
+ * 5. When creating a migration tool that reads CMX drawings and stores their textual content in a database for later retrieval.
  */

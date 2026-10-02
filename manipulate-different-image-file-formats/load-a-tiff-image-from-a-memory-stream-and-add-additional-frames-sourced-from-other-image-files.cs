@@ -1,63 +1,66 @@
-// HOW-TO: Add PNG Frames to Existing TIFF from Memory Stream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load TIFF From Memory Stream And Append PNG And JPG Frames In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputTiffPath = "input.tif";
-        string[] additionalImagePaths = new string[] { "frame1.png", "frame2.png" };
-        string outputPath = "output.tif";
-
         try
         {
-            // Verify input TIFF exists
+            string inputTiffPath = "input.tif";
+            string outputTiffPath = "output\\merged.tif";
+            string framePath1 = "frame1.png";
+            string framePath2 = "frame2.jpg";
+
             if (!File.Exists(inputTiffPath))
             {
                 Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
-
-            // Verify each additional image exists
-            foreach (var path in additionalImagePaths)
+            if (!File.Exists(framePath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {framePath1}");
+                return;
+            }
+            if (!File.Exists(framePath2))
+            {
+                Console.Error.WriteLine($"File not found: {framePath2}");
+                return;
             }
 
-            // Load the original TIFF from a memory stream
-            using (var tiffStream = new MemoryStream(File.ReadAllBytes(inputTiffPath)))
+            byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
+            using (var ms = new MemoryStream(tiffBytes))
             {
-                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
+                using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
                 {
-                    // Add each additional image as a new frame
-                    foreach (var imgPath in additionalImagePaths)
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                    using (Image additionalImage1 = Image.Load(framePath1))
                     {
-                        // Load the image (any raster format supported by Aspose.Imaging)
-                        using (RasterImage raster = (RasterImage)Image.Load(imgPath))
-                        {
-                            // Create a TiffFrame from the raster image
-                            TiffFrame frame = new TiffFrame(raster);
-                            // Add the frame to the TIFF image
-                            tiffImage.AddFrame(frame);
-                            // No explicit disposal needed for the frame; it will be disposed with the TiffImage
-                        }
+                        int width1 = additionalImage1.Width;
+                        int height1 = additionalImage1.Height;
+                        tiffImage.AddFrame(new TiffFrame(tiffOptions, width1, height1));
+                        TiffFrame newFrame1 = tiffImage.Frames[tiffImage.Frames.Count() - 1];
+                        newFrame1.SavePixels(newFrame1.Bounds, ((RasterImage)additionalImage1).LoadPixels(additionalImage1.Bounds));
                     }
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    using (Image additionalImage2 = Image.Load(framePath2))
+                    {
+                        int width2 = additionalImage2.Width;
+                        int height2 = additionalImage2.Height;
+                        tiffImage.AddFrame(new TiffFrame(tiffOptions, width2, height2));
+                        TiffFrame newFrame2 = tiffImage.Frames[tiffImage.Frames.Count() - 1];
+                        newFrame2.SavePixels(newFrame2.Bounds, ((RasterImage)additionalImage2).LoadPixels(additionalImage2.Bounds));
+                    }
 
-                    // Save the updated TIFF
-                    tiffImage.Save(outputPath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+                    tiffImage.Save(outputTiffPath);
                 }
             }
         }
@@ -70,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple images into a multi‑page TIFF for archival or printing without writing temporary files.
- * 2. When a base TIFF is stored in a database or received over a network and you must append additional pages from PNG or JPEG files.
- * 3. When you want to create a multi‑frame TIFF for fax or document‑scanning workflows by programmatically adding frames from user‑uploaded images.
- * 4. When you must merge scanned documents with supplementary graphics while keeping the original TIFF in memory to avoid extra disk I/O.
- * 5. When building a server‑side service that receives a TIFF stream and needs to enrich it with extra pages before returning the final file.
+ * 1. When you need to combine separate images such as a scanned document and additional graphics into a single multi‑page TIFF without writing the original file to disk first.
+ * 2. When a web service receives a TIFF as a byte array and you must add extra pages from user‑uploaded PNG or JPEG files before saving or returning it.
+ * 3. When generating a multi‑page report where the base TIFF is created elsewhere and you programmatically insert charts or photos as new frames.
+ * 4. When processing large TIFF files in memory to avoid I/O overhead while merging additional image layers for archival or printing purposes.
+ * 5. When building a document conversion pipeline that reads a TIFF from a database BLOB, adds supplemental pages, and stores the merged TIFF back to storage.
  */

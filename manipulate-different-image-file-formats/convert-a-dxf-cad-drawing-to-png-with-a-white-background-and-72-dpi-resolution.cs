@@ -1,8 +1,9 @@
-// HOW-TO: Convert DXF CAD Drawing to PNG with White Background at 72 DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DXF CAD Drawing to PNG with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,8 +11,9 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.dxf";
-            string outputPath = "Output/sample.png";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "drawing.dxf");
+            string outputPath = Path.Combine(baseDir, "Output", "drawing.png");
 
             if (!File.Exists(inputPath))
             {
@@ -23,16 +25,16 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                using (PngOptions options = new PngOptions())
                 {
-                    var rasterOptions = new VectorRasterizationOptions
+                    options.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Aspose.Imaging.Color.White
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-                    pngOptions.ResolutionSettings = new ResolutionSetting(72, 72);
-
-                    image.Save(outputPath, pngOptions);
+                    options.ResolutionSettings = new ResolutionSetting(72, 72);
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate thumbnail previews of engineering DXF files for a web portal, converting them to PNG with a white background and 72 DPI ensures consistent display across browsers.
- * 2. When exporting CAD drawings to embed in PDF reports, rasterizing the DXF to a 72 DPI PNG with a solid white background preserves layout while keeping file size low.
- * 3. When creating printable documentation that requires raster images instead of vector files, converting DXF to PNG at 72 DPI guarantees the image matches standard screen resolution.
- * 4. When integrating legacy CAD data into a C# desktop application that only supports bitmap formats, this code transforms the DXF into a PNG with a white canvas for easy rendering.
- * 5. When automating batch processing of CAD drawings for a GIS system, converting each DXF to a 72 DPI PNG with a white background simplifies layer handling and improves compatibility with map tiles.
+ * 1. When you need to generate preview images of engineering DXF files for web galleries, you can rasterize them to PNG with a white background using C#.
+ * 2. When a CAD‑to‑document workflow requires consistent 72 DPI PNG assets for printing or reporting, this code converts the DXF while setting the resolution.
+ * 3. When integrating a .NET application with a content management system that only accepts PNG, you can automatically transform uploaded DXF drawings to PNG with a solid background.
+ * 4. When creating thumbnails for a design review portal, you can use this snippet to render DXF vectors as white‑background PNGs at a fixed size and DPI.
+ * 5. When automating batch processing of architectural plans, the code lets you convert each DXF to a high‑contrast PNG suitable for OCR or image analysis tools.
  */

@@ -1,59 +1,47 @@
-// HOW-TO: Convert DICOM To TIFF With Floyd Steinberg Dithering In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to TIFF with Floyd Steinberg Dithering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        string inputPath = "input.dcm";
+        string outputPath = "output.tiff";
+
+        if (!File.Exists(inputPath))
         {
-            try
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        try
+        {
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage image = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
             {
-                // Input and output file paths (relative)
-                string inputPath = Path.Combine("Input", "sample.dicom");
-                string outputPath = Path.Combine("Output", "sample.tiff");
-
-                // Verify the input DICOM file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the DICOM image
-                using (Image image = Image.Load(inputPath))
-                {
-                    DicomImage dicomImage = (DicomImage)image;
-
-                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                    dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
-
-                    // Save the processed image as TIFF
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                image.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform high‑resolution medical DICOM scans into 1‑bit TIFF files for archival or printing while preserving visual detail through Floyd‑Steinberg dithering.
- * 2. When a radiology application must generate low‑size black‑and‑white TIFF images from DICOM data for compatibility with legacy PACS systems.
- * 3. When you are building a C# tool that converts DICOM images to TIFF format and applies error‑diffusion dithering to improve contrast on monochrome displays.
- * 4. When you need to automate batch processing of DICOM files, applying dithering and saving them as TIFF to meet regulatory documentation standards.
- * 5. When a healthcare software project requires converting DICOM images to TIFF with a 1‑bit palette to embed them in PDF reports without losing diagnostic information.
+ * 1. When a medical imaging application needs to archive high‑contrast DICOM scans as lossless TIFF files with Floyd‑Steinberg dithering for better visual quality on monochrome displays.
+ * 2. When a radiology workflow requires converting DICOM X‑ray images to TIFF for integration with legacy PACS systems that only accept TIFF inputs.
+ * 3. When a developer wants to generate printable TIFF versions of DICOM images with dithering to preserve detail while reducing file size for batch printing.
+ * 4. When a research project needs to preprocess DICOM images by applying Floyd‑Steinberg dithering before saving them as TIFF for use in image analysis tools that do not support DICOM.
+ * 5. When an application must automatically transform incoming DICOM files into TIFF format with dithering to ensure consistent rendering across non‑medical image viewers.
  */

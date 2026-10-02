@@ -1,37 +1,33 @@
-// HOW-TO: Convert DICOM to BMP with Gaussian Blur and Resize in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur and Resize DICOM to BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Bmp;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string inputPath = "input.dcm";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
+            string inputPath = "input\\input.dcm";
+            string outputPath = "output\\output.bmp";
+
+            if (!File.Exists(inputPath))
             {
-                // Apply Gaussian blur filter to the entire image
-                dicom.Filter(dicom.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Resize to 1024x768 using nearest neighbor resampling
-                dicom.Resize(1024, 768, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save as BMP
-                dicom.Save(outputPath, new BmpOptions());
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage image = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+            {
+                var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                image.Filter(image.Bounds, gaussianOptions);
+                image.Resize(1024, 768);
+                var bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to export DICOM scans as BMP thumbnails with a softening effect for quick preview in a Windows UI.
- * 2. When a radiology workflow requires batch processing of DICOM files to standardize size to 1024×768 and apply Gaussian blur before archiving them as BMP for compatibility with legacy systems.
- * 3. When a developer is building a diagnostic reporting tool that converts high‑resolution DICOM images to BMP format while reducing noise using a Gaussian filter and resizing for consistent layout.
- * 4. When integrating Aspose.Imaging into a C# service that transforms incoming DICOM images into BMP files for downstream image analysis pipelines that expect a fixed resolution.
- * 5. When creating a cross‑platform C# utility that prepares DICOM images for printing by applying blur, resizing, and saving them as BMP to meet printer driver requirements.
+ * 1. When a medical imaging application needs to preprocess DICOM scans by smoothing and scaling them before converting to BMP for display in a Windows viewer.
+ * 2. When a radiology workflow requires batch conversion of high‑resolution DICOM files to a smaller BMP format with a Gaussian blur to reduce noise for machine‑learning training data.
+ * 3. When a healthcare system must generate thumbnail BMP images from DICOM studies, applying a blur filter to protect patient details while resizing for quick preview.
+ * 4. When a developer integrates Aspose.Imaging in a C# service that transforms DICOM images into BMP files with standardized dimensions for archival in a non‑DICOM PACS.
+ * 5. When a diagnostic tool needs to load a DICOM image, apply a Gaussian smoothing filter, resize it to 1024×768, and save as BMP to embed in a PDF report.
  */

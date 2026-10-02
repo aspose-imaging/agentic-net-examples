@@ -1,41 +1,29 @@
-// HOW-TO: Load JPEG2000 Image With 4 MB Buffer And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Load JPEG2000 Image With 4 MB Buffer In C# To Reduce Memory Usage (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.jp2";
-        string outputPath = @"C:\temp\sample.output.png";
+        string inputPath = "input.jp2";
+        string outputPath = "output.txt";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Set up JPEG2000 load options with a 4 MB buffer size hint
-            var loadOptions = new Jpeg2000LoadOptions
+            using (Image image = Image.Load(inputPath, new LoadOptions() { BufferSizeHint = 4 * 1024 * 1024 }))
             {
-                BufferSizeHint = 4 // Buffer size in megabytes
-            };
-
-            // Load the JPEG2000 image using the custom load options
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // Save the image as PNG
-                image.Save(outputPath, new PngOptions());
+                string info = $"Width: {image.Width}, Height: {image.Height}";
+                File.WriteAllText(outputPath, info);
             }
         }
         catch (Exception ex)
@@ -47,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing large JPEG2000 files on a memory‑constrained server, you can limit RAM usage by setting a 4 MB buffer before converting to PNG.
- * 2. When building a desktop utility that batch‑converts high‑resolution JP2 images to PNG while preventing out‑of‑memory crashes, this code provides a safe load option.
- * 3. When integrating image conversion into a cloud function that has strict memory quotas, the buffer size hint ensures the function stays within limits.
- * 4. When developing a medical imaging viewer that reads JP2 scans and needs to display them as PNG thumbnails, controlling the buffer helps maintain responsive performance.
- * 5. When creating an automated pipeline that extracts JPEG2000 assets from archives and saves them as PNG for downstream processing, the custom buffer reduces peak memory consumption.
+ * 1. When processing large JPEG2000 files on a server with limited RAM, you can load the image using a 4 MB buffer to keep memory usage low.
+ * 2. When extracting image dimensions from a JP2 file for metadata generation without loading the entire image into memory.
+ * 3. When building a batch conversion tool that must read many high‑resolution JP2 images on a low‑end workstation, setting a custom buffer size prevents out‑of‑memory errors.
+ * 4. When integrating Aspose.Imaging into a cloud function that has strict memory quotas, using BufferSizeHint ensures the function stays within the allocated limit.
+ * 5. When creating a diagnostic utility that logs the width and height of JPEG2000 assets while preserving system performance.
  */

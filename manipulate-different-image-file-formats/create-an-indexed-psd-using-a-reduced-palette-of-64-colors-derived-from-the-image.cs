@@ -1,6 +1,8 @@
-// HOW-TO: Create Indexed PSD with 64‑Color Palette from PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Indexed PSD With 64‑Color Palette From PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
@@ -8,43 +10,55 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.psd";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\source.png";
+            string outputPath = "Output\\result.psd";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (Image srcImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access pixel data
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Create PSD save options
-                PsdOptions psdOptions = new PsdOptions
+                RasterImage raster;
+                if (srcImage is RasterCachedImage rci)
                 {
-                    // Use 8 bits per channel (standard)
-                    ChannelBitsCount = 8,
-                    // Set color mode to RGB (indexed palette works with RGB mode)
-                    ColorMode = ColorModes.Rgb,
-                    // Generate a palette with 64 colors derived from the image
-                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(rasterImage, 64)
-                };
+                    if (!rci.IsCached) rci.CacheData();
+                    raster = rci;
+                }
+                else
+                {
+                    raster = srcImage as RasterImage;
+                }
 
-                // Save the image as an indexed PSD
-                image.Save(outputPath, psdOptions);
+                Rectangle rect = new Rectangle(0, 0, raster.Width, raster.Height);
+                int[] argbPixels = new int[raster.Width * raster.Height];
+                raster.SaveArgb32Pixels(rect, argbPixels);
+
+                var distinctColors = new HashSet<int>(argbPixels);
+                var paletteColors = distinctColors.Take(64).Select(c => Color.FromArgb(c)).ToArray();
+                ColorPalette palette = new ColorPalette(paletteColors);
+
+                using (PsdOptions psdOptions = new PsdOptions())
+                {
+                    psdOptions.Source = new FileCreateSource(outputPath, false);
+                    psdOptions.ColorMode = ColorModes.Indexed;
+                    psdOptions.Palette = palette;
+
+                    using (Image psdImage = Image.Create(psdOptions, raster.Width, raster.Height))
+                    {
+                        Graphics graphics = new Graphics(psdImage);
+                        graphics.DrawImage(raster, 0, 0);
+                        psdImage.Save();
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce file size of a Photoshop document by converting a PNG to an indexed PSD with a limited 64‑color palette for web delivery.
- * 2. When preparing assets for a game engine that only supports indexed PSD files with a specific number of colors.
- * 3. When generating printable mock‑ups that require a consistent color palette across multiple images to ensure color matching.
- * 4. When automating batch conversion of high‑resolution PNGs to smaller PSD files for archival while preserving visual fidelity using Aspose.Imaging in C#.
- * 5. When creating thumbnails or preview images in PSD format that must use a reduced palette to meet legacy software constraints.
+ * 1. When you need to shrink a Photoshop file by converting a full‑color PNG into an indexed PSD limited to 64 colors to reduce storage size.
+ * 2. When exporting graphics for legacy game engines that only accept indexed PSD files with a maximum palette of 64 colors.
+ * 3. When preparing images for a printing workflow that requires indexed color mode to guarantee consistent color output across devices.
+ * 4. When generating thumbnails or preview images where a fixed 64‑color palette minimizes memory usage while retaining the original visual appearance.
+ * 5. When automating a batch process that converts PNG assets to indexed PSDs to meet a design pipeline’s strict palette‑size specifications.
  */

@@ -1,41 +1,36 @@
-// HOW-TO: Apply Gaussian Blur to DICOM and Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to GIF with Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.dcm";
+            string outputPath = "output/output.gif";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply Gaussian blur filter to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the processed image as GIF with default options
-                raster.Save(outputPath, new GifOptions());
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+            {
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                blurOptions.Radius = 5;
+                blurOptions.Sigma = 1.0;
+
+                dicom.Filter(dicom.Bounds, blurOptions);
+
+                var gifOptions = new GifOptions();
+                dicom.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to anonymize patient details by blurring sensitive regions of a DICOM scan before sharing it as a lightweight GIF for quick review.
- * 2. When a radiology web portal wants to generate preview thumbnails with softened edges from DICOM files to improve visual comfort for clinicians.
- * 3. When a healthcare research tool requires converting high‑resolution DICOM images into animated GIFs after applying a Gaussian blur to reduce noise for presentation slides.
- * 4. When a diagnostic software needs to preprocess DICOM images with a blur filter to smooth artifacts before exporting them to a GIF format for mobile device display.
- * 5. When a telemedicine system must automatically blur patient identifiers in DICOM images and deliver the result as a GIF to comply with privacy regulations.
+ * 1. When you need to anonymize patient scans by blurring sensitive details before sharing them as lightweight GIFs for web review.
+ * 2. When a medical imaging application must generate animated GIF previews of DICOM slices with a soft blur effect for quick visual assessment.
+ * 3. When integrating Aspose.Imaging into a C# workflow to convert high‑resolution DICOM files to GIF format while applying a Gaussian blur to reduce noise.
+ * 4. When creating a batch process that prepares DICOM images for presentation in PowerPoint by converting them to GIFs with a consistent blur radius.
+ * 5. When developing a tele‑medicine portal that requires server‑side C# code to blur and compress DICOM images into GIFs for faster browser loading.
  */

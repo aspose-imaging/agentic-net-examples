@@ -1,49 +1,42 @@
-// HOW-TO: Resize BMP Image to Fit Specific Dimensions While Preserving Aspect Ratio in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP Image to Fit Within Width and Height in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output\\resized.bmp";
+        int targetWidth = 200;
+        int targetHeight = 200;
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Desired dimensions (maintain aspect ratio)
-            int targetWidth = 800;   // example width
-            int targetHeight = 600;  // example height
-
-            // Load the BMP image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Calculate scaling factor to preserve aspect ratio
-                double widthRatio = (double)targetWidth / image.Width;
-                double heightRatio = (double)targetHeight / image.Height;
-                double scale = Math.Min(widthRatio, heightRatio);
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
-                int newWidth = (int)(image.Width * scale);
-                int newHeight = (int)(image.Height * scale);
+                float widthRatio = (float)targetWidth / originalWidth;
+                float heightRatio = (float)targetHeight / originalHeight;
+                float scale = Math.Min(widthRatio, heightRatio);
 
-                // Resize using nearest neighbour resampling (default)
-                image.Resize(newWidth, newHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                int newWidth = (int)(originalWidth * scale);
+                int newHeight = (int)(originalHeight * scale);
 
-                // Save as BMP
-                BmpOptions options = new BmpOptions();
-                image.Save(outputPath, options);
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate thumbnail previews of BMP files for a file‑manager UI without distorting the images.
- * 2. When preparing BMP assets for a legacy Windows application that only supports images up to a certain resolution.
- * 3. When batch‑processing scanned documents to fit within a printable page size while keeping the original proportions.
- * 4. When converting high‑resolution BMP screenshots to a smaller size for faster web upload but still require the BMP format.
- * 5. When integrating image resizing into an automated build pipeline that validates BMP dimensions before packaging.
+ * 1. When a developer needs to generate thumbnail previews of BMP files for a web gallery while preserving the original aspect ratio.
+ * 2. When an application must downscale large BMP scans to a fixed size for faster uploading to a cloud service.
+ * 3. When a Windows desktop tool converts user‑uploaded BMP screenshots into a standard 200 × 200 pixel format for consistent UI layout.
+ * 4. When a batch‑processing script resizes BMP assets to fit within a specific width and height before embedding them in a PDF report.
+ * 5. When a game engine loads BMP textures and requires them to be resized to a target resolution without distortion.
  */

@@ -1,44 +1,36 @@
-// HOW-TO: Convert DICOM to GIF With Floyd‑Steinberg Dithering And Resize In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to GIF With Floyd Steinberg Dithering And Resize In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.dcm";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
-                DicomImage dicomImage = (DicomImage)image;
-
-                // Apply Floyd‑Steinberg dithering (8‑bit palette)
-                dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
-
-                // Resize to 1024×768
-                dicomImage.Resize(1024, 768);
-
-                // Save as GIF
-                dicomImage.Save(outputPath, new GifOptions());
+                using (RasterImage raster = (RasterImage)dicom)
+                {
+                    raster.Resize(1024, 768);
+                    GifOptions gifOptions = new GifOptions();
+                    raster.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to generate a web‑friendly GIF preview of a DICOM scan with reduced color banding.
- * 2. When a radiology workflow requires converting high‑resolution DICOM files to a smaller 1024×768 GIF for inclusion in patient reports.
- * 3. When a developer wants to apply Floyd‑Steinberg dithering to a DICOM image before resizing to preserve visual detail in limited‑palette formats.
- * 4. When an electronic health record system must automatically transform DICOM images into GIFs for quick viewing on mobile devices.
- * 5. When a batch processing script needs to load DICOM files, dither them, resize, and save as GIFs for archival or transmission over low‑bandwidth networks.
+ * 1. When a medical imaging system needs to generate a web‑friendly GIF preview of a DICOM scan at a specific resolution.
+ * 2. When a radiology workflow requires converting high‑resolution DICOM files to smaller GIFs with Floyd‑Steinberg dithering for faster transmission.
+ * 3. When a desktop application must display DICOM images in a legacy UI that only supports GIF format and a fixed 1024×768 size.
+ * 4. When an automated report generator creates thumbnail GIFs from DICOM studies for inclusion in PDF or HTML reports.
+ * 5. When a cloud service processes incoming DICOM uploads, resizes them, applies dithering, and stores them as GIFs for archival or viewer compatibility.
  */

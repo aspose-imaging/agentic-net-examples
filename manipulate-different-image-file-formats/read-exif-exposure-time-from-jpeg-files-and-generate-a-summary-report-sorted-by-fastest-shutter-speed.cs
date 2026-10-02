@@ -1,8 +1,10 @@
-// HOW-TO: Read JPEG EXIF Exposure Time and Create Sorted Report in C# (Aspose.Imaging for .NET)
+// HOW-TO: Read JPEG EXIF Exposure Time and Generate Sorted Shutter Speed Report in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
@@ -11,15 +13,25 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputFile = "Output/report.txt";
+            string inputDirectory = "InputImages";
+            string outputPath = "Output/report.txt";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-            var records = new List<(string FileName, string Exposure)>();
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                return;
+            }
 
-            foreach (var file in files)
+            var jpegFiles = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var records = new List<(string FileName, string ExposureString, double ExposureValue)>();
+
+            foreach (var file in jpegFiles)
             {
                 if (!File.Exists(file))
                 {
@@ -27,72 +39,50 @@ class Program
                     return;
                 }
 
-                using (JpegImage image = (JpegImage)Image.Load(file))
+                using (JpegImage img = (JpegImage)Image.Load(file))
                 {
-                    var exif = image.ExifData;
+                    var exif = img.ExifData;
                     string exposureStr = "N/A";
-                    if (exif != null)
+                    double exposureVal = double.MaxValue;
+
+                    if (exif != null && exif.ExposureTime != null)
                     {
-                        var exposure = exif.ExposureTime;
-                        if (exposure != null)
+                        exposureStr = exif.ExposureTime.ToString();
+                        try
                         {
-                            exposureStr = exposure.ToString();
+                            if (exposureStr.Contains("/"))
+                            {
+                                var parts = exposureStr.Split('/');
+                                double num = double.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
+                                double den = double.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
+                                exposureVal = num / den;
+                            }
+                            else
+                            {
+                                exposureVal = double.Parse(exposureStr, System.Globalization.CultureInfo.InvariantCulture);
+                            }
+                        }
+                        catch
+                        {
+                            exposureVal = double.MaxValue;
                         }
                     }
-                    records.Add((Path.GetFileName(file), exposureStr));
+
+                    records.Add((Path.GetFileName(file), exposureStr, exposureVal));
                 }
             }
 
-            records.Sort((a, b) =>
+            var sorted = records.OrderBy(r => r.ExposureValue).ThenBy(r => r.FileName).ToList();
+
+            var lines = new List<string>();
+            lines.Add("FileName,ExposureTime (seconds)");
+            foreach (var rec in sorted)
             {
-                double valA = 0;
-                double valB = 0;
-
-                string partA = a.Exposure?.Split('(')[0].Trim();
-                if (!double.TryParse(partA, out valA))
-                {
-                    if (!string.IsNullOrEmpty(partA) && partA.Contains("/"))
-                    {
-                        var nums = partA.Split('/');
-                        if (nums.Length == 2 && double.TryParse(nums[0], out double num) && double.TryParse(nums[1], out double den) && den != 0)
-                            valA = num / den;
-                        else
-                            valA = double.MaxValue;
-                    }
-                    else
-                    {
-                        valA = double.MaxValue;
-                    }
-                }
-
-                string partB = b.Exposure?.Split('(')[0].Trim();
-                if (!double.TryParse(partB, out valB))
-                {
-                    if (!string.IsNullOrEmpty(partB) && partB.Contains("/"))
-                    {
-                        var nums = partB.Split('/');
-                        if (nums.Length == 2 && double.TryParse(nums[0], out double num) && double.TryParse(nums[1], out double den) && den != 0)
-                            valB = num / den;
-                        else
-                            valB = double.MaxValue;
-                    }
-                    else
-                    {
-                        valB = double.MaxValue;
-                    }
-                }
-
-                return valA.CompareTo(valB);
-            });
-
-            using (var writer = new StreamWriter(outputFile))
-            {
-                writer.WriteLine("Exposure Time Report (sorted by fastest shutter speed)");
-                foreach (var rec in records)
-                {
-                    writer.WriteLine($"{rec.FileName}: {rec.Exposure}");
-                }
+                lines.Add($"{rec.FileName},{rec.ExposureString}");
             }
+
+            File.WriteAllLines(outputPath, lines);
+            Console.WriteLine($"Report generated at {outputPath}");
         }
         catch (Exception ex)
         {
@@ -103,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to list all images in a folder by fastest shutter speed for quick review.
- * 2. When a digital asset management system needs to extract exposure information from JPEGs to generate metadata reports.
- * 3. When a web application must display a summary of camera settings for uploaded photos, sorted by shutter speed.
- * 4. When a forensic analyst needs to audit image files and identify those captured with the shortest exposure times.
- * 5. When a batch processing tool has to create a text report of EXIF exposure values for quality control in a photo‑printing workflow.
+ * 1. When a photographer wants to audit a batch of photos to identify the fastest shutter speeds for quality control.
+ * 2. When a media archive needs to extract exposure information from thousands of JPEGs to create a searchable metadata catalog.
+ * 3. When a web application must display a summary of camera settings for uploaded images to inform users about shooting conditions.
+ * 4. When a forensic analyst requires a quick report of exposure times to detect inconsistencies in image provenance.
+ * 5. When a developer builds an automated workflow that sorts images by shutter speed before applying further processing or storage rules.
  */

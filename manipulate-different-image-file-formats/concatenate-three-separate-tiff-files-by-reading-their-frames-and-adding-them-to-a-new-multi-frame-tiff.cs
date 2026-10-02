@@ -1,25 +1,22 @@
-// HOW-TO: Combine Multiple TIFF Files into a Single Multi‑Frame TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple TIFF Files into a Single Multi‑Frame TIFF in C# (Aspose.Imaging for .NET)
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = @"C:\Images\input1.tif";
-            string inputPath2 = @"C:\Images\input2.tif";
-            string inputPath3 = @"C:\Images\input3.tif";
-            string outputPath = @"C:\Images\output.tif";
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string inputPath3 = "input3.tif";
+            string outputPath = "output\\merged.tif";
 
-            // Verify input files exist
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -36,35 +33,49 @@ class Program
                 return;
             }
 
-            // Collect all frames from the three source TIFFs
-            List<TiffFrame> allFrames = new List<TiffFrame>();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Helper to load frames from a TIFF file
-            void LoadFrames(string path)
+            using (TiffImage srcImage1 = (TiffImage)Image.Load(inputPath1))
+            using (TiffImage srcImage2 = (TiffImage)Image.Load(inputPath2))
+            using (TiffImage srcImage3 = (TiffImage)Image.Load(inputPath3))
             {
-                using (TiffImage srcImage = (TiffImage)Image.Load(path))
+                // Determine canvas size from the first frame of the first image
+                int canvasWidth = srcImage1.ActiveFrame.Width;
+                int canvasHeight = srcImage1.ActiveFrame.Height;
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                using (TiffImage outputImage = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
                 {
-                    foreach (TiffFrame srcFrame in srcImage.Frames)
+                    int frameIndex = 0;
+
+                    // Helper local function to copy frames from a source image
+                    void CopyFrames(TiffImage source)
                     {
-                        // Create a copy of the frame to detach it from the source image
-                        TiffFrame copiedFrame = new TiffFrame((RasterImage)srcFrame);
-                        allFrames.Add(copiedFrame);
+                        foreach (TiffFrame srcFrame in source.Frames)
+                        {
+                            if (frameIndex == 0)
+                            {
+                                // Replace pixels of the initially created blank frame
+                                var srcPixels = ((RasterImage)source).LoadPixels(srcFrame.Bounds);
+                                outputImage.Frames[0].SavePixels(srcFrame.Bounds, srcPixels);
+                            }
+                            else
+                            {
+                                // Add a new blank frame and copy pixels into it
+                                outputImage.AddFrame(new TiffFrame(tiffOptions, srcFrame.Width, srcFrame.Height));
+                                var srcPixels = ((RasterImage)source).LoadPixels(srcFrame.Bounds);
+                                outputImage.Frames[frameIndex].SavePixels(srcFrame.Bounds, srcPixels);
+                            }
+                            frameIndex++;
+                        }
                     }
+
+                    CopyFrames(srcImage1);
+                    CopyFrames(srcImage2);
+                    CopyFrames(srcImage3);
+
+                    outputImage.Save(outputPath, tiffOptions);
                 }
-            }
-
-            LoadFrames(inputPath1);
-            LoadFrames(inputPath2);
-            LoadFrames(inputPath3);
-
-            // Create a new multi‑frame TIFF from the collected frames
-            using (TiffImage resultImage = new TiffImage(allFrames.ToArray()))
-            {
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the concatenated TIFF
-                resultImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -76,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge scanned document pages stored as separate TIFF files into one multi‑page TIFF for easier distribution.
- * 2. When creating a PDF‑like image sequence by combining individual TIFF frames from different sources into a single file for archival.
- * 3. When a medical imaging system outputs separate TIFF slices and you must assemble them into a single multi‑frame TIFF for DICOM compatibility.
- * 4. When automating a batch process that consolidates daily generated TIFF reports into one file to reduce file‑management overhead.
- * 5. When building a web service that receives multiple TIFF uploads and returns a single multi‑page TIFF for client consumption.
+ * 1. When you need to combine scanned pages stored as separate TIFF files into one multi‑frame TIFF for easier distribution or printing.
+ * 2. When a document management system requires a single TIFF document that contains all pages of a multi‑page report generated from separate image sources.
+ * 3. When you want to create a compact archival file by merging individual TIFF images from a camera or scanner into one file without losing metadata.
+ * 4. When a web service must accept multiple TIFF uploads and return a single combined TIFF for downstream processing or OCR.
+ * 5. When you are building a batch‑processing tool that consolidates daily generated TIFF charts into one multi‑frame image for automated analysis.
  */

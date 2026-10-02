@@ -2,44 +2,30 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"input\sample.tga";
-            string outputPath = @"output\rotated.bmp";
+            string inputPath = "Input/sample.tga";
+            string outputPath = "Output/result.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to TgaImage for access to TGA-specific members if needed
-                TgaImage tgaImage = image as TgaImage;
-                if (tgaImage == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a TGA image.");
-                    return;
-                }
-
-                // Rotate 90 degrees clockwise without resizing the canvas
-                tgaImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save as BMP (format inferred from .bmp extension)
-                tgaImage.Save(outputPath);
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -51,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a legacy TGA sprite in a Windows application that only supports BMP, you can rotate it and convert it on the fly.
- * 2. When preparing game assets for a platform that requires BMP orientation, rotating the TGA by 90° clockwise ensures correct alignment.
- * 3. When batch‑processing scanned textures stored as TGA files to match a portrait layout, this code rotates each image before saving as BMP.
- * 4. When integrating legacy graphics into a .NET reporting tool that only accepts BMP, you can re‑orient the TGA without losing quality.
- * 5. When automating a pipeline that receives TGA screenshots from a device and must store them as BMP thumbnails with a specific orientation.
+ * 1. When a game developer needs to re‑orient legacy TGA sprite sheets for a new engine and store them as BMP files for compatibility.
+ * 2. When an automated build pipeline must convert TGA textures to BMP after rotating them to match the target device’s portrait orientation.
+ * 3. When a desktop application processes user‑uploaded TGA screenshots, rotates them 90° clockwise, and saves them as BMP for faster loading.
+ * 4. When a batch‑processing tool prepares TGA assets for printing by rotating them correctly and converting to BMP, which printers accept.
+ * 5. When a migration script updates legacy graphics by rotating TGA icons and saving them as BMP to integrate with a Windows‑only UI framework.
  */

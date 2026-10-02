@@ -1,45 +1,49 @@
-// HOW-TO: Convert WMF to JPEG With Custom Font Folder In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WMF to JPEG with Custom Font Folder in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\input.wmf";
-        string outputPath = @"C:\Images\output.jpg";
-        string customFontDir = @"C:\CustomFonts";
-
         try
         {
-            // Set custom font directory for vector rendering
-            FontSettings.SetFontsFolder(customFontDir);
+            string inputPath = "input.wmf";
+            string outputPath = "output.jpg";
+            string fontFolder = "fonts";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] args) =>
             {
-                // Prepare JPEG save options
-                var jpegOptions = new JpegOptions
+                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
-                    // Example: set quality (optional)
-                    Quality = 90
-                };
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return list.ToArray();
+            }, fontFolder);
 
-                // Save as JPEG
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                var jpegOptions = new JpegOptions();
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to render legacy WMF vector graphics as high‑quality JPEGs for web display while using fonts that are not installed on the server.
- * 2. When a batch conversion tool must process WMF files that reference corporate typefaces stored in a separate fonts directory.
- * 3. When generating thumbnails of WMF diagrams for a reporting dashboard and the required fonts are located in a custom folder.
- * 4. When automating document migration from old Windows Metafile assets to JPEG images in a .NET application that cannot rely on system‑wide font installations.
- * 5. When creating printable JPEG versions of WMF logos for marketing material and you must ensure the correct custom fonts are applied during rendering.
+ * 1. When you need to render a WMF diagram that uses proprietary fonts on a server that doesn’t have those fonts installed, you can load the WMF with a custom font directory and save it as a JPEG for web display.
+ * 2. When generating thumbnails of legacy vector graphics for a reporting dashboard, you can convert WMF files to JPEG while supplying the required fonts to preserve text appearance.
+ * 3. When automating batch conversion of WMF assets in a CI pipeline and the source files rely on specific font files, you can point Aspose.Imaging to a font folder to ensure accurate conversion to JPEG.
+ * 4. When creating printable previews of WMF‑based logos in a C# desktop application, you can load the vector file with custom fonts and export it as a high‑quality JPEG image.
+ * 5. When migrating old Windows Metafile icons to a modern image format for mobile apps, you can use this code to embed missing fonts from a folder and output JPEG files that retain the original look.
  */

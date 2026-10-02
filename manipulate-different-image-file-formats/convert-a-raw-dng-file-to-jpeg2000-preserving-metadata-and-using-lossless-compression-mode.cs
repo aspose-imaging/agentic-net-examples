@@ -1,45 +1,32 @@
-// HOW-TO: Convert DNG RAW Image to Lossless JPEG2000 with Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DNG to JPEG2000 with Metadata Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.dng";
-            string outputPath = @"c:\temp\output.jp2";
+            string inputPath = Path.Combine("Input", "sample.dng");
+            string outputPath = Path.Combine("Output", "sample.jp2");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image
             using (Image image = Image.Load(inputPath))
             {
-                DngImage dngImage = (DngImage)image;
-
-                // Configure JPEG2000 options for lossless compression and metadata preservation
-                Jpeg2000Options jpeg2000Options = new Jpeg2000Options
+                using (Jpeg2000Options options = new Jpeg2000Options())
                 {
-                    Irreversible = false,          // lossless DWT 5-3
-                    KeepMetadata = true            // preserve original metadata
-                };
-
-                // Save as JPEG2000
-                dngImage.Save(outputPath, jpeg2000Options);
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive raw camera photos in a space-efficient, lossless format while keeping EXIF and XMP data intact.
- * 2. When a digital asset management system requires JPEG2000 files for long-term preservation of DNG source images.
- * 3. When a medical imaging workflow converts RAW DNG scans to JPEG2000 for lossless storage and metadata compliance.
- * 4. When a web service generates thumbnails from DNG files and must deliver them as JPEG2000 without losing original metadata.
- * 5. When a batch processing script migrates a collection of DNG files to JPEG2000 using C# and Aspose.Imaging for consistent image quality.
+ * 1. When a photographer needs to archive raw DNG files as lossless JPEG2000 images while keeping EXIF and XMP metadata intact.
+ * 2. When a digital asset management system must batch‑convert raw camera files to a web‑friendly JPEG2000 format without losing image quality.
+ * 3. When a scientific imaging application requires converting RAW sensor data to JPEG2000 for long‑term storage while preserving calibration metadata.
+ * 4. When a printing workflow needs to transform DNG files into JPEG2000 for high‑resolution proofing while retaining all embedded metadata.
+ * 5. When a mobile app developer wants to support DNG uploads and store them as lossless JPEG2000 files on the server using Aspose.Imaging for .NET.
  */

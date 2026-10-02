@@ -1,9 +1,9 @@
-// HOW-TO: Convert DjVu Document Pages to PNG with Sub Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document to PNG with Sub Filter Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -12,30 +12,32 @@ class Program
     {
         try
         {
-            string inputPath = "sample.djvu";
+            string inputPath = "Input\\sample.djvu";
+            string outputDirectory = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = "Output";
-
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int pageNumber = 0;
-                foreach (DjvuPage page in djvuImage.Pages)
+                DjvuImage djvu = (DjvuImage)image;
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    pageNumber++;
-                    string outputPath = Path.Combine(outputDir, $"page_{pageNumber}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    pngOptions.FilterType = PngFilterType.Sub;
 
-                    PngOptions pngOptions = new PngOptions
+                    for (int i = 0; i < djvu.Pages.Length; i++)
                     {
-                        FilterType = PngFilterType.Sub
-                    };
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    page.Save(outputPath, pngOptions);
+                        using (RasterImage page = (RasterImage)djvu.Pages[i])
+                        {
+                            page.Save(outputPath, pngOptions);
+                        }
+                    }
                 }
             }
         }
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu file and save them as high‑quality PNG images for web publishing.
- * 2. When you want to apply a specific PNG filter (e.g., Sub) to reduce file size while preserving visual fidelity during batch conversion.
- * 3. When an application must programmatically process scanned documents stored in DjVu format and generate PNG thumbnails for preview.
- * 4. When integrating Aspose.Imaging into a C# workflow that converts archival DjVu files into PNGs for compatibility with downstream image analysis tools.
- * 5. When automating the migration of legacy DjVu assets to PNG format with custom compression settings in a server‑side .NET service.
+ * 1. When you need to extract each page of a multi‑page DjVu file as separate PNG images for web preview.
+ * 2. When you want to apply a specific PNG filter (Sub) to reduce file size while preserving quality during conversion.
+ * 3. When automating a batch process that converts scanned DjVu archives into PNGs for OCR preprocessing.
+ * 4. When integrating Aspose.Imaging into a C# application to programmatically render DjVu pages as raster images.
+ * 5. When preparing DjVu content for platforms that only support PNG, requiring per‑page conversion with custom options.
  */

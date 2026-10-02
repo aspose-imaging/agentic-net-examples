@@ -1,6 +1,7 @@
-// HOW-TO: Create JPEG Thumbnails For All Images In A Folder Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Create JPEG Thumbnails for a Folder of Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -10,62 +11,50 @@ class Program
     {
         try
         {
-            // Input/Output directory setup (atomic block as required)
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string outputDirectory = Path.Combine(baseDir, "Output", "Thumbnails");
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            Directory.CreateDirectory(outputDirectory);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            // Process each JPEG file
             foreach (string inputPath in files)
             {
-                // Verify the file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Simple filter for JPEG extensions
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-                if (ext != ".jpg" && ext != ".jpeg")
-                {
-                    continue;
-                }
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to thumbnail size (e.g., 100x100)
-                    int thumbWidth = 100;
-                    int thumbHeight = 100;
-                    image.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
-
-                    // Prepare output path in a subdirectory
-                    string thumbDir = Path.Combine(outputDirectory, "Thumbnails");
-                    string outputPath = Path.Combine(thumbDir, Path.GetFileNameWithoutExtension(inputPath) + "_thumb.jpg");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save thumbnail as JPEG
-                    using (JpegOptions options = new JpegOptions())
+                    if (image is RasterImage raster)
                     {
-                        options.Quality = 90;
-                        image.Save(outputPath, options);
+                        int maxDim = 150;
+                        double scale = Math.Min((double)maxDim / raster.Width, (double)maxDim / raster.Height);
+                        if (scale > 1) scale = 1;
+                        int newWidth = Math.Max(1, (int)(raster.Width * scale));
+                        int newHeight = Math.Max(1, (int)(raster.Height * scale));
+
+                        raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                        using (JpegOptions jpegOptions = new JpegOptions())
+                        {
+                            jpegOptions.Quality = 90;
+                            raster.Save(outputPath, jpegOptions);
+                        }
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Unsupported image type: {inputPath}");
                     }
                 }
             }
@@ -79,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate small preview images for a web gallery from a batch of JPEG photos.
- * 2. When an e‑commerce site must automatically create product thumbnail icons from uploaded product pictures.
- * 3. When a desktop application has to prepare thumbnail caches for faster image browsing in a file explorer.
- * 4. When a content management system imports a folder of JPEGs and stores reduced‑size versions for mobile devices.
- * 5. When a photo‑processing pipeline requires resizing all incoming JPEGs to a fixed 100 × 100 size for PDF thumbnail pages.
+ * 1. When you need to generate small preview images for a web gallery from a batch of high‑resolution JPEG photos.
+ * 2. When you want to automatically create thumbnail versions of user‑uploaded pictures before storing them in a separate directory.
+ * 3. When you are building a desktop application that displays image lists and requires uniformly sized thumbnails for faster UI rendering.
+ * 4. When you must process a large collection of JPEG files on a server and save reduced‑size copies for email attachments or API responses.
+ * 5. When you need to resize images while preserving aspect ratio and ensure the thumbnails are saved with consistent naming in a subfolder.
  */

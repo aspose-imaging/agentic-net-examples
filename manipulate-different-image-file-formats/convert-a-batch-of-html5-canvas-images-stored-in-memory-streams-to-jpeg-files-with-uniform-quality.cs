@@ -1,68 +1,36 @@
-// HOW-TO: Convert Multiple HTML5 Canvas Files to JPEG with Fixed Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert In-Memory Canvas PNG Streams to JPEG with Fixed Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded list of input HTML5 Canvas files (stored as binary data)
-            string[] inputPaths = new string[]
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
+
+            var images = new List<(string FileName, byte[] Data)>
             {
-                @"C:\Images\canvas1.html",
-                @"C:\Images\canvas2.html",
-                @"C:\Images\canvas3.html"
+                ("canvas1.png", new byte[0]),
+                ("canvas2.png", new byte[0])
             };
 
-            // Hard‑coded output directory
-            string outputDir = @"C:\Images\Output";
-
-            // Uniform JPEG quality (1‑100)
-            int jpegQuality = 80;
-
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(outputDir);
-
-            for (int i = 0; i < inputPaths.Length; i++)
+            foreach (var (fileName, data) in images)
             {
-                string inputPath = inputPaths[i];
+                string outputPath = Path.Combine(outputDirectory, $"{Path.GetFileNameWithoutExtension(fileName)}.jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Verify input file existence
-                if (!File.Exists(inputPath))
+                using (MemoryStream ms = new MemoryStream(data))
+                using (Image image = Image.Load(ms))
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load the HTML5 Canvas file into a memory stream
-                using (FileStream fileStream = File.OpenRead(inputPath))
-                using (MemoryStream canvasStream = new MemoryStream())
-                {
-                    fileStream.CopyTo(canvasStream);
-                    canvasStream.Position = 0; // reset for reading
-
-                    // Load the image from the memory stream
-                    using (Image image = Image.Load(canvasStream))
-                    {
-                        // Prepare JPEG save options with the desired quality
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = jpegQuality
-                        };
-
-                        // Build the output file path
-                        string outputPath = Path.Combine(outputDir, $"canvas_{i + 1}.jpg");
-
-                        // Ensure the output directory exists (unconditional)
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the image as JPEG using the specified options
-                        image.Save(outputPath, jpegOptions);
-                    }
+                    jpegOptions.Quality = 90;
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -75,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate JPEG thumbnails from a series of HTML5 canvas drawings stored on disk.
- * 2. When a web application exports canvas graphics as HTML files and you must batch‑convert them to JPEG for email attachments.
- * 3. When you want to archive canvas‑based artwork in a compressed, widely supported image format with consistent quality.
- * 4. When a reporting tool consumes JPEG images, so you must transform canvas output into JPEG before feeding the report.
- * 5. When you automate image processing pipelines that read canvas files from memory streams and output JPEGs for downstream systems.
+ * 1. When you need to generate JPEG thumbnails from HTML5 canvas images that are kept in memory before saving them to disk.
+ * 2. When a web service receives canvas PNG data as byte arrays and must store them as compressed JPEG files for archival.
+ * 3. When you want to batch‑process user‑drawn canvas images on the server and enforce a uniform JPEG quality to reduce file size.
+ * 4. When converting uploaded canvas screenshots to JPEG format for compatibility with legacy image viewers.
+ * 5. When automating the export of in‑memory canvas graphics to a folder structure for further processing in a .NET application.
  */

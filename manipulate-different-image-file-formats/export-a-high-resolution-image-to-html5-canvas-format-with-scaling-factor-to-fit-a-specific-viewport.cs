@@ -1,52 +1,42 @@
-// HOW-TO: Export Scaled SVG to HTML5 Canvas with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize JPEG to Fit Viewport and Export as HTML5 Canvas in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.svg";
-            string outputPath = @"C:\Images\output.html";
+            string inputPath = "input.jpg";
+            string outputPath = "output.html";
+            int viewportWidth = 800;
+            int viewportHeight = 600;
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (SvgImage image = (SvgImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with scaling to fit a specific viewport
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    // Example: scale to 50% of original size (adjust as needed)
-                    ScaleX = 0.5f,
-                    ScaleY = 0.5f,
-                    // Preserve original page size
-                    PageSize = image.Size
-                };
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
-                // Set HTML5 Canvas export options
-                var canvasOptions = new Html5CanvasOptions
-                {
-                    VectorRasterizationOptions = rasterOptions,
-                    FullHtmlPage = true // generate a full HTML page
-                };
+                double scale = Math.Min((double)viewportWidth / originalWidth, (double)viewportHeight / originalHeight);
+                int newWidth = (int)(originalWidth * scale);
+                int newHeight = (int)(originalHeight * scale);
 
-                // Export to HTML5 Canvas format
-                image.Save(outputPath, canvasOptions);
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                Html5CanvasOptions options = new Html5CanvasOptions();
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -58,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a high‑resolution SVG in a web page using an HTML5 canvas that automatically scales to a specific viewport size.
- * 2. When you want to generate a full HTML page from an SVG for offline viewing while preserving vector quality with a custom scaling factor.
- * 3. When a web application must convert user‑uploaded SVG files to canvas‑based graphics to ensure consistent rendering across browsers.
- * 4. When you are building a reporting tool that exports charts stored as SVG into HTML5 canvas elements sized to fit printable page dimensions.
- * 5. When you need to programmatically resize and rasterize SVG assets for responsive design without losing detail, using C# and Aspose.Imaging.
+ * 1. When you need to display a high‑resolution photo on a web page inside a fixed‑size canvas without distortion, you can resize it to the viewport and save it as HTML5 Canvas.
+ * 2. When building a responsive image gallery that must adapt large images to different screen dimensions, this code scales the image and outputs a canvas‑compatible HTML file.
+ * 3. When converting legacy JPEG assets for use in HTML5 games or interactive demos, you can automatically fit them to the game’s viewport and embed them as canvas elements.
+ * 4. When generating printable previews that must be shown in a browser’s canvas at a specific size, the snippet resizes the source and creates an HTML5 canvas representation.
+ * 5. When automating batch processing of product photos to ensure they load quickly on mobile devices, you can scale each image to the target viewport and export it as a lightweight canvas HTML file.
  */

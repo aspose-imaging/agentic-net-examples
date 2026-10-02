@@ -1,56 +1,40 @@
-// HOW-TO: How To Reduce BMP Size From EMF Using Lossy Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to Compressed BMP with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.emf";
-            string outputPath = @"C:\Images\result.bmp";
+            string inputPath = "Input\\sample.emf";
+            string outputPath = "Output\\sample.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Prepare BMP save options with lossy settings
-                var bmpOptions = new BmpOptions
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    // Reduce color depth to 8 bits per pixel
-                    BitsPerPixel = 8,
-                    // Use RGB (uncompressed) or you could use RLE-8 for further reduction
-                    Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
-                    // Set rasterization options to render the vector EMF onto a bitmap
-                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    bmpOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageSize = image.Size
-                    }
-                };
-
-                // Optionally create an 8‑bit palette that approximates the original colors
-                if (image is RasterImage rasterImage)
-                {
-                    bmpOptions.Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256);
+                        BackgroundColor = Color.White,
+                        PageWidth = emfImage.Width,
+                        PageHeight = emfImage.Height
+                    };
+                    emfImage.Save(outputPath, bmpOptions);
                 }
-
-                // Save the rasterized BMP with the specified options
-                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EMF drawings to smaller BMP files for legacy Windows applications that only accept bitmap images.
- * 2. When you want to lower the storage footprint of generated BMPs by rasterizing EMF with an 8‑bit palette before saving.
- * 3. When you must create BMP thumbnails from high‑resolution EMF graphics while keeping file size under a specific limit.
- * 4. When you are preparing EMF‑based reports for email attachment and need the BMP version to be compact enough to avoid size restrictions.
- * 5. When you are building a batch processing tool that rasterizes multiple EMF files to BMP with lossy compression to speed up loading in resource‑constrained environments.
+ * 1. When you need to embed vector graphics from an EMF file into a legacy system that only accepts BMP images, you can rasterize the EMF to a BMP with a white background using Aspose.Imaging in C#.
+ * 2. When you want to generate smaller BMP files from high‑resolution EMF drawings for faster loading in desktop applications, you can apply compression during the conversion.
+ * 3. When a reporting tool requires bitmap images but your source assets are vector EMF files, you can programmatically convert them to BMP to maintain visual fidelity while reducing file size.
+ * 4. When automating a batch process that converts a collection of EMF logos into BMP thumbnails for a web catalog, this code provides a simple C# solution.
+ * 5. When you need to ensure consistent background color across all converted images for print or UI rendering, the VectorRasterizationOptions let you set a white background during EMF‑to‑BMP conversion.
  */

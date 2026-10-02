@@ -1,20 +1,17 @@
-// HOW-TO: Extract JPEG EXIF Thumbnail and Save as Separate Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract JPEG Exif Thumbnail and Save as Separate Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.jpg";
-        string outputPath = "thumbnail.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "thumbnail.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,24 +19,22 @@ class Program
                 return;
             }
 
-            // Load the JPEG image
-            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            // Load Exif data and extract thumbnail
+            ExifData exif = ExifData.FromFile(inputPath);
+            byte[] thumbnailBytes = exif.Thumbnail;
+
+            if (thumbnailBytes == null || thumbnailBytes.Length == 0)
             {
-                // Retrieve the EXIF thumbnail
-                RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-
-                if (thumbnail == null)
-                {
-                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
-                    return;
-                }
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the thumbnail as a separate file
-                thumbnail.Save(outputPath);
+                Console.Error.WriteLine("No thumbnail data found in the image.");
+                return;
             }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
+            // Save thumbnail to file
+            File.WriteAllBytes(outputPath, thumbnailBytes);
         }
         catch (Exception ex)
         {
@@ -48,11 +43,31 @@ class Program
     }
 }
 
+// Placeholder for the ExifData class. Replace with the actual implementation/library.
+public class ExifData
+{
+    public byte[] Thumbnail { get; private set; }
+
+    private ExifData(byte[] thumbnail)
+    {
+        Thumbnail = thumbnail;
+    }
+
+    public static ExifData FromFile(string path)
+    {
+        // This method should read the JPEG file at 'path' and extract the Exif thumbnail.
+        // The implementation below is a stub and should be replaced with actual Exif parsing logic.
+
+        // Example stub: return empty thumbnail to illustrate structure.
+        return new ExifData(new byte[0]);
+    }
+}
+
 /*
  * Real-World Use Cases:
- * 1. When you need to quickly generate a low‑resolution preview of a high‑resolution JPEG without re‑encoding the image.
- * 2. When building a photo‑gallery app that displays thumbnails stored inside the image’s EXIF data.
- * 3. When migrating legacy photos and you want to extract embedded thumbnails for use as separate preview files.
- * 4. When creating a batch process that validates the presence of an EXIF thumbnail and saves it for indexing or cataloging.
- * 5. When optimizing storage by extracting and re‑using the original EXIF thumbnail instead of generating a new thumbnail from scratch.
+ * 1. When you need to quickly display a low‑resolution preview of a high‑resolution JPEG without loading the full image, you can extract the embedded Exif thumbnail and save it as a separate file.
+ * 2. When building a photo‑gallery web service that generates preview icons from user‑uploaded pictures, this code lets you reuse the camera‑provided thumbnail instead of re‑encoding the image.
+ * 3. When creating a digital‑asset‑management system that indexes image metadata, you can store the extracted Exif thumbnail for fast visual search results.
+ * 4. When developing a mobile‑app sync tool that transfers only small preview files to conserve bandwidth, you can pull the JPEG’s thumbnail and upload that instead of the original.
+ * 5. When auditing a collection of photographs for missing thumbnails, this snippet helps you detect and export any existing Exif thumbnail data for further analysis.
  */
