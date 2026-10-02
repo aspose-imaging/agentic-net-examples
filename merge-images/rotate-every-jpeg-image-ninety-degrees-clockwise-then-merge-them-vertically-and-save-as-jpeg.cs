@@ -14,59 +14,66 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-            // Hardcoded output file
-            string outputPath = "merged.jpg";
+            string inputDirectory = "input";
+            string outputPath = "output/merged.jpg";
 
-            // Validate each input file exists
-            foreach (var inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // First pass: determine canvas size after rotating each image 90° clockwise
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (var inputPath in inputPaths)
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
+
+            if (jpegFiles.Length == 0)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                Console.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            var imagesData = new List<(int[] Pixels, int Width, int Height)>();
+
+            foreach (string filePath in jpegFiles)
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
                     img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                    sizes.Add(img.Size);
+                    int width = img.Width;
+                    int height = img.Height;
+                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                    imagesData.Add((pixels, width, height));
                 }
             }
 
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
+            int maxWidth = imagesData.Max(i => i.Width);
+            int totalHeight = imagesData.Sum(i => i.Height);
 
-            // Prepare JPEG options with bound output source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
+            };
 
-            // Create a JPEG canvas with the calculated dimensions
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
-                // Second pass: load, rotate, and copy each image onto the canvas vertically
-                foreach (var inputPath in inputPaths)
+                foreach (var data in imagesData)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
-                    {
-                        img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetY += img.Height;
-                    }
+                    Rectangle bounds = new Rectangle(0, offsetY, data.Width, data.Height);
+                    canvas.SaveArgb32Pixels(bounds, data.Pixels);
+                    offsetY += data.Height;
                 }
-
-                // Save the bound canvas (output file)
                 canvas.Save();
             }
         }
@@ -79,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you have a batch of JPEG photos saved sideways and need to rotate each 90° clockwise and stack them vertically into one high‑quality JPEG using Aspose.Imaging for .NET.
- * 2. When generating a single receipt image by rotating individual scanned JPEG pages and merging them vertically with Aspose.Imaging in a C# application.
- * 3. When creating a continuous banner from separate JPEG panels that must be rotated to the correct orientation and combined into one tall JPEG via Aspose.Imaging.
- * 4. When preparing a printable collage of portrait‑style JPEGs that were scanned upside‑down, requiring a 90° clockwise rotation and vertical merge with Aspose.Imaging for .NET.
- * 5. When automating the production of a single JPEG sprite sheet from multiple rotated icons for a game UI using C# and Aspose.Imaging.
+ * 1. When you need to correct the orientation of a batch of scanned JPEG photos and combine them into a single portrait‑style image for printing.
+ * 2. When creating a vertical photo strip from multiple camera snapshots to use in social media stories or product catalogs.
+ * 3. When preprocessing images for a PDF generator that requires all pages to be portrait and merged into one JPEG file.
+ * 4. When automating the preparation of receipt or invoice scans that were captured sideways, rotating them and stacking them for archival storage.
+ * 5. When building a slideshow thumbnail that displays several JPEG frames stacked vertically after aligning their orientation.
  */
