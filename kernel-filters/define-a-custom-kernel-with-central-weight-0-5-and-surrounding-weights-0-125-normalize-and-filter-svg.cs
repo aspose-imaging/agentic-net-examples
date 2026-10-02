@@ -1,99 +1,78 @@
-// HOW-TO: Apply Custom Convolution Kernel to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Filter to SVG Using C# and Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.Xml;
 
-class Program
+namespace SvgFilterApp
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = "input/input.svg";
-            string tempPngPath = "temp/temp.png";
-            string outputPath = "output/output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-            // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                // Configure rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                string inputPath = "input.svg";
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Set PNG save options with rasterization
-                PngOptions pngOptions = new PngOptions
+                string outputPath = "output.svg";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                XmlDocument doc = new XmlDocument();
+                doc.Load(inputPath);
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+                nsmgr.AddNamespace("svg", "http://www.w3.org/2000/svg");
+
+                XmlElement defs = doc.DocumentElement.SelectSingleNode("svg:defs", nsmgr) as XmlElement;
+                if (defs == null)
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    defs = doc.CreateElement("defs", doc.DocumentElement.NamespaceURI);
+                    doc.DocumentElement.InsertBefore(defs, doc.DocumentElement.FirstChild);
+                }
 
-                // Save rasterized PNG to temporary file
-                svgImage.Save(tempPngPath, pngOptions);
+                XmlElement filter = doc.CreateElement("filter", doc.DocumentElement.NamespaceURI);
+                string filterId = "customConvolve";
+                filter.SetAttribute("id", filterId);
+
+                XmlElement feConvolve = doc.CreateElement("feConvolveMatrix", doc.DocumentElement.NamespaceURI);
+                feConvolve.SetAttribute("order", "3");
+
+                double center = 0.5;
+                double surround = 0.125;
+                double sum = center + 8 * surround; // 1.5
+                double normCenter = center / sum;   // 0.333333...
+                double normSurround = surround / sum; // 0.083333...
+
+                string kernel = $"{normSurround} {normSurround} {normSurround} " +
+                                $"{normSurround} {normCenter} {normSurround} " +
+                                $"{normSurround} {normSurround} {normSurround}";
+                feConvolve.SetAttribute("kernelMatrix", kernel);
+                feConvolve.SetAttribute("preserveAlpha", "true");
+
+                filter.AppendChild(feConvolve);
+                defs.AppendChild(filter);
+
+                doc.DocumentElement.SetAttribute("filter", $"url(#{filterId})");
+
+                doc.Save(outputPath);
             }
-
-            // Load the rasterized PNG as a RasterImage
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            catch (Exception ex)
             {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                // Define custom 3x3 kernel (central 0.5, surrounding 0.125) and normalize
-                double sum = 0.5 + 8 * 0.125; // 1.5
-                double central = 0.5 / sum;   // 0.333333...
-                double surrounding = 0.125 / sum; // 0.083333...
-
-                double[,] kernel = new double[,]
-                {
-                    { surrounding, surrounding, surrounding },
-                    { surrounding, central,     surrounding },
-                    { surrounding, surrounding, surrounding }
-                };
-
-                // Create convolution filter options (factor = 1.0, bias = 0)
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
-
-                // Apply filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Save the filtered image to the final output path
-                rasterImage.Save(outputPath);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-
-            // Optionally delete the temporary PNG
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen or blur an SVG image by applying a custom filter before converting it to a raster PNG in a .NET application.
- * 2. When you want to ensure consistent visual appearance across different devices by rasterizing SVGs with a specific kernel‑based smoothing effect in C#.
- * 3. When you are building an automated image‑processing pipeline that requires custom weighting of pixel neighborhoods for SVG assets before storing them as PNG files.
- * 4. When you must preprocess vector graphics to reduce noise or emphasize edges using a 3×3 kernel prior to generating thumbnails or previews in a web service.
- * 5. When you are integrating Aspose.Imaging into a C# project to apply a user‑defined convolution filter to SVG content and output the result as a high‑quality PNG.
+ * 1. When you need to blur or sharpen an SVG graphic by applying a custom 3x3 convolution kernel in a .NET application.
+ * 2. When you want to embed a reusable filter definition directly into an SVG file for consistent rendering across browsers.
+ * 3. When you must normalize kernel weights to maintain the image’s overall brightness after applying the filter.
+ * 4. When you are programmatically generating SVG assets and need to ensure the filter is added only if a <defs> section is missing.
+ * 5. When you need to automate SVG preprocessing in a build pipeline, such as applying a subtle smoothing effect before conversion to raster formats.
  */
