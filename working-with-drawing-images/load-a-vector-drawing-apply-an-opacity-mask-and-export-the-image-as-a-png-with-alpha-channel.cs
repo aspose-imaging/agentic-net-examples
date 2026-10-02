@@ -1,23 +1,20 @@
-// HOW-TO: Convert SVG to PNG with Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 50% Opacity Mask to SVG and Save as PNG with Alpha in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,30 +23,33 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector drawing (SVG) as a raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Prepare PNG export options with alpha channel
-                PngOptions exportOptions = new PngOptions
+                int width = vectorImage.Width;
+                int height = vectorImage.Height;
+
+                using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                // Configure masking to make background transparent
-                MaskingOptions maskingOptions = new MaskingOptions
+                    Source = new FileCreateSource(outputPath, false)
+                }, width, height))
                 {
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
-                };
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.DrawImage(vectorImage, new Rectangle(0, 0, width, height));
 
-                // Apply the mask (no explicit mask needed; background becomes transparent)
-                ImageMasking.ApplyMask(image, null, maskingOptions);
+                    Rectangle bounds = new Rectangle(0, 0, width, height);
+                    int[] pixels = canvas.LoadArgb32Pixels(bounds);
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        int argb = pixels[i];
+                        int a = 128; // 50% opacity
+                        int rgb = argb & 0x00FFFFFF;
+                        pixels[i] = (a << 24) | rgb;
+                    }
+                    canvas.SaveArgb32Pixels(bounds, pixels);
 
-                // Save the result as PNG with alpha channel
-                image.Save(outputPath, exportOptions);
+                    canvas.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -61,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an SVG logo into a web page that requires a PNG with an alpha channel for seamless overlay.
- * 2. When you must generate transparent PNG thumbnails from vector drawings for a mobile app UI.
- * 3. When you are converting user‑uploaded SVG icons to PNG format while preserving transparency for PDF reports.
- * 4. When you want to automate batch processing of SVG assets to create PNG assets with no background for game sprites.
- * 5. When you need to apply an opacity mask to remove the background of a vector illustration before saving it as a PNG for email newsletters.
+ * 1. When you need to load an SVG file in C#, apply a 50% opacity mask, and export it as a PNG with an alpha channel for web overlays.
+ * 2. When generating semi‑transparent thumbnails of vector drawings using Aspose.Imaging for C# to display in a UI gallery.
+ * 3. When converting vector icons to PNG assets with consistent transparency for mobile app skins using the Aspose.Imaging library.
+ * 4. When creating watermarked graphics by applying a uniform opacity mask to a vector diagram before saving the result as a PNG in C#.
+ * 5. When preparing layered compositions that require PNG images with an alpha channel, such as compositing SVG artwork in a desktop application.
  */
