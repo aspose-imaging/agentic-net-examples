@@ -1,52 +1,58 @@
-// HOW-TO: Add a Rectangle Shape to a BMP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image with Rectangle Shape Using Figure.AddShape in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        string outputPath = "output/output.bmp";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        try
+        static void Main(string[] args)
         {
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            try
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.Wheat);
+                string outputPath = "output\\rectangle.bmp";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Aspose.Imaging.GraphicsPath graphicPath = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 300f, 200f)));
+                using (Image image = Image.Create(bmpOptions, 200, 200))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                graphicPath.AddFigure(figure);
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicPath);
+                    RectangleF rect = new RectangleF(50, 50, 100, 100);
+                    RectangleShape rectShape = new RectangleShape(rect);
 
-                image.Save();
+                    Figure figure = new Figure();
+                    figure.AddShape(rectShape);
+
+                    GraphicsPath path = new GraphicsPath();
+                    path.AddFigure(figure);
+
+                    Pen pen = new Pen(Color.Black);
+                    graphics.DrawPath(pen, path);
+
+                    image.Save();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a BMP diagram with a highlighted rectangular region for a technical report.
- * 2. When creating a custom thumbnail that includes a bordered rectangle overlay to indicate a selection area in a C# desktop application.
- * 3. When automating the production of printable forms where a rectangle marks a field boundary on a 500×500 pixel image.
- * 4. When building a simple image‑based UI mockup that requires drawing geometric shapes like rectangles on a solid‑color background.
- * 5. When preprocessing images for computer‑vision tests and you must add a known rectangle shape as a reference marker.
+ * 1. When you need to generate a simple BMP thumbnail with a highlighted rectangular region for a document preview.
+ * 2. When you want to programmatically add a border rectangle to a blank canvas for creating custom UI icons in C#.
+ * 3. When you are building a report that requires drawing fixed‑size rectangles on images for layout validation using Aspose.Imaging.
+ * 4. When you need to create test images with precise geometric shapes to verify image‑processing algorithms.
+ * 5. When you are automating the production of placeholder graphics that include a rectangle placeholder for later content insertion.
  */
