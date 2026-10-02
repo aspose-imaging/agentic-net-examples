@@ -2,50 +2,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputDng\";
-            string outputDir = @"C:\OutputTiff\";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Get all DNG files in the input directory
+            if (!Directory.Exists(inputDir))
+            {
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
             string[] dngFiles = Directory.GetFiles(inputDir, "*.dng");
 
             foreach (string inputPath in dngFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path with .tif extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".tif");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load DNG image with default load options
-                using (Image dngImage = Image.Load(inputPath, new DngLoadOptions()))
+                using (var dng = (Aspose.Imaging.FileFormats.Dng.DngImage)Image.Load(inputPath))
                 {
-                    // Resize to 1024x768
-                    dngImage.Resize(1024, 768);
+                    dng.Resize(1024, 768, ResizeType.NearestNeighbourResample);
 
-                    // Prepare TIFF save options
+                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".tiff");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                     var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                    // Save as TIFF
-                    dngImage.Save(outputPath, tiffOptions);
+                    dng.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -58,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to downscale raw DNG photos for quick preview and archive them as TIFF files.
- * 2. When a digital asset management system must process a folder of DNG files and store them in a universally supported TIFF format at a fixed resolution.
- * 3. When a batch conversion tool is required to prepare raw images for printing workflows that accept only 1024×768 TIFF files.
- * 4. When an automated script must ensure all incoming DNG files are resized and saved as TIFF to reduce storage size while preserving lossless quality.
- * 5. When a C# application needs to convert raw camera files to TIFF for compatibility with legacy image processing software.
+ * 1. When a photographer needs to downsize a collection of RAW DNG files to a standard 1024×768 resolution for quick preview and store them as TIFFs for compatibility with editing software.
+ * 2. When a digital asset management system must automatically convert incoming DNG uploads into smaller TIFF files to reduce storage costs while preserving lossless quality.
+ * 3. When a web service processes bulk DNG images from a camera and creates web‑ready TIFF thumbnails at a fixed size for display in an online gallery.
+ * 4. When an archival workflow requires batch resizing of high‑resolution DNG scans before archiving them as TIFF files to meet size constraints.
+ * 5. When a C# application integrates Aspose.Imaging to transform a folder of DNG photographs into uniformly sized TIFFs for downstream batch printing or analysis.
  */
