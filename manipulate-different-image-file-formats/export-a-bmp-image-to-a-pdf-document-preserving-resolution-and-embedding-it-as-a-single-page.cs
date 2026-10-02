@@ -1,4 +1,4 @@
-// HOW-TO: Convert BMP Image to Single‑Page PDF Preserving Resolution in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP Image To Single-Page PDF With Original Resolution In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,34 +8,23 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.pdf";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input.bmp";
+            string outputPath = "output/output.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    // Preserve the original image resolution
-                    UseOriginalImageResolution = true
-                };
-
-                // Save the image as a single‑page PDF
-                image.Save(outputPath, pdfOptions);
+                var options = new PdfOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a high‑resolution bitmap into a PDF report without losing detail.
- * 2. When generating printable PDFs from scanned BMP files for archival or distribution.
- * 3. When converting legacy BMP assets to PDF for inclusion in a document workflow that only accepts PDF.
- * 4. When creating a single‑page PDF thumbnail from a BMP to share with clients while keeping original resolution.
- * 5. When automating batch processing of BMP images to PDF for compliance with electronic filing standards.
+ * 1. When you need to embed a high‑resolution BMP diagram into a PDF report without losing detail.
+ * 2. When an application must generate printable PDFs from legacy BMP assets for archiving.
+ * 3. When a web service converts user‑uploaded BMP files to PDF for easy viewing on any device.
+ * 4. When automating batch processing to turn a folder of BMP scans into single‑page PDF documents.
+ * 5. When integrating Aspose.Imaging in a C# workflow to preserve image resolution while creating PDF invoices.
  */
