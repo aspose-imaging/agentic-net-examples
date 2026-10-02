@@ -4,53 +4,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                // Define a 4x4 averaging kernel (sum equals 1)
-                double[,] kernel = new double[,]
+                double[,] kernel = new double[4, 4];
+                for (int i = 0; i < 4; i++)
                 {
-                    { 0.0625, 0.0625, 0.0625, 0.0625 },
-                    { 0.0625, 0.0625, 0.0625, 0.0625 },
-                    { 0.0625, 0.0625, 0.0625, 0.0625 },
-                    { 0.0625, 0.0625, 0.0625, 0.0625 }
-                };
+                    for (int j = 0; j < 4; j++)
+                    {
+                        kernel[i, j] = 1.0 / 16.0;
+                    }
+                }
 
-                // Create convolution filter options with the custom kernel
-                var filterOptions = new ConvolutionFilterOptions(kernel)
-                {
-                    Factor = 1.0,
-                    Bias = 0
-                };
-
-                // Apply the filter to the entire image
+                var filterOptions = new ConvolutionFilterOptions(kernel);
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                var saveOptions = new PngOptions();
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -63,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to smooth a PNG image by averaging neighboring pixels using a custom 4x4 kernel in a C# application.
- * 2. When you want to implement a lightweight blur effect without third‑party libraries by applying a normalized convolution filter to raster images.
- * 3. When you must ensure the filter kernel sums to one to preserve overall image brightness while processing PNG files in .NET.
- * 4. When you are building a batch image‑processing pipeline that loads, filters, and saves PNGs automatically on the server.
- * 5. When you need to validate file existence and create output directories before applying image filters in a robust C# console utility.
+ * 1. When you need to smooth a PNG image by averaging neighboring pixels using a custom 4x4 kernel with Aspose.Imaging for .NET.
+ * 2. When you want to implement a simple blur effect on raster graphics before further processing or analysis in a C# application.
+ * 3. When you must ensure the convolution kernel sums to one to preserve overall image brightness while applying a filter to a PNG file.
+ * 4. When you are building an automated pipeline that loads PNG files, applies a uniform blur, and saves the results to a specific output folder.
+ * 5. When you need to replace built‑in filters with a user‑defined kernel for consistent image preprocessing across multiple PNG assets.
  */
