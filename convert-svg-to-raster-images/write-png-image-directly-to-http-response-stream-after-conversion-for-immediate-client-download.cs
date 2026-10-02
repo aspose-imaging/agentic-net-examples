@@ -1,8 +1,10 @@
-// HOW-TO: Convert JPEG to PNG and Stream to HTTP Response in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to PNG and Save File Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,39 +12,23 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // Simulated HTTP response stream (replace with actual response stream in real scenario)
-                using (Stream responseStream = new MemoryStream())
+                using (PngOptions options = new PngOptions())
                 {
-                    // Save the image as PNG directly to the stream
-                    image.Save(responseStream, pngOptions);
-
-                    // Example: write the stream to a file for verification (optional)
-                    responseStream.Position = 0;
-                    using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        responseStream.CopyTo(file);
-                    }
+                    options.Source = new FileCreateSource(outputPath, false);
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -55,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to let users download a resized JPEG as a PNG file without storing the converted image on the server.
- * 2. When an ASP.NET API must return dynamically generated PNG thumbnails from uploaded JPEG photos directly to the client’s browser.
- * 3. When a cloud service streams converted PNG images over HTTP to mobile apps to reduce bandwidth and improve load times.
- * 4. When a server‑side script creates on‑the‑fly PNG versions of user‑submitted JPEGs for instant preview in a single HTTP response.
- * 5. When an e‑commerce platform delivers product images in PNG format for transparent backgrounds by converting JPEGs and streaming them to the shopper’s request.
+ * 1. When a web application needs to generate PNG thumbnails from user‑uploaded JPEG photos for consistent display across browsers.
+ * 2. When a desktop utility must batch‑convert image assets from JPEG to lossless PNG before publishing them to a content management system.
+ * 3. When an e‑commerce platform wants to store product images in PNG format to preserve transparency after processing JPEG uploads.
+ * 4. When a reporting service creates PNG charts from JPEG sources to embed them in PDF documents generated with Aspose libraries.
+ * 5. When a migration script moves legacy JPEG files to PNG to reduce compression artifacts and improve image quality for archival storage.
  */

@@ -1,7 +1,8 @@
-// HOW-TO: Save BMP Image to MemoryStream for In-Memory Processing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to BMP and Store in MemoryStream Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -10,31 +11,37 @@ class Program
     {
         try
         {
-            // Hard‑coded input path
-            string inputPath = @"C:\temp\sample.bmp";
+            // Hardcoded paths
+            string inputPath = "input.webp";
+            string outputPath = "output\\output.bmp";
 
-            // Verify the input file exists
+            // Input validation
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the BMP image from disk
-            using (Image image = Image.Load(inputPath))
-            {
-                // Prepare BMP save options (default settings)
-                BmpOptions saveOptions = new BmpOptions();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the image into a memory stream for further in‑memory processing
+            // Load WebP image
+            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
+            {
+                // Convert to BMP and save to MemoryStream
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    image.Save(memoryStream, saveOptions);
-                    // Reset the stream position if it will be read later
-                    memoryStream.Position = 0;
+                    BmpOptions bmpOptions = new BmpOptions();
+                    webpImage.Save(memoryStream, bmpOptions);
 
-                    Console.WriteLine($"Image saved to memory stream. Size = {memoryStream.Length} bytes.");
-                    // Additional in‑memory processing can be performed here
+                    // Example: write the BMP from memory to a file
+                    memoryStream.Position = 0;
+                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        memoryStream.CopyTo(fileStream);
+                    }
+
+                    // At this point, memoryStream contains the BMP data for further in‑memory processing
                 }
             }
         }
@@ -47,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to load a BMP file, convert it with Aspose.Imaging and keep the result in a MemoryStream instead of writing to disk, such as when passing the image to another API that expects a stream.
- * 2. When you want to embed a BMP image directly into a database BLOB field without creating a temporary file, you can save it to a MemoryStream and store the byte array.
- * 3. When you are building a web service that returns a BMP image as a response, saving the image to a MemoryStream lets you set the response body directly from memory.
- * 4. When you need to chain multiple image operations (e.g., resizing, watermarking) without intermediate files, you can keep each step’s output in a MemoryStream for fast in‑memory processing.
- * 5. When you are generating a BMP thumbnail to be sent over a message queue or saved to cloud storage, using a MemoryStream avoids filesystem I/O and simplifies the upload code.
+ * 1. When you need to convert uploaded WebP images to BMP format for a legacy Windows application without writing temporary files to disk.
+ * 2. When you want to process the BMP data in‑memory (e.g., apply filters or embed into a PDF) before saving or transmitting it.
+ * 3. When you are building a web service that receives WebP payloads and must return BMP streams to client browsers that only support BMP.
+ * 4. When you need to batch‑convert a folder of WebP files to BMP while keeping the intermediate results in memory to improve performance.
+ * 5. When you are integrating Aspose.Imaging into a cloud function where disk I/O is restricted, so you store the converted BMP in a MemoryStream for further manipulation.
  */

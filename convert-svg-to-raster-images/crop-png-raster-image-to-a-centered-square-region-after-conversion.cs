@@ -1,47 +1,42 @@
-// HOW-TO: Crop PNG Image to Centered Square Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop PNG Image To Centered Square Region In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_cropped.png";
+        string inputPath = "Input\\image.png";
+        string outputPath = "Output\\cropped.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int side = Math.Min(raster.Width, raster.Height);
+                int x = (raster.Width - side) / 2;
+                int y = (raster.Height - side) / 2;
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to access raster-specific methods
-                RasterImage rasterImage = (RasterImage)image;
+                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(x, y, side, side);
+                raster.Crop(rect);
 
-                // Determine the size of the centered square
-                int side = Math.Min(rasterImage.Width, rasterImage.Height);
-                int left = (rasterImage.Width - side) / 2;
-                int top = (rasterImage.Height - side) / 2;
-
-                // Define the cropping rectangle
-                Rectangle cropArea = new Rectangle(left, top, side, side);
-
-                // Perform the crop
-                rasterImage.Crop(cropArea);
-
-                // Save the cropped image
-                rasterImage.Save(outputPath);
+                using (var options = new PngOptions())
+                {
+                    raster.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate square thumbnails from user‑uploaded PNG photos for a profile gallery.
- * 2. When preparing PNG assets for a mobile app that requires a centered square image to fit a circular avatar mask.
- * 3. When standardizing product images by cropping varied‑size PNGs to a uniform square before uploading to an e‑commerce platform.
- * 4. When creating consistent icons from larger PNG designs by extracting the central square region programmatically in C#.
- * 5. When automating batch processing of PNG screenshots to remove excess borders and keep only the central square content.
+ * 1. When you need to generate a square thumbnail from user‑uploaded PNG photos for a profile gallery.
+ * 2. When you must prepare a centered square PNG for printing on merchandise where only the central area should be visible.
+ * 3. When an application requires cropping scanned PNG documents to a uniform square size before further processing.
+ * 4. When you want to ensure consistent aspect ratio for PNG assets in a mobile game UI by cropping them to a centered square.
+ * 5. When you need to batch‑process PNG screenshots, removing excess borders and saving the result as a new PNG file.
  */

@@ -1,64 +1,53 @@
-// HOW-TO: Embed PNG Image in HTML Email Body Using C# and Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Embed PNG Image as Base64 in HTML Email Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageToEmail
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Emails\email.html";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.png";
+                string outputPath = "output/email.html";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image using Aspose.Imaging
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save the image to a memory stream to obtain raw bytes
-                using (MemoryStream ms = new MemoryStream())
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(ms, new PngOptions());
-                    byte[] imageBytes = ms.ToArray();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Convert image bytes to Base64 string
-                    string base64 = Convert.ToBase64String(imageBytes);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Build HTML email body with embedded image
-                    string html = $"<html><body>" +
-                                  $"<p>Hello,</p>" +
-                                  $"<img src=\"data:image/png;base64,{base64}\" alt=\"Embedded Image\"/>" +
-                                  $"</body></html>";
-
-                    // Write the HTML to the output file
-                    File.WriteAllText(outputPath, html);
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var options = new PngOptions();
+                        image.Save(ms, options);
+                        string base64 = Convert.ToBase64String(ms.ToArray());
+                        string html = $"<html><body><img src=\"data:image/png;base64,{base64}\" alt=\"Embedded Image\"/></body></html>";
+                        File.WriteAllText(outputPath, html);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to send a PNG logo directly inside an HTML email without attaching separate image files.
- * 2. When an automated reporting system must embed dynamically generated charts as inline images in email notifications.
- * 3. When a marketing application creates personalized newsletters and wants to include product images encoded as Base64 to avoid external image loading.
- * 4. When a C# service prepares transactional emails and must ensure the image renders correctly across email clients that block external resources.
- * 5. When you want to convert any PNG file to a Base64 string and embed it in an HTML template for compliance‑friendly email archiving.
+ * 1. When you need to send a product screenshot in an automated marketing email without attaching separate files.
+ * 2. When generating transactional emails that display a QR code inline for payment verification.
+ * 3. When creating newsletters that embed promotional graphics directly in the HTML to avoid image blocking by email clients.
+ * 4. When building a reporting system that inserts dynamically generated charts into email bodies for real‑time data visualization.
+ * 5. When developing a notification service that includes a company logo as an embedded PNG to maintain brand consistency across all recipients.
  */

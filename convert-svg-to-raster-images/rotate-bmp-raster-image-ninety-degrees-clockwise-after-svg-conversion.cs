@@ -1,52 +1,46 @@
-// HOW-TO: Rotate BMP Image 90 Degrees Clockwise After SVG Conversion in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to BMP and Rotate Image 90 Degrees Clockwise in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputSvgPath = "input.svg";
-        string intermediateBmpPath = "intermediate.bmp";
-        string outputBmpPath = "output_rotated.bmp";
-
         try
         {
-            // Verify input SVG exists
-            if (!File.Exists(inputSvgPath))
+            string svgPath = "input.svg";
+            string bmpPath = "output.bmp";
+
+            if (!File.Exists(svgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputSvgPath}");
+                Console.Error.WriteLine($"File not found: {svgPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(intermediateBmpPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(bmpPath) ?? ".");
 
-            // Load SVG and rasterize to BMP (intermediate file)
-            using (Image svgImage = Image.Load(inputSvgPath))
+            // Convert SVG to BMP
+            using (Image svgImage = Image.Load(svgPath))
             {
-                // Configure BMP save options with rasterization settings
-                var bmpOptions = new BmpOptions();
-                var vectorRasterOptions = new SvgRasterizationOptions
+                var bmpOptions = new BmpOptions
                 {
-                    PageSize = svgImage.Size // use original SVG size
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
                 };
-                bmpOptions.VectorRasterizationOptions = vectorRasterOptions;
-
-                // Save rasterized BMP
-                svgImage.Save(intermediateBmpPath, bmpOptions);
+                svgImage.Save(bmpPath, bmpOptions);
             }
 
-            // Load the rasterized BMP, rotate 90° clockwise, and save final result
-            using (Image bmpImage = Image.Load(intermediateBmpPath))
+            // Load BMP, rotate 90 degrees clockwise, and save
+            using (RasterImage bmpImage = (RasterImage)Image.Load(bmpPath))
             {
                 bmpImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                bmpImage.Save(outputBmpPath);
+                // Ensure directory again (in case it was changed)
+                Directory.CreateDirectory(Path.GetDirectoryName(bmpPath) ?? ".");
+                bmpImage.Save(bmpPath);
             }
         }
         catch (Exception ex)
@@ -58,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a bitmap thumbnail from an SVG and display it in landscape orientation in a Windows desktop app.
- * 2. When a reporting tool requires BMP images rotated to match page layout after converting vector graphics.
- * 3. When automating batch processing of SVG icons to BMP assets that must be rotated for correct alignment in a game engine.
- * 4. When preparing print‑ready BMP files from SVG logos that need a 90‑degree clockwise orientation for a specific printer feed.
- * 5. When integrating legacy systems that only accept BMP files and expect them to be pre‑rotated after vector‑to‑raster conversion.
+ * 1. When you need to generate a bitmap thumbnail from an SVG logo and ensure it is oriented correctly for display in a Windows desktop application.
+ * 2. When a batch process must convert vector graphics to BMP format for legacy systems that only accept raster images, while also rotating them to match a predefined layout.
+ * 3. When preparing assets for printing where the SVG artwork must be rasterized to BMP and rotated 90 degrees to align with the printer’s paper orientation.
+ * 4. When creating game textures from SVG icons and the engine requires BMP files that are pre‑rotated to fit the sprite sheet orientation.
+ * 5. When automating the conversion of SVG diagrams to BMP for inclusion in PDF reports, and the diagrams need to be rotated clockwise to match the report’s page layout.
  */
