@@ -1,8 +1,11 @@
-// HOW-TO: How To Convert PDF Page To JPEG And Remove Watermark In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Watermark From PDF Page and Save As JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -12,6 +15,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.pdf";
+            string tempPath = "Output/temp.jpg";
             string outputPath = "Output/cleaned.jpg";
 
             if (!File.Exists(inputPath))
@@ -20,45 +24,35 @@ class Program
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PDF document
+            // Convert PDF page to temporary JPEG
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Rasterize PDF page to JPEG in memory
-                var rasterizeOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = pdfImage.Width,
-                        PageHeight = pdfImage.Height
-                    }
+                    Quality = 90
                 };
+                pdfImage.Save(tempPath, jpegOptions);
+            }
 
-                using (var memoryStream = new MemoryStream())
+            // Load the temporary JPEG as RasterImage for watermark removal
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+            {
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(0, 0, 100, 50)));
+                mask.AddFigure(figure);
+
+                var options = new TeleaWatermarkOptions(mask);
+                using (RasterImage result = WatermarkRemover.PaintOver(raster, options))
                 {
-                    pdfImage.Save(memoryStream, rasterizeOptions);
-                    memoryStream.Position = 0;
-
-                    // Load rasterized image as RasterImage
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                    var outOptions = new JpegOptions
                     {
-                        // Define mask for watermark removal (example ellipse)
-                        var mask = new GraphicsPath();
-                        var figure = new Figure();
-                        figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 200)));
-                        mask.AddFigure(figure);
-
-                        var watermarkOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-
-                        // Remove watermark
-                        using (RasterImage cleaned = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, watermarkOptions))
-                        {
-                            var saveOptions = new JpegOptions();
-                            cleaned.Save(outputPath, saveOptions);
-                        }
-                    }
+                        Quality = 90
+                    };
+                    result.Save(outputPath, outOptions);
                 }
             }
         }
@@ -71,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a clean image from a PDF invoice that contains a semi‑transparent logo and save it as a JPEG for further processing.
- * 2. When an application must automatically strip watermarks from scanned PDF pages before performing OCR or archival storage.
- * 3. When a web service generates thumbnail previews of PDF documents and must ensure the thumbnails are free of embedded watermarks.
- * 4. When you are converting legal PDF documents to JPEG format for e‑discovery while preserving the original page dimensions and removing confidential watermarks.
- * 5. When a desktop tool batch‑processes PDF reports, rasterizes each page to JPEG, and cleans the images by masking out unwanted watermark shapes.
+ * 1. When you need to extract a page from a PDF, clean out a logo or stamp, and store the result as a high‑quality JPEG for web publishing.
+ * 2. When an automated document‑processing pipeline must convert scanned PDF invoices to images and remove confidential watermarks before archival.
+ * 3. When a reporting tool generates PDF charts that contain test watermarks and you must produce watermark‑free JPEG thumbnails for dashboards.
+ * 4. When a legal‑tech application must redact watermarked PDF evidence by painting over it and saving the cleaned image for review.
+ * 5. When a batch job processes multiple PDFs, converts each first page to JPEG, removes embedded watermarks, and saves the cleaned images for OCR preprocessing.
  */

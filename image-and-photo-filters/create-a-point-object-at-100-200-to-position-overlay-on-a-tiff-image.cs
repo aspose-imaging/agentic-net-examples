@@ -1,40 +1,46 @@
-// HOW-TO: Add Red Circle Overlay to TIFF at Specific Coordinates in C# (Aspose.Imaging for .NET)
+// HOW-TO: Overlay PNG onto TIFF at Specific Coordinates Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputTiffPath = "input.tif";
+        string overlayPath = "overlay.png";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputTiffPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputTiffPath}");
+            return;
+        }
+
+        if (!File.Exists(overlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
-            if (!File.Exists(inputPath))
+            using (RasterImage background = (RasterImage)Image.Load(inputTiffPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+                {
+                    Point position = new Point(100, 200);
+                    background.Blend(position, overlay, overlay.Bounds, 127);
+                }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                // Create a Point at (100, 200) for overlay positioning
-                Point overlayPoint = new Point(100, 200);
-
-                // Draw a simple overlay (red circle) at the specified point
-                Graphics graphics = new Graphics(tiffImage);
-                Pen pen = new Pen(Color.Red, 5);
-                int radius = 20;
-                Rectangle ellipseRect = new Rectangle(overlayPoint.X - radius, overlayPoint.Y - radius, radius * 2, radius * 2);
-                graphics.DrawEllipse(pen, ellipseRect);
-
-                // Save the modified TIFF image
-                tiffImage.Save();
+                Source outSource = new FileCreateSource(outputPath, false);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = outSource };
+                background.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to mark a precise location on a scanned document by drawing a colored circle on a TIFF file using C#.
- * 2. When you want to programmatically add a visual indicator at (100,200) to highlight a defect in a high‑resolution TIFF image.
- * 3. When you are building a .NET service that annotates medical or engineering TIFF images with overlay graphics at known pixel coordinates.
- * 4. When you must generate watermarked TIFF files that include a red circle at a fixed point for quality‑control tracking.
- * 5. When you require a simple way to overlay shapes on multi‑page TIFFs for automated report generation in C#.
+ * 1. When you need to add a logo or watermark at a fixed position on a multi‑page TIFF document.
+ * 2. When you want to programmatically merge a transparent PNG overlay onto a scanned TIFF image for report generation.
+ * 3. When you must place a signature image at exact X‑Y coordinates on a TIFF file before archiving.
+ * 4. When you are creating composite images by blending a PNG graphic onto a TIFF background with custom opacity in a C# application.
+ * 5. When you need to automate the placement of a template overlay on TIFF maps for GIS or printing workflows.
  */

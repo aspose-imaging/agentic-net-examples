@@ -1,52 +1,39 @@
-// HOW-TO: Blend JPEG Onto Transparent PNG With 50% Opacity In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Semi Transparent Blend To JPEG And Export PNG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.jpg";
-        string outputPath = "result.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the JPEG image
-            using (JpegImage jpegImage = new JpegImage(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare PNG creation options (transparent background)
-                PngOptions pngOptions = new PngOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (RasterImage background = (RasterImage)Image.Load(inputPath))
+            using (RasterImage overlay = (RasterImage)Image.Load(inputPath))
+            {
+                background.Blend(new Point(0, 0), overlay, 127);
+
+                PngOptions pngOptions = new PngOptions()
                 {
-                    // Use a memory stream source; the stream itself is not used for creation
-                    Source = new StreamSource(new MemoryStream(), false)
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Create a blank PNG image with the same dimensions as the JPEG
-                using (RasterImage pngImage = (RasterImage)Image.Create(pngOptions, jpegImage.Width, jpegImage.Height))
-                {
-                    // Apply alpha blending with 127 (≈50% opacity)
-                    // Blend the JPEG onto the PNG background at (0,0) with the specified alpha
-                    pngImage.Blend(new Point(0, 0), jpegImage, 127);
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the result as PNG
-                    pngImage.Save(outputPath);
-                }
+                background.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a JPEG photograph to a PNG with a semi‑transparent background for web overlays.
- * 2. When creating watermarked thumbnails where the original JPEG must be blended at 50% opacity onto a PNG canvas.
- * 3. When preparing images for UI elements that require PNG format with controlled opacity to match design specifications.
- * 4. When integrating legacy JPEG assets into a game engine that only accepts PNG textures with alpha channels.
- * 5. When generating printable graphics where the JPEG content must be merged with a transparent PNG layer to preserve background flexibility.
+ * 1. When you need to create a watermark effect by overlaying a JPEG onto itself with 50% opacity and saving the result as a PNG with transparency.
+ * 2. When you want to convert a JPEG image to a PNG while preserving a semi‑transparent alpha channel for web graphics.
+ * 3. When you are generating UI assets that require a PNG with partial opacity derived from an existing JPEG source.
+ * 4. When you need to programmatically blend two identical images to test alpha‑blending logic before applying it to different layers.
+ * 5. When you are building an image‑processing pipeline that must output PNG files with a specific opacity level for printing or publishing.
  */

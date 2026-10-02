@@ -1,11 +1,13 @@
-// HOW-TO: Batch Add 64% Alpha Black Overlay to PNGs and Convert to JPEG C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Images to JPEG with 64‑Alpha Overlay in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -36,39 +38,46 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                using (PngImage png = (PngImage)Image.Load(inputPath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
                 {
-                    // Create an overlay image of the same size
-                    PngOptions overlayOptions = new PngOptions()
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                using (RasterImage background = (RasterImage)Image.Load(inputPath))
+                {
+                    // Create temporary overlay image
+                    string tempOverlayPath = Path.GetTempFileName();
+                    Source overlaySource = new FileCreateSource(tempOverlayPath, false);
+                    JpegOptions overlayOptions = new JpegOptions() { Source = overlaySource };
+                    using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, background.Width, background.Height))
                     {
-                        Source = new FileCreateSource(Path.Combine(outputDirectory, "overlay_temp.png"), false)
-                    };
-                    using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, png.Width, png.Height))
+                        // Fill overlay with solid black
+                        Aspose.Imaging.Color overlayColor = Aspose.Imaging.Color.FromArgb(255, 0, 0, 0);
+                        Graphics graphics = new Graphics(overlay);
+                        graphics.Clear(overlayColor);
+
+                        // Blend overlay onto background with 64 alpha
+                        background.Blend(new Point(0, 0), overlay, 64);
+                    }
+                    // Delete temporary overlay file
+                    if (File.Exists(tempOverlayPath))
                     {
-                        // Fill overlay with black color
-                        Graphics overlayGraphics = new Graphics(overlay);
-                        overlayGraphics.Clear(Aspose.Imaging.Color.Black);
-                        // Blend overlay onto the original image with 64 alpha
-                        png.Blend(new Point(0, 0), overlay, 64);
+                        try { File.Delete(tempOverlayPath); } catch { }
                     }
 
-                    // Prepare output JPEG path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as JPEG with quality 90
+                    // Save result as JPEG
                     JpegOptions jpegOptions = new JpegOptions()
                     {
                         Source = new FileCreateSource(outputPath, false),
                         Quality = 90
                     };
-                    png.Save(outputPath, jpegOptions);
+                    background.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -81,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to watermark a whole folder of transparent PNG icons with a semi‑transparent black shade before publishing them as JPEGs for web use.
- * 2. When an application must reduce file size by converting PNGs to JPEG while ensuring a consistent 64‑percent opacity overlay for visual consistency.
- * 3. When a batch script is required to prepare product images by darkening them uniformly and changing the format for a legacy e‑commerce platform.
- * 4. When you want to automate the process of applying a low‑opacity overlay to scanned PNG documents and saving them as JPEGs for archival storage.
- * 5. When a developer needs to programmatically process user‑uploaded PNG avatars, add a subtle dark overlay, and store them as JPEG thumbnails.
+ * 1. When you need to automatically add a semi‑transparent watermark to a collection of PNG graphics and output them as JPEG files for web publishing.
+ * 2. When a photo‑editing tool must process dozens of product‑shot PNGs, apply a 64‑alpha overlay for branding, and save the results in a smaller JPEG format.
+ * 3. When an e‑commerce platform wants to generate thumbnail JPEGs from high‑resolution PNG assets while applying a consistent translucent overlay.
+ * 4. When a batch script has to convert PNG icons to JPEG previews with a 64‑alpha overlay for inclusion in a mobile app’s asset bundle.
+ * 5. When a reporting system requires converting PNG charts to JPEG images with a light overlay to match a corporate visual style.
  */

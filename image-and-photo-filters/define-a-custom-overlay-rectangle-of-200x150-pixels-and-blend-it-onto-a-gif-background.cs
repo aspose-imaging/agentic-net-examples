@@ -1,11 +1,10 @@
-// HOW-TO: Blend a 200x150 Overlay Rectangle onto a GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend Semi Transparent Rectangle Onto GIF Background In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,45 +12,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\background.gif";
-            string outputPath = @"C:\temp\output.gif";
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the background GIF
             using (GifImage background = (GifImage)Image.Load(inputPath))
             {
-                // Create an overlay rectangle block of 200x150 pixels
-                using (GifFrameBlock overlay = new GifFrameBlock(200, 150))
+                string overlayTempPath = Path.Combine(Path.GetTempPath(), "overlay_temp.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(overlayTempPath));
+                Source overlaySource = new FileCreateSource(overlayTempPath, false);
+                BmpOptions overlayOptions = new BmpOptions() { Source = overlaySource };
+
+                using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, 200, 150))
                 {
-                    // Fill the overlay with a solid color (e.g., blue)
                     Graphics graphics = new Graphics(overlay);
-                    SolidBrush brush = new SolidBrush(Color.Blue);
-                    graphics.FillRectangle(brush, overlay.Bounds);
+                    graphics.Clear(Color.FromArgb(128, 255, 0, 0));
 
-                    // Position where the overlay will be placed on the background
-                    int posX = 50; // example X offset
-                    int posY = 30; // example Y offset
-
-                    // Load overlay pixel data
-                    int[] overlayPixels = overlay.LoadArgb32Pixels(overlay.Bounds);
-
-                    // Blend the overlay onto the background at the specified position
-                    background.SaveArgb32Pixels(new Rectangle(posX, posY, overlay.Width, overlay.Height), overlayPixels);
+                    int x = (background.Width - overlay.Width) / 2;
+                    int y = (background.Height - overlay.Height) / 2;
+                    background.Blend(new Point(x, y), overlay, 127);
                 }
 
-                // Save the modified GIF with default options
-                GifOptions gifOptions = new GifOptions();
-                background.Save(outputPath, gifOptions);
+                GifOptions saveOptions = new GifOptions() { Source = new FileCreateSource(outputPath, false) };
+                background.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a solid‑color banner or badge to an animated GIF for branding or notification purposes.
- * 2. When you want to programmatically overlay a custom‑sized rectangle onto a GIF frame to highlight a region in a web‑based image editor.
- * 3. When you are generating dynamic GIFs that require a colored placeholder (e.g., loading indicator) positioned at a specific offset.
- * 4. When you must combine a generated graphic with an existing GIF background for creating composite animations in a C# application.
- * 5. When you are implementing a server‑side service that adds a colored overlay to user‑uploaded GIFs before storing or serving them.
+ * 1. When you need to add a semi‑transparent colored banner as a watermark to an animated GIF for branding purposes.
+ * 2. When you want to overlay a notification box onto a GIF frame in a web application using Aspose.Imaging for C#.
+ * 3. When you must programmatically highlight a specific area of a GIF with a centered rectangle to guide users.
+ * 4. When generating dynamic GIFs that display a status or progress indicator as a blended overlay.
+ * 5. When creating GIF thumbnails with a colored overlay to indicate selection or focus in a UI.
  */

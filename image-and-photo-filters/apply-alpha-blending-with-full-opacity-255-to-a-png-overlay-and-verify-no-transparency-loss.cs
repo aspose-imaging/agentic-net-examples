@@ -1,65 +1,65 @@
-// HOW-TO: Blend PNG Overlay Onto Background With Full Opacity In C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend PNG Overlay onto Background with Full Opacity in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace AlphaBlendExample
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string backgroundPath = "background.png";
-            string overlayPath = "overlay.png";
-            string outputPath = "output.png";
-
-            // Verify input files exist
-            if (!File.Exists(backgroundPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {backgroundPath}");
-                return;
-            }
-            if (!File.Exists(overlayPath))
-            {
-                Console.Error.WriteLine($"File not found: {overlayPath}");
-                return;
-            }
+                string backgroundPath = "background.png";
+                string overlayPath = "overlay.png";
+                string outputPath = "output.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load background and overlay images as RasterImage
-            using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
-            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-            {
-                // Blend overlay onto background at (0,0) with full opacity (255)
-                background.Blend(new Point(0, 0), overlay, 255);
-
-                // Prepare PNG save options with bound output source
-                PngOptions pngOptions = new PngOptions
+                if (!File.Exists(backgroundPath))
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    Console.Error.WriteLine($"File not found: {backgroundPath}");
+                    return;
+                }
+                if (!File.Exists(overlayPath))
+                {
+                    Console.Error.WriteLine($"File not found: {overlayPath}");
+                    return;
+                }
 
-                // Save the blended image preserving alpha channel
-                background.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
+                using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+                {
+                    int x = (background.Width - overlay.Width) / 2;
+                    int y = (background.Height - overlay.Height) / 2;
+                    var point = new Point(x, y);
+                    var rect = new Rectangle(0, 0, overlay.Width, overlay.Height);
+                    background.Blend(point, overlay, rect, 255);
+
+                    var options = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        CompressionLevel = 9
+                    };
+                    background.Save(outputPath, options);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to place a fully opaque PNG logo on top of a background image for branding without losing the original alpha channel.
- * 2. When generating composite images for a web application, such as combining a transparent button graphic with a background panel while keeping the final PNG fully opaque.
- * 3. When preparing game assets where a sprite overlay must be merged onto a base texture at full opacity to ensure consistent rendering across devices.
- * 4. When creating printable marketing materials that require a PNG overlay (e.g., a badge or seal) to be blended onto a background without any transparency artifacts.
- * 5. When automating batch processing of UI mockups, merging design overlays onto base screens while preserving the PNG format and alpha information.
+ * 1. When you need to combine a logo PNG over a photo without losing its alpha channel.
+ * 2. When you want to programmatically place a watermark PNG at the center of an image in a .NET application.
+ * 3. When you must generate composite PNGs for web assets while preserving transparency and applying maximum compression.
+ * 4. When you are building an automated batch process that merges UI icons onto screenshots for documentation.
+ * 5. When you need to ensure that a fully opaque overlay does not introduce unintended transparency in the final PNG file.
  */

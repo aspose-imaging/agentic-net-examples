@@ -1,71 +1,58 @@
-// HOW-TO: Blend Two Images with 50% Opacity Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend Red Overlay Onto JPEG Using Memory Streams In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string overlayPath = "overlay.png";
-            string outputPath = "output.png";
-
-            // Validate input files
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-            if (!File.Exists(overlayPath))
-            {
-                Console.Error.WriteLine($"File not found: {overlayPath}");
-                return;
-            }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load background image from memory stream
-            using (FileStream inputFileStream = File.OpenRead(inputPath))
-            using (MemoryStream inputMemoryStream = new MemoryStream())
+            byte[] inputBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream inputStream = new MemoryStream(inputBytes))
             {
-                inputFileStream.CopyTo(inputMemoryStream);
-                inputMemoryStream.Position = 0;
-
-                using (RasterImage background = (RasterImage)Image.Load(inputMemoryStream))
+                using (RasterImage sourceImage = (RasterImage)Image.Load(inputStream))
                 {
-                    // Load overlay image from memory stream
-                    using (FileStream overlayFileStream = File.OpenRead(overlayPath))
-                    using (MemoryStream overlayMemoryStream = new MemoryStream())
+                    using (MemoryStream overlayStream = new MemoryStream())
                     {
-                        overlayFileStream.CopyTo(overlayMemoryStream);
-                        overlayMemoryStream.Position = 0;
-
-                        using (RasterImage overlay = (RasterImage)Image.Load(overlayMemoryStream))
+                        BmpOptions bmpOptions = new BmpOptions
                         {
-                            // Apply alpha blending (50% opacity)
-                            background.Blend(new Point(0, 0), overlay, 128);
+                            Source = new StreamSource(overlayStream)
+                        };
+                        using (RasterImage overlay = (RasterImage)Image.Create(bmpOptions, sourceImage.Width, sourceImage.Height))
+                        {
+                            Graphics graphics = new Graphics(overlay);
+                            graphics.Clear(Aspose.Imaging.Color.Empty);
+                            graphics.FillRectangle(new SolidBrush(Aspose.Imaging.Color.Red), new Rectangle(0, 0, overlay.Width, overlay.Height));
+
+                            sourceImage.Blend(new Point(0, 0), overlay, 128);
                         }
-                    }
 
-                    // Save blended image to output memory stream
-                    using (MemoryStream outputMemoryStream = new MemoryStream())
-                    {
-                        PngOptions pngOptions = new PngOptions();
-                        pngOptions.Source = new StreamSource(outputMemoryStream, true);
-                        background.Save(outputMemoryStream, pngOptions);
-
-                        // Write memory stream to file
-                        outputMemoryStream.Position = 0;
-                        using (FileStream outputFileStream = new FileStream(outputPath, FileMode.Create))
+                        using (MemoryStream outputStream = new MemoryStream())
                         {
-                            outputMemoryStream.CopyTo(outputFileStream);
+                            PngOptions pngOptions = new PngOptions
+                            {
+                                Source = new StreamSource(outputStream)
+                            };
+                            sourceImage.Save(outputStream, pngOptions);
+                            File.WriteAllBytes(outputPath, outputStream.ToArray());
                         }
                     }
                 }
@@ -80,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a transparent PNG logo onto a JPEG photograph in a web service without writing temporary files.
- * 2. When generating dynamic watermarks for PDF thumbnails by blending a semi‑transparent image onto the source image in memory.
- * 3. When creating composite product images for an e‑commerce catalog by merging background and foreground images with 50 % opacity using C#.
- * 4. When processing user‑uploaded images in an ASP.NET API and applying an alpha‑blended filter before saving the result as PNG.
- * 5. When building a batch image‑processing tool that reads images from streams, blends them, and streams the combined PNG to another system.
+ * 1. When you need to add a semi‑transparent red overlay to a JPEG that is loaded from a byte array and then save the result as a PNG in memory.
+ * 2. When you want to perform alpha blending between a source image and a programmatically created bitmap without creating intermediate files on disk.
+ * 3. When you are processing images received from a web service and must combine them with a colored mask before returning the data as a stream.
+ * 4. When you are building a server‑side image conversion pipeline that converts uploaded JPEGs to PNGs with custom blending effects while keeping the entire workflow in memory.
+ * 5. When you need to generate a PNG stream for further transmission (e.g., HTTP response) after applying a 50 % opacity blend of a red rectangle over the original image.
  */

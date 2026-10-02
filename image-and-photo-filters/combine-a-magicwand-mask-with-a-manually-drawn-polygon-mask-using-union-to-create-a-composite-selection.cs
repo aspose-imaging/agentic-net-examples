@@ -1,50 +1,65 @@
-// HOW-TO: Combine Magic Wand and Polygon Masks Using Union in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Composite Image Mask by Union of Magic Wand and Polygon in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output\\result.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask using Magic Wand tool at a reference point (example: 100,100)
-                ImageBitMask magicMask = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
+                PointF[] polygonPoints = new PointF[]
+                {
+                    new PointF(100, 100),
+                    new PointF(200, 80),
+                    new PointF(250, 150),
+                    new PointF(180, 200),
+                    new PointF(120, 180)
+                };
 
-                // Create a manually defined polygon mask.
-                // For demonstration, a rectangle mask is used to represent a polygon area.
-                RectangleMask polygonMask = new RectangleMask(200, 150, 300, 200);
+                GraphicsPath manualMask = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new PolygonShape(polygonPoints));
+                manualMask.AddFigure(figure);
 
-                // Combine the two masks using Union to form a composite selection
-                ImageBitMask compositeMask = magicMask.Union(polygonMask);
+                var maskingOptions = new MaskingOptions
+                {
+                    Method = SegmentationMethod.Manual,
+                    Args = new ManualMaskingArgs { Mask = manualMask },
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    }
+                };
 
-                // Apply the composite mask to the image
-                compositeMask.Apply();
-
-                // Save the resulting image
-                image.Save(outputPath);
+                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                {
+                    foreground.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically select a region with the Magic Wand tool and then add a manually drawn polygon to refine the selection before saving a PNG in C#.
- * 2. When you want to create a composite mask that combines a color‑based selection and a geometric shape to isolate objects for background removal using Aspose.Imaging.
- * 3. When you are building an image‑processing pipeline that requires merging a Magic Wand selection with a rectangular (or polygon) mask to apply effects only to the combined area.
- * 4. When you need to programmatically edit scanned documents by selecting irregular areas with Magic Wand and adding precise polygon boundaries for OCR preprocessing.
- * 5. When you are developing a C# application that must generate a masked PNG by uniting automatically detected regions and custom‑drawn shapes for product photo compositing.
+ * 1. When you need to isolate a complex region that includes both automatically detected edges and a custom‑drawn area, such as extracting a product from a photo while preserving a hand‑drawn highlight.
+ * 2. When preparing images for e‑commerce catalogs and you must combine a Magic Wand selection with a manually defined polygon to retain specific background details.
+ * 3. When creating masks for medical imaging where automatic segmentation must be supplemented with physician‑drawn contours to ensure accurate region of interest.
+ * 4. When generating assets for games or AR applications and you want to merge a quick‑selection mask with a designer‑specified polygon to produce a clean cut‑out.
+ * 5. When automating batch processing of scanned documents and you need to combine auto‑detected text blocks with manually marked signatures for selective redaction or extraction.
  */

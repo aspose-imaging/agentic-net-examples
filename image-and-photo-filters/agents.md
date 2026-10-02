@@ -19,66 +19,66 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 - `using System;` (72/148 files)
 - `using System.IO;` (72/148 files)
-- `using Aspose.Imaging;` (72/148 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (55/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (35/148 files) ← category-specific
-- `using Aspose.Imaging.MagicWand;` (33/148 files) ← category-specific
-- `using Aspose.Imaging.MagicWand.ImageMasks;` (31/148 files) ← category-specific
-- `using Aspose.Imaging.Shapes;` (20/148 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (18/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (8/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (7/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (6/148 files) ← category-specific
-- `using Aspose.Imaging.Watermark;` (6/148 files) ← category-specific
-- `using Aspose.Imaging.Watermark.Options;` (6/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (4/148 files) ← category-specific
-- `using Aspose.Imaging.Masking;` (4/148 files) ← category-specific
-- `using Aspose.Imaging.Masking.Options;` (4/148 files) ← category-specific
-- `using Aspose.Imaging.Masking.Result;` (4/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (3/148 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/148 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (2/148 files) ← category-specific
+- `using Aspose.Imaging;` (67/148 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (61/148 files) ← category-specific
+- `using Aspose.Imaging.MagicWand;` (32/148 files) ← category-specific
+- `using Aspose.Imaging.MagicWand.ImageMasks;` (25/148 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (23/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (23/148 files) ← category-specific
+- `using Aspose.Imaging.Shapes;` (19/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (9/148 files) ← category-specific
+- `using Aspose.Imaging.Watermark;` (9/148 files) ← category-specific
+- `using Aspose.Imaging.Watermark.Options;` (9/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (5/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (4/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (4/148 files) ← category-specific
+- `using System.Linq;` (3/148 files)
 - `using System.Collections.Generic;` (2/148 files)
-- `using Aspose.Imaging.FileFormats.Webp;` (1/148 files) ← category-specific
-- `using System.Text;` (1/148 files)
-- `using System.Diagnostics;` (1/148 files)
-- `using System.Linq;` (1/148 files)
+- `using Aspose.Imaging.FileFormats.Gif;` (2/148 files) ← category-specific
+- `using Aspose.Imaging.Masking;` (2/148 files) ← category-specific
+- `using Aspose.Imaging.Masking.Options;` (2/148 files) ← category-specific
+- `using System.Diagnostics;` (2/148 files)
+- `using Aspose.Imaging.Brushes;` (1/148 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (1/148 files) ← category-specific
+- `using System.IO.Compression;` (1/148 files)
+- `using Aspose.Imaging.Masking.Result;` (1/148 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (1/148 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs](./load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs) | `JpegImage`, `PngOptions`, `RasterImage` | Load a JPEG image, apply alpha blending with 127 opacity, and save as PNG. |
+| [load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs](./load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs) | `PngOptions`, `RasterImage` | Load a JPEG image, apply alpha blending with 127 opacity, and save as PNG. |
 | [calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs](./calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs) | `RasterImage`, `TiffOptions` | Calculate center coordinates of a BMP background, blend a PNG overlay, and expor... |
-| [batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs](./batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs) | `Graphics`, `JpegOptions`, `PngImage` | Batch process a folder of PNG images, applying 64‑alpha overlay and saving resul... |
-| [create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs](./create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs) | `Graphics`, `TiffImage` | Create a Point object at (100,200) to position overlay on a TIFF image. |
-| [define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs](./define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs) | `GifImage`, `GifOptions`, `Graphics` | Define a custom overlay rectangle of 200x150 pixels and blend it onto a GIF back... |
+| [batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs](./batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs) | `Graphics`, `JpegOptions`, `RasterImage` | Batch process a folder of PNG images, applying 64‑alpha overlay and saving resul... |
+| [create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs](./create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs) | `RasterImage`, `TiffOptions` | Create a Point object at (100,200) to position overlay on a TIFF image. |
+| [define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs](./define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs) | `BmpOptions`, `GifImage`, `GifOptions` | Define a custom overlay rectangle of 200x150 pixels and blend it onto a GIF back... |
 | [apply-alpha-blending-with-full-opacity-255-to-a-png-overlay-and-verify-no-transparency-loss.cs](./apply-alpha-blending-with-full-opacity-255-to-a-png-overlay-and-verify-no-transparency-loss.cs) | `PngOptions`, `RasterImage` | Apply alpha blending with full opacity (255) to a PNG overlay and verify no tran... |
-| [use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs](./use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs) | `JpegOptions`, `RasterImage` | Use Magic Wand tool with threshold 30 to select red region in a JPEG image. |
-| [combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs](./combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs) | `PngOptions`, `RasterImage` | Combine two Magic Wand selections using union operation and save the combined ma... |
+| [use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs](./use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs) | `PngOptions`, `RasterImage` | Use Magic Wand tool with threshold 30 to select red region in a JPEG image. |
+| [combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs](./combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs) | `PngOptions` | Combine two Magic Wand selections using union operation and save the combined ma... |
 | [subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs](./subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs) | `BmpOptions`, `RasterImage` | Subtract a green Magic Wand selection from a blue selection and export the resul... |
 | [invert-a-magic-wand-selection-on-a-tiff-image-and-fill-the-inverted-area-with-white.cs](./invert-a-magic-wand-selection-on-a-tiff-image-and-fill-the-inverted-area-with-white.cs) | `RasterImage`, `TiffOptions` | Invert a Magic Wand selection on a TIFF image and fill the inverted area with wh... |
 | [apply-feathering-of-radius-5-pixels-to-a-magic-wand-selection-before-saving-as-png.cs](./apply-feathering-of-radius-5-pixels-to-a-magic-wand-selection-before-saving-as-png.cs) | `PngOptions`, `RasterImage` | Apply feathering of radius 5 pixels to a Magic Wand selection before saving as P... |
-| [remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs](./remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs) | `JpegImage` | Remove watermark from a JPEG using content‑aware fill algorithm with three remov... |
-| [remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs](./remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs) | `PngImage`, `TeleaWatermarkOptions` | Remove watermark from a PNG using Telea algorithm and set removal attempts to fi... |
-| [define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs](./define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs) | `BmpOptions`, `RasterImage` | Define watermark region coordinates (50,50,200,100) and apply removal filter on ... |
-| [batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs](./batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs) | `TiffImage` | Batch remove watermarks from a folder of TIFF files using content‑aware fill and... |
-| [load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs](./load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs) | `PngOptions`, `RasterImage` | Load an image from a memory stream, apply alpha blending, and write output to an... |
+| [remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs](./remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs) | `ContentAwareFillWatermarkOptions`, `JpegOptions`, `RasterImage` | Remove watermark from a JPEG using content‑aware fill algorithm with three remov... |
+| [remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs](./remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs) | `RasterImage` | Remove watermark from a PNG using Telea algorithm and set removal attempts to fi... |
+| [define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs](./define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs) | `BmpOptions`, `RasterImage`, `TeleaWatermarkOptions` | Define watermark region coordinates (50,50,200,100) and apply removal filter on ... |
+| [batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs](./batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs) | `ContentAwareFillWatermarkOptions`, `RasterImage`, `TiffOptions` | Batch remove watermarks from a folder of TIFF files using content‑aware fill and... |
+| [load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs](./load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs) | `BmpOptions`, `Graphics`, `PngOptions` | Load an image from a memory stream, apply alpha blending, and write output to an... |
 | [resize-a-jpeg-to-800x600-before-applying-magic-wand-selection-with-threshold-40.cs](./resize-a-jpeg-to-800x600-before-applying-magic-wand-selection-with-threshold-40.cs) | `RasterImage` | Resize a JPEG to 800x600 before applying Magic Wand selection with threshold 40. |
-| [rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs](./rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs) | `GifOptions`, `Graphics`, `PngOptions` | Rotate a PNG by 90 degrees, then blend a semi‑transparent overlay and save as GI... |
+| [rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs](./rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs) | `GifOptions`, `RasterImage` | Rotate a PNG by 90 degrees, then blend a semi‑transparent overlay and save as GI... |
 | [crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs](./crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs) | `PngOptions`, `RasterImage` | Crop a BMP to central 400x400 area, apply feathered Magic Wand selection, and ex... |
-| [process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs](./process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs) | `RasterImage`, `TiffImage` | Process each page of a multi‑page TIFF, applying alpha blending with 200 opacity... |
-| [convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs](./convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs) | `JpegOptions`, `RasterImage`, `VectorRasterizationOptions` | Convert a PDF page to image, apply watermark removal, and save the cleaned image... |
+| [process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs](./process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs) | `RasterImage`, `TiffImage`, `TiffOptions` | Process each page of a multi‑page TIFF, applying alpha blending with 200 opacity... |
+| [convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs](./convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs) | `JpegOptions`, `RasterImage`, `TeleaWatermarkOptions` | Convert a PDF page to image, apply watermark removal, and save the cleaned image... |
 | [load-a-gif-animation-apply-magic-wand-selection-on-first-frame-and-reassemble-animation.cs](./load-a-gif-animation-apply-magic-wand-selection-on-first-frame-and-reassemble-animation.cs) | `GifImage`, `GifOptions`, `RasterImage` | Load a GIF animation, apply Magic Wand selection on first frame, and reassemble ... |
 | [apply-alpha-blending-with-0-opacity-to-verify-that-background-image-remains-unchanged-after-operation.cs](./apply-alpha-blending-with-0-opacity-to-verify-that-background-image-remains-unchanged-after-operation.cs) | `PngOptions`, `RasterImage` | Apply alpha blending with 0 opacity to verify that background image remains unch... |
 | [set-overlay-alpha-to-192-and-blend-a-png-logo-onto-a-jpeg-banner-at-bottom-right-corner.cs](./set-overlay-alpha-to-192-and-blend-a-png-logo-onto-a-jpeg-banner-at-bottom-right-corner.cs) | `JpegOptions`, `RasterImage` | Set overlay alpha to 192 and blend a PNG logo onto a JPEG banner at bottom‑right... |
 | [use-magic-wand-threshold-70-to-select-sky-region-in-a-landscape-png-and-invert-selection.cs](./use-magic-wand-threshold-70-to-select-sky-region-in-a-landscape-png-and-invert-selection.cs) | `PngOptions`, `RasterImage` | Use Magic Wand threshold 70 to select sky region in a landscape PNG and invert s... |
-| [combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs](./combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs) | `RasterImage` | Combine three Magic Wand selections using union, then apply feathering of radius... |
+| [combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs](./combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs) | `PngOptions`, `RasterImage` | Combine three Magic Wand selections using union, then apply feathering of radius... |
 | [subtract-a-text-watermark-selection-from-a-scanned-document-image-and-export-as-high-resolution-tiff.cs](./subtract-a-text-watermark-selection-from-a-scanned-document-image-and-export-as-high-resolution-tiff.cs) | `RasterImage`, `TiffOptions` | Subtract a text watermark selection from a scanned document image and export as ... |
-| [apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs](./apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs) | `ContentAwareFillWatermarkOptions`, `JpegImage`, `TeleaWatermarkOptions` | Apply content‑aware fill removal on a JPEG with two attempts, then compare resul... |
-| [load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs](./load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs) | `BmpOptions`, `GifOptions`, `JpegOptions` | Load images from a ZIP archive, apply alpha blending to each, and write outputs ... |
-| [create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs](./create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs) | `Graphics`, `PngOptions`, `RasterImage` | Create a custom selection by combining Magic Wand union and subtraction, then fi... |
-| *...and 118 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/image-and-photo-filters) |
+| [apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs](./apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs) | `RasterImage` | Apply content‑aware fill removal on a JPEG with two attempts, then compare resul... |
+| [load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs](./load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs) | `PngOptions`, `RasterImage` | Load images from a ZIP archive, apply alpha blending to each, and write outputs ... |
+| [create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs](./create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs) | `PngOptions`, `RasterImage` | Create a custom selection by combining Magic Wand union and subtraction, then fi... |
+| *...and 118 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.9.0/image-and-photo-filters) |
 
 ## Category Statistics
 - Total examples: 148
@@ -125,39 +125,6 @@ All tasks passed ✅
 
 
 
-## Operations Covered
-- Invert grayscale mask for white and black masks  
-- Test mask inversion correctness with unit tests  
-- Apply a filter to each frame of an APNG image  
-- Preserve animation properties while filtering APNG frames  
-- Adjust gamma of APNG frames (pixel‑data modification)  
-- Apply Magic Wand filter to a raster image (JPEG/PNG)  
-- Apply Magic Wand filter to an APNG image (pixel‑data modification)  
-- Remove watermarks from PNG images using an ellipse mask and Telea inpainting  
-- Combine two Magic Wand selections using a union operation  
-- Save a combined mask as a PNG file  
-
-## Supported Formats
-- **PNG** – used for input images, output masks, and APNG frames.  
-- **JPEG** – loaded as a raster image before applying the Magic Wand filter.  
-- **APNG** – animated PNG format; loaded, filtered frame‑by‑frame, and saved.  
-
-## API Classes Used
-- `Image` — base class for loading any supported image format.  
-- `RasterImage` — represents a raster (single‑frame) image that allows direct pixel access.  
-- `ApngImage` — specialized class for handling animated PNG files and their frames.  
-- `PngOptions` — provides options for saving images in PNG format (e.g., compression).  
-- `MagicWand` — performs color‑based selection to create masks based on similarity criteria.  
-- `ImageMask` (in `Aspose.Imaging.MagicWand.ImageMasks`) — stores the mask generated by Magic Wand operations.  
-- `Watermark` — contains methods for removing watermarks from images.  
-- `WatermarkOptions` — configures watermark removal, including mask shape and inpainting algorithm.  
-- `EllipseShape` (from `Aspose.Imaging.Shapes`) — defines an elliptical region used as a mask for watermark removal.  
-- `Image.Load(string)` — static method that loads an image file into an appropriate `Image`‑derived object.  
-- `Image.Save(string, ImageOptions)` — saves the processed image using specified format options.  
-- `Directory.CreateDirectory(string)` — ensures the output folder exists before saving files.  
-- `File.Exists(string)` — checks for the presence of the input file before processing.
-
-
 ## Use Cases
 - When you need to verify that an **ImageGrayscaleMask** correctly flips white and black masks, you can run the unit‑test example that loads a PNG, applies the mask inversion, and checks both fully‑white and fully‑black inputs.  
 - If you have an animated APNG and must **apply a filter to each frame of an APNG image**, the sample that iterates through `ApngImage.Frames` lets you modify pixel data while keeping the original frame order.  
@@ -170,41 +137,6 @@ If you need to change the format of an APNG after filtering, the [Convert Apng](
 When your filter work involves more complex convolution kernels, the [Kernel Filters](../kernel-filters/) section shows how to combine custom kernels with the same image loading techniques used here.  
 For broader image manipulation tasks—such as resizing, rotating, or compositing multiple frames—see the [Manipulating Images](../manipulating-images/) category, which builds on the same `Aspose.Imaging` APIs demonstrated in these filter examples.
 
-
-## Get Started
-
-Ready to try Image And Photo Filters conversions on your own files with Aspose.Imaging for .NET?
-
-```bash
-dotnet add package Aspose.Imaging
-```
-
-| Resource | Link |
-|----------|------|
-| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
-| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
-| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
-| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
-
 <!-- AUTOGENERATED:START -->
-Updated: 2026-09-16 | Run: `20260722_054922` | Examples: 148
+Updated: 2026-10-02 | Run: `20261002_063219` | Examples: 148
 <!-- AUTOGENERATED:END -->
-
-## Developer Q&A
-
-### Q: How can I unit‑test ImageGrayscaleMask inversion for both fully white and fully black masks in C# with Aspose.Imaging?  
-Use the **ImageGrayscaleMask** class, call its **Invert()** method on a white or black mask, and assert the resulting pixel values in your test. → See: `add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs`
-
-### Q: How do I apply an image filter to every raster frame of an APNG while keeping the animation intact using Aspose.Imaging in .NET?  
-Load the file with **ApngImage**, loop through its **RasterFrames**, apply the desired filter via **ImageOptions** to each frame, then save the image. → See: `apply-a-specified-image-filter-to-each-raster-frame-within-an-apng-image-while-maintaining-animation-integrity.cs`
-
-### Q: How can I isolate a specific color region with the Magic Wand filter in Aspose.Imaging for C#?  
-Create a **MagicWand** object, set the target color and tolerance, generate an **ImageMask**, and apply the filter to isolate that region. → See: `apply-image-and-photo-filters-to-isolate-a-specific-color-region-using-the-magic-wand-selection-tool.cs`
-
-### Q: How do I center a PNG overlay on a BMP background and export the result as a TIFF using Aspose.Imaging in C#?  
-Load the BMP and PNG with **Image.Load**, calculate the center coordinates, draw the PNG onto the BMP via **Graphics.DrawImage**, and save with **TiffOptions**. → See: `calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs`
-
-### Q: How can I configure the RemoveWatermark filter with a specific watermark color and threshold in Aspose.Imaging for .NET?  
-Instantiate **WatermarkRemover**, set its **WatermarkColor** and **Threshold** properties, then call **Apply()** to remove the watermark. → See: `configure-the-remove-watermark-filter-by-defining-watermark-color-and-appropriate-threshold-parameters-clearly.cs`

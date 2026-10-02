@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 
@@ -9,11 +12,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,18 +27,20 @@ class Program
 
             using (var image = Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var raster = (RasterImage)image;
+                int width = raster.Width;
+                int height = raster.Height;
 
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                figure.AddShape(new RectangleShape(new RectangleF(0, 0, width, height)));
                 mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                var options = new TeleaWatermarkOptions(mask);
 
-                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                using (var result = WatermarkRemover.PaintOver(raster, options))
                 {
-                    result.Save(outputPath);
+                    result.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically erase a logo or text watermark from a PNG image while preserving smooth edges for a web‑ready photo gallery.
- * 2. When a desktop application must clean scanned documents in PNG format by removing watermarks without introducing jagged artifacts.
- * 3. When an e‑commerce platform wants to strip promotional watermarks from product PNGs before generating thumbnails, ensuring high visual quality.
- * 4. When a batch‑processing script processes PNG assets and requires anti‑aliased watermark removal to maintain consistent appearance across different screen resolutions.
- * 5. When integrating Aspose.Imaging into a C# service that receives user‑uploaded PNGs and must remove confidential watermarks while keeping the image’s original transparency intact.
+ * 1. When you need to clean up scanned PNG documents that contain faint watermarks and want smooth edges after removal.
+ * 2. When an e‑commerce platform must automatically strip promotional watermarks from product PNG images while preserving visual quality.
+ * 3. When a digital archivist wants to restore legacy PNG graphics by removing embedded logos without introducing jagged artifacts.
+ * 4. When a mobile app processes user‑uploaded PNG screenshots and must eliminate watermarks with anti‑aliasing to keep the UI crisp.
+ * 5. When a batch script converts watermarked PNG assets to clean versions for printing, using Aspose.Imaging’s TeleaWatermarkOptions for smoother results.
  */
