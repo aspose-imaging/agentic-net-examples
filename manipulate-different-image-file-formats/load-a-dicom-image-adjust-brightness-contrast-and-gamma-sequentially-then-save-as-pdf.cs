@@ -3,45 +3,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.dcm";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the DICOM image
+            string inputPath = Path.Combine("Input", "sample.dcm");
+            string outputPath = Path.Combine("Output", "result.pdf");
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access adjustment methods
-                DicomImage dicomImage = (DicomImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Adjust brightness (range -255 to 255)
-                dicomImage.AdjustBrightness(30);
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
-                // Adjust contrast (range -100 to 100)
-                dicomImage.AdjustContrast(20f);
+                raster.AdjustBrightness(50);
+                raster.AdjustContrast(0.2f);
+                raster.AdjustGamma(1.1f);
 
-                // Adjust gamma (single value applied to all channels)
-                dicomImage.AdjustGamma(1.2f);
-
-                // Save the processed image as PDF
-                dicomImage.Save(outputPath, new PdfOptions());
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to enhance a DICOM X‑ray by increasing brightness, contrast, and gamma before generating a PDF report for clinicians.
- * 2. When a radiology workflow requires converting processed DICOM scans into PDF files for easy sharing with patients who cannot view DICOM viewers.
- * 3. When a healthcare integration service must programmatically adjust image quality of DICOM files to meet visual standards before archiving them as PDFs.
- * 4. When a diagnostic software needs to batch‑process DICOM images, apply consistent visual adjustments, and store the results in a portable PDF format for electronic health records.
- * 5. When a developer wants to demonstrate image‑processing capabilities by loading a DICOM, tweaking its visual parameters, and exporting the result as a PDF document in a .NET application.
+ * 1. When a radiology application needs to enhance a DICOM X‑ray image’s visibility before archiving it as a searchable PDF report.
+ * 2. When a healthcare integration service must programmatically adjust the brightness, contrast, and gamma of medical scans and deliver them to clinicians in PDF format.
+ * 3. When a C# desktop tool converts DICOM files to PDF while applying visual corrections to meet diagnostic imaging standards.
+ * 4. When an automated batch process prepares DICOM images for patient records by normalizing image tones and exporting them as PDFs.
+ * 5. When a telemedicine platform requires on‑the‑fly image enhancement of DICOM scans before embedding them in PDF documents for remote review.
  */
