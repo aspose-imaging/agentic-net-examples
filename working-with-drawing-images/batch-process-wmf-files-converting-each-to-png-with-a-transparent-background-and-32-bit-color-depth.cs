@@ -1,10 +1,10 @@
-// HOW-TO: Batch Convert WMF to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WMF Files to Transparent 32‑Bit PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,62 +12,48 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "InputWmf";
-            string outputDir = "OutputPng";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all WMF files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.wmf");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (var file in files)
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                if (!file.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {file}");
+                    continue;
                 }
 
-                // Prepare output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
-
-                // Ensure output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load WMF image
-                using (WmfImage wmf = (WmfImage)Image.Load(inputPath))
+                using (Image image = Image.Load(file))
                 {
-                    // Configure rasterization options with transparent background
-                    WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = wmf.Size
-                    };
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set PNG options for 32‑bit color depth (Truecolor with Alpha)
-                    PngOptions pngOptions = new PngOptions
+                    using (var pngOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save as PNG
-                    wmf.Save(outputPath, pngOptions);
+                        Source = new FileCreateSource(outputPath, false)
+                    })
+                    {
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -80,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a library of legacy WMF icons into high‑quality PNGs with alpha transparency for use in modern web applications.
- * 2. When an automated build process must rasterize vector WMF diagrams into 32‑bit PNG files to embed them in PDF reports.
- * 3. When a desktop application requires batch exporting of user‑drawn WMF charts to transparent PNGs for seamless overlay on other graphics.
- * 4. When migrating a Windows‑based asset pipeline, you need to replace WMF logos with PNG equivalents that preserve transparency across platforms.
- * 5. When generating thumbnails of WMF files for a content‑management system, you want each thumbnail saved as a PNG with a transparent background for consistent UI styling.
+ * 1. When you need to generate web‑ready PNG icons from a collection of legacy WMF graphics while preserving transparency.
+ * 2. When an automated build process must convert multiple WMF assets into 32‑bit PNGs for inclusion in a mobile app.
+ * 3. When a reporting tool requires high‑quality PNG charts derived from WMF files without manual conversion.
+ * 4. When you are migrating a design library and need to batch export WMF logos to PNG with alpha channel support.
+ * 5. When a server‑side service has to process incoming WMF uploads and store them as transparent PNGs for downstream image processing.
  */
