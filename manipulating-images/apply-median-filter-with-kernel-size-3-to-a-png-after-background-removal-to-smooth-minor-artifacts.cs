@@ -1,43 +1,62 @@
-// HOW-TO: Apply 3x3 Median Filter to PNG After Background Removal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background From PNG and Apply 3x3 Median Filter In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
+                var maskingOptions = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(raster.Width, raster.Height) / 500) + 1,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent
+                };
 
-                // TODO: Perform background removal here if needed
-                // (Background removal logic would be placed here)
+                var masking = new ImageMasking(raster);
+                using (MaskingResult result = masking.Decompose(maskingOptions))
+                {
+                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                    {
+                        foreground.Filter(foreground.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Apply median filter with kernel size 3 to the entire image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(3));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                        var saveOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        foreground.Save(outputPath, saveOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up scanned PNG documents by removing speckles after extracting the foreground.
- * 2. When preparing product photos for an e‑commerce site, you want to smooth minor noise after making the background transparent.
- * 3. When processing medical imaging PNGs, you apply a median filter to reduce salt‑and‑pepper artifacts while preserving edges.
- * 4. When automating batch conversion of PNG screenshots, you use the filter to improve visual quality after removing unwanted background colors.
- * 5. When developing a C# application that enhances PNG graphics for printing, you smooth small imperfections post‑background removal.
+ * 1. When you need to automatically remove a solid or complex background from a PNG image and keep the foreground intact for further processing in a C# application.
+ * 2. When you want to replace the original background with a transparent layer after segmentation using Aspose.Imaging’s GraphCut algorithm.
+ * 3. When you have minor noise or edge artifacts left after background removal and require a 3×3 median filter to smooth the foreground without blurring details.
+ * 4. When you are preparing PNG assets for web or UI design and must ensure they have clean edges and an alpha channel for seamless overlay.
+ * 5. When you are building an automated image‑pre‑processing pipeline in .NET that loads, masks, filters, and saves PNG files with true‑color with alpha using Aspose.Imaging.
  */
