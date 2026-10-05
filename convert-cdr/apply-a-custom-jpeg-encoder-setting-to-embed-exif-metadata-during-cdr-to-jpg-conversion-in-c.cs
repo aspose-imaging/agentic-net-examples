@@ -1,52 +1,46 @@
-// HOW-TO: Convert CDR to JPEG with Custom EXIF Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CDR to JPEG With Quality Settings And Add EXIF Date In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output\sample.jpg";
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Prepare JPEG options with custom EXIF metadata
-                JpegOptions jpegOptions = new JpegOptions();
-
-                // Create and populate EXIF data
-                JpegExifData exif = new JpegExifData
+                var jpegOptions = new JpegOptions
                 {
-                    Make = "MyCompany",
-                    Model = "MyModel",
-                    Artist = "John Doe",
-                    Copyright = "© MyCompany 2026",
-                    ImageDescription = "Converted from CDR to JPEG with EXIF"
+                    Quality = 90,
+                    CompressionType = JpegCompressionMode.Baseline
                 };
-                jpegOptions.ExifData = exif;
+                cdrImage.Save(outputPath, jpegOptions);
+            }
 
-                // Optionally set quality (e.g., 90)
-                jpegOptions.Quality = 90;
-
-                // Save as JPEG with the specified options
-                image.Save(outputPath, jpegOptions);
+            using (JpegImage jpegImage = (JpegImage)Image.Load(outputPath))
+            {
+                var exif = jpegImage.ExifData;
+                if (exif != null)
+                {
+                    exif.DateTime = "2023:01:01 12:00:00";
+                }
+                jpegImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -58,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert CorelDRAW (CDR) files to JPEGs while preserving camera‑like EXIF tags for downstream cataloguing systems.
- * 2. When an e‑commerce platform requires product images generated from CDR artwork with embedded author and copyright information for legal compliance.
- * 3. When a digital asset management workflow must add custom Make, Model, and Artist EXIF fields to JPEGs created from vector designs.
- * 4. When automating image export in a C# application and you want to control JPEG quality and embed descriptive metadata for SEO purposes.
- * 5. When integrating Aspose.Imaging into a Windows service that processes incoming CDR files and stores JPEGs with standardized EXIF data for archival.
+ * 1. When you need to create JPEG previews of CorelDRAW (CDR) files for a web gallery while setting a specific compression quality and embedding a capture date in the EXIF metadata.
+ * 2. When an automated pipeline must convert CDR designs to JPEG images with baseline compression and then add a standardized EXIF DateTime tag for archival consistency.
+ * 3. When a digital asset management system requires JPEG outputs from CDR sources that include custom encoder options and consistent EXIF timestamps for searchable metadata.
+ * 4. When batch processing dozens of CDR files into JPEGs, you want to apply the same quality level and ensure each resulting image carries the same EXIF date for downstream image analysis.
+ * 5. When compliance or reporting demands that converted JPEG files retain a specific EXIF DateTime value, you can embed that metadata during the CDR‑to‑JPEG conversion in C#.
  */

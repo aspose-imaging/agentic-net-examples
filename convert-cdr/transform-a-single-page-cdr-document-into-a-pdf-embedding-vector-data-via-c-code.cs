@@ -1,63 +1,47 @@
-// HOW-TO: Convert Single Page CDR to PDF with Vector Rasterization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Single‑Page CDR to PDF With Vector Data In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace CdrToPdfConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Data\sample.cdr";
-            string outputPath = @"C:\Data\output\sample_page0.pdf";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.cdr";
+                string outputPath = "output.pdf";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // Select the first page (index 0)
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-
-                // Prepare PDF export options with vector rasterization settings
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the selected page as a PDF
-                page.Save(outputPath, pdfOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    PdfOptions options = new PdfOptions();
+                    image.Save(outputPath, options);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to export a CorelDRAW page as a high‑quality PDF while preserving vector information for printing.
- * 2. When an automated workflow must convert CDR files to PDF without losing exact dimensions or text rendering.
- * 3. When a server‑side application generates PDFs from user‑uploaded CDR drawings for archival or sharing.
- * 4. When you want to embed vector rasterization settings such as no smoothing and single‑bit text rendering to control PDF output size.
- * 5. When you have to programmatically ensure the output folder exists and handle missing CDR files gracefully during batch conversion.
+ * 1. When a designer needs to embed a CorelDRAW (CDR) illustration into a printable PDF without rasterizing the vector graphics.
+ * 2. When an automated workflow must convert single‑page CDR files to PDF for archival or distribution using C# and Aspose.Imaging.
+ * 3. When a web service receives CDR uploads and must generate PDF previews while preserving the original vector quality.
+ * 4. When a batch job processes a folder of CDR assets and creates PDF versions for inclusion in a digital catalog.
+ * 5. When a desktop application needs to validate the existence of a CDR file, convert it to PDF, and handle errors gracefully in .NET.
  */

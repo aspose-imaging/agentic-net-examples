@@ -3,19 +3,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.png";
-
         try
         {
+            string inputPath = "input.cdr";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,24 +22,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                PngOptions options = new PngOptions
                 {
-                    pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
+                    CompressionLevel = 9,
+                    ColorType = PngColorType.IndexedColor,
+                    Palette = ColorPaletteHelper.GetCloseTransparentImagePalette(image, 256),
+                    FilterType = PngFilterType.Avg
+                };
 
-                    if (image is VectorImage)
-                    {
-                        pngOptions.VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
-                    }
-
-                    image.Save(outputPath, pngOptions);
-                }
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to export CorelDRAW (CDR) artwork to web‑ready PNG files while keeping transparent backgrounds intact.
- * 2. When a graphics pipeline requires rasterizing vector CDR pages to PNG with truecolor and alpha for further image processing.
- * 3. When generating thumbnails of CDR designs for a mobile app and the thumbnails must retain original transparency.
- * 4. When automating batch conversion of CDR assets to PNG for a design system that relies on PNG’s alpha channel for layering.
- * 5. When integrating CorelDRAW files into a .NET application that displays PNG images with transparent regions in a UI.
+ * 1. When a designer needs to export transparent vector artwork from CorelDRAW (CDR) to web‑ready PNG files while keeping the original alpha channel intact.
+ * 2. When an automated build pipeline must batch‑convert CDR assets to compressed PNGs for mobile apps, ensuring the images retain their transparency.
+ * 3. When a graphics‑processing service uses Aspose.Imaging in C# to generate PNG thumbnails from CDR files without losing semi‑transparent layers.
+ * 4. When a legacy system stores icons in CDR format and requires conversion to indexed‑color PNGs with maximum compression for faster loading.
+ * 5. When a content‑management system programmatically transforms client‑provided CDR logos into PNGs with preserved transparency for branding on websites.
  */

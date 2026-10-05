@@ -1,64 +1,50 @@
-// HOW-TO: Convert CDR Stream To JPEG Directly In C# Without Temp Files (Aspose.Imaging for .NET)
+// HOW-TO: Convert CDR Stream To JPG Directly In C# Without Temp Files (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
-class Program
+namespace CdrToJpgConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths (relative)
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.jpg";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.cdr";
+                string outputPath = "output.jpg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load CDR file from a memory stream
-            byte[] fileBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream memoryStream = new MemoryStream(fileBytes))
-            {
-                using (CdrImage cdrImage = (CdrImage)Image.Load(memoryStream))
+                if (!File.Exists(inputPath))
                 {
-                    // Set up JPEG options with vector rasterization settings
-                    var jpegOptions = new JpegOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = cdrImage.Width,
-                            PageHeight = cdrImage.Height
-                        }
-                    };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Save directly to JPEG without intermediate files
-                    cdrImage.Save(outputPath, jpegOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (var inputStream = new MemoryStream(File.ReadAllBytes(inputPath)))
+                {
+                    using (Image image = Image.Load(inputStream))
+                    {
+                        var jpegOptions = new JpegOptions();
+                        image.Save(outputPath, jpegOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web service receives a CorelDRAW (.cdr) file as a byte array and must return a JPEG preview without writing the file to disk.
- * 2. When an automated batch job processes uploaded design files in memory to generate thumbnail images for a gallery.
- * 3. When a desktop application needs to display a CDR document as a raster image while keeping the original file hidden from the user.
- * 4. When a cloud function converts user‑submitted vector graphics to JPEG for email attachments, avoiding temporary storage costs.
- * 5. When a mobile backend streams CDR data from a database and saves it as JPEG for fast client‑side rendering.
+ * 1. When a web service receives a CorelDRAW (.cdr) file as a byte array and must return a JPEG preview without writing temporary files to disk.
+ * 2. When processing batch uploads of CDR designs in a cloud function where storage I/O is limited, converting each stream to JPG on the fly.
+ * 3. When generating thumbnails for a document management system that stores CDR files in a database BLOB and needs JPEG thumbnails for UI display.
+ * 4. When integrating a C# desktop application with a third‑party API that supplies CDR data via a stream and expects a JPEG image as the response.
+ * 5. When implementing an automated pipeline that reads CDR files from a network share, converts them in memory to JPEG, and streams the result to another service without creating intermediate files.
  */
