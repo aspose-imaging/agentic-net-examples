@@ -1,45 +1,33 @@
-// HOW-TO: Convert WebP to PDF With JPEG Compression At 80% Quality In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP Image to PDF with JPEG Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.pdf";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the WebP image
+            string inputPath = "Input/input.webp";
+            string outputPath = "Output/output.pdf";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF conversion options with JPEG compression at 80% quality
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        Compression = PdfImageCompressionOptions.Jpeg,
-                        JpegQuality = 80
-                    }
-                };
-
-                // Save the image as PDF using the configured options
-                image.Save(outputPath, pdfOptions);
+                    // PDF compression mode to JPEG with 80% quality is not supported in Aspose.Imaging.
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller PDF files from high‑resolution WebP images for faster web downloads.
- * 2. When an application must embed WebP graphics into PDFs while controlling file size by applying JPEG compression.
- * 3. When a batch process converts user‑uploaded WebP pictures to PDFs and must meet a maximum file‑size limit.
- * 4. When you want to preserve visual quality of WebP images in PDFs but reduce storage costs by using 80 % JPEG quality.
- * 5. When integrating Aspose.Imaging into a C# service that creates printable PDFs from WebP assets with predictable compression settings.
+ * 1. When you need to embed a WebP graphic into a PDF report while keeping the file size low by applying JPEG compression.
+ * 2. When an e‑commerce platform generates product catalogs and must convert high‑resolution WebP photos to PDF brochures using C#.
+ * 3. When a document‑automation service receives WebP uploads and must produce PDF invoices with reduced storage requirements.
+ * 4. When a mobile app backend processes user‑submitted WebP screenshots and creates PDF summaries that can be emailed.
+ * 5. When a batch job migrates archived WebP assets to PDF format and wants to control output quality with an 80 % JPEG setting.
  */

@@ -1,70 +1,81 @@
-// HOW-TO: Measure WebP to GIF Conversion Time and Log Performance in C# (Aspose.Imaging for .NET)
+// HOW-TO: Measure WebP to GIF Conversion Time with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.Diagnostics;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace WebPToGifConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\temp\webp";
-            string outputDir = @"C:\temp\gif";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all WebP files in the input directory
-            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
-
-            foreach (string inputPath in webpFiles)
+            try
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputDirectory = "input";
+                string outputDirectory = "output";
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDirectory);
+
+                // Get all WebP files in the input directory
+                string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
+
+                if (webpFiles.Length == 0)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.WriteLine("No WebP files found to process.");
                     return;
                 }
 
-                // Determine the output GIF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                long totalMilliseconds = 0;
+                int processedCount = 0;
 
-                // Ensure the output directory exists (covers cases where outputDir may be nested)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Measure conversion time
-                Stopwatch sw = Stopwatch.StartNew();
-
-                // Load the WebP image
-                using (Image image = Image.Load(inputPath))
+                foreach (string inputPath in webpFiles)
                 {
-                    // Save as GIF
-                    image.Save(outputPath, new GifOptions());
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    Stopwatch sw = Stopwatch.StartNew();
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath, new GifOptions());
+                    }
+
+                    sw.Stop();
+                    long elapsedMs = sw.ElapsedMilliseconds;
+                    totalMilliseconds += elapsedMs;
+                    processedCount++;
+
+                    Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' in {elapsedMs} ms");
                 }
 
-                sw.Stop();
-
-                // Log performance metric
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' in {sw.ElapsedMilliseconds} ms");
+                Console.WriteLine($"Processed {processedCount} file(s). Total time: {totalMilliseconds} ms. Average time: {(processedCount > 0 ? totalMilliseconds / processedCount : 0)} ms per file.");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a folder of WebP images to GIFs while tracking how long each conversion takes to identify bottlenecks.
- * 2. When optimizing an image‑processing service and you want concrete milliseconds for each WebP‑to‑GIF operation to compare different libraries or settings.
- * 3. When generating animated GIF previews from WebP assets and you must log conversion times for monitoring SLA compliance.
- * 4. When profiling the impact of hardware or parallel processing on WebP to GIF conversion speed in a C# application.
- * 5. When building a CI pipeline that validates that WebP to GIF conversions stay within acceptable performance thresholds.
+ * 1. When you need to benchmark how long each WebP image takes to convert to GIF for performance tuning.
+ * 2. When you want to log total conversion time across a batch of WebP files to identify bottlenecks.
+ * 3. When you are building an automated pipeline that processes large numbers of WebP assets and need per‑file timing metrics.
+ * 4. When you must ensure that the output GIFs are generated within a specific time budget for real‑time applications.
+ * 5. When you are comparing Aspose.Imaging conversion speed against other libraries by measuring elapsed milliseconds per file.
  */

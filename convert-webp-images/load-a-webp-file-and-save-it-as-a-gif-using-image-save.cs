@@ -1,47 +1,45 @@
-// HOW-TO: Convert WebP Image to GIF Using Aspose.Imaging Save Method in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to GIF Using Aspose.Imaging Image.Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace WebPToGifConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.webp";
-            string outputPath = @"c:\temp\output.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.webp";
+                string outputPath = "output.gif";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    image.Save(outputPath, new GifOptions());
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load WebP image and save as GIF
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            catch (Exception ex)
             {
-                webPImage.Save(outputPath, new GifOptions());
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a WebP graphic on a platform that only supports GIF animations.
- * 2. When you are generating email newsletters and must embed images as GIFs for compatibility with older email clients.
- * 3. When you want to create a lightweight animated preview by converting a WebP sequence into a GIF for web pages.
- * 4. When you are migrating a legacy asset library and need to batch‑convert WebP files to GIF for a Windows application that reads only GIFs.
- * 5. When you need to extract a single frame from a WebP file and save it as a GIF for use in documentation or reports.
+ * 1. When you need to display a WebP picture on a legacy website that only supports GIF format.
+ * 2. When you are generating email attachments and must convert WebP assets to GIF for compatibility with older email clients.
+ * 3. When you are building a batch conversion tool that transforms user‑uploaded WebP files into GIFs for use in social media posts.
+ * 4. When you need to embed a small animation in a Windows Forms application that only accepts GIF images.
+ * 5. When you are preparing image assets for a game engine that does not recognize WebP and requires GIF sprites.
  */
