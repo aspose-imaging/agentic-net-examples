@@ -1,45 +1,33 @@
-// HOW-TO: Convert EPS File To PDF/A-1b For Professional Printing In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF with CMYK Color Space in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Result.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/result.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with PDF/A-1b compliance (suitable for professional printing)
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    }
-                };
-
-                // Save the EPS as a PDF
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert client‑provided EPS artwork into PDF/A‑1b files to ensure CMYK color fidelity for offset printing.
- * 2. When a desktop publishing application must batch‑process EPS logos and export them as PDF documents that meet professional printing standards.
- * 3. When an automated workflow has to validate that generated PDFs are PDF/A‑1b compliant before sending them to a pre‑press system.
- * 4. When a C# service integrates Aspose.Imaging to transform vector EPS files into print‑ready PDFs without losing color information.
- * 5. When a developer builds a file‑conversion utility that checks for the EPS source, creates the output folder, and saves the result as a PDF suitable for archival printing.
+ * 1. When you need to transform a vector EPS artwork into a print‑ready PDF while preserving CMYK colors for a commercial printing workflow in a C# application.
+ * 2. When an automated publishing system must generate PDF proofs from designer‑provided EPS files without losing color fidelity using Aspose.Imaging.
+ * 3. When a web service receives EPS logos from clients and must return PDF versions suitable for high‑resolution brochures or flyers.
+ * 4. When a desktop utility needs to batch‑convert multiple EPS files to PDFs for pre‑press preparation, ensuring the output uses the CMYK color space.
+ * 5. When integrating a document management solution that stores PDFs, you may need to convert incoming EPS assets on the fly in .NET to maintain consistent color profiles.
  */

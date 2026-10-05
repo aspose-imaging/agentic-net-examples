@@ -1,9 +1,9 @@
-// HOW-TO: Convert EPS to PDF with Landscape Orientation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Wide EPS to Landscape PDF with Custom Page Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,31 +22,32 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                float pageWidth = image.Width;
-                float pageHeight = image.Height;
+                var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)image;
 
-                // Ensure landscape orientation
-                if (pageHeight > pageWidth)
+                int pageWidth = epsImage.Width;
+                int pageHeight = epsImage.Height;
+                if (pageWidth < pageHeight)
                 {
-                    float temp = pageWidth;
+                    int temp = pageWidth;
                     pageWidth = pageHeight;
                     pageHeight = temp;
                 }
 
-                var pdfOptions = new PdfOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    PageSize = new SizeF(pageWidth, pageHeight),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = pageWidth,
-                        PageHeight = pageHeight
-                    }
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = pageWidth,
+                    PageHeight = pageHeight
                 };
 
-                image.Save(outputPath, pdfOptions);
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                epsImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDFs from wide EPS illustrations while ensuring the pages are set to landscape for optimal layout.
- * 2. When an automated reporting system must convert vector EPS logos into PDF files that retain the original dimensions without rotating the artwork.
- * 3. When a web service processes user‑uploaded EPS files and must return PDFs that preserve the original aspect ratio in landscape mode.
- * 4. When creating batch scripts that convert a folder of EPS graphics to PDFs for large‑format printing that requires landscape pages.
- * 5. When integrating Aspose.Imaging into a C# application to rasterize EPS artwork into PDFs with custom page size and a white background for archival purposes.
+ * 1. When a developer needs to generate a landscape‑oriented PDF from a wide EPS illustration for printing large‑format banners.
+ * 2. When an application must automatically adjust the PDF page dimensions to match the EPS width and height before saving.
+ * 3. When a reporting tool has to embed vector EPS graphics into PDF reports while preserving a white background and correct orientation.
+ * 4. When a workflow converts EPS files received from designers into PDF for archival storage with consistent page layout.
+ * 5. When a batch process creates PDF portfolios from multiple EPS files and must ensure each PDF uses landscape orientation for better on‑screen viewing.
  */

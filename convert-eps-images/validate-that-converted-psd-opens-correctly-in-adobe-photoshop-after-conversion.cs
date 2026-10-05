@@ -1,9 +1,8 @@
-// HOW-TO: Convert BMP to Grayscale PSD with RLE Compression and Verify in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to PSD and Verify Validity in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -11,39 +10,33 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.psd";
+            const string inputPath = "input.png";
+            const string outputPath = "output/output.psd";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD saving options
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
-                };
-
-                // Save as PSD
+                var psdOptions = new PsdOptions();
                 image.Save(outputPath, psdOptions);
             }
 
-            // Attempt to load the saved PSD to verify it can be opened
             using (Image psdImage = Image.Load(outputPath))
             {
-                // Simple validation: output dimensions
-                Console.WriteLine($"PSD loaded successfully. Size: {psdImage.Width}x{psdImage.Height}");
+                if (psdImage.Width > 0 && psdImage.Height > 0)
+                {
+                    Console.WriteLine("PSD conversion successful and file is valid.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("PSD file loaded but has invalid dimensions.");
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform legacy BMP assets into Photoshop‑compatible PSD files while preserving grayscale data and using lossless RLE compression.
- * 2. When an automated pipeline must generate PSD files from source images and confirm they can be opened by Photoshop before further processing.
- * 3. When you are building a batch conversion tool that standardizes image color mode to grayscale for consistent editing in Adobe Photoshop.
- * 4. When you want to ensure that converted PSD files meet size and dimension expectations by loading them immediately after saving.
- * 5. When integrating Aspose.Imaging into a C# application to replace manual Photoshop imports with programmatic PSD creation and validation.
+ * 1. When you need to generate Photoshop‑compatible PSD files from PNG assets in a C# application and ensure the files open without errors.
+ * 2. When automating a workflow that converts user‑uploaded PNG images to PSD for further editing in Adobe Photoshop while programmatically confirming the conversion succeeded.
+ * 3. When building a batch‑processing tool that creates PSD versions of design assets and validates their dimensions before publishing to a digital asset management system.
+ * 4. When integrating Aspose.Imaging into a .NET service that must deliver PSD files to clients and guarantee the files are readable by Photoshop.
+ * 5. When testing a CI/CD pipeline that includes image format conversion, you can use this code to confirm the generated PSD files are not corrupted.
  */

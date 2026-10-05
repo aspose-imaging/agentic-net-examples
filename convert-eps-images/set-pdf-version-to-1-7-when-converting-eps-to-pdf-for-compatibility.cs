@@ -3,33 +3,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.eps");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and convert to PDF (default PDF version is 1.7)
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions(); // No explicit compliance set; defaults to PDF 1.7
-
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -42,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow requires converting EPS illustrations to PDF files that conform to PDF 1.7 for maximum viewer compatibility.
- * 2. When automating batch processing of design assets, you can programmatically transform EPS logos into PDF documents using Aspose.Imaging in C#.
- * 3. When integrating legacy vector graphics into a .NET application that generates PDF reports, this code ensures the EPS content is rendered correctly as PDF 1.7.
- * 4. When a client mandates that all delivered PDFs meet PDF 1.7 compliance, you can use this snippet to convert EPS source files accordingly.
- * 5. When building a server‑side service that receives EPS uploads and returns PDF versions, the example shows how to perform the conversion safely with error handling in C#.
+ * 1. When you need to generate PDF files from legacy EPS artwork while ensuring the output conforms to PDF 1.7 for compatibility with modern viewers.
+ * 2. When a printing workflow requires converting vector EPS logos to PDF documents that meet specific PDF version standards.
+ * 3. When an automated document processing system must batch‑convert EPS files to PDFs that can be opened in Adobe Acrobat Reader 2020 and later.
+ * 4. When a web application needs to serve EPS‑based graphics as PDFs to browsers that only support PDF version 1.7 or higher.
+ * 5. When migrating archival EPS assets to PDF format and you must guarantee the resulting PDFs adhere to the PDF 1.7 specification for regulatory compliance.
  */

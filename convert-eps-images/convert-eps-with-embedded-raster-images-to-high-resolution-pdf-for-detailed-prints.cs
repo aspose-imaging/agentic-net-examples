@@ -1,45 +1,44 @@
-// HOW-TO: Convert EPS With Raster Images To High‑Resolution PDF/A‑1b In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS with Embedded Images to High‑Resolution PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
-
         try
         {
-            // Verify that the input EPS file exists
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\result.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with required compliance (e.g., PDF/A-1b)
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
                     {
                         PdfCompliance = PdfComplianceVersion.PdfA1b
-                    }
-                };
+                    };
 
-                // Save the EPS as a high‑resolution PDF
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to archive vector artwork that contains embedded photos as a print‑ready PDF/A‑1b document using C#.
- * 2. When a publishing workflow must transform EPS files from a legacy graphics system into high‑resolution PDFs for commercial printing.
- * 3. When an automated build process has to generate PDF proofs from EPS assets while preserving raster image quality.
- * 4. When a compliance‑focused application must convert EPS graphics to PDF/A‑1b to meet archival standards.
- * 5. When a .NET service needs to batch‑convert customer‑submitted EPS files into PDFs for preview in web browsers.
+ * 1. When a developer needs to generate print‑ready PDF files from EPS artwork that contains raster images, preserving the original resolution.
+ * 2. When creating PDF/A‑1b compliant documents for archival or legal purposes from vector EPS sources.
+ * 3. When an automated workflow must batch‑convert EPS files to PDFs with exact page dimensions matching the source image.
+ * 4. When a web service needs to render EPS logos or diagrams as high‑quality PDFs for client download.
+ * 5. When integrating Aspose.Imaging into a C# application to replace EPS files with PDFs for downstream printing pipelines.
  */

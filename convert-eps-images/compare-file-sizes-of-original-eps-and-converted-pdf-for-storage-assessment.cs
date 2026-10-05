@@ -2,54 +2,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\converted.pdf";
 
-            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Set up PDF export options (optional compliance settings)
-                var pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    }
-                };
-
-                // Save the EPS image as PDF
-                image.Save(outputPath, pdfOptions);
+                    epsImage.Save(outputPath, pdfOptions);
+                }
             }
 
-            // Retrieve file sizes
             long epsSize = new FileInfo(inputPath).Length;
             long pdfSize = new FileInfo(outputPath).Length;
 
-            // Output the comparison results
-            Console.WriteLine($"EPS file size: {epsSize} bytes");
-            Console.WriteLine($"PDF file size: {pdfSize} bytes");
-            Console.WriteLine($"Size difference: {pdfSize - epsSize} bytes");
+            Console.WriteLine($"EPS size: {epsSize} bytes");
+            Console.WriteLine($"PDF size: {pdfSize} bytes");
         }
         catch (Exception ex)
         {
@@ -60,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to evaluate the storage impact of converting EPS artwork to PDF for archiving.
- * 2. When you must verify that a PDF generated from an EPS meets size constraints for web delivery.
- * 3. When performing a batch migration of legacy EPS files to PDF and want to log size differences.
- * 4. When auditing compliance documents and need to ensure PDF/A‑1b output does not exceed the original EPS size.
- * 5. When building a storage‑budget calculator that compares source EPS size with resulting PDF size in a .NET application.
+ * 1. When you need to evaluate storage savings by converting legacy EPS graphics to PDF in a .NET application.
+ * 2. When you want to verify that a batch conversion process does not increase file size beyond acceptable limits.
+ * 3. When you are migrating design assets to a PDF‑based workflow and must compare original EPS dimensions for compliance.
+ * 4. When you need to log or display the size difference between EPS and PDF for reporting or auditing purposes.
+ * 5. When you are building an automated tool that chooses the smaller format for archiving documents in C#.
  */
