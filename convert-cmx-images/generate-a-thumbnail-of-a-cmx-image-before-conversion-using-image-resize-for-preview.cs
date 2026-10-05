@@ -1,43 +1,42 @@
-// HOW-TO: Create PNG Thumbnail from CMX Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG Thumbnail of CMX Image and Convert to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cmx";
-            string outputPath = @"C:\Images\Thumbnail\sample_thumbnail.png";
+            string inputPath = "input.cmx";
+            string thumbnailPath = "output/thumbnail.png";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(thumbnailPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (CmxImage thumb = (CmxImage)Image.Load(inputPath))
             {
-                // Define thumbnail size (e.g., 150x150)
-                int thumbWidth = 150;
-                int thumbHeight = 150;
+                int thumbWidth = 200;
+                int thumbHeight = (int)(thumb.Height * (thumbWidth / (double)thumb.Width));
+                thumb.Resize(thumbWidth, thumbHeight);
+                thumb.Save(thumbnailPath, new PngOptions());
+            }
 
-                // Resize the image to create a thumbnail preview
-                cmxImage.Resize(thumbWidth, thumbHeight);
-
-                // Save the thumbnail (PNG format)
-                PngOptions pngOptions = new PngOptions();
-                cmxImage.Save(outputPath, pngOptions);
+            using (CmxImage original = (CmxImage)Image.Load(inputPath))
+            {
+                original.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -49,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to show a quick preview of a large CMX vector file in a web gallery without loading the full image.
- * 2. When generating thumbnail icons for a document management system that stores engineering drawings in CMX format.
- * 3. When creating low‑resolution PNG previews for email attachments that contain CMX drawings to reduce bandwidth.
- * 4. When building a desktop application that lists CMX files and requires uniform 150 × 150 pixel thumbnails for the UI.
- * 5. When automating batch processing of CMX assets to produce PNG thumbnails for a searchable image catalog.
+ * 1. When a web application needs to show a small preview of a CMX drawing before the user downloads the full image, this code creates a PNG thumbnail.
+ * 2. When migrating legacy CMX files to JPEG for web publishing, developers can generate a preview thumbnail to verify quality before conversion.
+ * 3. When building a document management system that lists CMX assets, the thumbnail can be displayed in a grid while the original is stored as JPEG.
+ * 4. When implementing batch processing of CMX files, the code can quickly produce 200‑pixel wide PNG previews for each file to speed up UI rendering.
+ * 5. When integrating Aspose.Imaging into a C# desktop tool, developers can use Image.Resize to generate consistent thumbnail sizes for CMX files before saving them in different formats.
  */

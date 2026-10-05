@@ -1,9 +1,8 @@
-// HOW-TO: Write Unit Tests for CMX to TIFF Conversion in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Single and Multi Page CMX Files to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,9 +11,16 @@ class Program
     {
         try
         {
-            // Single‑page CMX to TIFF conversion
-            string singleInput = Path.Combine("Input", "single_page.cmx");
-            string singleOutput = Path.Combine("Output", "single_page.tif");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
+
+            Directory.CreateDirectory(inputDir);
+            Directory.CreateDirectory(outputDir);
+
+            // Single-page CMX to TIFF
+            string singleInput = Path.Combine(inputDir, "single_page.cmx");
+            string singleOutput = Path.Combine(outputDir, "single_page.tif");
 
             if (!File.Exists(singleInput))
             {
@@ -26,26 +32,18 @@ class Program
 
             using (Image image = Image.Load(singleInput))
             {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
-
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(singleOutput, tiffOptions);
             }
 
-            Console.WriteLine($"Single‑page conversion succeeded: {singleOutput}");
+            if (File.Exists(singleOutput))
+                Console.WriteLine("Single-page CMX to TIFF conversion succeeded.");
+            else
+                Console.Error.WriteLine("Single-page conversion failed.");
 
-            // Multi‑page CMX to TIFF conversion (export first two pages)
-            string multiInput = Path.Combine("Input", "multi_page.cmx");
-            string multiOutput = Path.Combine("Output", "multi_page.tif");
+            // Multi-page CMX to TIFF
+            string multiInput = Path.Combine(inputDir, "multi_page.cmx");
+            string multiOutput = Path.Combine(outputDir, "multi_page.tif");
 
             if (!File.Exists(multiInput))
             {
@@ -57,26 +55,14 @@ class Program
 
             using (Image image = Image.Load(multiInput))
             {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                if (image is IMultipageImage multipage && multipage.PageCount > 2)
-                {
-                    tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
-                }
-
-                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(multiOutput, tiffOptions);
             }
 
-            Console.WriteLine($"Multi‑page conversion succeeded: {multiOutput}");
+            if (File.Exists(multiOutput))
+                Console.WriteLine("Multi-page CMX to TIFF conversion succeeded.");
+            else
+                Console.Error.WriteLine("Multi-page conversion failed.");
         }
         catch (Exception ex)
         {
@@ -87,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application needs to generate raster TIFF previews of CMX drawings for printing or archiving.
- * 2. When an automated build pipeline must verify that single‑page CMX files are correctly converted to TIFF without data loss.
- * 3. When a document management system has to batch‑process multi‑page CMX files and store each page as separate TIFF frames.
- * 4. When a web service provides on‑the‑fly conversion of uploaded CMX files to TIFF for browser display.
- * 5. When a quality‑assurance suite requires unit tests that confirm both single‑page and multi‑page CMX to TIFF conversions work as expected.
+ * 1. When a developer needs to programmatically convert legacy CMX drawings to TIFF for archival or printing, ensuring both single‑page and multi‑page documents are handled.
+ * 2. When integrating a document management system that must accept CMX files and store them as TIFF images for compatibility with downstream workflows.
+ * 3. When creating an automated batch process that converts incoming CMX design files to TIFF to generate preview thumbnails or PDFs.
+ * 4. When building a migration tool that moves engineering drawings from CorelDRAW formats to TIFF for use in GIS or CAD applications.
+ * 5. When writing unit tests to verify that Aspose.Imaging correctly preserves page count and image quality during CMX‑to‑TIFF conversion.
  */

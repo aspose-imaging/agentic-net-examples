@@ -1,68 +1,58 @@
-// HOW-TO: Convert JPEG to PNG and Verify Output Size Limit in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to JPEG and Ensure Output Size Under 5 MB in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Maximum allowed output file size (e.g., 5 MB)
-        const long maxOutputSizeBytes = 5 * 1024 * 1024;
-
-        try
+        static void Main()
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            const string inputPath = "input.png";
+            const string outputPath = "output.jpg";
+            const long maxOutputSizeBytes = 5 * 1024 * 1024; // 5 MB
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            try
             {
-                // Define save options (PNG in this example)
-                var saveOptions = new PngOptions();
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image to the output path
-                image.Save(outputPath, saveOptions);
-            }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Check the size of the generated file
-            FileInfo outInfo = new FileInfo(outputPath);
-            if (outInfo.Length > maxOutputSizeBytes)
-            {
-                Console.Error.WriteLine(
-                    $"Output file size {outInfo.Length} bytes exceeds the limit of {maxOutputSizeBytes} bytes.");
+                using (Image image = Image.Load(inputPath))
+                {
+                    var options = new JpegOptions();
+                    image.Save(outputPath, options);
+                }
+
+                FileInfo outInfo = new FileInfo(outputPath);
+                if (outInfo.Length > maxOutputSizeBytes)
+                {
+                    Console.Error.WriteLine($"Output file size exceeds limit: {outInfo.Length} bytes > {maxOutputSizeBytes} bytes");
+                }
+                else
+                {
+                    Console.WriteLine($"Conversion successful. Output size: {outInfo.Length} bytes");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"Conversion succeeded. Output file size: {outInfo.Length} bytes.");
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            // Report any unexpected errors
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert user‑uploaded JPEG photos to PNG for web delivery while ensuring the resulting file stays under a bandwidth‑friendly size limit.
- * 2. When an automated batch process must generate thumbnails in PNG format and reject any image that exceeds a predefined maximum file size.
- * 3. When a cloud service stores images in a storage tier that caps file size, you can convert and validate each image before upload.
- * 4. When regulatory compliance requires that exported images not surpass a specific byte size, this code checks the size immediately after saving.
- * 5. When integrating Aspose.Imaging into a C# application to re‑encode images, you can also enforce a size constraint to avoid exceeding email attachment limits.
+ * 1. When you need to convert user‑uploaded PNG avatars to JPEG thumbnails while guaranteeing the files stay below a 5 MB email attachment limit.
+ * 2. When an automated batch process must shrink high‑resolution PNG graphics to JPEG for faster web page loading and must verify the resulting size does not exceed a predefined budget.
+ * 3. When a desktop application creates JPEG previews of PNG drawings and must alert the user if the preview file would be too large for storage on a limited‑capacity device.
+ * 4. When a cloud service transforms PNG product images to JPEG for CDN delivery and needs to enforce a maximum file size to meet bandwidth constraints.
+ * 5. When a reporting tool exports charts as PNG, then converts them to JPEG for inclusion in PDFs, ensuring each image complies with the PDF’s size restrictions.
  */

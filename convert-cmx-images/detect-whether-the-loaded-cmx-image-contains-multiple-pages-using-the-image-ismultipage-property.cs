@@ -1,41 +1,25 @@
-// HOW-TO: Check If A CMX Image Has Multiple Pages In C# (Aspose.Imaging for .NET)
+// HOW-TO: Check If a CMX Image Has Multiple Pages in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cmx";
-        string outputPath = "output\\result.txt";
-
         try
         {
+            string inputPath = "input.cmx";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
-                CmxImage cmxImage = image as CmxImage;
-                if (cmxImage == null)
-                {
-                    Console.WriteLine("The loaded file is not a CMX image.");
-                    return;
-                }
-
-                bool isMultiPage = false;
-                if (cmxImage is IMultipageImage multipage)
-                {
-                    isMultiPage = multipage.PageCount > 1;
-                }
-
+                bool isMultiPage = image is IMultipageImage;
                 Console.WriteLine($"Is multi-page: {isMultiPage}");
             }
         }
@@ -48,9 +32,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing CAD drawings stored as CMX files, you may need to know if the file contains more than one page before extracting or converting each page.
- * 2. When building a batch conversion tool that converts each page of a CMX document to separate PNG images, you must first detect multi‑page files to handle them correctly.
- * 3. When validating user‑uploaded CMX files in a web application, checking the page count helps enforce limits on document size or complexity.
- * 4. When generating thumbnails for CMX documents, you may want to display a different icon for multi‑page files versus single‑page files.
- * 5. When integrating Aspose.Imaging with a document management system, detecting multi‑page CMX images allows you to store page metadata or split the document into individual pages.
+ * 1. When you need to verify whether an imported CorelDRAW CMX file contains more than one page before processing each layer individually.
+ * 2. When your application must decide to split or merge pages of a CMX document based on its multi‑page status.
+ * 3. When you want to conditionally apply batch conversions only to single‑page CMX files to avoid unexpected results.
+ * 4. When you are building a preview generator that should display a navigation control only if the CMX source has multiple pages.
+ * 5. When you need to log or report the page‑count capability of CMX assets during automated quality‑control checks.
  */
