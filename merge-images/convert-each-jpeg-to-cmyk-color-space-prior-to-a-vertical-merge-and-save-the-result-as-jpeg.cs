@@ -1,4 +1,4 @@
-// HOW-TO: Convert JPEG Images To CMYK And Vertically Merge In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG Images to CMYK and Merge Vertically in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Linq;
@@ -14,36 +14,22 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputPath = Path.Combine("Output", "merged.jpg");
 
-            if (!Directory.Exists(inputDirectory))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (files.Length == 0)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine("No JPEG files found in input directory.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-            List<string> jpegFiles = files
-                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (jpegFiles.Count == 0)
-            {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            List<RasterImage> cmykImages = new List<RasterImage>();
-
-            foreach (string filePath in jpegFiles)
+            foreach (string filePath in files)
             {
                 if (!File.Exists(filePath))
                 {
@@ -51,47 +37,33 @@ class Program
                     return;
                 }
 
-                using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
+                using (JpegImage img = (JpegImage)Image.Load(filePath))
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        JpegOptions cmykOptions = new JpegOptions
-                        {
-                            ColorType = JpegCompressionColorMode.Cmyk,
-                            Source = new StreamSource(ms, false)
-                        };
-                        jpeg.Save(ms, cmykOptions);
-                        ms.Position = 0;
-                        RasterImage cmykImg = (RasterImage)Image.Load(ms);
-                        cmykImages.Add(cmykImg);
-                    }
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
-            int totalHeight = cmykImages.Sum(img => img.Height);
-            int maxWidth = cmykImages.Max(img => img.Width);
+            int canvasWidth = widths.Max();
+            int canvasHeight = heights.Sum();
 
-            string outputPath = Path.Combine(outputDirectory, "merged_cmyk.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            JpegOptions outOptions = new JpegOptions
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            using (JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 })
             {
-                ColorType = JpegCompressionColorMode.Cmyk,
-                Quality = 100,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(outOptions, maxWidth, totalHeight))
-            {
-                int offsetY = 0;
-                foreach (RasterImage img in cmykImages)
+                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                    img.Dispose();
+                    int offsetY = 0;
+                    foreach (string filePath in files)
+                    {
+                        using (JpegImage img = (JpegImage)Image.Load(filePath))
+                        {
+                            Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                            offsetY += img.Height;
+                        }
+                    }
+                    canvas.Save();
                 }
-                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -103,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a set of JPEG photos for high‑quality CMYK printing and combine them into a single tall image using C# and Aspose.Imaging.
- * 2. When an e‑commerce platform must generate a continuous product‑catalog banner from individual JPEG thumbnails, converting each to CMYK to match the printer’s color profile.
- * 3. When a digital publishing workflow requires merging scanned JPEG pages vertically while ensuring the final PDF‑ready image uses the CMYK color space.
- * 4. When a marketing automation script has to batch‑process JPEG ads, convert them to CMYK for consistent brand colors, and stack them for a vertical slideshow.
- * 5. When a desktop application needs to combine multiple JPEG screenshots into one CMYK image for archival printing without losing color fidelity.
+ * 1. When preparing product photos for high‑resolution print catalogs, a developer can convert the JPEGs to CMYK and stack them vertically to create a single printable image.
+ * 2. When generating a continuous strip of scanned receipts for archival, the code ensures each JPEG is in CMYK color space and merges them into one file for easier storage.
+ * 3. When building a web service that returns a combined image of multiple advertisements, converting each JPEG to CMYK maintains color consistency before vertically concatenating them.
+ * 4. When creating a printable banner from separate JPEG panels, the developer can use this code to convert each panel to CMYK and merge them into a single high‑quality JPEG.
+ * 5. When automating the preparation of proof sheets for a printing press, the script converts source JPEGs to CMYK and stacks them vertically to match the press’s layout requirements.
  */

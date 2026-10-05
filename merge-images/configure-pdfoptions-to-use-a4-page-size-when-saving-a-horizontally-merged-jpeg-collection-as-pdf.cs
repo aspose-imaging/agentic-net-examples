@@ -1,4 +1,4 @@
-// HOW-TO: Save Horizontally Merged JPEG Images As A4 PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create A4 PDF from Horizontally Merged JPEG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -15,31 +15,20 @@ class Program
     {
         try
         {
-            // Input JPEG files (hardcoded relative paths)
-            string[] inputPaths = new string[]
-            {
-                "Input\\image1.jpg",
-                "Input\\image2.jpg",
-                "Input\\image3.jpg"
-            };
+            string[] inputPaths = new string[] { "Input/image1.jpg", "Input/image2.jpg", "Input/image3.jpg" };
+            string outputPath = "Output/merged.pdf";
 
-            // Validate each input file
-            foreach (string inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Output PDF file (hardcoded relative path)
-            string outputPath = "Output\\merged.pdf";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -49,13 +38,11 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Create a raster canvas (no source bound)
-            JpegOptions canvasOptions = new JpegOptions();
-            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            JpegOptions jpegOptions = new JpegOptions();
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
@@ -68,13 +55,8 @@ class Program
                     }
                 }
 
-                // Configure PDF options with A4 page size (595x842 points)
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    PageSize = new SizeF(595f, 842f)
-                };
-
-                // Save the merged canvas as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PageSize = new SizeF(595, 842); // A4 size in points
                 canvas.Save(outputPath, pdfOptions);
             }
         }
@@ -87,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple product photos placed side‑by‑side into a single A4‑sized PDF brochure for printing or distribution.
- * 2. When an application must generate a printable catalog page by stitching landscape‑oriented JPEG screenshots into one PDF document.
- * 3. When a reporting tool has to create an A4 PDF report that merges several scanned receipts horizontally for audit review.
- * 4. When a web service converts a set of JPEG banners into a single A4 PDF flyer without losing image quality.
- * 5. When an automated workflow assembles daily camera snapshots into an A4 PDF sheet for archival or email attachment.
+ * 1. When you need to combine multiple product photos into a single A4‑sized PDF catalog page for printing or sharing.
+ * 2. When generating a printable invoice that includes scanned JPEG receipts placed side‑by‑side on an A4 PDF.
+ * 3. When creating a landscape brochure that stitches together several JPEG banners into one A4 PDF document.
+ * 4. When automating the conversion of a series of camera‑shot images into a standardized A4 PDF report for compliance archives.
+ * 5. When building a web service that merges user‑uploaded JPEG screenshots into an A4 PDF for easy download and offline viewing.
  */

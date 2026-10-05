@@ -15,7 +15,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
             string outputPath = "merged.jpg";
 
             // Validate input files
@@ -31,7 +31,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
             foreach (string inputPath in inputPaths)
             {
@@ -42,19 +42,23 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas with background color
+            // Create output canvas with JPEG options
             Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-            using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
-                // Set uniform background color
-                canvas.BackgroundColor = Color.White;
-                canvas.HasBackgroundColor = true;
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Color.White);
+                // Fill background with uniform color (white)
+                Aspose.Imaging.Color bgColor = Aspose.Imaging.Color.FromArgb(255, 255, 255, 255);
+                int bgArgb = bgColor.ToArgb();
+                int[] bgPixels = new int[totalWidth * maxHeight];
+                for (int i = 0; i < bgPixels.Length; i++)
+                {
+                    bgPixels[i] = bgArgb;
+                }
+                canvas.SaveArgb32Pixels(new Rectangle(0, 0, totalWidth, maxHeight), bgPixels);
 
                 // Merge images horizontally
                 int offsetX = 0;
@@ -81,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine product photos side‑by‑side into a single JPEG with a consistent white backdrop for an online catalog.
- * 2. When generating a panoramic view from several JPEG screenshots and want the canvas to fill empty space with a uniform color.
- * 3. When creating a printable brochure that stitches multiple JPEG advertisements together and requires a solid background to avoid transparent gaps.
- * 4. When automating batch processing of JPEG thumbnails to produce a single composite image for a gallery page, ensuring the background matches the site theme.
- * 5. When developing a C# application that merges user‑uploaded JPEG images horizontally and must set a specific background color before saving the final file.
+ * 1. When you need to combine product photos side‑by‑side into a single JPEG for an online catalog.
+ * 2. When creating a panoramic thumbnail by stitching several JPEG screenshots together with a uniform background.
+ * 3. When generating a printable banner that merges multiple JPEG advertisements while ensuring a consistent white canvas.
+ * 4. When preparing a composite image for email newsletters by horizontally joining JPEG logos with a solid background color.
+ * 5. When automating batch processing to concatenate JPEG images for a slideshow preview without gaps between them.
  */

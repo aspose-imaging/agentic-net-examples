@@ -1,8 +1,7 @@
-// HOW-TO: Merge Multiple JPEG Images Horizontally Into a MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Horizontally into a Memory Stream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,7 +13,7 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
+            // Hardcoded input image paths
             string[] inputPaths = new string[]
             {
                 "image1.jpg",
@@ -22,7 +21,7 @@ class Program
                 "image3.jpg"
             };
 
-            // Validate each input file
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -32,8 +31,8 @@ class Program
                 }
             }
 
-            // Load images to collect sizes
-            List<Size> sizes = new List<Size>();
+            // Collect sizes
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -43,21 +42,27 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (var sz in sizes)
+            {
+                totalWidth += sz.Width;
+                if (sz.Height > maxHeight) maxHeight = sz.Height;
+            }
 
-            // Prepare output memory stream
+            // Create memory stream for output
             using (MemoryStream outputStream = new MemoryStream())
             {
-                // Configure JPEG options with the stream as source
-                JpegOptions jpegOptions = new JpegOptions
+                // Set up JPEG options with stream source
+                StreamSource streamSource = new StreamSource(outputStream);
+                JpegOptions jpegOptions = new JpegOptions()
                 {
-                    Quality = 90,
-                    Source = new StreamSource(outputStream, true)
+                    Source = streamSource,
+                    Quality = 100
                 };
 
-                // Create bound JPEG canvas
-                using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
+                // Create canvas image bound to the stream
+                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
                 {
                     int offsetX = 0;
                     foreach (string path in inputPaths)
@@ -70,13 +75,15 @@ class Program
                         }
                     }
 
-                    // Save the bound canvas (writes to the stream)
+                    // Save canvas to the bound stream
                     canvas.Save();
                 }
 
-                // At this point, outputStream contains the merged JPEG image
-                // Example: display the size of the resulting stream
-                Console.WriteLine($"Merged image size in bytes: {outputStream.Length}");
+                // At this point, outputStream contains the merged JPEG image.
+                // Optionally, reset position for further processing.
+                outputStream.Position = 0;
+                // Example: write to a file (not required by task)
+                // File.WriteAllBytes("merged.jpg", outputStream.ToArray());
             }
         }
         catch (Exception ex)
@@ -88,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several JPEG photos side‑by‑side for a web gallery without creating temporary files on disk.
- * 2. When you want to generate a single composite JPEG on the fly and send it directly over a network stream or API response.
- * 3. When you are building a PDF or email attachment that requires a horizontally stitched image but must keep everything in memory for performance.
- * 4. When you need to batch process product images, merging them into one banner image for a marketing email while avoiding I/O overhead.
- * 5. When you are creating a thumbnail strip of screenshots for a UI preview and need the result stored in a MemoryStream for further manipulation.
+ * 1. When you need to create a single panoramic JPEG from several product photos on a web server without writing temporary files.
+ * 2. When generating a combined thumbnail strip of user‑uploaded JPEGs for a mobile app and you want the result directly in a MemoryStream for further API transmission.
+ * 3. When building an email attachment that contains multiple scanned JPEG pages stitched side‑by‑side, and you must keep the image in memory to embed it without disk I/O.
+ * 4. When processing images in a cloud function that merges JPEG banners horizontally and streams the output to another service such as Azure Blob Storage.
+ * 5. When creating a printable collage of JPEG screenshots in a desktop application and need the final image in a stream for immediate saving or printing.
  */

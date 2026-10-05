@@ -14,63 +14,60 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            // Hardcoded output merged JPEG file
-            string outputPath = "merged.jpg";
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "output.jpg";
+
+            // Validate input files
+            foreach (string path in inputPaths)
+            {
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Desired uniform width for each image
-            int targetWidth = 800;
+            const int targetWidth = 200; // uniform width for all images
 
-            // First pass: validate files and collect resized dimensions
-            List<Size> resizedSizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            List<RasterImage> resizedImages = new List<RasterImage>();
+            List<Size> sizes = new List<Size>();
+
+            // Load, resize, and collect sizes
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                using (JpegImage img = (JpegImage)Image.Load(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
-                {
-                    int newHeight = (int)(img.Height * (double)targetWidth / img.Width);
-                    resizedSizes.Add(new Size(targetWidth, newHeight));
+                    int newHeight = (int)Math.Round((double)img.Height * targetWidth / img.Width);
+                    img.Resize(targetWidth, newHeight, ResizeType.NearestNeighbourResample);
+                    // Clone the resized image into a new RasterImage to keep after disposing original
+                    RasterImage cloned = (RasterImage)Image.Create(new JpegOptions(), img.Width, img.Height);
+                    cloned.SaveArgb32Pixels(new Rectangle(0, 0, img.Width, img.Height), img.LoadArgb32Pixels(img.Bounds));
+                    resizedImages.Add(cloned);
+                    sizes.Add(new Size(cloned.Width, cloned.Height));
                 }
             }
 
             // Calculate canvas size for horizontal merge
-            int canvasWidth = resizedSizes.Sum(s => s.Width);
-            int canvasHeight = resizedSizes.Max(s => s.Height);
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas bound to the output file
-            Source fileSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = fileSource,
-                Quality = 90
-            };
-
+            // Create output JPEG canvas
+            Source outSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outSource, Quality = 90 };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                // Second pass: load, resize, and copy each image onto the canvas
-                foreach (string inputPath in inputPaths)
+                foreach (RasterImage img in resizedImages)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
-                    {
-                        int newHeight = (int)(img.Height * (double)targetWidth / img.Width);
-                        img.Resize(targetWidth, newHeight);
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
+                    img.Dispose();
                 }
-
-                // Save the bound canvas to the output file
                 canvas.Save();
             }
         }
@@ -83,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a side‑by‑side photo collage from several JPEG photos that must share a consistent width.
- * 2. When preparing product images for an e‑commerce catalog where each item image must be the same width before being combined into a single banner.
- * 3. When generating a before‑and‑after comparison image by resizing two JPEGs to equal width and stitching them horizontally.
- * 4. When automating the creation of a panoramic thumbnail from a set of individual JPEG snapshots taken at the same location.
- * 5. When consolidating scanned document pages saved as JPEGs into one wide image for easier viewing or printing.
+ * 1. When creating a photo strip for a web gallery, you need to resize several JPEG photos to a common width and stitch them side‑by‑side into a single JPEG image.
+ * 2. When generating printable product labels that combine multiple product photos, you must standardize the width of each JPEG and merge them horizontally before saving.
+ * 3. When building a thumbnail carousel where each thumbnail must have identical dimensions, you can resize the source JPEGs to the same width and concatenate them into one image for efficient loading.
+ * 4. When preparing before‑and‑after comparison images for a marketing email, you need to align the before and after JPEGs by width and combine them horizontally into a single file.
+ * 5. When automating batch processing of scanned receipts to create a single page view, you resize each receipt JPEG to a uniform width and merge them side‑by‑side using C# and Aspose.Imaging.
  */

@@ -1,12 +1,12 @@
-// HOW-TO: Merge JPEG Images Horizontally Into PDF With 300 DPI In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge JPEG Images Horizontally into a 300 DPI PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -30,62 +30,73 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-            if (files.Length == 0)
+            string[] allFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+            List<string> jpegFiles = new List<string>();
+            foreach (var f in allFiles)
             {
-                Console.WriteLine("No JPEG files found in the input directory.");
+                string ext = Path.GetExtension(f).ToLowerInvariant();
+                if (ext == ".jpg" || ext == ".jpeg")
+                {
+                    jpegFiles.Add(f);
+                }
+            }
+
+            if (jpegFiles.Count == 0)
+            {
+                Console.WriteLine("No JPEG files found.");
                 return;
             }
 
-            List<int> widths = new List<int>();
-            List<int> heights = new List<int>();
-            foreach (string file in files)
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (var path in jpegFiles)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
 
-                using (RasterImage img = (RasterImage)Image.Load(file))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    widths.Add(img.Width);
-                    heights.Add(img.Height);
+                    sizes.Add(img.Size);
                 }
             }
 
-            int newWidth = widths.Sum();
-            int newHeight = heights.Max();
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (var sz in sizes)
+            {
+                totalWidth += sz.Width;
+                if (sz.Height > maxHeight)
+                    maxHeight = sz.Height;
+            }
 
-            using (JpegOptions jpegOptions = new JpegOptions
+            string tempCanvasPath = Path.Combine(outputDirectory, "temp_canvas.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+
+            Source source = new FileCreateSource(tempCanvasPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
-                Quality = 100,
-                ResolutionSettings = new ResolutionSetting(300, 300),
-                ResolutionUnit = ResolutionUnit.Inch
-            })
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-            {
+                canvas.HorizontalResolution = 300;
+                canvas.VerticalResolution = 300;
+
                 int offsetX = 0;
-                foreach (string file in files)
+                foreach (var path in jpegFiles)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(file))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-                using (PdfOptions pdfOptions = new PdfOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300, 300)
-                })
-                {
-                    canvas.Save(pdfPath, pdfOptions);
-                }
+                string outputPdfPath = Path.Combine(outputDirectory, "merged.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -97,9 +108,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple scanned JPEG pages into a single high‑resolution PDF for printing or archiving.
- * 2. When generating a printable catalog where each product photo (JPEG) must appear side‑by‑side on one PDF page at 300 DPI.
- * 3. When creating a PDF report that stitches together screenshots saved as JPEGs while preserving print‑quality resolution.
- * 4. When automating the preparation of legal documents that require merged JPEG evidence images in a single PDF with exact DPI settings.
- * 5. When developing a web service that receives JPEG uploads, merges them horizontally, and returns a 300‑DPI PDF for downstream workflow.
+ * 1. When you need to combine multiple scanned photos side‑by‑side into a single high‑resolution PDF for printing or archiving.
+ * 2. When generating a printable product catalog page by stitching product JPEG images horizontally and exporting to a 300 DPI PDF.
+ * 3. When creating a side‑by‑side comparison document of before‑and‑after JPEG images for a client report in PDF format.
+ * 4. When automating the preparation of large‑format advertisement layouts by merging banner JPEGs into a PDF with print‑ready DPI.
+ * 5. When building a batch process that consolidates daily camera JPEG captures into a single PDF for easy distribution to stakeholders.
  */
