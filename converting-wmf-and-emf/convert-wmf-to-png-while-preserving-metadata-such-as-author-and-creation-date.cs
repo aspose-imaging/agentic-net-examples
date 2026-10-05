@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -23,18 +24,8 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new WmfRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                image.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution PNG thumbnails from legacy WMF vector drawings while keeping the original author and creation date information.
- * 2. When a document‑management system must convert uploaded WMF files to web‑friendly PNGs without losing embedded metadata for audit trails.
- * 3. When automating batch processing of engineering schematics stored as WMF and exporting them as PNGs for inclusion in reports, preserving source metadata.
- * 4. When integrating a C# application with Aspose.Imaging to replace WMF icons with PNG assets while retaining their original metadata for branding consistency.
- * 5. When migrating legacy WMF assets to a modern asset pipeline and require programmatic conversion to PNG that maintains author and timestamp metadata for compliance.
+ * 1. When a developer needs to convert legacy WMF vector graphics to PNG for web display while keeping the original author and creation date information.
+ * 2. When an application must batch‑process engineering diagrams stored as WMF files and output PNG thumbnails that retain embedded metadata for audit trails.
+ * 3. When a reporting tool generates charts in WMF format and the final PDF requires PNG images with preserved metadata for compliance documentation.
+ * 4. When migrating a digital asset library from Windows Metafile to a cross‑platform PNG format without losing attribution data such as author name.
+ * 5. When automating the import of WMF icons into a C# desktop application and the PNG assets must carry the original creation timestamps for version control.
  */

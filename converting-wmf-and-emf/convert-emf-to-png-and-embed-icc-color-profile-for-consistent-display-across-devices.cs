@@ -1,8 +1,10 @@
-// HOW-TO: Convert EMF to PNG with ICC Profile Embedding in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to PNG with Vector Rasterization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,46 +12,29 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.emf";
-            string outputPath = "Output\\sample.png";
+            string inputPath = Path.Combine("Input", "input.emf");
+            string outputPath = Path.Combine("Output", "output.png");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
+            using (PngOptions pngOptions = new PngOptions())
             {
-                // Configure rasterization options for EMF to PNG conversion
-                var rasterOptions = new EmfRasterizationOptions
+                pngOptions.Source = new FileCreateSource(outputPath, false);
+                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    BackgroundColor = Color.White,
+                    PageWidth = emfImage.Width,
+                    PageHeight = emfImage.Height
                 };
 
-                // Set PNG save options with the rasterization settings
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // ----- ICC profile embedding (illustrative) -----
-                // Load an ICC profile if needed. Aspose.Imaging PNG saving does not expose a direct
-                // property for ICC profiles, but you could embed it via metadata APIs if required.
-                // using (FileStream iccStream = File.OpenRead("Input\\profile.icc"))
-                // {
-                //     // Embed ICC profile into the image metadata here.
-                // }
-
-                // Save the converted PNG image
-                image.Save(outputPath, pngOptions);
+                emfImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -61,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector EMF graphics as raster PNGs on web pages while preserving color accuracy across monitors.
- * 2. When a reporting system generates charts in EMF format and you must convert them to PNG for inclusion in PDF documents.
- * 3. When an automated batch job processes legacy EMF assets and saves them as PNG files with a consistent background color.
- * 4. When you want to embed an ICC color profile into the PNG to ensure the same colors appear on different devices.
- * 5. When you are building a C# application that validates the existence of source files and creates output directories before converting images.
+ * 1. When you need to display Windows Metafile (EMF) graphics on web pages that only support PNG images.
+ * 2. When generating thumbnails of vector diagrams for reports that require a fixed pixel size and white background.
+ * 3. When converting printable vector assets to raster PNG files for inclusion in mobile apps that cannot render EMF.
+ * 4. When automating a batch process that transforms EMF logos into PNGs while preserving original dimensions for brand consistency.
+ * 5. When preparing vector illustrations for email newsletters that require PNG format to ensure proper rendering across email clients.
  */

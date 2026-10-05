@@ -1,51 +1,43 @@
-// HOW-TO: Convert Transparent EMF to JPEG with Custom Background Color in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Transparent EMF to JPEG with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = "Input\\sample.emf";
+            string outputPath = "Output\\sample.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access size and other EMF-specific properties
-                EmfImage emfImage = (EmfImage)image;
-
-                // Configure rasterization options with a custom background color
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                Source src = new FileCreateSource(outputPath, false);
+                using (JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 })
                 {
-                    PageSize = emfImage.Size,
-                    BackgroundColor = Color.LightGray // custom background color
-                };
-
-                // Set JPEG save options and attach the rasterization options
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the image as JPEG with the specified background
-                emfImage.Save(outputPath, jpegOptions);
+                    using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, emfImage.Width, emfImage.Height))
+                    {
+                        Aspose.Imaging.Color bgColor = Aspose.Imaging.Color.White;
+                        Graphics graphics = new Graphics(canvas);
+                        graphics.Clear(bgColor);
+                        graphics.DrawImage(emfImage, 0, 0);
+                        canvas.Save();
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -57,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate JPEG thumbnails from EMF logos that contain transparent areas and want a specific background shade.
- * 2. When exporting vector diagrams from a Windows application to JPEG for web display while ensuring a consistent background color.
- * 3. When batch‑processing EMF reports to JPEG for email attachments and must replace transparency with a corporate brand color.
- * 4. When converting EMF charts to JPEG for printing on a light‑colored paper and need to set a matching background.
- * 5. When integrating Aspose.Imaging into a C# service that transforms user‑uploaded EMF files to JPEG with a predefined background for preview images.
+ * 1. When you need to embed vector EMF logos with transparent areas into a JPEG report and require a solid white background to avoid visual artifacts.
+ * 2. When generating thumbnails of EMF diagrams for web pages that only support JPEG and need a consistent background color.
+ * 3. When converting legacy EMF drawings to JPEG for email attachments while ensuring the transparent parts appear on a chosen background.
+ * 4. When automating batch processing of EMF files to JPEG in a C# application and must replace transparency with a specific color for printing.
+ * 5. When creating JPEG assets from EMF icons for mobile apps where the platform does not support transparency and a background fill is required.
  */
