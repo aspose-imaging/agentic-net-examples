@@ -1,9 +1,8 @@
-// HOW-TO: Apply Magic Wand Selection at Cursor Position in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Magic Wand Selection at Cursor Position in C# with Aspose Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -24,20 +23,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Placeholder cursor coordinates; replace with actual cursor values if available
-            int cursorX = 100;
-            int cursorY = 100;
-
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(cursorX, cursorY))
-                    .Apply();
+                int cursorX = 100;
+                int cursorY = 100;
 
-                image.Save(outputPath, new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                });
+                MagicWandTool.Select(image, new MagicWandSettings(cursorX, cursorY)).Apply();
+
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -49,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to let users click on a photo in a Windows Forms app and automatically select the region around the click for background removal using Aspose.Imaging’s MagicWandTool.
- * 2. When you want to programmatically generate a mask from a specific point in a PNG image to create transparent cut‑outs for UI overlays.
- * 3. When building an image‑editing feature that isolates objects under the mouse pointer for further processing such as color correction or cropping.
- * 4. When automating batch processing where a predefined seed point is used to extract similar‑colored areas from multiple PNG files.
- * 5. When integrating a quick “click‑to‑select” tool in a C# graphics editor that saves the selected area with alpha channel preservation.
+ * 1. When you need to let users click a button to automatically select and mask an area of a PNG image based on the mouse cursor location.
+ * 2. When building a photo‑editing desktop app that uses Aspose.Imaging to perform Magic Wand selections without manual region drawing.
+ * 3. When implementing an automated screenshot tool that isolates a region around the cursor for further processing or saving as a PNG.
+ * 4. When creating a graphics workflow that programmatically extracts objects from raster images by seeding the Magic Wand at runtime coordinates.
+ * 5. When integrating image segmentation into a C# WinForms or WPF interface where a button triggers a mask generation using the current cursor point.
  */

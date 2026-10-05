@@ -1,11 +1,8 @@
-// HOW-TO: Select Color Region with Magic Wand and Custom Threshold in C# (Aspose.Imaging for .NET)
+// HOW-TO: Select Color Region With Magic Wand Threshold 30 In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -14,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output\\result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -26,11 +23,9 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(50, 50) { Threshold = 30 })
-                    .Apply();
-
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                MagicWandSettings settings = new MagicWandSettings(50, 50) { Threshold = 30 };
+                MagicWandTool.Select(image, settings).Apply();
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -42,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically isolate a specific color area in a PNG image by defining a seed point and adjusting the selection sensitivity with a custom threshold.
- * 2. When creating a C# tool that lets users click on a photo to remove or replace the background based on color similarity using Aspose.Imaging’s MagicWandTool.
- * 3. When generating thumbnails that only include objects of a particular hue, requiring precise region selection with a threshold to avoid capturing neighboring shades.
- * 4. When building a batch process that extracts logo graphics from scanned PNG files by selecting the logo’s color region using a seed coordinate and a 30‑pixel threshold.
- * 5. When implementing an automated quality‑check that highlights areas of a PNG that match a target color within a tolerance, enabling further analysis or reporting.
+ * 1. When you need to automatically select and isolate a solid‑color area in a PNG image for background removal using C#.
+ * 2. When you want to create a mask around a specific region of a raster image by defining a seed point and custom tolerance.
+ * 3. When you are building a photo‑editing tool that lets users click a point and select all similar pixels with a threshold of 30.
+ * 4. When you must extract a colored logo from a scanned image by selecting pixels around a known coordinate in .NET.
+ * 5. When you need to batch‑process images to highlight a target color region before applying further filters or effects.
  */

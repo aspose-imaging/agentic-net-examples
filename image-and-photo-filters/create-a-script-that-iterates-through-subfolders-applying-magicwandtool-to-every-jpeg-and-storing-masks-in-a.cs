@@ -1,53 +1,54 @@
-// HOW-TO: Batch Apply Magic Wand Mask to JPEGs in Subfolders Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate Grayscale Mask PNGs from JPEGs in Subfolders Using MagicWand in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputRoot = @"C:\Images\Input";
-            string outputRoot = @"C:\Images\Output";
+            string inputRoot = "InputImages";
+            string outputRoot = "Masks";
 
-            // Get all JPEG files in subfolders
-            string[] jpegFiles = Directory.GetFiles(inputRoot, "*.jpg", SearchOption.AllDirectories);
+            Directory.CreateDirectory(outputRoot);
 
-            foreach (string inputPath in jpegFiles)
+            var jpegFiles = Directory.GetFiles(inputRoot, "*.*", SearchOption.AllDirectories)
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var inputPath in jpegFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine relative path and corresponding output path
                 string relativePath = Path.GetRelativePath(inputRoot, inputPath);
-                string outputPath = Path.Combine(outputRoot, relativePath);
+                string outputPath = Path.Combine(outputRoot, Path.ChangeExtension(relativePath, ".png"));
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Create a mask using MagicWandTool with a default point and threshold
-                    // (adjust the point and threshold as needed for your use case)
-                    var settings = new MagicWandSettings(10, 10) { Threshold = 100 };
-                    ImageBitMask mask = MagicWandTool.Select(image, settings);
+                    MagicWandTool.Select(image, new MagicWandSettings(0, 0)).Apply();
 
-                    // Apply the mask to the image
-                    mask.Apply();
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.Grayscale
+                    };
 
-                    // Save the masked image as JPEG
-                    image.Save(outputPath, new JpegOptions());
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -60,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically remove backgrounds from a large collection of JPEG photos stored in nested folders.
- * 2. When you want to generate consistent masked versions of product images for an e‑commerce catalog without manually editing each file.
- * 3. When you are preparing training data for a computer‑vision model and must apply the same threshold‑based selection to every image in a dataset.
- * 4. When you must preserve the original folder hierarchy while saving processed images to a separate output directory.
- * 5. When you require a C# solution that leverages Aspose.Imaging’s MagicWandTool to batch‑process images with a custom threshold.
+ * 1. When you need to automatically create selection masks for a large collection of JPEG photos stored in nested folders, such as preparing assets for background removal.
+ * 2. When you want to batch‑process product images to extract their foreground objects and save the masks as grayscale PNG files for later compositing.
+ * 3. When a machine‑learning pipeline requires binary masks for training data and the source images are organized in multiple subdirectories.
+ * 4. When you are building a web service that receives JPEG uploads and must generate corresponding mask images for image‑editing tools.
+ * 5. When you have to archive image masks separately from the original pictures while preserving the original folder hierarchy for easy reference.
  */

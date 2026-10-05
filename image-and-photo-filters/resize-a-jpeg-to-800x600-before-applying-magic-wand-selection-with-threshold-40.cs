@@ -2,42 +2,31 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the JPEG image as a RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 800x600 using default resampling
-                image.Resize(800, 600);
-
-                // Apply Magic Wand selection with threshold 40 at point (100, 100)
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100) { Threshold = 40 })
+                image.Resize(800, 600, ResizeType.NearestNeighbourResample);
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 40 })
                     .Apply();
-
-                // Save the processed image
                 image.Save(outputPath);
             }
         }
@@ -50,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to downscale a high‑resolution photo to a standard 800×600 size before performing region selection for further editing.
- * 2. When you want to automatically isolate a specific area of a JPEG using the Magic Wand tool with a custom threshold to create masks or cutouts.
- * 3. When preparing images for web galleries where each picture must be resized and a particular object selected for overlay or annotation.
- * 4. When building a batch‑processing pipeline that resizes user‑uploaded JPEGs and extracts a region based on color similarity for automated cropping.
- * 5. When integrating image analysis into a C# application that requires both size normalization and selective pixel grouping for downstream computer‑vision tasks.
+ * 1. When you need to downscale a high‑resolution JPEG to a web‑friendly 800×600 size before extracting a region with a Magic Wand tool in a C# application.
+ * 2. When preparing product photos for an e‑commerce site, you can resize them and automatically select background areas using a threshold‑based Magic Wand to simplify background removal.
+ * 3. When processing scanned documents, you may want to shrink the image and isolate similar‑colored sections for OCR preprocessing using Aspose.Imaging’s Magic Wand with a threshold of 40.
+ * 4. When building a batch image‑editing script, you can ensure consistent dimensions and then apply a Magic Wand selection to batch‑crop or mask areas across multiple JPEG files.
+ * 5. When creating thumbnails that require both size reduction and selective region detection, this code resizes the JPEG and selects pixels within the specified tolerance for further editing.
  */

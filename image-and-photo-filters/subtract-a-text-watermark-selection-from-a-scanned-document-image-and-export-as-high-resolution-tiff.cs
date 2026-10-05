@@ -1,4 +1,4 @@
-// HOW-TO: Remove Text Watermark from Scanned Image and Save as High‑Resolution TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Text Watermark from Scanned Image and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,47 +11,34 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the scanned document image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Define the watermark mask (example ellipse)
-                var mask = new GraphicsPath();
-                var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 50)));
+                // Define mask covering the watermark area (example coordinates)
+                GraphicsPath mask = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 50)));
                 mask.AddFigure(figure);
 
-                // Configure Telea watermark removal options
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-                // Remove the watermark
                 using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
                 {
-                    // Set high‑resolution TIFF options
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Lzw,
-                        Photometric = TiffPhotometrics.Rgb
-                    };
-
-                    // Save the cleaned image as TIFF
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                     result.Save(outputPath, tiffOptions);
                 }
             }
@@ -65,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean scanned paper documents that contain a printed watermark before archiving them as lossless TIFF files.
- * 2. When a batch‑processing tool must automatically erase logo or text overlays from JPEG scans and store the results with LZW compression for long‑term storage.
- * 3. When a document management system requires high‑resolution TIFF output after removing confidential watermarks to meet compliance standards.
- * 4. When you want to programmatically apply a custom shape mask (e.g., ellipse) to target a specific watermark region in a scanned image using C#.
- * 5. When integrating Aspose.Imaging into a workflow that converts watermarked JPEG scans into searchable TIFFs for OCR processing.
+ * 1. When you need to clean up a scanned JPEG page by removing a printed text watermark before archiving it as a high‑resolution TIFF.
+ * 2. When an OCR pipeline requires a watermark‑free image to improve text recognition accuracy, and you must output the result in TIFF format for downstream processing.
+ * 3. When a document management system stores scanned documents as JPEGs with confidential watermarks that must be stripped before converting them to lossless TIFF for legal compliance.
+ * 4. When a batch job processes scanned invoices, removing the “Paid” stamp watermark and saving the cleaned images as TIFF to preserve detail for printing.
+ * 5. When a medical imaging workflow receives scanned reports with overlay text that must be removed and the clean image saved as a high‑resolution TIFF for archival standards.
  */
