@@ -1,24 +1,29 @@
-// HOW-TO: Create C# REST API to Apply Gaussian Blur to Image URL (Aspose.Imaging for .NET)
+// HOW-TO: Create a C# REST API to Apply Gaussian Blur to Remote Images (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded paths for temporary storage
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up a simple HTTP listener
             var listener = new System.Net.HttpListener();
             listener.Prefixes.Add("http://localhost:5000/");
             listener.Start();
@@ -26,11 +31,10 @@ class Program
 
             while (true)
             {
-                var context = listener.GetContext(); // Wait for a request
+                var context = listener.GetContext();
                 var request = context.Request;
                 var response = context.Response;
 
-                // Expect a query parameter named 'url'
                 string imageUrl = request.QueryString["url"];
                 if (string.IsNullOrEmpty(imageUrl))
                 {
@@ -43,39 +47,42 @@ class Program
                     continue;
                 }
 
-                // Download the image to the hardcoded input path
-                using (var client = new System.Net.WebClient())
+                try
                 {
-                    client.DownloadFile(imageUrl, inputPath);
-                }
+                    var httpClient = new System.Net.Http.HttpClient();
+                    using (var imageStream = httpClient.GetStreamAsync(imageUrl).GetAwaiter().GetResult())
+                    {
+                        using (var rasterImage = (RasterImage)Image.Load(imageStream))
+                        {
+                            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                            rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-                // Verify the downloaded file exists
-                if (!File.Exists(inputPath))
+                            using (var outputStream = new MemoryStream())
+                            {
+                                var jpegOptions = new JpegOptions();
+                                rasterImage.Save(outputStream, jpegOptions);
+                                byte[] imageBytes = outputStream.ToArray();
+
+                                response.ContentType = "image/jpeg";
+                                response.ContentLength64 = imageBytes.Length;
+                                response.OutputStream.Write(imageBytes, 0, imageBytes.Length);
+                            }
+                        }
+                    }
+                    response.StatusCode = 200;
+                }
+                catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
                     response.StatusCode = 500;
-                    response.Close();
-                    continue;
+                    using (var writer = new StreamWriter(response.OutputStream))
+                    {
+                        writer.Write($"Error processing image: {ex.Message}");
+                    }
                 }
-
-                // Load, apply Gaussian blur, and save as PNG
-                using (Image image = Image.Load(inputPath))
+                finally
                 {
-                    RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                    Source src = new FileCreateSource(outputPath, false);
-                    PngOptions pngOptions = new PngOptions() { Source = src };
-                    raster.Save(outputPath, pngOptions);
+                    response.Close();
                 }
-
-                // Return the processed image
-                byte[] resultBytes = File.ReadAllBytes(outputPath);
-                response.ContentType = "image/png";
-                response.ContentLength64 = resultBytes.Length;
-                response.OutputStream.Write(resultBytes, 0, resultBytes.Length);
-                response.OutputStream.Close();
-                response.Close();
             }
         }
         catch (Exception ex)
@@ -87,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need a lightweight web endpoint that receives a remote JPEG or PNG, blurs it with Aspose.Imaging, and returns the processed image to a web or mobile client.
- * 2. When building a microservice that automatically sanitizes user‑uploaded photos by applying a Gaussian blur before storing them in a CDN.
- * 3. When creating a server‑side image preview generator that accepts an image URL, adds a soft blur effect, and streams the result without saving intermediate files.
- * 4. When integrating image processing into an existing C# application that must expose a simple HTTP listener for on‑the‑fly photo transformations.
- * 5. When developing a proof‑of‑concept API for testing how Gaussian blur impacts OCR accuracy on images fetched from external sources.
+ * 1. When you need a lightweight web endpoint that receives an image URL and returns a blurred JPEG for privacy‑preserving thumbnails.
+ * 2. When building a microservice that automatically softens user‑uploaded photos before storing them in a cloud bucket.
+ * 3. When integrating a C# backend that provides on‑the‑fly Gaussian blur for image‑processing pipelines without saving intermediate files.
+ * 4. When creating a simple API for mobile apps to request a blurred version of any public image without handling the image data locally.
+ * 5. When developing a server‑side solution that fetches remote images, applies a 5‑pixel radius Gaussian blur, and streams the result back to the client.
  */

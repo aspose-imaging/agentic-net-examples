@@ -1,40 +1,41 @@
-// HOW-TO: Apply 3×3 High‑Pass Sharpen Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply High Pass Edge Filter to PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "Output\\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            double[,] kernel = new double[,]
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage raster = (RasterImage)image;
+                { -1, -1, -1 },
+                { -1, 8, -1 },
+                { -1, -1, -1 }
+            };
 
-                // Apply a 3×3 high‑pass (sharpen) kernel
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(3, 1.0));
-
-                // Save the processed image
-                raster.Save(outputPath);
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance edges in a PNG before performing optical character recognition.
- * 2. When preparing product photos for a web catalog and want to sharpen details without changing the file format.
- * 3. When creating a preprocessing step for a computer‑vision algorithm that requires emphasized edges in input images.
- * 4. When automating batch processing of scanned documents to improve visual contrast for printing.
- * 5. When developing a C# desktop application that lets users apply a high‑pass filter to their PNG images on the fly.
+ * 1. When you want to emphasize edges in a PNG diagram by applying a high‑pass convolution filter with Aspose.Imaging in C#.
+ * 2. When preparing PNG assets for computer‑vision models that require edge‑enhanced images before feature extraction.
+ * 3. When generating sharpened PNG thumbnails for a web gallery where fine details need to be more visible.
+ * 4. When preprocessing scanned PNG documents for OCR by increasing contrast around text edges using a high‑pass kernel.
+ * 5. When automating a batch process that applies an edge‑detecting filter to multiple PNG files and saves the results with Aspose.Imaging.
  */

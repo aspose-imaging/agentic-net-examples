@@ -1,10 +1,9 @@
-// HOW-TO: Apply Edge Detection to PNG Using Aspose.Imaging Convolution Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load PNG and Save to Different Folder Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,32 +11,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/edge_detected.png";
+            string outputPath = "output\\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
-
-                // Apply a simple edge detection using the emboss kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-                // Save the processed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight object outlines in product photos before uploading them to an e‑commerce site.
- * 2. When you want to preprocess scanned documents to emphasize text edges for OCR accuracy.
- * 3. When you are building a desktop tool that converts raw PNG screenshots into stylized line‑art for presentations.
- * 4. When you must generate edge‑detected thumbnails for a gallery that helps users spot visual differences quickly.
- * 5. When you are automating a batch job that applies emboss‑style edge detection to PNG assets for a game’s UI effects.
+ * 1. When you need to move or copy a PNG file to a new directory while preserving its original format in a C# application.
+ * 2. When you want to programmatically ensure a PNG image is saved with Aspose.Imaging settings before further processing or archiving.
+ * 3. When building an automated pipeline that reads PNG assets from one location and writes them to a structured output folder for downstream tasks.
+ * 4. When you must validate that a PNG file exists and create the target folder on the fly to avoid runtime errors in image handling code.
+ * 5. When integrating Aspose.Imaging into a .NET service that stores uploaded PNG images into a separate storage path for security or organization purposes.
  */

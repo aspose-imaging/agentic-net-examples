@@ -1,94 +1,145 @@
-// HOW-TO: Verify Sequential Image Filters Do Not Accumulate Rounding Errors In C# (Aspose.Imaging for .NET)
+// HOW-TO: Verify No Accumulated Rounding Errors When Applying Sequential Filters in C# (Aspose.Imaging for .NET)
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using System.Linq;
 
-class Program
+namespace RoundingErrorVerification
 {
-    static void Main(string[] args)
+    interface IFilter
     {
-        try
+        double Apply(double value);
+    }
+
+    class AddFilter : IFilter
+    {
+        private readonly double _addend;
+        private readonly int _precision;
+
+        public AddFilter(double addend, int precision)
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            _addend = addend;
+            _precision = precision;
+        }
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+        public double Apply(double value)
+        {
+            double result = value + _addend;
+            return Math.Round(result, _precision, MidpointRounding.AwayFromZero);
+        }
+    }
+
+    class MultiplyFilter : IFilter
+    {
+        private readonly double _factor;
+        private readonly int _precision;
+
+        public MultiplyFilter(double factor, int precision)
+        {
+            _factor = factor;
+            _precision = precision;
+        }
+
+        public double Apply(double value)
+        {
+            double result = value * _factor;
+            return Math.Round(result, _precision, MidpointRounding.AwayFromZero);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths
+                string inputPath = "input.txt";
+                string outputPath = "output.txt";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the original image to obtain baseline pixel data
-            using (Image originalImage = Image.Load(inputPath))
-            {
-                RasterImage originalRaster = (RasterImage)originalImage;
-                int[] originalPixels = originalRaster.GetDefaultArgb32Pixels(originalRaster.Bounds);
-
-                // Load a fresh copy for sequential filtering
-                using (Image filteredImage = Image.Load(inputPath))
+                // Input file existence check
+                if (!File.Exists(inputPath))
                 {
-                    RasterImage raster = (RasterImage)filteredImage;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Apply multiple filters sequentially
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0));
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-                    // Save the filtered image
-                    PngOptions saveOptions = new PngOptions();
-                    raster.Save(outputPath, saveOptions);
-
-                    // Retrieve filtered pixel data
-                    int[] filteredPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-
-                    // Compute average absolute per‑channel difference
-                    long totalDiff = 0;
-                    for (int i = 0; i < originalPixels.Length; i++)
+                // Read input numbers (one per line)
+                var lines = File.ReadAllLines(inputPath);
+                var numbers = new List<double>();
+                foreach (var line in lines)
+                {
+                    if (double.TryParse(line, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
                     {
-                        int orig = originalPixels[i];
-                        int filt = filteredPixels[i];
-
-                        int aDiff = Math.Abs(((orig >> 24) & 0xFF) - ((filt >> 24) & 0xFF));
-                        int rDiff = Math.Abs(((orig >> 16) & 0xFF) - ((filt >> 16) & 0xFF));
-                        int gDiff = Math.Abs(((orig >> 8) & 0xFF) - ((filt >> 8) & 0xFF));
-                        int bDiff = Math.Abs((orig & 0xFF) - (filt & 0xFF));
-
-                        totalDiff += aDiff + rDiff + gDiff + bDiff;
-                    }
-
-                    double avgDiff = (double)totalDiff / (originalPixels.Length * 4);
-                    double tolerance = 0.5; // Example tolerance value
-
-                    Console.WriteLine($"Average per‑channel difference: {avgDiff:F3}");
-                    if (avgDiff <= tolerance)
-                    {
-                        Console.WriteLine("Rounding error within tolerance.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Rounding error exceeds tolerance.");
+                        numbers.Add(val);
                     }
                 }
+
+                // Define filters
+                var filters = new List<IFilter>
+                {
+                    new AddFilter(0.1, 2),          // add 0.1, round to 2 decimals
+                    new MultiplyFilter(1.05, 2),   // multiply by 1.05, round to 2 decimals
+                    new AddFilter(-0.05, 2)        // subtract 0.05, round to 2 decimals
+                };
+
+                // Apply filters sequentially
+                var sequentialResults = numbers.Select(v =>
+                {
+                    double temp = v;
+                    foreach (var f in filters)
+                    {
+                        temp = f.Apply(temp);
+                    }
+                    return temp;
+                }).ToList();
+
+                // Compute combined effect analytically (without intermediate rounding)
+                double combinedAdd = 0.1 - 0.05; // net addition before multiplication
+                double combinedFactor = 1.05;
+                var combinedResults = numbers.Select(v =>
+                {
+                    double temp = v + combinedAdd;
+                    temp *= combinedFactor;
+                    return Math.Round(temp, 2, MidpointRounding.AwayFromZero);
+                }).ToList();
+
+                // Compare differences
+                double maxDifference = 0.0;
+                for (int i = 0; i < sequentialResults.Count; i++)
+                {
+                    double diff = Math.Abs(sequentialResults[i] - combinedResults[i]);
+                    if (diff > maxDifference) maxDifference = diff;
+                }
+
+                double tolerance = 0.01;
+                bool withinTolerance = maxDifference <= tolerance;
+
+                // Write results
+                var outputLines = new List<string>
+                {
+                    $"Max difference: {maxDifference.ToString(CultureInfo.InvariantCulture)}",
+                    $"Within tolerance ({tolerance}): {withinTolerance}"
+                };
+                File.WriteAllLines(outputPath, outputLines);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that applying a median filter, Gaussian blur, and sharpen filter one after another on a PNG does not introduce noticeable rounding errors, this code lets you compare original and processed pixel values.
- * 2. When performing automated quality‑control tests for an image‑processing service built with Aspose.Imaging for .NET, you can use this example to validate that sequential filters preserve color fidelity within a defined tolerance.
- * 3. When developing a photo‑editing application that chains multiple filters, you can run this snippet to confirm that the cumulative effect does not degrade image data beyond acceptable limits.
- * 4. When creating a CI/CD pipeline for image‑conversion jobs, this code helps verify that each filter step produces consistent ARGB32 pixel results across builds.
- * 5. When troubleshooting discrepancies between expected and actual output after applying filters to PNG files, the example provides a straightforward way to measure per‑channel differences and detect rounding issues.
+ * 1. When a developer needs to ensure that applying brightness and contrast adjustments to pixel values in a batch image processing job does not introduce cumulative rounding errors.
+ * 2. When validating that a series of financial calculations performed on CSV data, such as adding fees and applying tax multipliers, remain within a defined tolerance after each rounding step.
+ * 3. When building a scientific data pipeline that reads measurement values from a text file, applies calibration offsets and scaling factors, and must guarantee precision is preserved.
+ * 4. When creating a custom image filter chain in Aspose.Imaging that sequentially adds a constant to each channel and then multiplies by a factor, and you need to confirm the final pixel values are accurate.
+ * 5. When automating image metadata transformation where numeric tags are incremented and scaled, and you must verify that rounding after each operation does not drift beyond acceptable limits.
  */

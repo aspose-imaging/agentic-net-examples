@@ -4,69 +4,69 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath) ?? "", "temp.png");
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to SvgImage
-                SvgImage svgImage = (SvgImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Rasterize SVG to PNG in memory
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                using (MemoryStream ms = new MemoryStream())
+            // Rasterize SVG to PNG
+            using (Image svgImg = Image.Load(inputPath))
+            {
+                var pngOpts = new PngOptions
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load raster image from memory
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        // Apply custom convolution kernel (sharpen example)
-                        double[,] kernel = new double[,]
-                        {
-                            { 0, -1, 0 },
-                            { -1, 5, -1 },
-                            { 0, -1, 0 }
-                        };
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
-
-                        // Create a new SVG canvas
-                        SvgGraphics2D graphics = new SvgGraphics2D(svgImage.Width, svgImage.Height, 96);
-
-                        // Draw the filtered raster onto the SVG canvas
-                        graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0));
-
-                        // Finalize SVG image
-                        using (SvgImage finalSvg = graphics.EndRecording())
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            finalSvg.Save(outputPath);
-                        }
+                        PageWidth = svgImg.Width,
+                        PageHeight = svgImg.Height
                     }
-                }
+                };
+                svgImg.Save(tempPngPath, pngOpts);
+            }
+
+            // Load rasterized PNG and apply custom convolution kernel
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                double[,] kernel = new double[,]
+                {
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+                var convOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
+
+                // Create new SVG and embed the filtered raster image
+                int width = raster.Width;
+                int height = raster.Height;
+                var svgGraphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, 96);
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+                SvgImage resultSvg = svgGraphics.EndRecording();
+
+                resultSvg.Save(outputPath);
+            }
+
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -78,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance an SVG logo with a sharpening effect while keeping the file editable as SVG.
- * 2. When you want to programmatically apply a custom convolution kernel to vector graphics for web‑optimized images.
- * 3. When you must process SVG assets in a .NET service, rasterize them for filtering, then return the result as SVG for downstream design tools.
- * 4. When you are building an automated pipeline that improves the visual clarity of SVG icons before embedding them in a mobile app.
- * 5. When you require in‑memory image processing of SVG files without writing temporary PNG files to disk.
+ * 1. When you need to enhance an SVG logo with a custom sharpening filter but must deliver the final artwork still as an SVG file for web scalability.
+ * 2. When a reporting tool generates vector diagrams that require pixel‑level adjustments, such as edge enhancement, before embedding them back into SVG reports.
+ * 3. When an e‑commerce platform wants to apply a brand‑specific image effect to product illustrations stored as SVG without converting the whole catalog to raster formats.
+ * 4. When a GIS application must rasterize complex map SVGs, apply a convolution filter to improve visual contrast, and then re‑package them as SVG for downstream vector‑aware tools.
+ * 5. When a CI/CD pipeline automates image preprocessing by converting SVG assets to PNG, applying a custom kernel, and recreating SVGs to keep the original file type for downstream designers.
  */

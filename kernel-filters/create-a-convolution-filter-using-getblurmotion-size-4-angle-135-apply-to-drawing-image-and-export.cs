@@ -1,36 +1,35 @@
-// HOW-TO: Apply Motion Blur Convolution Filter to PNG Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur Filter to PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string outputPath = Path.Combine("Output", "filtered.png");
+            string inputPath = "input.png";
+            string outputPath = "output\\filtered.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var pngOptions = new PngOptions())
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                pngOptions.Source = new FileCreateSource(outputPath, false);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(4, 135));
 
-                using (Image image = Image.Create(pngOptions, 400, 300))
-                {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
-                    graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
+                raster.Filter(raster.Bounds, filterOptions);
 
-                    double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(4, 135);
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                    RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, filterOptions);
-
-                    image.Save();
-                }
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blank PNG canvas, draw shapes, and add a motion‑blur effect for a stylized graphic in a C# application.
- * 2. When you want to programmatically create thumbnails with a directional blur to simulate movement in product preview images.
- * 3. When you are building a reporting tool that overlays annotations on images and requires a consistent blur filter to hide sensitive details.
- * 4. When you need to preprocess scanned documents by applying a motion blur to reduce noise before OCR in a .NET workflow.
- * 5. When you are developing a game UI and want to render UI elements with a custom 135‑degree blur to match a dynamic background effect.
+ * 1. When you need to add a diagonal motion‑blur effect to a PNG before publishing it on a website.
+ * 2. When you want to programmatically enhance scanned documents by simulating camera shake using a 4‑pixel, 135° blur in a .NET application.
+ * 3. When you are building an image‑processing pipeline that must apply a custom convolution filter to raster images for artistic rendering.
+ * 4. When you need to generate blurred thumbnails of PNG assets automatically during a build process with Aspose.Imaging for C#.
+ * 5. When you are creating a batch job that reads PNG files, applies a motion blur filter, and saves the results to a specific output folder.
  */

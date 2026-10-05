@@ -1,4 +1,4 @@
-// HOW-TO: Apply Emboss3x3 Filter to All Pages of a Multipage PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Filter to Every Page of a Multipage PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,35 +12,39 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output.png";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
             using (Image image = Image.Load(inputPath))
             {
-                if (image is IMultipageImage multipage && multipage.PageCount > 0)
+                if (image is IMultipageImage multipage)
                 {
-                    for (int i = 0; i < multipage.PageCount; i++)
+                    foreach (var page in multipage.Pages)
                     {
-                        var page = multipage.Pages[i];
-                        using (RasterImage raster = (RasterImage)page)
+                        if (page is RasterImage raster)
                         {
-                            raster.Filter(
-                                raster.Bounds,
-                                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                            var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+                            var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                            raster.Filter(raster.Bounds, options);
                         }
                     }
+                }
+                else if (image is RasterImage raster)
+                {
+                    var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+                    var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, options);
                 }
 
                 var saveOptions = new PngOptions();
@@ -56,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a 3×3 emboss effect to every frame of an animated PNG before publishing it online.
- * 2. When you want to preprocess each page of a multi‑page scanned PNG document to highlight edges for OCR or visual inspection.
- * 3. When you are generating stylized thumbnails for each layer of a PNG sprite sheet and require a consistent emboss look.
- * 4. When you must batch‑apply a convolution filter to all pages of a multi‑page PNG in a .NET service that prepares images for a printing workflow.
- * 5. When you are building a C# desktop application that lets users apply artistic effects to each page of a multi‑page PNG file without losing the original file structure.
+ * 1. When you need to add a 3‑D embossed effect to each frame of a multi‑page PNG before publishing it online.
+ * 2. When you want to preprocess scanned document pages stored as a PNG stack by applying an emboss filter to enhance edge contrast for OCR preprocessing.
+ * 3. When generating stylized thumbnails for every page of a PNG animation and require a consistent emboss effect across all frames.
+ * 4. When converting a single‑page PNG to an embossed version using the same code path that also supports multipage files, simplifying maintenance.
+ * 5. When automating a batch workflow that reads PNG files, applies a convolution emboss filter, and saves the result with Aspose.Imaging in a .NET application.
  */

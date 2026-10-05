@@ -1,74 +1,98 @@
-// HOW-TO: Apply Gaussian Blur With Sigma 2.8 To SVG And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Gaussian Blur Filter to SVG with Sigma 2.8 in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using System.Xml.Linq;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            XDocument doc = XDocument.Load(inputPath);
+            XNamespace ns = "http://www.w3.org/2000/svg";
+
+            XElement defs = doc.Root.Element(ns + "defs");
+            if (defs == null)
+            {
+                defs = new XElement(ns + "defs");
+                doc.Root.AddFirst(defs);
+            }
+
+            // Remove any existing filter with the same id
+            foreach (var existing in defs.Elements(ns + "filter"))
+            {
+                if ((string)existing.Attribute("id") == "gaussianBlur")
                 {
-                    var pngOptions = new PngOptions();
-                    var rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    // Load the rasterized image
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Apply Gaussian blur with size 5 and sigma 2.8
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.8));
-
-                        // Save the filtered image as PNG
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
+                    existing.Remove();
+                    break;
                 }
             }
+
+            XElement filter = new XElement(ns + "filter",
+                new XAttribute("id", "gaussianBlur"),
+                new XElement(ns + "feGaussianBlur",
+                    new XAttribute("stdDeviation", "2.8")
+                )
+            );
+
+            defs.Add(filter);
+            doc.Root.SetAttributeValue("filter", "url(#gaussianBlur)");
+
+            doc.Save(outputPath);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    static double[,] GenerateGaussianKernel(double sigma)
+    {
+        int radius = (int)Math.Ceiling(3 * sigma);
+        int size = radius * 2 + 1;
+        double[,] kernel = new double[size, size];
+        double twoSigmaSq = 2 * sigma * sigma;
+        double sum = 0;
+
+        for (int y = -radius; y <= radius; y++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                double value = Math.Exp(-(x * x + y * y) / twoSigmaSq);
+                kernel[y + radius, x + radius] = value;
+                sum += value;
+            }
+        }
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                kernel[y, x] /= sum;
+            }
+        }
+
+        return kernel;
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo to a blurred PNG thumbnail for a website using C#.
- * 2. When preprocessing vector icons by rasterizing them and applying a Gaussian blur before embedding them in a mobile app.
- * 3. When generating soft‑focus background images from SVG illustrations for marketing materials in an automated .NET workflow.
- * 4. When creating a dataset of blurred PNGs from SVG diagrams for machine‑learning training pipelines.
- * 5. When applying a custom sigma value to a Gaussian kernel while rasterizing SVG graphics for print‑ready PDFs in a C# application.
+ * 1. When you need to programmatically add a Gaussian blur effect to an SVG icon before embedding it in a web page.
+ * 2. When you must generate a custom blur radius (sigma 2.8) for vector graphics used in a PDF report generated by C#.
+ * 3. When an automated build process has to apply consistent softening to all SVG assets in a design system without manual editing.
+ * 4. When a desktop application creates SVG thumbnails and wants to smooth edges by applying a filter defined in the SVG markup.
+ * 5. When you are converting raster images to SVG and need to preserve a blur effect by inserting a feGaussianBlur element via C# code.
  */

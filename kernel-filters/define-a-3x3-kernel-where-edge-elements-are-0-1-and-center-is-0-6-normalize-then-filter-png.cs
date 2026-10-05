@@ -1,4 +1,4 @@
-// HOW-TO: Apply Custom 3x3 Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Normalized 3x3 Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,64 +9,53 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Define the 3x3 kernel with edge elements 0.1 and center 0.6
-                double[,] kernel = new double[3, 3]
+                double[,] kernel = new double[3, 3];
+                for (int y = 0; y < 3; y++)
                 {
-                    { 0.1, 0.1, 0.1 },
-                    { 0.1, 0.6, 0.1 },
-                    { 0.1, 0.1, 0.1 }
-                };
-
-                // Normalize the kernel so that the sum of all elements equals 1
-                double sum = 0.0;
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
+                    for (int x = 0; x < 3; x++)
                     {
-                        sum += kernel[i, j];
+                        kernel[y, x] = (x == 1 && y == 1) ? 0.6 : 0.1;
                     }
                 }
 
-                double[,] normalizedKernel = new double[3, 3];
-                for (int i = 0; i < 3; i++)
+                double sum = 0;
+                for (int y = 0; y < 3; y++)
                 {
-                    for (int j = 0; j < 3; j++)
+                    for (int x = 0; x < 3; x++)
                     {
-                        normalizedKernel[i, j] = kernel[i, j] / sum;
+                        sum += kernel[y, x];
                     }
                 }
 
-                // Apply the custom convolution filter to the entire image
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(normalizedKernel);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Save the filtered image as PNG
-                var saveOptions = new PngOptions
+                for (int y = 0; y < 3; y++)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                rasterImage.Save(outputPath, saveOptions);
+                    for (int x = 0; x < 3; x++)
+                    {
+                        kernel[y, x] /= sum;
+                    }
+                }
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var saveOptions = new PngOptions();
+                saveOptions.Source = new FileCreateSource(outputPath, false);
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -78,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to smooth a PNG image while preserving overall brightness using a custom weighted kernel.
- * 2. When you want to add a simple blur effect to a PNG in a C# desktop application without third‑party image libraries.
- * 3. When you must preprocess PNG textures for a game to reduce high‑frequency noise before they are loaded into the engine.
- * 4. When you are building an image‑processing pipeline that requires a normalized convolution filter to ensure consistent results across different PNG files.
- * 5. When you need to programmatically apply the same custom filter to multiple PNG files during batch processing.
+ * 1. When you need to smooth a PNG image while preserving its central pixel intensity using a custom kernel in a C# application.
+ * 2. When you want to implement a lightweight blur effect for UI thumbnails by applying a normalized 3x3 convolution filter with Aspose.Imaging.
+ * 3. When you must preprocess scanned PNG graphics to reduce noise before performing OCR or pattern recognition in .NET.
+ * 4. When you are building an automated image pipeline that requires consistent edge weighting and center emphasis for PNG assets.
+ * 5. When you need to replace a built‑in blur filter with a manually defined kernel to achieve a specific visual style in a C# imaging project.
  */

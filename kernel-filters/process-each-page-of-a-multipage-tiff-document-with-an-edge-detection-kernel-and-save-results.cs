@@ -4,6 +4,9 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,57 +14,51 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF path
             string inputPath = "input.tif";
+            string outputDirectory = "output_pages";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the multipage TIFF image
-            using (Image img = Image.Load(inputPath))
+            if (!File.Exists(outputDirectory))
             {
-                TiffImage tiff = img as TiffImage;
-                if (tiff == null)
+                // Ensure the output directory exists (Path.GetDirectoryName will be null for a directory path,
+                // so we create the directory directly).
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int pageIndex = 0;
+                foreach (TiffFrame frame in tiff.Frames)
                 {
-                    Console.Error.WriteLine("Input file is not a TIFF image.");
-                    return;
-                }
+                    tiff.ActiveFrame = frame;
 
-                // Edge detection kernel (simple Laplacian)
-                double[,] kernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, -1, -1 },
+                        { -1,  8, -1 },
+                        { -1, -1, -1 }
+                    };
+                    var filterOptions = new ConvolutionFilterOptions(kernel);
+                    ((RasterImage)tiff).Filter(tiff.ActiveFrame.Bounds, filterOptions);
 
-                // Create convolution filter options with the kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-
-                // Process each frame (page) of the TIFF
-                for (int i = 0; i < tiff.PageCount; i++)
-                {
-                    // Set the current frame as active
-                    tiff.ActiveFrame = tiff.Frames[i];
-
-                    // Apply the edge detection filter to the active frame
-                    tiff.Filter(tiff.ActiveFrame.Bounds, filterOptions);
-
-                    // Prepare output path for the processed page
-                    string outputPath = Path.Combine("output", $"page_{i + 1}.png");
-
-                    // Ensure the output directory exists
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the processed frame as PNG
-                    using (var pngOptions = new PngOptions())
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.Source = new FileCreateSource(outputPath, false);
+                    using (TiffImage singlePage = (TiffImage)Image.Create(tiffOptions, frame.Width, frame.Height))
                     {
-                        tiff.ActiveFrame.Save(outputPath, pngOptions);
+                        Color[] processedPixels = ((RasterImage)tiff).LoadPixels(frame.Bounds);
+                        singlePage.SavePixels(singlePage.Bounds, processedPixels);
+                        singlePage.Save();
                     }
+
+                    pageIndex++;
                 }
             }
         }
@@ -74,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight outlines in each page of a scanned multipage TIFF before feeding it to an OCR engine.
- * 2. When you want to generate edge‑enhanced PNG previews of every page in a large TIFF archive for quick visual inspection.
- * 3. When processing medical imaging TIFF stacks to emphasize structural boundaries for diagnostic analysis in a C# application.
- * 4. When converting multi‑page engineering drawings stored as TIFF into separate PNG files with edge detection for feature extraction.
- * 5. When automating document digitization pipelines that require per‑page edge sharpening to improve downstream pattern‑recognition accuracy.
+ * 1. When you need to extract and enhance the outlines of every page in a scanned multipage TIFF for OCR preprocessing.
+ * 2. When you want to generate separate TIFF files with edge‑enhanced content for archival or printing workflows.
+ * 3. When you must apply a custom convolution kernel to each frame of a medical imaging TIFF series to highlight structures.
+ * 4. When you are building a document‑analysis pipeline that requires per‑page edge detection before feature extraction.
+ * 5. When you need to automate batch processing of multi‑page TIFFs to create individual pages with sharpened edges for visual inspection.
  */

@@ -2,39 +2,66 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.svg";
-            string outputPath = @"C:\Images\sample_blur.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            string tempPath = Path.Combine(Path.GetTempPath(), "tempRaster.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath) ?? ".");
+
+            // Rasterize SVG to PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to enable filtering
-                RasterImage rasterImage = (RasterImage)image;
+                PngOptions pngOptions = new PngOptions();
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = 800,
+                    PageHeight = 600,
+                    BackgroundColor = Color.White
+                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+                svgImage.Save(tempPath, pngOptions);
+            }
 
-                // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Load raster image and apply Gaussian blur kernel
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+            {
+                double[,] customKernel = new double[,]
+                {
+                    { 0.0625, 0.125,  0.0625 },
+                    { 0.125,  0.25,   0.125 },
+                    { 0.0625, 0.125,  0.0625 }
+                };
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(customKernel);
+                raster.Filter(raster.Bounds, convOptions);
+
+                PngOptions outOptions = new PngOptions();
+                raster.Save(outputPath, outOptions);
+            }
+
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften vector graphics for web thumbnails by applying a Gaussian blur and exporting them as PNG files using C#.
- * 2. When generating blurred background images from SVG logos for UI overlays in a .NET application.
- * 3. When preprocessing SVG assets for machine‑learning pipelines that require raster images with reduced detail.
- * 4. When creating stylized product catalogs where SVG illustrations must be blurred before being embedded in PDF reports.
- * 5. When automating a batch job that converts SVG icons to blurred PNGs for responsive design breakpoints.
+ * 1. When you need to soften vector graphics before embedding them in a web page, you can rasterize an SVG, apply a Gaussian blur with Aspose.Imaging, and output a PNG for faster loading.
+ * 2. When generating thumbnail previews of SVG icons with a subtle blur effect for UI hover states, this code converts the SVG to a raster image, blurs it, and saves the result as PNG.
+ * 3. When preparing print‑ready assets that require a smooth blur on vector artwork, you can use the convolution filter to apply a Gaussian kernel to the rasterized SVG and export a high‑quality PNG.
+ * 4. When creating stylized map overlays where the original SVG layers need a soft focus, the example shows how to rasterize, blur, and save the image using C# and Aspose.Imaging.
+ * 5. When automating batch processing of SVG files to produce blurred PNG versions for marketing materials, this snippet demonstrates the end‑to‑end workflow with custom kernel convolution.
  */

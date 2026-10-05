@@ -1,47 +1,39 @@
-// HOW-TO: Apply Gaussian Blur to JPEG in C# While Keeping Original DPI (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG While Preserving DPI Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output\\blurred.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage to access pixel operations
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Preserve original DPI (resolution)
-                double originalHorizontalDpi = raster.HorizontalResolution;
-                double originalVerticalDpi = raster.VerticalResolution;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-                // Restore original DPI after processing
-                raster.SetResolution(originalHorizontalDpi, originalVerticalDpi);
+                double originalHorizontal = raster.HorizontalResolution;
+                double originalVertical = raster.VerticalResolution;
 
-                // Save the processed image
-                raster.Save(outputPath);
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+
+                raster.HorizontalResolution = originalHorizontal;
+                raster.VerticalResolution = originalVertical;
+
+                JpegOptions options = new JpegOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften a high‑resolution JPEG for a web gallery but must retain its original DPI for printing later.
- * 2. When a desktop application must automatically blur scanned documents to protect sensitive information while preserving the scan’s resolution metadata.
- * 3. When generating thumbnail previews of medical images where the blur is used for visual effect but the DPI must stay unchanged for compliance.
- * 4. When batch‑processing product photos to add a subtle blur for aesthetic purposes without altering the images’ embedded resolution data.
- * 5. When integrating an image‑editing feature into a C# reporting tool that applies Gaussian blur to charts yet keeps the DPI intact for accurate PDF export.
+ * 1. When you need to soften a high‑resolution JPEG for a web gallery but must keep the original DPI for accurate print scaling.
+ * 2. When generating preview thumbnails of scanned documents where a blur reduces noise yet the DPI information must remain unchanged for downstream OCR tools.
+ * 3. When applying a Gaussian blur to product photos in an e‑commerce pipeline while ensuring the image metadata stays intact for consistent catalog dimensions.
+ * 4. When creating a blurred background effect for a mobile app UI and the image’s resolution metadata must be preserved for responsive layout calculations.
+ * 5. When processing medical imaging JPEGs that require anonymization via blurring while retaining DPI data required for diagnostic measurements.
  */

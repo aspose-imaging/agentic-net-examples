@@ -1,65 +1,64 @@
-// HOW-TO: Apply Custom Soft Edge Vignette Kernel to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Soft Edge Vignette to SVG and Export as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output\\result.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                var pngOptions = new PngOptions();
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    var pngOptions = new PngOptions();
-                    var rasterOptions = new SvgRasterizationOptions();
-                    rasterOptions.PageSize = svgImage.Size;
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    PageWidth = 800,
+                    PageHeight = 600
+                };
+                pngOptions.VectorRasterizationOptions = rasterizationOptions;
 
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+                {
+                    svgImage.Save(ms, pngOptions);
+                }
 
-                    // Load the rasterized image as RasterImage
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
+                ms.Position = 0;
+
+                using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(ms))
+                {
+                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)img;
+                    if (!raster.IsCached) raster.CacheData();
+
+                    double[,] kernel = new double[5, 5]
                     {
-                        var rasterImage = (RasterImage)rasterImageContainer;
+                        { 0.0, 0.0, 0.1, 0.0, 0.0 },
+                        { 0.0, 0.2, 0.5, 0.2, 0.0 },
+                        { 0.1, 0.5, 1.0, 0.5, 0.1 },
+                        { 0.0, 0.2, 0.5, 0.2, 0.0 },
+                        { 0.0, 0.0, 0.1, 0.0, 0.0 }
+                    };
+                    var convOptions = new ConvolutionFilterOptions(kernel);
+                    raster.Filter(new Aspose.Imaging.Rectangle(0, 0, raster.Width, raster.Height), convOptions);
 
-                        // Define a custom soft‑edge kernel for vignette effect
-                        double[,] kernel = new double[,]
-                        {
-                            { 0.5, 0.75, 0.5 },
-                            { 0.75, 1.0, 0.75 },
-                            { 0.5, 0.75, 0.5 }
-                        };
-
-                        // Apply convolution filter with the custom kernel
-                        var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-                        // Save the processed image as PNG
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
+                    var outOptions = new PngOptions();
+                    raster.Save(outputPath, outOptions);
                 }
             }
         }
@@ -72,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a subtle vignette border to an SVG logo before exporting it as a high‑resolution PNG for web use.
- * 2. When a desktop application must convert vector illustrations to raster images with a soft‑edge effect to match a brand’s visual style.
- * 3. When generating thumbnails of SVG diagrams that require a gentle darkening around the edges to improve focus in a reporting dashboard.
- * 4. When automating batch processing of SVG assets to produce PNG assets with a custom convolution kernel for consistent UI theming.
- * 5. When integrating Aspose.Imaging into a C# service that applies a custom soft‑edge filter to user‑uploaded SVG files before storing them as PNGs.
+ * 1. When you need to add a subtle vignette border to an SVG logo before embedding it in a web page as a PNG.
+ * 2. When you want to convert vector graphics to raster images with a custom soft‑edge filter for print‑ready PDFs.
+ * 3. When you need to programmatically create a faded edge effect on icons for a mobile app UI using C#.
+ * 4. When you must preprocess SVG diagrams with a vignette to improve visual focus in a reporting dashboard.
+ * 5. When you are automating batch processing of SVG assets to generate PNG thumbnails with a soft‑edge look.
  */

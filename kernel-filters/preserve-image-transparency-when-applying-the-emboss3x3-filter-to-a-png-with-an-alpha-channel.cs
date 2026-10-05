@@ -1,9 +1,8 @@
 // HOW-TO: Preserve PNG Transparency While Applying Emboss3x3 Filter In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,39 +10,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                var bounds = raster.Bounds;
 
-                // Apply Emboss3x3 convolution filter while preserving alpha channel
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                int[] originalPixels = raster.LoadArgb32Pixels(bounds);
+                int pixelCount = originalPixels.Length;
+                byte[] alphas = new byte[pixelCount];
+                int[] rgbPixels = new int[pixelCount];
 
-                // Prepare PNG save options to keep alpha channel
-                PngOptions saveOptions = new PngOptions
+                for (int i = 0; i < pixelCount; i++)
                 {
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha
-                };
+                    alphas[i] = (byte)(originalPixels[i] >> 24);
+                    rgbPixels[i] = (0xFF << 24) | (originalPixels[i] & 0x00FFFFFF);
+                }
 
-                // Save the processed image
-                raster.Save(outputPath, saveOptions);
+                raster.SaveArgb32Pixels(bounds, rgbPixels);
+                raster.Filter(bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+
+                int[] filteredPixels = raster.LoadArgb32Pixels(bounds);
+                for (int i = 0; i < pixelCount; i++)
+                {
+                    filteredPixels[i] = (alphas[i] << 24) | (filteredPixels[i] & 0x00FFFFFF);
+                }
+                raster.SaveArgb32Pixels(bounds, filteredPixels);
+
+                var options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add an emboss effect to a logo PNG without losing its transparent background.
- * 2. When generating thumbnails for a web app and must keep the original alpha channel after applying a convolution filter.
- * 3. When processing UI icons in a desktop application and want the emboss style while preserving click‑through transparency.
- * 4. When batch‑editing product images for an e‑commerce site, ensuring the emboss filter does not turn transparent areas opaque.
- * 5. When creating stylized overlays for a game UI and require the PNG’s alpha channel to remain intact after filtering.
+ * 1. When you need to apply an emboss effect to a PNG logo and keep its transparent background intact.
+ * 2. When processing user‑uploaded PNG avatars in a C# web service and must preserve the alpha channel after a convolution filter.
+ * 3. When generating stylized thumbnails for a website and require the PNG’s transparent edges to remain after applying the Emboss3x3 filter.
+ * 4. When creating game sprites that need an embossed appearance while retaining per‑pixel opacity using Aspose.Imaging for .NET.
+ * 5. When automating batch conversion of PNG assets for marketing materials and want to maintain transparency after applying image filters.
  */

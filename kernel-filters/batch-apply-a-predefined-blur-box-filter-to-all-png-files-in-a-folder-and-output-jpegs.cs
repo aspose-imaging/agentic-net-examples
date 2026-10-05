@@ -1,53 +1,62 @@
-// HOW-TO: Batch Apply Gaussian Blur to PNGs and Save as JPEGs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Blur Filter to PNG Images and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all PNG files in the input folder
-            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
-
-            foreach (string inputPath in pngFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            double[,] blurKernel = new double[,]
+            {
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                { 0.04, 0.04, 0.04, 0.04, 0.04 }
+            };
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output JPEG path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".jpg");
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
 
-                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply filters
-                    RasterImage rasterImage = (RasterImage)image;
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(blurKernel));
 
-                    // Apply a Gaussian blur filter (acts as a blur box)
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                    // Save the result as JPEG
-                    rasterImage.Save(outputPath, new JpegOptions());
+                    JpegOptions jpegOptions = new JpegOptions();
+                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -60,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur a collection of product photos in PNG format before publishing them as smaller JPEG thumbnails.
- * 2. When you want to preprocess scanned documents by applying a blur box filter to reduce noise and then convert them to JPEG for web display.
- * 3. When a photo‑editing tool must batch‑process user‑uploaded PNG images, add a Gaussian blur effect, and store the results as JPEGs for faster loading.
- * 4. When you are building a server‑side script that prepares PNG assets for email newsletters by blurring and converting them to JPEG to meet size limits.
- * 5. When you need to migrate a legacy PNG image library to JPEG while applying a consistent blur filter to protect sensitive details across all files.
+ * 1. When you need to automatically blur a collection of PNG assets before publishing them as compressed JPEGs for a web gallery.
+ * 2. When you want to preprocess scanned PNG documents with a uniform box blur to reduce noise before converting them to JPEG for archival storage.
+ * 3. When a photo‑editing tool must apply the same convolution filter to every PNG in a folder and output JPEGs for faster loading on mobile devices.
+ * 4. When an e‑commerce platform requires batch conversion of product PNG images with a subtle blur effect to meet branding guidelines while delivering JPEG thumbnails.
+ * 5. When a CI/CD pipeline should validate image quality by applying a predefined blur kernel to PNG test assets and generate JPEG results for visual regression testing.
  */

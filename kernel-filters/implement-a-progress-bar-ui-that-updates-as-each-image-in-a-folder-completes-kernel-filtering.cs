@@ -1,71 +1,66 @@
-// HOW-TO: Apply Gaussian Blur to All Images in Folder With Progress Bar in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to Images in a Folder with Progress Bar in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
         try
         {
-            // Get all files in the input folder (filter common image extensions)
-            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            List<string> imageFiles = new List<string>();
-            foreach (var f in files)
-            {
-                string ext = Path.GetExtension(f).ToLowerInvariant();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tif" || ext == ".tiff" || ext == ".gif")
-                {
-                    imageFiles.Add(f);
-                }
-            }
+            string inputFolder = "C:\\Images\\Input";
+            string outputFolder = "C:\\Images\\Output";
 
-            int total = imageFiles.Count;
+            Directory.CreateDirectory(outputFolder);
+
+            var imageFiles = Directory.GetFiles(inputFolder)
+                .Where(f => new[] { ".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".gif", ".webp" }
+                .Contains(Path.GetExtension(f).ToLower()))
+                .ToArray();
+
+            int total = imageFiles.Length;
             int processed = 0;
 
             foreach (var inputPath in imageFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_filtered.png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Ensure output directory exists
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, filter, and save the image
-                using (Image image = Image.Load(inputPath))
+                using (var image = Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    var raster = image as RasterImage;
+                    if (raster == null)
+                    {
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        continue;
+                    }
 
-                    // Save as PNG
-                    raster.Save(outputPath, new PngOptions());
+                    var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(5, 1.0);
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    var saveOptions = new PngOptions();
+                    raster.Save(outputPath, saveOptions);
                 }
 
-                // Update progress UI
                 processed++;
-                int barWidth = 30;
-                int filled = (int)((processed / (double)total) * barWidth);
-                string bar = new string('#', filled).PadRight(barWidth, '-');
-                Console.WriteLine($"[{bar}] {processed}/{total} - Processed: {Path.GetFileName(inputPath)}");
+                int barSize = 30;
+                int filled = (int)Math.Round((double)processed / total * barSize);
+                string bar = new string('#', filled).PadRight(barSize, '-');
+                Console.Write($"\rProcessing: [{bar}] {processed}/{total}");
             }
 
-            Console.WriteLine("All images have been processed.");
+            Console.WriteLine("\nProcessing complete.");
         }
         catch (Exception ex)
         {
@@ -76,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑apply a Gaussian blur to every PNG, JPEG, BMP, TIFF, or GIF in a directory and save the results as new PNG files.
- * 2. When you want to display a console progress bar that updates after each image is filtered to inform users of processing status.
- * 3. When you must automatically create the output folder if it does not exist before writing the filtered images.
- * 4. When you are converting mixed‑format source images to a consistent PNG format after applying a kernel filter.
- * 5. When you need to verify each input file exists before loading it to prevent crashes in an automated image‑processing pipeline.
+ * 1. When you need to batch‑process a collection of JPEG, PNG, BMP, or TIFF files to add a Gaussian blur before publishing them online.
+ * 2. When you want to convert various image formats to PNG while applying a smoothing filter and track the operation with a console progress bar.
+ * 3. When an automated workflow must improve image quality by reducing noise on every picture in a directory using Aspose.Imaging in C#.
+ * 4. When a desktop application requires real‑time feedback while applying a convolution filter to each file in a large image dataset.
+ * 5. When you are building a preprocessing step for machine‑learning training data that standardizes images with a Gaussian kernel and saves them uniformly.
  */

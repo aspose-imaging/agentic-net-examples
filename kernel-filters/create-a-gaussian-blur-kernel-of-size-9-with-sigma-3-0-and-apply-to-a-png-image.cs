@@ -1,40 +1,39 @@
-// HOW-TO: Apply Gaussian Blur Kernel Size 9 Sigma 3 To PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.png";
-            string outputPath = @"C:\Images\sample.GaussianBlur.png";
-
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
-                RasterImage rasterImage = (RasterImage)image;
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(9, 3.0);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Apply Gaussian blur with kernel size 9 and sigma 3.0 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(9, 3.0));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Use this code to soften the edges of a PNG product photo before publishing it on an e‑commerce site.
- * 2. Use this code to reduce high‑frequency noise in a scanned PNG diagram by applying a 9‑pixel Gaussian blur with sigma 3.0.
- * 3. Use this code to add a uniform blur to PNG game assets during the build process, ensuring consistent visual style.
- * 4. Use this code to preprocess PNG screenshots with a Gaussian blur, helping OCR engines ignore fine details and improve text extraction.
- * 5. Use this code to create a blurred PNG background from a portrait image for UI overlay or thumbnail generation.
+ * 1. When you need to soften a PNG photograph for a web gallery by applying a Gaussian blur with a custom kernel.
+ * 2. When you want to reduce noise in a PNG screenshot before further analysis or OCR processing.
+ * 3. When you are building a C# desktop app that automatically blurs sensitive parts of an image for privacy compliance.
+ * 4. When you need to create a stylized background effect for UI assets by applying a 9‑pixel Gaussian blur to PNG icons.
+ * 5. When you are preprocessing PNG textures for a game engine to achieve a smooth visual transition between levels.
  */

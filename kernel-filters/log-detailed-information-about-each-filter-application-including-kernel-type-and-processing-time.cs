@@ -1,8 +1,11 @@
-// HOW-TO: Log Kernel Type and Processing Time for Gaussian Blur and Sharpen in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Processing Time for Gaussian Blur and Emboss Filters in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -10,108 +13,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.png";
-            string outputBaseDir = "output";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputBaseDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // ---------- Gaussian Blur ----------
-            using (Image img = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: {options.Kernel?.GetType().Name}, Time: {elapsedMs} ms");
+                if (!image.IsCached) image.CacheData();
 
-                string outPath = Path.Combine(outputBaseDir, "GaussianBlur.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
-            }
+                var stopwatch = Stopwatch.StartNew();
+                var gaussianOptions = new GaussianBlurFilterOptions(2, 2.0);
+                image.Filter(image.Bounds, gaussianOptions);
+                stopwatch.Stop();
+                Console.WriteLine($"Applied GaussianBlur filter (sigma=2.0) in {stopwatch.ElapsedMilliseconds} ms.");
 
-            // ---------- Sharpen ----------
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: {options.Kernel?.GetType().Name}, Time: {elapsedMs} ms");
+                stopwatch.Restart();
+                double[,] embossKernel = ConvolutionFilter.Emboss3x3;
+                var convOptions = new ConvolutionFilterOptions(embossKernel);
+                image.Filter(image.Bounds, convOptions);
+                stopwatch.Stop();
+                Console.WriteLine($"Applied Convolution filter (Emboss3x3) in {stopwatch.ElapsedMilliseconds} ms.");
 
-                string outPath = Path.Combine(outputBaseDir, "Sharpen.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
-            }
-
-            // ---------- Median ----------
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: N/A, Time: {elapsedMs} ms");
-
-                string outPath = Path.Combine(outputBaseDir, "Median.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
-            }
-
-            // ---------- Bilateral Smoothing ----------
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: N/A, Time: {elapsedMs} ms");
-
-                string outPath = Path.Combine(outputBaseDir, "BilateralSmoothing.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
-            }
-
-            // ---------- Gauss Wiener ----------
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: {options.Kernel?.GetType().Name}, Time: {elapsedMs} ms");
-
-                string outPath = Path.Combine(outputBaseDir, "GaussWiener.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
-            }
-
-            // ---------- Motion Wiener ----------
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
-                DateTime start = DateTime.Now;
-                raster.Filter(raster.Bounds, options);
-                double elapsedMs = (DateTime.Now - start).TotalMilliseconds;
-                Console.WriteLine($"Applied {options.GetType().Name}, Kernel Type: {options.Kernel?.GetType().Name}, Time: {elapsedMs} ms");
-
-                string outPath = Path.Combine(outputBaseDir, "MotionWiener.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                raster.Save(outPath, new PngOptions());
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -123,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to benchmark how long a Gaussian blur filter takes on PNG images in a .NET application.
- * 2. When you want to record the specific kernel class used by Aspose.Imaging filters for debugging or documentation.
- * 3. When you must apply both blur and sharpen effects to the same source image and compare their performance.
- * 4. When you are building an automated image‑processing pipeline that logs filter details for audit trails.
- * 5. When you need to generate separate output files for each filter while capturing processing metrics for quality control.
+ * 1. When you need to benchmark how long a Gaussian blur takes on a JPEG image before saving the result.
+ * 2. When you want to apply an emboss convolution filter to a raster image and record its execution time for performance analysis.
+ * 3. When you must ensure an input image is cached in memory before applying multiple filters using Aspose.Imaging in a C# application.
+ * 4. When you are building an automated image processing pipeline that logs detailed filter metrics for quality control reports.
+ * 5. When you need to create a processed JPEG output after sequentially applying blur and emboss effects while tracking each step’s duration.
  */

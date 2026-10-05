@@ -1,8 +1,16 @@
-// HOW-TO: Apply 5x5 Blur Box Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+
+class ConvolutionKernels
+{
+    public static readonly double[,] Emboss3x3 = ConvolutionFilter.Emboss3x3;
+    public static readonly double[,] Sharpen3x3 = ConvolutionFilter.Sharpen3x3;
+    public static readonly double[,] BlurBox5 = ConvolutionFilter.GetBlurBox(5);
+}
 
 class Program
 {
@@ -11,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,20 +29,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                if (!image.IsCached)
+                {
+                    image.CacheData();
+                }
 
-                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5);
-                double factor = 1.0;
-                int bias = 0;
+                // Apply emboss filter using predefined kernel
+                image.Filter(image.Bounds, new ConvolutionFilterOptions(ConvolutionKernels.Emboss3x3));
 
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, factor, bias);
-
-                raster.Filter(raster.Bounds, convOptions);
-
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                // Save the result
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -43,12 +49,3 @@ class Program
         }
     }
 }
-
-/*
- * Real-World Use Cases:
- * 1. When you need to soften the edges of a PNG image to create a smoother web thumbnail.
- * 2. When you want to reduce visual noise in scanned PNG documents before running OCR.
- * 3. When you need to generate a blurred background effect for UI overlays using C#.
- * 4. When you are preprocessing PNG images for a machine‑learning pipeline that requires uniform smoothing.
- * 5. When you must batch‑process PNG files to apply a consistent blur for privacy masking.
- */

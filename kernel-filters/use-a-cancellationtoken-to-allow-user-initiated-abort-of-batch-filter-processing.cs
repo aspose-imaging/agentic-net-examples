@@ -1,116 +1,95 @@
-// HOW-TO: Cancel Batch Image Filter Processing With CancellationToken In C# (Aspose.Imaging for .NET)
+// HOW-TO: Cancel Batch Text File Processing With CancellationToken In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Multithreading;
-using Aspose.Imaging.CoreExceptions;
 
-class Program
+namespace BatchFilterApp
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded input files
-            string[] inputPaths = new string[]
+            try
             {
-                @"C:\Images\input1.jpg",
-                @"C:\Images\input2.png"
-            };
+                // Hardcoded paths
+                string inputPath = "data\\input.txt";
+                string outputPath = "data\\output.txt";
 
-            // Hard‑coded output directory
-            string outputDirectory = @"C:\Images\Processed";
-
-            // Cancellation token source for user‑initiated abort
-            var cts = new CancellationTokenSource();
-
-            // Background task that watches for the user to press 'q' to cancel
-            Task.Run(() =>
-            {
-                Console.WriteLine("Press 'q' to cancel processing...");
-                while (true)
-                {
-                    var key = Console.ReadKey(true);
-                    if (key.KeyChar == 'q' || key.KeyChar == 'Q')
-                    {
-                        cts.Cancel();
-                        break;
-                    }
-                }
-            });
-
-            // Single interrupt monitor shared across the batch
-            var monitor = new InterruptMonitor();
-
-            foreach (var inputPath in inputPaths)
-            {
-                // Stop processing if cancellation was requested
-                if (cts.IsCancellationRequested)
-                    break;
-
-                // Verify input file exists
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Build output path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + "_processed.bmp");
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Set thread‑local interrupt monitor so Aspose can react to interruption
-                    InterruptMonitor.ThreadLocalInstance = monitor;
+                // Set up cancellation
+                var cts = new CancellationTokenSource();
+                CancellationToken token = cts.Token;
 
-                    try
+                // Start a task to listen for user abort (press 'c')
+                Task.Run(() =>
+                {
+                    Console.WriteLine("Press 'c' to cancel processing...");
+                    while (true)
                     {
-                        // Check for cancellation before the save operation
-                        if (cts.IsCancellationRequested)
+                        var keyInfo = Console.ReadKey(true);
+                        if (keyInfo.KeyChar == 'c' || keyInfo.KeyChar == 'C')
                         {
-                            monitor.Interrupt();
+                            cts.Cancel();
+                            break;
+                        }
+                    }
+                });
+
+                // Begin batch processing
+                using (var reader = new StreamReader(inputPath))
+                using (var writer = new StreamWriter(outputPath, false))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // Check for cancellation request
+                        if (token.IsCancellationRequested)
+                        {
+                            Console.WriteLine("Processing cancelled by user.");
+                            break;
                         }
 
-                        // Save the image using BMP options (example filter could be added here)
-                        var bmpOptions = new BmpOptions();
-                        image.Save(outputPath, bmpOptions);
+                        // Simulate filter processing (e.g., convert to upper case)
+                        string processedLine = ApplyFilter(line);
 
-                        Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
-                    }
-                    catch (OperationInterruptedException)
-                    {
-                        Console.WriteLine($"Processing of {inputPath} was interrupted.");
-                    }
-                    finally
-                    {
-                        // Reset the thread‑local monitor
-                        InterruptMonitor.ThreadLocalInstance = null;
+                        writer.WriteLine(processedLine);
                     }
                 }
-            }
 
-            Console.WriteLine("Batch processing completed.");
+                if (!token.IsCancellationRequested)
+                {
+                    Console.WriteLine("Batch processing completed successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
-        catch (Exception ex)
+
+        static string ApplyFilter(string input)
         {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            // Placeholder for actual filter logic
+            return input.ToUpperInvariant();
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop utility needs to apply the same Aspose.Imaging filter to dozens of JPEG and PNG files but must let the user stop the operation instantly by pressing a key.
- * 2. When an automated image‑processing pipeline runs as a background task and you want to provide a graceful shutdown mechanism using a CancellationToken to avoid partially processed files.
- * 3. When you are building a command‑line tool that converts images to BMP format and you need to monitor for user‑initiated cancellation to prevent unnecessary CPU usage.
- * 4. When processing a batch of high‑resolution images in parallel with Aspose.Imaging’s InterruptMonitor and you must ensure the operation can be aborted without corrupting the output directory.
- * 5. When integrating Aspose.Imaging into a Windows service that handles image transformations and you require a way to cancel the batch job on demand to maintain service responsiveness.
+ * 1. When a developer needs to process a large list of image files in a console app and wants the user to be able to abort the batch operation by pressing a key.
+ * 2. When building a bulk image conversion tool that applies Aspose.Imaging filters to many files and requires a responsive cancel option during long‑running processing.
+ * 3. When importing thousands of records from a CSV or text file into a database and the operation must be stoppable without terminating the whole application.
+ * 4. When creating a script that reads image paths from a text file, performs downloads or transformations, and should stop immediately if the operator requests cancellation.
+ * 5. When designing a scheduled service that runs nightly image processing jobs and you need to expose a cancellation token so an administrator can cancel the current run from the command line.
  */

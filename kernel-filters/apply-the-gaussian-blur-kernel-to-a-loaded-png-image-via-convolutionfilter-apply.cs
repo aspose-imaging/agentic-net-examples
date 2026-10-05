@@ -1,40 +1,46 @@
-// HOW-TO: Apply Gaussian Blur to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PNG Image Using Aspose.Imaging Convolution Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.png";
-            string outputPath = @"C:\temp\sample.GaussianBlur.png";
-
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                double[,] kernel = new double[,]
+                {
+                    { 0.0625, 0.125, 0.0625 },
+                    { 0.125,  0.25,  0.125 },
+                    { 0.0625, 0.125, 0.0625 }
+                };
 
-                // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                image.Filter(image.Bounds, filterOptions);
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften edges or reduce noise in a PNG before embedding it in a web page.
- * 2. When you want to create a background‑blur effect for product photos in an e‑commerce catalog using C#.
- * 3. When you must preprocess scanned PNG documents to hide sensitive details by applying a Gaussian blur.
- * 4. When you are generating thumbnail previews that require a smooth blur to improve visual appeal.
- * 5. When you automate batch processing of PNG assets to apply a consistent blur radius for a mobile app’s UI.
+ * 1. When you need to soften the edges of a product photo in a PNG before publishing it on an e‑commerce website.
+ * 2. When you want to reduce visual noise in scanned PNG documents by applying a Gaussian blur filter in a C# batch job.
+ * 3. When creating a thumbnail generator that adds a subtle blur to background PNG layers for a mobile app UI.
+ * 4. When preprocessing PNG assets for a game to achieve a smooth glow effect using Aspose.Imaging’s convolution filter.
+ * 5. When automating image preparation for machine‑learning training data, applying Gaussian blur to PNG samples to augment the dataset.
  */

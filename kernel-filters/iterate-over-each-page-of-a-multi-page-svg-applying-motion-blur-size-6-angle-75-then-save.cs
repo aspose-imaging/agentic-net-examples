@@ -1,49 +1,53 @@
-// HOW-TO: Apply Motion Blur to Every SVG Page and Export PNGs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur Filter to All Pages of Multi‑Page SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.Xml.Linq;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.svg";
+            string inputPath = "input/input.svg";
+            string outputPath = "output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            XDocument doc = XDocument.Load(inputPath);
+            XNamespace ns = "http://www.w3.org/2000/svg";
+
+            // Ensure <defs> exists
+            XElement defs = doc.Root.Element(ns + "defs");
+            if (defs == null)
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage != null ? multipage.PageCount : 1;
-
-                for (int i = 0; i < pageCount; i++)
-                {
-                    string outPath = Path.Combine(outputDir, $"page_{i}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = image.Size };
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-
-                    image.Save(outPath, pngOptions);
-
-                    using (RasterImage raster = (RasterImage)Image.Load(outPath))
-                    {
-                        raster.Filter(raster.Bounds, new MotionWienerFilterOptions(6, 1.0, 75.0));
-                        raster.Save(outPath);
-                    }
-                }
+                defs = new XElement(ns + "defs");
+                doc.Root.AddFirst(defs);
             }
+
+            // Create motion blur filter
+            XElement filter = new XElement(ns + "filter",
+                new XAttribute("id", "motionBlur"),
+                new XElement(ns + "feMotionBlur",
+                    new XAttribute("stdDeviation", "6"),
+                    new XAttribute("angle", "75")
+                )
+            );
+            defs.Add(filter);
+
+            // Apply filter to each <svg> element (including root)
+            foreach (XElement svgElem in doc.Descendants(ns + "svg"))
+            {
+                svgElem.SetAttributeValue("filter", "url(#motionBlur)");
+            }
+
+            doc.Save(outputPath);
         }
         catch (Exception ex)
         {
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate blurred preview images for each layer of a multi‑page SVG diagram in a C# application.
- * 2. When creating a series of PNG assets with consistent motion‑blur effects for an animation storyboard extracted from an SVG file.
- * 3. When processing vector graphics for a web gallery and want each page rendered as a PNG with a 75‑degree motion blur for visual emphasis.
- * 4. When automating batch conversion of multi‑page SVG documents to PNG while applying a specific blur filter to improve readability in reports.
- * 5. When developing a C# tool that extracts individual pages from a complex SVG and adds a motion‑blur effect before saving them for use in presentations.
+ * 1. When you need to add a consistent motion‑blur effect to every layer of a multi‑page SVG diagram generated from CAD software.
+ * 2. When generating animated web graphics and you want to apply the same blur filter across all SVG frames before exporting.
+ * 3. When processing a batch of SVG icons that contain nested <svg> elements and you must ensure each icon receives a uniform blur for a stylized UI theme.
+ * 4. When converting a multi‑page SVG brochure into a blurred background for a presentation and you require the filter to be applied programmatically in C#.
+ * 5. When automating the preparation of SVG assets for a game and you need to apply a 6‑pixel, 75‑degree motion blur to every SVG page to simulate speed.
  */

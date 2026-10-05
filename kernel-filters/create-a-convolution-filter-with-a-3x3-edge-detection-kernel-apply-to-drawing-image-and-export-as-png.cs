@@ -1,58 +1,61 @@
-// HOW-TO: Apply Edge Detection Convolution Filter to Drawn Image and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 3x3 Edge Detection Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        string outputPath = "output/output.png";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        try
+        static void Main(string[] args)
         {
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
 
-            int width = 500;
-            int height = 500;
-
-            using (Image image = Image.Create(pngOptions, width, height))
+            if (!File.Exists(inputPath))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-                graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(100, 100, 300, 300));
-                graphics.DrawLine(new Pen(Color.Red, 2), new Point(100, 100), new Point(400, 400));
-
-                RasterImage raster = (RasterImage)image;
-                double[,] kernel = new double[3, 3]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
-
-                image.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            try
+            {
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                {
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, -1, -1 },
+                        { -1, 8, -1 },
+                        { -1, -1, -1 }
+                    };
+
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    var pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    raster.Save(outputPath, pngOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a diagram, highlight its edges, and export it as a high‑quality PNG for web display.
- * 2. When you want to add custom edge‑detection processing to dynamically drawn shapes in a C# application without using external image‑processing libraries.
- * 3. When you must create a raster image, draw geometric primitives, apply a 3×3 convolution kernel, and save the result for further analysis or reporting.
- * 4. When you are building a preview generator that emphasizes outlines of vector drawings by applying a convolution filter before saving to PNG.
- * 5. When you require an automated way to produce PNG assets with enhanced edge contrast for machine‑vision or OCR preprocessing in .NET.
+ * 1. When you need to highlight the outlines of a drawing by applying an edge‑detection filter to a PNG file using Aspose.Imaging in C#.
+ * 2. When you want to preprocess scanned sketches for OCR by emphasizing edges before further analysis.
+ * 3. When you are building a C# application that automatically converts hand‑drawn PNG assets into high‑contrast versions for UI icons.
+ * 4. When you must generate stylized thumbnails that show only the contours of images for a gallery preview.
+ * 5. When you require a server‑side routine to detect and accentuate edges in user‑uploaded PNG drawings for quality inspection.
  */

@@ -3,56 +3,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "templates/input.svg";
+        string outputPath = "output/embossed.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "templates/input.svg";
-            string outputPath = "output/output.png";
-
-            if (!File.Exists(inputPath))
+            using (Image svgImg = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                SvgImage svgImage = (SvgImage)svgImg;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            using (Image image = Image.Load(inputPath))
-            {
-                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
-
-                // Rasterize SVG to PNG in memory
-                var pngOptions = new PngOptions
+                var pngOptions = new PngOptions();
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    }
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height
                 };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                using (var memoryStream = new MemoryStream())
+                svgImage.Save(tempPath, pngOptions);
+
+                using (RasterImage raster = (RasterImage)Image.Load(tempPath))
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Apply Emboss5x5 filter
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
-
-                        // Save the filtered image
-                        rasterImage.Save(outputPath);
-                    }
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                    raster.Save(outputPath, new PngOptions());
                 }
+
+                File.Delete(tempPath);
             }
         }
         catch (Exception ex)
@@ -64,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector SVG graphics to raster PNG files while adding a 3‑D emboss effect for web thumbnails.
- * 2. When generating product catalog images from SVG logos and want a stylized embossed look without using external image editors.
- * 3. When automating batch processing of SVG icons to create embossed PNG assets for mobile app UI resources.
- * 4. When preparing SVG illustrations for print or PDF inclusion and require a subtle depth filter applied programmatically.
- * 5. When building a server‑side image service that receives SVG uploads, rasterizes them, applies an emboss filter, and returns PNGs to clients.
+ * 1. When you need to convert an SVG logo to a PNG thumbnail with an embossed effect for a web UI.
+ * 2. When generating product catalog images from vector assets and want a subtle 3‑D look without manual editing.
+ * 3. When automating batch processing of SVG icons to create embossed PNGs for mobile app assets.
+ * 4. When preparing printable graphics from SVG files and require a raised‑edge appearance for visual emphasis.
+ * 5. When integrating image processing into a C# service that transforms vector diagrams into stylized raster images for reports.
  */

@@ -1,11 +1,7 @@
-// HOW-TO: Apply Custom Convolution Kernel To Each Page Of A Multi-Page SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Filter to Each Page of a Multipage SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,72 +9,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputDirectory = "output";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (unconditional as per rule)
-            Directory.CreateDirectory(outputDirectory);
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Determine if the image supports multiple pages
-                IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage != null ? multipage.PageCount : 1;
-
-                // Custom convolution kernel (sharpen example)
-                double[,] kernel = new double[,]
+                if (image is Aspose.Imaging.IMultipageImage multipageImage)
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
-                };
-
-                for (int i = 0; i < pageCount; i++)
-                {
-                    // Prepare rasterization options for the current page
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    int pageCount = multipageImage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        PageSize = image.Size
-                    };
-
-                    // Prepare PNG options with page selection and rasterization settings
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions,
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
-                    };
-
-                    // Rasterize the selected page into a memory stream
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        // Load the rasterized image as a RasterImage
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        using (Aspose.Imaging.Image pageImage = multipageImage.Pages[i])
                         {
-                            // Apply the custom convolution filter
-                            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                            var pngOptions = new PngOptions();
+                            var rasterOptions = new SvgRasterizationOptions();
+                            rasterOptions.PageWidth = pageImage.Width;
+                            rasterOptions.PageHeight = pageImage.Height;
+                            rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
+                            pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                            // Define output path for the processed page
-                            string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
-
-                            // Ensure the output directory exists (unconditional)
+                            string outputPath = Path.Combine("output", $"page_{i}.png");
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                            // Save the filtered raster image
-                            raster.Save(outputPath, new PngOptions());
+                            pageImage.Save(outputPath, pngOptions);
+
+                            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(outputPath))
+                            {
+                                double[,] kernel = new double[,] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } };
+                                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                                raster.Filter(raster.Bounds, convOptions);
+                                raster.Save(outputPath);
+                            }
                         }
                     }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image does not support multiple pages.");
                 }
             }
         }
@@ -91,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen every layer of a multi-page SVG before converting it to PNG for web publishing.
- * 2. When you want to batch-process vector illustrations that contain multiple artboards, applying a custom filter to each page programmatically.
- * 3. When an automated pipeline must rasterize each page of an SVG logo set and enhance contrast using a convolution matrix.
- * 4. When you are building a C# tool that extracts individual pages from a multi-page SVG and applies edge-detection before saving them as PNG files.
- * 5. When you require consistent image processing across all pages of a multi-page SVG, such as applying a custom blur or emboss kernel in a .NET application.
+ * 1. When you need to convert every layer of a multi‑page SVG diagram into high‑resolution PNGs and enhance each image with a custom sharpening kernel.
+ * 2. When generating thumbnails for each page of a vector brochure and applying a specific edge‑enhancement filter before publishing.
+ * 3. When processing architectural SVG plans page by page, rasterizing them to PNG and using a convolution matrix to improve line clarity for downstream analysis.
+ * 4. When automating batch preparation of SVG icons for a mobile app, converting each icon page to PNG and applying a custom filter to match the app’s visual style.
+ * 5. When creating print‑ready assets from a multi‑page SVG file and need to apply a user‑defined convolution filter to each page to meet quality standards.
  */

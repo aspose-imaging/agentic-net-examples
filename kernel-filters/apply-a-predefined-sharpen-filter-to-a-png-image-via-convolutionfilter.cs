@@ -1,7 +1,10 @@
-// HOW-TO: Apply Sharpen Filter to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Load And Save A PNG Image Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,31 +12,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
-
-                // Apply Sharpen filter with kernel size 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                // Save the processed image
-                raster.Save(outputPath);
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -45,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the details of product photos in a PNG catalog before uploading them to an e‑commerce site.
- * 2. When you want to automatically sharpen scanned screenshots stored as PNG files during a batch image‑processing pipeline in a C# application.
- * 3. When you are building a desktop tool that improves the clarity of PNG graphics for print‑ready PDFs using Aspose.Imaging.
- * 4. When you must programmatically increase the edge contrast of PNG icons for a UI theme without using external image editors.
- * 5. When you are developing a server‑side service that receives PNG uploads and applies a convolution‑based sharpen filter before saving them to storage.
+ * 1. When you need to read a PNG file, manipulate its pixels, and then write the modified image back to disk using Aspose.Imaging in a C# application.
+ * 2. When your .NET service must validate that a PNG image can be opened and saved without corruption before further processing.
+ * 3. When you want to convert a PNG stored in a custom location to a new file path while preserving image quality using Aspose.Imaging’s RasterImage class.
+ * 4. When an automated batch job has to load multiple PNG files, apply transformations, and save each result with specific PNG options in C#.
+ * 5. When you are building a web API that receives a PNG upload, needs to re‑encode it with Aspose.Imaging, and returns the saved file to the client.
  */

@@ -1,51 +1,44 @@
-// HOW-TO: Apply 3x3 Edge Detection Kernel to PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom 3x3 Edge Detection Kernel to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
-
-                // Define a 3x3 edge detection kernel
-                double[,] kernel = new double[,]
+                double[,] kernel = new double[3, 3]
                 {
                     { -1, -1, -1 },
-                    { -1,  8, -1 },
+                    { -1, 8, -1 },
                     { -1, -1, -1 }
                 };
 
-                // Apply the custom convolution filter
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                var options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -57,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight object boundaries in a PNG for computer‑vision preprocessing.
- * 2. When you want to create a stylized outline effect for UI icons without external tools.
- * 3. When you must programmatically detect edges in scanned documents before OCR.
- * 4. When you need to generate edge‑enhanced thumbnails for a web gallery on the fly.
- * 5. When you are building an automated pipeline that applies custom convolution filters to batches of PNG files.
+ * 1. When you need to highlight object boundaries in a PNG photograph for computer‑vision preprocessing.
+ * 2. When you want to generate an edge‑enhanced version of a scanned diagram before OCR analysis.
+ * 3. When you must create a stylized outline effect for UI icons stored as PNG files in a .NET application.
+ * 4. When you are building a batch image‑processing pipeline that applies a custom convolution filter to detect edges in PNG assets.
+ * 5. When you need to programmatically test edge‑detection algorithms by applying a 3×3 kernel to PNG images using Aspose.Imaging.
  */
