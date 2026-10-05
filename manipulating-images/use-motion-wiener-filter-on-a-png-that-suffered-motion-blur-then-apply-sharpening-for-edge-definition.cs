@@ -1,45 +1,33 @@
-// HOW-TO: Remove Motion Blur From PNG and Sharpen Edges Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Motion Blur from PNG and Sharpen Edges Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\blurred.png";
-            string outputPath = @"C:\Images\processed.png";
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 0.5));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                // Apply Motion Wiener filter to reduce motion blur
-                var motionOptions = new MotionWienerFilterOptions(size: 10, sigma: 1.0, angle: 90.0);
-                rasterImage.Filter(rasterImage.Bounds, motionOptions);
-
-                // Apply Sharpen filter for edge definition
-                var sharpenOptions = new SharpenFilterOptions(size: 5, sigma: 4.0);
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -51,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives user‑uploaded PNG photos that are blurry due to camera shake, you can use this code to deblur and sharpen them before displaying.
- * 2. If an e‑commerce platform stores product images as PNG and wants to improve visual quality of motion‑blurred shots taken on a conveyor line, the filter sequence restores clarity.
- * 3. For a desktop utility that batch‑processes scanned PNG documents with motion blur, the code automatically reduces blur and enhances edge definition.
- * 4. When preparing PNG assets for a game’s UI where motion blur from screenshots degrades readability, applying the Motion Wiener and Sharpen filters restores crispness.
- * 5. In a scientific imaging workflow that captures PNG frames from a moving microscope slide, the snippet cleans up blur and highlights fine details for analysis.
+ * 1. When you need to restore a motion‑blurred PNG captured from a moving camera and improve its clarity in a C# application.
+ * 2. When processing scanned documents that appear smeared due to camera shake, and you want to deblur and sharpen them before saving as PNG.
+ * 3. When preparing product photos for an e‑commerce site, removing blur caused by handheld shooting and enhancing edge definition using Aspose.Imaging filters.
+ * 4. When building an automated image‑processing pipeline that receives PNG files from drones, you can apply a Motion‑Wiener filter followed by sharpening to make details more visible.
+ * 5. When creating a desktop tool for photographers to batch‑fix blurry PNG images, you can use the Motion‑Wiener and Sharpen filters in C# to improve image quality.
  */

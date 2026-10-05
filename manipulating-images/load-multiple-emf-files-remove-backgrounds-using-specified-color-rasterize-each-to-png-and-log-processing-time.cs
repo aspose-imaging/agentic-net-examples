@@ -1,76 +1,68 @@
-// HOW-TO: Batch Convert EMF to PNG with Background Removal and Timing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input EMF files (modify as needed)
-            string[] inputFiles = new[]
-            {
-                @"C:\Images\sample1.emf",
-                @"C:\Images\sample2.emf",
-                @"C:\Images\sample3.emf"
-            };
+            string inputDirectory = "InputEmf";
+            string outputDirectory = "OutputPng";
 
-            // Desired background color to remove (example: white)
-            var backgroundColorToRemove = Aspose.Imaging.Color.White;
-
-            foreach (var inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PNG path (same folder, same name with .png)
-                string outputPath = Path.ChangeExtension(inputPath, ".png");
+                Stopwatch sw = Stopwatch.StartNew();
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Measure processing time
-                var stopwatch = Stopwatch.StartNew();
-
-                // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to EmfImage for background operations
-                    var emfImage = (EmfImage)image;
-
-                    // Set the background color that should be treated as background
-                    emfImage.BackgroundColor = backgroundColorToRemove;
-
-                    // Remove the background (makes it transparent)
-                    emfImage.RemoveBackground();
-
-                    // Prepare rasterization options for PNG output
-                    var rasterOptions = new EmfRasterizationOptions
+                    VectorImage vectorImage = image as VectorImage;
+                    if (vectorImage != null)
                     {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Aspose.Imaging.Color.Transparent
+                        vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                    }
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.Transparent,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
                     };
 
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save rasterized PNG
-                    emfImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
                 }
 
-                stopwatch.Stop();
-                Console.WriteLine($"Processed '{inputPath}' -> '{outputPath}' in {stopwatch.ElapsedMilliseconds} ms");
+                sw.Stop();
+                Console.WriteLine($"Processed {Path.GetFileName(inputPath)} in {sw.ElapsedMilliseconds} ms.");
             }
         }
         catch (Exception ex)
@@ -82,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a set of vector EMF diagrams into web‑ready PNG images while making the white page background transparent.
- * 2. When an automated build process must generate PNG thumbnails from EMF icons and ensure the background color is removed for seamless UI integration.
- * 3. When a reporting tool exports charts as EMF files and you want to rasterize them to PNG with transparent backgrounds for inclusion in PDF reports.
- * 4. When performance monitoring is required while batch processing EMF files, so you log the time taken for each conversion to optimize the workflow.
- * 5. When migrating legacy Windows Metafile assets to a modern format, you need to programmatically strip unwanted backgrounds and save them as PNG using C# and Aspose.Imaging.
+ * 1. When you need to convert a folder of vector EMF drawings into PNG images with transparent backgrounds for web display.
+ * 2. When you want to automatically remove any solid background from EMF files before rasterizing them for inclusion in a PDF report.
+ * 3. When you have to process large numbers of EMF icons and generate PNG assets while measuring the time each conversion takes.
+ * 4. When you need to integrate a C# routine that prepares EMF graphics for mobile apps by producing PNG files with alpha channels.
+ * 5. When you are building a batch image pipeline that cleans up legacy EMF files and outputs high‑quality PNGs for a content management system.
  */

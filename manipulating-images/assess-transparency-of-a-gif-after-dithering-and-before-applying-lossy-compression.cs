@@ -1,59 +1,57 @@
-// HOW-TO: Check GIF Transparency After Dithering Before Lossy Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Count Transparent Pixels In A Dithered GIF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.gif";
+        string outputPath = "output/transparent_pixels.txt";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputGifPath = @"c:\temp\input.gif";
-            string ditheredPngPath = @"c:\temp\dithered.png";
-            string lossyGifPath = @"c:\temp\output.lossy.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputGifPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputGifPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the GIF image
-            using (Image image = Image.Load(inputGifPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF‑specific members
-                GifImage gifImage = (GifImage)image;
-
-                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
-
-                // Assess transparency after dithering
-                bool hasTransparency = gifImage.HasTransparentColor;
-                Console.WriteLine($"Has transparent color after dithering: {hasTransparency}");
-
-                // Ensure output directory exists before saving PNG
-                Directory.CreateDirectory(Path.GetDirectoryName(ditheredPngPath));
-                // Save the dithered image as PNG (lossless)
-                gifImage.Save(ditheredPngPath, new PngOptions());
-
-                // Prepare GIF options for lossy compression
-                GifOptions gifOptions = new GifOptions
+                if (gif.PageCount == 0)
                 {
-                    // Enable palette correction for better color matching
-                    DoPaletteCorrection = true,
-                    // Set a moderate loss level (recommended 80)
-                    MaxDiff = 80
-                };
+                    Console.Error.WriteLine("No frames in GIF.");
+                    return;
+                }
 
-                // Ensure output directory exists before saving lossy GIF
-                Directory.CreateDirectory(Path.GetDirectoryName(lossyGifPath));
-                // Save the image as a lossy GIF
-                gifImage.Save(lossyGifPath, gifOptions);
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+                RasterImage raster = (RasterImage)gif.ActiveFrame;
+
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+
+                int[] pixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, raster.Width, raster.Height));
+                long transparentCount = 0;
+                foreach (int argb in pixels)
+                {
+                    if ((argb >> 24) == 0)
+                    {
+                        transparentCount++;
+                    }
+                }
+
+                File.WriteAllText(outputPath, $"Transparent pixels: {transparentCount}");
             }
         }
         catch (Exception ex)
@@ -65,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify whether a GIF retains any transparent pixels after applying Floyd‑Steinberg dithering before further compression.
- * 2. When you want to generate a lossless PNG preview of a dithered GIF to compare visual quality before creating a smaller lossy GIF.
- * 3. When you are building an automated pipeline that must decide if palette correction is required based on the presence of transparency after dithering.
- * 4. When you need to apply moderate lossy compression to a GIF while preserving transparency information detected earlier in the workflow.
- * 5. When you are troubleshooting image‑processing bugs and need to log the transparency state of a GIF at a specific stage of the conversion process.
+ * 1. When you need to verify how many fully transparent pixels remain after applying Floyd‑Steinberg dithering to a GIF before compressing it.
+ * 2. When you want to generate a report of transparency loss for quality‑control of animated GIF assets in a C# application.
+ * 3. When you are building an image‑processing pipeline that must ensure a minimum number of transparent pixels are preserved after dithering.
+ * 4. When you need to debug or audit the effect of dithering on GIF frames by counting transparent pixels programmatically.
+ * 5. When you are preparing GIFs for lossy compression and want to log transparency statistics to decide if further processing is required.
  */

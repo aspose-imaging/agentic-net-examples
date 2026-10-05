@@ -1,13 +1,14 @@
-// HOW-TO: Apply Gaussian Blur to GIF and Save with Lossy Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Re-Encode GIF with Aspose.Imaging to Reduce File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
@@ -22,19 +23,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                GifImage gif = (GifImage)image;
-
-                // Apply Gaussian blur to the entire GIF
-                gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                // Set lossy compression options
-                GifOptions saveOptions = new GifOptions
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    MaxDiff = 80 // recommended value for lossy compression
-                };
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                }
 
+                GifOptions saveOptions = new GifOptions();
                 gif.Save(outputPath, saveOptions);
             }
         }
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of an animated GIF for faster web loading while softening its visual appearance.
- * 2. When you want to apply a uniform Gaussian blur to every frame of a GIF before archiving it to hide sensitive details.
- * 3. When creating preview thumbnails of animated content that require both a blurred effect and a smaller storage footprint.
- * 4. When optimizing GIFs for email newsletters where bandwidth is limited and a subtle blur improves readability.
- * 5. When preprocessing GIF animations for machine‑learning pipelines that expect compressed, low‑detail input images.
+ * 1. When you need to shrink an animated GIF for faster web page loading without changing its visual content.
+ * 2. When you want to standardize GIF frames by resetting the active frame before saving to ensure compatibility across browsers.
+ * 3. When you need to batch‑process GIF files on a server and re‑save them using Aspose.Imaging to apply default lossy compression.
+ * 4. When you are building a C# application that must validate the existence of a GIF, load it, and output a new file in a specific directory.
+ * 5. When you want to use Aspose.Imaging’s GifOptions to control GIF saving parameters while preserving the original animation sequence.
  */

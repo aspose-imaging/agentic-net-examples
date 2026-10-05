@@ -1,69 +1,49 @@
-// HOW-TO: Render High Quality PSD From SVG With AntiAliasing And Convert To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Render EPS To High‑Quality PSD With Anti‑Aliasing And Convert To PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.svg";
-            string psdPath = "Output\\result.psd";
-            string pdfPath = "Output\\result.pdf";
+            string inputPath = "input.eps";
+            string psdPath = "output.psd";
+            string pdfPath = "output.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-            // Load the source image (vector format assumed for high‑quality rendering)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options with vector rasterization settings
-                PsdOptions psdOptions = new PsdOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        TextRenderingHint = TextRenderingHint.AntiAlias
-                    }
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAliasGridFit
                 };
 
-                // Save as PSD
+                var psdOptions = new PsdOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
                 image.Save(psdPath, psdOptions);
             }
 
-            // Load the generated PSD and export to PDF with the same high‑quality settings
             using (Image psdImage = Image.Load(psdPath))
             {
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = psdImage.Width,
-                        PageHeight = psdImage.Height,
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        TextRenderingHint = TextRenderingHint.AntiAlias
-                    }
-                };
+                var pdfOptions = new PdfOptions();
 
-                // Save as PDF
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
                 psdImage.Save(pdfPath, pdfOptions);
             }
         }
@@ -76,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector SVG logo into a print‑ready PSD file with smooth edges and crisp text before generating a PDF for client review.
- * 2. When an automated workflow must preserve anti‑aliased rendering while turning design assets into PDFs for digital distribution.
- * 3. When a desktop application creates high‑resolution PSD mockups from SVG illustrations and then exports them as PDFs for archiving.
- * 4. When a batch process has to ensure consistent smoothing and text rendering across multiple SVG files converted to PSD and PDF formats.
- * 5. When a publishing system requires vector‑to‑raster conversion with anti‑aliasing to maintain visual quality in both PSD and PDF outputs.
+ * 1. When you need to preserve the visual fidelity of vector EPS artwork while converting it to a PSD for further editing in Photoshop, using anti‑alias smoothing and text rendering hints.
+ * 2. When you must generate a print‑ready PDF from an EPS source but want to ensure that rasterized layers retain high‑quality rendering by first saving as a PSD.
+ * 3. When an automated pipeline processes incoming EPS files and requires consistent anti‑aliased rasterization before delivering PDFs to clients.
+ * 4. When you are building a .NET application that converts legacy EPS graphics to modern PDF documents while maintaining crisp text and smooth edges.
+ * 5. When you need to batch‑convert multiple EPS files to PDFs and want to intermediate them as PSDs to apply Photoshop‑compatible settings such as smoothing and text rendering.
  */

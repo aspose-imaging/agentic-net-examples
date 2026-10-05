@@ -1,74 +1,79 @@
-// HOW-TO: How to Add a Progress Bar While Converting PNG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Process a Large Batch of PNG Files with Progress Bar in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace BatchPngProcessor
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
-
-            int total = pngFiles.Length;
-            for (int i = 0; i < total; i++)
+            try
             {
-                string inputPath = pngFiles[i];
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputDirectory = "InputImages";
+                string outputDirectory = "OutputImages";
+
+                // Get all PNG files in the input directory
+                string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.TopDirectoryOnly);
+                int totalFiles = pngFiles.Length;
+
+                if (totalFiles == 0)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.WriteLine("No PNG files found to process.");
                     return;
                 }
 
-                // Build output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_processed.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                for (int i = 0; i < totalFiles; i++)
                 {
-                    // Save with progressive PNG options
-                    var pngOptions = new PngOptions
+                    string inputPath = pngFiles[i];
+
+                    // Input file existence check
+                    if (!File.Exists(inputPath))
                     {
-                        Progressive = true
-                    };
-                    image.Save(outputPath, pngOptions);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    // Load the PNG image
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        // Prepare output path
+                        string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the image (could apply processing here if needed)
+                        var pngOptions = new PngOptions();
+                        image.Save(outputPath, pngOptions);
+                    }
+
+                    // Update progress bar
+                    int processed = i + 1;
+                    int percent = (int)((processed / (double)totalFiles) * 100);
+                    Console.Write($"\rProgress: {percent}% ({processed}/{totalFiles})");
                 }
 
-                // Update simple progress bar
-                Console.Write($"\rProcessed {i + 1}/{total} images");
+                // Move to next line after completion
+                Console.WriteLine();
+                Console.WriteLine("Batch processing completed.");
             }
-
-            // Move to next line after processing
-            Console.WriteLine();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to process thousands of PNG images and show real‑time progress in a console application.
- * 2. When you want to convert standard PNGs to progressive PNGs for faster web loading using Aspose.Imaging in C#.
- * 3. When you must ensure output folders exist before saving processed images in an automated batch workflow.
- * 4. When you require a simple console feedback loop that reports the number of images processed out of the total.
- * 5. When you are building a command‑line tool that validates input files, applies image options, and writes the results to a separate directory.
+ * 1. When you need to convert or copy thousands of PNG images to another folder while showing users how many files have been processed.
+ * 2. When you want to integrate Aspose.Imaging into a C# console app to batch‑resize or apply filters to PNG files and keep the UI responsive with a progress indicator.
+ * 3. When an automated build or deployment script must verify the existence of each PNG, load it with Aspose.Imaging, and log progress for monitoring.
+ * 4. When a desktop utility must ensure the output directory exists before saving each processed PNG and display percentage completion to avoid guessing runtime duration.
+ * 5. When you are creating a data‑migration tool that moves PNG assets between storage locations and need real‑time feedback on processing status for large image sets.
  */

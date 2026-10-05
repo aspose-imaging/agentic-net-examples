@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -35,15 +36,14 @@ class Program
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
                     image.Resize(640, 480);
-                    image.Save(outputPath, new BmpOptions());
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    BmpOptions options = new BmpOptions();
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate low‑resolution BMP thumbnails from a collection of high‑resolution PNG assets for a legacy Windows application.
- * 2. When an automated pipeline must convert user‑uploaded PNG screenshots to 640×480 BMP files for consistent display on embedded devices.
- * 3. When a game development tool requires all texture files in BMP format at a fixed size, and you have a folder of PNG source images.
- * 4. When a reporting system expects BMP images of a specific resolution, and you must batch‑process existing PNG charts before publishing.
- * 5. When migrating a photo archive to a format supported by older printing hardware, you need to resize each PNG to 640×480 and save it as BMP using C#.
+ * 1. When you need to automatically shrink a collection of PNG screenshots to a standard 640x480 size and store them as BMP files for a legacy Windows application.
+ * 2. When a photo‑gallery website requires all uploaded PNG pictures to be resized and saved in BMP format for faster thumbnail generation on a .NET server.
+ * 3. When migrating assets from a design folder to a format compatible with a printing system that only accepts BMP, while ensuring each image fits a 640x480 layout.
+ * 4. When creating a batch script that processes user‑provided PNG icons, resizes them to a uniform resolution, and converts them to BMP for use in a game engine that reads BMP textures.
+ * 5. When implementing an automated build step that converts a set of PNG UI mockups into 640x480 BMP files to be bundled with a desktop application built with C#.
  */

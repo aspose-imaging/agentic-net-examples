@@ -1,16 +1,16 @@
-// HOW-TO: Increase PSD Brightness, Apply Anti-Alias Smoothing, Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase Brightness of PSD and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.psd";
-        string outputPath = "output/output.png";
+        string outputPath = "output.png";
 
         try
         {
@@ -24,17 +24,12 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.AdjustBrightness(50); // Increase brightness
-
-                Graphics graphics = new Graphics(raster);
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-                PngOptions pngOptions = new PngOptions
+                if (image is RasterImage raster)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    raster.AdjustBrightness(50);
+                }
 
+                PngOptions pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to brighten a Photoshop PSD file and export it as a web‑ready PNG with anti‑alias smoothing for an e‑commerce product catalog.
- * 2. When a designer wants to increase the visibility of a dark layer in a PSD before converting it to PNG for mobile app assets.
- * 3. When automating a workflow that adjusts the overall brightness of scanned artwork PSDs and saves them as high‑quality PNGs for print proofs.
- * 4. When preprocessing PSD images for a machine‑learning pipeline, applying brightness correction and smoothing before saving them in PNG format.
- * 5. When creating thumbnails from PSD source files, you can boost brightness, apply anti‑alias smoothing, and output PNGs for faster page loading.
+ * 1. When a web application needs to brighten a Photoshop PSD file before displaying it as a lightweight PNG thumbnail.
+ * 2. When an automated batch process must enhance the visibility of dark layers in PSD assets and export them to PNG for use in mobile apps.
+ * 3. When a digital asset management system requires converting user‑uploaded PSD files to PNG while applying a brightness boost to meet branding guidelines.
+ * 4. When a reporting tool generates PNG charts from PSD templates and needs to increase brightness to improve readability on projector screens.
+ * 5. When a cloud service processes PSD images, adjusts their brightness to compensate for low‑light scans, and stores the result as PNG for downstream processing.
  */

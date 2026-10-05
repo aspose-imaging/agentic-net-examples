@@ -1,14 +1,9 @@
-// HOW-TO: Selective Background Removal From Rectangular Area of CDR Vector in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background From Specific Area Of CDR And Convert To PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 
 class Program
 {
@@ -16,68 +11,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.cdr";
+            string inputPath = "input.cdr";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary rasterized PNG path
-            string tempPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-            // Rasterize the CDR vector image to a PNG file
-            using (CdrImage vectorImage = (CdrImage)Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                var rasterOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPath, false)
-                };
-                vectorImage.Save(tempPath, rasterOptions);
-            }
-
-            // Load the rasterized image and apply selective background removal
-            using (RasterImage rasterImage = (RasterImage)Image.Load(tempPath))
-            {
-                var exportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                var maskingOptions = new MaskingOptions
-                {
-                    Method = SegmentationMethod.Manual,
-                    Decompose = false,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions,
-                    // Define the rectangular area where background removal will be applied
-                    MaskingArea = new Rectangle(100, 100, 300, 200)
-                };
-
-                var masking = new ImageMasking(rasterImage);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                {
-                    using (Image resultImage = result[1].GetImage())
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        resultImage.Save(outputPath, exportOptions);
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
                     }
-                }
-            }
+                };
 
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                var vectorImage = image as VectorImage;
+                if (vectorImage != null)
+                {
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                }
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -89,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a logo from a CorelDRAW (CDR) file while keeping only the portion inside a defined rectangle and save it as a transparent PNG.
- * 2. When you want to prepare product images from vector designs by removing the background around a specific area before uploading to an e‑commerce site.
- * 3. When a printing workflow requires converting CDR artwork to raster format and isolating a selected region for further compositing in a graphics editor.
- * 4. When you are building a batch tool that automatically crops and makes the background transparent for icons stored in CDR files.
- * 5. When you need to integrate selective background removal into a .NET application that processes corporate branding assets stored as CDR vectors.
+ * 1. When you need to extract a logo from a CorelDRAW (CDR) file and save it as a transparent PNG for web display.
+ * 2. When you want to create product thumbnails by removing the background of a defined rectangular region in a CDR illustration before rasterizing to PNG.
+ * 3. When an e‑commerce site requires clean PNG images of vector artwork with only the foreground retained for overlay on different backgrounds.
+ * 4. When automating batch conversion of multiple CDR files to PNG while discarding unwanted background portions within a specific area.
+ * 5. When preparing print‑ready assets that need a transparent background only around a selected part of a vector design.
  */

@@ -1,9 +1,8 @@
-// HOW-TO: Rotate PNG Image 45 Degrees With Transparent Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate PNG Image 45 Degrees with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,38 +10,29 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = "Output/output.png";
+            string outputPath = "output.png";
 
-            // Create a PNG image of 200x200 pixels
-            using (PngImage png = new PngImage(200, 200))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            int width = 200;
+            int height = 200;
+
+            using (PngImage png = new PngImage(width, height, PngColorType.TruecolorWithAlpha))
             {
-                // Fill the image with a solid color for visibility
-                Graphics graphics = new Graphics(png);
-                SolidBrush brush = new SolidBrush(Color.Blue);
-                graphics.FillRectangle(brush, png.Bounds);
+                int[] transparentPixels = new int[width * height];
+                png.SaveArgb32Pixels(new Rectangle(0, 0, width, height), transparentPixels);
 
-                // Store original dimensions
-                int originalWidth = png.Width;
-                int originalHeight = png.Height;
-
-                // Rotate 45 degrees without resizing, using transparent background
                 png.Rotate(45f, false, Color.Transparent);
 
-                // Verify dimensions remain unchanged
-                if (png.Width == originalWidth && png.Height == originalHeight)
+                if (png.Width != width || png.Height != height)
                 {
-                    Console.WriteLine("Dimensions unchanged after rotation.");
+                    Console.WriteLine($"Dimensions changed: {png.Width}x{png.Height}");
                 }
                 else
                 {
-                    Console.WriteLine($"Dimensions changed: {originalWidth}x{originalHeight} -> {png.Width}x{png.Height}");
+                    Console.WriteLine($"Dimensions unchanged: {png.Width}x{png.Height}");
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the rotated image
                 png.Save(outputPath);
             }
         }
@@ -55,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a 200×200 PNG thumbnail and rotate it 45 degrees for a UI component while keeping the canvas size unchanged.
- * 2. When a logo must be displayed at a diagonal angle on a website but the layout requires the original PNG dimensions to remain constant.
- * 3. When creating a game sprite that needs a 45‑degree tilt yet must retain its original bounding box for collision calculations.
- * 4. When processing a batch of PNG assets to apply a uniform transparent‑background rotation without resizing each image.
- * 5. When you want to programmatically verify that rotating an image does not alter its width and height before saving it to disk.
+ * 1. When you need to generate a blank PNG canvas, rotate it at an angle while keeping the original width and height for UI overlays.
+ * 2. When creating thumbnails that must stay the same size after a 45‑degree tilt, using Aspose.Imaging to preserve transparent corners.
+ * 3. When preparing graphics for a game sprite sheet where the image is rotated but the layout grid dimensions cannot change.
+ * 4. When processing scanned documents that require a diagonal orientation without altering the page dimensions, ensuring compatibility with existing layout engines.
+ * 5. When building a web service that returns a rotated PNG with a transparent background while confirming the output size matches the input for downstream processing.
  */

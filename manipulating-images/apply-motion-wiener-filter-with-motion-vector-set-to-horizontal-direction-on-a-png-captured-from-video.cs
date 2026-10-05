@@ -1,42 +1,37 @@
-// HOW-TO: Apply Horizontal Motion Wiener Filter to PNG Video Frame in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Horizontal Motion Wiener Filter to PNG Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\video_frame.png";
-        string outputPath = @"C:\Images\video_frame_motion_wiener.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 0.0);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Apply MotionWiener filter with horizontal motion (angle = 0 degrees)
-                // Size = 10, Sigma = 1.0 (adjust as needed)
-                var options = new MotionWienerFilterOptions(10, 1.0, 0.0);
-                rasterImage.Filter(rasterImage.Bounds, options);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce motion blur in a single video frame saved as a PNG before further analysis.
- * 2. When you want to enhance the sharpness of horizontally moving objects in surveillance footage stored as PNG images.
- * 3. When preparing PNG screenshots from a video for machine‑learning preprocessing that requires de‑blurring.
- * 4. When cleaning up PNG frames extracted from a dash‑cam video to improve visual quality for reporting.
- * 5. When automating a batch process that applies a motion‑compensated Wiener filter to PNG images captured from any video source.
+ * 1. When you need to reduce horizontal motion blur in a video frame saved as a PNG before further analysis.
+ * 2. When you want to improve the visual quality of surveillance footage by applying a motion‑Wiener filter to each extracted PNG snapshot.
+ * 3. When processing a batch of PNG images captured from a moving camera and you require automated de‑blurring using Aspose.Imaging in C#.
+ * 4. When preparing PNG assets for computer‑vision algorithms and you must remove directional blur to enhance edge detection.
+ * 5. When building a C# application that cleans up horizontally blurred PNG screenshots from a streaming video source.
  */

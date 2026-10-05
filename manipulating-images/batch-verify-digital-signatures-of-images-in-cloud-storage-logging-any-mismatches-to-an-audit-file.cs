@@ -1,49 +1,53 @@
-// HOW-TO: Batch Verify Image Digital Signatures In Cloud Storage With C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Verify Image Digital Signatures and Log Mismatches in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = {
-                "cloud/image1.jpg",
-                "cloud/image2.png",
-                "cloud/image3.tif"
-            };
-
-            // Hardcoded audit log file path
-            string auditPath = "audit/mismatches.txt";
+            // Hardcoded paths
+            string inputDirectory = @"C:\Images\Input";
+            string auditFilePath = @"C:\Images\Audit\audit.txt";
+            string password = "SecretPwd";
 
             // Ensure audit directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(auditPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(auditFilePath));
 
-            using (var writer = new StreamWriter(auditPath, false))
+            // Open audit file for appending
+            using (var auditWriter = new StreamWriter(auditFilePath, true))
             {
-                foreach (var inputPath in inputPaths)
+                // Get all files in the input directory (non-recursive)
+                foreach (string filePath in Directory.GetFiles(inputDirectory))
                 {
-                    if (!File.Exists(inputPath))
+                    // Verify file existence
+                    if (!File.Exists(filePath))
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        continue;
                     }
 
-                    using (var image = Image.Load(inputPath))
+                    // Load image
+                    using (Image img = Image.Load(filePath))
                     {
-                        var raster = image as RasterImage;
-                        bool signed = false;
-                        if (raster != null)
+                        // Ensure we are working with a RasterImage
+                        if (img is RasterImage rasterImg)
                         {
-                            signed = raster.IsDigitalSigned("password");
+                            bool isSigned = rasterImg.IsDigitalSigned(password);
+                            if (!isSigned)
+                            {
+                                // Log mismatch
+                                auditWriter.WriteLine($"{DateTime.UtcNow:u} - Signature mismatch: {filePath}");
+                            }
                         }
-
-                        if (!signed)
+                        else
                         {
-                            writer.WriteLine($"{inputPath} - signature mismatch");
+                            // Not a raster image; skip or log as needed
+                            Console.Error.WriteLine($"Unsupported image format: {filePath}");
                         }
                     }
                 }
@@ -58,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a set of JPEG, PNG, or TIFF files stored in a cloud folder have not been tampered with by checking their digital signatures and recording any mismatches.
- * 2. When an audit trail is required for compliance, logging which images failed signature verification to a text file for later review.
- * 3. When processing a batch of uploaded images in an automated pipeline and you must reject or flag those without a valid digital signature before further processing.
- * 4. When integrating Aspose.Imaging into a C# application to validate the integrity of archived images on a remote server and capture errors without stopping the entire job.
- * 5. When you want to programmatically confirm that images protected with a password‑based digital signature are still authentic across multiple file formats.
+ * 1. When a compliance system must confirm that all uploaded PNG or JPEG files are digitally signed before they are archived, this code can scan the folder and record any unsigned images.
+ * 2. When a medical imaging workflow needs to detect tampered raster images by checking their digital signatures and writing discrepancies to an audit log.
+ * 3. When a content management platform stores user‑generated images in cloud storage and wants to run a nightly job that validates each file’s signature using Aspose.Imaging and logs failures for review.
+ * 4. When a legal firm requires proof that evidence photos have not been altered, they can use this routine to batch‑verify signatures and generate a timestamped audit trail.
+ * 5. When an e‑commerce site processes product photos and must ensure that no image has been modified after upload, this script can automatically flag and log any signature mismatches.
  */

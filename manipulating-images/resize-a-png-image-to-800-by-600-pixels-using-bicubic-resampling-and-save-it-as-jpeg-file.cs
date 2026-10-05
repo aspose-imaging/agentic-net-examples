@@ -1,43 +1,34 @@
-// HOW-TO: Resize PNG to 800x600 with Bicubic Resampling and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 800x600 and Convert to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.jpg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to 800x600 using Bicubic (CubicConvolution) resampling
-                image.Resize(800, 600, ResizeType.CubicConvolution);
+                image.Resize(800, 600, ResizeType.NearestNeighbourResample);
 
-                // Prepare JPEG save options (default quality)
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 100
+                    Quality = 90
                 };
-
-                // Save the resized image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -50,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a web‑ready JPEG thumbnail from a high‑resolution PNG for faster page loads.
- * 2. When an e‑commerce platform requires product images in a fixed 800×600 JPEG size while preserving quality using bicubic resampling.
- * 3. When converting user‑uploaded PNG screenshots to JPEG for email attachments that have size limits.
- * 4. When preparing assets for a mobile app that only supports JPEG at a specific resolution, ensuring consistent dimensions.
- * 5. When automating a batch process that standardizes legacy PNG graphics to 800×600 JPEG files for archival storage.
+ * 1. When you need to generate web‑ready thumbnails from high‑resolution PNG assets by resizing them to a standard 800×600 size and saving as a smaller JPEG.
+ * 2. When an e‑commerce platform requires product images in JPEG format with a fixed dimension for consistent display across browsers.
+ * 3. When a batch‑processing script must convert uploaded PNG logos to 800×600 JPEGs for email newsletters to reduce file size.
+ * 4. When a desktop application needs to downscale user‑provided PNG screenshots to a specific resolution before archiving them as JPEGs.
+ * 5. When a content‑management system automatically resizes PNG illustrations to 800×600 and stores them as JPEGs for faster page loading.
  */

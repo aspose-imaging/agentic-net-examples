@@ -1,4 +1,4 @@
-// HOW-TO: Get Digital Signature Confidence Percentage of a JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Analyze Digital Signature Confidence in JPEG Using Aspose Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,30 +8,31 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path and password
-        string inputPath = "input.jpg";
-        string password = "myPassword";
-
         try
         {
-            // Verify that the input file exists
+            const string inputPath = "input.jpg";
+            const string outputPath = "result.txt";
+            const string password = "myPassword";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the JPEG image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                // Get the confidence percentage of the embedded digital signature
-                int confidence = image.AnalyzePercentageDigitalSignature(password);
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Image is not a raster image.");
+                    return;
+                }
 
-                // Optionally, determine if the image is considered signed using the default threshold (75%)
-                bool isSigned = image.IsDigitalSigned(password);
-
-                Console.WriteLine($"Digital signature confidence: {confidence}%");
-                Console.WriteLine($"Is image signed (default threshold): {isSigned}");
+                int confidence = raster.AnalyzePercentageDigitalSignature(password);
+                File.WriteAllText(outputPath, confidence.ToString());
             }
         }
         catch (Exception ex)
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify the authenticity of a JPEG received from a partner by checking its digital signature confidence.
- * 2. When you want to enforce a policy that only images with a signature confidence above a certain threshold are accepted in a document management system.
- * 3. When you are building an audit trail that records whether each uploaded image is digitally signed and how strong the signature is.
- * 4. When you need to programmatically reject tampered JPEG files by comparing the confidence value against the expected level.
- * 5. When you are integrating image security checks into a C# web API that validates user‑submitted photos before processing them.
+ * 1. When a developer needs to verify the authenticity of a JPEG that contains a password‑protected digital signature and obtain its confidence percentage.
+ * 2. When integrating image processing into a document management system that must validate signed JPEGs before archiving them.
+ * 3. When building a compliance audit tool that extracts the digital signature confidence score from scanned JPEG images for regulatory reporting.
+ * 4. When creating a batch job that reads multiple JPEG files, checks each embedded signature with a known password, and writes the confidence results to a text report.
+ * 5. When troubleshooting image security by programmatically measuring how strongly a JPEG’s embedded digital signature matches the expected password.
  */

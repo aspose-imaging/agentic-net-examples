@@ -1,10 +1,9 @@
-// HOW-TO: Batch Dither PSD Files and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Dither PSD Images and Save as PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,46 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input PSD files
-            string[] inputPaths = new string[]
-            {
+            string[] inputPaths = {
                 @"C:\Images\image1.psd",
                 @"C:\Images\image2.psd"
             };
 
-            foreach (string inputPath in inputPaths)
+            string outputDirectory = @"C:\ProcessedPdf";
+
+            foreach (var inputPath in inputPaths)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path (same folder, same name with .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply dithering if the image is raster based
-                    if (image is RasterImage rasterImage)
+                    if (image is RasterImage raster)
                     {
-                        // Floyd‑Steinberg dithering with 1‑bit palette (black & white)
-                        rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
                     }
 
-                    // Prepare PDF save options
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the processed image as PDF
+                    var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Processed and saved: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -63,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare high‑contrast black‑and‑white PDFs from a series of Photoshop PSD designs for fast printing or archival.
- * 2. When an application must automatically convert multiple layered PSD assets into PDF documents while applying Floyd‑Steinberg dithering to reduce file size.
- * 3. When a workflow requires batch processing of PSD artwork to generate PDF proofs with a 1‑bit palette for e‑book publishing.
- * 4. When you want to integrate image preprocessing in a C# service that transforms PSD files into PDF format for downstream OCR or document management systems.
- * 5. When a developer needs to ensure each PSD is saved as a PDF in the same folder, handling missing files and creating output directories on the fly.
+ * 1. When you need to convert a batch of Photoshop PSD files into print‑ready PDF documents while applying Floyd‑Steinberg dithering to reduce color depth.
+ * 2. When you want to generate lightweight PDF previews of high‑resolution PSD artwork for quick sharing or web display.
+ * 3. When an automated workflow must process multiple PSD layers, apply 8‑bit dithering, and store the results as PDFs for archival purposes.
+ * 4. When a desktop application requires converting user‑uploaded PSD files to PDFs with consistent dithering to ensure uniform appearance across different printers.
+ * 5. When you are building a server‑side service that receives PSD files, dithers them to reduce file size, and returns PDF versions for downstream processing.
  */

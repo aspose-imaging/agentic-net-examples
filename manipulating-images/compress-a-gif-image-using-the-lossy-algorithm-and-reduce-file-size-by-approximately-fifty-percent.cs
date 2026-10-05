@@ -1,46 +1,31 @@
-// HOW-TO: Compress GIF with Lossy Algorithm to Reduce File Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compress GIF Image With Lossy Algorithm In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output.lossy.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\input.gif";
+            string outputPath = "Output\\output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source GIF image
-            using (Image image = Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Configure lossy GIF options
-                GifOptions saveOptions = new GifOptions
-                {
-                    // Recommended value for good lossy compression
-                    MaxDiff = 80,
-                    // Optional: improve palette quality
-                    DoPaletteCorrection = true
-                };
-
-                // Save the image with lossy compression
-                using (FileStream outStream = File.OpenWrite(outputPath))
-                {
-                    image.Save(outStream, saveOptions);
-                }
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink animated GIFs for faster web page loading using Aspose.Imaging’s lossy compression in C# without completely losing visual quality.
- * 2. When you want to reduce the size of GIF email attachments with Aspose.Imaging to stay under typical mailbox limits.
- * 3. When you are preparing GIF assets for a mobile app where bandwidth and storage are limited and you need C# code to apply lossy compression.
- * 4. When you need to batch‑process user‑uploaded GIFs on a server with Aspose.Imaging to meet CDN size constraints.
- * 5. When you want to generate lower‑resolution preview GIFs for product catalogs while keeping the original animation using C# and Aspose.Imaging.
+ * 1. When you need to shrink large animated GIFs for faster web page loading without losing visual quality.
+ * 2. When you want to reduce the size of GIF assets before sending them in email attachments to stay under size limits.
+ * 3. When you are preparing GIFs for mobile apps where bandwidth and storage are limited.
+ * 4. When you need to batch‑process GIF files on a server to lower CDN storage costs.
+ * 5. When you want to automate GIF compression in a C# build pipeline using Aspose.Imaging.
  */

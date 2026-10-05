@@ -1,49 +1,43 @@
-// HOW-TO: Increase GIF Contrast and Apply Lossy Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase GIF Frame Contrast and Apply Lossy Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.gif";
-            string outputPath = "C:\\temp\\output.lossy.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to GifImage to access GIF-specific functionality
-                GifImage gifImage = (GifImage)image;
-
-                // Increase contrast (value range: -100 to 100)
-                gifImage.AdjustContrast(50f);
-
-                // Configure lossy GIF compression options
-                GifOptions saveOptions = new GifOptions
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    MaxDiff = 80,               // Enable lossy compression
-                    DoPaletteCorrection = true, // Improve palette quality
-                    ColorResolution = 7         // Bits per color minus 1
-                };
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    RasterImage frameRaster = (RasterImage)gif.ActiveFrame;
+                    if (!frameRaster.IsCached)
+                    {
+                        frameRaster.CacheData();
+                    }
+                    frameRaster.AdjustContrast(0.5f);
+                }
 
-                // Save the enhanced GIF with lossy compression
-                gifImage.Save(outputPath, saveOptions);
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to make an animated GIF more vivid for a web banner while reducing its file size for faster loading.
- * 2. When you want to preprocess user‑uploaded GIFs by boosting contrast before storing them in a content‑delivery network.
- * 3. When you are building a C# tool that automatically optimizes GIF animations for email newsletters with lossy compression.
- * 4. When you need to improve the visual quality of low‑contrast GIFs and shrink them for mobile app assets using Aspose.Imaging.
- * 5. When you are creating a batch script that adjusts GIF contrast and applies palette correction to meet strict bandwidth limits.
+ * 1. When you need to make a low‑visibility animated GIF more vivid before embedding it in a website, you can boost each frame’s contrast and then compress the animation to keep page load times low.
+ * 2. When preparing marketing email newsletters that include animated GIFs, enhancing contrast improves visual impact while lossy compression reduces the attachment size to meet email size limits.
+ * 3. When optimizing GIF assets for mobile apps, increasing frame contrast ensures clarity on small screens and the lossy compression minimizes the app bundle size.
+ * 4. When archiving a series of GIF screenshots for documentation, adjusting contrast makes details easier to read and the compression saves storage space on the server.
+ * 5. When creating GIF memes that need a punchy look, programmatically raising contrast and applying compression lets you generate eye‑catching animations quickly without manual editing tools.
  */

@@ -1,49 +1,46 @@
-// HOW-TO: Remove White Background from SVG While Keeping White Objects in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove SVG Background While Keeping White Elements and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.svg";
+        string outputPath = "output/output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a VectorImage
-            using (VectorImage vectorImage = Image.Load(inputPath) as VectorImage)
+            using (var image = Image.Load(inputPath))
             {
-                if (vectorImage == null)
+                var vectorImage = image as VectorImage;
+                if (vectorImage != null)
                 {
-                    Console.Error.WriteLine("The loaded file is not a vector image.");
-                    return;
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
                 }
 
-                // Configure background removal to treat white as background
-                var bgSettings = new RemoveBackgroundSettings
+                var pngOptions = new PngOptions
                 {
-                    Color1 = Aspose.Imaging.Color.White // set background color to white
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
                 };
 
-                // Remove the background using the configured settings
-                vectorImage.RemoveBackground(bgSettings);
-
-                // Save the processed image
-                vectorImage.Save(outputPath);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up scanned SVG logos by stripping a white canvas but retaining white text or icons.
- * 2. When preparing SVG assets for dark‑mode websites, you want to eliminate the white background without losing white foreground elements.
- * 3. When converting vector graphics for printing, you may need to remove the page‑white background while preserving white decorative details.
- * 4. When automating batch processing of SVG files to make them transparent for overlay on other images, you set the background color to white to keep white shapes visible.
- * 5. When integrating SVGs into a UI that applies its own background, you remove the original white background to avoid double‑layering while keeping any white graphics intact.
+ * 1. When you need to strip the background from an SVG logo but keep white text or shapes intact before exporting to a PNG for web use.
+ * 2. When generating product thumbnails from vector artwork and you want a transparent PNG without losing white foreground details.
+ * 3. When automating batch conversion of SVG icons to PNG assets for a mobile app, ensuring the icons retain their white elements on a clear background.
+ * 4. When preparing vector diagrams for inclusion in a PDF report and you must remove the original background while preserving white lines and labels.
+ * 5. When cleaning up scanned vector graphics that contain a solid background, and you need to programmatically make the background transparent while keeping white graphics visible.
  */

@@ -1,30 +1,25 @@
-// HOW-TO: Rotate A JPEG 90 Degrees Clockwise And Save With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate a JPEG 90 Degrees and Save New File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output_rotated.jpg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output/rotated.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image, rotate 90 degrees clockwise, and save
             using (Image image = Image.Load(inputPath))
             {
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
@@ -40,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an e‑commerce site needs to automatically correct portrait‑oriented product photos uploaded as JPEGs before displaying them online.
- * 2. When a desktop application must rotate scanned JPEG documents 90° clockwise to match the original page orientation.
- * 3. When a photo‑gallery service processes user‑uploaded JPEG images to ensure consistent landscape layout across thumbnails.
- * 4. When a batch‑processing script has to re‑orient a large number of JPEG files on a server without using external tools.
- * 5. When a mobile‑backend API receives JPEG images from devices and must rotate them server‑side before storing them in storage.
+ * 1. When you need to automatically correct portrait‑oriented photos uploaded by users before storing them on the server.
+ * 2. When generating thumbnails that must be displayed in landscape orientation for a web gallery.
+ * 3. When preprocessing scanned documents that were saved sideways and must be rotated for OCR processing.
+ * 4. When creating a batch job that re‑orients product images to match a catalog layout without manual editing.
+ * 5. When integrating a C# service that receives JPEGs from a mobile app and must rotate them 90° before saving to a cloud folder.
  */

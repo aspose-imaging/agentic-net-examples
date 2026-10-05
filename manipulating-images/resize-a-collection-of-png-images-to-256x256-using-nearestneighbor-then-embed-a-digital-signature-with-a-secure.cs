@@ -1,7 +1,9 @@
-// HOW-TO: Resize Multiple PNG Images to 256x256 and Add Secure Digital Signature in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 256x256 Using Nearest Neighbor and Embed Secure Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,11 +11,10 @@ class Program
     {
         try
         {
-            // Define input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
+            string password = "SecurePassword123";
 
-            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -21,42 +22,33 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_resized.png");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, resize, embed signature, and save
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Resize to 256x256 using default NearestNeighbourResample
-                    image.Resize(256, 256);
+                    if (!image.IsCached)
+                        image.CacheData();
 
-                    // Embed digital signature with a secure password
-                    image.EmbedDigitalSignature("secure123");
+                    image.Resize(256, 256, ResizeType.NearestNeighbourResample);
+                    image.EmbedDigitalSignature(password);
 
-                    // Save the processed image
-                    image.Save(outputPath);
+                    var saveOptions = new PngOptions();
+                    image.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -69,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process user‑uploaded avatars to a fixed 256×256 size while protecting them with a password‑protected digital signature.
- * 2. When a web service must generate thumbnail PNGs for a product catalog and ensure each thumbnail is cryptographically signed to prevent tampering.
- * 3. When an automated pipeline prepares PNG assets for a mobile app, resizing them uniformly and embedding a digital signature for integrity verification.
- * 4. When a document management system stores PNG scans and requires each file to be resized for storage efficiency and signed with a secure password for compliance.
- * 5. When a security‑focused application needs to resize a batch of PNG logos and embed a password‑protected signature before distributing them to partners.
+ * 1. When you need to batch‑process user‑uploaded PNG avatars to a fixed 256×256 size for a web portal while preserving sharp edges with nearest‑neighbor scaling.
+ * 2. When you must protect PNG assets by embedding a digital signature protected by a password before distributing them to clients.
+ * 3. When an e‑commerce platform requires all product PNG images to be uniformly sized and tamper‑evident for catalog uploads.
+ * 4. When a mobile app stores thumbnail PNGs locally and you want to ensure each thumbnail is resized quickly and signed to prevent unauthorized modifications.
+ * 5. When a document management system archives PNG scans and needs to standardize dimensions and add a secure signature for compliance auditing.
  */

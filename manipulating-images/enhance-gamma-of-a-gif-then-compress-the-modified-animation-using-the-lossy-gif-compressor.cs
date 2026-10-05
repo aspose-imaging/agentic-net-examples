@@ -1,56 +1,41 @@
-// HOW-TO: Adjust Gamma of GIF and Apply Lossy Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase Gamma of GIF and Save with Lossy Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic to catch unexpected exceptions
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.gif";
-            string outputPath = "output_gamma.gif";
-            string outputLossyPath = "output_gamma_lossy.gif";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputLossyPath));
 
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
-                GifImage gifImage = (GifImage)image;
+                Aspose.Imaging.FileFormats.Gif.GifImage gif = (Aspose.Imaging.FileFormats.Gif.GifImage)img;
 
-                // Apply gamma correction (example gamma value 2.2f)
-                gifImage.AdjustGamma(2.2f);
-
-                // Save the gamma‑corrected GIF (lossless)
-                gifImage.Save(outputPath, new GifOptions());
-
-                // Prepare options for lossy compression
-                GifOptions lossyOptions = new GifOptions
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    // Enable palette correction for better quality
-                    DoPaletteCorrection = true,
-                    // Set maximum pixel difference to trigger lossy compression
-                    MaxDiff = 80
-                };
+                    gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[i];
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)gif.ActiveFrame)
+                    {
+                        raster.AdjustGamma(1.2f);
+                    }
+                }
 
-                // Save the lossy compressed GIF
-                gifImage.Save(outputLossyPath, lossyOptions);
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -62,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to improve the brightness and contrast of an animated GIF for better visual appearance on different displays, they can use gamma correction before saving it.
- * 2. When a web application must reduce the file size of a GIF animation while preserving acceptable visual quality, the lossy compression options can be applied after gamma adjustment.
- * 3. When an e‑commerce platform wants to standardize product animation colors and also meet bandwidth limits, they can adjust the GIF’s gamma and then compress it with palette correction.
- * 4. When a mobile app processes user‑uploaded GIFs and needs to ensure the images load quickly on cellular networks, it can apply gamma correction and lossy compression in a single workflow.
- * 5. When a digital marketing tool prepares animated banners for email campaigns, it can enhance the GIF’s gamma for brand consistency and then shrink the file using Aspose.Imaging’s lossy GIF compressor.
+ * 1. When you need to brighten a GIF animation for better visibility on bright screens while reducing its file size for web delivery.
+ * 2. When you want to programmatically adjust the gamma of each frame in an animated GIF before uploading it to a mobile app to ensure consistent color appearance.
+ * 3. When you are building an automated image pipeline that optimizes GIFs by enhancing contrast and applying lossy compression to meet email attachment size limits.
+ * 4. When you need to preprocess legacy GIF assets by increasing their gamma and saving them with reduced bandwidth usage for faster page load times.
+ * 5. When you are creating a batch tool that processes multiple GIF files, applying gamma correction and compressing them using Aspose.Imaging to store them efficiently in a cloud storage bucket.
  */

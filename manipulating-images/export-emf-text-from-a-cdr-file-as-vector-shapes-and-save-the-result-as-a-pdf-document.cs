@@ -1,9 +1,8 @@
-// HOW-TO: Export CDR Text As Vector Shapes To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PDF with Vector Shapes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -11,36 +10,20 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.cdr.pdf";
+            string inputPath = "input.cdr";
+            string outputPath = "output.pdf";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Set rasterization options so that text is rendered as vector shapes
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                };
-
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the result as PDF
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve editable text from a CorelDRAW (CDR) file in a PDF without rasterizing it, you can use this code to export the text as vector shapes.
- * 2. When generating printable PDFs from design assets and want the text to remain crisp at any zoom level, this approach converts CDR text to vector outlines.
- * 3. When automating a workflow that converts legacy CDR drawings to PDF for archiving while ensuring the text is not lost during rasterization, the snippet provides a reliable solution.
- * 4. When building a C# application that extracts vector‑based text from CDR files for use in a document management system, this code saves the result directly as a PDF.
- * 5. When creating a batch process to convert multiple CDR files to PDF while maintaining exact typography and layout, the example shows how to configure Aspose.Imaging rasterization options for vector text rendering.
+ * 1. When a developer needs to generate a printable PDF from a CorelDRAW design while preserving editable vector graphics.
+ * 2. When an application must batch‑convert customer‑provided CDR files to PDF for archiving without rasterizing the artwork.
+ * 3. When a web service offers on‑the‑fly preview of CDR drawings in PDF format for browsers that only support PDF viewing.
+ * 4. When integrating a document workflow that extracts vector‑based content from CDR files to embed in reports or invoices as scalable graphics.
+ * 5. When automating the migration of legacy CorelDRAW assets to a PDF‑based catalog while keeping text as selectable, searchable vector objects.
  */

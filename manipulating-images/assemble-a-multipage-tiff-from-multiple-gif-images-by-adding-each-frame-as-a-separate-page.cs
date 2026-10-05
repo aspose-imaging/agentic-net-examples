@@ -1,10 +1,12 @@
-// HOW-TO: Create Multipage TIFF From Multiple GIF Frames In C# (Aspose.Imaging for .NET)
+// HOW-TO: Assemble Multipage TIFF From Several GIF Images Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,68 +14,65 @@ class Program
     {
         try
         {
-            // Hardcoded input GIF paths
-            string inputPath1 = @"c:\temp\frame1.gif";
-            string inputPath2 = @"c:\temp\frame2.gif";
-            string inputPath3 = @"c:\temp\frame3.gif";
+            string gifPath1 = "Input/gif1.gif";
+            string gifPath2 = "Input/gif2.gif";
+            string gifPath3 = "Input/gif3.gif";
+            string outputPath = "Output/multipage.tif";
 
-            // Verify input files exist
-            if (!File.Exists(inputPath1))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-            if (!File.Exists(inputPath3))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath3}");
-                return;
-            }
+            if (!File.Exists(gifPath1)) { Console.Error.WriteLine($"File not found: {gifPath1}"); return; }
+            if (!File.Exists(gifPath2)) { Console.Error.WriteLine($"File not found: {gifPath2}"); return; }
+            if (!File.Exists(gifPath3)) { Console.Error.WriteLine($"File not found: {gifPath3}"); return; }
 
-            // Output TIFF path
-            string outputPath = @"c:\temp\multipage.tif";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Determine canvas size from the first GIF
-            int canvasWidth, canvasHeight;
-            using (Aspose.Imaging.Image firstImg = Aspose.Imaging.Image.Load(inputPath1))
+            using (GifImage firstGif = (GifImage)Image.Load(gifPath1))
             {
-                canvasWidth = firstImg.Width;
-                canvasHeight = firstImg.Height;
-            }
+                int width = firstGif.Width;
+                int height = firstGif.Height;
 
-            // Configure TIFF creation options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-            // Create the multipage TIFF image
-            using (TiffImage tiffImage = (TiffImage)Aspose.Imaging.Image.Create(tiffOptions, canvasWidth, canvasHeight))
-            {
-                // Add each GIF as a separate TIFF frame
-                string[] gifPaths = new[] { inputPath1, inputPath2, inputPath3 };
-                foreach (string gifPath in gifPaths)
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
                 {
-                    // Create a TiffFrame directly from the GIF file
-                    TiffFrame frame = new TiffFrame(gifPath);
-                    tiffImage.AddFrame(frame);
+                    int pageIndex = 0;
+                    string[] gifPaths = new[] { gifPath1, gifPath2, gifPath3 };
+                    foreach (var gifPath in gifPaths)
+                    {
+                        using (GifImage gif = (GifImage)Image.Load(gifPath))
+                        {
+                            for (int i = 0; i < gif.PageCount; i++)
+                            {
+                                using (MemoryStream ms = new MemoryStream())
+                                {
+                                    PngOptions pngOptions = new PngOptions();
+                                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                                    gif.Save(ms, pngOptions);
+                                    ms.Position = 0;
+                                    using (Image frameImg = Image.Load(ms))
+                                    {
+                                        if (frameImg.Width != width || frameImg.Height != height)
+                                        {
+                                            frameImg.Resize(width, height, ResizeType.NearestNeighbourResample);
+                                        }
+
+                                        if (pageIndex == 0)
+                                        {
+                                            ((RasterImage)tiff).SavePixels(tiff.Bounds, ((RasterImage)frameImg).LoadPixels(frameImg.Bounds));
+                                        }
+                                        else
+                                        {
+                                            tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
+                                            tiff.ActiveFrame = tiff.Frames[pageIndex];
+                                            ((RasterImage)tiff).SavePixels(tiff.Bounds, ((RasterImage)frameImg).LoadPixels(frameImg.Bounds));
+                                        }
+                                        pageIndex++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    tiff.Save(outputPath);
                 }
-
-                // Remove the initially created blank frame
-                TiffFrame initialFrame = tiffImage.ActiveFrame;
-                tiffImage.ActiveFrame = tiffImage.Frames[1];
-                tiffImage.RemoveFrame(0);
-                initialFrame.Dispose();
-
-                // Save the TIFF (output path already bound via FileCreateSource)
-                tiffImage.Save();
             }
         }
         catch (Exception ex)
@@ -85,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several GIF frames into a single multi‑page TIFF using Aspose.Imaging for .NET for archival or printing purposes.
- * 2. When a document‑management workflow requires TIFF files but your source images are separate GIF files, and you want to generate the TIFF programmatically in C#.
- * 3. When generating a multi‑page report where each page is a GIF screenshot captured from a web application, and you need to assemble them into a TIFF document.
- * 4. When converting GIF assets into a TIFF stack for compatibility with legacy imaging software that only reads TIFF, using Aspose.Imaging’s TiffOptions.
- * 5. When creating a multi‑page fax or scanned document from individual GIF scans to meet regulatory file‑format standards in a C# application.
+ * 1. When you need to combine animated GIF frames into a single multi‑page TIFF for archival or printing.
+ * 2. When a document workflow requires converting multiple GIF files into one TIFF to embed in a PDF.
+ * 3. When you want to preserve each GIF frame as a separate page in a TIFF for medical imaging or scanning applications.
+ * 4. When a web service must deliver a batch of GIFs as a single TIFF file to reduce network requests.
+ * 5. When an automated script must generate a multi‑page TIFF from user‑uploaded GIFs for further image analysis.
  */

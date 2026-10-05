@@ -1,12 +1,13 @@
-// HOW-TO: Increase PSD Image Contrast and Export to PDF with Text Rendering Hint in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PSD to PDF with Single Bit Text Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
@@ -23,25 +24,15 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                if (image is RasterImage raster)
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    if (!raster.IsCached) raster.CacheData();
-                    raster.AdjustContrast(50f);
-                }
-
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel
+                    };
 
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the visual contrast of a Photoshop PSD file before delivering it as a PDF report.
- * 2. When a web service must convert uploaded PSD designs to PDF while ensuring text is rendered with a single‑bit per pixel hint for crisp printing.
- * 3. When an automated batch process has to adjust contrast of multiple PSD assets and generate PDF previews for a digital asset management system.
- * 4. When a desktop application requires saving edited PSD layers as a PDF with specific rasterization options such as no smoothing and a white background.
- * 5. When integrating Aspose.Imaging in a C# workflow to produce PDF documents from PSD files with custom text rendering settings for low‑resolution displays.
+ * 1. When you need to generate a PDF from a Photoshop PSD file while ensuring that all text is rasterized using a single‑bit per pixel hint for sharper on‑screen rendering.
+ * 2. When you want to programmatically convert layered PSD artwork to a PDF for printing or archiving without losing vector text quality.
+ * 3. When an application must batch‑process PSD files and output PDFs that use a specific text rendering mode to meet accessibility or file‑size requirements.
+ * 4. When you are building a C# service that receives PSD uploads and returns PDF previews with optimized text rendering for low‑resolution displays.
+ * 5. When you need to automate the conversion of design assets from PSD to PDF while controlling rasterization options such as text rendering hints.
  */

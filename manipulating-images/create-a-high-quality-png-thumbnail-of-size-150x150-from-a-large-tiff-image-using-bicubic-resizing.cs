@@ -1,4 +1,4 @@
-// HOW-TO: Create 150x150 PNG Thumbnail From Large TIFF Using Bicubic Resize In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 150x150 PNG Thumbnail From Large TIFF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,30 +9,26 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\large.tif";
-        string outputPath = @"C:\Images\thumbnail.png";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the TIFF image
-            using (TiffImage image = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Resize to 150x150 using bicubic (CubicConvolution) resampling
-                image.Resize(150, 150, ResizeType.CubicConvolution);
+                // Resize to 150x150 using high‑quality Lanczos (bicubic‑like) filter
+                image.Resize(150, 150, ResizeType.LanczosResample);
 
-                // Save the result as PNG
-                image.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a small preview PNG for a high‑resolution TIFF scanned document in a web application.
- * 2. When you want to display fast‑loading thumbnails of large medical imaging files without losing quality by using bicubic interpolation.
- * 3. When an e‑commerce site must create uniform 150 × 150 product image icons from original TIFF photos for catalog listings.
- * 4. When a desktop utility processes batch TIFF files and saves compact PNG thumbnails for quick file‑system browsing.
- * 5. When a reporting tool requires consistent PNG thumbnails of TIFF charts to embed in PDF or HTML reports.
+ * 1. When you need to generate small preview images for high‑resolution TIFF scans in a web gallery.
+ * 2. When an application must convert medical or satellite TIFF files into lightweight PNG thumbnails for faster loading.
+ * 3. When you want to display product catalog images stored as TIFFs as 150 × 150 PNG icons on an e‑commerce site.
+ * 4. When a document management system requires consistent PNG thumbnails for TIFF documents to show in search results.
+ * 5. When you are building a batch‑processing tool that creates uniform PNG previews from large TIFF files for reporting dashboards.
  */

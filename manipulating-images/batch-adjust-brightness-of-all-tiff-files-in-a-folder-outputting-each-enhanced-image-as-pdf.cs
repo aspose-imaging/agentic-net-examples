@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -11,47 +10,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string inputFolder = "C:\\InputTiffs";
+            string outputFolder = "C:\\OutputPdfs";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in tiffFiles)
+            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string file in files)
             {
-                // Process only .tif and .tiff extensions
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
+                string ext = Path.GetExtension(file).ToLowerInvariant();
+                if (ext != ".tif" && ext != ".tiff")
                     continue;
 
-                // Verify the input file exists
-                if (!File.Exists(filePath))
+                string inputPath = file;
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(filePath) + ".pdf";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Ensure the output directory exists (unconditional as required)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the TIFF image
-                using (Image image = Image.Load(filePath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to TiffImage to access AdjustBrightness
-                    TiffImage tiffImage = (TiffImage)image;
+                    if (image is RasterImage raster)
+                    {
+                        raster.AdjustBrightness(20);
+                    }
 
-                    // Adjust brightness (example value: 50)
-                    tiffImage.AdjustBrightness(50);
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as PDF
-                    tiffImage.Save(outputPath, new PdfOptions());
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -64,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the visibility of scanned TIFF documents before archiving them as searchable PDFs.
- * 2. When a medical imaging workflow requires brightening multiple TIFF X‑ray files and converting them to PDF for patient records.
- * 3. When a publishing system must automatically enhance the brightness of a batch of TIFF artwork files and output them as PDF proofs.
- * 4. When a legal firm wants to batch‑process TIFF evidence photos, increase their brightness, and store them in PDF format for case files.
- * 5. When an automated script must convert a folder of low‑contrast TIFF scans into brighter PDFs for easier viewing on mobile devices.
+ * 1. When you need to automatically brighten scanned TIFF documents before converting them to searchable PDF files for archiving.
+ * 2. When a workflow requires processing a folder of medical imaging TIFFs, enhancing visibility by increasing brightness, and outputting each as a PDF report.
+ * 3. When you want to prepare a batch of high‑resolution TIFF photographs for client delivery by adjusting exposure and saving them as PDF portfolios.
+ * 4. When an application must convert legacy TIFF blueprints to PDF while improving contrast through a brightness boost for easier viewing on tablets.
+ * 5. When a document management system needs to ingest multiple TIFF files, apply a uniform brightness correction, and store the results as PDF files for downstream indexing.
  */

@@ -1,8 +1,9 @@
-// HOW-TO: Convert TIFF to PDF with Anti-Alias Text Rendering in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Set Text Rendering Hint When Converting TIFF to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -10,39 +11,33 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.tif";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "Input\\sample.tif";
+            string outputPath = "Output\\result.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Configure PDF options with vector rasterization settings
-                var pdfOptions = new PdfOptions();
-
-                var vectorOpts = new VectorRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.AntiAlias, // Enhance readability of embedded fonts
-                    SmoothingMode = SmoothingMode.None
-                };
+                    var vectorOpts = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = tiff.Width,
+                        PageHeight = tiff.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                    pdfOptions.VectorRasterizationOptions = vectorOpts;
 
-                pdfOptions.VectorRasterizationOptions = vectorOpts;
-
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                    tiff.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate searchable PDF documents from high‑resolution TIFF scans while keeping the embedded text crisp and readable.
- * 2. When a medical imaging application must export patient scans as PDFs with anti‑aliased text to improve legibility on screen.
- * 3. When an archival system converts scanned legal documents from TIFF to PDF and wants the vectorized text to appear smooth without jagged edges.
- * 4. When a desktop utility processes batch TIFF files into PDFs and requires consistent font rendering across different page sizes.
- * 5. When a reporting tool embeds TIFF charts into PDFs and needs the text labels to be rendered with anti‑aliasing for professional presentation.
+ * 1. When a developer needs to generate searchable PDF documents from scanned TIFF files while ensuring the embedded text remains crisp and readable.
+ * 2. When converting multi‑page TIFF archives to PDF and wants to control font rendering to avoid blurry characters on low‑resolution displays.
+ * 3. When producing PDF reports from high‑resolution TIFF maps and must preserve vector text quality by disabling smoothing.
+ * 4. When automating a document workflow that requires consistent text appearance across PDFs generated from various TIFF sources.
+ * 5. When integrating Aspose.Imaging into a C# application to create PDFs with single‑bit per pixel text rendering for better OCR accuracy.
  */

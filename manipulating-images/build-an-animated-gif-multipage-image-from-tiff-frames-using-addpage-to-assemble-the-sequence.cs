@@ -1,52 +1,60 @@
-// HOW-TO: Create Animated GIF From Multi‑Page TIFF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated GIF from Multiple TIFF Frames Using AddPage in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.gif";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the multi‑frame TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                TiffFrame[] frames = tiffImage.Frames;
-                if (frames == null || frames.Length == 0)
-                {
-                    Console.Error.WriteLine("No frames found in the TIFF image.");
-                    return;
-                }
+            string tiffPath1 = "frame1.tif";
+            string tiffPath2 = "frame2.tif";
+            string tiffPath3 = "frame3.tif";
+            string outputPath = "output/animated.gif";
 
-                // Create the GIF image using the first frame
-                using (GifImage gifImage = new GifImage(new GifFrameBlock((RasterImage)frames[0])))
+            if (!File.Exists(tiffPath1))
+            {
+                Console.Error.WriteLine($"File not found: {tiffPath1}");
+                return;
+            }
+            if (!File.Exists(tiffPath2))
+            {
+                Console.Error.WriteLine($"File not found: {tiffPath2}");
+                return;
+            }
+            if (!File.Exists(tiffPath3))
+            {
+                Console.Error.WriteLine($"File not found: {tiffPath3}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image firstImg = Image.Load(tiffPath1))
+            {
+                int width = firstImg.Width;
+                int height = firstImg.Height;
+
+                GifOptions gifOptions = new GifOptions();
+
+                using (GifImage gif = (GifImage)Image.Create(gifOptions, width, height))
                 {
-                    // Append remaining frames as pages
-                    for (int i = 1; i < frames.Length; i++)
+                    gif.SavePixels(gif.Bounds, ((RasterImage)firstImg).LoadPixels(firstImg.Bounds));
+
+                    string[] additionalPaths = new string[] { tiffPath2, tiffPath3 };
+                    foreach (string path in additionalPaths)
                     {
-                        gifImage.AddPage((RasterImage)frames[i]);
+                        using (Image img = Image.Load(path))
+                        {
+                            gif.AddPage((RasterImage)img);
+                        }
                     }
 
-                    // Save the animated GIF
-                    gifImage.Save(outputPath);
+                    gif.Save(outputPath, gifOptions);
                 }
             }
         }
@@ -59,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to turn a multi‑page scanned document (TIFF) into a lightweight animated GIF for quick preview in a web application.
- * 2. When you want to generate an animated product showcase by combining each frame of a TIFF sprite sheet into a looping GIF using C#.
- * 3. When you have a series of medical imaging slices stored as TIFF frames and must deliver them as an animated GIF for remote diagnosis.
- * 4. When you are building an email newsletter and need to compress a multi‑frame TIFF into an animated GIF that most email clients can display.
- * 5. When you automate a reporting pipeline that extracts chart pages from a TIFF report and assembles them into an animated GIF for dashboard visualisation.
+ * 1. When you need to combine scanned document pages saved as TIFF files into a single animated GIF for quick web preview.
+ * 2. When you want to generate a looping animation from a series of medical imaging TIFF slices for a diagnostic dashboard.
+ * 3. When you have a collection of RAW camera TIFF images and must create a lightweight GIF slideshow for an email newsletter.
+ * 4. When you must programmatically assemble TIFF frames into an animated GIF to display step‑by‑step changes in a reporting UI.
+ * 5. When you are building a desktop utility that converts multi‑page TIFF invoices into an animated GIF for easier visual inspection.
  */

@@ -1,46 +1,44 @@
-// HOW-TO: Apply Gaussian Blur To PSD And Save As PNG Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PSD and Save as PNG with Text Anti-Alias in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input/input.psd";
-            string outputPath = "output/output.png";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = image as RasterImage;
+                var raster = image as Aspose.Imaging.RasterImage;
                 if (raster == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    Console.Error.WriteLine("Failed to load raster image.");
                     return;
                 }
 
-                // Apply Gaussian blur
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                blurOptions.Radius = 5;
+                blurOptions.Sigma = 1.0;
 
-                // Prepare PNG export options
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                raster.Filter(raster.Bounds, blurOptions);
 
-                // Save the blurred image as PNG
+                var graphics = new Aspose.Imaging.Graphics(raster);
+                graphics.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAliasGridFit;
+
+                var pngOptions = new PngOptions();
                 raster.Save(outputPath, pngOptions);
             }
         }
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a softened preview of a Photoshop PSD file for faster loading, developers can use this code to blur the image and export it as a lightweight PNG.
- * 2. When an e‑commerce platform wants to create background‑blurred product thumbnails from original PSD assets, the snippet provides a simple way to apply a Gaussian blur and save the result in PNG format.
- * 3. When a digital publishing workflow requires converting high‑resolution PSD artwork into PNG with a subtle blur for watermarking or visual effect, this code automates the process in C#.
- * 4. When a desktop utility must batch‑process PSD files to produce blurred PNG versions for UI placeholders, developers can integrate the Aspose.Imaging filter and save steps shown here.
- * 5. When a mobile app backend needs to serve blurred versions of user‑uploaded PSD designs to protect intellectual property while still displaying a preview, this example demonstrates how to apply the blur and output a PNG using C#.
+ * 1. When you need to soften a Photoshop PSD background before generating a PNG thumbnail for a web gallery.
+ * 2. When you want to apply a Gaussian blur to a PSD layer and preserve crisp anti‑aliased text in the exported PNG.
+ * 3. When an automated pipeline must convert edited PSD files to PNG while ensuring text is rendered with GridFit smoothing.
+ * 4. When you are building a C# service that processes PSD assets, blurs them for privacy, and outputs PNGs for mobile apps.
+ * 5. When you require programmatic control over image filters and text rendering hints while converting PSD to PNG using Aspose.Imaging.
  */

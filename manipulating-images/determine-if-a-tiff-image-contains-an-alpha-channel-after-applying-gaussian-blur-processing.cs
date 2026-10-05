@@ -1,51 +1,40 @@
-// HOW-TO: Check If TIFF Has Alpha Channel After Gaussian Blur in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check for Alpha Channel in TIFF After Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.tif";
+            string outputPath = "output\\blurred.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                TiffImage tiffImage = (TiffImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Check alpha channel before processing
-                bool hasAlphaBefore = tiffImage.HasAlpha;
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
 
-                // Apply Gaussian blur filter to the whole image
-                tiffImage.Filter(
-                    tiffImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                bool hasAlpha = image.BitsPerPixel > 24;
+                Console.WriteLine($"Alpha channel present: {hasAlpha}");
 
-                // Save the processed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                tiffImage.Save(outputPath, pngOptions);
-
-                // Check alpha channel after processing
-                bool hasAlphaAfter = tiffImage.HasAlpha;
-
-                Console.WriteLine($"HasAlpha before blur: {hasAlphaBefore}, after blur: {hasAlphaAfter}");
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify whether a multi‑page TIFF retains its transparency after applying a Gaussian blur before converting it to PNG.
- * 2. When a workflow requires detecting alpha channel changes in medical imaging TIFF files after noise‑reduction filtering in a C# application.
- * 3. When you want to ensure that a scanned document’s transparency is preserved after blur processing for watermarking purposes.
- * 4. When building an automated batch job that blurs satellite TIFF images and must log if the blur operation removes or adds an alpha channel before saving as PNG.
- * 5. When debugging image‑processing pipelines to compare the presence of an alpha channel in a TIFF before and after applying a Gaussian blur filter using Aspose.Imaging for .NET.
+ * 1. When you need to verify whether a scanned TIFF document retains transparency after applying a Gaussian blur filter using Aspose.Imaging in C#.
+ * 2. When processing medical imaging TIFF files and must ensure that any alpha channel is preserved before saving the blurred result.
+ * 3. When building a batch image‑processing pipeline that blurs large TIFF images and conditionally handles files with an alpha channel differently.
+ * 4. When integrating image preprocessing for a GIS application and need to detect transparency in TIFF layers after smoothing.
+ * 5. When creating a PDF conversion workflow that first applies a Gaussian blur to TIFF pages and must know if the pages contain an alpha channel for proper rendering.
  */

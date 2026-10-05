@@ -1,52 +1,43 @@
-// HOW-TO: Apply Anti-Aliasing to CDR When Converting to TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Anti-Alias Smoothing to CDR When Converting to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.cdr";
-        string outputPath = "sample_output.tiff";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.cdr";
+            string outputPath = "output.tiff";
+
+            if (!File.Exists(inputPath))
             {
-                // Prepare rasterization options for CDR
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
                 var rasterOptions = new CdrRasterizationOptions
                 {
-                    // Apply anti‑aliasing to reduce jagged lines
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // Preserve original size
-                    PageSize = image.Size,
-                    // Optional: set a white background
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
                 };
 
-                // Prepare TIFF save options and attach rasterization options
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rasterized image as TIFF
-                image.Save(outputPath, tiffOptions);
+                cdr.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑quality printable TIFF files from CorelDRAW (CDR) graphics without jagged edges.
- * 2. When a reporting system must embed vector‑based CDR logos into TIFF images for PDF export while preserving smooth lines.
- * 3. When an e‑commerce platform converts product illustrations stored as CDR into TIFF thumbnails and wants anti‑aliasing to improve visual appearance.
- * 4. When a document archiving workflow rasterizes CDR drawings to TIFF for long‑term storage and requires consistent smoothing across pages.
- * 5. When a desktop application batch‑processes CDR files to TIFF for OCR preprocessing and needs anti‑aliased output to enhance text recognition accuracy.
+ * 1. When you need to generate high‑quality TIFF previews of CorelDRAW (CDR) files for print‑ready PDFs without jagged edges.
+ * 2. When an application must batch‑convert CDR artwork to TIFF for archival purposes while preserving smooth vector lines.
+ * 3. When a web service creates thumbnail TIFF images from user‑uploaded CDR designs and requires anti‑aliased rendering.
+ * 4. When integrating Aspose.Imaging into a C# workflow to export CDR diagrams to TIFF for GIS or CAD systems that need clean raster output.
+ * 5. When automating document processing to ensure that converted TIFFs from CDR maintain visual fidelity on high‑resolution monitors.
  */

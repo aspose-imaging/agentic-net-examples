@@ -1,76 +1,102 @@
-// HOW-TO: Batch Crop JPEG Images from CSV Coordinates Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop JPEG Images From CSV Coordinates Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageCropper
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded paths
-        string csvPath = @"C:\Images\crop_data.csv";
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
-        try
+        static void Main()
         {
-            // Read all lines from the CSV file
-            string[] lines = File.ReadAllLines(csvPath);
-
-            foreach (string line in lines)
+            try
             {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue; // Skip empty lines
+                // Hardcoded paths
+                string csvPath = "input.csv";
+                string imagesFolder = "images";
+                string outputFolder = "output";
 
-                // Expected CSV format: FileName, Left, Top, Width, Height
-                string[] parts = line.Split(',');
-
-                if (parts.Length < 5)
-                    continue; // Skip malformed lines
-
-                string fileName = parts[0].Trim();
-                int left = int.Parse(parts[1].Trim());
-                int top = int.Parse(parts[2].Trim());
-                int width = int.Parse(parts[3].Trim());
-                int height = int.Parse(parts[4].Trim());
-
-                // Build full input path and verify existence
-                string inputPath = Path.Combine(inputDirectory, fileName);
-                if (!File.Exists(inputPath))
+                // Validate CSV file existence
+                if (!File.Exists(csvPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {csvPath}");
                     return;
                 }
 
-                // Load the image using Aspose.Imaging
-                using (Image image = Image.Load(inputPath))
+                // Read all lines from CSV
+                string[] lines = File.ReadAllLines(csvPath);
+                if (lines.Length == 0)
                 {
-                    // Crop the image using the rectangle from CSV
-                    var cropArea = new Rectangle(left, top, width, height);
-                    image.Crop(cropArea);
+                    Console.Error.WriteLine("CSV file is empty.");
+                    return;
+                }
 
-                    // Prepare output path and ensure directory exists
-                    string outputFileName = Path.GetFileNameWithoutExtension(fileName) + "_cropped.jpg";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Process each line (skip header if present)
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i].Trim();
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    // Simple check for header (contains non-numeric in coordinate fields)
+                    if (i == 0 && (line.Contains("ImageFileName") || line.Contains("X")))
+                        continue;
+
+                    string[] parts = line.Split(',');
+                    if (parts.Length < 5)
+                    {
+                        Console.Error.WriteLine($"Invalid CSV line: {line}");
+                        continue;
+                    }
+
+                    string imageFileName = parts[0].Trim();
+                    if (!int.TryParse(parts[1].Trim(), out int x) ||
+                        !int.TryParse(parts[2].Trim(), out int y) ||
+                        !int.TryParse(parts[3].Trim(), out int width) ||
+                        !int.TryParse(parts[4].Trim(), out int height))
+                    {
+                        Console.Error.WriteLine($"Invalid rectangle values in line: {line}");
+                        continue;
+                    }
+
+                    string inputPath = Path.Combine(imagesFolder, imageFileName);
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    string outputPath = Path.Combine(outputFolder, imageFileName);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the cropped image as JPEG
-                    image.Save(outputPath);
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+                    {
+                        if (!rasterImage.IsCached)
+                        {
+                            rasterImage.CacheData();
+                        }
+
+                        Aspose.Imaging.Rectangle rectangle = new Aspose.Imaging.Rectangle(x, y, width, height);
+                        rasterImage.Crop(rectangle);
+                        rasterImage.Save(outputPath);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically trim product photos to a standard size based on rectangle coordinates stored in a CSV file.
- * 2. When you have a large collection of scanned documents and must extract specific regions for archival using batch processing in C#.
- * 3. When a marketing team provides a spreadsheet of crop areas for campaign images and you need to generate the cropped JPEGs programmatically.
- * 4. When you want to preprocess satellite imagery by cutting out areas of interest defined in a CSV before further analysis.
- * 5. When you are building a desktop utility that reads user‑specified crop rectangles from a CSV and saves the resulting JPEGs to a separate output folder.
+ * 1. When you need to automatically trim product photos based on coordinates stored in a spreadsheet for an e‑commerce catalog.
+ * 2. When a batch of scanned receipts must be cropped to the relevant area using coordinates supplied by a data‑entry system.
+ * 3. When a marketing team provides a CSV of banner dimensions and you must generate cropped JPEG assets for a website.
+ * 4. When you are preprocessing images for a machine‑learning pipeline and the region of interest is defined in a CSV file.
+ * 5. When you want to replace manual Photoshop cropping with a C# script that reads rectangle values from a CSV and saves the results to a folder.
  */

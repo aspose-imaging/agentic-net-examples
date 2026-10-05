@@ -1,3 +1,4 @@
+// HOW-TO: Resize Image with Nearest Neighbor and Rotate 270 Degrees to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "Input/input.jpg";
+            string outputPath = "Output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,9 +23,19 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
-                image.Rotate(270f, false, Color.Black);
-                image.Save(outputPath, new PngOptions());
+                if (!image.IsCached)
+                    image.CacheData();
+
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+                if (newWidth == 0) newWidth = 1;
+                if (newHeight == 0) newHeight = 1;
+
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                image.Rotate(270f, true, Aspose.Imaging.Color.Black);
+
+                var options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -36,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews for a web gallery, a developer can resize the original JPEG by 50 % using nearest‑neighbor interpolation, rotate it 270° to portrait orientation, and save the result as a PNG with a black background fill.
- * 2. When preparing product images for a mobile app that requires smaller PNG files rotated to match device orientation, the code resizes the JPEG with nearest‑neighbor scaling, rotates it 270°, and fills empty areas with black.
- * 3. When converting scanned JPEG documents into PNGs for an OCR pipeline, a developer may need to downscale the image, rotate it 270 degrees, and use a black background to maintain consistent contrast.
- * 4. When creating sprite sheets for a game, a developer can shrink each source JPEG sprite, rotate it 270° to align with the engine’s coordinate system, and export it as a PNG with a black fill to avoid transparent artifacts.
- * 5. When automating batch processing of user‑uploaded photos, a C# service can resize each image by half using nearest‑neighbor resampling, rotate it 270°, and save it as a PNG with a black background to ensure uniform presentation across browsers.
+ * 1. When you need to generate a smaller thumbnail from a high‑resolution JPEG and rotate it for a portrait layout while preserving sharp edges, you can use this code.
+ * 2. When an e‑commerce site must automatically convert product photos to square PNGs that are half the original size and rotated 270° to match a carousel orientation, this snippet handles it.
+ * 3. When a desktop application processes scanned documents, resizing them with nearest‑neighbor interpolation and rotating them to correct orientation with a black background fill before saving as PNG, the code provides a quick solution.
+ * 4. When a game developer prepares sprite assets by reducing their dimensions, rotating them to fit the engine’s coordinate system, and exporting them as lossless PNGs, this example shows how to do it in C#.
+ * 5. When a batch‑processing tool needs to read JPEG images, downscale them for faster web delivery, rotate them 270 degrees to align with UI design, and store them as PNG files, the provided code accomplishes the task.
  */

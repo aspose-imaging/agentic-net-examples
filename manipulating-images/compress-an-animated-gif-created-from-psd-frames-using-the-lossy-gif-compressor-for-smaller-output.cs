@@ -1,66 +1,52 @@
-// HOW-TO: Compress Animated GIF Created from PSD Frames Using Lossy GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compress Animated GIF Created From PSD Frames Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input directory containing PSD frames and output file path
-        string inputDirectory = @"C:\Temp\psd_frames";
-        string outputPath = @"C:\Temp\output\animated_lossy.gif";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string psdPath1 = "frame1.psd";
+            string psdPath2 = "frame2.psd";
+            string psdPath3 = "frame3.psd";
+            string outputPath = "output.gif";
 
-            // Get all PSD files in the input directory
-            string[] psdFiles = Directory.GetFiles(inputDirectory, "*.psd");
-            if (psdFiles.Length == 0)
+            if (!File.Exists(psdPath1))
             {
-                Console.Error.WriteLine($"No PSD files found in: {inputDirectory}");
+                Console.Error.WriteLine($"File not found: {psdPath1}");
+                return;
+            }
+            if (!File.Exists(psdPath2))
+            {
+                Console.Error.WriteLine($"File not found: {psdPath2}");
+                return;
+            }
+            if (!File.Exists(psdPath3))
+            {
+                Console.Error.WriteLine($"File not found: {psdPath3}");
                 return;
             }
 
-            // Verify each input file exists (safety rule)
-            foreach (string file in psdFiles)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                if (!File.Exists(file))
-                {
-                    Console.Error.WriteLine($"File not found: {file}");
-                    return;
-                }
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Load the first frame and create the GifImage
-            using (RasterImage firstRaster = (RasterImage)Image.Load(psdFiles[0]))
-            using (GifFrameBlock firstBlock = new GifFrameBlock(firstRaster))
-            using (GifImage gifImage = new GifImage(firstBlock))
+            using (RasterImage frame1 = (RasterImage)Image.Load(psdPath1))
+            using (RasterImage frame2 = (RasterImage)Image.Load(psdPath2))
+            using (RasterImage frame3 = (RasterImage)Image.Load(psdPath3))
             {
-                // Add remaining frames
-                for (int i = 1; i < psdFiles.Length; i++)
+                RasterImage[] frames = new RasterImage[] { frame1, frame2, frame3 };
+                using (Image gif = Image.Create(frames, true))
                 {
-                    using (RasterImage raster = (RasterImage)Image.Load(psdFiles[i]))
-                    using (GifFrameBlock block = new GifFrameBlock(raster))
-                    {
-                        gifImage.AddBlock(block);
-                    }
+                    GifOptions gifOptions = new GifOptions();
+                    gif.Save(outputPath, gifOptions);
                 }
-
-                // Configure lossy compression options
-                var saveOptions = new GifOptions
-                {
-                    MaxDiff = 80,               // Enable lossy compression (recommended value)
-                    DoPaletteCorrection = true // Improve palette quality
-                };
-
-                // Save the animated GIF with the specified options
-                gifImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -72,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a lightweight animated GIF from a series of Photoshop PSD layers for web pages.
- * 2. When you want to reduce the file size of an animation without converting the source files to another format.
- * 3. When you must ensure all PSD frames exist before building the GIF to avoid runtime errors.
- * 4. When you need to apply Aspose.Imaging’s lossy GIF compression to meet strict bandwidth or email attachment limits.
- * 5. When you are automating a batch process that reads PSD files from a folder and outputs a compressed animated GIF in a .NET application.
+ * 1. When you need to generate a lightweight animated banner from multiple Photoshop (PSD) layers for a website.
+ * 2. When you want to reduce the file size of an animated GIF created from PSD frames for faster email newsletter loading.
+ * 3. When you have a series of PSD design iterations that must be combined into a single looping GIF for a mobile app.
+ * 4. When you must programmatically assemble PSD files into an animated GIF on a server to automate a content pipeline.
+ * 5. When you require a C# solution that loads PSD images, creates an animated GIF, and applies lossy compression for quicker page rendering.
  */
