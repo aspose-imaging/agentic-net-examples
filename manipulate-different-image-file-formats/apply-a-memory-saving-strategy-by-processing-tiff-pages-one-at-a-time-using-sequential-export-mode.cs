@@ -1,50 +1,61 @@
-// HOW-TO: How to Process Multipage TIFF Pages Sequentially to Save Memory in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Export Multi‑Page TIFF One Frame At A Time In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multipage TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage source = (TiffImage)Image.Load(inputPath))
             {
-                // Set the page exporting action to process pages one by one
-                // This action is called just before each page is saved.
-                // It forces garbage collection and performs a sample operation
-                // (rotate each page 90 degrees) to illustrate per‑page processing.
-                tiffImage.PageExportingAction = delegate (int index, Image page)
+                int width = source.ActiveFrame.Width;
+                int height = source.ActiveFrame.Height;
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                using (TiffImage dest = (TiffImage)Image.Create(tiffOptions, width, height))
                 {
-                    // Release resources from previous pages
-                    GC.Collect();
+                    int frameCount = source.Frames.Count();
+                    for (int i = 0; i < frameCount; i++)
+                    {
+                        if (i > 0)
+                        {
+                            dest.AddFrame(new TiffFrame(tiffOptions, width, height));
+                        }
 
-                    // Example per‑page operation: rotate the page
-                    ((RasterImage)page).Rotate(90);
-                };
+                        TiffFrame srcFrame = source.Frames[i];
+                        TiffFrame destFrame = dest.Frames[i];
 
-                // Save the processed image; pages are handled sequentially
-                tiffImage.Save(outputPath);
+                        Aspose.Imaging.Color[] pixels = source.LoadPixels(srcFrame.Bounds);
+                        dest.SavePixels(destFrame.Bounds, pixels);
+                    }
+
+                    dest.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to rotate each page of a large multi‑page TIFF without loading the entire file into memory.
- * 2. When a document management system processes high‑resolution scanned TIFFs on a low‑memory server and must apply per‑page transformations.
- * 3. When an automated batch job handles thousands of multi‑page TIFF files and wants to avoid out‑of‑memory exceptions by processing pages one at a time.
- * 4. When a cloud function such as an Azure Function manipulates large TIFF images and must release resources after each page to stay within memory limits.
- * 5. When a developer wants to re‑orient or preview each page of a multi‑page TIFF before archiving it, using Aspose.Imaging’s PageExportingAction for per‑page operations.
+ * 1. When processing a huge multi‑page TIFF on a server with limited RAM, you can load and write each page sequentially to avoid out‑of‑memory errors.
+ * 2. When converting scanned document bundles into a single TIFF while preserving each page, this code lets you add frames one by one without loading the whole file.
+ * 3. When creating a PDF‑to‑TIFF pipeline that must handle thousands of pages, you can stream each page to the destination TIFF to keep the application responsive.
+ * 4. When extracting individual frames from a multi‑page medical image (e.g., DICOM exported as TIFF) and re‑saving them into a new TIFF, the approach ensures low memory consumption.
+ * 5. When building an image‑processing service that resizes or edits each page of a large TIFF archive, you can read, modify, and write each frame sequentially using Aspose.Imaging for .NET.
  */

@@ -1,62 +1,52 @@
-// HOW-TO: Batch Convert EMF Files to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEmf";
-            string outputDirectory = @"C:\OutputSvg";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path (same file name with .svg extension)
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
-                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set up SVG save options
-                    SvgOptions svgOptions = new SvgOptions
+                    using (SvgOptions options = new SvgOptions())
                     {
-                        TextAsShapes = true
-                    };
-
-                    // Configure rasterization options for EMF
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                        PageSize = emfImage.Size,
-                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                        BorderX = 0,
-                        BorderY = 0
-                    };
-
-                    svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save as SVG
-                    emfImage.Save(outputPath, svgOptions);
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -69,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a folder of Windows Metafile (EMF) graphics into scalable SVG files for web display.
- * 2. When you want to preserve text as vector shapes during conversion to ensure crisp rendering at any resolution.
- * 3. When you must apply a uniform background color to all converted SVGs to match a corporate style guide.
- * 4. When you need to process multiple EMF assets in a batch job without manually opening each file.
- * 5. When you are integrating image conversion into a C# build pipeline that outputs SVGs for downstream vector editing tools.
+ * 1. When you need to transform a collection of Windows Metafile (EMF) graphics into scalable SVG files for web display in a C# application.
+ * 2. When automating the migration of legacy vector assets stored as EMF to modern SVG format for responsive design projects.
+ * 3. When generating SVG versions of EMF diagrams in bulk to integrate with vector‑based reporting tools without manual conversion.
+ * 4. When creating a server‑side service that reads EMF files from a folder and outputs SVG files for downstream processing pipelines.
+ * 5. When preparing EMF icons for inclusion in mobile or cross‑platform apps that require SVG resources, using Aspose.Imaging in .NET.
  */

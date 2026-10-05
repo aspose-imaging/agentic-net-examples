@@ -1,55 +1,49 @@
-// HOW-TO: Get BMP Image Width and Height in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Get Width and Height of a BMP Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging;
 
-class Program
+namespace ImageProcessingDemo
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and (optional) output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\dimensions.txt";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.bmp";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    if (image is RasterImage rasterImage)
+                    {
+                        Console.WriteLine($"Width: {rasterImage.Width}, Height: {rasterImage.Height}");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Loaded image is not a raster image.");
+                    }
+                }
             }
-
-            // Ensure output directory exists (required before any save operation)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image using Aspose.Imaging
-            using (BmpImage bmpImage = new BmpImage(inputPath))
+            catch (Exception ex)
             {
-                // Retrieve pixel dimensions
-                int width = bmpImage.Width;
-                int height = bmpImage.Height;
-
-                // Output dimensions to console
-                Console.WriteLine($"Width: {width} px");
-                Console.WriteLine($"Height: {height} px");
-
-                // Optionally write dimensions to a file
-                File.WriteAllText(outputPath, $"Width: {width} px{Environment.NewLine}Height: {height} px");
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to validate that a BMP file meets specific size requirements before uploading it to a web service.
- * 2. When you want to calculate scaling factors for generating thumbnails from BMP images in a batch processing job.
- * 3. When you are logging image metadata for an inventory system that tracks the dimensions of BMP assets.
- * 4. When you must compare the dimensions of two BMP files to ensure they match for a side‑by‑side compositing operation.
- * 5. When you need to write the pixel width and height of a BMP image to a text file for downstream analytics or reporting.
+ * 1. When you need to validate that an uploaded BMP file meets specific size requirements before storing it.
+ * 2. When you want to calculate scaling factors for resizing a BMP image while preserving its aspect ratio.
+ * 3. When you are generating thumbnails and need the original BMP's pixel dimensions to position overlay graphics correctly.
+ * 4. When you are converting BMP files to another format and must preserve the original width and height metadata.
+ * 5. When you are performing batch processing of BMP assets and need to log each image’s dimensions for quality control.
  */

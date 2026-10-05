@@ -1,54 +1,51 @@
-// HOW-TO: Extract TIFF Clipping Paths and Save as SVG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract TIFF Frame Clipping Paths and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.PathResources;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output locations
-        string inputPath = "Sample.tif";
-        string outputDirectory = "ExportedSvg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.tif";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Load the TIFF image
-            using (var image = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Get the size of the active frame (used for SVG canvas size)
-                var frameSize = image.ActiveFrame.Size;
-
-                // Iterate over each clipping path (PathResource)
-                foreach (var pathResource in image.ActiveFrame.PathResources)
+                int frameIndex = 0;
+                foreach (var frame in tiff.Frames)
                 {
-                    // Build a simple SVG content – this example creates an empty path.
-                    // For a real conversion you would translate the PathResource records
-                    // into SVG path commands. Here we provide a minimal valid SVG.
-                    string svgContent = GenerateSimpleSvg(frameSize.Width, frameSize.Height, pathResource.Name);
+                    tiff.ActiveFrame = frame;
+                    var pathResources = frame.PathResources;
+                    int pathIndex = 0;
+                    foreach (var pathResource in pathResources)
+                    {
+                        var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
+                            new[] { pathResource }, frame.Size);
 
-                    // Determine output file path (use the path name, fallback to a generic name)
-                    string safeName = string.IsNullOrWhiteSpace(pathResource.Name) ? "UnnamedPath" : pathResource.Name;
-                    string outputPath = Path.Combine(outputDirectory, $"{safeName}.svg");
+                        string outputPath = $"output\\frame{frameIndex}_path{pathIndex}.svg";
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Ensure the directory for the output file exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var svgOptions = new SvgOptions();
+                        using (Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)Image.Create(svgOptions, frame.Width, frame.Height))
+                        {
+                            var graphics = new Graphics(svgImage);
+                            graphics.DrawPath(new Pen(Color.Black), graphicsPath);
+                            svgImage.Save(outputPath);
+                        }
 
-                    // Write the SVG file
-                    File.WriteAllText(outputPath, svgContent, Encoding.UTF8);
+                        pathIndex++;
+                    }
+                    frameIndex++;
                 }
             }
         }
@@ -57,26 +54,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Generates a minimal SVG document with a placeholder path.
-    private static string GenerateSimpleSvg(int width, int height, string title)
-    {
-        // Simple path data – a single move command; replace with real data if needed.
-        const string pathData = "M0,0";
-
-        return $@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"" version=""1.1"">
-  <title>{System.Security.SecurityElement.Escape(title)}</title>
-  <path d=""{pathData}"" stroke=""black"" fill=""none""/>
-</svg>";
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector clipping paths embedded in a multi‑page TIFF into separate SVG files for web graphics or further editing.
- * 2. When a printing workflow requires extracting precise cutout shapes from a TIFF and providing them as scalable SVG masks.
- * 3. When automating archival of design assets, you want to preserve the original TIFF clipping paths as reusable SVG vector files.
- * 4. When integrating with a GIS or CAD system that accepts SVG, you can pull the TIFF path resources and export them for spatial analysis.
- * 5. When building a C# application that batch‑processes scanned documents and needs to separate each embedded clipping path into its own SVG for downstream processing.
+ * 1. When you need to convert the vector clipping paths embedded in a multi‑page TIFF into separate SVG files for web display or further editing.
+ * 2. When a printing workflow requires extracting each page’s cutout shapes from a TIFF to generate scalable vector outlines for a pre‑press system.
+ * 3. When you want to programmatically analyze or modify the vector masks of scanned documents by exporting them from TIFF to SVG using C#.
+ * 4. When building a digital asset management tool that must index and render the vector paths of TIFF images as SVG thumbnails.
+ * 5. When integrating Aspose.Imaging into a C# application to automate the extraction of TIFF path resources for use in GIS or CAD applications.
  */

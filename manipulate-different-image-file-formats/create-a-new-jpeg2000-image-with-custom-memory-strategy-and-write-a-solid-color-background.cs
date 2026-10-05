@@ -1,11 +1,8 @@
-// HOW-TO: Create JPEG2000 Image With Custom Buffer And Solid Color Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Solid Color JPEG Image from Pixel Array in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,38 +10,25 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = @"C:\temp\output.jp2";
-
-            // Ensure output directory exists
+            string outputPath = "output.jpg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a source bound to the output file
-            Source fileSource = new FileCreateSource(outputPath, false);
+            int width = 800;
+            int height = 600;
+            Color bgColor = Color.FromArgb(255, 0, 128, 255);
+            int bgArgb = bgColor.ToArgb();
 
-            // Configure JPEG2000 options with custom memory strategy
-            Jpeg2000Options jp2Options = new Jpeg2000Options
+            JpegOptions options = new JpegOptions();
+            using (Image image = Image.Create(options, width, height))
             {
-                Source = fileSource,
-                BufferSizeHint = 10 * 1024 * 1024, // 10 MB buffer
-                Irreversible = true // optional: use irreversible DWT
-            };
-
-            int width = 200;
-            int height = 200;
-
-            // Create JPEG2000 image canvas
-            using (Jpeg2000Image canvas = new Jpeg2000Image(width, height, jp2Options))
-            {
-                // Draw solid color background
-                Graphics graphics = new Graphics(canvas);
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                RasterImage raster = (RasterImage)image;
+                int[] pixels = new int[width * height];
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    graphics.FillRectangle(brush, canvas.Bounds);
+                    pixels[i] = bgArgb;
                 }
-
-                // Save the bound image
-                canvas.Save();
+                raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -56,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a JPEG2000 file on the fly with a specific buffer size to avoid high memory consumption while filling the canvas with a uniform background color.
- * 2. When an application must create a lossless or near‑lossless JPEG2000 thumbnail for medical imaging or GIS data and requires a solid color placeholder before adding actual content.
- * 3. When a server‑side service processes large images and wants to write the output directly to disk using a FileCreateSource to control the file creation and memory usage.
- * 4. When you are building a batch job that programmatically creates blank JPEG2000 canvases of a fixed size for later overlay of graphics or text.
- * 5. When you need to use Aspose.Imaging’s Jpeg2000Options to enable irreversible DWT and custom buffer hints while initializing the image with a single‑color background for testing compression settings.
+ * 1. When you need to generate a blank JPEG placeholder with a specific background color for dynamic image generation in a web application.
+ * 2. When you want to programmatically create a JPEG thumbnail of a fixed size filled with a brand color before adding overlay graphics.
+ * 3. When you must produce a JPEG file for testing image pipelines that requires a known ARGB background without loading an existing picture.
+ * 4. When you are building a reporting tool that inserts a solid‑color JPEG as a background layer for charts or diagrams.
+ * 5. When you need to allocate pixel data manually to control memory usage while creating a JPEG image in a high‑performance C# service.
  */

@@ -1,51 +1,44 @@
-// HOW-TO: How To Apply Lossless Compression To JPEG2000 And Compare File Size In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Lossless Compression to JPEG2000 and Compare File Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.jp2";
-            string outputPath = @"c:\temp\output_lossless.jp2";
+            string inputPath = "input.jp2";
+            string outputPath = "Output\\output_lossless.jp2";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the original JPEG2000 image
-            using (Jpeg2000Image originalImage = new Jpeg2000Image(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare lossless JPEG2000 options (Irreversible = false by default)
-                Jpeg2000Options options = new Jpeg2000Options
-                {
-                    Irreversible = false, // Ensure lossless DWT 5-3 compression
-                    Codec = Jpeg2000Codec.J2K // Use raw codestream format
-                };
-
-                // Save the image with lossless compression
-                originalImage.Save(outputPath, options);
+                Jpeg2000Options options = new Jpeg2000Options();
+                image.Save(outputPath, options);
             }
 
-            // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Original size   : {originalSize} bytes");
-            Console.WriteLine($"Compressed size : {compressedSize} bytes");
-            Console.WriteLine($"Size reduction  : {originalSize - compressedSize} bytes");
+            Console.WriteLine($"Original size: {originalSize} bytes");
+            Console.WriteLine($"Compressed size: {compressedSize} bytes");
         }
         catch (Exception ex)
         {
@@ -56,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution JPEG2000 images without quality loss while minimizing storage space.
- * 2. When you are building a medical‑imaging application that must store DICOM JPEG2000 scans losslessly and verify the size reduction.
- * 3. When a GIS system requires lossless compression of satellite JPEG2000 tiles before uploading them to a cloud repository.
- * 4. When you want to benchmark Aspose.Imaging’s lossless JPEG2000 codec against the original file size in a C# performance test.
- * 5. When an e‑learning platform must generate smaller, lossless JPEG2000 assets for offline delivery and report the saved bytes.
+ * 1. When you need to reduce the storage size of high‑resolution JPEG2000 scans without losing any image data, such as archiving medical images.
+ * 2. When you want to compare the effectiveness of Aspose.Imaging’s lossless JPEG2000 compression against the original file to decide if re‑encoding is worthwhile.
+ * 3. When building a C# batch‑processing tool that standardizes JPEG2000 files to a consistent lossless format for digital asset management.
+ * 4. When optimizing image delivery for bandwidth‑limited environments while preserving exact pixel fidelity, like in satellite imagery pipelines.
+ * 5. When validating that a newly generated JPEG2000 file meets size constraints for regulatory compliance in document imaging systems.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Merge Multiple CMX Files into One PNG Preserving Layer Order in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple CMX Files Into One PNG Preserving Layer Order In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -15,18 +15,16 @@ class Program
     {
         try
         {
-            // Hardcoded input CMX file paths
-            string[] inputPaths = new[]
+            // Hardcoded input and output paths
+            List<string> inputPaths = new List<string>
             {
-                @"C:\Images\input1.cmx",
-                @"C:\Images\input2.cmx",
-                @"C:\Images\input3.cmx"
+                "input1.cmx",
+                "input2.cmx",
+                "input3.cmx"
             };
+            string outputPath = "output.png";
 
-            // Hardcoded output PNG path
-            string outputPath = @"C:\Images\merged_output.png";
-
-            // Validate input files
+            // Verify input files exist
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -39,7 +37,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // First pass: determine maximum canvas size
+            // Determine canvas size (maximum width and height among all CMX files)
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -52,27 +50,25 @@ class Program
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create output source and PNG options
+            // Create output canvas bound to the output file
             Source outputSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = outputSource };
-
-            // Create raster canvas bound to the output file
+            PngOptions pngOptions = new PngOptions() { Source = outputSource };
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
-                // Second pass: rasterize each CMX and merge onto canvas
+                // Merge each CMX onto the canvas preserving order
                 foreach (string path in inputPaths)
                 {
                     using (CmxImage cmx = (CmxImage)Image.Load(path))
                     {
                         using (MemoryStream ms = new MemoryStream())
                         {
-                            // Rasterize CMX to PNG in memory
-                            cmx.Save(ms, new PngOptions());
+                            // Render CMX to a temporary PNG in memory
+                            PngOptions tempOptions = new PngOptions();
+                            cmx.Save(ms, tempOptions);
                             ms.Position = 0;
 
                             using (RasterImage raster = (RasterImage)Image.Load(ms))
                             {
-                                // Merge raster onto canvas at (0,0)
                                 Rectangle bounds = new Rectangle(0, 0, raster.Width, raster.Height);
                                 canvas.SaveArgb32Pixels(bounds, raster.LoadArgb32Pixels(raster.Bounds));
                             }
@@ -80,7 +76,7 @@ class Program
                     }
                 }
 
-                // Save the composite image (already bound to output source)
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -93,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD system exports separate CMX drawings for each component and you need to combine them into a single PNG for web preview while keeping the original layer stacking.
- * 2. When an automated reporting tool must generate a composite image from several CMX design files to embed in a PDF report without losing the order of visual elements.
- * 3. When a batch processing script has to consolidate multiple CMX pages into one high‑resolution PNG for archival or printing, ensuring the layers appear exactly as designed.
- * 4. When a GIS application receives individual CMX layers representing map features and you need to merge them into a single PNG overlay while preserving their drawing order.
- * 5. When a legacy workflow requires converting a series of CMX files into a single raster image for use in a mobile app, and the correct layer sequence is critical for proper display.
+ * 1. When you need to combine several CMX vector drawings from different sources into a single raster image for printing or web display.
+ * 2. When you want to create a composite blueprint by stacking CMX layers in their original order to maintain design hierarchy.
+ * 3. When an automated pipeline must convert a collection of CMX files into one PNG thumbnail while preserving visual stacking.
+ * 4. When a CAD integration tool has to merge multiple CMX components into a single image for reporting or documentation.
+ * 5. When you need to generate a combined preview of multiple CMX diagrams without manually opening each file.
  */

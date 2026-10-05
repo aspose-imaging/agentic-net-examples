@@ -1,48 +1,55 @@
-// HOW-TO: Crop a CorelDRAW CDR to 200x200 and Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop CorelDRAW File to 200x200 and Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample_cropped.gif";
+            string inputPath = "input.cdr";
+            string outputPath = "output\\output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW (CDR) image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
             {
-                // Cast to CdrImage to access vector-specific functionality
-                CdrImage cdrImage = (CdrImage)image;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Define a 200x200 rectangle starting at (0,0)
-                Rectangle cropArea = new Rectangle(0, 0, 200, 200);
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        if (!raster.IsCached)
+                            raster.CacheData();
 
-                // Crop the image
-                cdrImage.Crop(cropArea);
+                        var cropRect = new Rectangle(0, 0, 200, 200);
+                        raster.Crop(cropRect);
 
-                // Prepare GIF save options
-                GifOptions gifOptions = new GifOptions();
-
-                // Save the cropped image as GIF
-                cdrImage.Save(outputPath, gifOptions);
+                        var gifOptions = new GifOptions();
+                        raster.Save(outputPath, gifOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a thumbnail GIF from a large CorelDRAW design for web previews.
- * 2. When an e‑commerce platform requires a 200 × 200 GIF extracted from a CDR logo file.
- * 3. When automating batch conversion of vector CDR assets into small GIF icons for mobile apps.
- * 4. When creating a preview image for a document management system that only supports GIF format.
- * 5. When extracting a specific region of a CDR illustration to embed in a PowerPoint slide as a GIF.
+ * 1. When you need to generate a small thumbnail GIF from a large CorelDRAW illustration for web previews.
+ * 2. When an automated pipeline must extract a fixed‑size region from a CDR design and convert it to an animated‑compatible GIF format.
+ * 3. When a reporting tool requires a 200 × 200 GIF snapshot of a vector drawing to embed in PDF or email.
+ * 4. When migrating legacy CDR assets to a web‑friendly format while ensuring the image fits a specific UI component size.
+ * 5. When creating batch scripts that process multiple CorelDRAW files, crop a defined area, and output GIFs for use in mobile applications.
  */

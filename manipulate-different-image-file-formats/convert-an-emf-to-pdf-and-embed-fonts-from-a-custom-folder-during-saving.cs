@@ -1,39 +1,61 @@
 // HOW-TO: Convert EMF to PDF with Custom Font Embedding in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.pdf";
-        string customFontsFolder = @"C:\CustomFonts";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.emf");
+            string outputPath = Path.Combine("Output", "sample.pdf");
+            string fontsFolder = "Fonts";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Register custom fonts folder for rendering
-            FontSettings.SetFontsFolder(customFontsFolder);
-
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] args) =>
             {
-                // Save as PDF, fonts from the custom folder will be embedded automatically
-                image.Save(outputPath, new PdfOptions());
+                string path = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                {
+                    foreach (var fontFile in Directory.GetFiles(path))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return list.ToArray();
+            }, fontsFolder);
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from vector EMF graphics while ensuring that corporate fonts stored in a separate folder are embedded for consistent rendering.
- * 2. When an application must batch‑process EMF logos and embed licensed fonts from a custom directory into the resulting PDFs for print‑ready documents.
- * 3. When a web service receives user‑uploaded EMF files and must return PDFs that preserve the original typography by loading fonts from a specified folder.
- * 4. When automating the creation of PDF manuals that contain EMF diagrams and require embedding of specialized engineering fonts located outside the system fonts folder.
- * 5. When integrating Aspose.Imaging into a C# workflow to convert EMF icons to PDF and guarantee that all text appears correctly on machines that do not have the custom fonts installed.
+ * 1. When you need to generate a PDF report from vector EMF graphics while ensuring the document uses company‑specific fonts stored in a separate folder.
+ * 2. When an application must convert user‑uploaded EMF logos to PDF for printing, embedding the required fonts to avoid missing‑font warnings on any printer.
+ * 3. When automating batch processing of EMF diagrams into PDF files and the fonts are not installed on the server, so they must be supplied from a custom directory.
+ * 4. When creating PDF invoices that contain EMF‑based watermarks and you want the watermark text to appear with the exact font style regardless of the viewer’s system fonts.
+ * 5. When integrating Aspose.Imaging into a C# service that converts EMF drawings to PDF and you need to guarantee that all text renders correctly by loading fonts from a configurable fonts folder.
  */

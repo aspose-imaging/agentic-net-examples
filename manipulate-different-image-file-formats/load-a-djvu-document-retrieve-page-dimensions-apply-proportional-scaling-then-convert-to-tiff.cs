@@ -1,45 +1,49 @@
-// HOW-TO: Scale DjVu Image Proportionally and Convert to TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Scale DjVu Page and Convert to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.tiff";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load DjVu document
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\scaled.tiff";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Retrieve original dimensions
-                int originalWidth = djvu.Width;
-                int originalHeight = djvu.Height;
+                var page = djvu.Pages[0];
+                int originalWidth = page.Width;
+                int originalHeight = page.Height;
 
-                // Apply proportional scaling (double the size)
-                int newWidth = originalWidth * 2;
-                djvu.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
+                double scale = 2.0;
+                int newWidth = (int)(originalWidth * scale);
+                int newHeight = (int)(originalHeight * scale);
 
-                // Convert and save as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                djvu.Save(outputPath, tiffOptions);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                using (TiffImage canvas = (TiffImage)Image.Create(tiffOptions, newWidth, newHeight))
+                {
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.DrawImage(page, 0, 0, newWidth, newHeight);
+                    canvas.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enlarge scanned DjVu pages for better readability before archiving them as high‑resolution TIFF files.
- * 2. When a document‑management system requires DjVu documents to be converted to TIFF while maintaining aspect ratio for downstream processing.
- * 3. When generating printable TIFF copies of DjVu illustrations that must be scaled up without distortion.
- * 4. When integrating a C# service that automatically resizes DjVu graphics to double size and stores them in a TIFF format for compatibility with legacy software.
- * 5. When creating a batch workflow that reads DjVu files, extracts their dimensions, applies proportional scaling, and saves the results as TIFF for OCR or archival purposes.
+ * 1. When you need to display a high‑resolution version of a scanned DjVu document in a Windows application, you can scale the page and save it as a TIFF file.
+ * 2. When a document‑management system requires TIFF images for archival but receives DjVu files, this code converts and enlarges the pages to meet the archive’s quality standards.
+ * 3. When generating printable assets from DjVu manuals, developers can proportionally enlarge the pages and output them as TIFF to preserve detail for large‑format printing.
+ * 4. When integrating Aspose.Imaging into a batch‑processing pipeline that extracts DjVu pages, rescales them, and stores the results as TIFF for downstream OCR processing.
+ * 5. When creating thumbnails or preview images for DjVu content, you can resize the original page and convert it to TIFF to ensure compatibility with viewers that only support TIFF.
  */

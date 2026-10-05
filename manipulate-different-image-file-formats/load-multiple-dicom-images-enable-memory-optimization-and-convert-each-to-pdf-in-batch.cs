@@ -3,49 +3,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputDICOMs";
-            string outputDir = @"C:\OutputPDFs";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
-
-            foreach (string inputPath in dicomFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build the corresponding PDF output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory exists
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DICOM image with memory optimization (buffer size hint)
-                var loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 256 * 1024 // 256 KB
-                };
+                var loadOptions = new LoadOptions { BufferSizeHint = 1024 * 1024 };
 
-                using (Image dicomImage = Image.Load(inputPath, loadOptions))
+                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
                 {
-                    // Prepare PDF export options
-                    var pdfOptions = new PdfOptions();
-
-                    // Save the image as PDF
-                    dicomImage.Save(outputPath, pdfOptions);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.BufferSizeHint = 1024 * 1024;
+                        dicomImage.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -58,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to archive dozens of patient DICOM scans as PDF reports while keeping RAM usage low.
- * 2. When a research lab processes a folder of radiology images and wants to generate searchable PDF documents for each study.
- * 3. When a medical imaging workflow requires automated conversion of incoming DICOM files to PDF for integration with a document management system.
- * 4. When a cloud service batches large numbers of DICOM images and must limit memory consumption during conversion to PDF.
- * 5. When a desktop application offers users a one‑click export of selected DICOM series to PDF without loading the entire image into memory.
+ * 1. When a hospital IT system needs to generate printable PDF reports from thousands of DICOM scans while keeping RAM usage low.
+ * 2. When a research lab wants to automate the conversion of a folder of MRI DICOM images into PDFs for easy sharing with collaborators.
+ * 3. When a medical imaging software vendor must batch process patient studies into PDF archives without loading entire images into memory.
+ * 4. When a radiology PACS integration requires on‑the‑fly conversion of incoming DICOM files to PDF documents for electronic health records.
+ * 5. When a cloud service processes uploaded DICOM files in bulk and needs to output PDF files while optimizing server memory consumption.
  */

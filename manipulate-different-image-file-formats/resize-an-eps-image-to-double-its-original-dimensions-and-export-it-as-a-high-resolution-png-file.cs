@@ -1,42 +1,46 @@
-// HOW-TO: Resize EPS to Double Size and Save as High‑Resolution PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize EPS Image to Double Size and Save as High‑Resolution PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\source.eps";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
 
         try
         {
-            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (var image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                // Calculate double dimensions
-                int newWidth = image.Width * 2;
-                int newHeight = image.Height * 2;
+                int newWidth = epsImage.Width * 2;
+                int newHeight = epsImage.Height * 2;
 
-                // Resize using a high‑quality interpolation method
-                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = newWidth,
+                    PageHeight = newHeight
+                };
 
-                // Save as high‑resolution PNG
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                epsImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enlarge a vector EPS logo for printing on large banners while preserving quality by converting it to a high‑resolution PNG.
- * 2. When a web application must generate a zoomed‑in preview of an EPS diagram for detailed inspection in a browser.
- * 3. When an automated workflow processes EPS artwork and creates double‑sized PNG assets for high‑DPI displays.
- * 4. When a desktop tool resizes EPS icons to twice their original size to match modern UI guidelines and saves them as PNG files.
- * 5. When a batch script converts legacy EPS files to high‑resolution PNGs with doubled dimensions for archival or sharing purposes.
+ * 1. When you need to convert a vector EPS logo to a larger, high‑resolution PNG for use on a high‑DPI website or digital signage.
+ * 2. When a printing workflow requires scaling an EPS illustration to double its original dimensions before exporting to PNG for raster‑based printers.
+ * 3. When an application must generate a zoomed‑in preview of an EPS diagram by rasterizing it at twice the size and saving it as PNG for quick display.
+ * 4. When you need to create a high‑quality PNG thumbnail from an EPS file while preserving detail by increasing the rasterization resolution in C#.
+ * 5. When a batch process must upscale multiple EPS assets and export them as PNG files for inclusion in a mobile app that only supports raster images.
  */

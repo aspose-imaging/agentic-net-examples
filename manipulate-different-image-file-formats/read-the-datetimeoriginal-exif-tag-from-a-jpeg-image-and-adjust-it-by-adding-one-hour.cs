@@ -1,55 +1,47 @@
-// HOW-TO: How to Add One Hour to JPEG EXIF DateTimeOriginal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Read JPEG DateTimeOriginal EXIF Tag and Add One Hour in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the JPEG image
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Access EXIF data
-                ExifData exif = image.ExifData;
+                var exif = image.ExifData;
                 if (exif != null && !string.IsNullOrEmpty(exif.DateTimeOriginal))
                 {
-                    // Parse the original DateTime string (format: yyyy:MM:dd HH:mm:ss)
-                    if (DateTime.TryParseExact(
-                            exif.DateTimeOriginal,
-                            "yyyy:MM:dd HH:mm:ss",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.None,
-                            out DateTime originalDateTime))
+                    if (DateTime.TryParseExact(exif.DateTimeOriginal, "yyyy:MM:dd HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out DateTime dt))
                     {
-                        // Add one hour
-                        DateTime updatedDateTime = originalDateTime.AddHours(1);
-
-                        // Write back in the same format
-                        exif.DateTimeOriginal = updatedDateTime.ToString("yyyy:MM:dd HH:mm:ss");
+                        dt = dt.AddHours(1);
+                        exif.DateTimeOriginal = dt.ToString("yyyy:MM:dd HH:mm:ss");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Failed to parse DateTimeOriginal EXIF tag.");
                     }
                 }
+                else
+                {
+                    Console.Error.WriteLine("DateTimeOriginal EXIF tag not found.");
+                }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified image
                 image.Save(outputPath);
             }
         }
@@ -62,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the capture time of photos taken in a different time zone by shifting the JPEG DateTimeOriginal EXIF tag forward one hour using Aspose.Imaging in C#.
- * 2. When an application must synchronize image timestamps with a server clock that is one hour ahead, updating the EXIF DateTimeOriginal field of each JPEG file programmatically.
- * 3. When preparing a photo gallery for legal evidence, you may need to adjust the original capture time in the JPEG metadata to reflect daylight‑saving changes before archiving.
- * 4. When automating a batch import of travel photos, you can use this code to add an hour to each image’s EXIF DateTimeOriginal so the chronological order matches the itinerary.
- * 5. When building a C# tool that repairs corrupted or missing EXIF timestamps, adding a one‑hour offset ensures consistency across all JPEG images processed with Aspose.Imaging.
+ * 1. When you need to correct the capture timestamp of JPEG photos taken in a different timezone before uploading them to an online gallery.
+ * 2. When you are batch‑processing images to synchronize their EXIF DateTimeOriginal values with a server‑side clock in a C# application.
+ * 3. When you want to adjust the original capture time of JPEGs after daylight‑saving time changes to keep metadata accurate.
+ * 4. When you need to ensure proper chronological ordering of images for a photo‑journalism workflow by fixing the EXIF timestamp.
+ * 5. When you are preparing JPEG images for legal evidence and must reflect the correct capture hour in the EXIF metadata.
  */

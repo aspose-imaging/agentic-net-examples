@@ -1,41 +1,42 @@
-// HOW-TO: How to Change DateTimeOriginal EXIF Tag in JPEG Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Update DateTimeOriginal EXIF Tag In JPEG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Modify the DateTimeOriginal EXIF tag if EXIF data is present
-                if (image.ExifData != null)
+                Aspose.Imaging.Exif.JpegExifData exif = image.ExifData;
+                if (exif != null)
                 {
-                    // Set to desired date/time in EXIF format (yyyy:MM:dd HH:mm:ss)
-                    image.ExifData.DateTimeOriginal = "2023:01:01 12:00:00";
+                    exif.DateTimeOriginal = DateTime.Now.ToString("yyyy:MM:dd HH:mm:ss");
                 }
 
-                // Save the modified image
-                image.Save(outputPath);
+                JpegOptions options = new JpegOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the original capture date of a JPEG photo after the camera clock was wrong, you can update the DateTimeOriginal EXIF tag with C# and Aspose.Imaging.
- * 2. When migrating images to a digital asset management system that relies on accurate EXIF timestamps for sorting, you can programmatically set the DateTimeOriginal field.
- * 3. When preparing a batch of photos for legal evidence, you may need to ensure the recorded capture time matches documented timestamps, which can be done by modifying the EXIF tag in C#.
- * 4. When creating a photo‑sharing application that displays images based on their original shooting date, you can adjust the DateTimeOriginal metadata before publishing.
- * 5. When automating image processing pipelines that require consistent metadata for downstream analytics, you can use Aspose.Imaging to set the DateTimeOriginal tag in each JPEG file.
+ * 1. When you need to correct or set the original capture date of photos before uploading them to a gallery or cloud service.
+ * 2. When a batch script must rewrite the DateTimeOriginal metadata of JPEGs to match the current system time for compliance with archival standards.
+ * 3. When an application generates images on the fly and must embed accurate timestamp metadata for later sorting or searching.
+ * 4. When you are preparing product photos for e‑commerce platforms that require a valid EXIF DateTimeOriginal field to avoid listing errors.
+ * 5. When a digital forensics tool needs to update the capture timestamp of JPEG evidence without altering the image pixels.
  */

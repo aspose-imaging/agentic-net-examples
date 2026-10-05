@@ -1,62 +1,47 @@
-// HOW-TO: Convert CorelDRAW CDR to PDF Preserving Original Layout in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PDF Preserving Layout in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
-class Program
+namespace CorelDrawToPdf
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.cdr";
-            string outputPath = @"C:\Output\sample.cdr.pdf";
+            string inputPath = "input.cdr";
+            string outputPath = "output.pdf";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CorelDRAW file
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PDF export options
-                var pdfOptions = new PdfOptions();
-
-                // Configure rasterization options specific to CDR
-                var rasterOptions = new CdrRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save as PDF preserving original layout
-                image.Save(outputPath, pdfOptions);
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically convert a CorelDRAW CDR design into a PDF for client delivery while keeping the exact layout and text rendering.
- * 2. When an automated build process must generate PDF documentation from CDR files without manual export in CorelDRAW.
- * 3. When a web service receives CDR uploads and must return a PDF preview that matches the original vector appearance.
- * 4. When migrating legacy CDR assets to a PDF archive and require precise positioning and smoothing settings via C#.
- * 5. When integrating Aspose.Imaging into a desktop application to batch‑convert multiple CDR drawings to PDFs while preserving their original design fidelity.
+ * 1. When a design team needs to automatically generate printable PDFs from CorelDRAW source files in a .NET backend.
+ * 2. When an e‑commerce platform must convert uploaded CDR artwork to PDF for customer preview without losing the original layout.
+ * 3. When a document management system stores CDR files and requires on‑the‑fly PDF conversion for viewing in browsers.
+ * 4. When a batch‑processing service has to create PDF archives of multiple CorelDRAW drawings while preserving exact positioning and formatting.
+ * 5. When a reporting tool integrates vector graphics created in CorelDRAW and needs to embed them as high‑quality PDFs in generated reports.
  */

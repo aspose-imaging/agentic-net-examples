@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -10,27 +11,36 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.eps";
+        string outputPath = "output/output.tiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output.tiff";
-
-            if (!File.Exists(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int newWidth = 2000;
+                int newHeight = (int)Math.Round((double)epsImage.Height * newWidth / epsImage.Width);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = newWidth,
+                    PageHeight = newHeight
+                };
 
-            using (Image image = Image.Load(inputPath))
-            {
-                int targetWidth = 2000;
-                int newHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
-                image.Resize(targetWidth, newHeight, ResizeType.NearestNeighbourResample);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                epsImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer provides vector EPS artwork that must be rasterized to a fixed 2000‑pixel width for high‑resolution printing, a developer can use this code to resize and output a TIFF file.
- * 2. When an automated publishing pipeline needs to convert incoming EPS logos to TIFF images with consistent width while preserving the original proportions, this snippet handles the transformation.
- * 3. When a legacy system requires TIFF files for archival but receives EPS files from suppliers, the code resizes the EPS to a standard width and saves it as a TIFF for compliance.
- * 4. When a web service generates preview thumbnails of EPS drawings and must maintain aspect ratio, developers can adapt this example to produce 2000‑pixel‑wide TIFF previews.
- * 5. When a batch job processes a folder of EPS files, resizing each to a uniform width before converting to TIFF for downstream image analysis, this approach provides the necessary resizing and format conversion.
+ * 1. When you need to convert a vector EPS logo to a high‑resolution TIFF for printing while keeping the original aspect ratio.
+ * 2. When a web service must generate a 2000‑pixel‑wide raster preview of an EPS file for thumbnail galleries.
+ * 3. When a desktop application prepares EPS artwork for archival in TIFF format with a specific width constraint.
+ * 4. When an automated batch process resizes multiple EPS diagrams to a uniform width before feeding them into a PDF composition workflow.
+ * 5. When a GIS tool requires EPS map layers to be rasterized to TIFF at a set pixel width for further spatial analysis.
  */

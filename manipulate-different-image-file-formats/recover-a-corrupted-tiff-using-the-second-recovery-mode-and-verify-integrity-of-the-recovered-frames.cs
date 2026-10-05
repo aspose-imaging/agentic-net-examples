@@ -1,59 +1,55 @@
 // HOW-TO: Recover Corrupted TIFF Using Consistent Recover Mode in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "corrupted.tif";
-            string outputPath = "recovered.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output\\recovered.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (if any)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set load options for second recovery mode
             var loadOptions = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
 
-            // Load the corrupted TIFF with recovery options
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Cast to TiffImage to access frames
-                using (TiffImage tiff = (TiffImage)image)
+                using (TiffImage tiffImage = (TiffImage)image)
                 {
-                    // Verify integrity by enumerating frames
-                    Console.WriteLine($"Recovered frame count: {tiff.Frames.Length}");
-                    for (int i = 0; i < tiff.Frames.Length; i++)
+                    int frameCount = tiffImage.Frames.Count();
+                    Console.WriteLine($"Recovered TIFF frame count: {frameCount}");
+                    int index = 0;
+                    foreach (TiffFrame frame in tiffImage.Frames)
                     {
-                        var frame = tiff.Frames[i];
-                        Console.WriteLine($"Frame {i}: {frame.Width}x{frame.Height}");
+                        Console.WriteLine($"Frame {index}: {frame.Width}x{frame.Height}");
+                        index++;
                     }
 
-                    // Save the recovered TIFF
-                    var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiff.Save(outputPath, saveOptions);
+                    tiffImage.Save(outputPath);
                 }
             }
         }
@@ -66,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a batch process receives damaged multi‑page TIFF files from scanners and needs to restore them before further processing.
- * 2. When an application must verify that every frame of a recovered TIFF is intact after applying a recovery algorithm.
- * 3. When a document management system has to automatically fix corrupted TIFF attachments uploaded by users.
- * 4. When a medical imaging workflow requires rebuilding TIFF images with missing data while preserving page dimensions.
- * 5. When a migration tool needs to convert corrupted TIFF archives to clean files for archival storage.
+ * 1. When a batch of scanned documents stored as multi‑page TIFF files becomes corrupted, you can use this code to recover the images and confirm each page’s dimensions before saving a clean file.
+ * 2. When an application receives TIFF images from unreliable sources such as fax machines and needs to automatically restore readable frames without manual intervention, the ConsistentRecover mode can be applied.
+ * 3. When you need to validate that a recovered TIFF contains the expected number of frames after a storage failure, the code enumerates and prints each frame’s width and height.
+ * 4. When integrating Aspose.Imaging into a C# service that must generate a new TIFF from partially damaged input, this snippet demonstrates loading, recovering, and re‑saving the image.
+ * 5. When troubleshooting image‑processing pipelines, you can use this example to test whether the DataBackgroundColor setting correctly fills missing pixel data in recovered TIFF frames.
  */

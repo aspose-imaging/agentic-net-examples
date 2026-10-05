@@ -4,56 +4,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = "sample.djvu";
+            string inputPath = "input.djvu";
+            string outputDir = "Output";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hardcoded output directory
-            string outputDir = "output";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Iterate through each page in the DjVu document
-                foreach (DjvuPage page in djvuImage.Pages)
+                for (int i = 0; i < djvu.Pages.Length; i++)
                 {
-                    // Build the output BMP file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.bmp");
-
-                    // Ensure the directory for the output file exists (covers nested paths)
+                    var page = djvu.Pages[i];
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure BMP options with 32 bits per pixel
-                    BmpOptions bmpOptions = new BmpOptions
+                    using (BmpOptions bmpOptions = new BmpOptions())
                     {
-                        BitsPerPixel = 32
-                    };
-
-                    // Save the current page as a BMP file using the specified options
-                    page.Save(outputPath, bmpOptions);
+                        page.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -61,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu file and save them as high‑color‑depth BMP files for legacy Windows applications.
- * 2. When converting scanned DjVu archives into 32‑bit BMP images to preserve image quality before performing OCR or further processing.
- * 3. When preparing DjVu documents for printing on devices that only accept BMP format with full alpha channel support.
- * 4. When batch‑processing DjVu manuals into BMP thumbnails for inclusion in a .NET desktop catalog viewer.
- * 5. When migrating DjVu assets to a BMP‑based workflow in a C# project using Aspose.Imaging to ensure consistent pixel depth across all pages.
+ * 1. When you need to extract each page of a multi‑page DjVu file and save them as high‑color‑depth BMP files for further editing in Windows graphics tools.
+ * 2. When a legacy application only accepts BMP images, you can programmatically convert DjVu documents to 32‑bit BMPs before importing them.
+ * 3. When automating a batch process that archives scanned documents, converting DjVu pages to BMP ensures compatibility with systems that do not support DjVu.
+ * 4. When preparing DjVu content for printing on devices that require BMP format, you can generate per‑page BMP files with Aspose.Imaging in C#.
+ * 5. When performing image analysis on individual DjVu pages, converting each page to BMP allows you to use standard .NET image libraries that work with BMP data.
  */

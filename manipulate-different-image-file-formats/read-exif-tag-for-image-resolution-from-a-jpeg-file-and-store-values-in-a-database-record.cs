@@ -1,41 +1,57 @@
-// HOW-TO: Read JPEG EXIF Resolution and Save to Database in C# (Aspose.Imaging for .NET)
+// HOW-TO: Read JPEG EXIF Resolution and Save to CSV with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output\\resolution.txt";
-
         try
         {
-            // Validate input file existence
+            string inputPath = "input.jpg";
+            string dbPath = "output/database.csv";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(dbPath));
 
-            // Load JPEG image and extract resolution
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                double horizontalResolution = image.HorizontalResolution;
-                double verticalResolution = image.VerticalResolution;
+                var exif = image.ExifData;
+                double xRes = 0;
+                double yRes = 0;
 
-                // Prepare data to store (simulating a database record)
-                string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
+                if (exif != null)
+                {
+                    if (exif.XResolution != null)
+                        xRes = exif.XResolution.Value;
+                    if (exif.YResolution != null)
+                        yRes = exif.YResolution.Value;
+                }
 
-                // Store the record in a text file
-                File.WriteAllText(outputPath, record);
+                bool fileExists = File.Exists(dbPath);
+                using (var writer = new StreamWriter(dbPath, true))
+                {
+                    if (!fileExists)
+                    {
+                        writer.WriteLine("FileName,XResolution,YResolution");
+                    }
+                    writer.WriteLine($"{Path.GetFileName(inputPath)},{xRes},{yRes}");
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to import the DPI settings of uploaded JPEG photos into a SQL record for printing or layout calculations.
- * 2. When a digital asset management system must catalog image resolution metadata to filter high‑resolution assets.
- * 3. When generating thumbnails you must preserve the original horizontal and vertical resolution values for later re‑scaling.
- * 4. When auditing a batch of camera‑generated JPEGs to verify that their EXIF resolution matches required specifications.
- * 5. When synchronizing image metadata between a file system and a database to support responsive UI scaling in a C# web application.
+ * 1. When you need to catalog a collection of photos by their DPI values for printing workflows, you can extract the XResolution and YResolution EXIF tags from each JPEG and record them in a CSV database using C#.
+ * 2. When building a digital asset management system that sorts images based on their native resolution, reading the EXIF resolution from JPEG files and storing the values in a database enables efficient queries.
+ * 3. When generating reports for a photography studio that require the exact image resolution metadata, this code reads the JPEG EXIF data and appends the results to a CSV file for further analysis.
+ * 4. When migrating image metadata into a legacy system that only accepts CSV imports, extracting JPEG EXIF resolution tags with Aspose.Imaging and writing them to a CSV provides a simple integration path.
+ * 5. When validating that uploaded JPEGs meet minimum resolution requirements before processing, you can read the EXIF XResolution/YResolution values and log them to a database for audit purposes.
  */

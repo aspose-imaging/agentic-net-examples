@@ -1,12 +1,12 @@
-// HOW-TO: Extract DjVu Pages 2 to 4 as PNG and Merge into PDF Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 2 To 4 To PNG And Merge Into PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
 
@@ -16,75 +16,76 @@ class Program
     {
         try
         {
-            string inputPath = "input.djvu";
-            string outputPdfPath = "output.pdf";
-            string tempCanvasPath = "temp_canvas.jpg";
+            string inputDjvuPath = "input.djvu";
+            string outputFolder = "output";
+            string pngFolder = Path.Combine(outputFolder, "pngs");
+            string pdfPath = Path.Combine(outputFolder, "merged.pdf");
 
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputDjvuPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputDjvuPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+            Directory.CreateDirectory(pngFolder);
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-            // Step 1: Extract pages 2‑4 as PNG files
             List<string> pngPaths = new List<string>();
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvu = new DjvuImage(stream))
+
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputDjvuPath))
             {
-                foreach (DjvuPage page in djvu.Pages)
+                int startPage = 1; // page index 1 = page 2
+                int endPage = 3;   // page index 3 = page 4
+
+                for (int i = startPage; i <= endPage && i < djvu.Pages.Length; i++)
                 {
-                    if (page.PageNumber >= 2 && page.PageNumber <= 4)
+                    string pngPath = Path.Combine(pngFolder, $"page_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+
+                    PngOptions pngOptions = new PngOptions
                     {
-                        string pngPath = $"page_{page.PageNumber}.png";
-                        FileCreateSource pngSource = new FileCreateSource(pngPath, false);
-                        PngOptions pngOptions = new PngOptions { Source = pngSource };
-                        page.Save(pngPath, pngOptions);
-                        pngPaths.Add(pngPath);
-                    }
+                        Source = new FileCreateSource(pngPath, false)
+                    };
+
+                    djvu.Pages[i].Save(pngPath, pngOptions);
+                    pngPaths.Add(pngPath);
                 }
             }
 
-            if (pngPaths.Count == 0)
-            {
-                Console.Error.WriteLine("No pages were extracted.");
-                return;
-            }
+            // Load PNGs to calculate canvas size
+            List<RasterImage> pngImages = new List<RasterImage>();
+            int canvasWidth = 0;
+            int canvasHeight = 0;
 
-            // Step 2: Collect sizes of PNG images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string pngPath in pngPaths)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(pngPath))
+                if (!File.Exists(pngPath))
                 {
-                    sizes.Add(img.Size);
+                    Console.Error.WriteLine($"File not found: {pngPath}");
+                    return;
                 }
+
+                RasterImage img = (RasterImage)Image.Load(pngPath);
+                pngImages.Add(img);
+                canvasWidth = Math.Max(canvasWidth, img.Width);
+                canvasHeight += img.Height;
             }
 
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
-
-            // Step 3: Create temporary canvas (JPEG) for merging
-            FileCreateSource canvasSource = new FileCreateSource(tempCanvasPath, false);
-            JpegOptions canvasOptions = new JpegOptions { Source = canvasSource, Quality = 100 };
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            // Create canvas
+            PngOptions canvasOptions = new PngOptions();
+            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (string pngPath in pngPaths)
+                foreach (RasterImage img in pngImages)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(pngPath))
-                    {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetY += img.Height;
-                    }
+                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetY += img.Height;
+                    img.Dispose();
                 }
 
-                // Step 4: Save merged canvas as PDF
                 PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(outputPdfPath, pdfOptions);
+                canvas.Save(pdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -96,9 +97,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert specific pages of a DjVu document into high‑quality PNG images for further processing or archival.
- * 2. When you want to create a single PDF that contains only selected pages from a multi‑page DjVu file.
- * 3. When you must extract a range of pages from a scanned DjVu book and embed them in a PDF report.
- * 4. When you are building a workflow that transforms DjVu pages to PNG before applying image‑based analysis and then packaging the results into a PDF.
- * 5. When you need to automate the conversion of DjVu pages to PNG and combine them into a PDF for distribution to users who cannot view DjVu files.
+ * 1. When you need to extract specific pages from a DjVu document and save them as high‑quality PNG images for web preview or further editing.
+ * 2. When you want to create a PDF that contains only selected pages of a multi‑page DjVu file, such as a subset of a scanned book.
+ * 3. When an application must automate the conversion of DjVu pages to PNG before applying image‑processing algorithms like OCR or watermarking.
+ * 4. When you need to generate a printable PDF from a range of DjVu pages while preserving the original resolution of each page.
+ * 5. When a workflow requires batch processing of DjVu files, converting chosen pages to PNG and then combining them into a single PDF report.
  */

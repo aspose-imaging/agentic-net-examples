@@ -1,59 +1,46 @@
-// HOW-TO: Convert WMF to SVG with White Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WMF to SVG with White Background Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic to catch unexpected errors
+        string inputPath = "input.wmf";
+        string outputPath = "output/output.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Temp\input.wmf";
-            string outputPath = @"C:\Temp\output.svg";
-
-            // Verify that the input WMF file exists
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
-            {
-                // Prepare SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    // Render text as vector shapes (optional but common)
-                    TextAsShapes = true
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Configure rasterization options, setting the background to white
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                var svgOptions = new SvgOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White, // Desired background color
-                    PageSize = wmfImage.Size,                     // Preserve original size
-                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Attach rasterization options to the SVG options
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the image as SVG
-                wmfImage.Save(outputPath, svgOptions);
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -61,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy WMF graphics on a web page, converting them to SVG with a white background ensures compatibility with modern browsers.
- * 2. When preparing vector icons from old Windows Metafile files for a cross‑platform mobile app, you can rasterize them to SVG while enforcing a consistent white backdrop.
- * 3. When generating printable documents that require vector images without transparent backgrounds, this code converts WMF logos to SVG with a solid white canvas.
- * 4. When automating a batch migration of corporate branding assets from WMF to SVG, setting the background to white guarantees uniform appearance across all assets.
- * 5. When integrating WMF diagrams into a reporting system that only accepts SVG input, this conversion adds a white background to avoid rendering issues in the final report.
+ * 1. When you need to embed a legacy WMF diagram into a web page that only supports SVG, you can convert it while forcing a white background to match the page design.
+ * 2. When generating printable reports that require vector graphics, converting WMF charts to SVG ensures scalability and a consistent white canvas across different browsers.
+ * 3. When automating a batch process that cleans up old WMF assets, you can use this code to replace transparent or colored backgrounds with white before saving them as SVG files.
+ * 4. When integrating with a design workflow that expects SVG input, this snippet lets you programmatically transform WMF icons to SVG with a uniform background color using Aspose.Imaging for .NET.
+ * 5. When creating an SVG export feature in a C# application, you can load any WMF file, set the background to white, and save it as SVG to guarantee proper rendering on platforms that ignore WMF transparency.
  */

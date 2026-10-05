@@ -1,58 +1,61 @@
-// HOW-TO: Add Custom EXIF Thumbnail to JPEG and Verify Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom EXIF Thumbnail to JPEG and Verify with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
             string inputPath = "input.jpg";
             string thumbnailPath = "thumb.jpg";
-            string outputPath = "output.jpg";
+            string outputPath = "output/output.jpg";
 
-            // Verify input files exist
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the main JPEG image
-            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Load the thumbnail image (any supported format)
-                using (RasterImage thumb = (RasterImage)Image.Load(thumbnailPath))
+                var exif = image.ExifData;
+                if (exif != null)
                 {
-                    // Assign the thumbnail to the EXIF data
-                    jpegImage.ExifData.Thumbnail = thumb;
-                }
-
-                // Verify that the thumbnail was set
-                if (jpegImage.ExifData.Thumbnail != null)
-                {
-                    Console.WriteLine($"Thumbnail set: {jpegImage.ExifData.Thumbnail.Width}x{jpegImage.ExifData.Thumbnail.Height}");
+                    using (RasterImage thumbImg = (RasterImage)Image.Load(thumbnailPath))
+                    {
+                        exif.Thumbnail = thumbImg;
+                        image.Save(outputPath);
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Thumbnail not set.");
+                    image.Save(outputPath);
                 }
+            }
 
-                // Save the JPEG with updated EXIF data
-                jpegImage.Save(outputPath);
+            using (JpegImage savedImage = (JpegImage)Image.Load(outputPath))
+            {
+                var savedExif = savedImage.ExifData;
+                if (savedExif != null && savedExif.Thumbnail != null)
+                {
+                    Console.WriteLine("Thumbnail added successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Thumbnail not found.");
+                }
             }
         }
         catch (Exception ex)
@@ -64,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a small preview image in a JPEG’s EXIF data so photo‑gallery apps can display a thumbnail without loading the full image.
- * 2. When preparing images for a digital asset management system that requires an EXIF thumbnail for quick browsing and indexing.
- * 3. When creating JPEG files for mobile devices that read the EXIF thumbnail to show a low‑resolution preview before the full‑size picture is downloaded.
- * 4. When adding a custom thumbnail to email attachments so the recipient’s mail client can show a miniature preview of the picture.
- * 5. When you must verify that the thumbnail was correctly written to the JPEG’s EXIF segment to ensure compliance with metadata standards.
+ * 1. When a developer needs to embed a small preview image into a JPEG’s EXIF data so that photo‑gallery applications display a custom thumbnail.
+ * 2. When building a digital asset management system that must store and later retrieve EXIF thumbnails for quick image browsing.
+ * 3. When creating a batch‑processing tool that adds a company logo as a thumbnail to product photos before uploading them to an e‑commerce platform.
+ * 4. When validating that an image processing pipeline correctly wrote the thumbnail by loading the saved JPEG and checking the EXIF thumbnail property.
+ * 5. When ensuring compliance with camera‑software requirements that expect a JPEG to contain a non‑empty EXIF thumbnail for proper rendering on mobile devices.
  */

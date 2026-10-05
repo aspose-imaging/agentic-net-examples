@@ -1,4 +1,4 @@
-// HOW-TO: Extract All Frames From WebP and Save As BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract All Frames From a WebP Image and Save As BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,45 +9,41 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.webp";
+        string outputDir = "output_frames";
+
         try
         {
-            // Hardcoded input WebP file path
-            string inputPath = "input.webp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Directory to store extracted BMP frames
-            string outputDirectory = "extracted_frames";
+            Directory.CreateDirectory(outputDir);
 
-            // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface to access frames
-                IMultipageImage multipage = webPImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                WebPImage webp = image as WebPImage;
+                if (webp == null)
                 {
-                    Console.Error.WriteLine("No frames found in the WebP image.");
+                    Console.Error.WriteLine("Input is not a WebP image.");
                     return;
                 }
 
-                for (int i = 0; i < multipage.PageCount; i++)
+                for (int i = 0; i < webp.Pages.Length; i++)
                 {
-                    // Build output BMP file path for each frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
+                    RasterImage frame = webp.Pages[i] as RasterImage;
+                    if (frame == null)
+                        continue;
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                    string dir = Path.GetDirectoryName(outputPath);
+                    if (string.IsNullOrWhiteSpace(dir))
+                        dir = ".";
+                    Directory.CreateDirectory(dir);
 
-                    // Extract the frame and save as BMP
-                    using (RasterImage frameImage = (RasterImage)multipage.Pages[i])
-                    {
-                        frameImage.Save(outputPath, new BmpOptions());
-                    }
+                    frame.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an animated WebP advertisement into separate BMP frames for legacy printing systems.
- * 2. When processing user‑uploaded animated WebP avatars and storing each frame as a BMP thumbnail for a Windows desktop application.
- * 3. When extracting frames from a WebP sprite sheet to edit or replace individual images in a game development pipeline.
- * 4. When migrating a collection of animated WebP assets to BMP format for compatibility with older image analysis tools.
- * 5. When generating separate BMP files from a WebP animation to perform frame‑by‑frame processing such as watermarking or OCR.
+ * 1. When you need to convert each animation frame of a WebP file into separate BMP files for legacy Windows applications.
+ * 2. When you want to preprocess animated WebP assets for a game engine that only supports BMP textures.
+ * 3. When you must extract individual frames from a WebP advertisement to generate thumbnails in BMP format.
+ * 4. When you are building a batch script that archives every frame of a WebP animation as lossless BMP for quality‑preserving analysis.
+ * 5. When you need to read a WebP image on a server, split its pages, and store them as BMP files for downstream image‑processing pipelines.
  */

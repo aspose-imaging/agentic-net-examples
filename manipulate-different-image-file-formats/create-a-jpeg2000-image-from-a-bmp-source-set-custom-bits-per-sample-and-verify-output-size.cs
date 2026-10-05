@@ -1,55 +1,36 @@
-// HOW-TO: Create JPEG2000 from BMP with Custom Bits Per Sample in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to JPEG2000 and Get Output File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.bmp";
-            string outputPath = @"C:\Images\output.jp2";
+            string inputPath = "Input\\source.bmp";
+            string outputPath = "Output\\result.jp2";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for conversion
-                RasterImage raster = bmpImage as RasterImage;
-                if (raster == null)
+                using (Jpeg2000Options options = new Jpeg2000Options())
                 {
-                    Console.Error.WriteLine("Failed to load raster image.");
-                    return;
-                }
-
-                // Create JPEG2000 image from raster with custom bits per sample (e.g., 12 bits)
-                int customBitsPerSample = 12;
-                using (Jpeg2000Image jp2Image = new Jpeg2000Image(raster, customBitsPerSample))
-                {
-                    // Save JPEG2000 image with default options
-                    jp2Image.Save(outputPath, new Jpeg2000Options());
-
-                    // Verify output file size
-                    long fileSize = new FileInfo(outputPath).Length;
-                    Console.WriteLine($"JPEG2000 file saved. Size: {fileSize} bytes.");
+                    image.Save(outputPath, options);
                 }
             }
+
+            FileInfo info = new FileInfo(outputPath);
+            Console.WriteLine($"Output file size: {info.Length} bytes");
         }
         catch (Exception ex)
         {
@@ -60,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP files to high‑quality JPEG2000 for archival while controlling bit depth.
- * 2. When an application must generate JPEG2000 images with a specific bits‑per‑sample value for medical imaging standards.
- * 3. When you want to programmatically verify the size of the generated JPEG2000 file to ensure it meets storage constraints.
- * 4. When integrating image conversion into a batch process that reads BMP files from disk and outputs JPEG2000 to a designated folder.
- * 5. When you need to handle missing input files or create output directories automatically during image format conversion in C#.
+ * 1. When you need to convert legacy BMP assets to the high‑compression JPEG2000 format for web or archival storage while using Aspose.Imaging in a C# application.
+ * 2. When you must programmatically generate JPEG2000 files from BMP sources to meet industry standards for medical imaging or satellite data processing.
+ * 3. When you want to automate a batch job that converts BMP scans to JPEG2000 and logs the resulting file size to monitor compression efficiency.
+ * 4. When you are building a .NET service that receives BMP uploads, converts them to JPEG2000, and validates the output size before saving to a database.
+ * 5. When you need to verify that a JPEG2000 conversion produces the expected byte size for quality‑control or compliance reporting in an imaging workflow.
  */

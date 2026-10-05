@@ -1,41 +1,40 @@
-// HOW-TO: Binarize DICOM Image Using Bradley Adaptive Threshold and Export to BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Bradley Adaptive Threshold to DICOM and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\sample_binarized.bmp";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = Path.Combine("Input", "sample.dcm");
+            string outputPath = Path.Combine("Output", "result.bmp");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
-                DicomImage dicomImage = (DicomImage)image;
+                if (!dicom.IsCached)
+                {
+                    dicom.CacheData();
+                }
 
-                // Apply Bradley adaptive thresholding (brightnessDifference = 5, windowSize = 15)
-                dicomImage.BinarizeBradley(5.0, 15);
+                // Apply Bradley Adaptive Threshold with window size 15 (using typical threshold 0.15)
+                dicom.BinarizeBradley(0.15, 15);
 
-                // Save the processed image as BMP
-                dicomImage.Save(outputPath, new BmpOptions());
+                using (BmpOptions bmpOptions = new BmpOptions())
+                {
+                    dicom.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert grayscale DICOM scans into high‑contrast black‑and‑white BMP files for easier visual inspection or downstream analysis.
- * 2. When a developer wants to preprocess DICOM radiology images with Bradley adaptive thresholding to improve OCR accuracy on embedded annotations.
- * 3. When integrating Aspose.Imaging into a C# workflow that extracts binary masks from DICOM files for use in machine‑learning segmentation pipelines.
- * 4. When generating thumbnail previews of DICOM studies in BMP format after applying adaptive binarization to reduce file size for web display.
- * 5. When automating batch conversion of DICOM images to BMP with consistent binarization parameters for archival or compliance reporting.
+ * 1. When a radiology application needs to convert DICOM scans to high‑contrast BMP files for legacy PACS systems.
+ * 2. When developers want to preprocess medical images with Bradley adaptive binarization before performing OCR on scanned reports.
+ * 3. When a diagnostic tool requires thresholded bitmap output to highlight bone structures for visual inspection.
+ * 4. When integrating Aspose.Imaging in a C# workflow to batch‑process DICOM files and store them as BMP for use in non‑medical software.
+ * 5. When a research project needs to apply a 15‑pixel window adaptive threshold to DICOM images to reduce noise before image analysis.
  */

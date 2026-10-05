@@ -1,61 +1,35 @@
-// HOW-TO: Create Animated GIF From DjVu Pages 8 to 10 in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 8 to 10 to Animated GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\document.djvu";
+        string outputPath = "Output\\pages_8_10.gif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/animated.gif";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Page indexes to convert (pages 8‑10, zero‑based indexes 7‑9)
-                int[] pageIndexes = { 7, 8, 9 };
-                if (pageIndexes.Length == 0) return;
-
-                // Prepare first frame
-                using (RasterImage firstPage = (RasterImage)djvu.Pages[pageIndexes[0]])
+                using (GifOptions gifOptions = new GifOptions())
                 {
-                    using (GifImage gif = new GifImage(new GifFrameBlock((ushort)firstPage.Width, (ushort)firstPage.Height)))
-                    {
-                        // Draw first page onto the initial frame
-                        Graphics graphics = new Graphics(gif);
-                        graphics.DrawImage(firstPage, 0, 0);
-                        gif.ActiveFrame.FrameTime = 200; // custom delay in ms
+                    gifOptions.MultiPageOptions = new MultiPageOptions(new IntRange(8, 10));
+                    gifOptions.LoopsCount = 0; // infinite loop
 
-                        // Add remaining pages as frames
-                        for (int i = 1; i < pageIndexes.Length; i++)
-                        {
-                            using (RasterImage page = (RasterImage)djvu.Pages[pageIndexes[i]])
-                            {
-                                gif.AddPage(page);
-                                gif.ActiveFrame.FrameTime = 200; // same custom delay
-                            }
-                        }
-
-                        // Save animated GIF
-                        gif.Save(outputPath);
-                    }
+                    djvu.Save(outputPath, gifOptions);
                 }
             }
         }
@@ -68,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a short animation of selected DjVu pages on a website, you can convert pages 8‑10 to an animated GIF with a custom frame delay using C#.
- * 2. When generating preview thumbnails for a multi‑page DjVu document, creating an animated GIF of specific pages helps users quickly understand the content.
- * 3. When automating a workflow that extracts key pages from scanned books and bundles them into a lightweight GIF for email attachments, this code provides the conversion.
- * 4. When building a desktop application that visualizes selected DjVu pages as a looping animation for presentations, the sample shows how to set frame timing.
- * 5. When integrating document processing into a reporting system that needs to embed a short animated sequence of DjVu pages into PDFs or HTML reports, this approach creates the GIF programmatically.
+ * 1. When you need to extract a specific range of pages from a DjVu document and display them as an animated GIF on a website.
+ * 2. When creating a preview animation of selected DjVu pages for a digital library or e‑book catalog.
+ * 3. When generating a looping GIF slideshow of particular pages for a presentation or marketing material.
+ * 4. When converting scanned multi‑page DjVu files into lightweight GIF animations for mobile apps with limited bandwidth.
+ * 5. When automating batch processing to produce animated GIFs of specific DjVu pages for archival or documentation purposes.
  */

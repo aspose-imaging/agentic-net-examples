@@ -1,50 +1,40 @@
-// HOW-TO: Crop a BMP Image by Pixel Coordinates and Save in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop a BMP Image by Pixel Coordinates and Save with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output_cropped.bmp";
+        string inputPath = "input.bmp";
+        string outputPath = "output\\cropped.bmp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                if (!image.IsCached)
+                    image.CacheData();
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Define the crop rectangle (x, y, width, height)
+                Rectangle cropRect = new Rectangle(50, 30, 200, 150);
+                image.Crop(cropRect);
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Define the rectangle to crop (left, top, width, height)
-                int left = 100;   // X coordinate of the left edge
-                int top = 50;     // Y coordinate of the top edge
-                int width = 200;  // Width of the cropped area
-                int height = 150; // Height of the cropped area
-
-                var cropArea = new Rectangle(left, top, width, height);
-
-                // Perform the crop operation
-                image.Crop(cropArea);
-
-                // Save the cropped image to the output path
-                image.Save(outputPath);
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific region from a large BMP file for a thumbnail or preview in a C# desktop application.
- * 2. When you want to isolate a portion of a scanned BMP document to focus on a particular form field before further analysis.
- * 3. When you are generating sprite sheets and must crop individual sprite frames from a master BMP image using exact pixel coordinates.
- * 4. When you need to remove unwanted borders or margins from BMP images automatically during a batch processing workflow.
- * 5. When you are preparing BMP assets for a game engine and must crop them to fit required texture dimensions without losing quality.
+ * 1. When you need to extract a specific area from a large BMP file for a thumbnail or preview in a C# application.
+ * 2. When you must programmatically remove unwanted borders from scanned BMP documents before archiving them.
+ * 3. When generating sprite sheets requires cutting individual sprites out of a master BMP image using exact pixel positions.
+ * 4. When a game engine needs to load only a portion of a BMP texture to reduce memory usage at runtime.
+ * 5. When an automated batch process has to crop fixed-size regions from multiple BMP images for data-labeling or machine-learning preprocessing.
  */

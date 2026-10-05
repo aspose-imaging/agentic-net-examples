@@ -3,52 +3,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\HighResPhoto.jpg";
-            string outputPath = @"C:\Images\ExportedCanvas.html";
+            string inputPath = "input.jpg";
+            string outputPath = "output.html";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the high‑resolution image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Calculate scaling factor to fit within 1920x1080 while preserving aspect ratio
-                double widthScale = 1920.0 / image.Width;
-                double heightScale = 1080.0 / image.Height;
-                double scale = Math.Min(widthScale, heightScale);
-                if (scale < 1.0) // Downscale only if larger than viewport
+                int maxWidth = 1920;
+                int maxHeight = 1080;
+
+                double widthRatio = (double)maxWidth / image.Width;
+                double heightRatio = (double)maxHeight / image.Height;
+                double scale = Math.Min(1.0, Math.Min(widthRatio, heightRatio));
+
+                int newWidth = (int)(image.Width * scale);
+                int newHeight = (int)(image.Height * scale);
+
+                if (scale < 1.0)
                 {
-                    int newWidth = (int)(image.Width * scale);
-                    int newHeight = (int)(image.Height * scale);
-                    image.Resize(newWidth, newHeight);
+                    image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
                 }
 
-                // Prepare HTML5 Canvas export options
-                var canvasOptions = new Html5CanvasOptions
+                Html5CanvasOptions options = new Html5CanvasOptions()
                 {
-                    FullHtmlPage = true,
-                    // For raster images a default rasterization option is sufficient
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save as HTML5 Canvas
-                image.Save(outputPath, canvasOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a large JPEG photograph in a web page using an HTML5 canvas that fits a standard 1920x1080 screen without distortion.
- * 2. When you want to automatically downscale high‑resolution images on the server before sending them to browsers to reduce bandwidth and improve load times.
- * 3. When you are building a C# application that converts raster photos to a self‑contained HTML file with canvas rendering for offline viewing.
- * 4. When you must preserve the original aspect ratio while resizing images to match a specific viewport size for responsive design.
- * 5. When you require a simple way to generate HTML5 canvas markup from images using Aspose.Imaging without manually handling rasterization settings.
+ * 1. When you need to embed a large JPEG image in a web page using an HTML5 canvas without loading the full‑size file, you can downscale it to 1920×1080 and save it as a canvas HTML file.
+ * 2. When creating a photo‑gallery application that generates offline HTML5 canvas previews of high‑resolution pictures for faster client rendering.
+ * 3. When optimizing images for a responsive web design that limits the viewport to 1080p, you can programmatically resize and export them to HTML5 canvas format in C#.
+ * 4. When building a reporting tool that embeds high‑quality photographs directly into HTML reports via canvas elements, ensuring the images fit within a standard HD display.
+ * 5. When automating batch conversion of RAW or JPEG photos to HTML5 canvas files for use in interactive tutorials or e‑learning modules that require a fixed 1920×1080 canvas size.
  */

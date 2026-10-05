@@ -1,6 +1,14 @@
 // HOW-TO: Add JPEG Compressed Frame to Existing TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
@@ -10,37 +18,32 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output/output.tif";
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDir);
-            }
+                int width = tiff.Width;
+                int height = tiff.Height;
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                frameOptions.Compression = TiffCompressions.Jpeg;
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
+                TiffFrame newFrame = new TiffFrame(tiffOptions, width, height);
 
-                tiffImage.AddFrame(newFrame);
+                Color[] whitePixels = Enumerable.Repeat(Color.White, width * height).ToArray();
+                newFrame.SavePixels(newFrame.Bounds, whitePixels);
 
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Compression = TiffCompressions.Jpeg;
-
-                tiffImage.Save(outputPath, saveOptions);
+                tiff.AddFrame(newFrame);
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -52,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a multi‑page TIFF by appending a new JPEG‑compressed image to an existing file in a C# application.
- * 2. When you want to reduce the file size of added pages in a TIFF document by using JPEG compression while preserving the original dimensions.
- * 3. When a document‑management system requires each page of a scanned TIFF to be stored as a separate frame with consistent compression settings.
- * 4. When you are building a batch‑processing tool that updates legacy TIFF archives by inserting additional pages without re‑encoding the whole file.
- * 5. When you need to programmatically generate a TIFF portfolio where new frames are added on the fly using Aspose.Imaging for .NET.
+ * 1. When you need to append a new JPEG‑compressed page to a multi‑page TIFF archive generated from scanned documents.
+ * 2. When you want to create a blank white page in a TIFF file for later annotation or stamping in a C# imaging workflow.
+ * 3. When a medical imaging system must add an additional image layer to a DICOM‑derived TIFF while preserving JPEG compression for size efficiency.
+ * 4. When a digital archiving solution requires inserting a placeholder frame into an existing TIFF before merging it with other image assets.
+ * 5. When a GIS application programmatically expands a geospatial TIFF stack with a new raster layer using Aspose.Imaging for .NET.
  */

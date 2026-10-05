@@ -1,62 +1,55 @@
-// HOW-TO: Render EMF to High Resolution BMP at 300 DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Render EMF Vector Graphic to High Resolution BMP at 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.bmp";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "Input\\vector.emf";
+                string outputPath = "Output\\rendered.bmp";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image emfImage = Image.Load(inputPath))
+                {
+                    BmpOptions bmpOptions = new BmpOptions();
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = emfImage.Width,
+                        PageHeight = emfImage.Height
+                    };
+
+                    bmpOptions.VectorRasterizationOptions = vectorOptions;
+
+                    emfImage.Save(outputPath, bmpOptions);
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF vector image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Configure BMP save options with 300 DPI resolution
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300, 300)
-                };
-
-                // Set vector rasterization options to control rendering
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-                bmpOptions.VectorRasterizationOptions = vectorOptions;
-
-                // Save the rendered bitmap
-                image.Save(outputPath, bmpOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a Windows Metafile (EMF) into a printable BMP file with 300 dpi resolution for high‑quality reports.
- * 2. When generating thumbnails or preview images of vector diagrams for a desktop application that only supports bitmap formats.
- * 3. When preparing EMF graphics for archival storage in a lossless BMP format while preserving exact dimensions and DPI.
- * 4. When integrating Aspose.Imaging into a C# service that rasterizes vector logos into high‑resolution bitmaps for branding on marketing materials.
- * 5. When automating batch processing of EMF assets to BMP for compatibility with legacy systems that require fixed‑resolution bitmap inputs.
+ * 1. When a developer needs to convert Windows Metafile (EMF) diagrams into BMP files for printing or legacy systems that only accept bitmap formats.
+ * 2. When an application must generate high‑resolution raster images from vector logos to embed in PDF reports.
+ * 3. When a batch process has to prepare EMF icons for display on devices that do not support vector formats.
+ * 4. When a data‑import tool requires converting vector drawings to BMP to perform pixel‑based analysis or OCR.
+ * 5. When a software product needs to create 300 DPI BMP thumbnails of EMF schematics for documentation portals.
  */

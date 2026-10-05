@@ -2,59 +2,66 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\sample1.cdr",
-                @"C:\Images\sample2.cdr"
-            };
+            string inputDirectory = "InputCdr";
+            string outputDirectory = "OutputPng";
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\Converted";
-
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output PNG path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Cache the whole document and its pages
-                    cdrImage.CacheData();
-                    foreach (CdrImagePage page in cdrImage.Pages)
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        page.CacheData();
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new CdrRasterizationOptions
+                            {
+                                PageWidth = 800,
+                                PageHeight = 600
+                            }
+                        };
+
+                        cdr.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            raster.Save(outputPath, new PngOptions());
+                        }
                     }
-
-                    // Use the first page for conversion
-                    CdrImagePage firstPage = (CdrImagePage)cdrImage.Pages[0];
-
-                    // Resize to 800x600
-                    firstPage.Resize(800, 600);
-
-                    // Save as PNG
-                    firstPage.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -67,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑ready thumbnails from a collection of CorelDRAW (CDR) designs for an online portfolio.
- * 2. When an e‑commerce platform must batch‑process product illustrations stored as CDR files into PNGs of a fixed 800×600 size for display on product pages.
- * 3. When a printing service automates the conversion of client‑submitted CDR artwork into PNG previews that fit a standard preview window.
- * 4. When a desktop application migrates legacy CDR assets to PNG format while ensuring each image matches a specific resolution for a digital catalog.
- * 5. When a CI/CD pipeline validates and resizes multiple CDR source files to PNGs before they are uploaded to a content management system.
+ * 1. When a design studio needs to generate web‑ready thumbnails from a folder of CorelDRAW (.cdr) artwork automatically.
+ * 2. When an e‑commerce platform must convert product illustrations stored as CDR files into 800×600 PNGs for display on product pages.
+ * 3. When a migration script has to batch‑process legacy CDR assets into PNG format with a fixed size for a mobile app’s image cache.
+ * 4. When a reporting tool requires rasterizing multiple vector CDR diagrams into PNG charts that fit a predefined layout.
+ * 5. When an automated build pipeline must ensure all CDR source files are resized and saved as PNGs for cross‑platform compatibility.
  */

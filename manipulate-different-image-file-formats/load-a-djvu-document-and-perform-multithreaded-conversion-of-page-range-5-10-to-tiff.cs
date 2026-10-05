@@ -1,7 +1,8 @@
-// HOW-TO: Convert DjVu Pages 5 to 10 to TIFF Using Parallel C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 5 to 10 to TIFF in Parallel Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -15,7 +16,7 @@ class Program
         try
         {
             string inputPath = "input.djvu";
-            string outputDir = "Output";
+            string outputDirectory = "Output";
 
             if (!File.Exists(inputPath))
             {
@@ -23,25 +24,36 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
-            Parallel.ForEach(System.Linq.Enumerable.Range(5, 6), pageIndex =>
+            var tasks = new List<System.Threading.Tasks.Task>();
+
+            for (int pageIndex = 5; pageIndex <= 10; pageIndex++)
             {
-                string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.tif");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (FileStream stream = File.OpenRead(inputPath))
+                var task = System.Threading.Tasks.Task.Run(() =>
                 {
-                    using (DjvuImage djvuImage = new DjvuImage(stream))
+                    using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                     {
-                        using (Image page = djvuImage.Pages[pageIndex])
+                        if (pageIndex < 0 || pageIndex >= djvu.Pages.Length)
                         {
+                            Console.Error.WriteLine($"Page index out of range: {pageIndex}");
+                            return;
+                        }
+
+                        using (RasterImage pageImage = (RasterImage)djvu.Pages[pageIndex])
+                        {
+                            string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                            page.Save(outputPath, tiffOptions);
+                            pageImage.Save(outputPath, tiffOptions);
                         }
                     }
-                }
-            });
+                });
+
+                tasks.Add(task);
+            }
+
+            System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
         }
         catch (Exception ex)
         {
@@ -52,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific range of pages from a multi‑page DjVu document and save each page as a separate TIFF file for archival or printing.
- * 2. When you want to speed up conversion of large DjVu files by processing multiple pages concurrently on a multi‑core server.
- * 3. When an application must generate TIFF images for pages 5‑10 of a scanned book to feed into OCR or document management systems.
- * 4. When you are building a batch‑processing pipeline that reads DjVu files from disk and outputs high‑resolution TIFFs for downstream image analysis.
- * 5. When you need to ensure the output directory structure exists before saving each converted page, handling missing files gracefully in a C# service.
+ * 1. When you need to extract a specific range of pages from a DjVu file and save each as a high‑resolution TIFF for archival or printing.
+ * 2. When you want to speed up batch conversion of DjVu pages by processing them concurrently on multiple CPU cores.
+ * 3. When a document management system requires individual TIFF images for OCR or indexing of selected DjVu pages.
+ * 4. When you are building a web service that receives DjVu uploads and must return TIFF files for pages 5‑10 on demand.
+ * 5. When you must automate the creation of TIFF thumbnails from a DjVu document while ensuring the operation runs efficiently in a background task.
  */

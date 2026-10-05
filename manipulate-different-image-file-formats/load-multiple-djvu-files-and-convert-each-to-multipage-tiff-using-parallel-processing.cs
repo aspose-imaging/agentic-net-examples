@@ -1,7 +1,6 @@
 // HOW-TO: Convert Multiple DjVu Files To Multipage TIFF In Parallel With C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -9,52 +8,35 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input DjVu files
-            string[] inputFiles = new[]
-            {
-                @"C:\Images\Input1.djvu",
-                @"C:\Images\Input2.djvu",
-                @"C:\Images\Input3.djvu"
-            };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\Output";
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Process each file in parallel
-            Parallel.ForEach(inputFiles, inputPath =>
+            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
+
+            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output file path (same name with .tif extension)
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu document and save as multipage TIFF
-                using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    // Configure TIFF save options
-                    TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Deflate,
-                        BitsPerSample = new ushort[] { 1 },
-                        MultiPageOptions = new DjvuMultiPageOptions()
-                    };
-
-                    // Save the multipage TIFF
-                    djvuImage.Save(outputPath, saveOptions);
+                    djvu.Save(outputPath, tiffOptions);
                 }
             });
         }
@@ -67,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to batch‑convert scanned DjVu archives into searchable multipage TIFFs for long‑term storage while maximizing CPU utilization.
- * 2. When a document‑management system must ingest dozens of DjVu reports and store them as compressed TIFF files that can be opened by standard image viewers.
- * 3. When a developer wants to speed up conversion of large DjVu collections by processing each file on a separate thread using Parallel.ForEach.
- * 4. When an automated workflow requires converting DjVu e‑books into multipage TIFFs with Deflate compression to reduce file size before uploading to a cloud repository.
- * 5. When a legal‑tech application must transform multiple DjVu evidence files into multipage TIFFs to preserve page order and enable OCR processing later.
+ * 1. When a developer needs to batch‑convert a large collection of scanned DjVu documents into searchable multipage TIFFs for archival systems, this code provides a fast parallel solution.
+ * 2. When integrating a document‑management workflow that receives DjVu files from users and must store them as TIFF images compatible with existing .NET applications, the example shows how to automate the conversion.
+ * 3. When optimizing server‑side processing time for converting dozens of DjVu pages into a single TIFF per file, the parallel loop reduces overall execution time.
+ * 4. When preparing DjVu‑based e‑books for printing or OCR pipelines that require multipage TIFF input, this snippet demonstrates the required format conversion using Aspose.Imaging.
+ * 5. When building a background service that monitors an input folder and instantly transforms any new DjVu files into TIFFs without blocking other operations, the code illustrates the necessary file handling and parallel execution.
  */

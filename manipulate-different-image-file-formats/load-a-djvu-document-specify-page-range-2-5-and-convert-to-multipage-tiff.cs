@@ -1,55 +1,34 @@
-// HOW-TO: Convert DjVu Pages 2 to 5 into a Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 2 To 5 To Multipage TIFF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputPath = @"C:\temp\sample.tif";
+            string inputPath = "input\\document.djvu";
+            string outputPath = "output\\range2-5.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Configure TIFF save options
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Compression = TiffCompressions.Deflate;
-                // Convert to black/white (1 bit per sample)
-                saveOptions.BitsPerSample = new ushort[] { 1 };
-
-                // Specify page range 2‑5 (zero‑based indexes 1‑4)
-                saveOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 1, 2, 3, 4 });
-
-                // Optional: set page titles
-                saveOptions.MultiPageOptions.PageTitles = new string[]
-                {
-                    "Page 2",
-                    "Page 3",
-                    "Page 4",
-                    "Page 5"
-                };
-
-                // Save as multipage TIFF
-                djvuImage.Save(outputPath, saveOptions);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(2, 5));
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -61,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a subset of pages from a DjVu document and archive them as a single compressed black‑and‑white multi‑page TIFF for easy viewing in Windows.
- * 2. When a legal or medical workflow requires converting specific DjVu pages (e.g., pages 2‑5) into a searchable TIFF file to attach to an electronic case file.
- * 3. When you want to reduce file size by saving selected DjVu pages as a Deflate‑compressed 1‑bit TIFF for printing or long‑term storage.
- * 4. When an application must programmatically generate a multi‑page TIFF from a DjVu source, preserving page titles for later reference in a document management system.
- * 5. When you need to automate the conversion of a DjVu e‑book’s middle chapters into a TIFF format that can be processed by legacy imaging tools that only support TIFF.
+ * 1. When you need to extract a specific range of pages from a DjVu archive and save them as a single multipage TIFF for archival or printing.
+ * 2. When a document management system must convert selected DjVu pages (e.g., pages 2‑5) into a compressed LZW RGB TIFF to reduce file size while preserving image quality.
+ * 3. When generating preview images for a web application that only requires a subset of DjVu pages, converting them into a TIFF that browsers can display without plugins.
+ * 4. When automating batch processing of DjVu manuals, converting only the relevant chapters (pages 2‑5) into a multipage TIFF for inclusion in a PDF compilation.
+ * 5. When integrating Aspose.Imaging into a C# workflow to programmatically convert DjVu page ranges into TIFF for downstream OCR or image analysis pipelines.
  */

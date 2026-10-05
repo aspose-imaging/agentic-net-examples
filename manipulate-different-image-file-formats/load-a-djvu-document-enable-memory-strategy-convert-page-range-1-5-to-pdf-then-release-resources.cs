@@ -1,52 +1,36 @@
-// HOW-TO: Convert Specific DjVu Pages To PDF With Memory Buffer In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 1 To 5 To PDF With Memory Buffer In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.pdf";
-
-        // Ensure input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
-            // Configure memory strategy (buffer size hint)
-            LoadOptions loadOptions = new LoadOptions
+            string inputPath = "Input\\document.djvu";
+            string outputPath = "Output\\output.pdf";
+
+            if (!File.Exists(inputPath))
             {
-                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Open the DjVu file stream and load the document with the specified options
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 1024 * 1024 }))
             {
-                // Define the page range to convert (pages 1‑5)
-                int[] pagesToConvert = new int[] { 1, 2, 3, 4, 5 };
-                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pagesToConvert);
+                IntRange range = new IntRange(1, 5);
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(range);
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.MultiPageOptions = multiPageOptions;
 
-                // Set up PDF saving options with the selected page range
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    MultiPageOptions = multiPageOptions
-                };
-
-                // Save the selected pages as a PDF file
-                djvuImage.Save(outputPath, pdfOptions);
+                djvu.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first few pages of a large DjVu document and generate a smaller PDF for preview or sharing.
- * 2. When you want to limit memory usage while loading a DjVu file by providing a buffer size hint in a .NET application.
- * 3. When you have to programmatically convert a range of DjVu pages (e.g., pages 1‑5) into a PDF for batch processing or archiving.
- * 4. When you need to ensure the output directory exists and handle missing input files gracefully before converting DjVu to PDF.
- * 5. When you want to automatically release file streams and image resources after saving a DjVu document as PDF in C#.
+ * 1. When you need to extract the first five pages of a large DjVu document and save them as a PDF while controlling memory usage in a C# application.
+ * 2. When an archival system must batch‑convert specific page ranges from DjVu scans to searchable PDFs without loading the entire file into memory.
+ * 3. When a desktop tool processes user‑uploaded DjVu files and offers a preview PDF of selected pages, using Aspose.Imaging’s buffer‑size hint to improve performance.
+ * 4. When a server‑side service generates PDF excerpts from multi‑page DjVu manuals for on‑demand printing, ensuring efficient resource handling in .NET.
+ * 5. When a document‑management workflow needs to programmatically convert a subset of DjVu pages to PDF and automatically clean up resources after saving.
  */
