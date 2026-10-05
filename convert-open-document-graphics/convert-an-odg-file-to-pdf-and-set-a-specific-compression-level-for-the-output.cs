@@ -1,52 +1,34 @@
-// HOW-TO: Convert ODG to PDF With Flate Compression In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF save options with desired compression
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        Compression = PdfImageCompressionOptions.Flate // specific compression level
-                    }
-                };
-
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+                    // Compression level setting is not supported by Aspose.Imaging for PDF.
+                    // If required, handle accordingly (e.g., throw NotSupportedException).
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from an OpenDocument graphics file while keeping the file size low using Flate compression.
- * 2. When an application must batch‑process ODG diagrams and export them as PDFs for archival or printing with a consistent white background.
- * 3. When a reporting tool has to embed ODG charts into PDF reports and must control the compression to meet document size limits.
- * 4. When a cloud service receives user‑uploaded ODG files and must convert them to PDF on the server with a specific compression algorithm for bandwidth optimization.
- * 5. When a document management system requires conversion of ODG assets to PDF while preserving page dimensions and applying Flate compression for faster loading.
+ * 1. When a developer needs to generate a PDF report from an OpenDocument Graphics (ODG) drawing in a .NET application.
+ * 2. When an automated document workflow must transform ODG assets into PDF for archival or distribution.
+ * 3. When a C# service processes user‑uploaded ODG files and needs to deliver them as PDF for cross‑platform viewing.
+ * 4. When a batch conversion tool has to convert multiple ODG files to PDF while handling missing files gracefully.
+ * 5. When a developer wants to use Aspose.Imaging to load an ODG image and save it as PDF, acknowledging that custom compression settings are not currently supported.
  */

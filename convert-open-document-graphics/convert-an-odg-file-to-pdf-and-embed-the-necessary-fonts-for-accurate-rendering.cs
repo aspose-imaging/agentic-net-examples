@@ -1,54 +1,35 @@
-// HOW-TO: Convert ODG to PDF with Embedded Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF with Embedded Fonts in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.odg";
-        string outputPath = @"C:\output\sample.pdf";
-
         try
         {
-            // Verify input file exists
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "sample.odg");
+            string outputPath = Path.Combine(baseDir, "Output", "sample.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Optional: set custom fonts folder to embed required fonts
-            // Adjust the path to point to a folder containing the needed TrueType fonts
-            string fontsFolder = @"C:\Fonts";
-            FontSettings.SetFontsFolder(fontsFolder);
-            FontSettings.UpdateFonts();
-
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for ODG
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF save options and attach rasterization options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save the image as PDF with embedded fonts
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF from an OpenDocument Graphics (ODG) file in a C# application while preserving the original text appearance by embedding the required fonts.
- * 2. When a document management system must automatically convert user‑uploaded ODG diagrams to searchable PDFs with all fonts included to avoid missing‑font warnings on client machines.
- * 3. When creating batch processing scripts that convert multiple ODG files to PDF on a server and ensure consistent rendering by specifying a custom fonts folder.
- * 4. When integrating Aspose.Imaging into a reporting tool that outputs design assets as PDFs and must embed TrueType fonts to meet corporate branding guidelines.
- * 5. When developing a Windows service that monitors a folder for new ODG files, converts them to PDF, and embeds fonts to guarantee accurate printing on any printer.
+ * 1. When you need to generate printable PDF reports from LibreOffice Draw (ODG) files while preserving the original text appearance.
+ * 2. When an application must batch‑convert user‑uploaded ODG diagrams to PDF for archival or sharing without losing font styling.
+ * 3. When a web service creates PDF invoices from ODG templates and must embed the custom fonts to ensure consistent rendering on any device.
+ * 4. When migrating legacy ODG assets to a PDF‑based workflow and require embedded fonts to avoid missing‑font warnings in PDF viewers.
+ * 5. When automating document processing in a C# backend and need to preserve exact layout and typography by embedding fonts during ODG‑to‑PDF conversion.
  */

@@ -1,9 +1,7 @@
 // HOW-TO: Convert ODG to JPEG with EXIF Orientation Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -22,20 +20,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var odgImage = image as OdgImage;
-                if (odgImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load ODG image.");
-                    return;
-                }
-
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
                     KeepMetadata = true
                 };
-
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -48,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to show OpenDocument graphics (ODG) on a website that only supports JPEG images while keeping the original EXIF orientation so the picture displays correctly.
- * 2. When migrating legacy design files to email‑friendly JPEG format and must retain orientation metadata for recipients’ photo viewers.
- * 3. When generating thumbnails for a digital asset manager from ODG drawings and want the thumbnails to respect the original orientation.
- * 4. When integrating Aspose.Imaging into a document management system to automatically convert user‑uploaded ODG files to JPEG while preserving metadata for downstream workflows.
- * 5. When building a C# microservice that prepares design assets for a printing pipeline, converting ODG to JPEG and ensuring the EXIF orientation is maintained for accurate print layout.
+ * 1. When a web application needs to display OpenDocument graphics as JPEG thumbnails while keeping the original camera rotation information.
+ * 2. When a batch processing tool converts user‑uploaded ODG diagrams to JPEG for email attachments and must retain EXIF orientation for correct viewing on mobile devices.
+ * 3. When a digital asset management system imports ODG files and stores them as JPEGs, preserving metadata so downstream editors can read the original orientation.
+ * 4. When a reporting service generates JPEG charts from ODG templates and wants the images to appear upright in PDF reports without additional rotation code.
+ * 5. When a migration script moves legacy ODG artwork to a JPEG‑based CMS and must keep EXIF orientation to avoid manual image correction.
  */

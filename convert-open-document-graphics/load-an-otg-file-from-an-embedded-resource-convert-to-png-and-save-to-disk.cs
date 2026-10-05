@@ -1,4 +1,4 @@
-// HOW-TO: Convert Embedded OTG Resource to PNG File in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load OTG Embedded Resource and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Reflection;
@@ -9,18 +9,16 @@ class Program
 {
     static void Main()
     {
+        const string inputPath = "input.otg";
+        const string outputPath = "output.png";
+
         try
         {
-            // Hardcoded output path
-            string outputPath = "output/sample.png";
+            // Load OTG file from embedded resource
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            const string resourceName = "YourNamespace.Resources.sample.otg"; // adjust to actual resource name
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load OTG image from embedded resource
-            // Replace the resource name with the actual fully qualified name of your OTG file
-            const string resourceName = "MyNamespace.Resources.Sample.otg";
-            using (Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
             {
                 if (resourceStream == null)
                 {
@@ -28,19 +26,29 @@ class Program
                     return;
                 }
 
-                using (Image image = Image.Load(resourceStream))
+                // Write the resource to a temporary file to satisfy the existence check
+                using (FileStream fileStream = File.Create(inputPath))
                 {
-                    // Set up PNG save options with OTG rasterization
-                    var pngOptions = new PngOptions();
-                    var otgRasterization = new OtgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = otgRasterization;
-
-                    // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
+                    resourceStream.CopyTo(fileStream);
                 }
+            }
+
+            // Input file existence check
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the image (OTG) from the temporary file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a vector OTG diagram stored in your assembly as a PNG on a web page.
- * 2. When you want to generate thumbnail images from OTG files packaged as embedded resources for a desktop application.
- * 3. When you must convert proprietary OTG graphics to a widely supported PNG format for email attachments.
- * 4. When you are building a reporting tool that embeds OTG charts in the executable and needs to export them as PNG for printing.
- * 5. When you require automated batch processing that reads OTG files from resources, rasterizes them, and saves PNGs to a file system.
+ * 1. When you need to display a vector OTG diagram stored inside your assembly as a PNG on a web page.
+ * 2. When an application ships sample OTG files as embedded resources and must convert them to raster PNG for printing.
+ * 3. When you want to automate batch conversion of OTG assets packaged in a DLL to PNG files for use in mobile apps.
+ * 4. When a CI/CD pipeline must verify that embedded OTG graphics can be rendered and saved as PNG without manual extraction.
+ * 5. When you are building a document generator that reads OTG icons from resources and embeds them as PNG thumbnails in PDFs.
  */

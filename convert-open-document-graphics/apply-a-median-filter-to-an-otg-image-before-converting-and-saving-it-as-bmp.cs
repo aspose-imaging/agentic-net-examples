@@ -1,57 +1,40 @@
 // HOW-TO: Apply Median Filter to OTG Image and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_filtered.bmp";
+        string inputPath = Path.Combine("Input", "sample.otg");
+        string outputPath = Path.Combine("Output", "sample.bmp");
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
-            using (Image otgImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare BMP save options with OTG rasterization settings
-                BmpOptions bmpOptions = new BmpOptions();
-                OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageSize = otgImage.Size // Preserve original size
-                };
-                bmpOptions.VectorRasterizationOptions = otgRaster;
+                    var pngOptions = new PngOptions();
+                    vectorImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                // Rasterize OTG to a memory stream
-                using (MemoryStream rasterStream = new MemoryStream())
-                {
-                    otgImage.Save(rasterStream, bmpOptions);
-                    rasterStream.Position = 0; // Reset stream position for reading
-
-                    // Load the rasterized BMP as a RasterImage
-                    using (Image rasterImageWrapper = Image.Load(rasterStream))
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(memoryStream))
                     {
-                        RasterImage rasterImage = (RasterImage)rasterImageWrapper;
+                        var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
+                        raster.Filter(raster.Bounds, medianOptions);
 
-                        // Apply median filter with size 5 to the whole image
-                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                        // Save the filtered image as BMP
-                        rasterImage.Save(outputPath);
+                        var bmpOptions = new BmpOptions();
+                        raster.Save(outputPath, bmpOptions);
                     }
                 }
             }
@@ -65,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noise in a vector OTG file before converting it to a BMP for legacy Windows applications.
- * 2. When you want to preprocess scanned engineering drawings in OTG format with a median filter to improve edge clarity before rasterizing them to bitmap images.
- * 3. When an automated batch job must convert OTG graphics to BMP while applying a 5‑pixel median filter to ensure consistent visual quality across all output files.
- * 4. When integrating Aspose.Imaging in a C# service that receives OTG uploads and must deliver noise‑reduced BMP thumbnails for web preview.
- * 5. When preparing OTG artwork for printing on devices that only accept BMP, and you need to remove speckles using a median filter during the conversion process.
+ * 1. When you need to reduce speckle noise in a vector‑based OTG diagram before converting it to a BMP for legacy Windows applications.
+ * 2. When an automated pipeline must rasterize OTG graphics, apply a median filter for smoothing, and store the result as BMP for printing on industrial equipment.
+ * 3. When a desktop utility processes user‑uploaded OTG files, cleans them with a median filter, and saves them as BMP to maintain compatibility with older image viewers.
+ * 4. When a batch job converts a collection of OTG assets to BMP while applying noise reduction to improve OCR accuracy on the resulting bitmaps.
+ * 5. When a C# service integrates Aspose.Imaging to preprocess OTG images with a median filter before delivering BMP files to a third‑party reporting system.
  */

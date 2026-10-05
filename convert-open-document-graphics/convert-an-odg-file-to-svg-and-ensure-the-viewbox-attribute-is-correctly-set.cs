@@ -1,46 +1,37 @@
-// HOW-TO: Convert ODG to SVG with Correct ViewBox Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to SVG with Proper ViewBox in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = @"C:\Temp\sample.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.svg");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare SVG rasterization options with page size to set proper viewBox
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                var options = new SvgOptions
                 {
-                    PageSize = odgImage.Size // ensures viewBox matches image dimensions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    }
                 };
-
-                // Configure SVG save options
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save as SVG
-                odgImage.Save(outputPath, svgOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OpenDocument graphics file on a web page, you can convert the .odg to scalable .svg while preserving the correct viewBox dimensions.
- * 2. When integrating a document processing pipeline that receives ODG drawings and must output vector graphics for a responsive UI, this code automates the conversion in C#.
- * 3. When migrating legacy design assets stored as ODG into an SVG‑based asset library, the snippet ensures the resulting files retain proper scaling information.
- * 4. When generating printable PDFs from SVG files that originated as ODG, setting the viewBox correctly avoids distortion during further conversions.
- * 5. When building a cross‑platform reporting tool that embeds ODG diagrams as SVG icons, the code provides a reliable way to convert and embed them with accurate size metadata.
+ * 1. When you need to embed an OpenDocument graphic into a web page and require the SVG’s viewBox to match the original ODG dimensions.
+ * 2. When automating a batch process that converts legacy ODG illustrations to scalable SVG files for responsive design.
+ * 3. When generating SVG assets from ODG drawings in a C# application while preserving background color and exact page size.
+ * 4. When integrating Aspose.Imaging into a .NET service that transforms user‑uploaded ODG files into web‑ready SVG with correct scaling.
+ * 5. When creating a build pipeline that validates ODG files and outputs SVGs with accurate viewBox attributes for downstream vector editing tools.
  */

@@ -3,37 +3,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.odg";
-            string outputPath = "sample.png";
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.png");
 
-            // Verify input file exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with maximum lossless compression
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9 // 0-9, 9 = maximum compression
+                    PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
 
-                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready PNG thumbnails from OpenDocument graphics while keeping the smallest possible file size.
- * 2. When an application must batch‑process ODG diagrams and store them as losslessly compressed PNGs for archival without quality loss.
- * 3. When a reporting tool converts vector ODG charts into PNG images to embed in PDFs and wants maximum compression to reduce document size.
- * 4. When a cloud service receives user‑uploaded ODG files and needs to convert them to PNG for preview thumbnails with optimal storage efficiency.
- * 5. When a desktop utility automates the conversion of ODG assets to PNG for use in mobile apps, requiring the highest lossless compression to meet bandwidth constraints.
+ * 1. When you need to embed an OpenDocument graphic in a web page and require a small, lossless PNG file.
+ * 2. When automating a batch conversion of ODG diagrams to PNG for inclusion in mobile apps where bandwidth is limited.
+ * 3. When preserving the exact visual quality of a vector drawing while converting it to a raster format for PDF generation.
+ * 4. When generating thumbnails of ODG files with maximum compression to store in a content‑management system.
+ * 5. When integrating Aspose.Imaging into a C# service that converts user‑uploaded ODG files to PNG with the smallest possible file size.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Convert OTG to Flattened PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG File To PDF With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,42 +6,28 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Data\sample.otg";
-            string outputPath = @"C:\Data\sample.pdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "sample.otg");
+            string outputPath = Path.Combine(baseDir, "Output", "sample.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for OTG
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                using (PdfOptions options = new PdfOptions())
                 {
-                    // Use the original image size as page size
-                    PageSize = image.Size
-                };
-
-                // Set up PDF save options and attach rasterization options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = otgOptions
-                };
-
-                // Save the flattened PDF
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a non‑editable PDF report from an OTG design file in a C# application.
- * 2. When you must archive OTG drawings as static PDFs to ensure annotations are permanently flattened for compliance.
- * 3. When a document management system requires converting user‑uploaded OTG images to PDF for preview without preserving edit layers.
- * 4. When automating batch processing of OTG files to PDF on a server, preserving the original page size and removing interactive elements.
- * 5. When integrating Aspose.Imaging into a .NET workflow to rasterize vector OTG content into a PDF that can be opened by any PDF viewer.
+ * 1. When you need to archive engineering drawings stored as OTG files into a universally viewable PDF for distribution.
+ * 2. When a web application must generate static PDF reports from OTG images without preserving interactive annotation layers.
+ * 3. When integrating a document workflow that receives OTG uploads and must convert them to PDF for downstream processing like OCR or printing.
+ * 4. When migrating legacy OTG assets to a PDF format that requires flattened images to ensure consistent rendering across devices.
+ * 5. When building a C# service that programmatically converts OTG files to PDF to comply with regulatory document‑format standards.
  */

@@ -1,9 +1,8 @@
-// HOW-TO: Crop a Specific Area from ODG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Specific Area From ODG Image And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -11,39 +10,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample_cropped.png";
+            string inputPath = "input.odg";
+            string outputPath = "output\\cropped.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to OdgImage to access ODG-specific methods
-                OdgImage odgImage = (OdgImage)image;
+                var rasterImage = image as RasterImage;
+                if (rasterImage == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Define the crop rectangle (example: central half of the image)
-                int cropX = odgImage.Width / 4;
-                int cropY = odgImage.Height / 4;
-                int cropWidth = odgImage.Width / 2;
-                int cropHeight = odgImage.Height / 2;
-                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                // Crop by shifts: left, right, top, bottom
+                int left = 50;
+                int right = 50;
+                int top = 30;
+                int bottom = 30;
+                rasterImage.Crop(left, right, top, bottom);
 
-                // Crop the image
-                odgImage.Crop(cropRect);
-
-                // Save the cropped image as PNG
                 var pngOptions = new PngOptions();
-                odgImage.Save(outputPath, pngOptions);
+                rasterImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a central portion of an OpenDocument graphic for use in a web thumbnail, they can load the .odg file, crop it, and export it as a PNG.
- * 2. When integrating legacy ODG assets into a modern .NET application, cropping unwanted margins before converting to PNG ensures consistent layout and reduced file size.
- * 3. When generating printable assets from a design created in OpenDocument, developers can programmatically crop the required region and save it as a high‑quality PNG for downstream workflows.
- * 4. When automating batch processing of ODG diagrams, the code can isolate each diagram’s key area, crop it, and store the result as PNG for inclusion in reports or presentations.
- * 5. When a user uploads an ODG file to a C# web service and only a specific region is needed for a preview, the service can crop that region and return a PNG image instantly.
+ * 1. When you need to extract a logo or diagram from an ODG drawing and deliver it as a lightweight PNG for web display.
+ * 2. When a reporting tool generates ODG charts but the final PDF requires only a cropped portion saved as PNG.
+ * 3. When an automated pipeline processes OpenDocument graphics and must remove unwanted margins before storing them in a PNG asset library.
+ * 4. When a desktop application lets users select a region of an ODG file and saves the selection as a PNG thumbnail.
+ * 5. When converting legacy ODG assets to PNG while trimming borders to match a predefined layout in a C# project.
  */

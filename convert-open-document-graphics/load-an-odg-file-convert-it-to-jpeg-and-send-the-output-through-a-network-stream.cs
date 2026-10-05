@@ -4,74 +4,75 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
-class Program
+namespace OdgToJpegNetwork
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\output.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths and network settings
+                string inputPath = "input.odg";
+                string outputPath = "output\\output.jpg";
+                string host = "localhost";
+                int port = 5000;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to OdgImage
-                OdgImage odgImage = image as OdgImage;
-                if (odgImage == null)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine("Loaded image is not an ODG image.");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save as JPEG to the output path
-                odgImage.Save(outputPath, jpegOptions);
-
-                // Send the JPEG file through a network stream
-                using (FileStream fileStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
+                // Load ODG image
+                using (Image image = Image.Load(inputPath))
                 {
-                    string host = "127.0.0.1";
-                    int port = 5000;
-                    using (TcpClient client = new TcpClient())
+                    // Prepare JPEG options
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        client.Connect(host, port);
-                        using (NetworkStream netStream = client.GetStream())
+                        Quality = 90
+                    };
+
+                    // Save to file
+                    image.Save(outputPath, jpegOptions);
+
+                    // Also save to memory stream for network transmission
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        image.Save(ms, jpegOptions);
+                        byte[] jpegBytes = ms.ToArray();
+
+                        // Send over network
+                        using (TcpClient client = new TcpClient())
                         {
-                            fileStream.CopyTo(netStream);
-                            netStream.Flush();
+                            client.Connect(host, port);
+                            using (NetworkStream networkStream = client.GetStream())
+                            {
+                                networkStream.Write(jpegBytes, 0, jpegBytes.Length);
+                                networkStream.Flush();
+                            }
                         }
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OpenDocument graphic on a web page that only supports JPEG images.
- * 2. When you must send a converted image from a desktop application to a remote server or service via a TCP socket.
- * 3. When you are building a batch process that converts ODG drawings to JPEG files before archiving them on a network share.
- * 4. When you want to preview ODG diagrams in a thin client that can only render JPEG streams.
- * 5. When you integrate a legacy CAD system that outputs ODG files and need to transmit the rasterized result to a mobile device in real time.
+ * 1. When you need to generate a JPEG preview of an ODG drawing and store it on disk for later use.
+ * 2. When a server application must send a converted JPEG image of an ODG file to a remote client over a TCP connection.
+ * 3. When an automated pipeline processes OpenDocument graphics files and delivers the resulting JPEGs to another service without manual intervention.
+ * 4. When you want to ensure the output directory exists before saving the JPEG to avoid runtime errors.
+ * 5. When you require a specific JPEG quality setting while converting ODG files for bandwidth‑controlled network transmission.
  */

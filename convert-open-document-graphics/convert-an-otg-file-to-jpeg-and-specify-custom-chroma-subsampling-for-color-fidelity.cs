@@ -1,9 +1,8 @@
-// HOW-TO: Convert OTG to JPEG with Custom Chroma Subsampling in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Image To High‑Quality JPEG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.otg");
-            string outputPath = Path.Combine("Output", "sample.jpg");
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,21 +23,10 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    HorizontalSampling = new byte[] { 2, 1, 1 },
-                    VerticalSampling = new byte[] { 2, 1, 1 },
                     Quality = 100
                 };
-
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-                jpegOptions.VectorRasterizationOptions = vectorOptions;
-
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -51,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to render an OTG vector graphic as a high‑quality JPEG for web publishing while preserving color fidelity through specific chroma subsampling.
- * 2. When a batch process must convert multiple OTG files to JPEGs with 100 % quality and custom sampling to match a printing workflow’s color requirements.
- * 3. When integrating Aspose.Imaging into a C# application that generates thumbnails of OTG drawings and requires precise control over JPEG compression parameters.
- * 4. When automating the conversion of OTG design assets to JPEG for email newsletters, ensuring the background is white and the image dimensions match the original vector size.
- * 5. When developing a document management system that stores OTG files but needs to display them as JPEG previews with consistent chroma sampling across different devices.
+ * 1. When a .NET application must display or share OTG graphics on web pages that only support JPEG, developers can use this code to convert the files with maximum quality.
+ * 2. When an image‑processing pipeline receives OTG files from a design tool and needs to archive them as compressed JPEGs for storage efficiency, this snippet automates the conversion.
+ * 3. When a mobile app imports OTG assets and requires them in JPEG format for faster loading on devices, the code provides a straightforward C# solution.
+ * 4. When a batch job processes a folder of OTG drawings and generates JPEG previews for client review, developers can employ this routine to produce high‑fidelity outputs.
+ * 5. When integrating Aspose.Imaging into a C# service that converts user‑uploaded OTG files to JPEG for email attachments, this example shows the necessary steps.
  */

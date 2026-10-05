@@ -1,60 +1,46 @@
-// HOW-TO: Convert OTG Vector Image to PNG with Proper Resource Disposal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Image to PNG with Proper Resource Disposal in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OTGToPngConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.otg";
+                string outputPath = "output/output.png";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new PngOptions());
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the OTG image and ensure proper disposal
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Configure rasterization options to match the source size
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Set up PNG save options with the vector rasterization options
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = otgOptions
-                };
-
-                // Save the image as PNG
-                image.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG preview of an OTG vector diagram in a C# desktop application while ensuring memory is released promptly.
- * 2. When a server‑side service must batch‑convert uploaded OTG files to PNG for web display without leaking file handles.
- * 3. When integrating Aspose.Imaging into an automated build pipeline that transforms OTG assets into PNG thumbnails and requires deterministic disposal of the Image object.
- * 4. When creating a Windows service that monitors a folder for new OTG files and saves them as PNG, using a using block to avoid resource exhaustion.
- * 5. When developing a C# utility that validates the existence of OTG files, creates the output directory, and safely converts them to PNG with vector rasterization options.
+ * 1. When you need to convert legacy OTG design files to web‑friendly PNGs in a .NET batch process while ensuring memory is released promptly.
+ * 2. When building an automated image pipeline that reads OTG assets from a folder and outputs PNG thumbnails without leaking unmanaged resources.
+ * 3. When integrating Aspose.Imaging into a C# service that receives OTG uploads and must store them as PNGs for downstream reporting.
+ * 4. When migrating a desktop application to .NET Core and want to safely handle large OTG files by wrapping the Image object in a using statement.
+ * 5. When creating a command‑line utility that validates the existence of an OTG file, creates the output directory, and saves a PNG while handling exceptions gracefully.
  */
