@@ -1,4 +1,4 @@
-// HOW-TO: Convert PNG to SVG with Light Gray Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Light Gray Background to Raster Image and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +7,29 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
-
-            // Verify input file exists
+            string inputPath = "Input/sample.jpg";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            string outputPath = "Output/output.svg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options with background color
-                SvgOptions svgOptions = new SvgOptions();
-
-                // Configure rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var svgOptions = new SvgOptions();
+                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set background color to light gray
-                    BackgroundColor = Aspose.Imaging.Color.LightGray,
-                    // Set page size to match the source image
-                    PageSize = image.Size
+                    BackgroundColor = Color.LightGray,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
-
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save as SVG with the specified options
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -55,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a PNG logo into a web page as scalable SVG while ensuring a consistent light‑gray canvas behind it.
- * 2. When generating vector graphics from scanned photos for print layouts and you want a uniform background color to avoid transparency issues.
- * 3. When converting UI screenshots to SVG for responsive design and you must replace transparent areas with a light gray fill.
- * 4. When creating SVG assets from raster icons for a mobile app and you need the background color set programmatically using Aspose.Imaging in C#.
- * 5. When automating batch processing of product images to SVG format and require a specific background shade to match brand guidelines.
+ * 1. When you need to embed a JPEG photograph into an SVG document with a uniform light‑gray canvas for consistent web rendering.
+ * 2. When generating printable graphics where the original raster image must be converted to vector‑friendly SVG while ensuring a background color for PDF export.
+ * 3. When creating thumbnails for a UI that require SVG format with a neutral background to match the application theme.
+ * 4. When preprocessing images for responsive web design, converting them to scalable SVG with a light‑gray backdrop to avoid transparent gaps.
+ * 5. When automating batch conversion of product photos to SVG for an e‑commerce catalog, adding a light gray background to maintain visual consistency.
  */

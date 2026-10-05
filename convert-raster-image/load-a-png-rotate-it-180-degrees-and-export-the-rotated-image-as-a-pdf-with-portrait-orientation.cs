@@ -1,41 +1,34 @@
-// HOW-TO: Rotate PNG 180 Degrees and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate PNG 180 Degrees and Save as Portrait PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "Input\\image.png";
+        string outputPath = "Output\\rotated.pdf";
 
         try
         {
-            // Load the PNG image
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Rotate the image 180 degrees
                 image.RotateFlip(RotateFlipType.Rotate180FlipNone);
-
-                // Prepare PDF export options (portrait orientation is default)
-                var pdfOptions = new PdfOptions();
-
-                // Save the rotated image as PDF
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from a scanned PNG that must be upside‑down for correct orientation.
- * 2. When a web service receives PNG receipts, rotates them 180° and returns a PDF for archival.
- * 3. When automating batch conversion of product label images that are stored as PNGs and need to be flipped before embedding in PDF catalogs.
- * 4. When creating PDF reports that include rotated screenshots captured as PNG files.
- * 5. When integrating with a document workflow that requires PNG assets to be rotated and saved as portrait‑oriented PDFs for compliance.
+ * 1. When you need to generate a printable PDF from a scanned PNG that must be upside-down for correct orientation.
+ * 2. When an e‑commerce platform requires product images rotated 180° before embedding them in PDF catalogs.
+ * 3. When a document automation system converts user‑uploaded PNG signatures into portrait PDFs after correcting their rotation.
+ * 4. When a reporting tool creates PDF reports that include PNG charts that need to be flipped vertically.
+ * 5. When a mobile app syncs rotated PNG screenshots and stores them as PDF files for archival purposes.
  */

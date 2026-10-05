@@ -1,45 +1,40 @@
-// HOW-TO: Crop Image, Apply Gaussian Blur, and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to SVG with Crop and Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = "input.jpg";
+            string outputPath = "output.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for raster operations
-                RasterImage rasterImage = (RasterImage)image;
+                if (!image.IsCached)
+                    image.CacheData();
 
-                // Crop a 400x400 region from the top-left corner
-                rasterImage.Crop(new Rectangle(0, 0, 400, 400));
+                var cropRect = new Rectangle(0, 0, 400, 400);
+                image.Crop(cropRect);
 
-                // Apply Gaussian blur to the entire image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5);
+                image.Filter(image.Bounds, blurOptions);
 
-                // Save the processed image as SVG
-                image.Save(outputPath, new SvgOptions());
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a vector‑based preview of a cropped portion of a raster photo with a soft blur effect for web thumbnails.
- * 2. When you want to preprocess a large PNG by extracting a 400×400 area, applying a Gaussian blur, and exporting it as SVG for scalable UI assets.
- * 3. When creating responsive graphics where a blurred, cropped raster region must be converted to SVG to retain quality at any screen size.
- * 4. When automating a pipeline that extracts a specific region from scanned images, smooths it with a blur, and stores the result in a lightweight vector format.
- * 5. When building a C# tool that prepares image assets for print or digital publishing by cropping, blurring, and converting them to SVG for easy editing.
+ * 1. When you need to generate a vector‑based thumbnail of a specific 400 × 400 area of a photo with a soft focus effect for web previews.
+ * 2. When you want to preprocess a high‑resolution raster image by extracting a 400 × 400 region and applying a Gaussian blur before embedding it in an SVG diagram.
+ * 3. When creating responsive UI icons that require a blurred raster source converted to scalable SVG for different screen densities.
+ * 4. When automating batch processing to crop and blur sections of JPEG assets and store them as lightweight SVG files for faster loading in browsers.
+ * 5. When integrating image manipulation into a C# application that must output blurred, cropped graphics in SVG format for downstream vector‑based editing tools.
  */

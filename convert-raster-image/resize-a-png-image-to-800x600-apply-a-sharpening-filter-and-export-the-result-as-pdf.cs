@@ -1,8 +1,9 @@
-// HOW-TO: Resize PNG to 800x600, Sharpen and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 800x600, Sharpen, and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\result.pdf";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,17 +24,18 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to 800x600
-                image.Resize(800, 600);
-
-                // Apply sharpening filter
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
-                // Save as PDF
+                raster.Resize(800, 600, ResizeType.NearestNeighbourResample);
+                raster.Filter(raster.Bounds, new SharpenFilterOptions());
+
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    image.Save(outputPath, pdfOptions);
+                    raster.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from a high‑resolution PNG while ensuring the image fits a standard 800×600 layout and appears sharper.
- * 2. When an e‑commerce platform must create thumbnail‑size PDFs of product photos uploaded as PNGs for catalog PDFs.
- * 3. When a reporting tool requires converting PNG charts to PDF pages with consistent dimensions and enhanced edge clarity.
- * 4. When a document‑automation workflow needs to downscale large PNG assets, apply a sharpening filter, and embed them in PDF invoices.
- * 5. When a mobile app backend processes user‑uploaded PNG screenshots, resizes them, sharpens details, and stores them as PDFs for archival.
+ * 1. When you need to generate a printable PDF from a high‑resolution PNG by scaling it to standard 800×600 dimensions and enhancing details with a sharpening filter.
+ * 2. When an e‑commerce platform must create thumbnail‑size PDFs of product images for catalog PDFs while improving image clarity.
+ * 3. When a reporting tool requires converting dashboard screenshots (PNG) into compact PDF pages with consistent size and sharper visuals.
+ * 4. When a document‑automation workflow needs to batch‑process PNG assets, resize them for uniform layout, apply sharpening, and embed them in PDF invoices.
+ * 5. When a mobile app backend must prepare user‑uploaded PNG photos for PDF email attachments, ensuring they fit a specific page size and appear crisp.
  */

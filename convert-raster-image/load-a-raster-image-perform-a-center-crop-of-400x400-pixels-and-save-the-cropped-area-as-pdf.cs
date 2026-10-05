@@ -1,61 +1,64 @@
-// HOW-TO: Center Crop a JPEG to 400x400 and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Center Crop Image To 400x400 And Save As PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.pdf";
-
-        try
+        static void Main(string[] args)
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "Input\\sample.png";
+                string outputPath = "Output\\cropped.pdf";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    if (!image.IsCached)
+                        image.CacheData();
+
+                    int cropWidth = 400;
+                    int cropHeight = 400;
+
+                    int left = (image.Width - cropWidth) / 2;
+                    int top = (image.Height - cropHeight) / 2;
+
+                    if (left < 0) left = 0;
+                    if (top < 0) top = 0;
+
+                    Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight);
+                    image.Crop(cropRect);
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Determine the rectangle for a centered 400x400 crop
-                int cropWidth = 400;
-                int cropHeight = 400;
-                int left = (image.Width - cropWidth) / 2;
-                int top = (image.Height - cropHeight) / 2;
-                var cropArea = new Rectangle(left, top, cropWidth, cropHeight);
-
-                // Perform the crop
-                image.Crop(cropArea);
-
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Save the cropped image as PDF
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF thumbnail of a photo by extracting the central 400×400 region.
- * 2. When creating printable PDFs from scanned images and you want to focus on the image’s central area.
- * 3. When preparing a fixed‑size preview for a web gallery and the output must be a PDF document.
- * 4. When automating a workflow that extracts a centered square from product photos and stores it as PDF for archival.
- * 5. When converting high‑resolution JPEGs to smaller PDF files while preserving only the most important central content.
+ * 1. When you need to extract a 400 × 400 pixel region from the center of a PNG and deliver it as a PDF document.
+ * 2. When generating printable thumbnails from large raster files for inclusion in PDF catalogs.
+ * 3. When creating a centered preview of a scanned image and saving it as a PDF for archiving.
+ * 4. When automating the conversion of product photos into fixed‑size PDF assets for e‑commerce platforms.
+ * 5. When preparing a consistent page layout by cropping user‑uploaded images to a central square before embedding them in PDF invoices.
  */

@@ -3,48 +3,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\source.png";
+        string outputPath = "Output\\result.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.svg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for SVG output
-                var rasterizationOptions = new SvgRasterizationOptions
+                using (SvgOptions options = new SvgOptions())
                 {
-                    // Set background color to white
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    // Use the size of the source image as the page size
-                    PageSize = image.Size
-                };
+                    options.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
 
-                // Create SVG save options and attach rasterization options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a raster logo in a web page as scalable SVG while ensuring a solid white background.
- * 2. When converting scanned PNG diagrams to SVG for printing on white paper without transparent artifacts.
- * 3. When generating SVG assets from user‑uploaded PNG images in a C# application that requires consistent background color.
- * 4. When creating vector‑compatible versions of PNG icons for responsive UI designs using Aspose.Imaging.
- * 5. When automating batch processing of PNG files to SVG format with predefined page size and white background in .NET.
+ * 1. When you need to embed a raster logo in an SVG file for responsive web design while ensuring a consistent white backdrop.
+ * 2. When generating printable vector graphics from user‑uploaded PNG images for a reporting system that requires a solid background.
+ * 3. When converting product photos to scalable SVG assets for a mobile app that scales images without losing quality.
+ * 4. When automating batch processing of scanned PNG documents into SVG format with a white canvas for archival purposes.
+ * 5. When creating SVG placeholders from PNG thumbnails in a content‑management workflow that demands a uniform background color.
  */

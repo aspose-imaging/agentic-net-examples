@@ -1,62 +1,68 @@
-// HOW-TO: Batch Resize Images to 1024x1024, Apply Median Filter, Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Resize Raster Images to 1024x1024 and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of input raster images
-            string[] inputFiles = new[]
-            {
-                @"C:\Images\input1.png",
-                @"C:\Images\input2.jpg",
-                @"C:\Images\input3.bmp"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output SVG path (same folder, .svg extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".svg");
-
-                // Ensure the output directory exists
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image
-                using (Image image = Image.Load(inputPath))
+                using (Image img = Image.Load(inputPath))
                 {
-                    // Resize to 1024x1024 using the default resampling method
-                    image.Resize(1024, 1024);
-
-                    // Apply a median filter (size 5) to the entire image
-                    if (image is RasterImage rasterImage)
+                    RasterImage raster = (RasterImage)img;
+                    if (!raster.IsCached)
                     {
-                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                        raster.CacheData();
                     }
 
-                    // Prepare SVG save options with appropriate rasterization settings
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = new Size(1024, 1024)
-                        }
-                    };
+                    raster.Resize(1024, 1024);
+                    raster.Filter(raster.Bounds, new MedianFilterOptions(3));
 
-                    // Save the processed image as SVG
-                    image.Save(outputPath, svgOptions);
+                    using (SvgOptions svgOptions = new SvgOptions())
+                    {
+                        svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = 1024,
+                            PageHeight = 1024,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        };
+                        raster.Save(outputPath, svgOptions);
+                    }
                 }
             }
         }
@@ -69,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process a folder of PNG, JPG, or BMP photos, resize them to a uniform 1024 × 1024 canvas, reduce noise with a median filter, and output scalable SVG files for web galleries.
- * 2. When preparing scanned documents for vector‑based annotation, you can resize each raster page, smooth out speckles with a median filter, and convert the result to SVG to retain editability.
- * 3. When generating icon assets for a responsive UI, this code lets you take existing raster icons, standardize their size, clean up edges, and produce SVG versions that scale without quality loss.
- * 4. When feeding images into a machine‑learning pipeline that expects fixed‑size inputs, you can resize, denoise, and store the pre‑processed data as SVG to keep file size low while preserving visual detail.
- * 5. When creating printable graphics that must be resized and cleaned before vector conversion, the script automates the workflow for multiple raster files, applying a median filter and exporting them as SVG for high‑resolution output.
+ * 1. When you need to prepare a large set of photos for a web‑based vector graphics viewer by resizing them uniformly and converting them to SVG.
+ * 2. When you want to reduce noise in scanned documents before vectorizing them, applying a median filter to each raster file in a folder.
+ * 3. When an e‑commerce platform requires product images to be standardized to 1024 × 1024 pixels and delivered as scalable SVG files for responsive design.
+ * 4. When automating the migration of legacy bitmap assets to SVG for a mobile app, ensuring each image is resized and denoised in a single batch process.
+ * 5. When creating a preprocessing pipeline for machine‑learning training data that expects clean, uniformly sized SVG inputs derived from various raster formats.
  */

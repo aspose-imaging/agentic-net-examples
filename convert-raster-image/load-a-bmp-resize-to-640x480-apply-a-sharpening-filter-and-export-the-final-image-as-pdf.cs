@@ -1,18 +1,18 @@
-// HOW-TO: Resize BMP, Sharpen Image, and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP to 640x480, Sharpen, and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output.pdf";
+            string inputPath = "Input/input.bmp";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,13 +22,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                image.Resize(640, 480);
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                raster.Resize(640, 480);
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to take a high‑resolution BMP scan, shrink it to a standard 640×480 size, sharpen the details, and embed it in a PDF report for easy sharing.
- * 2. When generating printable PDFs from legacy BMP assets, you can resize the images to fit the page, enhance edges with a sharpening filter, and save the result as a PDF using Aspose.Imaging.
- * 3. When preparing screenshots saved as BMP for documentation, you may want to reduce their dimensions, improve clarity, and convert them to a single PDF file for inclusion in manuals.
- * 4. When creating an e‑commerce catalog, you can automatically resize product BMP images, apply a sharpening filter to highlight features, and export them as PDF pages for offline browsing.
- * 5. When archiving scanned BMP documents, you can compress them by resizing, enhance readability with sharpening, and store the final version as a searchable PDF using C#.
+ * 1. When you need to convert legacy BMP scans into compact PDF reports while standardizing them to a 640x480 resolution and enhancing details with a sharpening filter.
+ * 2. When generating printable PDFs from user‑uploaded BMP images for an online form, ensuring the pages are uniformly sized and the images appear crisp.
+ * 3. When automating the preparation of BMP assets for a mobile app, resizing them to 640x480, sharpening to improve visual quality, and bundling them as PDFs for distribution.
+ * 4. When creating archival PDFs from BMP screenshots, applying a sharpen filter to recover lost detail and resizing to reduce file size.
+ * 5. When building a C# service that processes BMP product photos, normalizes their dimensions, enhances edges, and outputs them as PDF catalogs for clients.
  */

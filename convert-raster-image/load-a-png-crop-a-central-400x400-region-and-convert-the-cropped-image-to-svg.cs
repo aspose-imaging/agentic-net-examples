@@ -3,46 +3,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.png";
+        string outputPath = "output/output.svg";
 
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine the central 400x400 rectangle
-                int cropWidth = 400;
-                int cropHeight = 400;
-                int x = (image.Width - cropWidth) / 2;
-                int y = (image.Height - cropHeight) / 2;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Crop the image to the central region
-                image.Crop(new Rectangle(x, y, cropWidth, cropHeight));
+                int targetSize = 400;
+                int left = (raster.Width - targetSize) / 2;
+                int right = left;
+                int top = (raster.Height - targetSize) / 2;
+                int bottom = top;
 
-                // Prepare SVG save options
+                raster.Crop(left, right, top, bottom);
+
                 SvgOptions svgOptions = new SvgOptions();
-
-                // Save the cropped image as SVG
-                image.Save(outputPath, svgOptions);
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a 400 × 400 thumbnail from the middle of a PNG logo and embed it as scalable SVG in a web page.
- * 2. When generating vector‑based icons from raster screenshots by cropping the focal area before conversion to SVG for responsive UI design.
- * 3. When preparing print‑ready artwork that requires a centered raster segment of a PNG to be transformed into an editable SVG format.
- * 4. When automating batch processing to isolate the central portion of product images and store them as SVG files for lightweight storage.
- * 5. When creating diagram components by trimming the core area of a PNG diagram and converting it to SVG for seamless scaling in documentation.
+ * 1. When you need to extract a fixed‑size thumbnail from a large PNG and deliver it as a scalable SVG for responsive web graphics.
+ * 2. When converting raster logos stored as PNG into vector SVGs after cropping the central area to fit branding guidelines.
+ * 3. When generating cut‑out icons from user‑uploaded PNG files for use in high‑resolution UI designs that require SVG format.
+ * 4. When preprocessing PNG assets by cropping a 400‑pixel square before converting them to SVG for inclusion in printable PDFs.
+ * 5. When automating a batch process that trims the center of PNG screenshots and saves them as SVGs for lightweight documentation.
  */

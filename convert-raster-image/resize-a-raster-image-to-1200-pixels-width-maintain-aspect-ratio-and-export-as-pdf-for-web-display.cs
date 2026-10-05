@@ -6,41 +6,38 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Images\ResizedOutput.pdf";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\image.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Desired width
-                int targetWidth = 1200;
+                RasterImage raster = (RasterImage)img;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
-                // Calculate proportional height
-                int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+                int newWidth = 1200;
+                int newHeight = (int)(raster.Height * (newWidth / (double)raster.Width));
 
-                // Resize while preserving aspect ratio
-                image.Resize(targetWidth, targetHeight, ResizeType.HighQualityResample);
+                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                // Prepare PDF export options
-                var pdfOptions = new PdfOptions();
-
-                // Save the resized image as PDF
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a web‑friendly PDF from a high‑resolution JPEG by scaling it to a fixed width for faster page load.
- * 2. When an e‑commerce site must display product photos in PDF catalogs with consistent width while preserving the original aspect ratio.
- * 3. When a reporting tool creates printable PDFs from user‑uploaded images and requires automatic resizing to fit standard page layouts.
- * 4. When a content management system converts uploaded raster images to PDFs for archival, ensuring each file is no wider than 1200 pixels.
- * 5. When a mobile app backend prepares image‑based PDFs for email attachments, resizing them to reduce file size without distortion.
+ * 1. When you need to convert a large PNG into a PDF that fits a 1200‑pixel width for faster web display while keeping the original aspect ratio.
+ * 2. When an e‑commerce platform generates product catalogs by resizing product images to a uniform width and exporting them as PDFs for consistent presentation.
+ * 3. When a reporting application creates printable PDFs from high‑resolution screenshots, scaling them to 1200 px wide to match typical browser dimensions.
+ * 4. When a content‑management system automatically processes uploaded images, resizing them to 1200 px and saving them as PDFs for easy download and viewing.
+ * 5. When a batch job prepares marketing assets by using Aspose.Imaging to resize raster images and output them as PDFs for email newsletters.
  */

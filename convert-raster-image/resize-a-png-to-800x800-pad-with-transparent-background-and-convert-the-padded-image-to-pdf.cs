@@ -1,62 +1,62 @@
-// HOW-TO: Resize PNG to 800x800, Pad Transparent Background, Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 800x800 with Transparent Padding and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/input.png";
-        string outputPath = "Output/output.pdf";
-
         try
         {
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/padded.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage src = (RasterImage)Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                if (!src.IsCached) src.CacheData();
+                Directory.CreateDirectory(outputDir);
+            }
 
-                const int targetSize = 800;
-                int newWidth, newHeight;
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                // Calculate scaling to fit within 800x800 while preserving aspect ratio
+                double scale = Math.Min(800.0 / sourceImage.Width, 800.0 / sourceImage.Height);
+                int resizedWidth = (int)(sourceImage.Width * scale);
+                int resizedHeight = (int)(sourceImage.Height * scale);
 
-                if (src.Width > src.Height)
+                // Resize source image
+                sourceImage.Resize(resizedWidth, resizedHeight, ResizeType.NearestNeighbourResample);
+
+                // Create a transparent 800x800 canvas
+                using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), 800, 800))
                 {
-                    newWidth = targetSize;
-                    newHeight = src.Height * targetSize / src.Width;
-                }
-                else
-                {
-                    newHeight = targetSize;
-                    newWidth = src.Width * targetSize / src.Height;
-                }
+                    canvas.BackgroundColor = Color.Transparent;
+                    canvas.HasTransparentColor = true;
 
-                src.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                PngOptions canvasOptions = new PngOptions();
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, targetSize, targetSize))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.Transparent);
-
-                    int offsetX = (targetSize - newWidth) / 2;
-                    int offsetY = (targetSize - newHeight) / 2;
+                    // Center the resized image on the canvas
+                    int offsetX = (800 - resizedWidth) / 2;
+                    int offsetY = (800 - resizedHeight) / 2;
 
                     canvas.SaveArgb32Pixels(
-                        new Rectangle(offsetX, offsetY, src.Width, src.Height),
-                        src.LoadArgb32Pixels(src.Bounds));
+                        new Rectangle(offsetX, offsetY, resizedWidth, resizedHeight),
+                        sourceImage.LoadArgb32Pixels(sourceImage.Bounds));
 
-                    PdfOptions pdfOptions = new PdfOptions();
-                    canvas.Save(outputPath, pdfOptions);
+                    // Save canvas as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        canvas.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a square PDF thumbnail from user‑uploaded PNG logos while preserving transparency.
- * 2. When an e‑commerce platform must standardize product images to 800 × 800 pixels and embed them in PDF catalogs.
- * 3. When a reporting tool requires converting resized PNG charts into PDF pages with a transparent canvas.
- * 4. When a mobile app backend must prepare printable PDFs from variable‑size PNG assets without distorting the original graphics.
- * 5. When an automated workflow needs to batch‑process PNG icons, pad them to a uniform size, and archive them as PDF files.
+ * 1. When generating product catalog pages that require all images to be a uniform 800x800 size with transparent borders before embedding them into a PDF brochure.
+ * 2. When preparing user‑uploaded PNG avatars for a web application that must be resized, padded to a square canvas, and stored as PDF for archival.
+ * 3. When creating printable PDF reports that include icons or logos, ensuring each image fits a fixed square dimension without distortion and retains transparency.
+ * 4. When automating the conversion of varied‑size PNG assets into a standardized PDF format for batch printing or e‑signature workflows.
+ * 5. When building a C# service that normalizes images for a mobile app, resizing them to 800×800, adding transparent padding, and delivering them as PDF files to reduce client‑side processing.
  */

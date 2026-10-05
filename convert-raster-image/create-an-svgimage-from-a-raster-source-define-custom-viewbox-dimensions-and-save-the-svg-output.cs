@@ -1,52 +1,56 @@
-// HOW-TO: Create SVG From PNG With Custom ViewBox In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to Scalable SVG with Custom Viewbox in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.png";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            string inputPath = Path.Combine(inputDirectory, "sample.png");
+            string outputPath = Path.Combine(outputDirectory, "output.svg");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster source image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Define custom viewbox dimensions (width, height, dpi)
-                int viewBoxWidth = 800;   // custom width in pixels
-                int viewBoxHeight = 600;  // custom height in pixels
-                int dpi = 96;             // typical screen DPI
-
-                // Create an SVG graphics context with the custom viewbox
-                SvgGraphics2D graphics = new SvgGraphics2D(viewBoxWidth, viewBoxHeight, dpi);
-
-                // Draw the raster image onto the SVG canvas, scaling to fit the viewbox
-                graphics.DrawImage((RasterImage)rasterImage,
-                                   new Aspose.Imaging.Point(0, 0),
-                                   new Aspose.Imaging.Size(viewBoxWidth, viewBoxHeight));
-
-                // Finalize the SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (SvgOptions svgOptions = new SvgOptions())
                 {
-                    // Save the SVG output
-                    svgImage.Save(outputPath);
+                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = 800,
+                        PageHeight = 600,
+                        BackgroundColor = Color.White
+                    };
+                    image.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -59,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a high‑resolution PNG into a scalable SVG for responsive web design, this code converts the raster image and sets a specific viewbox size.
- * 2. When generating vector graphics for print layouts that require exact dimensions and DPI, the example creates an SVG with a custom viewbox matching the desired output size.
- * 3. When automating batch conversion of product photos to SVG icons with consistent width and height, the code demonstrates how to draw and scale each raster image onto an SVG canvas.
- * 4. When integrating Aspose.Imaging into a C# application that must produce SVG assets for mobile apps, the snippet shows how to load a PNG, define viewbox parameters, and save the result.
- * 5. When you need to programmatically create SVG placeholders that reference existing raster images while preserving aspect ratio, this example illustrates drawing the image onto an SVG graphics context with custom scaling.
+ * 1. When you need to embed a high‑resolution PNG into a web page as a scalable SVG with a defined 800×600 viewbox.
+ * 2. When generating printable graphics from raster assets and you require a white background in the resulting SVG.
+ * 3. When automating batch conversion of product photos to vector format for responsive UI layouts in a C# application.
+ * 4. When creating SVG placeholders from existing bitmap logos while preserving exact dimensions for design tools.
+ * 5. When integrating Aspose.Imaging into a .NET service that transforms uploaded images into SVG files with custom page size settings.
  */

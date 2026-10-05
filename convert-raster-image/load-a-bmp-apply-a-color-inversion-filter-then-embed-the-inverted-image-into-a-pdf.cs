@@ -2,50 +2,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.bmp";
             string outputPath = "output.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load BMP image
-            using (BmpImage bmp = new BmpImage(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Invert colors pixel by pixel
-                for (int y = 0; y < bmp.Height; y++)
+                RasterImage raster = (RasterImage)img;
+                var rect = raster.Bounds;
+                int[] pixels = raster.LoadArgb32Pixels(rect);
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    for (int x = 0; x < bmp.Width; x++)
-                    {
-                        var pixel = bmp.GetPixel(x, y);
-                        var inverted = Aspose.Imaging.Color.FromArgb(
-                            pixel.A,
-                            255 - pixel.R,
-                            255 - pixel.G,
-                            255 - pixel.B);
-                        bmp.SetPixel(x, y, inverted);
-                    }
+                    int pixel = pixels[i];
+                    int a = (pixel >> 24) & 0xFF;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    r = 255 - r;
+                    g = 255 - g;
+                    b = 255 - b;
+                    pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                 }
-
-                // Save the inverted image into a PDF file
-                var pdfOptions = new PdfOptions();
-                bmp.Save(outputPath, pdfOptions);
+                raster.SaveArgb32Pixels(rect, pixels);
+                raster.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -57,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a negative‑style preview of a BMP diagram and embed it directly into a PDF report.
- * 2. When an application must automatically convert scanned BMP assets into PDF files with inverted colors for printing on dark backgrounds.
- * 3. When a batch job processes legacy BMP icons, applies a color inversion filter, and stores the results as PDF documents for archival.
- * 4. When a web service receives BMP uploads, inverts the image colors for visual effect, and returns a PDF version to the client.
- * 5. When you want to create a PDF portfolio that contains BMP images with their colors reversed to meet branding guidelines.
+ * 1. When you need to generate a printable PDF that shows a negative‑film effect of an existing BMP photograph.
+ * 2. When a document‑generation system must embed a color‑inverted version of a bitmap logo into a PDF report.
+ * 3. When an archival workflow requires converting legacy BMP scans to PDF while applying a visual contrast enhancement.
+ * 4. When a web service creates PDF previews of user‑uploaded BMP images with inverted colors for accessibility testing.
+ * 5. When a batch‑processing tool automates the transformation of BMP assets into PDF files with a reversed color palette for branding guidelines.
  */

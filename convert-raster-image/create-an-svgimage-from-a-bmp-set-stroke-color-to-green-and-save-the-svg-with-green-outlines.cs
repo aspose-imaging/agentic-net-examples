@@ -1,53 +1,39 @@
-// HOW-TO: Create SVG From BMP With Green Outline Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to SVG With Green Outline In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/sample.bmp";
-        string outputPath = "output/result.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/input.bmp";
+            string outputPath = "Output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (RasterImage bmpImage = (RasterImage)Image.Load(inputPath))
+            using (Image bmpImage = Image.Load(inputPath))
             {
-                // Create SVG graphics with the same dimensions as the BMP
-                int width = bmpImage.Width;
-                int height = bmpImage.Height;
-                int dpi = 96; // standard screen DPI
+                RasterImage raster = (RasterImage)bmpImage;
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-                // Draw the BMP onto the SVG canvas
-                graphics.DrawImage(bmpImage, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
-
-                // Draw a green rectangle outline around the image to set the stroke color to green
-                Pen greenPen = new Pen(Color.Green, 2);
-                graphics.DrawRectangle(greenPen, 0, 0, width, height);
-
-                // Finalize SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (SvgImage svgImage = (SvgImage)Image.Create(new SvgOptions(), raster.Width, raster.Height))
                 {
-                    // Save the SVG file
+                    Graphics graphics = new Graphics(svgImage);
+                    graphics.DrawImage(raster, new Point(0, 0));
+
+                    Pen greenPen = new Pen(Color.Green);
+                    graphics.DrawRectangle(greenPen, new Rectangle(0, 0, raster.Width, raster.Height));
+
                     svgImage.Save(outputPath);
                 }
             }
@@ -61,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a legacy BMP graphic into a scalable SVG for web display while adding a green border to highlight the image.
- * 2. When generating vector assets from raster screenshots for documentation and you want the outlines colored green to match branding guidelines.
- * 3. When automating a batch process that creates SVG diagrams from BMP files and requires a consistent green stroke around each diagram for visual emphasis.
- * 4. When integrating image conversion into a C# application that must produce SVG files with custom stroke colors for downstream editing in vector editors.
- * 5. When preparing printable SVG assets from BMP sources and need a green rectangle outline to indicate cut lines or safety margins.
+ * 1. When you need to embed a bitmap logo into a web page as scalable SVG while highlighting its border in green.
+ * 2. When you want to generate vector graphics from legacy BMP assets for printing, adding a green outline for brand colors.
+ * 3. When an application must convert user‑uploaded BMP files to SVG format and automatically apply a green stroke for visual emphasis.
+ * 4. When creating diagrammatic thumbnails from BMP screenshots and requiring a consistent green frame in the resulting SVG files.
+ * 5. When automating batch processing of BMP icons to SVG with a green border to match a UI theme using Aspose.Imaging in C#.
  */
