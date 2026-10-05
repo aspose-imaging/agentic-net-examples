@@ -1,41 +1,32 @@
 // HOW-TO: Apply Median Filter to DICOM and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "sample.dicom";
-            string outputPath = "sample.MedianFiltered.png";
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
+                dicom.Filter(dicom.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Apply a median filter with size 5 to the entire image
-                dicomImage.Filter(dicomImage.Bounds, new MedianFilterOptions(5));
-
-                // Save the filtered image as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions();
+                dicom.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application needs to reduce speckle noise in DICOM scans before displaying them as PNG thumbnails for web viewers.
- * 2. When a healthcare data pipeline must preprocess DICOM images with a median filter to improve visual quality before archiving them as lossless PNG files.
- * 3. When a C# program has to convert noisy DICOM ultrasound frames to PNG for integration with a machine‑learning model that expects clean pixel data.
- * 4. When a medical imaging system requires batch processing of DICOM files, applying a 5‑pixel median filter and saving the results as PNG for patient reports.
- * 5. When a developer wants to use Aspose.Imaging to denoise DICOM images and export them to PNG for use in cross‑platform mobile health apps.
+ * 1. When you need to reduce speckle noise in a medical DICOM scan before creating a PNG thumbnail for a web viewer.
+ * 2. When you want to preprocess radiology images with a median filter to improve visual quality before storing them in a PNG archive.
+ * 3. When an application must convert DICOM files to PNG for reporting while preserving diagnostic details by smoothing noise.
+ * 4. When integrating Aspose.Imaging into a C# workflow that cleans up noisy CT images prior to exporting them as lossless PNGs.
+ * 5. When building a PACS export tool that applies a 3×3 median filter to DICOM images to enhance readability before saving as PNG files.
  */

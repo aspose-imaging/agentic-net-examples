@@ -1,4 +1,4 @@
-// HOW-TO: Extract Each Frame From Multi‑Page DICOM and Save As PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract All Frames From Multi-Page DICOM and Save As PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,39 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input DICOM file path
-            string inputPath = @"C:\Temp\multiframe.dcm";
-            // Hardcoded output directory
-            string outputDir = @"C:\Temp\Output";
+            string inputPath = "input.dcm";
+            string outputDirectory = "output";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Open file stream for DICOM image
-            using (Stream stream = File.OpenRead(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Load DICOM image from stream
-                using (DicomImage dicomImage = new DicomImage(stream))
+                IMultipageImage multiPage = image as IMultipageImage;
+                if (multiPage == null)
                 {
-                    // Iterate through each page
-                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
-                    {
-                        // Build output file path for this page
-                        string outputPath = Path.Combine(outputDir, $"frame.{dicomPage.Index}.png");
+                    Console.Error.WriteLine("The image does not support multiple pages.");
+                    return;
+                }
 
-                        // Ensure directory for this file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save page as PNG
-                        dicomPage.Save(outputPath, new PngOptions());
-                    }
+                int pageIndex = 0;
+                foreach (Image page in multiPage.Pages)
+                {
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{pageIndex}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    PngOptions pngOptions = new PngOptions();
+                    page.Save(outputPath, pngOptions);
+                    pageIndex++;
                 }
             }
         }
@@ -56,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert every slice of a multi‑frame medical DICOM study into separate PNG images for analysis or reporting.
- * 2. When a PACS integration requires exporting individual DICOM frames to a web‑friendly format for preview in a browser.
- * 3. When building a batch‑processing tool that extracts each frame from a DICOM file to feed into a machine‑learning pipeline that expects PNG inputs.
- * 4. When creating archival copies of each DICOM frame as lossless PNG files to comply with regulatory documentation standards.
- * 5. When developing a diagnostic application that displays each DICOM slice as a separate PNG thumbnail in a gallery view.
+ * 1. When a radiology software needs to generate thumbnail previews of each slice in a DICOM series for a web viewer.
+ * 2. When a medical research pipeline must convert every frame of a multi-frame DICOM into PNG files for machine-learning model training.
+ * 3. When a hospital information system wants to archive individual DICOM frames as lossless PNGs for long-term storage compliance.
+ * 4. When a developer builds a diagnostic reporting tool that extracts each DICOM image to embed them in PDF reports.
+ * 5. When an imaging QA process requires batch conversion of all frames in a DICOM study to PNG to compare visual quality across modalities.
  */
