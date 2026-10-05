@@ -1,20 +1,19 @@
-// HOW-TO: Add Frame Index Labels to APNG and Export as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated PNG to GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -26,16 +25,10 @@ class Program
 
             using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                for (int i = 0; i < apng.PageCount; i++)
+                var gifOptions = new GifOptions
                 {
-                    ApngFrame frame = (ApngFrame)apng.Pages[i];
-                    Graphics graphics = new Graphics(frame);
-                    Font font = new Font("Arial", 12);
-                    SolidBrush brush = new SolidBrush(Color.Yellow);
-                    graphics.DrawString($"Frame {i}", font, brush, new Point(5, 5));
-                }
-
-                GifOptions gifOptions = new GifOptions();
+                    Source = new FileCreateSource(outputPath, false)
+                };
                 apng.Save(outputPath, gifOptions);
             }
         }
@@ -48,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an animated PNG to a GIF while showing each original frame number on the animation for debugging or documentation.
- * 2. When you want to embed frame index watermarks into an APNG before exporting it as a GIF for use in presentations or tutorials.
- * 3. When a game developer must generate a GIF preview of sprite animations and include the frame order as on‑screen labels.
- * 4. When a web application needs to display an APNG as a GIF with visible frame numbers to help users understand the animation sequence.
- * 5. When automating image processing pipelines with Aspose.Imaging in C# to annotate each frame of an APNG and produce a GIF for platforms that only support GIF animation.
+ * 1. When you need to display an animated PNG on platforms that only support GIF, you can convert it to GIF with Aspose.Imaging in C#.
+ * 2. When a web application must generate lightweight animated images for email newsletters, converting APNG to GIF reduces file size and ensures compatibility.
+ * 3. When processing user‑uploaded APNG files on a server and storing them as GIFs for a legacy content management system, this code automates the conversion.
+ * 4. When creating a batch job that transforms a library of APNG assets into GIFs for use in mobile apps that lack APNG support, the example provides the necessary steps.
+ * 5. When integrating image conversion into a .NET service that prepares animated images for archival, you can start with this APNG‑to‑GIF conversion as the base operation.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Add Author Description and Creation Date Metadata to APNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Author Description And Creation Date Metadata To APNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,14 +7,14 @@ using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.apng";
+            string inputPath = Path.Combine("Input", "source.png");
+            string outputPath = Path.Combine("Output", "output.apng");
 
             if (!File.Exists(inputPath))
             {
@@ -29,15 +29,13 @@ class Program
                 ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apngImage.RemoveAllFrames();
-                    apngImage.AddFrame(sourceImage);
-                    apngImage.Save();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
                 }
             }
         }
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed copyright information such as the author name into an animated PNG generated from a static PNG using Aspose.Imaging in a C# application.
- * 2. When a web service creates APNG thumbnails and must include a description field for SEO or accessibility purposes.
- * 3. When an automated reporting tool generates animated charts as APNG files and wants to record the creation date in the file metadata for audit trails.
- * 4. When a game asset pipeline converts sprite sheets to APNG and needs to store author and description metadata for asset management systems.
- * 5. When a desktop utility batch‑processes images to APNG format and must preserve custom metadata so downstream applications can read the author and creation timestamp.
+ * 1. When you need to embed author, description, and creation date information into an animated PNG generated from a static PNG using Aspose.Imaging in a C# application.
+ * 2. When a web service must deliver APNG files with proper metadata for copyright tracking and SEO purposes.
+ * 3. When converting a series of PNG frames into a single APNG and want the resulting file to carry custom metadata for downstream processing tools.
+ * 4. When building a desktop tool that archives images with provenance data, requiring the APNG to store creator details and timestamps.
+ * 5. When automating image pipelines that generate animated graphics and need to comply with metadata standards for digital asset management systems.
  */

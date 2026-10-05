@@ -1,51 +1,69 @@
-// HOW-TO: Batch Convert TIFF to APNG with Dimension Based Frame Delay in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multi‑Page TIFF to APNG with Dynamic Frame Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\InputTiffs";
-        string outputFolder = @"C:\OutputApngs";
-
         try
         {
-            // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            foreach (string inputPath in tiffFiles)
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
-                using (Image image = Image.Load(inputPath))
+                using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
                 {
-                    // Compute frame delay based on image dimensions (average of width and height)
-                    uint frameDelay = (uint)((image.Width + image.Height) / 2);
+                    int maxWidth = 0;
+                    int maxHeight = 0;
+                    foreach (TiffFrame frame in tiff.Frames)
+                    {
+                        if (frame.Width > maxWidth) maxWidth = frame.Width;
+                        if (frame.Height > maxHeight) maxHeight = frame.Height;
+                    }
 
-                    // Save as APNG with the calculated default frame time
                     ApngOptions apngOptions = new ApngOptions
                     {
-                        DefaultFrameTime = frameDelay
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
-                    image.Save(outputPath, apngOptions);
+                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, maxWidth, maxHeight))
+                    {
+                        apng.RemoveAllFrames();
+
+                        foreach (TiffFrame frame in tiff.Frames)
+                        {
+                            apng.AddFrame(frame);
+                        }
+
+                        apng.Save();
+                    }
                 }
             }
         }
@@ -58,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of multi‑page TIFF scans into animated PNGs for web display, while setting each frame’s duration based on its size.
- * 2. When a graphics pipeline must generate lightweight APNG sprites from high‑resolution TIFF assets and ensure larger images stay on screen longer by using dimension‑derived frame times.
- * 3. When an archival system requires batch exporting of scanned documents to APNG format with consistent animation speed that adapts to varying image dimensions.
- * 4. When a game developer wants to create character animations from TIFF frames, automatically adjusting the playback speed so bigger frames appear slower without manual timing.
- * 5. When a reporting tool needs to transform TIFF charts into animated PNGs for dashboards, using the average width‑height to calculate a suitable default frame delay for each file.
+ * 1. When you need to automatically transform a folder of multi‑page TIFF scans into animated PNGs for web display.
+ * 2. When you want to generate APNG files that preserve the largest frame dimensions across all TIFF pages.
+ * 3. When you have to process thousands of medical or satellite TIFF images and output lightweight animated PNGs for mobile apps.
+ * 4. When you need to ensure each APNG animation uses a consistent canvas size derived from the biggest TIFF frame.
+ * 5. When you are building a C# batch job that converts legacy TIFF assets to modern APNG format without manual intervention.
  */

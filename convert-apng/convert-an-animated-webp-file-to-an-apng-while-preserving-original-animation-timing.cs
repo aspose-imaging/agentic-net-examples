@@ -1,39 +1,52 @@
-// HOW-TO: Convert Animated WebP to APNG While Preserving Frame Timing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated WebP to APNG with Original Frame Timing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.webp";
-            string outputPath = "output.png";
+            string inputPath = Path.Combine("Input", "animation.webp");
+            string outputPath = Path.Combine("Output", "animation.apng");
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Save as Animated PNG (APNG) preserving original frame timing
-                image.Save(outputPath, new ApngOptions());
+                var webpImage = (WebPImage)img;
+
+                var apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, webpImage.Width, webpImage.Height))
+                {
+                    foreach (var page in webpImage.Pages)
+                    {
+                        var raster = (RasterImage)page;
+                        apngImage.AddFrame(raster);
+                    }
+
+                    apngImage.Save();
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -41,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display animated web graphics on platforms that only support APNG, you can convert WebP animations to APNG with original timing using C#.
- * 2. When optimizing a mobile app’s assets, you may replace WebP animations with APNG to ensure compatibility with iOS while keeping the animation speed unchanged.
- * 3. When building a server‑side image processing pipeline, you might convert user‑uploaded animated WebP files to APNG for downstream tools that require PNG input.
- * 4. When creating marketing emails that only allow PNG images, you can transform animated WebP banners into APNGs without losing the intended frame delays.
- * 5. When migrating a legacy website’s animated assets from WebP to a format supported by older browsers, you can use this code to batch‑convert them while preserving the original animation timing.
+ * 1. When you need to display animated graphics on platforms that support APNG but not WebP, you can convert the WebP animation to APNG while keeping the original frame delays.
+ * 2. When optimizing a mobile app’s assets, you may convert animated WebP stickers to APNG to ensure consistent playback timing across iOS and Android devices.
+ * 3. When migrating a legacy web catalog that uses animated WebP files to a new system that only accepts APNG, this code preserves the animation speed during the transition.
+ * 4. When generating email newsletters that require APNG for animated images, you can programmatically transform WebP animations to APNG without losing timing information.
+ * 5. When building a server‑side image processing pipeline in C#, you can use this snippet to batch‑convert user‑uploaded animated WebP files to APNG while retaining their original animation timing.
  */

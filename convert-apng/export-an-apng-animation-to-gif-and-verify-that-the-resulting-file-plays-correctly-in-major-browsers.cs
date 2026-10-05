@@ -1,38 +1,32 @@
-// HOW-TO: Convert APNG Animation to GIF and Test Browser Compatibility in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert APNG Animation to GIF for Browser Compatibility in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output/output.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG animation
-            using (Image image = Image.Load(inputPath))
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Save as GIF animation
-                var gifOptions = new GifOptions();
-                image.Save(outputPath, gifOptions);
+                GifOptions options = new GifOptions();
+                apng.Save(outputPath, options);
             }
-
-            // The resulting GIF can be opened in major browsers to verify playback.
         }
         catch (Exception ex)
         {
@@ -43,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated PNG on browsers that only support GIF, you can convert the APNG to a GIF using Aspose.Imaging in C#.
- * 2. When preparing marketing assets for email newsletters that require GIF format, you can transform APNG animations to GIFs programmatically.
- * 3. When migrating legacy web content that uses APNG to a modern site with limited GIF support, the code automates the conversion and ensures the animation plays correctly.
- * 4. When building an automated pipeline that validates image compatibility across Chrome, Firefox, and Safari, you can generate a GIF from an APNG and open it in each browser to confirm playback.
- * 5. When creating a desktop utility that batch‑processes user‑uploaded APNG files into GIFs for social media sharing, this snippet shows the core conversion and directory handling logic.
+ * 1. When you need to serve animated images on websites that only support GIF, you can convert APNG files to GIF using Aspose.Imaging in C#.
+ * 2. When integrating user‑generated content, converting uploaded APNG stickers to GIF ensures they display correctly across all major browsers.
+ * 3. When building an email marketing system, converting APNG banners to GIF guarantees animation works in email clients that lack APNG support.
+ * 4. When migrating legacy assets, batch‑processing APNG icons to GIF with C# simplifies compatibility with older web platforms.
+ * 5. When creating a cross‑platform mobile app, converting APNG animations to GIF at runtime ensures smooth playback on iOS and Android browsers.
  */
