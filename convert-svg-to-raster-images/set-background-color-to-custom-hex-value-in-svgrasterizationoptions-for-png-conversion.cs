@@ -1,49 +1,43 @@
 // HOW-TO: Set Custom Hex Background Color When Converting SVG to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/sample.png";
 
         try
         {
-            // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Configure rasterization options with a custom background color (hex #1A2B3C)
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.FromArgb(255, 0x1A, 0x2B, 0x3C), // opaque custom color
-                    PageSize = svgImage.Size
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Set PNG save options and attach rasterization options
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the rasterized PNG
-                svgImage.Save(outputPath, pngOptions);
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                using (var pngOptions = new PngOptions())
+                {
+                    pngOptions.Source = new FileCreateSource(outputPath, false);
+
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.FromArgb(255, 0x12, 0x34, 0x56)
+                    };
+
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PNG thumbnails from SVG logos with a specific brand color as the canvas background.
- * 2. When exporting SVG diagrams to PNG for reports and must ensure a consistent dark background that matches corporate styling.
- * 3. When converting user-uploaded SVG icons to PNG assets for a web app and want to replace transparent areas with a custom hex color.
- * 4. When creating print-ready PNG images from SVG illustrations and need to set an opaque background to avoid unwanted transparency.
- * 5. When automating batch processing of SVG files to PNG and require a fixed background shade to maintain visual uniformity across all output files.
+ * 1. When generating product thumbnails from SVG logos and you need the PNG background to use a specific brand hex color.
+ * 2. When exporting SVG diagrams to PNG for email attachments and want a consistent dark background defined by a custom hex value.
+ * 3. When creating printable PNG assets from vector icons and must ensure the background matches a corporate color palette specified in hex.
+ * 4. When processing user‑uploaded SVG files on a web service and need to replace transparent backgrounds with a custom hex color before saving as PNG.
+ * 5. When automating batch conversion of SVG charts to PNG for a reporting dashboard that requires a uniform background shade in hex.
  */

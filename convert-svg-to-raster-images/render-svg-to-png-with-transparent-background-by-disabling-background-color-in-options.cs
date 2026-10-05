@@ -1,48 +1,30 @@
-// HOW-TO: Convert SVG to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to PNG with Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\test.svg";
-            string outputPath = @"C:\temp\test.output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (SvgImage svgImage = new SvgImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with a transparent background
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    PageSize = svgImage.Size // preserve original size
-                };
-
-                // Set PNG save options and attach rasterization options
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save as PNG with transparent background
-                svgImage.Save(outputPath, pngOptions);
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PNG icons from SVG assets while preserving transparency for web UI.
- * 2. When converting vector logos stored as SVG into PNG files for email signatures that require a clear background.
- * 3. When creating thumbnails of SVG diagrams for PDF reports and the background must remain invisible.
- * 4. When processing user‑uploaded SVG illustrations in a C# service and saving them as transparent PNGs for a mobile app.
- * 5. When automating batch conversion of SVG graphics to PNG for a design system that needs overlay compatibility.
+ * 1. When you need to generate web‑ready PNG icons from scalable SVG graphics while preserving transparency for overlay on different backgrounds.
+ * 2. When an e‑commerce platform must convert product vector illustrations into PNG thumbnails that can be displayed over varied UI themes without a solid background.
+ * 3. When a reporting tool creates charts as SVG and you need to embed them in PDF or Word documents that require PNG images with transparent backgrounds.
+ * 4. When a mobile app builds custom stickers from SVG assets and must export them as PNG files that blend seamlessly with user photos.
+ * 5. When an automated build pipeline processes design assets, converting SVG logos to transparent PNGs for use in email signatures and marketing materials.
  */

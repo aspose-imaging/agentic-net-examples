@@ -1,58 +1,53 @@
-// HOW-TO: How to Catch SVG Save Errors and Log File Path in C# (Aspose.Imaging for .NET)
+// HOW-TO: Catch Exceptions When Converting PNG To SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace SvgConversion
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.png";
+                string outputPath = "output/output.svg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                try
+                if (!File.Exists(inputPath))
                 {
-                    // Save the image as SVG
-                    var options = new SvgOptions();
-                    image.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-                catch (Exception ex)
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Record save errors with file path and message
-                    Console.Error.WriteLine($"Error saving file '{outputPath}': {ex.Message}");
+                    try
+                    {
+                        image.Save(outputPath, new SvgOptions());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Failed to save SVG for {outputPath}: {ex.Message}");
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Catch any unexpected errors
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to process user‑uploaded SVG files and ensure any save failures are recorded for troubleshooting.
- * 2. When automating batch conversion of SVG assets and want to log the exact file that caused an error.
- * 3. When integrating Aspose.Imaging into a web service that generates SVG output and must return clear error messages.
- * 4. When building a desktop tool that edits SVG graphics and you must verify the output directory exists before saving.
- * 5. When running scheduled scripts that modify SVG diagrams and you need to capture and report unexpected exceptions.
+ * 1. When an automated batch job converts user‑uploaded PNG files to SVG and must log any failures without stopping the whole process.
+ * 2. When a web service generates scalable vector graphics from raster images and needs to capture the exact file path and error details for troubleshooting.
+ * 3. When a desktop application allows users to export edited PNG pictures as SVG and wants to display a clear error message if the save operation fails.
+ * 4. When a CI/CD pipeline validates image assets by converting them to SVG and requires exception handling to prevent pipeline crashes.
+ * 5. When a background service monitors a folder, converts new PNG files to SVG using Aspose.Imaging, and records any save errors to a log file for later analysis.
  */

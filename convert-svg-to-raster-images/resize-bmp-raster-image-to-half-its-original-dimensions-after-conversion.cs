@@ -4,43 +4,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageResizerApp
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output_resized.bmp";
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = image as RasterImage;
+                    if (raster == null)
+                    {
+                        Console.Error.WriteLine("The loaded image is not a raster image.");
+                        return;
+                    }
+
+                    int newWidth = raster.Width / 2;
+                    int newHeight = raster.Height / 2;
+
+                    raster.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                    raster.Save(outputPath);
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Calculate half of the original dimensions
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-
-                // Resize the image (default NearestNeighbourResample)
-                image.Resize(newWidth, newHeight);
-
-                // Save the resized image back as BMP
-                image.Save(outputPath);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
@@ -48,8 +50,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to generate smaller thumbnail versions of large BMP files for faster web page loading.
- * 2. When a desktop application must reduce the memory footprint of BMP assets before embedding them in a report.
- * 3. When an automated batch job processes scanned BMP documents and must halve their resolution to meet email attachment size limits.
- * 4. When a game developer wants to downscale high‑resolution BMP textures to improve rendering performance on low‑end devices.
- * 5. When a legacy system requires BMP images at exactly half their original width and height for compatibility with older hardware.
+ * 2. When a desktop application must reduce the dimensions of scanned BMP documents before storing them to save disk space.
+ * 3. When a game engine requires BMP textures at half resolution to improve rendering performance on low‑end devices.
+ * 4. When an automated batch process converts high‑resolution BMP screenshots to a reduced size for email attachment limits.
+ * 5. When a legacy system that only accepts BMP images needs the pictures downscaled to meet a maximum width/height constraint.
  */
