@@ -1,8 +1,10 @@
-// HOW-TO: Apply Tilt‑Shift Effect To SVG And Save As High‑Resolution JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Tilt‑Shift Blur to SVG and Save as High‑Resolution JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.jpg";
+            string outputPath = "output/output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,41 +23,29 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = vectorImage.Width,
-                    PageHeight = vectorImage.Height,
-                    BackgroundColor = Color.White
-                };
-
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    vectorImage.Save(ms, pngOptions);
+                    vectorImage.Save(ms, new PngOptions());
                     ms.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
                     {
-                        RasterImage raster = (RasterImage)rasterImg;
-
                         int width = raster.Width;
                         int height = raster.Height;
-                        int blurHeight = height / 3;
 
-                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(15, 5.0);
+                        Aspose.Imaging.Rectangle topRect = new Aspose.Imaging.Rectangle(0, 0, width, height / 3);
+                        Aspose.Imaging.Rectangle bottomRect = new Aspose.Imaging.Rectangle(0, 2 * height / 3, width, height / 3);
 
-                        raster.Filter(new Rectangle(0, 0, width, blurHeight), blurOptions);
-                        raster.Filter(new Rectangle(0, height - blurHeight, width, blurHeight), blurOptions);
+                        raster.Filter(topRect, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+                        raster.Filter(bottomRect, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
 
-                        var jpegOptions = new JpegOptions
+                        JpegOptions jpegOptions = new JpegOptions
                         {
-                            Quality = 95,
-                            ResolutionSettings = new ResolutionSetting(300, 300)
+                            Quality = 100,
+                            Source = new FileCreateSource(outputPath, false)
                         };
-
                         raster.Save(outputPath, jpegOptions);
                     }
                 }
@@ -70,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector logo (SVG) into a print‑ready JPEG with a tilt‑shift blur for a stylized brochure cover.
- * 2. When an e‑commerce site wants to generate high‑resolution product thumbnails from SVG artwork with a selective blur effect for visual emphasis.
- * 3. When a mobile app creates custom postcards by rasterizing user‑uploaded SVG designs, applying a tilt‑shift look, and exporting a 300 dpi JPEG for printing.
- * 4. When a marketing automation workflow automatically transforms SVG infographics into JPEG images with a top‑and‑bottom blur to simulate depth of field.
- * 5. When a desktop publishing tool programmatically adds a tilt‑shift effect to vector illustrations before saving them as high‑quality JPEGs for magazine layouts.
+ * 1. When you need to convert an SVG logo into a stylized JPEG with a tilt‑shift blur for marketing brochures.
+ * 2. When you want to generate high‑resolution product images from vector artwork and add selective top and bottom blur to create a depth‑of‑field effect.
+ * 3. When an e‑commerce platform requires thumbnail images that simulate a miniature scene by applying blur to the upper and lower thirds of an SVG illustration before saving as JPEG.
+ * 4. When automating batch processing of vector diagrams to produce print‑ready JPEGs with artistic tilt‑shift styling using Aspose.Imaging in a C# workflow.
+ * 5. When integrating image processing into a C# application to render SVG icons with a tilt‑shift effect and export them as high‑quality JPEG files for web delivery.
  */

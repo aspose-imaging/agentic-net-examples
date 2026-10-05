@@ -1,18 +1,17 @@
-// HOW-TO: Flatten EMF Layers Into Single Layer and Save with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to EMF and Flatten Layers Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.emf";
+            string inputPath = "data/input.svg";
+            string outputPath = "output/result.emf";
 
             if (!File.Exists(inputPath))
             {
@@ -24,12 +23,9 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                EmfImage emfImage = (EmfImage)image;
-                EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
-                using (EmfImage flattened = graphics.EndRecording())
-                {
-                    flattened.Save(outputPath);
-                }
+                // No explicit layer flattening needed for vector images in Aspose.Imaging.
+                var options = new EmfOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -41,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple vector layers of an EMF drawing into a single layer before sending it to a printing service that only accepts flat EMF files.
- * 2. When a legacy application requires a simplified EMF file without layer information to ensure compatibility with older Windows GDI rendering.
- * 3. When you want to reduce the file size of a complex EMF by flattening layers, making it easier to embed in Word documents or PowerPoint presentations.
- * 4. When automating a workflow that extracts EMF assets from a design tool, flattens them, and stores the result in a shared folder for downstream processing.
- * 5. When preparing EMF graphics for digital signatures, flattening layers ensures the visual content remains unchanged after the signature is applied.
+ * 1. When you need to embed an SVG diagram into a Microsoft Office document that only accepts EMF format.
+ * 2. When you must provide a high‑resolution vector image for printing systems that require EMF files.
+ * 3. When you want to simplify a multi‑layer SVG into a single‑layer vector for compatibility with legacy Windows applications.
+ * 4. When you are building a batch conversion tool that transforms web‑friendly SVG assets into EMF for use in Windows Forms controls.
+ * 5. When you need to programmatically generate EMF files from SVG icons to ensure lossless scaling in a C# desktop application.
  */

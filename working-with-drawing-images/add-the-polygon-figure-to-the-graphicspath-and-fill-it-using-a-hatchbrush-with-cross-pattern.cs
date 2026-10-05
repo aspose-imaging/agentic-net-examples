@@ -1,51 +1,52 @@
-// HOW-TO: Fill Polygon With Cross Hatch Pattern Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Fill Polygon with Cross Hatch Brush Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\polygon_fill.png";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            int width = 400;
+            int height = 400;
+
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                GraphicsPath graphicsPath = new GraphicsPath();
+                GraphicsPath path = new GraphicsPath();
 
-                Figure polygonFigure = new Figure();
-
+                Figure figure = new Figure();
                 PointF[] points = new PointF[]
                 {
-                    new PointF(100f, 100f),
-                    new PointF(400f, 100f),
-                    new PointF(350f, 300f),
-                    new PointF(150f, 300f)
+                    new PointF(100, 100),
+                    new PointF(300, 100),
+                    new PointF(200, 300)
                 };
+                PolygonShape polygon = new PolygonShape(points);
+                figure.AddShape(polygon);
+                path.AddFigure(figure);
 
-                polygonFigure.AddShape(new PolygonShape(points, true));
-                graphicsPath.AddFigure(polygonFigure);
-
-                using (SolidBrush solidBrush = new SolidBrush(Color.Red))
+                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
                 {
-                    graphics.FillPath(solidBrush, graphicsPath);
+                    graphics.FillPath(brush, path);
                 }
 
-                Pen outlinePen = new Pen(Color.Black, 2);
-                graphics.DrawPath(outlinePen, graphicsPath);
+                Pen pen = new Pen(Color.Black);
+                graphics.DrawPath(pen, path);
 
                 image.Save();
             }
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG image that highlights a custom‑shaped area with a cross‑hatch fill using Aspose.Imaging in C#.
- * 2. When creating printable diagrams where a polygon must be distinguished by a cross‑hatch pattern instead of a solid color.
- * 3. When dynamically drawing map regions or floor‑plan sections in a C# application and you want a hatch texture to indicate selection.
- * 4. When exporting vector‑based graphics to raster format while preserving a stylized hatch fill for branding or watermark purposes.
- * 5. When automating the production of thumbnails that require a patterned background inside irregular shapes for visual consistency.
+ * 1. When you need to programmatically generate a BMP file that contains a custom‑shaped polygon filled with a cross‑hatch pattern for reports or printable graphics.
+ * 2. When creating dynamic UI elements such as icons or badges where a triangular shape must be highlighted with a hatch fill to distinguish it from solid colors.
+ * 3. When exporting CAD or GIS data to raster images and you want to represent selected areas with a hatch pattern to indicate zoning or selection.
+ * 4. When building a server‑side image service that produces watermarked diagrams, using a hatch brush to overlay a semi‑transparent pattern on specific polygonal regions.
+ * 5. When automating the production of printable forms that require patterned fills (e.g., cross‑hatch) inside polygons to meet branding guidelines without manual graphic design.
  */

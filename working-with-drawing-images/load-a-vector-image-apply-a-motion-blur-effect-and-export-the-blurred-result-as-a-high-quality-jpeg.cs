@@ -3,8 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -13,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.jpg";
+            string outputPath = "output/output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -23,27 +21,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Image vectorImg = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageWidth = vectorImage.Width,
-                    PageHeight = vectorImage.Height,
-                    BackgroundColor = Color.White
-                };
+                    var pngOptions = new PngOptions();
+                    vectorImg.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                using (Image rasterImage = Image.Create(
-                    new PngOptions { VectorRasterizationOptions = rasterOptions },
-                    vectorImage.Width,
-                    vectorImage.Height))
-                {
-                    RasterImage raster = (RasterImage)rasterImage;
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 0.0);
+                        raster.Filter(raster.Bounds, filterOptions);
 
-                    raster.Filter(raster.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(15, 1.0, 45.0));
-
-                    var jpegOptions = new JpegOptions { Quality = 100 };
-                    raster.Save(outputPath, jpegOptions);
+                        var jpegOptions = new JpegOptions { Quality = 100 };
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -56,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a realistic motion‑blur effect to a vector logo (SVG) before delivering it as a high‑resolution JPEG for web or print.
- * 2. When an e‑commerce platform wants to generate stylized product thumbnails by blurring SVG icons and exporting them as compressed, quality‑preserved JPEGs.
- * 3. When a desktop application must convert user‑uploaded SVG diagrams into JPEG previews with a motion‑blur filter applied for visual emphasis.
- * 4. When a marketing automation script creates dynamic banner images by rasterizing SVG graphics, applying motion blur, and saving them as 100‑quality JPEG files.
- * 5. When a reporting tool requires fast processing of vector charts, adding motion blur for artistic effect, and outputting them as JPEGs compatible with legacy viewers.
+ * 1. When you need to add a realistic motion‑blur effect to a logo stored as SVG before publishing it as a high‑resolution JPEG on a website.
+ * 2. When converting vector illustrations to raster format for print, and you want to simulate movement by applying a motion filter using Aspose.Imaging in a C# application.
+ * 3. When generating thumbnail previews of SVG graphics with a blurred background for a gallery, requiring the final images to be saved as quality‑controlled JPEG files.
+ * 4. When automating a batch process that reads SVG assets, applies a motion‑blur transformation, and outputs JPEGs for use in marketing materials without manual editing.
+ * 5. When integrating image processing into a .NET service that receives SVG uploads, adds a motion‑blur effect for visual effect, and returns a high‑quality JPEG to the client.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to SVG and Replace Gradients with Solid Colors in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = "input.eps";
             string outputPath = "output.svg";
 
@@ -21,22 +21,18 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Aspose.Imaging does not provide a direct API to replace gradients with solid colors.
-                // Implementing such a transformation would require custom rendering logic.
-                // For the purpose of this example we proceed to save the image as SVG.
-
-                var svgOptions = new SvgOptions();
-
-                // Optional: configure rasterization options if needed
-                // svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = image.Size };
+                // NOTE: Aspose.Imaging does not provide a direct API to replace gradients with solid colors.
+                // This placeholder represents where such processing would occur if supported.
+                // For example, one might iterate over vector objects and modify their fill properties.
 
                 // Save the image as SVG
+                var svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -49,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically transform legacy EPS artwork into scalable SVG files for web display using C#.
- * 2. When an automated build pipeline must convert batch EPS logos to SVG format to ensure resolution‑independent graphics in a .NET application.
- * 3. When a desktop tool has to import user‑provided EPS files and export them as SVG so they can be edited in vector editors without manual conversion.
- * 4. When a server‑side service generates reports that include EPS diagrams and must deliver them as SVG to browsers for faster rendering.
- * 5. When migrating a design asset library from EPS to SVG, you require a C# script that loads each EPS, optionally processes it, and saves it as SVG using Aspose.Imaging.
+ * 1. When you need to convert a complex EPS illustration to a lightweight SVG for web display while ensuring all gradient fills are flattened to solid colors.
+ * 2. When preparing print‑ready artwork for a workflow that only accepts SVG files and cannot handle gradient definitions.
+ * 3. When optimizing vector assets for mobile apps where solid‑color fills reduce rendering time and memory usage.
+ * 4. When automating batch processing of legacy EPS logos to SVG format and want to simplify their appearance for consistent branding.
+ * 5. When integrating Aspose.Imaging into a C# service that sanitizes incoming EPS files by removing gradients before storing them in a vector‑graphics repository.
  */

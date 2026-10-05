@@ -1,9 +1,8 @@
-// HOW-TO: Create BMP With Green Ellipse And Get Byte Array In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Green Ellipse and Save as File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,41 +10,22 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\output.bmp";
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options and bind to the output file
-            BmpOptions bmpOptions = new BmpOptions
+            var createOptions = new BmpOptions();
+            using (var image = Image.Create(createOptions, 200, 200) as RasterImage)
             {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Create a 500x400 BMP image
-            using (Image image = Image.Create(bmpOptions, 500, 400))
-            {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Optional: clear background
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 5);
+                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(20, 20, 160, 120);
+                graphics.DrawEllipse(pen, rect);
 
-                // Create a thick green pen
-                Pen pen = new Pen(Color.Green, 8);
-
-                // Draw an ellipse
-                graphics.DrawEllipse(pen, new Rectangle(50, 50, 400, 300));
-
-                // Save changes (file is already bound to the source)
-                image.Save();
+                var saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
             }
-
-            // Export the image as a byte array
-            byte[] imageBytes = File.ReadAllBytes(outputPath);
-            Console.WriteLine($"Image saved to {outputPath} ({imageBytes.Length} bytes).");
         }
         catch (Exception ex)
         {
@@ -56,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail with a highlighted green ellipse for a reporting dashboard and send the image data over a web API.
- * 2. When an automated testing tool must create a sample BMP file with a specific shape to validate image‑processing pipelines.
- * 3. When a desktop application requires drawing a thick green ellipse on a blank canvas and storing the result in memory for further manipulation without keeping a temporary file.
- * 4. When you want to embed a dynamically drawn BMP graphic into an email attachment by converting the file to a byte array first.
- * 5. When a game server needs to produce simple BMP sprites with geometric markers and transmit them to clients as byte streams.
+ * 1. When you need to generate a BMP thumbnail that highlights a region with a green outline for a reporting dashboard.
+ * 2. When you want to programmatically create a simple graphic, such as a green ellipse, to embed in a Windows Forms application without using external image editors.
+ * 3. When an automated service must produce a BMP file with a custom shape for printing labels or receipts.
+ * 4. When you are building a test suite that requires a known BMP image containing a specific ellipse to validate image‑processing algorithms.
+ * 5. When you need to create a BMP image on the fly and later convert it to a byte array for transmission over a network or storage in a database.
  */

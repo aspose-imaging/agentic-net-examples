@@ -1,59 +1,48 @@
-// HOW-TO: Widen a GraphicsPath by 3 Pixels for Hit Testing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Widen Graphics Path By 3 Pixels Using Pen For Hit Testing In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output.png";
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
 
         try
         {
-            // Ensure output directory exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Image image = Image.Create(pngOptions, 400, 300))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Original path (rectangle)
-                GraphicsPath originalPath = new GraphicsPath();
-                Figure originalFigure = new Figure();
-                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                originalPath.AddFigure(originalFigure);
+                GraphicsPath path = new GraphicsPath();
 
-                // Draw original path with a thin black pen
-                Pen thinPen = new Pen(Color.Black, 1);
-                graphics.DrawPath(thinPen, originalPath);
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50, 50, 100, 100)));
+                path.AddFigure(figure);
 
-                // Widened path for hit testing
-                GraphicsPath widenedPath = new GraphicsPath();
-                Figure widenedFigure = new Figure();
-                widenedFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                widenedPath.AddFigure(widenedFigure);
+                Pen pen = new Pen(Color.Black, 3);
+                path.Widen(pen);
 
-                // Pen that defines the widening width (3 pixels)
-                Pen thickPen = new Pen(Color.Red, 3);
-                widenedPath.Widen(thickPen);
+                using (var brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                {
+                    graphics.FillPath(brush, path);
+                }
 
-                // Draw the widened path with a blue pen to visualize the expanded area
-                Pen visualPen = new Pen(Color.Blue, 1);
-                graphics.DrawPath(visualPen, widenedPath);
-
-                // Save the image
-                image.Save();
+                var saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to detect mouse clicks on a rectangle with a tolerance of a few pixels, you can widen the GraphicsPath using a thick Pen for accurate hit testing.
- * 2. When creating a selectable UI overlay on a PNG image, widening the path ensures the selection area is larger than the visible border, improving user interaction.
- * 3. When generating printable graphics where the clickable region must extend beyond the visual shape, using Widen with a 3‑pixel pen creates a buffer zone for the hit test.
- * 4. When implementing custom shape editing tools in a C# application, widening the path helps to capture drag events even if the user clicks slightly outside the original shape.
- * 5. When building a diagram editor that saves to PNG, widening the path before hit testing allows you to highlight the expanded area with a different color for debugging.
+ * 1. When you need to increase the clickable area around a shape for accurate mouse hit testing in a PNG image.
+ * 2. When you want to create a semi‑transparent colored overlay that follows a widened rectangle border in a raster image.
+ * 3. When you must generate a thicker outline around a region to improve visual emphasis before saving as PNG.
+ * 4. When you are building a custom UI component that requires expanding a path’s stroke width for better touch target detection.
+ * 5. When you need to programmatically enlarge a shape’s boundary by a few pixels to accommodate anti‑aliasing or printing tolerances.
  */

@@ -1,18 +1,19 @@
-// HOW-TO: How To Clip Drawing Area With GraphicsPath In Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Fill Entire PNG Image with Red Color Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\clipped_output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,29 +23,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Define clipping region as a rectangle
-                GraphicsPath clipPath = new GraphicsPath();
-                Figure clipFigure = new Figure();
-                clipFigure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 200f, 200f)));
-                clipPath.AddFigure(clipFigure);
-                graphics.Clip = new Region(clipPath);
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                {
+                    graphics.FillRectangle(brush, new Aspose.Imaging.RectangleF(0, 0, image.Width, image.Height));
+                }
 
-                // Draw a diagonal line (only the part inside the clip will appear)
-                Pen redPen = new Pen(Color.Red, 5);
-                graphics.DrawLine(redPen, new Point(0, 0), new Point(image.Width, image.Height));
-
-                // Draw a rectangle that extends beyond the clip region
-                Pen bluePen = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(bluePen, new Rectangle(50, 50, 300, 300));
-
-                // Save the result
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to restrict drawing to a specific rectangular region of a PNG image, such as creating a masked overlay in a C# application.
- * 2. When you want to generate a thumbnail that only shows content inside a defined area while discarding the rest of the original image.
- * 3. When you are building a reporting tool that draws charts but must hide parts that fall outside a printable margin using Aspose.Imaging.
- * 4. When you need to apply a custom clipping mask before compositing multiple shapes onto an image to avoid unwanted overlap.
- * 5. When you are preparing images for UI components and must ensure that drawn lines or shapes do not exceed a designated viewport.
+ * 1. When you need to generate a solid‑color placeholder PNG for UI mockups or testing.
+ * 2. When you want to replace an existing image’s background with a uniform red overlay before adding other graphics.
+ * 3. When creating a red background layer for a composite image that will later have transparent elements drawn on top.
+ * 4. When programmatically resetting a PNG’s pixels to a known color as part of a batch‑processing cleanup routine.
+ * 5. When producing a simple red badge or icon without loading external assets, using only Aspose.Imaging in C#.
  */

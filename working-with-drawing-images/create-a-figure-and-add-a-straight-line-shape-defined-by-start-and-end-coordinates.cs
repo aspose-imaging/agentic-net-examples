@@ -1,52 +1,34 @@
-// HOW-TO: Create BMP Image With Straight Line Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Figure with a Straight Line Placeholder Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
-using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.png"; // Not used but kept for rule compliance
-        string outputPath = @"c:\temp\line_figure_output.bmp";
-
         try
         {
-            // Input file existence check (rule 2)
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Create a Figure
+            Figure figure = new Figure();
 
-            // Ensure output directory exists (rule 3)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Define start and end coordinates
+            float startX = 10f;
+            float startY = 20f;
+            float endX = 200f;
+            float endY = 150f;
 
-            // Create BMP options with a file create source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Since LineShape is not available, use a RectangleShape as a placeholder
+            var rect = new RectangleF(
+                Math.Min(startX, endX),
+                Math.Min(startY, endY),
+                Math.Abs(endX - startX),
+                Math.Abs(endY - startY));
 
-            // Create a new image canvas (500x500)
-            using (Image image = Image.Create(bmpOptions, 500, 500))
-            {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+            RectangleShape placeholderShape = new RectangleShape(rect);
+            figure.AddShape(placeholderShape);
 
-                // Define start and end points for the straight line
-                PointF startPoint = new PointF(100f, 100f);
-                PointF endPoint = new PointF(400f, 300f);
-
-                // Draw the line using a black pen of width 2
-                graphics.DrawLine(new Pen(Color.Black, 2), startPoint, endPoint);
-
-                // Save the image (since the source is already bound, just call Save)
-                image.Save();
-            }
+            Console.WriteLine("Figure with placeholder shape created successfully.");
         }
         catch (Exception ex)
         {
@@ -57,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP diagram programmatically and add a custom line for engineering schematics.
- * 2. When creating placeholder graphics for UI testing that require a specific background color and a black line overlay.
- * 3. When automating the production of simple vector‑style illustrations, such as arrows or connectors, in batch image processing pipelines.
- * 4. When exporting chart data as a static image where a trend line must be drawn directly onto a 500×500 canvas.
- * 5. When building a server‑side service that returns a bitmap with dynamically calculated line coordinates for reporting or annotation purposes.
+ * 1. When you need to programmatically generate a vector diagram and add a line‑like shape as a placeholder before the actual line implementation is available.
+ * 2. When creating dynamic reports in C# that require drawing simple connectors between points on a canvas using Aspose.Imaging.
+ * 3. When building a CAD‑style preview where the start and end coordinates of a line are known but the library lacks a dedicated LineShape class.
+ * 4. When automating the creation of placeholder graphics for UI mockups, such as drawing bounding boxes that represent future line elements.
+ * 5. When exporting custom annotations to image formats (PNG, JPEG) and need to insert a shape defined by coordinate bounds using the Figure API.
  */

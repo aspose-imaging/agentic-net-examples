@@ -1,52 +1,43 @@
-// HOW-TO: Add Border to EPS and Save as Lossless PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Black Border to EPS and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output/output.png";
+            string inputPath = "Input/input.eps";
+            string outputPath = "Output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image epsImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure rasterization options with a border frame
-                var rasterOptions = new EpsRasterizationOptions
-                {
-                    BorderX = 10,                     // Horizontal border thickness
-                    BorderY = 10,                     // Vertical border thickness
-                    PageWidth = epsImage.Width,       // Preserve original width
-                    PageHeight = epsImage.Height,     // Preserve original height
-                    BackgroundColor = Color.White    // Optional background color
-                };
+                int width = epsImage.Width;
+                int height = epsImage.Height;
 
-                // Set PNG options to use the rasterization settings
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                var pngOptions = new PngOptions();
 
-                // Save the framed image as a lossless PNG
-                epsImage.Save(outputPath, pngOptions);
+                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.DrawImage(epsImage, 0, 0, width, height);
+
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black);
+                    graphics.DrawRectangle(pen, 0, 0, width - 1, height - 1);
+
+                    canvas.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -58,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EPS artwork into a raster PNG with a white margin for web publishing.
- * 2. When you must preserve the original dimensions of an EPS file while adding a uniform border before archiving.
- * 3. When a printing workflow requires EPS files to be rasterized with a consistent frame for preview generation.
- * 4. When generating thumbnails of EPS drawings for a catalog and you want a lossless PNG output with added padding.
- * 5. When integrating Aspose.Imaging into a C# application to batch‑process EPS files and automatically add a border for consistent layout.
+ * 1. When you need to convert vector EPS artwork to a raster PNG for web display while preserving a clean white background.
+ * 2. When you want to programmatically add a thin black frame around an EPS logo before embedding it in a PDF report.
+ * 3. When you must generate lossless PNG thumbnails of EPS files for a product catalog with a consistent border style.
+ * 4. When an automated build process requires converting EPS diagrams to PNG images with a surrounding border for documentation consistency.
+ * 5. When you are creating a batch script to prepare EPS illustrations for mobile apps, adding a border and saving them as PNG to ensure uniform appearance.
  */

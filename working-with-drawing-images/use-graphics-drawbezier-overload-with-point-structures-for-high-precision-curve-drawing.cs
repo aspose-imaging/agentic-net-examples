@@ -1,52 +1,34 @@
-// HOW-TO: Draw High Precision Bezier Curve with Points in PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Bezier Curve on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output\\bezier.bmp";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = @"C:\temp\bezier.png";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a file stream for the output image
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            int width = 400;
+            int height = 400;
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Set PNG options with the stream as source
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
-
-                // Create a 500x500 PNG image
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
-                {
-                    // Initialize graphics for drawing
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                    // Clear background to white
-                    graphics.Clear(Aspose.Imaging.Color.White);
-
-                    // Define a blue pen for the Bezier curve
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
-
-                    // Draw a Bezier curve using Point structures
-                    graphics.DrawBezier(
-                        pen,
-                        new Aspose.Imaging.Point(50, 250),   // start point
-                        new Aspose.Imaging.Point(150, 50),   // first control point
-                        new Aspose.Imaging.Point(350, 450),  // second control point
-                        new Aspose.Imaging.Point(450, 250)   // end point
-                    );
-
-                    // Save the image (writes to the stream)
-                    image.Save();
-                }
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                Pen pen = new Pen(Color.Blue, 2);
+                graphics.DrawBezier(pen,
+                    new Point(50, 300),
+                    new Point(150, 50),
+                    new Point(250, 350),
+                    new Point(350, 100));
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -58,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG diagram that includes a smooth, high‑precision Bezier curve for UI mockups or technical illustrations.
- * 2. When you want to programmatically create vector‑style graphics in a bitmap image for reports, using Aspose.Imaging’s Graphics.DrawBezier with Point structures.
- * 3. When you must render custom curved paths in a server‑side C# service that outputs PNG files for web thumbnails or email attachments.
- * 4. When you are building a CAD‑like preview where control points are defined as points and you need exact curve placement without loss of precision.
- * 5. When you require automated drawing of scalable curves in batch processing, saving each result directly to a file stream for efficient storage.
+ * 1. When you need to generate a high‑resolution BMP file with a smooth custom curve for a technical diagram or illustration.
+ * 2. When you want to programmatically add a decorative blue Bezier line to a white background for a branding watermark.
+ * 3. When creating dynamic chart graphics where control points define a curve that must be rendered precisely in a bitmap format.
+ * 4. When exporting vector‑style paths as raster images for legacy systems that only accept BMP files.
+ * 5. When building a CAD‑like preview in a .NET application that requires drawing precise curves using point coordinates.
  */

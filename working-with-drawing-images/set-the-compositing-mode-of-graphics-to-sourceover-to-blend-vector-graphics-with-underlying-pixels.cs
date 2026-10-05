@@ -1,19 +1,21 @@
-// HOW-TO: How To Set Graphics Compositing Mode To SourceOver In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Blend Semi Transparent Rectangle Over PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,12 +24,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            var options = new PngOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            using (var image = Image.Create(options, 200, 200) as RasterImage)
             {
-                Graphics graphics = new Graphics(image);
-                Source src = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = src };
-                image.Save(outputPath, pngOptions);
+                int[] whitePixels = Enumerable.Repeat(Color.White.ToArgb(), 200 * 200).ToArray();
+                image.SaveArgb32Pixels(new Rectangle(0, 0, 200, 200), whitePixels);
+
+                var graphics = new Graphics(image);
+
+                using (var brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(50, 50, 100, 100));
+                }
+
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -39,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a transparent logo onto an existing PNG image while preserving the background colors.
- * 2. When generating dynamic charts that combine vector shapes with a photo background in a web application.
- * 3. When creating watermarked product images by compositing semi‑transparent text over a base picture.
- * 4. When building a thumbnail generator that draws vector icons on top of uploaded user photos.
- * 5. When implementing a PDF‑to‑PNG conversion that adds annotation graphics without erasing the original raster content.
+ * 1. When you need to overlay a semi‑transparent shape onto a PNG thumbnail for a web UI watermark.
+ * 2. When generating dynamic report graphics that require blending colored rectangles with existing pixel data in a .NET application.
+ * 3. When creating custom icons where a translucent color layer must be composited over a base image using Aspose.Imaging.
+ * 4. When programmatically adding a semi‑opaque highlight to a map tile before saving it as a PNG file.
+ * 5. When building a batch image‑processing tool that adds transparent overlays to photos without losing the original background.
  */

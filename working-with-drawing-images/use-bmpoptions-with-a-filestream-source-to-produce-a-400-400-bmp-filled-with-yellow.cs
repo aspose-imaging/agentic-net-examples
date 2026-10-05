@@ -1,10 +1,9 @@
-// HOW-TO: Create 400x400 Yellow BMP Image Using FileStream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 400x400 Yellow BMP Image from FileStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,22 +11,16 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\yellow.bmp";
+            string outputPath = "output/output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
             {
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(stream);
-
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
+                BmpOptions options = new BmpOptions() { Source = new StreamSource(fs) };
+                using (RasterImage canvas = (RasterImage)Image.Create(options, 400, 400))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Yellow))
-                    {
-                        graphics.FillRectangle(brush, image.Bounds);
-                    }
-                    image.Save();
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.Yellow);
+                    canvas.Save();
                 }
             }
         }
@@ -40,9 +33,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a solid‑color BMP thumbnail for a legacy Windows application that only accepts BMP files.
- * 2. When you want to programmatically create a 400 × 400 yellow canvas as a background for further drawing with Aspose.Imaging graphics.
- * 3. When you must write the BMP directly to a FileStream (such as a network share or temporary folder) while specifying BmpOptions.
- * 4. When you are building a batch job that creates placeholder images for missing assets in a game or UI design pipeline.
- * 5. When you need to produce a fixed‑size BMP image without loading an existing source, useful for automated report generation or testing.
+ * 1. When you need to generate a solid‑color BMP thumbnail on the fly for a reporting dashboard using Aspose.Imaging in C#.
+ * 2. When an application must create a blank canvas of a specific size and fill it with a background color before drawing additional graphics.
+ * 3. When you want to write a BMP file directly to a FileStream to avoid temporary files and control the output location programmatically.
+ * 4. When a service produces colored placeholder images for missing assets and requires the image to be saved in BMP format for legacy compatibility.
+ * 5. When you are automating batch creation of uniform‑size BMP images for testing image‑processing pipelines or performance benchmarks.
  */

@@ -1,11 +1,10 @@
-// HOW-TO: Set BMP Compression Level and Draw Shapes in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP With Shapes And Set Compression Level In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,44 +12,25 @@ class Program
     {
         try
         {
-            // Define output path
             string outputPath = "output.bmp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a file source for the BMP image
             Source source = new FileCreateSource(outputPath, false);
-
-            // Configure BMP options with desired compression
             BmpOptions bmpOptions = new BmpOptions()
             {
-                Source = source,
-                Compression = BitmapCompression.Rgb // No compression (RGB)
+                Source = source
             };
 
-            // Create a BMP canvas of size 400x300
-            using (Image canvas = Image.Create(bmpOptions, 400, 300))
+            int width = 200;
+            int height = 150;
+
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
-
-                // Fill a rectangle with a solid brush
-                using (SolidBrush brush = new SolidBrush())
-                {
-                    brush.Color = Color.LightBlue;
-                    brush.Opacity = 100;
-                    graphics.FillRectangle(brush, new Rectangle(50, 50, 200, 150));
-                }
-
-                // Draw rectangle border
-                graphics.DrawRectangle(new Pen(Color.DarkBlue, 2), new Rectangle(50, 50, 200, 150));
-
-                // Draw an ellipse inside the rectangle
-                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(100, 100, 150, 100));
-
-                // Save the bound image (options already contain the output path)
+                Pen pen = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(pen, new Rectangle(20, 20, 160, 110));
+                graphics.DrawEllipse(pen, new Rectangle(50, 40, 100, 70));
                 canvas.Save();
             }
         }
@@ -63,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP image with custom rectangles and ellipses in a .NET app while explicitly setting the compression mode to control file size.
- * 2. When creating graphics for legacy Windows software that requires uncompressed RGB BMP files and you want to automate the drawing process in C#.
- * 3. When producing diagrammatic reports that include colored shapes and you must specify BMP compression settings programmatically using Aspose.Imaging.
- * 4. When exporting server‑side rendered drawings to BMP format to meet compatibility requirements of older systems that expect a specific compression type.
- * 5. When building a batch job that adds visual annotations to BMP files and you need to control the compression level for each output image in C#.
+ * 1. When you need to generate a BMP file that contains custom graphics such as rectangles or ellipses while controlling file size through compression.
+ * 2. When an application must programmatically create thumbnails or overlays for legacy BMP assets and ensure they meet specific storage constraints.
+ * 3. When a Windows desktop tool requires drawing vector shapes onto a bitmap and saving it with a chosen compression level for faster loading.
+ * 4. When automating batch processing of reports that embed simple diagrams into BMP images and you want to reduce disk usage without losing shape fidelity.
+ * 5. When integrating Aspose.Imaging into a C# service that produces BMP images on the fly for printing or archival purposes and you must specify compression to comply with size limits.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Batch Convert SVG Files to PDF with Metadata Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert SVG Files to PDF with Title Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,12 +11,10 @@ class Program
     {
         try
         {
-            // Set up base, input, and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -24,50 +22,34 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files from the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
 
-                // Ensure the output directory for this file exists
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf"));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
                 using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Prepare PDF options with metadata
-                    PdfOptions pdfOptions = new PdfOptions
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        PdfDocumentInfo = new PdfDocumentInfo
-                        {
-                            Title = Path.GetFileNameWithoutExtension(inputPath) // use file name as description
-                        },
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        }
+                        Title = Path.GetFileNameWithoutExtension(inputPath)
                     };
-
-                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -81,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDFs from a collection of SVG illustrations for a product catalog, preserving each image’s description as searchable PDF metadata.
- * 2. When an automated build process must convert design assets stored as SVG into PDF documents for archival while embedding source metadata for future retrieval.
- * 3. When a web service receives SVG icons from users and must return PDF versions that include the original alt‑text as PDF metadata for accessibility compliance.
- * 4. When a digital publishing workflow requires batch conversion of SVG artwork into PDF pages and wants the artwork’s description embedded for cataloging in a document management system.
- * 5. When a desktop application needs to export multiple SVG diagrams to PDF files and store each diagram’s title or notes inside the PDF’s metadata for easy indexing.
+ * 1. When a design team needs to generate printable PDFs from a folder of SVG icons while preserving each icon’s name as the PDF title for easy catalog lookup.
+ * 2. When an e‑commerce platform wants to batch‑convert product illustration SVGs to PDF brochures and embed the product code in the PDF metadata for search indexing.
+ * 3. When a publishing workflow requires automated conversion of SVG chapter diagrams to PDFs with the diagram name stored as the document title for reference management.
+ * 4. When a GIS application must transform a collection of SVG map overlays into PDFs and include the layer name in the PDF metadata for later layer identification.
+ * 5. When a documentation system needs to create PDF versions of SVG flowcharts in bulk, embedding each chart’s description as the PDF title to support automated document archiving.
  */

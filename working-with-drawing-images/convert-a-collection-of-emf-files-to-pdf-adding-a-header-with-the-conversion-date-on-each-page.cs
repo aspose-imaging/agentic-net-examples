@@ -1,9 +1,8 @@
-// HOW-TO: Convert EMF Files to PDF with Date Header in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to PDF with Date Header in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -12,44 +11,38 @@ class Program
     {
         try
         {
-            string inputFolder = "C:\\InputEmf";
-            string outputFolder = "C:\\OutputPdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            Directory.CreateDirectory(outputFolder);
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
-            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (string inputPath in emfFiles)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
-
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
                     Graphics graphics = new Graphics(image);
-                    string headerText = $"Converted on {DateTime.Now:yyyy-MM-dd}";
-                    Font font = new Font("Arial", 24);
+                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
                     using (SolidBrush brush = new SolidBrush(Color.Black))
                     {
-                        graphics.DrawString(headerText, font, brush, 10, 10);
+                        string header = $"Converted on {DateTime.Now:yyyy-MM-dd}";
+                        graphics.DrawString(header, font, brush, new Point(10, 10));
                     }
 
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageSize = new SizeF(image.Width, image.Height)
-                        }
-                    };
-
+                    PdfOptions pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -63,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a folder of Windows Metafile (EMF) drawings into PDF reports and include a “Converted on” date stamp on every page.
- * 2. When generating archival PDFs from legacy EMF diagrams and want the conversion date automatically added for compliance documentation.
- * 3. When creating printable PDFs from vector graphics in a C# application and require a consistent header showing the processing date for version tracking.
- * 4. When automating the preparation of design assets for client delivery, converting multiple EMF files to PDF while embedding the current date as a header on each page.
- * 5. When building a server‑side service that receives EMF uploads, converts them to PDF, and adds a timestamp header to indicate when the conversion occurred.
+ * 1. When you need to generate printable PDF reports from a collection of EMF vector graphics and include the conversion date on each page.
+ * 2. When an automated workflow must archive legacy EMF diagrams as PDFs while adding a timestamp for audit compliance.
+ * 3. When a desktop application has to batch‑process user‑uploaded EMF files and produce PDF versions with a consistent header for branding.
+ * 4. When a server‑side service converts EMF assets to PDF for downstream systems and requires a date stamp to track processing time.
+ * 5. When you want to create a searchable PDF catalog of EMF illustrations and need the conversion date displayed on every page for version control.
  */

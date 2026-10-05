@@ -1,7 +1,9 @@
 // HOW-TO: Create Multiple BMP Images with Colored Diagonal Lines in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,38 +12,34 @@ class Program
     {
         try
         {
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
-
-            Aspose.Imaging.Color[] colors = new Aspose.Imaging.Color[]
-            {
-                Aspose.Imaging.Color.Red,
-                Aspose.Imaging.Color.Green,
-                Aspose.Imaging.Color.Blue,
-                Aspose.Imaging.Color.Yellow,
-                Aspose.Imaging.Color.Magenta
-            };
-
+            string outputDirectory = "output";
             int width = 200;
             int height = 200;
+            Color[] colors = new Color[]
+            {
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.Yellow,
+                Color.Magenta,
+                Color.Cyan,
+                Color.Black,
+                Color.White
+            };
 
             for (int i = 0; i < colors.Length; i++)
             {
-                string outputPath = Path.Combine(outputDir, $"diag_{i + 1}.bmp");
+                string outputPath = Path.Combine(outputDirectory, $"DiagonalLine_{i + 1}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                FileCreateSource source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
+                BmpOptions bmpOptions = new BmpOptions();
 
-                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
+                using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(colors[i], 5);
-                    graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width - 1, height - 1));
-
-                    canvas.Save();
+                    Graphics graphics = new Graphics(image);
+                    Pen pen = new Pen(colors[i], 5);
+                    graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+                    image.Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a set of BMP test images with distinct colored diagonal lines to verify rendering pipelines in a graphics application.
- * 2. When creating placeholder assets for UI mockups that require simple color‑coded diagonal patterns for layout testing.
- * 3. When automating visual regression tests that compare generated BMP files against baseline images to detect changes in drawing code.
- * 4. When preparing sample images for documentation or tutorials that demonstrate how to draw lines using Aspose.Imaging in C#.
- * 5. When building a batch process that produces color‑coded diagnostic images for hardware calibration or printer testing.
+ * 1. When you need a set of BMP test files each showing a different colored diagonal line to verify rendering pipelines or display hardware.
+ * 2. When generating sample assets for UI components that require diagonal line graphics in various colors for documentation or demos.
+ * 3. When creating placeholder images for automated visual regression tests that compare colored line patterns across builds.
+ * 4. When producing a batch of simple bitmap images for teaching graphics programming concepts such as drawing primitives and color handling in C#.
+ * 5. When preparing colored diagonal line sprites for game development tools that only accept BMP format and need quick batch generation.
  */

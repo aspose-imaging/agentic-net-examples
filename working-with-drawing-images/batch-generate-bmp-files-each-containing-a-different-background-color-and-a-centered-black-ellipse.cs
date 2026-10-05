@@ -1,8 +1,9 @@
-// HOW-TO: Create Multiple BMP Images With Colored Backgrounds And Centered Ellipse In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multiple BMP Images with Colored Backgrounds and Centered Ellipse in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,48 +12,27 @@ class Program
     {
         try
         {
-            // Define output directory
-            string outputDir = @"C:\Temp\BmpBatch";
+            string outputDir = "output";
             Directory.CreateDirectory(outputDir);
-
-            // List of background colors and corresponding file names
-            var items = new List<(string FileName, Aspose.Imaging.Color BgColor)>
+            int width = 400;
+            int height = 400;
+            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Cyan, Color.Magenta };
+            for (int i = 0; i < colors.Length; i++)
             {
-                ("red.bmp", Aspose.Imaging.Color.Red),
-                ("green.bmp", Aspose.Imaging.Color.Green),
-                ("blue.bmp", Aspose.Imaging.Color.Blue),
-                ("yellow.bmp", Aspose.Imaging.Color.Yellow),
-                ("purple.bmp", Aspose.Imaging.Color.Purple)
-            };
-
-            int canvasWidth = 400;
-            int canvasHeight = 400;
-            int ellipseWidth = 200;
-            int ellipseHeight = 200;
-            int ellipseX = (canvasWidth - ellipseWidth) / 2;
-            int ellipseY = (canvasHeight - ellipseHeight) / 2;
-
-            foreach (var (fileName, bgColor) in items)
-            {
-                string outputPath = Path.Combine(outputDir, fileName);
+                string outputPath = Path.Combine(outputDir, $"image_{i + 1}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Create BMP options with bound file source
-                BmpOptions options = new BmpOptions
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source };
+                using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, canvasWidth, canvasHeight))
-                {
-                    // Draw background and centered black ellipse
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(bgColor);
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                    graphics.DrawEllipse(pen, ellipseX, ellipseY, ellipseWidth, ellipseHeight);
-
-                    // Save the bound image
-                    image.Save();
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(colors[i]);
+                    Pen blackPen = new Pen(Color.Black, 3);
+                    int ellipseWidth = width / 2;
+                    int ellipseHeight = height / 2;
+                    Rectangle rect = new Rectangle((width - ellipseWidth) / 2, (height - ellipseHeight) / 2, ellipseWidth, ellipseHeight);
+                    graphics.DrawEllipse(blackPen, rect);
+                    canvas.Save();
                 }
             }
         }
@@ -65,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a set of BMP icons with different theme colors for a Windows desktop application's toolbar.
- * 2. When creating test assets for image‑processing pipelines that require uniform size images with a known shape overlay.
- * 3. When preparing colored placeholders with a central ellipse for UI mockups or documentation screenshots.
- * 4. When automating the production of printable labels that use a solid background color and a centered logo shape.
- * 5. When building a batch of sprite sheets where each frame has a distinct background hue and a consistent black ellipse for game development.
+ * 1. When you need to generate a set of BMP icons with different theme colors and a consistent circular logo for a desktop application's UI.
+ * 2. When creating test images for automated image‑processing pipelines that require varied background colors and a known shape to validate detection algorithms.
+ * 3. When producing placeholder graphics for game assets where each level uses a distinct background hue and a central marker.
+ * 4. When preparing a series of printable labels in BMP format, each with a unique background shade and a centered ellipse as a branding element.
+ * 5. When building a batch of sample files for a documentation tutorial that demonstrates Aspose.Imaging’s drawing and saving capabilities in C#.
  */

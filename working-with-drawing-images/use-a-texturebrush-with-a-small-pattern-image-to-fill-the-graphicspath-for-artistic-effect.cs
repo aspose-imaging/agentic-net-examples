@@ -1,9 +1,8 @@
-// HOW-TO: Fill a Rectangle with a Repeating Pattern Using TextureBrush in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply a Small Pattern Texture to a Shape with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -11,51 +10,43 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input pattern and output image paths
-        string patternPath = "pattern.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(patternPath))
-        {
-            Console.Error.WriteLine($"File not found: {patternPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
-            // Load the small pattern image to be used as a texture
-            using (Image patternImage = Image.Load(patternPath))
+            string baseImagePath = "base.png";
+            string patternImagePath = "pattern.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(baseImagePath))
             {
-                // Create a PNG canvas bound to the output file
-                Source outSource = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = outSource };
-                using (Image canvas = Image.Create(pngOptions, 500, 500))
+                Console.Error.WriteLine($"File not found: {baseImagePath}");
+                return;
+            }
+            if (!File.Exists(patternImagePath))
+            {
+                Console.Error.WriteLine($"File not found: {patternImagePath}");
+                return;
+            }
+
+            using (RasterImage baseImage = (RasterImage)Image.Load(baseImagePath))
+            using (RasterImage patternImage = (RasterImage)Image.Load(patternImagePath))
+            {
+                Graphics graphics = new Graphics(baseImage);
+
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 200, 200));
+                figure.AddShape(rectShape);
+                path.AddFigure(figure);
+
+                using (TextureBrush textureBrush = new TextureBrush(patternImage))
                 {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+                    graphics.FillPath(textureBrush, path);
+                }
 
-                    // Build a graphics path (a rectangle in this case)
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                    path.AddFigure(figure);
-
-                    // Create a texture brush from the pattern image
-                    using (TextureBrush textureBrush = new TextureBrush(
-                        patternImage,
-                        new Rectangle(0, 0, patternImage.Width, patternImage.Height)))
-                    {
-                        // Fill the path with the texture brush
-                        graphics.FillPath(textureBrush, path);
-                    }
-
-                    // Save the bound canvas image
-                    canvas.Save();
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                using (PngOptions options = new PngOptions())
+                {
+                    baseImage.Save(outputPath, options);
                 }
             }
         }
@@ -68,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a decorative background by tiling a small PNG pattern across a shape in a generated image.
- * 2. When you want to programmatically generate custom‑styled graphics such as logos or badges that use a texture fill instead of a solid color.
- * 3. When you are building a reporting tool that adds patterned watermarks or borders to images exported from PDFs.
- * 4. When you need to produce game assets where a repeating texture is applied to UI elements like buttons or panels.
- * 5. When you are automating the creation of marketing banners that require a consistent pattern fill inside geometric shapes.
+ * 1. When you need to overlay a decorative pattern onto a specific region of a PNG image, such as adding a tiled background to a logo area.
+ * 2. When creating custom UI skins or game assets where a small texture must fill a larger geometric shape without stretching.
+ * 3. When generating printable marketing materials that require a repeated watermark or texture inside a defined rectangle.
+ * 4. When programmatically applying a fabric or wood‑grain texture to a shape in an image‑processing pipeline using C# and Aspose.Imaging.
+ * 5. When building an automated tool that composites multiple images and uses a pattern image as a fill for vector shapes to achieve artistic effects.
  */

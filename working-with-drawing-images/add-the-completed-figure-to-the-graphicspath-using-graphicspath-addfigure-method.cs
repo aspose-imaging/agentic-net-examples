@@ -1,49 +1,46 @@
-// HOW-TO: Add Rectangle and Ellipse Figure to PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Add a Figure to GraphicsPath and Draw Rectangle in BMP with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
+        string outputPath = "output\\result.bmp";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            int width = 400;
+            int height = 300;
+
+            using (var bmpOptions = new BmpOptions())
             {
-                // Initialize graphics for the loaded image
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Create a graphics path and a figure
-                Aspose.Imaging.GraphicsPath graphicPath = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                    GraphicsPath path = new GraphicsPath();
+                    Figure figure = new Figure();
 
-                // Add shapes to the figure
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(50f, 50f, 150f, 150f)));
+                    RectangleF rect = new RectangleF(50, 50, 200, 150);
+                    RectangleShape rectShape = new RectangleShape(rect);
+                    figure.AddShape(rectShape);
 
-                // Add the completed figure to the graphics path
-                graphicPath.AddFigure(figure);
+                    path.AddFigure(figure);
 
-                // Draw the path onto the image
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicPath);
+                    Pen pen = new Pen(Color.Blue, 3);
+                    graphics.DrawPath(pen, path);
 
-                // Save the modified image
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a rectangle and an ellipse as a single figure onto an existing PNG image in a C# application.
- * 2. When you want to programmatically create a composite figure and draw it on a bitmap for custom graphics or UI elements.
- * 3. When you must clear an image background and then add vector shapes for generating reports or diagrams.
- * 4. When building a server‑side image processing service that annotates uploaded PNG files with combined shapes.
- * 5. When you need to save the modified image with lossless PNG options after drawing complex path figures.
+ * 1. When you need to programmatically generate a BMP file with a custom rectangle outline using Aspose.Imaging in C#.
+ * 2. When you want to add complex vector figures to a GraphicsPath before rendering them onto a raster image.
+ * 3. When you must create a blank canvas, clear it to a solid background, and draw shapes with specific pen thickness and color.
+ * 4. When you are building a server‑side service that produces diagrammatic images such as forms or schematics on the fly.
+ * 5. When you require precise control over the placement and dimensions of shapes in a bitmap for automated report graphics.
  */

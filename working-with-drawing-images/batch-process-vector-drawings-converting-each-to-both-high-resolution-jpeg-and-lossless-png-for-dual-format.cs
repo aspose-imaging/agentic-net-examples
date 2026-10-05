@@ -1,86 +1,69 @@
-// HOW-TO: Batch Convert Vector Images to High-Resolution JPEG and PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Vector Files to High‑Resolution JPEG and PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define base, input and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDirectory = "input";
+            string outputDirectory = "output";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            // Vector file extensions to process
+            string[] vectorExtensions = new[] { ".eps", ".svg", ".pdf", ".wmf", ".emf" };
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Ensure output base directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (var inputPath in files)
+            // Enumerate files in the input directory
+            foreach (string filePath in Directory.GetFiles(inputDirectory))
             {
-                // Verify the file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                string extension = Path.GetExtension(filePath);
+                if (!vectorExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
                     continue;
+
+                // Verify input file exists
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
 
+                // Prepare output paths
+                string baseFileName = Path.GetFileNameWithoutExtension(filePath);
+                string jpegOutputPath = Path.Combine(outputDirectory, baseFileName + ".jpg");
+                string pngOutputPath = Path.Combine(outputDirectory, baseFileName + ".png");
+
+                // Ensure directories for each output file exist
+                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
                 // Load the vector image
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                    string jpegOutputPath = Path.Combine(outputDirectory, fileName + ".jpg");
-                    string pngOutputPath = Path.Combine(outputDirectory, fileName + ".png");
-
-                    // Ensure output subdirectories exist
-                    Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-
-                    // Configure JPEG options (high quality)
-                    JpegOptions jpegOptions = new JpegOptions
+                    // Save as high‑resolution JPEG
+                    var jpegOptions = new JpegOptions
                     {
-                        Quality = 100,
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        }
+                        Quality = 100
                     };
-
-                    // Configure PNG options (lossless)
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        }
-                    };
-
-                    // Save as JPEG
                     image.Save(jpegOutputPath, jpegOptions);
-                    // Save as PNG
+                }
+
+                // Load again for PNG (or reuse the same instance if desired)
+                using (Image image = Image.Load(filePath))
+                {
+                    // Save as lossless PNG
+                    var pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.Truecolor
+                    };
                     image.Save(pngOutputPath, pngOptions);
                 }
             }
@@ -94,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team needs both web‑ready JPEGs and print‑quality PNGs from a folder of SVG logos.
- * 2. When an e‑commerce platform must generate high‑resolution product images in JPEG for browsers and lossless PNGs for catalog PDFs.
- * 3. When a developer automates the conversion of vector illustrations into dual formats for mobile app assets and desktop documentation.
- * 4. When a digital archive requires batch exporting of vector drawings to JPEG for quick preview and PNG for archival preservation.
- * 5. When a content management system must process incoming vector files and store them as JPEG thumbnails and PNG originals for downstream workflows.
+ * 1. When you need to generate web‑ready high‑quality JPEG previews and print‑ready PNG assets from a folder of EPS, SVG, PDF, WMF, or EMF drawings.
+ * 2. When an e‑commerce platform must automatically create both compressed JPEG thumbnails and lossless PNG versions of supplier vector logos for product listings.
+ * 3. When a publishing workflow requires bulk conversion of source vector illustrations into dual formats for inclusion in both digital PDFs (JPEG) and print‑ready PDFs (PNG).
+ * 4. When a marketing automation script has to prepare a set of vector icons for email campaigns, delivering fast‑loading JPEGs while preserving original detail in PNGs for high‑DPI displays.
+ * 5. When a document management system needs to archive incoming vector files by converting each to a high‑resolution JPEG for quick preview and a PNG for archival quality without manual intervention.
  */

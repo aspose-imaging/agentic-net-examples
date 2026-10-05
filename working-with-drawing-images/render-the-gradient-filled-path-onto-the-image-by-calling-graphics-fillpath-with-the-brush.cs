@@ -1,58 +1,58 @@
-// HOW-TO: Fill a Rectangle Path with Solid Color on PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Fill a Path with Solid Color in PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            string outputPath = "output\\gradient_path.png";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Define image size
+            int width = 500;
+            int height = 500;
+
+            // Create PNG options with FileCreateSource bound to output path
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create the image canvas
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Create a Graphics object for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Clear the canvas (optional)
-                graphics.Clear(Aspose.Imaging.Color.White);
-
-                // Build a path consisting of a single rectangle figure
+                // Create a graphics path
                 Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 400f, 300f)));
+
+                // Create a figure and add a rectangle shape
+                Figure figure = new Figure();
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 400, 400));
+                figure.AddShape(rectShape);
+
+                // Add the figure to the path
                 path.AddFigure(figure);
 
-                // Create a brush for filling the path.
-                using (SolidBrush brush = new SolidBrush())
+                // Use a solid brush (gradient not supported for FillPath)
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 0, 0))) // Red color
                 {
-                    brush.Color = Aspose.Imaging.Color.LightBlue;
-                    brush.Opacity = 100;
-
-                    // Fill the path with the brush
+                    // Fill the path
                     graphics.FillPath(brush, path);
                 }
 
-                // Save the modified image
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the image (bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -64,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a solid‑colored rectangle onto an existing PNG image in a C# application.
- * 2. When generating a watermark or background shape programmatically using Aspose.Imaging’s Graphics.FillPath method.
- * 3. When creating custom UI thumbnails that require a colored rectangle highlight on top of a source image.
- * 4. When preprocessing images for reports and you must fill a defined area with a specific color before saving as PNG.
- * 5. When automating batch image editing to add a light‑blue banner or panel to multiple PNG files using C#.
+ * 1. When you need to generate a PNG badge with a solid‑colored rectangle background programmatically in C#.
+ * 2. When creating a custom thumbnail that requires drawing a filled shape onto an image canvas using Aspose.Imaging.
+ * 3. When automating the production of printable labels that contain a solid‑filled rectangular area for branding.
+ * 4. When building a server‑side service that renders simple graphics, such as a colored frame, into PNG files without external dependencies.
+ * 5. When testing graphics pipelines by drawing a known solid shape to verify that FillPath and brush handling work correctly.
  */

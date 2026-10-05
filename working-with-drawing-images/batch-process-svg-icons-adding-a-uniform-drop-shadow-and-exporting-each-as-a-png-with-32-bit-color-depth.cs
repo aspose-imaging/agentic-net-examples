@@ -1,9 +1,11 @@
-// HOW-TO: Batch Convert SVG Icons to 32‑Bit PNGs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Drop Shadow to Multiple SVG Icons and Export as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,16 +13,25 @@ class Program
     {
         try
         {
-            string inputFolder = "C:\\icons\\svg";
-            string outputFolder = "C:\\icons\\png";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Get all SVG files in the input folder
-            string[] files = Directory.GetFiles(inputFolder, "*.svg");
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            foreach (var inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -28,53 +39,40 @@ class Program
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".png");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
                     int width = svgImage.Width;
                     int height = svgImage.Height;
-                    int offsetX = 5;
-                    int offsetY = 5;
+                    int shadowOffset = 5;
 
-                    // Rasterize SVG to an in‑memory PNG
-                    using (MemoryStream ms = new MemoryStream())
+                    int canvasWidth = width + shadowOffset * 2;
+                    int canvasHeight = height + shadowOffset * 2;
+
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    FileCreateSource source = new FileCreateSource(outputPath, false);
+                    PngOptions pngOptions = new PngOptions
                     {
-                        var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-                        var pngOptions = new PngOptions
+                        Source = source,
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+                    {
+                        Graphics graphics = new Graphics(canvas);
+                        graphics.Clear(Color.Transparent);
+
+                        using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
                         {
-                            VectorRasterizationOptions = rasterOptions,
-                            BitDepth = 32
-                        };
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage rasterSvg = (RasterImage)Image.Load(ms))
-                        {
-                            // Create a canvas larger than the original to accommodate the shadow
-                            using (Image canvas = Image.Create(pngOptions, width + offsetX, height + offsetY))
-                            {
-                                Graphics graphics = new Graphics(canvas);
-                                graphics.Clear(Color.Transparent);
-
-                                // Draw a semi‑transparent black rectangle as a simple drop shadow
-                                using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
-                                {
-                                    graphics.FillRectangle(shadowBrush, offsetX, offsetY, width, height);
-                                }
-
-                                // Draw the rasterized SVG on top of the shadow
-                                graphics.DrawImage(rasterSvg, new Point(0, 0));
-
-                                // Save the final PNG
-                                canvas.Save(outputPath, pngOptions);
-                            }
+                            Rectangle shadowRect = new Rectangle(shadowOffset, shadowOffset, width, height);
+                            graphics.FillRectangle(shadowBrush, shadowRect);
                         }
+
+                        graphics.DrawImage(svgImage, new Point(shadowOffset, shadowOffset));
+
+                        canvas.Save();
                     }
                 }
             }
@@ -88,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically rasterize a large collection of SVG icons into high‑quality 32‑bit PNG files for a web or mobile UI.
- * 2. When you want to generate PNG assets from SVG source files in a build pipeline without manually opening each file.
- * 3. When you are preparing icon sets for a game engine that requires PNG images with full alpha channel support.
- * 4. When you must ensure consistent image dimensions while converting SVG vectors to raster PNGs using Aspose.Imaging in C#.
- * 5. When you need to script a folder‑to‑folder conversion that creates PNGs with 32‑bit color depth for print‑ready graphics.
+ * 1. When you need to apply a consistent drop‑shadow effect to a whole collection of SVG icons before publishing them as high‑quality 32‑bit PNGs for a web UI.
+ * 2. When you want to automate the conversion of vector assets from a design folder into raster PNG files with added depth for use in a mobile application.
+ * 3. When a branding team requires every SVG logo to be exported with a uniform shadow and exact color depth to maintain visual consistency across marketing materials.
+ * 4. When generating thumbnail previews of SVG illustrations for an online catalog, and the thumbnails must include a subtle shadow and be saved as PNG with full color fidelity.
+ * 5. When preparing a set of SVG symbols for a game’s UI, and you need to batch‑process them to add a shadow and output 32‑bit PNGs that the engine can load directly.
  */

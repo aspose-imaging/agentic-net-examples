@@ -1,51 +1,44 @@
-// HOW-TO: Convert PDF Vector Pages to Separate PNG Images with Transparency Flattening in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page PDF to PNG Images with Alpha Channel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.pdf";
+        string outputDir = "Output";
+
         try
         {
-            string inputPath = "input.pdf";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDirectory = "output";
+            Directory.CreateDirectory(outputDir);
 
-            using (Image image = Image.Load(inputPath))
+            using (Image pdf = Image.Load(inputPath))
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage?.PageCount ?? 1;
+                int pageCount = (pdf as IMultipageImage)?.PageCount ?? 1;
 
                 for (int i = 0; i < pageCount; i++)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    PngOptions pngOptions = new PngOptions();
-
-                    if (image is VectorImage)
+                    PngOptions options = new PngOptions
                     {
-                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                    }
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                    };
 
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-
-                    image.Save(outputPath, pngOptions);
+                    pdf.Save(outputPath, options);
                 }
             }
         }
@@ -58,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution PNG thumbnails of each page in a PDF that contains vector graphics for web preview.
- * 2. When you must preserve the visual appearance of PDF artwork while removing transparency by rasterizing onto a white background for printing workflows.
- * 3. When an application has to batch‑process multi‑page PDF reports and save each page as an individual PNG file for downstream image analysis.
- * 4. When you want to extract vector‑based PDF pages as PNGs with an alpha channel to overlay them on other graphics in a C# desktop application.
- * 5. When you are building a document conversion service that requires converting PDF pages to PNG format while ensuring consistent color rendering across all pages.
+ * 1. When you need to generate transparent PNG thumbnails of each page of a vector‑based PDF for web previews.
+ * 2. When you must extract individual pages from a multi‑page PDF and preserve their vector quality as PNGs with an alpha channel for overlay in graphics editors.
+ * 3. When a reporting system requires converting PDF charts into PNG assets that retain transparency for inclusion in dashboards.
+ * 4. When automating a workflow that creates PNG assets from PDF brochures to be used in mobile apps where PNG with alpha is required.
+ * 5. When preparing print‑ready assets by flattening PDF transparency and exporting each page as a high‑resolution PNG for further processing.
  */

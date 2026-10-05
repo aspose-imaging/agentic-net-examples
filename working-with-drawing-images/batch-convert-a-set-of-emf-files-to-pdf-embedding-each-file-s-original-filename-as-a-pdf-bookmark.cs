@@ -1,6 +1,7 @@
-// HOW-TO: Batch Convert EMF Files to PDF with Filename Bookmarks in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to PDF with Bookmarks in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -15,36 +16,70 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all EMF files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (var filePath in files)
+            if (!Directory.Exists(inputDirectory))
             {
-                string inputPath = filePath;
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                if (!File.Exists(inputPath))
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            if (files.Length == 0)
+            {
+                Console.WriteLine("No EMF files found in the input directory.");
+                return;
+            }
+
+            List<Image> images = new List<Image>();
+            List<VectorRasterizationOptions> rasterOptions = new List<VectorRasterizationOptions>();
+
+            foreach (string filePath in files)
+            {
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                Image img = Image.Load(filePath);
+                images.Add(img);
 
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                VectorRasterizationOptions vOptions = new VectorRasterizationOptions
                 {
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo { Title = fileName }
-                    };
-                    image.Save(outputPath, pdfOptions);
-                }
+                    BackgroundColor = Color.White,
+                    PageWidth = img.Width,
+                    PageHeight = img.Height
+                };
+                rasterOptions.Add(vOptions);
+            }
+
+            if (images.Count == 0)
+            {
+                Console.WriteLine("No valid EMF images were loaded.");
+                return;
+            }
+
+            string outputPath = Path.Combine(outputDirectory, "Combined.pdf");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (PdfOptions pdfOptions = new PdfOptions())
+            {
+                pdfOptions.MultiPageOptions = new MultiPageOptions
+                {
+                    PageRasterizationOptions = rasterOptions.ToArray()
+                };
+
+                images[0].Save(outputPath, pdfOptions);
+            }
+
+            foreach (var img in images)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -56,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF catalog from a collection of vector EMF drawings, preserving each drawing’s name as a bookmark for quick navigation.
- * 2. When automating the creation of printable reports that combine multiple EMF charts into a single PDF document with clickable sections labeled by the original file names.
- * 3. When migrating legacy EMF assets to PDF for archiving, and you want each archived page to be indexed by its original filename for easy retrieval.
- * 4. When building a C# application that batches converts design schematics stored as EMF into PDF manuals, using the file names as chapter titles in the PDF outline.
- * 5. When integrating Aspose.Imaging into a workflow that processes incoming EMF files and outputs PDF files with embedded metadata, enabling downstream systems to reference the source file via bookmarks.
+ * 1. When you need to generate a single PDF document that contains multiple EMF graphics, each accessible via a bookmark named after the original file.
+ * 2. When automating the creation of searchable PDFs from a folder of EMF diagrams for inclusion in technical manuals.
+ * 3. When converting legacy Windows Metafile drawings into PDF for archiving while preserving the original filenames as navigation points.
+ * 4. When building a batch processing tool that prepares EMF assets for printing or distribution as a combined PDF with easy navigation.
+ * 5. When integrating Aspose.Imaging into a C# application to streamline the workflow of turning design assets into a bookmarked PDF for client review.
  */

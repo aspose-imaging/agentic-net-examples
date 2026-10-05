@@ -1,4 +1,4 @@
-// HOW-TO: Create 500x500 PNG With Light Gray Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG Image With Light Gray Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,17 +8,16 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/output.png";
         try
         {
-            string outputPath = "output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            var pngOptions = new PngOptions();
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            var options = new PngOptions();
+            using (Image image = Image.Create(options, 200, 200))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.LightGray);
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -30,9 +29,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need a blank 500 × 500 PNG placeholder with a light gray canvas for UI mock‑ups.
- * 2. When generating a solid‑color background image to serve as a base for further drawing operations in a C# graphics routine.
- * 3. When creating a template thumbnail that will later have text or icons overlaid in an automated report.
- * 4. When preparing a uniform light‑gray background for batch processing of images that must share the same dimensions and format.
- * 5. When automating the production of email‑newsletter or marketing assets that start with a light gray PNG background.
+ * 1. When you need to generate a blank PNG placeholder with a light gray canvas for web thumbnails or UI mockups.
+ * 2. When creating report PDFs that embed a solid‑color background image generated on the fly with Aspose.Imaging in C#.
+ * 3. When programmatically preparing a background layer for overlaying graphics or text in automated image composition.
+ * 4. When initializing a drawing surface for a game sprite sheet where a uniform light gray background simplifies later processing.
+ * 5. When building a batch process that creates template images for email newsletters, ensuring each PNG starts with a consistent light gray background.
  */
