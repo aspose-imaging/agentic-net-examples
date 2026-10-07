@@ -1,90 +1,72 @@
-// HOW-TO: Batch Crop Images To 16:9 Aspect Ratio And Convert To SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Crop Images to 16:9 Aspect Ratio and Convert to SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
+        string inputDirectory = "input";
+        string outputDirectory = "output";
+
         try
         {
-            // Hard‑coded list of input image files to process
-            string[] inputFiles = new[]
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Images\photo1.jpg",
-                @"C:\Images\photo2.png",
-                @"C:\Images\photo3.bmp"
-            };
+                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
+                return;
+            }
 
-            foreach (string inputPath in inputFiles)
+            string[] files = Directory.GetFiles(inputDirectory);
+            foreach (string filePath in files)
             {
-                // Verify that the input file exists
+                string inputPath = filePath;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the image (supports raster formats)
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access width, height and cropping
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
+                    int width = image.Width;
+                    int height = image.Height;
+                    double targetAspect = 16.0 / 9.0;
+                    double currentAspect = (double)width / height;
+
+                    int left = 0, right = 0, top = 0, bottom = 0;
+
+                    if (currentAspect > targetAspect)
                     {
-                        Console.Error.WriteLine($"Unsupported image type: {inputPath}");
-                        continue;
+                        // Image is too wide, crop left and right
+                        int newWidth = (int)(height * targetAspect);
+                        int excess = width - newWidth;
+                        left = excess / 2;
+                        right = excess - left;
+                    }
+                    else if (currentAspect < targetAspect)
+                    {
+                        // Image is too tall, crop top and bottom
+                        int newHeight = (int)(width / targetAspect);
+                        int excess = height - newHeight;
+                        top = excess / 2;
+                        bottom = excess - top;
+                    }
+                    // If aspect is already 16:9, no cropping needed (all zeros)
+
+                    if (left != 0 || right != 0 || top != 0 || bottom != 0)
+                    {
+                        image.Crop(left, right, top, bottom);
                     }
 
-                    int originalWidth = raster.Width;
-                    int originalHeight = raster.Height;
-
-                    // Desired 16:9 aspect ratio
-                    const double targetRatio = 16.0 / 9.0;
-                    double currentRatio = (double)originalWidth / originalHeight;
-
-                    int cropX = 0, cropY = 0, cropWidth = originalWidth, cropHeight = originalHeight;
-
-                    if (currentRatio > targetRatio)
-                    {
-                        // Image is too wide – crop width
-                        cropWidth = (int)(originalHeight * targetRatio);
-                        cropX = (originalWidth - cropWidth) / 2;
-                    }
-                    else if (currentRatio < targetRatio)
-                    {
-                        // Image is too tall – crop height
-                        cropHeight = (int)(originalWidth / targetRatio);
-                        cropY = (originalHeight - cropHeight) / 2;
-                    }
-                    // Define the cropping rectangle
-                    var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                    raster.Crop(cropRect);
-
-                    // Prepare output path – same folder, same name, .svg extension
-                    string outputPath = Path.ChangeExtension(inputPath, ".svg");
-
-                    // Ensure the output directory exists
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set up SVG rasterization options (use the cropped size as page size)
-                    var vectorOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = raster.Size
-                    };
-
-                    // Configure SVG save options
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions,
-                        Compress = false // plain SVG
-                    };
-
-                    // Save the cropped image as SVG
-                    raster.Save(outputPath, svgOptions);
+                    var svgOptions = new SvgOptions();
+                    image.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -97,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a series of product photos for a web gallery that requires a uniform 16:9 view and scalable SVG output.
- * 2. When converting legacy raster assets such as JPG, PNG, or BMP into vector SVG files for responsive design while ensuring the correct aspect ratio.
- * 3. When automating thumbnail generation for a video platform where each thumbnail must be 16:9 and stored as SVG for lightweight rendering.
- * 4. When processing scanned documents to fit a widescreen layout and exporting them as SVG for further editing in vector graphics tools.
- * 5. When building a batch script to standardize marketing banners by cropping them to 16:9 and saving them as SVG to maintain quality at any resolution.
+ * 1. When you need to prepare a large set of photos for a web video gallery that requires every thumbnail to be 16:9 and delivered as scalable SVG files.
+ * 2. When an e‑learning platform must automatically trim uploaded screenshots to a widescreen format before converting them to SVG for resolution‑independent rendering.
+ * 3. When a marketing team wants to batch‑process product images so they fit a 16:9 banner layout and can be edited in vector graphics tools.
+ * 4. When a mobile app generates screenshots that must be cropped to a consistent aspect ratio and saved as SVG to reduce file size on low‑bandwidth connections.
+ * 5. When a digital signage system needs to convert a folder of raster images into 16:9 SVG assets for seamless scaling on various display sizes.
  */

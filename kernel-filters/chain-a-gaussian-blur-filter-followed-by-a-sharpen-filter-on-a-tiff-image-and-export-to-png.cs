@@ -1,46 +1,48 @@
 // HOW-TO: Apply Gaussian Blur Then Sharpen to TIFF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output\\result.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\input.tif";
+            string outputPath = "Output\\output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access Filter method
-                TiffImage tiffImage = (TiffImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
-                tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                var gaussOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f);
+                raster.Filter(raster.Bounds, gaussOptions);
 
-                // Apply Sharpen filter (radius 5, sigma 4.0) to the whole image
-                tiffImage.Filter(tiffImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions();
+                raster.Filter(raster.Bounds, sharpenOptions);
 
-                // Save the processed image as PNG
-                tiffImage.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a scanned TIFF document before enhancing edges and delivering the result as a web‑friendly PNG.
- * 2. When a batch process must soften a high‑resolution TIFF photograph and then sharpen details for a product catalog, outputting PNG files.
- * 3. When converting medical imaging TIFFs to PNG while applying a blur‑then‑sharpen pipeline to improve visual clarity for reports.
- * 4. When preparing archival TIFF images for mobile apps, applying Gaussian blur to smooth artifacts and sharpening to retain key features before saving as PNG.
- * 5. When integrating image preprocessing in a C# service that receives TIFF uploads, applies blur and sharpen filters, and stores the final PNG for downstream analysis.
+ * 1. When you need to reduce noise in a scanned TIFF document before enhancing edges and delivering a web‑friendly PNG.
+ * 2. When preparing high‑resolution TIFF photographs for an online gallery, applying a blur to smooth grain and then sharpening to restore detail before converting to PNG.
+ * 3. When processing medical imaging TIFF files to soften background artifacts and accentuate structures, then exporting to PNG for integration into a reporting system.
+ * 4. When automating a batch workflow that cleans up scanned receipts (TIFF) by blurring and sharpening before saving as PNG for OCR preprocessing.
+ * 5. When creating thumbnail previews from large TIFF maps, applying a Gaussian blur followed by a sharpen filter to improve visual clarity and saving the result as PNG.
  */

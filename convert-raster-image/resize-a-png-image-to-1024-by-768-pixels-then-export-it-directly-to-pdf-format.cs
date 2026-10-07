@@ -3,52 +3,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "Input/image.png";
+                string outputPath = "Output/resized.pdf";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Resize(1024, 768);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Resize to the required dimensions
-                image.Resize(1024, 768);
-
-                // Set up PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the resized image directly as a PDF
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from a high‑resolution PNG thumbnail that must fit a standard slide size.
- * 2. When an e‑commerce platform requires product images resized to 1024×768 before embedding them in PDF catalogs.
- * 3. When a document automation system must convert user‑uploaded PNG screenshots into PDF pages with consistent dimensions.
- * 4. When a batch job prepares marketing assets by scaling PNG banners and saving them as PDF files for printing.
- * 5. When a web service creates printable PDFs from PNG logos, ensuring the logo fits within a 1024×768 layout.
+ * 1. When you need to generate a PDF report that includes a PNG logo scaled to a standard 1024×768 size for consistent layout.
+ * 2. When an e‑commerce platform must convert product thumbnail PNGs into PDF catalogs while ensuring all images fit a predefined page dimension.
+ * 3. When a document automation system requires resizing user‑uploaded PNG signatures before embedding them into PDF contracts.
+ * 4. When a batch processing tool must shrink large PNG screenshots to 1024×768 and archive them as PDF files to save storage space.
+ * 5. When a web service needs to deliver printable PDFs from PNG assets, ensuring the images are resized to fit standard A4‑like dimensions.
  */

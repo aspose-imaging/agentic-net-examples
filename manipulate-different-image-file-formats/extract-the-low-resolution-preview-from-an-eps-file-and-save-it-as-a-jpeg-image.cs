@@ -1,44 +1,38 @@
-// HOW-TO: Extract EPS Preview Image and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Low Resolution EPS Preview and Save as JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.eps";
-            string outputPath = "preview.jpg";
+            string inputPath = "input.eps";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                // Try to get the default preview image
-                using (Image preview = epsImage.GetPreviewImage())
+                using (Image preview = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.TIFF))
                 {
-                    if (preview == null)
-                    {
-                        Console.Error.WriteLine("No preview image found in the EPS file.");
-                        return;
-                    }
-
-                    // Save preview as JPEG
-                    var jpegOptions = new JpegOptions();
+                    JpegOptions jpegOptions = new JpegOptions();
                     preview.Save(outputPath, jpegOptions);
                 }
             }
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a quick thumbnail of an EPS artwork for a web gallery without rendering the full vector file.
- * 2. When a document management system must display a low‑resolution preview of uploaded EPS files in a preview pane.
- * 3. When converting batch EPS files to JPEG previews for email attachments where the recipient cannot view EPS.
- * 4. When creating a catalog of design assets and you want to store a small JPEG snapshot alongside the original EPS for faster loading.
- * 5. When integrating EPS files into a C# application that only supports raster images, you can extract the embedded preview and convert it to JPEG for display.
+ * 1. When you need to generate a quick thumbnail of an EPS artwork for a web gallery without rendering the full vector image.
+ * 2. When a document management system must display a preview of uploaded EPS files as JPEGs for faster loading in browsers.
+ * 3. When converting batch EPS files to low‑resolution JPEG previews for email attachments or reporting tools.
+ * 4. When integrating a C# application that extracts the embedded TIFF preview from EPS and saves it as a JPEG for preview panes.
+ * 5. When creating low‑resolution previews of EPS logos to embed in mobile apps where vector rendering is not supported.
  */

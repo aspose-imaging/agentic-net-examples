@@ -1,9 +1,10 @@
-// HOW-TO: Crop, Rotate, Flip DICOM Image and Export to GIF Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM to GIF with Crop Rotate and Flip in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -24,22 +25,15 @@ class Program
         {
             using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Crop 10 pixels from each side
-                int cropLeft = 10;
-                int cropTop = 10;
-                int cropWidth = dicom.Width - 2 * cropLeft;
-                int cropHeight = dicom.Height - 2 * cropTop;
-                var cropRect = new Rectangle(cropLeft, cropTop, cropWidth, cropHeight);
+                if (!dicom.IsCached)
+                    dicom.CacheData();
+
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(50, 50, 200, 200);
                 dicom.Crop(cropRect);
 
-                // Rotate 45 degrees clockwise, resize proportionally, gray background
-                dicom.Rotate(45f, true, Color.Gray);
+                dicom.RotateFlip(RotateFlipType.Rotate90FlipX);
 
-                // Flip horizontally
-                dicom.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                // Save as GIF
-                var gifOptions = new GifOptions();
+                GifOptions gifOptions = new GifOptions();
                 dicom.Save(outputPath, gifOptions);
             }
         }
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to generate a thumbnail GIF from a DICOM file after cropping unwanted borders and applying orientation adjustments.
- * 2. When a radiology web portal must display patient scans as GIFs with consistent rotation and horizontal flip to match viewer expectations.
- * 3. When a healthcare data pipeline converts DICOM images to a web‑friendly format while removing edge artifacts and standardizing the background color.
- * 4. When diagnostic software prepares DICOM images for inclusion in reports, requiring a 45° rotation and horizontal flip before saving as GIF.
- * 5. When a telemedicine system needs to preprocess DICOM scans by cropping, rotating, and flipping them before transmitting them as lightweight GIF files.
+ * 1. When a medical imaging application needs to extract a specific region from a DICOM scan, re‑orient it, and deliver it as a lightweight GIF for web viewers.
+ * 2. When a radiology workflow requires converting DICOM slices into animated GIFs after applying a 90‑degree rotation and horizontal flip for consistent patient positioning.
+ * 3. When a healthcare portal wants to display cropped DICOM thumbnails as GIFs on mobile devices, ensuring the image is correctly rotated and mirrored.
+ * 4. When a developer must batch‑process DICOM files, trim unnecessary borders, rotate them for standard orientation, and save them in GIF format for inclusion in reports.
+ * 5. When integrating Aspose.Imaging into a C# service that transforms DICOM images into GIFs with custom cropping and flip operations for archival or sharing purposes.
  */

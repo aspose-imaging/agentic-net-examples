@@ -1,9 +1,7 @@
-// HOW-TO: Rotate a GraphicsPath 45 Degrees Around Center in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Rotate a Rectangle Path 45 Degrees and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -12,42 +10,33 @@ class Program
     {
         try
         {
-            // Output file path
             string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            int width = 400;
+            int height = 400;
+            var pngOptions = new PngOptions();
 
-            // Set up PNG options with a file source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, width, height))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+                var graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Build a graphics path with a rectangle and an ellipse
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 300f)));
-                figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
+                var path = new Aspose.Imaging.GraphicsPath();
+                var figure = new Aspose.Imaging.Figure();
+
+                var rect = new Aspose.Imaging.RectangleF(100, 100, 200, 200);
+                var rectangleShape = new RectangleShape(rect);
+                figure.AddShape(rectangleShape);
+
                 path.AddFigure(figure);
 
-                // Rotate the path 45 degrees around the image center
-                float centerX = image.Width / 2f;
-                float centerY = image.Height / 2f;
-                graphics.TranslateTransform(centerX, centerY);
-                graphics.RotateTransform(45);
-                graphics.TranslateTransform(-centerX, -centerY);
+                graphics.RotateTransform(45f);
 
-                // Draw the rotated path
-                graphics.DrawPath(new Pen(Color.Black, 2), path);
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black);
+                graphics.DrawPath(pen, path);
 
-                // Save the image (source is already bound to the file)
-                image.Save();
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG thumbnail that shows a rectangle and ellipse rotated for a dynamic UI icon.
- * 2. When creating a custom watermark that must be tilted at a 45-degree angle around the image center.
- * 3. When producing printable diagrams where shapes must be rotated to align with design specifications.
- * 4. When developing a game asset pipeline that requires pre-rotated vector shapes saved as PNG files.
- * 5. When automating report graphics that need a consistent 45-degree rotation of composite shapes for visual emphasis.
+ * 1. When you need to generate a PNG thumbnail with a rotated square for a UI icon.
+ * 2. When creating a dynamic diagram where rectangles must be displayed at a 45‑degree angle using Aspose.Imaging in a C# web service.
+ * 3. When preprocessing scanned documents to overlay rotated watermark shapes before saving them as PNG files.
+ * 4. When building a game asset pipeline that requires programmatically rotating shape paths to align with design specifications.
+ * 5. When automating report graphics that include rotated geometric figures for better visual emphasis in .NET applications.
  */

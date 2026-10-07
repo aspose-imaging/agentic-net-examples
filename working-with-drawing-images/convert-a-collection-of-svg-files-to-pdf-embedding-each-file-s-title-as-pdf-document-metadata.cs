@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -28,35 +27,33 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
+                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
-                {
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        PdfDocumentInfo = new PdfDocumentInfo(),
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageSize = image.Size
-                        }
-                    };
-                    pdfOptions.PdfDocumentInfo.Title = fileNameWithoutExt;
+                string title = Path.GetFileNameWithoutExtension(inputPath);
 
-                    image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    pdfOptions.PdfDocumentInfo.Title = title;
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -69,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF reports while preserving each graphic’s title as PDF metadata.
- * 2. When generating printable catalogs from SVG product illustrations and wanting the PDF file’s Title property to match the original SVG name for easier indexing.
- * 3. When automating a document workflow that extracts vector graphics from a design folder and creates PDF assets with embedded titles for downstream content‑management systems.
- * 4. When building a C# service that receives SVG uploads, converts them to PDF, and stores the PDFs with proper metadata for compliance or archival purposes.
- * 5. When creating a desktop utility that scans an input directory of SVG diagrams, converts each to a PDF page‑size match, and sets the PDF title to the diagram’s filename for quick search in file explorers.
+ * 1. When you need to generate printable PDFs from a batch of SVG icons while preserving each file’s name as the document title for cataloging.
+ * 2. When an automated reporting system must convert vector graphics into searchable PDFs and embed descriptive metadata for easier indexing.
+ * 3. When a web service receives user‑uploaded SVG diagrams and must store them as PDFs with the original diagram name in the PDF metadata for compliance.
+ * 4. When a desktop application creates PDF portfolios from design assets, using the SVG filename as the title to display in PDF viewers.
+ * 5. When a document management workflow requires bulk conversion of SVG assets to PDFs with title fields so that downstream tools can sort and filter files by title.
  */

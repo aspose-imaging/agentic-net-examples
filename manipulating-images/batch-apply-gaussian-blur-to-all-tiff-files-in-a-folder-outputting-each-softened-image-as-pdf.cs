@@ -1,9 +1,9 @@
-// HOW-TO: Batch Apply Gaussian Blur to TIFF Files and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to TIFF Images and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,12 +11,25 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            foreach (string inputPath in tiffFiles)
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -24,17 +37,26 @@ class Program
                     return;
                 }
 
+                string extension = Path.GetExtension(inputPath).ToLowerInvariant();
+                if (extension != ".tif" && extension != ".tiff")
+                {
+                    continue;
+                }
+
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    TiffImage tiffImage = (TiffImage)image;
-                    tiffImage.Filter(tiffImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                    tiffImage.Save(outputPath, new PdfOptions());
+                    RasterImage raster = (RasterImage)image;
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions());
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -47,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften a large collection of scanned TIFF documents before archiving them as searchable PDFs.
- * 2. When a printing workflow requires applying a uniform blur effect to all TIFF pages and delivering the result in PDF format for distribution.
- * 3. When automating the preparation of medical imaging TIFF files with a Gaussian blur to protect patient details before converting them to PDF reports.
- * 4. When a digital asset management system must batch‑process high‑resolution TIFF photographs, add a subtle blur, and store them as PDFs for web preview.
- * 5. When a compliance process mandates obscuring sensitive information in TIFF files by blurring and then converting them to PDF for secure storage.
+ * 1. When you need to soften scanned TIFF documents before converting them into searchable PDF reports.
+ * 2. When automating a workflow that processes a folder of high‑resolution TIFF maps, applying a blur filter and exporting each as a PDF for web preview.
+ * 3. When creating a batch script to reduce visual noise in medical TIFF images and archive the results as PDF files.
+ * 4. When building a C# service that ingests TIFF photographs, applies a Gaussian blur for privacy, and stores the output as PDFs for compliance.
+ * 5. When preparing a set of TIFF engineering drawings for client delivery, applying a uniform blur effect and converting them to PDF in a single operation.
  */

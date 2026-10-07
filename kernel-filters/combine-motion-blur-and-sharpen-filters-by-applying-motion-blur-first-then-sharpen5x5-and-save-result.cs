@@ -1,47 +1,38 @@
-// HOW-TO: Apply Motion Blur Followed By Sharpen Filter To PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur Followed by Sharpen Filter to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var motionOptions = new MotionWienerFilterOptions(5, 1.0, 0.0);
+                image.Filter(image.Bounds, motionOptions);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                var sharpenOptions = new ConvolutionFilterOptions(ConvolutionFilter.Sharpen5x5);
+                image.Filter(image.Bounds, sharpenOptions);
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply motion blur (using Gaussian blur as a stand‑in for motion blur)
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 4.0));
-
-                // Apply sharpen filter (5x5 kernel)
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new SharpenFilterOptions(5, 4.0));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce motion artifacts in a PNG photo and then sharpen its edges before publishing it on a website using Aspose.Imaging for .NET in C#.
- * 2. When creating a game asset where a motion‑blur effect adds a sense of speed and a subsequent sharpen filter preserves important details, all processed programmatically in C#.
- * 3. When generating video thumbnails that require a subtle blur to suggest movement followed by sharpening to keep the title text readable, using Aspose.Imaging filters.
- * 4. When batch‑processing e‑commerce product images to apply a light motion blur for background smoothing and then a 5×5 sharpen to highlight the product, saving the results as PNG files.
- * 5. When building an image‑conversion pipeline in a C# application that must apply a custom filter chain—motion blur first, then sharpen—before saving the output in a different format.
+ * 1. When you need to soften motion in a photo while preserving edge detail for a product catalog, you can apply a motion blur then a sharpen filter using Aspose.Imaging in C#.
+ * 2. When preparing frames for a video game cutscene where motion streaks should appear smooth but still look crisp, this code adds motion blur followed by sharpening to the JPEG assets.
+ * 3. When cleaning up scanned documents that contain slight camera shake, applying motion blur first and then a 5x5 sharpen restores readability before saving as JPEG.
+ * 4. When creating artistic thumbnails that require a subtle motion effect without losing overall sharpness, the combined filters can be applied programmatically in a .NET application.
+ * 5. When automating batch processing of wildlife photos to emphasize movement while keeping feathers or fur detailed, the code demonstrates how to chain filters and export the result as a JPEG file.
  */

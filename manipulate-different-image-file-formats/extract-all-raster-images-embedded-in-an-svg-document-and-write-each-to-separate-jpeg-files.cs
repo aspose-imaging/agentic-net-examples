@@ -1,4 +1,4 @@
-// HOW-TO: Extract Embedded Raster Images From SVG and Save As JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Embedded Raster Images from SVG and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,52 +6,48 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputFolder = "Output";
+
         try
         {
-            // Hardcoded input SVG file path
-            string inputPath = @"C:\Images\sample.svg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the SVG (or any vector) image
+            Directory.CreateDirectory(outputFolder);
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to VectorImage to access embedded images
-                var vectorImage = (VectorImage)image;
+                var vectorImage = image as VectorImage;
+                if (vectorImage == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not a vector image.");
+                    return;
+                }
 
-                // Retrieve embedded raster images
-                EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
-
-                // Output folder for extracted JPEGs
-                string outputFolder = @"C:\Images\Extracted";
-
-                // Ensure the output folder exists (unconditional)
-                Directory.CreateDirectory(outputFolder);
-
+                var embeddedImages = vectorImage.GetEmbeddedImages();
                 int index = 0;
                 foreach (var embedded in embeddedImages)
                 {
-                    // Build output file path
-                    string outputPath = Path.Combine(outputFolder, $"image{index}.jpg");
-
-                    // Ensure directory for this file exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the embedded image as JPEG
                     using (embedded)
                     {
-                        JpegOptions jpegOptions = new JpegOptions();
-                        embedded.Image.Save(outputPath, jpegOptions);
-                    }
+                        var raster = embedded.Image as RasterImage;
+                        if (raster == null)
+                            continue;
 
-                    index++;
+                        string outputPath = Path.Combine(outputFolder, $"embedded_{index++}.jpg");
+                        string dir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrEmpty(dir))
+                            Directory.CreateDirectory(dir);
+
+                        JpegOptions jpegOptions = new JpegOptions();
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -64,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to pull out raster graphics embedded in an SVG logo to generate separate JPEG thumbnails for a web catalog.
- * 2. When an automated build process must convert all embedded images inside vector icons to JPEG files for legacy systems that only support raster formats.
- * 3. When a content management system imports SVG files and you must extract the original photos to store them as individual JPEG assets for editing.
- * 4. When preparing print‑ready materials and you need to isolate each embedded bitmap from an SVG illustration to apply separate color corrections in JPEG.
- * 5. When migrating design assets from a vector‑based workflow to a raster‑only pipeline and you require a C# script to batch‑extract and save each embedded image as JPEG.
+ * 1. When you need to pull out bitmap graphics embedded in an SVG logo and convert them to JPEG files for use in a web‑gallery.
+ * 2. When a design workflow requires separating raster assets from a vector illustration so they can be edited independently in Photoshop.
+ * 3. When an automated build process must extract all embedded images from SVG icons and store them as JPEG thumbnails for a mobile app.
+ * 4. When migrating legacy SVG assets to a content management system that only accepts JPEG images, you can programmatically extract and convert each raster element.
+ * 5. When generating reports that embed SVG diagrams but need the raster parts as separate JPEG files for compatibility with PDF generators.
  */

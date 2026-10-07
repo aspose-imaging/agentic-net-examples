@@ -1,7 +1,8 @@
-// HOW-TO: Get GraphicsPath Bounding Rectangle and Align Elements in C# (Aspose.Imaging for .NET)
+// HOW-TO: Get GraphicsPath Bounds And Align Shapes Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -10,45 +11,63 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                // Create a graphics path and add a rectangle shape
+                // Create a GraphicsPath with a rectangle shape
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-                RectangleF rect = new RectangleF(50f, 50f, 200f, 150f);
-                figure.AddShape(new RectangleShape(rect));
+                RectangleF rect = new RectangleF(50, 50, 200, 100);
+                RectangleShape rectShape = new RectangleShape(rect);
+                figure.AddShape(rectShape);
                 path.AddFigure(figure);
 
-                // Draw the original path
-                graphics.DrawPath(new Pen(Color.Black, 2), path);
+                // Retrieve bounds of the path
+                RectangleF bounds = path.GetBounds(new Matrix());
 
-                // Use the original rectangle as bounds
-                RectangleF bounds = rect;
+                // Determine canvas size with margin
+                int margin = 20;
+                int canvasWidth = (int)Math.Ceiling(bounds.Right) + margin;
+                int canvasHeight = (int)Math.Ceiling(bounds.Bottom) + margin;
 
-                // Align an additional element: draw a red rectangle around the bounds
-                graphics.DrawRectangle(new Pen(Color.Red, 2), new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save the modified image
-                image.Save(outputPath);
+                // Create output image
+                PngOptions pngOptions = new PngOptions();
+                using (RasterImage outputImage = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+                {
+                    Graphics graphics = new Graphics(outputImage);
+                    graphics.Clear(Color.White);
+
+                    // Draw the original path
+                    Pen bluePen = new Pen(Color.Blue);
+                    graphics.DrawPath(bluePen, path);
+
+                    // Align additional element: draw a circle at the center of the bounds
+                    float centerX = bounds.X + bounds.Width / 2;
+                    float centerY = bounds.Y + bounds.Height / 2;
+                    float radius = Math.Min(bounds.Width, bounds.Height) / 4;
+                    RectangleF circleRect = new RectangleF(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    EllipseShape ellipse = new EllipseShape(circleRect);
+                    Figure circleFigure = new Figure();
+                    circleFigure.AddShape(ellipse);
+                    GraphicsPath circlePath = new GraphicsPath();
+                    circlePath.AddFigure(circleFigure);
+                    Pen redPen = new Pen(Color.Red);
+                    graphics.DrawPath(redPen, circlePath);
+
+                    // Save the image
+                    outputImage.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to determine the exact bounding rectangle of a GraphicsPath in a PNG file so you can place other graphics precisely.
- * 2. When you want to draw a red outline around a previously drawn shape to highlight its area in a C# image‑processing routine.
- * 3. When generating dynamic diagrams that require aligning labels or icons to the edges of vector shapes created with Aspose.Imaging.
- * 4. When building a custom UI overlay that must snap buttons or tooltips to the corners of a rectangle drawn on an image.
- * 5. When automating image annotation where the annotation box must match the size and position of an existing graphics path.
+ * 1. When you need to calculate the exact size of a drawn rectangle so you can create a PNG canvas that fits the shape with a margin.
+ * 2. When you want to position additional graphics, such as circles or text, relative to an existing GraphicsPath without manual coordinate calculations.
+ * 3. When generating dynamic images where the dimensions depend on vector shapes defined by Aspose.Imaging’s GraphicsPath.
+ * 4. When aligning overlay elements to the bounding box of a shape for consistent layout across different image resolutions.
+ * 5. When automating image processing pipelines that require extracting shape bounds to place watermarks or annotations precisely.
  */

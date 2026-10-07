@@ -1,71 +1,66 @@
-// HOW-TO: Batch Convert Multiple TIFF Files to WebP in Parallel with C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert TIFF to WebP in Parallel with Memory Limit in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of TIFF files to convert
-            string[] inputFiles = new string[]
-            {
-                @"C:\Images\sample1.tif",
-                @"C:\Images\sample2.tif",
-                @"C:\Images\sample3.tif"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Limit parallelism to the number of logical processors
-            ParallelOptions parallelOptions = new ParallelOptions
+            if (!Directory.Exists(inputDirectory))
             {
-                MaxDegreeOfParallelism = Environment.ProcessorCount
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
+            if (!Directory.Exists(outputDirectory))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            Parallel.ForEach(files, inputPath =>
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output path with .webp extension
-                string outputPath = Path.ChangeExtension(inputPath, ".webp");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".webp");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
-                using (Image image = Image.Load(inputPath))
+                var loadOptions = new LoadOptions { BufferSizeHint = 100 * 1024 * 1024 };
+
+                using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    // If the image is a multi‑page TIFF, release pages after each export to keep memory low
-                    if (image is TiffImage tiffImage)
+                    using (WebPOptions webpOptions = new WebPOptions())
                     {
-                        tiffImage.PageExportingAction = (index, page) =>
-                        {
-                            // Force garbage collection after each page is saved
-                            GC.Collect();
-                        };
+                        image.Save(outputPath, webpOptions);
                     }
-
-                    // Configure WebP export options (adjust as needed)
-                    var webpOptions = new WebPOptions
-                    {
-                        Lossless = false,
-                        Quality = 80
-                    };
-
-                    // Save the image as WebP
-                    image.Save(outputPath, webpOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
@@ -77,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to quickly shrink a large collection of high‑resolution TIFF scans into smaller WebP files for faster web delivery.
- * 2. When processing multi‑page TIFF documents on a server, you want each page saved as WebP while keeping memory usage low.
- * 3. When a desktop application must convert dozens of TIFF images to WebP simultaneously, leveraging all CPU cores for speed.
- * 4. When automating image migration in a CI pipeline, you require parallel conversion with controlled parallelism to avoid out‑of‑memory errors.
- * 5. When building a photo‑archiving tool that exports TIFF archives to WebP format without blocking the UI, using Aspose.Imaging’s parallel API.
+ * 1. When you need to quickly convert a large folder of high‑resolution TIFF scans to smaller WebP files for web delivery while keeping RAM usage low.
+ * 2. When an automated image‑processing pipeline must handle dozens of TIFF documents simultaneously on a multi‑core server without running out of memory.
+ * 3. When you are building a desktop tool that lets users drop a batch of TIFF medical images and get WebP versions for faster viewing on browsers.
+ * 4. When you want to integrate parallel image conversion into a CI/CD step that prepares assets for a responsive website, ensuring each conversion respects a 100 MB buffer.
+ * 5. When you have limited hardware resources and must process TIFF archives in parallel, converting them to WebP to reduce storage costs and improve load times.
  */

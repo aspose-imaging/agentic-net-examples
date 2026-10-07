@@ -1,64 +1,54 @@
-// HOW-TO: Save BMP As PNG To MemoryStream For Network Transfer In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert TIFF to PNG and Save to MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        // Wrap the whole logic to catch unexpected exceptions
-        try
+        static void Main()
         {
-            // Hard‑coded input and (unused) output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.tif";
+                string outputPath = "output/output.png";
 
-            // Ensure the output directory exists (required by the safety rules)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the image to a memory stream for network transmission
-                using (MemoryStream memoryStream = new MemoryStream())
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(memoryStream, pngOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // The stream now contains the PNG data; reset position if needed
-                    memoryStream.Position = 0;
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Example usage: output the size of the generated PNG
-                    Console.WriteLine($"PNG image size in bytes: {memoryStream.Length}");
-                    
-                    // At this point the memoryStream can be sent over a network
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save to disk as PNG
+                    image.Save(outputPath, new PngOptions());
+
+                    // Save to MemoryStream for transmission
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        image.Save(ms, new PngOptions());
+                        Console.WriteLine($"PNG saved to MemoryStream, length = {ms.Length} bytes");
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Report any runtime errors without crashing
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a BMP file to a PNG and send it directly over HTTP without writing a temporary file to disk.
- * 2. When a web service must return an image generated from a legacy bitmap as a PNG stream to a client application.
- * 3. When you are building a real‑time image processing pipeline that compresses BMP frames to PNG and streams them to a remote viewer.
- * 4. When an API endpoint has to embed a PNG image in a JSON payload, requiring the image data to be held in memory first.
- * 5. When you want to measure the size of a PNG conversion before uploading it to cloud storage, using a MemoryStream to avoid extra I/O.
+ * 1. When you need to convert high‑resolution TIFF scans to lightweight PNGs for sending over a web API without writing temporary files.
+ * 2. When an application must generate PNG thumbnails from TIFF documents and stream them directly to a client browser.
+ * 3. When a microservice processes uploaded TIFF images and returns the PNG data in a response payload using a MemoryStream.
+ * 4. When you want to store converted PNG bytes in a database or message queue after converting from TIFF.
+ * 5. When a background job converts TIFF files to PNG and passes the image data to another service via TCP/IP without touching the file system.
  */

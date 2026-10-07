@@ -1,4 +1,4 @@
-// HOW-TO: Save Single-Frame PNG As APNG With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Save Single-Frame APNG While Preserving Backward Compatibility In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,24 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.apng";
+            string inputPath = "Input\\input.apng";
+            string outputPath = "Output\\output.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (unconditional call)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the static image and save it as an APNG with default options
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new ApngOptions());
+                var options = new ApngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -39,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a regular PNG icon into an APNG file while keeping compatibility with viewers that only support single‑frame APNGs.
- * 2. When a batch process must generate APNG assets from existing PNG resources without adding animation data.
- * 3. When an application exports user‑uploaded PNGs as APNGs to meet a platform’s file‑type requirement while preserving the original static appearance.
- * 4. When you want to ensure that a generated APNG containing only one frame can be opened by older browsers that expect a static image.
- * 5. When automating image pipelines that require saving images using Aspose.Imaging’s ApngOptions to maintain consistent metadata across PNG and APNG formats.
+ * 1. When a web application needs to serve an APNG that contains only one static image but must remain compatible with older browsers that do not support animated PNGs.
+ * 2. When a batch conversion tool processes user‑uploaded PNGs and must re‑save single‑frame APNGs without losing the original file format.
+ * 3. When generating thumbnails for a gallery and the source APNG has a single frame, ensuring the saved file can be opened by legacy image viewers.
+ * 4. When migrating assets from a legacy system to a new .NET service and you need to preserve the APNG container even though the animation consists of just one frame.
+ * 5. When creating a CI pipeline that validates image assets and re‑saves single‑frame APNGs to guarantee they remain valid APNG files for downstream processes.
  */

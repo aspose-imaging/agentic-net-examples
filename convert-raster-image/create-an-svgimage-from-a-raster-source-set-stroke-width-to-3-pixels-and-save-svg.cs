@@ -1,19 +1,19 @@
-// HOW-TO: Create SVG From BMP With 3 Pixel Border In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG From JPEG With 3‑Pixel Border Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
-
         try
         {
+            string inputPath = "input/input.jpg";
+            string outputPath = "output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,18 +26,15 @@ class Program
             {
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96;
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0));
-
-                // Draw a border with a 3‑pixel stroke width
-                graphics.DrawRectangle(new Pen(Color.Black, 3), 0, 0, width, height);
-
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (Image svgImage = Image.Create(new SvgOptions(), width, height))
                 {
+                    Graphics graphics = new Graphics(svgImage);
+                    graphics.DrawImage(raster, new Point(0, 0));
+
+                    Pen pen = new Pen(Color.Black, 3);
+                    graphics.DrawRectangle(pen, new Rectangle(0, 0, width, height));
+
                     svgImage.Save(outputPath);
                 }
             }
@@ -51,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a bitmap logo into a scalable SVG document and ensure it has a consistent 3‑pixel outline for branding purposes.
- * 2. When generating printable graphics where a raster photograph must be wrapped in a vector border to maintain sharp edges at any resolution.
- * 3. When converting legacy BMP assets to SVG for web use while adding a uniform stroke to match a site’s design system.
- * 4. When creating automated reports that combine raster screenshots with vector annotations, such as a 3‑pixel frame around each image.
- * 5. When building a batch process that transforms a folder of raster images into SVG files with a predefined border thickness for consistent UI icons.
+ * 1. When you need to convert a JPEG photo into a scalable SVG for responsive web design while adding a uniform 3‑pixel black outline.
+ * 2. When generating vector graphics from raster scans for printing and you want a consistent border thickness around the image.
+ * 3. When creating thumbnails in SVG format that retain the original dimensions and include a visible frame for UI components.
+ * 4. When automating batch processing of raster assets to SVG with a predefined stroke width for brand‑consistent styling.
+ * 5. When integrating Aspose.Imaging in a C# application to overlay a rectangular border on converted SVG files for diagram annotations.
  */

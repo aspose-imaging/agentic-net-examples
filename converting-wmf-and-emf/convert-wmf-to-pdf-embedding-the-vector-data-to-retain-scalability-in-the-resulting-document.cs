@@ -3,59 +3,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
-class Program
+namespace WmfToPdfConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.wmf";
-            string outputPath = @"C:\Images\sample.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.wmf";
+                string outputPath = "output.pdf";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load WMF image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Set up vector rasterization options to preserve vector data
-                var vectorOptions = new WmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Configure PDF options with the vector rasterization settings
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
-
-                // Save as PDF, embedding the vector content
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed scalable vector graphics from legacy WMF files into PDF reports without rasterizing the artwork.
- * 2. When an application must generate printable PDFs from Windows Metafile diagrams while keeping the original vector quality for zoom‑in clarity.
- * 3. When a document‑management system requires converting user‑uploaded WMF logos to PDF format while preserving edit‑able vector data.
- * 4. When a batch‑processing tool automates migration of old WMF assets to PDF for archiving, ensuring the files remain resolution‑independent.
- * 5. When a C# service creates PDF invoices that include WMF‑based charts and wants the charts to remain crisp at any size.
+ * 1. When a developer needs to embed scalable WMF graphics into a PDF report generated from a .NET application.
+ * 2. When an automated batch process must convert legacy Windows Metafile diagrams to PDF for archival without losing vector quality.
+ * 3. When a web service creates printable PDFs from user‑uploaded WMF logos while keeping them resolution‑independent.
+ * 4. When a desktop tool exports engineering schematics stored as WMF files into PDF documents for client distribution.
+ * 5. When a document management system migrates WMF assets to PDF format to ensure consistent rendering across platforms.
  */

@@ -2,42 +2,34 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\lowlight.png";
-        string outputPath = @"C:\Images\lowlight_blur.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(1, 0.8);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Apply Gaussian blur with kernel size 5 and sigma 0.8 to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 0.8)
-                );
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                PngOptions options = new PngOptions();
+                options.Source = new FileCreateSource(outputPath, false);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -49,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in low‑light PNG photos before further analysis or display.
- * 2. When preparing PNG assets for a web gallery and want a subtle blur to smooth grainy images.
- * 3. When cleaning up scanned PNG documents taken in dim conditions to improve readability.
- * 4. When preprocessing images for a computer‑vision pipeline that requires less high‑frequency noise.
- * 5. When automating batch processing of PNG screenshots captured at night to enhance visual quality.
+ * 1. When you need to reduce noise in a low‑light PNG photograph before publishing it on a website.
+ * 2. When preprocessing images for OCR to remove grain that interferes with text extraction.
+ * 3. When cleaning up dimly lit product photos so they appear clearer in e‑commerce listings.
+ * 4. When smoothing sensor noise in surveillance PNG frames prior to long‑term storage.
+ * 5. When applying a subtle blur to game asset PNGs captured in dark environments to improve visual consistency.
  */

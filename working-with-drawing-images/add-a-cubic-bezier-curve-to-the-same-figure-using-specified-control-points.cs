@@ -1,8 +1,7 @@
-// HOW-TO: Draw a Cubic Bezier Curve on a PNG with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Cubic Bezier Curve on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -11,36 +10,38 @@ class Program
     {
         try
         {
-            string outputPath = "output.png";
-
+            string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (PngOptions pngOptions = new PngOptions())
+            var bmpOptions = new BmpOptions
             {
-                pngOptions.Source = new FileCreateSource(outputPath, false);
+                BitsPerPixel = 32
+            };
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 600, 400))
+            using (var image = Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
+            {
+                var graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                var graphicsPath = new Aspose.Imaging.GraphicsPath();
+
+                var figure = new Aspose.Imaging.Figure();
+
+                var bezierShape = new BezierShape(new[]
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
+                    new Aspose.Imaging.PointF(50, 300),
+                    new Aspose.Imaging.PointF(150, 100),
+                    new Aspose.Imaging.PointF(250, 300),
+                    new Aspose.Imaging.PointF(350, 100)
+                });
 
-                    Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
-                    Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                figure.AddShape(bezierShape);
+                graphicsPath.AddFigure(figure);
 
-                    Aspose.Imaging.PointF pt1 = new Aspose.Imaging.PointF(0, 0);
-                    Aspose.Imaging.PointF pt2 = new Aspose.Imaging.PointF(200, 133);
-                    Aspose.Imaging.PointF pt3 = new Aspose.Imaging.PointF(400, 166);
-                    Aspose.Imaging.PointF pt4 = new Aspose.Imaging.PointF(600, 400);
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                graphics.DrawPath(pen, graphicsPath);
 
-                    BezierShape bezier = new BezierShape(new Aspose.Imaging.PointF[] { pt1, pt2, pt3, pt4 });
-                    figure.AddShape(bezier);
-                    path.AddFigure(figure);
-
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2);
-                    graphics.DrawPath(pen, path);
-
-                    image.Save();
-                }
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a vector‑based illustration such as a smooth curve and export it as a PNG for web or UI assets.
- * 2. When you want to programmatically create custom chart lines or signature strokes in a .NET application using Aspose.Imaging.
- * 3. When you must overlay a precise cubic Bezier path onto an existing image for watermarking or diagram annotations.
- * 4. When you are building a design‑tool feature that lets users define control points and renders the resulting curve directly to a raster file.
- * 5. When you require automated generation of scalable curve graphics for reports or PDFs without relying on external drawing libraries.
+ * 1. When you need to generate a BMP file with a custom smooth curve for a diagram or UI element in a C# application.
+ * 2. When you want to programmatically add a cubic Bezier shape to an image for creating vector‑based graphics without using external design tools.
+ * 3. When you need to render precise control‑point curves on a white background for testing rendering performance of Aspose.Imaging.
+ * 4. When you are building a reporting tool that draws scalable curves onto bitmap charts or signatures in .NET.
+ * 5. When you require automated creation of decorative wave patterns in BMP format for game assets or marketing banners using C#.
  */

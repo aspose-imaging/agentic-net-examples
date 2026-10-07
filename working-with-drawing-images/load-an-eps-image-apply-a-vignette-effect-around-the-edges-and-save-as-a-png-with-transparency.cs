@@ -1,10 +1,12 @@
-// HOW-TO: Create PNG with Vignette Effect from EPS in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Vignette Effect to EPS and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -23,37 +25,45 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image epsImage = Image.Load(inputPath))
+            using (var eps = (EpsImage)Image.Load(inputPath))
             {
-                using (MemoryStream ms = new MemoryStream())
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    var rasterOptions = new PngOptions();
-                    epsImage.Save(ms, rasterOptions);
-                    ms.Position = 0;
+                    PageWidth = eps.Width,
+                    PageHeight = eps.Height,
+                    BackgroundColor = Color.Transparent
+                };
 
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        int width = raster.Width;
-                        int height = raster.Height;
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = rasterOptions,
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                        Graphics graphics = new Graphics(raster);
-                        int steps = 10;
-                        int maxAlpha = 180;
-                        int minDim = Math.Min(width, height);
-                        float stepSize = (float)minDim / (2 * steps);
+                eps.Save(outputPath, pngOptions);
+            }
 
-                        for (int i = 0; i < steps; i++)
-                        {
-                            int inset = (int)(i * stepSize);
-                            var rect = new Rectangle(inset, inset, width - 2 * inset, height - 2 * inset);
-                            byte alpha = (byte)(maxAlpha * (i + 1) / steps);
-                            var brush = new SolidBrush(Color.FromArgb(alpha, 0, 0, 0));
-                            graphics.FillEllipse(brush, rect);
-                        }
+            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
+            {
+                Graphics graphics = new Graphics(raster);
 
-                        raster.Save(outputPath, new PngOptions());
-                    }
+                int centerX = raster.Width / 2;
+                int centerY = raster.Height / 2;
+                int maxRadius = Math.Min(raster.Width, raster.Height) / 2;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    double factor = (double)i / 10.0;
+                    int radius = maxRadius + i * 5;
+                    int alpha = (int)(255 * (1.0 - factor) * 0.5);
+                    Color brushColor = Color.FromArgb(alpha, 0, 0, 0);
+                    SolidBrush brush = new SolidBrush(brushColor);
+                    Rectangle ellipseRect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    graphics.FillEllipse(brush, ellipseRect);
                 }
+
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -65,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector EPS logo to a PNG thumbnail with a soft dark border for web display.
- * 2. When you want to add a vignette overlay to a rasterized EPS illustration before embedding it in a mobile app.
- * 3. When you must generate transparent PNG assets from EPS files while automatically applying a fade‑out edge for UI themes.
- * 4. When you are preparing print‑ready EPS artwork for online galleries and require a subtle vignette to focus viewer attention.
- * 5. When you automate batch processing of EPS diagrams into PNGs with consistent edge shading for presentation slides.
+ * 1. When you need to convert a vector EPS logo into a PNG with a soft dark border for web thumbnails.
+ * 2. When you want to generate transparent PNG assets from EPS illustrations while adding a vignette to focus viewer attention.
+ * 3. When an e‑commerce site requires product EPS drawings to be displayed as PNGs with a subtle edge shading for a polished look.
+ * 4. When preparing marketing materials that combine EPS artwork with a vignette effect and need the final image in PNG format with alpha channel support.
+ * 5. When automating a batch process that rasterizes EPS files to PNG, applies a fade‑out border, and preserves transparency for use in UI overlays.
  */

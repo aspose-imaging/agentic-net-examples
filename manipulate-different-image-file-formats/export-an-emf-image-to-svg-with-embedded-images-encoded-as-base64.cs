@@ -1,46 +1,39 @@
-// HOW-TO: Convert EMF to SVG with Embedded Images Base64 in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to SVG with Embedded Base64 Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.svg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input.emf";
+        string outputPath = "output.svg";
 
         try
         {
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                SvgOptions saveOptions = new SvgOptions
-                {
-                    TextAsShapes = true
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                {
-                    BackgroundColor = Color.WhiteSmoke,
-                    PageSize = emfImage.Size,
-                    RenderMode = EmfRenderMode.Auto,
-                    BorderX = 50,
-                    BorderY = 50
-                };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+            using (Image image = Image.Load(inputPath))
+            {
+                SvgOptions options = new SvgOptions();
 
-                emfImage.Save(outputPath, saveOptions);
+                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions();
+                vectorOptions.PageWidth = image.Width;
+                vectorOptions.PageHeight = image.Height;
+                vectorOptions.BackgroundColor = Color.White;
+
+                options.VectorRasterizationOptions = vectorOptions;
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display Windows Metafile graphics on the web, converting EMF to SVG with Base64‑encoded raster images ensures the SVG is self‑contained and browser‑compatible.
- * 2. When generating printable reports that combine vector shapes and embedded bitmaps, you can use this code to rasterize EMF content and embed the images directly into an SVG file.
- * 3. When migrating legacy engineering diagrams stored as EMF into a modern SVG workflow, the conversion preserves appearance by embedding any raster parts as Base64 data.
- * 4. When creating an SVG asset pipeline that must avoid external image files, this approach embeds all EMF raster elements, simplifying deployment and version control.
- * 5. When building a C# application that converts user‑uploaded EMF files to scalable SVG for responsive UI components, the code ensures the output SVG contains all necessary image data without separate resources.
+ * 1. When you need to embed a Windows Metafile (EMF) into a web page as a scalable SVG without external image files.
+ * 2. When generating printable reports that require vector graphics from EMF sources to be converted to SVG for cross‑platform compatibility.
+ * 3. When migrating legacy diagram assets stored as EMF into an SVG asset library while preserving embedded raster images as Base64 strings.
+ * 4. When creating an automated pipeline that transforms EMF icons into SVG icons for responsive UI designs in a C# application.
+ * 5. When exporting EMF charts to SVG for use in email newsletters, ensuring all images are self‑contained via Base64 encoding.
  */

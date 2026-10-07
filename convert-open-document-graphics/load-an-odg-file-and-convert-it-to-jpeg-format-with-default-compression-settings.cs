@@ -1,42 +1,38 @@
-// HOW-TO: Convert ODG to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG File to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OdgToJpegConverter
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
-
-        try
+        static void Main()
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.odg";
+                string outputPath = "output\\output.jpg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    JpegOptions options = new JpegOptions();
+                    image.Save(outputPath, options);
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Prepare default JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
-
-                // Save the image as JPEG
-                image.Save(outputPath, jpegOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
@@ -44,8 +40,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to display OpenDocument graphics on a website that only supports JPEG images.
- * 2. When an automated batch job must convert ODG design files to JPEG for inclusion in PDF reports.
- * 3. When a desktop application imports ODG drawings and saves them as JPEG thumbnails for quick preview.
- * 4. When a cloud service receives ODG uploads and must store them as compressed JPEG files to reduce storage costs.
- * 5. When a migration script transforms legacy ODG assets into JPEG format for compatibility with third‑party image editors.
+ * 2. When an automated batch job must convert archived ODG drawings to JPEG for quick preview generation.
+ * 3. When integrating a C# application with a content management system that stores images as JPEG but receives source files in ODG format.
+ * 4. When creating thumbnails of ODG diagrams for email attachments where JPEG is the required format.
+ * 5. When migrating legacy OpenDocument graphics to a photo‑gallery application that only accepts JPEG files.
  */

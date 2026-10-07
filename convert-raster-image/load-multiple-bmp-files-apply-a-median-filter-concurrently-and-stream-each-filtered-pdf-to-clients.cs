@@ -1,66 +1,76 @@
-// HOW-TO: Apply Median Filter to Multiple BMPs and Convert to PDF Concurrently in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter to Multiple BMPs and Convert to PDF in Parallel C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string[] inputPaths = {
-                @"C:\Images\image1.bmp",
-                @"C:\Images\image2.bmp",
-                @"C:\Images\image3.bmp"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            string[] outputPaths = {
-                @"C:\Output\image1.pdf",
-                @"C:\Output\image2.pdf",
-                @"C:\Output\image3.pdf"
-            };
-
-            // Process each file concurrently
-            Parallel.For(0, inputPaths.Length, i =>
+            if (!Directory.Exists(inputDirectory))
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                // Verify input file exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+            files.AsParallel().ForAll(inputPath =>
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply median filter to the whole image
-                    var rasterImage = (RasterImage)image;
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                    // Prepare PDF options
-                    var pdfOptions = new PdfOptions();
-
-                    // Save filtered image to a memory stream as PDF
-                    using (var memoryStream = new MemoryStream())
+                    RasterImage raster = image as RasterImage;
+                    if (raster == null)
                     {
-                        image.Save(memoryStream, pdfOptions);
+                        return;
+                    }
 
-                        // Simulate streaming to client (e.g., write size to console)
-                        Console.WriteLine($"Processed '{Path.GetFileName(inputPath)}' - PDF size: {memoryStream.Length} bytes");
+                    // Apply median filter with size 3
+                    var medianOptions = new MedianFilterOptions(3);
+                    raster.Filter(raster.Bounds, medianOptions);
 
-                        // Write PDF to output file
-                        File.WriteAllBytes(outputPath, memoryStream.ToArray());
+                    // Prepare output PDF path
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save to PDF file
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        raster.Save(outputPath, pdfOptions);
+                    }
+
+                    // Stream PDF to client (simulated by writing to a MemoryStream)
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        using (PdfOptions pdfOptions = new PdfOptions())
+                        {
+                            raster.Save(ms, pdfOptions);
+                        }
+                        Console.WriteLine($"Streamed PDF for {fileName}: {ms.Length} bytes");
                     }
                 }
             });
@@ -74,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process scanned BMP documents, reduce noise with a median filter, and deliver each result as a PDF stream to a web client.
- * 2. When a web service must quickly convert user‑uploaded BMP images to PDF while applying noise‑reduction in parallel to improve throughput.
- * 3. When an automated reporting system has to generate PDF versions of multiple bitmap charts, applying a median filter to smooth visual artifacts before sending them to downstream applications.
- * 4. When a cloud‑based image‑processing pipeline requires concurrent handling of several BMP files, applying a median filter and streaming the filtered PDFs without writing intermediate files to disk.
- * 5. When a desktop application needs to load several BMP files, clean them with a median filter, and provide each cleaned image as a PDF stream for printing or email attachment.
+ * 1. When you need to clean up noisy BMP scans before sending them as PDFs to a web client.
+ * 2. When a server must process a batch of BMP images concurrently to reduce latency in a high‑traffic application.
+ * 3. When you want to apply a median filter to remove salt‑and‑pepper noise from medical or engineering BMP files before archiving them as PDFs.
+ * 4. When an ASP.NET service streams filtered PDF documents on‑the‑fly to browsers without storing intermediate files.
+ * 5. When you need to automate conversion of legacy BMP assets into searchable PDF reports while preserving image quality.
  */

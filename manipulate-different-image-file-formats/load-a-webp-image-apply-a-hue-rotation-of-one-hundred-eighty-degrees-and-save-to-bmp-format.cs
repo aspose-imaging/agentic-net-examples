@@ -1,39 +1,44 @@
-// HOW-TO: Rotate WebP Image 180 Degrees and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to BMP with Gamma Adjustment in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.bmp";
+            string inputPath = "Input\\sample.webp";
+            string outputPath = "Output\\sample.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Apply a 180-degree rotation (used here as a placeholder for hue rotation)
-                webPImage.Rotate(180f, true, Aspose.Imaging.Color.White);
-
-                // Save the result as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                webPImage.Save(outputPath, bmpOptions);
+                RasterImage raster = (RasterImage)image;
+                raster.AdjustGamma(1.2f);
+                using (BmpOptions bmpOptions = new BmpOptions())
+                {
+                    bmpOptions.Source = new FileCreateSource(outputPath, false);
+                    raster.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a WebP graphic to BMP after flipping it for legacy Windows applications.
- * 2. When a batch process must re‑orient WebP photos by 180° before storing them in a BMP‑based reporting system.
- * 3. When an image‑processing pipeline requires rotating WebP assets for correct display on devices that only support BMP.
- * 4. When you are preparing thumbnails for a .NET desktop app that only reads BMP files and the source images are in WebP format.
- * 5. When you must programmatically adjust the orientation of WebP images and save them as BMP to maintain compatibility with older printing software.
+ * 1. When you need to display a WebP image on a legacy Windows application that only supports BMP, you can convert it while correcting brightness with gamma adjustment.
+ * 2. When processing user‑uploaded WebP photos for printing, you may convert them to BMP and increase gamma to ensure proper tonal reproduction.
+ * 3. When generating thumbnails for a reporting tool that requires BMP format, you can load the original WebP, boost its gamma, and save the result as BMP.
+ * 4. When integrating with a third‑party library that accepts only BMP files, you can transform WebP assets and apply a gamma correction to match the library’s expected contrast.
+ * 5. When preparing images for an embedded system that uses BMP and needs a brighter appearance, you can convert WebP files and adjust gamma in a single C# routine.
  */

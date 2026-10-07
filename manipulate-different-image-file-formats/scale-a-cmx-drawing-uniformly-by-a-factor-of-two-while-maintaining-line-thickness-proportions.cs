@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
@@ -10,31 +9,23 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cmx";
             string outputPath = "output.cmx";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Calculate new dimensions (scale by factor of 2)
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
 
-                // Resize the vector image; this scales drawing and line thickness proportionally
                 image.Resize(newWidth, newHeight);
-
-                // Save the scaled CMX drawing
                 image.Save(outputPath);
             }
         }
@@ -47,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to double the size of a CorelDRAW CMX file for high‑resolution printing while keeping the original line weights unchanged.
- * 2. When a CAD‑to‑CMX conversion pipeline requires uniform scaling of vector drawings before embedding them in a larger layout.
- * 3. When an automated batch process must enlarge legacy CMX schematics for display on large‑format monitors without distorting line thickness.
- * 4. When integrating Aspose.Imaging in a C# application to resize CMX artwork for a printable poster while preserving visual fidelity.
- * 5. When preparing CMX graphics for a zoom‑in feature in a web viewer, ensuring lines remain proportionally thick after scaling.
+ * 1. When a CAD application needs to double the size of a CMX vector drawing for high‑resolution printing without distorting line weights.
+ * 2. When an engineering workflow requires converting legacy CMX files to larger dimensions for integration into a larger‑scale layout.
+ * 3. When a developer must programmatically enlarge CMX schematics for a touchscreen display while keeping the original line thickness ratios.
+ * 4. When automating batch processing of CMX drawings to create zoomed‑in versions for detailed review in a .NET application.
+ * 5. When preparing CMX artwork for a poster print, scaling it uniformly by two while ensuring the line strokes remain proportionally consistent.
  */

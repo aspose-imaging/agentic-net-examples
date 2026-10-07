@@ -3,71 +3,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string svgPath = "input.svg";
+        string overlayPath = "overlay.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string svgPath = @"C:\Images\input.svg";
-            string overlayPath = @"C:\Images\overlay.png";
-            string outputPath = @"C:\Images\output.png";
-            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_svg.png");
-
-            // Validate input files
             if (!File.Exists(svgPath))
             {
                 Console.Error.WriteLine($"File not found: {svgPath}");
                 return;
             }
+
             if (!File.Exists(overlayPath))
             {
                 Console.Error.WriteLine($"File not found: {overlayPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rasterize SVG to a temporary PNG file
+            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_svg.png");
+
+            // Convert SVG to PNG
+            var pngOptions = new PngOptions
+            {
+                Source = new FileCreateSource(tempPngPath, false)
+            };
             using (Image svgImage = Image.Load(svgPath))
             {
-                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
                 svgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Load the rasterized SVG and the overlay image
-            using (RasterImage baseImage = (RasterImage)Image.Load(tempPngPath))
-            using (RasterImage overlayImage = (RasterImage)Image.Load(overlayPath))
+            // Load base PNG and overlay image, then merge
+            using (RasterImage baseImg = (RasterImage)Image.Load(tempPngPath))
             {
-                // Create output canvas bound to the output file
-                Source outSource = new FileCreateSource(outputPath, false);
-                var canvasOptions = new PngOptions { Source = outSource };
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, baseImage.Width, baseImage.Height))
+                using (RasterImage overlayImg = (RasterImage)Image.Load(overlayPath))
                 {
-                    // Draw base image onto canvas
-                    canvas.SaveArgb32Pixels(
-                        new Rectangle(0, 0, baseImage.Width, baseImage.Height),
-                        baseImage.LoadArgb32Pixels(baseImage.Bounds));
-
-                    // Overlay the second image at position (0,0) – adjust as needed
-                    canvas.SaveArgb32Pixels(
-                        new Rectangle(0, 0, overlayImage.Width, overlayImage.Height),
-                        overlayImage.LoadArgb32Pixels(overlayImage.Bounds));
-
-                    // Save the bound canvas
-                    canvas.Save();
+                    Rectangle bounds = new Rectangle(0, 0, overlayImg.Width, overlayImg.Height);
+                    baseImg.SaveArgb32Pixels(bounds, overlayImg.LoadArgb32Pixels(overlayImg.Bounds));
                 }
-            }
 
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                try { File.Delete(tempPngPath); } catch { /* ignore cleanup errors */ }
+                var outOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                baseImg.Save(outputPath, outOptions);
             }
         }
         catch (Exception ex)
@@ -79,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine a vector logo (SVG) with a watermark PNG to produce a single PNG for web publishing.
- * 2. When generating product thumbnails by rendering an SVG diagram and adding a promotional badge PNG on top.
- * 3. When creating printable flyers where the base artwork is an SVG and a logo PNG must be overlaid before saving as PNG.
- * 4. When automating batch processing that converts multiple SVG icons to PNG and applies a company‑branded overlay image.
- * 5. When building a C# service that merges a dynamically generated SVG chart with a static PNG background for dashboard images.
+ * 1. When you need to add a watermark logo PNG onto an SVG‑based graphic before exporting it as a final PNG file.
+ * 2. When generating product thumbnails that combine a vector SVG background with a promotional badge PNG overlay in a .NET application.
+ * 3. When creating composite icons by merging a scalable SVG illustration with a foreground PNG overlay for consistent UI assets.
+ * 4. When automating marketing asset preparation that requires converting SVG diagrams to PNG and then stamping a transparent PNG overlay for branding.
+ * 5. When building a server‑side image pipeline that converts SVG to PNG and subsequently applies a PNG overlay such as a logo or label before delivery.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Convert Multi‑Page TIFF to Animated WebP Using Sequential Export in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Page TIFF to Animated WebP Using Sequential Batch Export in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,39 +11,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output/output.webp";
+            string inputPath = "Input/multipage.tif";
+            string outputPath = "Output/animated.webp";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Enable sequential batch export mode
-                tiff.PageExportingAction = delegate (int index, Image page)
+                tiff.PageExportingAction = (int pageIndex, Image pageImage) =>
                 {
-                    // Release resources for each page
-                    GC.Collect();
+                    // Sequential processing; no custom per-page logic required.
                 };
 
-                // Configure WebP export options
-                WebPOptions options = new WebPOptions
+                using (var webpOptions = new WebPOptions())
                 {
-                    Lossless = false,
-                    Quality = 80f
-                };
-
-                // Save as animated WebP (each TIFF page becomes a frame)
-                tiff.Save(outputPath, options);
+                    webpOptions.Quality = 80;
+                    webpOptions.Lossless = false;
+                    tiff.Save(outputPath, webpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a lightweight animated WebP preview from a large multi‑page scanned document without exhausting memory.
- * 2. When a web application must serve high‑resolution TIFF archives as animated WebP to improve page load speed on browsers.
- * 3. When processing satellite imagery stored as multi‑page TIFFs and you want to create compact WebP animations for quick visual analysis.
- * 4. When converting multi‑page medical imaging files to WebP for integration into a mobile health app while keeping the device’s RAM usage low.
- * 5. When automating batch conversion of archival TIFF slides into animated WebP files on a server that handles many files concurrently.
+ * 1. When you need to generate an animated WebP from a large multi‑page TIFF without exhausting memory.
+ * 2. When processing scanned document pages one at a time and delivering them as a single WebP file for web use.
+ * 3. When converting medical imaging TIFF stacks to lightweight WebP for fast browser preview.
+ * 4. When automating server‑side batch conversion of archival TIFF files to WebP in a .NET service while preserving page order.
+ * 5. When creating animated WebP thumbnails from multi‑page TIFFs in a C# application without loading the entire image into RAM.
  */

@@ -1,4 +1,4 @@
-// HOW-TO: Resize WMF to 800x800 PNG in C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Resize WMF to 800x800 PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,32 +7,35 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.wmf";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.wmf";
+        string outputPath = "output.png";
 
         try
         {
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Resize to 800x800 pixels (using default nearest‑neighbour resampling)
-                wmfImage.Resize(800, 800);
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    PageWidth = 800,
+                    PageHeight = 800
+                };
 
-                // Save the resized image as PNG
-                wmfImage.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑ready thumbnails from legacy WMF vector graphics by resizing them to 800 × 800 PNG using Aspose.Imaging in C#.
- * 2. When an automated report generator must convert and resize WMF logos to a fixed 800 × 800 PNG for email attachments with Aspose.Imaging.
- * 3. When a batch processing script has to standardize the dimensions of WMF icons to 800 × 800 PNG before uploading them to cloud storage using Aspose.Imaging.
- * 4. When a desktop application requires converting user‑provided WMF drawings into 800 × 800 PNG images for printing, leveraging Aspose.Imaging in C#.
- * 5. When a migration tool moves old WMF assets to modern PNG format while ensuring each image fits an 800‑pixel square layout with Aspose.Imaging.
+ * 1. When you need to convert legacy WMF vector graphics to PNG thumbnails of a fixed 800‑pixel size for web previews.
+ * 2. When generating consistent‑sized product images from WMF files for an e‑commerce catalog in a C# application.
+ * 3. When preparing WMF diagrams for inclusion in PDF reports that require raster images of exact dimensions.
+ * 4. When automating batch processing of WMF icons to create uniformly sized PNG assets for a mobile app.
+ * 5. When integrating Aspose.Imaging into a .NET service that resizes and rasterizes WMF files to meet a UI design specification of 800 × 800 pixels.
  */

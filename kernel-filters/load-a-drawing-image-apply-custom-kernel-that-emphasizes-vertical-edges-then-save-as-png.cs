@@ -1,37 +1,31 @@
-// HOW-TO: Apply Vertical Edge Detection to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Vertical Edge Detection To PNG Image Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Define a vertical edge detection kernel (Sobel operator)
                 double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
@@ -39,15 +33,11 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                // Create convolution filter options with the custom kernel
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Apply the filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Save the processed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                options.Source = new FileCreateSource(outputPath, false);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -59,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight vertical lines in a scanned blueprint before sharing it as a PNG.
- * 2. When you want to preprocess engineering drawings to make vertical edges more pronounced for visual inspection.
- * 3. When you are building a C# tool that automatically enhances architectural diagrams by applying a Sobel filter.
- * 4. When you must convert a raw PNG drawing into a sharpened version for inclusion in a PDF report.
- * 5. When you require a simple way to detect and emphasize vertical features in images for a machine‑vision preprocessing pipeline.
+ * 1. When you need to highlight vertical lines in a scanned engineering drawing before further analysis.
+ * 2. When preparing a PNG map for a GIS application that requires strong vertical edge contrast.
+ * 3. When creating a stylized thumbnail that emphasizes building outlines in architectural renderings.
+ * 4. When preprocessing images for OCR where vertical strokes must be more pronounced.
+ * 5. When converting hand‑drawn sketches to PNG with enhanced edge definition for web display.
  */

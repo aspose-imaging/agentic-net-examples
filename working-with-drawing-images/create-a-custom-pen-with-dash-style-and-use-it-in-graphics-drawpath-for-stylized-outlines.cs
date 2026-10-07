@@ -1,4 +1,4 @@
-// HOW-TO: Draw Dashed Rectangle and Ellipse with Custom Pen in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Dashed Rectangle Outline with Custom Pen in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,38 +12,37 @@ class Program
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = "output/output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Ensure the output directory exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set PNG options and bind the output file
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 500×500 image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            using (Image image = Image.Create(bmpOptions, 400, 300))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Create a custom pen with dash style
-                Pen pen = new Pen(Color.Blue, 5f);
-                pen.DashStyle = DashStyle.Dash; // dashed line
+                Pen pen = new Pen(Color.Blue, 3);
+                pen.DashStyle = DashStyle.Dash;
 
-                // Build a graphics path containing a rectangle and an ellipse
-                GraphicsPath path = new GraphicsPath();
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 300, 200));
+
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 300f, 200f)));
+                figure.AddShape(rectShape);
+
+                GraphicsPath path = new GraphicsPath();
                 path.AddFigure(figure);
 
-                // Draw the path using the custom pen
                 graphics.DrawPath(pen, path);
 
-                // Save the image (output file already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG image that highlights shapes with a dashed outline for a technical report using Aspose.Imaging in C#.
- * 2. When you want to programmatically add stylized, dashed borders around UI elements in a .NET application with a custom Pen and Graphics.DrawPath.
- * 3. When creating custom icons that combine rectangles and ellipses with a dashed stroke for a branding guide using C# and Aspose.Imaging.
- * 4. When automating the production of printable diagrams where the dash pattern distinguishes different layers, saved as PNG via Aspose.Imaging.
- * 5. When building a server‑side image service that returns PNG images with highlighted regions drawn with a custom dashed pen in C#.
+ * 1. Use this code to generate a PNG image with a blue dashed rectangle border to highlight a region in automated reports.
+ * 2. Use it when you need to draw custom‑styled outlines on shapes in a server‑side C# image processing workflow without relying on GDI+.
+ * 3. Use it to create diagram illustrations where rectangles are rendered with a specific dash pattern and line thickness using Aspose.Imaging.
+ * 4. Use it to produce thumbnails that include a visible, customizable dashed frame indicating selection or focus.
+ * 5. Use it in a web API that returns images with dynamically drawn dashed borders around user‑uploaded pictures.
  */

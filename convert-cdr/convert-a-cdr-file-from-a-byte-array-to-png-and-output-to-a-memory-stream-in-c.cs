@@ -1,9 +1,10 @@
-// HOW-TO: Convert CorelDRAW CDR Byte Array to PNG Memory Stream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CDR Byte Array to PNG Memory Stream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,42 +12,22 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths (required by path‑safety rules)
-            string inputPath = "input.cdr";
-            string outputPath = "output.png";
+            // Input byte array containing CDR data
+            byte[] cdrData = new byte[0]; // Replace with actual CDR byte array
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (MemoryStream inputStream = new MemoryStream(cdrData))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Example byte array containing a CDR file – replace with actual data
-            byte[] cdrBytes = File.ReadAllBytes(inputPath);
-
-            // Load CDR image from byte array
-            using (MemoryStream inputStream = new MemoryStream(cdrBytes))
-            using (CdrImage cdrImage = new CdrImage(inputStream, new LoadOptions()))
-            {
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // Save to a memory stream
-                using (MemoryStream outputStream = new MemoryStream())
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputStream))
                 {
-                    // Ensure output directory exists before any save (already done above)
-                    cdrImage.Save(outputStream, pngOptions);
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        PngOptions pngOptions = new PngOptions();
+                        pngOptions.Source = new StreamSource(outputStream);
+                        cdrImage.Save(outputStream, pngOptions);
 
-                    // Example usage of the resulting PNG bytes
-                    byte[] pngBytes = outputStream.ToArray();
-                    Console.WriteLine($"PNG byte array length: {pngBytes.Length}");
-
-                    // Optionally write to the hardcoded output file path
-                    File.WriteAllBytes(outputPath, pngBytes);
+                        byte[] pngData = outputStream.ToArray();
+                        Console.WriteLine($"PNG data length: {pngData.Length}");
+                    }
                 }
             }
         }
@@ -59,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you receive a CorelDRAW drawing as a byte array from a web API and need to display it as a PNG in a .NET application.
- * 2. When you want to generate thumbnail previews of CDR files stored in a database without writing intermediate files to disk.
- * 3. When you need to convert user‑uploaded CDR images to PNG for further processing such as OCR or image analysis in a server‑side service.
- * 4. When you are building a document conversion pipeline that transforms legacy CDR assets into web‑friendly PNG format for browsers.
- * 5. When you must embed a CDR‑derived PNG into an email attachment or PDF by first obtaining the PNG bytes in memory.
+ * 1. When you receive a CorelDRAW (CDR) file as a byte array from a web API and need to display it as a PNG image in a .NET web application without writing temporary files.
+ * 2. When you want to generate thumbnail previews of uploaded CDR documents in an ASP.NET service by converting them directly to PNG streams for fast client delivery.
+ * 3. When you are building a document conversion microservice that transforms CDR files stored in a database BLOB into PNG format for downstream image processing pipelines.
+ * 4. When you need to embed CDR graphics into a PDF or email by first converting the CDR byte data to a PNG memory stream using Aspose.Imaging in C#.
+ * 5. When you are performing batch conversion of multiple CDR files loaded from network storage into PNG images in memory to reduce I/O overhead in a high‑performance server application.
  */

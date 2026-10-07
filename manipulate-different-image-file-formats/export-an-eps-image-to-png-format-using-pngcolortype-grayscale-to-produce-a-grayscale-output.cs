@@ -1,4 +1,4 @@
-// HOW-TO: Export EPS to Grayscale PNG in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS File to Grayscale PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -20,21 +20,23 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                var options = new PngOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    ColorType = PngColorType.Grayscale,
-                    VectorRasterizationOptions = new EpsRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height
                 };
 
-                image.Save(outputPath, options);
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.Grayscale,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                epsImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EPS artwork into a lightweight grayscale PNG for inclusion in a PDF report.
- * 2. When an application must generate print‑ready grayscale thumbnails from EPS logos for a catalog website.
- * 3. When a batch process has to archive legacy EPS files as lossless grayscale PNGs to reduce storage while preserving detail.
- * 4. When a scientific imaging tool requires converting EPS plots to grayscale PNGs for consistent display on monochrome monitors.
- * 5. When a mobile app needs to render EPS diagrams as grayscale PNG images to improve rendering speed and reduce memory usage.
+ * 1. When you need to generate a lightweight grayscale preview of a vector EPS illustration for a web thumbnail, you can rasterize it to PNG using C# and Aspose.Imaging.
+ * 2. When a printing workflow requires converting EPS artwork to a grayscale PNG for proofing on monochrome printers, this code automates the conversion.
+ * 3. When an e‑learning platform stores course diagrams as EPS and must deliver them as grayscale PNG images for accessibility compliance, the snippet provides the needed transformation.
+ * 4. When a batch‑processing service must extract EPS logos and store them as grayscale PNG files to reduce file size before uploading to a CDN, the code handles the rasterization.
+ * 5. When a desktop application needs to display EPS vector graphics in a UI component that only supports PNG and prefers grayscale rendering for a consistent look, this example shows how to perform the conversion.
  */

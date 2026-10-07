@@ -1,68 +1,63 @@
-// HOW-TO: Check If JPEG Is Digitally Signed and Add Signature in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check and Embed Digital Signature in an Image Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
-class Program
+namespace ImageSignatureDemo
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths and password
+                string inputPath = "input.jpg";
+                string outputPath = "output.png";
+                string password = "mySecret";
 
-            // Ensure output directory exists (null‑safe)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Load the image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage for digital signature operations
-                RasterImage raster = (RasterImage)image;
-
-                // Passwords as per requirements
-                string validPassword = "secure123";
-                string invalidPassword = "123";
-
-                // Check if already signed with a valid password
-                bool alreadySigned = raster.IsDigitalSigned(validPassword);
-
-                if (!alreadySigned)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Embed a new digital signature using the valid password
-                    raster.EmbedDigitalSignature(validPassword);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save the (potentially) signed image
-                raster.Save(outputPath);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image as RasterImage
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    // Check if the image is already digitally signed with the given password
+                    if (image.IsDigitalSigned(password))
+                    {
+                        Console.WriteLine("Image is already digitally signed with the provided password.");
+                    }
+                    else
+                    {
+                        // Embed digital signature
+                        image.EmbedDigitalSignature(password);
+                        // Save the signed image
+                        image.Save(outputPath);
+                        Console.WriteLine($"Digital signature embedded and image saved to {outputPath}");
+                    }
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure a JPEG file hasn't been tampered with before adding a new digital signature in a C# application.
- * 2. When an automated workflow must verify existing digital signatures on images using a password before embedding additional security metadata.
- * 3. When a document management system stores scanned photos and must sign only unsigned images to avoid duplicate signatures.
- * 4. When a compliance tool checks for a valid digital signature on product images and signs them if the required password is missing.
- * 5. When a batch processing script processes a folder of images, validates each image's signature status, and applies a secure signature to unsigned files.
+ * 1. When you need to verify that a JPEG file is already signed before converting it to a PNG to avoid duplicate signatures.
+ * 2. When your application must ensure a confidential image is protected with a password‑based digital signature before distribution.
+ * 3. When processing user‑uploaded photos you want to embed a digital signature only if the image hasn't been signed previously.
+ * 4. When automating a workflow that converts signed images to another format while preserving the original signature status.
+ * 5. When integrating Aspose.Imaging in a C# service that validates and signs images to meet regulatory compliance requirements.
  */

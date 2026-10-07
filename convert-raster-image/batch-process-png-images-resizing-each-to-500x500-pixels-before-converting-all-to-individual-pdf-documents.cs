@@ -3,48 +3,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
-
-            foreach (string inputPath in pngFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Resize the image to 500x500 pixels
-                    // The Resize method is part of Aspose.Imaging.Image; using Lanczos resampling for quality
-                    image.Resize(500, 500, Aspose.Imaging.ResizeType.LanczosResample);
-
-                    // Prepare PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the resized image as a PDF document
-                    image.Save(outputPath, pdfOptions);
+                    if (!image.IsCached) image.CacheData();
+                    image.Resize(500, 500, ResizeType.NearestNeighbourResample);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate standardized 500 × 500 PDF thumbnails from a folder of PNG assets for a web catalog.
- * 2. When an automated build process must convert a batch of product PNG images into PDF files with uniform dimensions for printing.
- * 3. When a document management system requires all incoming PNG scans to be resized and stored as PDFs to save storage space.
- * 4. When a reporting tool expects PDF pages of a fixed size and you must preprocess PNG charts by resizing them before conversion.
- * 5. When you are preparing a set of PNG logos for inclusion in a PDF brochure and need each logo to be resized to 500 × 500 pixels automatically.
+ * 1. When you need to generate standardized 500×500 PDF thumbnails from a folder of PNG assets for a web catalog.
+ * 2. When you must automate conversion of multiple PNG logos into PDF files while ensuring each image fits a fixed square dimension for printing.
+ * 3. When a document management system requires all uploaded PNG diagrams to be resized and stored as PDF for consistent archival.
+ * 4. When creating batch reports that embed PNG screenshots as PDF pages, and each screenshot must be uniformly sized.
+ * 5. When preparing a set of product images for a mobile app, resizing them to 500×500 and converting to PDF to meet the app’s asset pipeline.
  */

@@ -1,38 +1,32 @@
-// HOW-TO: How to Vertically Flip a TGA Image and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Flip TGA Image Vertically and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tga";
-        string outputPath = "output.jpg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.tga";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            var outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Load the TGA image, flip vertically, and save as JPEG
-            using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Vertical flip
-                tgaImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-                // Save as JPEG using JpegOptions (format inferred from extension)
-                tgaImage.Save(outputPath, new JpegOptions());
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                JpegOptions jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct upside‑down TGA textures from a legacy game engine before publishing them as JPEG thumbnails.
- * 2. When an automated pipeline must convert raw TGA screenshots into web‑friendly JPEGs with a vertical flip to match screen orientation.
- * 3. When a desktop application processes user‑uploaded TGA files and stores the flipped version as JPEG for faster preview loading.
- * 4. When migrating legacy assets, you may need to flip TGA logos vertically and save them as JPEGs for inclusion in marketing materials.
- * 5. When generating printable JPEGs from TGA artwork that requires a vertical flip to align with the printer’s coordinate system.
+ * 1. When you need to correct an upside‑down TGA sprite before embedding it in a game and deliver it as a JPEG for web preview.
+ * 2. When converting legacy TGA textures from a graphics pipeline to JPEG thumbnails while ensuring the vertical orientation matches the original design.
+ * 3. When processing scanned TGA files that were saved inverted and you must output a correctly oriented JPEG for client delivery.
+ * 4. When automating batch conversion of TGA assets to JPEG for a mobile app, applying a vertical flip to match the device’s coordinate system.
+ * 5. When integrating Aspose.Imaging in a C# service that receives TGA files, flips them vertically, and stores them as JPEGs for downstream image analysis.
  */

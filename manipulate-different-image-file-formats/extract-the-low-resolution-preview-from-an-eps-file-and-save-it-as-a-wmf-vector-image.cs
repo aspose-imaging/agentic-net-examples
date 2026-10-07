@@ -1,59 +1,91 @@
-// HOW-TO: Extract EPS Low‑Resolution WMF Preview and Save as WMF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EPS Low Resolution Preview and Save as WMF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
+using System.Text;
 
-class Program
+namespace EpsPreviewExtractor
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample_preview.wmf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        try
-        {
-            // Load EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            try
             {
-                // Retrieve WMF preview (low‑resolution)
-                using (Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF))
+                // Hardcoded input and output paths
+                string inputPath = "input.eps";
+                string outputPath = "output.wmf";
+
+                // Check input file existence
+                if (!File.Exists(inputPath))
                 {
-                    if (preview != null)
-                    {
-                        // Save preview as WMF vector image
-                        preview.Save(outputPath);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("No WMF preview available in the EPS file.");
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+
+                // Read entire EPS file
+                byte[] epsBytes = File.ReadAllBytes(inputPath);
+                string epsText = Encoding.ASCII.GetString(epsBytes);
+
+                // Locate the preview section
+                const string beginMarker = "%%BeginPreview";
+                const string endMarker = "%%EndPreview";
+
+                int beginIndex = epsText.IndexOf(beginMarker, StringComparison.Ordinal);
+                if (beginIndex == -1)
+                {
+                    Console.Error.WriteLine("BeginPreview marker not found.");
+                    return;
+                }
+
+                // Find end of the line containing the BeginPreview marker
+                int lineEnd = epsText.IndexOf('\n', beginIndex);
+                if (lineEnd == -1)
+                {
+                    Console.Error.WriteLine("Malformed BeginPreview line.");
+                    return;
+                }
+
+                // Data starts after the line break
+                int dataStart = lineEnd + 1;
+
+                int endIndex = epsText.IndexOf(endMarker, dataStart, StringComparison.Ordinal);
+                if (endIndex == -1)
+                {
+                    Console.Error.WriteLine("EndPreview marker not found.");
+                    return;
+                }
+
+                // Calculate length of preview data
+                int previewLength = endIndex - dataStart;
+                if (previewLength <= 0)
+                {
+                    Console.Error.WriteLine("Preview data is empty.");
+                    return;
+                }
+
+                // Extract preview bytes
+                byte[] previewBytes = new byte[previewLength];
+                Array.Copy(epsBytes, dataStart, previewBytes, 0, previewLength);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Write preview as WMF file
+                File.WriteAllBytes(outputPath, previewBytes);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a quick thumbnail of an EPS artwork for a Windows Forms UI, extracting the WMF preview lets you display a lightweight vector thumbnail without rendering the full EPS.
- * 2. When converting legacy EPS files to a format that older Office applications understand, saving the embedded WMF preview provides a compatible vector representation for documents.
- * 3. When building a batch process that indexes EPS files and stores a low‑resolution preview for search results, using the WMF preview reduces storage and speeds up rendering.
- * 4. When creating a print preview pane that shows a simplified version of an EPS diagram, extracting the WMF preview ensures fast display while preserving vector quality.
- * 5. When developing a migration tool that moves design assets from EPS to WMF for use in CAD or diagramming software, the code extracts the embedded preview to retain the original layout.
+ * 1. When you need to generate a thumbnail of an EPS illustration for a Windows Forms UI without rendering the full vector content.
+ * 2. When converting legacy EPS files to WMF so they can be inserted into older Microsoft Office documents that only accept WMF graphics.
+ * 3. When creating low‑resolution previews for a batch of EPS assets to display in a web gallery while keeping the preview file size minimal.
+ * 4. When extracting the embedded preview from EPS files to produce printable preview pages for a document management system.
+ * 5. When automating the extraction of EPS preview data to embed as vector icons in a C# reporting or dashboard application.
  */

@@ -1,45 +1,41 @@
-// HOW-TO: Generate BMP Image With Blue Rectangle And 50% Transparent Red Ellipse In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP With Rectangle And Semi Transparent Ellipse In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\output.bmp";
-
+        string outputPath = "output/output.bmp";
         try
         {
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the image canvas
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
+            int width = 400;
+            int height = 300;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Draw a rectangle
-                Aspose.Imaging.Pen rectPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawRectangle(rectPen, new Aspose.Imaging.Rectangle(50, 50, 300, 200));
+                Pen rectPen = new Pen(Color.Blue, 3);
+                Rectangle rect = new Rectangle(50, 50, 300, 200);
+                graphics.DrawRectangle(rectPen, rect);
 
-                // Overlay a semi‑transparent ellipse
-                using (SolidBrush ellipseBrush = new SolidBrush())
+                Color ellipseColor = Color.FromArgb(128, 255, 0, 0);
+                using (SolidBrush ellipseBrush = new SolidBrush(ellipseColor))
                 {
-                    ellipseBrush.Color = Aspose.Imaging.Color.Red;
-                    ellipseBrush.Opacity = 0.5f; // 50% opacity
-                    graphics.FillEllipse(ellipseBrush, new Aspose.Imaging.Rectangle(100, 80, 200, 150));
+                    graphics.FillEllipse(ellipseBrush, rect);
                 }
 
-                // Save the image
                 image.Save();
             }
         }
@@ -52,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically create a BMP file for a legacy system and draw basic shapes like a rectangle and a semi‑transparent ellipse.
- * 2. When you want to add a watermark‑style overlay with adjustable opacity to an image generated on the fly in a C# desktop application.
- * 3. When you are building a reporting tool that renders simple graphics such as charts or diagrams directly to BMP without using external design software.
- * 4. When you must produce a 24‑bit BMP for printing devices that only accept that format and require custom shape annotations.
- * 5. When you are testing image‑processing pipelines and need a deterministic BMP sample containing both stroked and filled shapes with alpha blending.
+ * 1. When you need to generate a BMP thumbnail that highlights a selected region with a blue border and a semi‑transparent red overlay for a desktop reporting tool.
+ * 2. When creating custom UI icons or buttons in a Windows application that require a solid rectangle outline and a translucent ellipse to indicate hover or active states.
+ * 3. When producing printable graphics for a legacy system that only accepts BMP files and you must overlay a semi‑transparent shape to mark areas of interest.
+ * 4. When building a simple image‑annotation feature that draws a rectangular selection and adds a translucent ellipse as a visual cue for user‑defined regions.
+ * 5. When automating the creation of test images for computer‑vision algorithms that need both opaque and alpha‑blended shapes in a BMP format.
  */

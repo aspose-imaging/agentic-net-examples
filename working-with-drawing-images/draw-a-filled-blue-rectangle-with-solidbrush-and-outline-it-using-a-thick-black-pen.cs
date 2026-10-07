@@ -1,51 +1,37 @@
-// HOW-TO: Create a Filled Blue Rectangle with Black Border in C# PNG (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG with Filled Blue Rectangle and Thick Black Border in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\filled_rectangle.png";
+            string outputPath = "output.png";
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            var pngOptions = new PngOptions();
 
-            // Create a file stream for the output image
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            using (Image image = Image.Create(pngOptions, 200, 200))
             {
-                // Configure PNG options to write to the stream
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Create a new PNG image with desired dimensions
-                using (Image image = Image.Create(pngOptions, 400, 300))
+                var pen = new Pen(Aspose.Imaging.Color.Black, 5);
+
+                using (var brush = new SolidBrush(Aspose.Imaging.Color.Blue))
                 {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(image);
-
-                    // Define the rectangle area
-                    Rectangle rect = new Rectangle(50, 50, 300, 200);
-
-                    // Fill the rectangle with solid blue brush
-                    SolidBrush blueBrush = new SolidBrush(Color.Blue);
-                    graphics.FillRectangle(blueBrush, rect);
-
-                    // Outline the rectangle with a thick black pen (width = 5)
-                    Pen blackPen = new Pen(Color.Black, 5);
-                    graphics.DrawRectangle(blackPen, rect);
-
-                    // Save the image to the stream
-                    image.Save();
+                    graphics.FillRectangle(brush, 50, 50, 100, 100);
+                    graphics.DrawRectangle(pen, 50, 50, 100, 100);
                 }
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG badge or label with a solid blue background and a thick black outline using Aspose.Imaging in C#.
- * 2. When creating dynamic graphics for a web API that returns custom‑shaped images, such as highlighted selection boxes drawn with SolidBrush and Pen.
- * 3. When producing printable reports that require a simple colored rectangle as a placeholder or background element in a generated image.
- * 4. When building a Windows desktop application that draws UI components on the fly, like a highlighted button rendered to a PNG file with Aspose.Imaging.
- * 5. When automating test image creation to verify that fill and stroke operations work correctly in an image‑processing workflow.
+ * 1. When you need to generate a PNG badge or icon that contains a solid blue square with a prominent black outline for a web dashboard.
+ * 2. When creating placeholder images for UI mockups where a colored rectangle highlights an area of interest in a C# application.
+ * 3. When producing simple printable labels or stickers that require a blue background shape framed by a thick black border using Aspose.Imaging.
+ * 4. When generating chart background elements, such as a highlighted region, by drawing a filled rectangle with a contrasting outline in a PNG file.
+ * 5. When automating the creation of thumbnail graphics for documentation that need a consistent blue rectangle with a bold black frame.
  */

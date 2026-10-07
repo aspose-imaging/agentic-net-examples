@@ -1,59 +1,49 @@
-// HOW-TO: Invert BMP Colors And Save As SVG Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Invert BMP Colors and Export as SVG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input/input.bmp";
+        string outputPath = "Output/inverted.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.bmp";
-            string outputPath = "output\\inverted.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to raster image for pixel manipulation
-                var raster = image as RasterImage;
-                if (raster == null)
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
+                    raster.CacheData();
                 }
 
-                // Invert colors pixel by pixel
-                for (int y = 0; y < raster.Height; y++)
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    for (int x = 0; x < raster.Width; x++)
-                    {
-                        var original = raster.GetPixel(x, y);
-                        var inverted = Color.FromArgb(
-                            original.A,
-                            255 - original.R,
-                            255 - original.G,
-                            255 - original.B);
-                        raster.SetPixel(x, y, inverted);
-                    }
+                    int pixel = pixels[i];
+                    int a = (pixel >> 24) & 0xFF;
+                    int rgb = pixel & 0x00FFFFFF;
+                    int inv = (~rgb) & 0x00FFFFFF;
+                    pixels[i] = (a << 24) | inv;
                 }
+                raster.SaveArgb32Pixels(raster.Bounds, pixels);
 
-                // Save the processed image as SVG
-                var svgOptions = new SvgOptions();
-                raster.Save(outputPath, svgOptions);
+                using (SvgOptions svgOptions = new SvgOptions())
+                {
+                    image.Save(outputPath, svgOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -65,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP icons to scalable SVG graphics with a negative color scheme for a dark‑mode UI.
- * 2. When generating high‑contrast negative images for computer‑vision preprocessing or visual analysis.
- * 3. When preparing web assets that require SVG format but the source files are BMPs that must be color‑inverted for branding.
- * 4. When creating accessible, high‑visibility graphics by inverting colors of BMP illustrations before exporting them as SVG.
- * 5. When batch‑processing scanned BMP documents to produce inverted, resolution‑independent SVG files for printing or archiving.
+ * 1. When you need to generate a vector graphic version of a legacy BMP with its colors reversed for branding or UI themes.
+ * 2. When an application must programmatically convert scanned bitmap images into SVG while applying a negative filter for visual effects.
+ * 3. When a batch process has to prepare inverted SVG assets from BMP files for responsive web design.
+ * 4. When a game development tool requires color‑inverted SVG icons derived from original BMP sprites.
+ * 5. When a reporting system needs to embed high‑resolution, color‑inverted diagrams by converting BMP charts to scalable SVG format.
  */

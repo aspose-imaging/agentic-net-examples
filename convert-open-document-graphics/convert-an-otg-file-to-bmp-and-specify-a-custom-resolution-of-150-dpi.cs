@@ -1,53 +1,30 @@
 // HOW-TO: Convert OTG to BMP with 150 DPI Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_converted.bmp";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load OTG image and save as BMP using rasterization options
-            using (Image otgImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    // Preserve original page size
-                    PageSize = otgImage.Size
-                };
-
-                var bmpSaveOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = otgRasterOptions
-                };
-
-                otgImage.Save(outputPath, bmpSaveOptions);
-            }
-
-            // Reload the saved BMP to set custom resolution (150 DPI)
-            using (Image bmpImage = Image.Load(outputPath))
-            {
-                var bmp = (BmpImage)bmpImage;
-                bmp.SetResolution(150.0, 150.0);
-                bmp.Save(outputPath);
+                var options = new BmpOptions();
+                options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(150, 150);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -59,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector OTG graphics in a Windows application that only supports BMP files, you can rasterize and convert them using C#.
- * 2. When preparing print‑ready assets, you may need to set a specific DPI (e.g., 150) on a BMP generated from an OTG source.
- * 3. When integrating legacy systems that require BMP images with a known resolution, this code converts and adjusts the image size automatically.
- * 4. When automating batch processing of engineering diagrams stored as OTG files, you can convert them to BMP and enforce a uniform DPI for downstream tools.
- * 5. When creating thumbnails or previews for OTG drawings in a web portal, converting to BMP with a set DPI ensures consistent scaling across browsers.
+ * 1. When you need to prepare an OTG vector graphic for a Windows application that only accepts BMP files at a specific print quality.
+ * 2. When generating high‑resolution thumbnails for a document management system that requires BMP output at 150 DPI.
+ * 3. When converting legacy OTG drawings to BMP for inclusion in a PDF report where a fixed DPI ensures consistent scaling.
+ * 4. When automating a batch process that extracts OTG assets and saves them as BMP images with a custom 150 DPI setting for accurate on‑screen rendering.
+ * 5. When integrating Aspose.Imaging into a C# service that receives OTG uploads and must store them as BMP files with a defined resolution for downstream printing workflows.
  */

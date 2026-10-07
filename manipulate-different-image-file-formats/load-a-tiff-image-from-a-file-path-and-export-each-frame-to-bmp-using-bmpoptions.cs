@@ -1,49 +1,41 @@
-// HOW-TO: Extract Each Frame From Multi‑Page TIFF and Save As BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract All Frames From Multi‑Page TIFF And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputDirectory = @"C:\Images\Frames";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.tif";
+            string outputDir = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            Directory.CreateDirectory(outputDir);
+
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Cast to TiffImage to access frames
-                TiffImage tiffImage = image as TiffImage;
-                if (tiffImage == null)
+                int frameCount = tiffImage.Frames.Count();
+                for (int i = 0; i < frameCount; i++)
                 {
-                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
-                    return;
-                }
-
-                // Iterate over each frame and export to BMP
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
-                {
-                    // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
-
-                    // Ensure the output directory exists
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the frame as BMP using default BmpOptions
-                    tiffImage.Frames[i].Save(outputPath, new BmpOptions());
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        tiffImage.Frames[i].Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -56,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to separate individual pages of a multi‑page TIFF scan into separate BMP files for legacy Windows applications.
- * 2. When a document‑management system requires each TIFF frame to be stored as an uncompressed BMP for accurate pixel‑by‑pixel analysis.
- * 3. When converting scanned medical images from TIFF to BMP to feed into a diagnostic tool that only accepts BMP input.
- * 4. When preparing assets for a game engine that cannot read TIFF but can load BMP textures for each frame of an animation.
- * 5. When archiving each page of a multi‑page TIFF as a BMP to ensure compatibility with older printing hardware that only supports BMP files.
+ * 1. When you need to convert each page of a multi‑page TIFF document into separate BMP files for legacy Windows applications.
+ * 2. When you must extract individual frames from a scanned TIFF file to process them separately in a .NET image‑processing pipeline.
+ * 3. When a reporting system requires BMP images for high‑quality printing and you have source images stored as multi‑page TIFFs.
+ * 4. When you are building a batch conversion tool that archives each TIFF page as an uncompressed BMP for archival compliance.
+ * 5. When you need to programmatically split a multi‑frame medical image (TIFF) into BMP slices for analysis with third‑party diagnostic software.
  */

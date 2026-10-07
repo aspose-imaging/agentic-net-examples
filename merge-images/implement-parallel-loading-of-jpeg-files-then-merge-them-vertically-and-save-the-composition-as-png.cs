@@ -1,4 +1,4 @@
-// HOW-TO: Merge Multiple JPEG Images Vertically Into a PNG Using Parallel Loading in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Vertically Into a PNG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,65 +14,78 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = new string[]
-            {
-                "Input\\image1.jpg",
-                "Input\\image2.jpg",
-                "Input\\image3.jpg"
-            };
+            // Hardcoded paths
+            string inputDirectory = "InputImages";
+            string outputPath = "Output/merged.png";
 
-            // Hardcoded output PNG path
-            string outputPath = "Output\\merged.png";
-
-            // Validate each input file exists
-            foreach (string inputPath in inputPaths)
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Parallel loading to collect image sizes
-            List<Size> sizes = new List<Size>();
-            object lockObj = new object();
-
-            inputPaths.AsParallel().ForAll(path =>
+            // Get JPEG files
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (files.Length == 0)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                Console.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            // Load images in parallel and collect pixel data
+            var imageDataList = files.AsParallel()
+                .Select(path =>
                 {
-                    lock (lockObj)
+                    if (!File.Exists(path))
                     {
-                        sizes.Add(img.Size);
+                        Console.Error.WriteLine($"File not found: {path}");
+                        return null;
                     }
-                }
-            });
 
-            // Calculate canvas dimensions for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        var bounds = img.Bounds;
+                        int[] pixels = img.LoadArgb32Pixels(bounds);
+                        return new
+                        {
+                            Width = img.Width,
+                            Height = img.Height,
+                            Pixels = pixels
+                        };
+                    }
+                })
+                .Where(x => x != null)
+                .ToList();
 
-            // Create PNG canvas bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = source };
+            if (imageDataList.Count == 0)
+            {
+                Console.WriteLine("No valid images were loaded.");
+                return;
+            }
+
+            // Calculate canvas size for vertical merge
+            int canvasWidth = imageDataList.Max(i => i.Width);
+            int canvasHeight = imageDataList.Sum(i => i.Height);
+
+            // Create PNG canvas bound to output file
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = outputSource };
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (string path in inputPaths)
+                foreach (var data in imageDataList)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetY += img.Height;
-                    }
+                    var destRect = new Rectangle(0, offsetY, data.Width, data.Height);
+                    canvas.SaveArgb32Pixels(destRect, data.Pixels);
+                    offsetY += data.Height;
                 }
-                // Save the bound image
+
+                // Save the composed image
                 canvas.Save();
             }
         }
@@ -85,9 +98,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several scanned JPEG pages into a single PNG document for easier viewing or printing.
- * 2. When building a web service that creates a tall image sprite from user‑uploaded JPEGs to improve page load performance.
- * 3. When generating a printable PDF cover sheet by first stitching JPEG photos vertically and then converting to PNG for lossless quality.
- * 4. When processing large batches of product photos in parallel to reduce memory usage and speed up creation of a composite PNG catalog.
- * 5. When creating a timeline graphic where each event’s JPEG picture is stacked vertically and saved as a high‑resolution PNG for sharing.
+ * 1. When you need to combine a series of scanned JPEG pages into a single PNG document for easier viewing or printing.
+ * 2. When building a web service that creates a vertical thumbnail strip from user‑uploaded JPEG photos on the fly.
+ * 3. When generating a composite image for a product catalog by stitching product JPEG shots together into one high‑resolution PNG.
+ * 4. When processing large batches of JPEG files in parallel to reduce load time before creating a combined PNG for archival.
+ * 5. When creating a vertical sprite sheet from individual JPEG assets for use in game development or UI design.
  */

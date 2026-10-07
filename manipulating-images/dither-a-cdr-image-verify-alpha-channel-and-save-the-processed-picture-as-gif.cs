@@ -1,19 +1,19 @@
-// HOW-TO: Dither CDR Image, Check Alpha Channel and Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Dither CDR Image, Check Alpha Channel, and Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.gif";
-
         try
         {
+            string inputPath = "input.cdr";
+            string outputPath = "output\\output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,31 +22,28 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions
+                    PngOptions pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
-                            PageHeight = cdr.Height,
-                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                            PageHeight = cdr.Height
                         }
                     };
-
                     cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        raster.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8);
+                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
                         bool hasAlpha = raster.HasAlpha;
                         Console.WriteLine($"Alpha channel present: {hasAlpha}");
-
-                        raster.Save(outputPath, new GifOptions());
+                        GifOptions gifOptions = new GifOptions();
+                        raster.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -60,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a CorelDRAW (.cdr) file to a web‑friendly GIF while applying Floyd‑Steinberg dithering to reduce colors.
- * 2. When you must verify whether the rasterized image retains an alpha channel before further processing or compositing.
- * 3. When you are generating low‑size static GIFs from vector graphics for email newsletters or legacy browsers.
- * 4. When you want to automate batch conversion of CDR files to GIF with consistent page dimensions and no smoothing.
- * 5. When you need to integrate Aspose.Imaging into a C# service that prepares print‑ready assets by rasterizing vector files and checking transparency.
+ * 1. When converting a CorelDRAW (CDR) illustration to a web‑friendly GIF while preserving visual quality through Floyd‑Steinberg dithering.
+ * 2. When you need to determine whether a rasterized CDR page contains transparency before deciding on a suitable output format.
+ * 3. When an application must batch‑process CDR files, rasterize them to PNG, apply dithering, and store the results as GIF images.
+ * 4. When integrating Aspose.Imaging into a C# service that validates the presence of an alpha channel in imported vector graphics.
+ * 5. When generating low‑color GIF assets from high‑resolution CDR designs for email newsletters or legacy systems.
  */

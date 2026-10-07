@@ -1,4 +1,4 @@
-// HOW-TO: Blend PNG Logo onto JPEG Banner with Custom Alpha in C# (Aspose.Imaging for .NET)
+// HOW-TO: Overlay PNG Logo with Alpha 192 onto JPEG Banner in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,12 +11,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string bannerPath = "banner.jpg";
             string logoPath = "logo.png";
             string outputPath = "output.jpg";
 
-            // Validate input files
             if (!File.Exists(bannerPath))
             {
                 Console.Error.WriteLine($"File not found: {bannerPath}");
@@ -28,28 +26,40 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load images
             using (RasterImage banner = (RasterImage)Image.Load(bannerPath))
             using (RasterImage logo = (RasterImage)Image.Load(logoPath))
             {
-                // Calculate bottom‑right position
-                int x = banner.Width - logo.Width;
-                int y = banner.Height - logo.Height;
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                Point origin = new Point(x, y);
+                // Adjust logo alpha to 192
+                Rectangle logoBounds = logo.Bounds;
+                int[] logoPixels = logo.LoadArgb32Pixels(logoBounds);
+                for (int i = 0; i < logoPixels.Length; i++)
+                {
+                    int pixel = logoPixels[i];
+                    pixel = (pixel & 0x00FFFFFF) | (192 << 24);
+                    logoPixels[i] = pixel;
+                }
+                logo.SaveArgb32Pixels(logoBounds, logoPixels);
 
-                // Blend logo onto banner with alpha 192
-                banner.Blend(origin, logo, 192);
+                // Position logo at bottom-right corner
+                int posX = banner.Width - logo.Width;
+                int posY = banner.Height - logo.Height;
+                if (posX < 0) posX = 0;
+                if (posY < 0) posY = 0;
 
-                // Save result as JPEG
+                Rectangle destRect = new Rectangle(posX, posY, logo.Width, logo.Height);
+                banner.SaveArgb32Pixels(destRect, logoPixels);
+
+                // Save the merged image as JPEG
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    Quality = 90
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
                 };
                 banner.Save(outputPath, jpegOptions);
             }
@@ -63,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a semi‑transparent PNG watermark to a promotional JPEG banner for online advertising.
- * 2. When generating product catalog images that require a company logo placed at the bottom‑right corner with consistent opacity.
- * 3. When creating personalized email header images by blending a user‑provided PNG badge onto a JPEG background.
- * 4. When automating the preparation of social‑media graphics that combine a logo overlay with a fixed transparency level.
- * 5. When building a batch process that stamps a PNG logo onto multiple JPEG flyers while preserving JPEG quality.
+ * 1. When you need to add a semi‑transparent company logo to the corner of a promotional JPEG banner for web advertising.
+ * 2. When you want to programmatically watermark product images with a PNG logo that retains partial transparency.
+ * 3. When generating dynamic email newsletters that require a logo blended onto a background image without fully obscuring it.
+ * 4. When creating batch‑processed marketing assets where each JPEG banner must display a PNG badge at the bottom‑right with consistent opacity.
+ * 5. When building a C# application that composites a transparent PNG overlay onto a JPEG photo for social‑media sharing.
  */

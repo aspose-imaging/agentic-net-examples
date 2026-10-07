@@ -1,51 +1,65 @@
-// HOW-TO: Validate Low Magic Wand Threshold Does Not Create Empty Mask in C# (Aspose.Imaging for .NET)
+// HOW-TO: Validate Low Magic Wand Threshold Does Not Produce Empty Mask in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "uniform.png";
+            string outputMaskPath = "mask.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath) ?? ".");
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 1 });
-
-                bool anyOpaque = false;
-                for (int y = 0; y < mask.Height && !anyOpaque; y++)
+                if (!image.IsCached)
                 {
-                    for (int x = 0; x < mask.Width; x++)
+                    image.CacheData();
+                }
+
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 1 }).Apply();
+
+                bool hasNonTransparent = false;
+                for (int y = 0; y < image.Height && !hasNonTransparent; y++)
+                {
+                    for (int x = 0; x < image.Width; x++)
                     {
-                        if (mask.IsOpaque(x, y))
+                        var color = image.GetPixel(x, y);
+                        if (color.A != 0)
                         {
-                            anyOpaque = true;
+                            hasNonTransparent = true;
                             break;
                         }
                     }
                 }
 
-                Console.WriteLine(anyOpaque ? "Mask is not empty." : "Mask is empty.");
+                if (hasNonTransparent)
+                {
+                    Console.WriteLine("Mask contains data.");
+                }
+                else
+                {
+                    Console.WriteLine("Empty mask produced.");
+                }
 
-                mask.Apply();
-
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                var saveOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+                image.Save(outputMaskPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a very low Magic Wand threshold still selects pixels on a solid‑color PNG so the resulting mask isn’t empty.
- * 2. When you want to programmatically verify that image masking works on uniform images before applying transparency in a C# application.
- * 3. When you are building an automated pipeline that adds an alpha channel to PNGs and must confirm the mask contains at least one opaque pixel.
- * 4. When you need to debug or test the MagicWandTool.Select method to prevent false‑negative selections on images with no color variation.
- * 5. When you are converting a plain PNG to a true‑color‑with‑alpha PNG and must guarantee the mask generation step succeeds even with minimal threshold settings.
+ * 1. When you need to ensure that a Magic Wand selection on a solid‑color PNG still generates a usable alpha mask even with a minimal threshold.
+ * 2. When you want to programmatically verify that applying a low‑threshold Magic Wand does not result in an entirely transparent image before further processing.
+ * 3. When you are building an automated image‑masking pipeline and must confirm that uniform images produce non‑empty masks for downstream compositing.
+ * 4. When you need to debug or test Aspose.Imaging’s MagicWandTool behavior on edge‑case images with no color variation.
+ * 5. When you are saving the resulting mask as a PNG with alpha channel to preserve transparency information for later use.
  */

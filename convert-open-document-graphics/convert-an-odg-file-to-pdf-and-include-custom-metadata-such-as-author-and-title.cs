@@ -1,54 +1,38 @@
-// HOW-TO: Convert ODG to PDF with Custom Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF with Custom Author and Title Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = @"C:\Temp\sample.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for ODG
-                var rasterOptions = new OdgRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF options and set custom metadata
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "John Doe",
-                        Title = "Sample ODG to PDF Conversion"
-                    }
-                };
-
-                // Save the image as PDF with the specified options
-                image.Save(outputPath, pdfOptions);
+                        Author = "Custom Author",
+                        Title = "Custom Title"
+                    };
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically export OpenDocument graphics (ODG) to a searchable PDF while embedding author and title information for document management systems.
- * 2. When an application must generate PDF reports from ODG diagrams and include custom metadata to comply with corporate publishing standards.
- * 3. When a batch conversion tool processes multiple ODG files and must preserve source attribution by setting the PDF's Author and Title fields.
- * 4. When integrating Aspose.Imaging into a C# workflow to rasterize vector ODG content into PDF pages with a white background and specific page size.
- * 5. When automating the creation of PDF portfolios that contain ODG illustrations and require embedded metadata for easier indexing in content repositories.
+ * 1. When a developer needs to generate PDF reports from ODG drawings while embedding the document’s author and title for proper cataloging in a document management system.
+ * 2. When an application must batch‑process OpenDocument graphics and produce searchable PDFs that include custom metadata for compliance auditing.
+ * 3. When a CAD‑to‑PDF export feature requires preserving source information such as creator name and project title within the PDF’s document properties.
+ * 4. When integrating Aspose.Imaging into a workflow that converts user‑uploaded ODG files to PDFs and adds branding metadata before storing them in a cloud repository.
+ * 5. When building a C# service that converts design files to PDF and programmatically sets PDF metadata to improve SEO and enable easy retrieval in content‑management platforms.
  */

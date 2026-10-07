@@ -1,7 +1,9 @@
-// HOW-TO: Create BMP With Anti‑Aliased Curved Line In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Anti-Aliased Bezier Curve on BMP Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,41 +11,27 @@ class Program
     {
         try
         {
-            // Output BMP file path (hard‑coded)
-            string outputPath = @"C:\temp\curved_line.bmp";
-
-            // Ensure the output directory exists
+            string outputPath = "output/output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options
-            BmpOptions bmpOptions = new BmpOptions();
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            int width = 200;
+            int height = 150;
 
-            // Create a new image canvas (400x300)
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
+            using (Image image = Image.Create(options, width, height))
             {
-                // Initialize Graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Graphics graphics = new Graphics(image);
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Enable antialiasing for smoother curves
-                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                Pen pen = new Pen(Color.Blue, 2);
+                graphics.DrawBezier(pen,
+                    new Point(10, 10),
+                    new Point(50, 0),
+                    new Point(80, 100),
+                    new Point(120, 50));
 
-                // Define a blue pen for the curve
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-
-                // Points defining the curved line
-                Aspose.Imaging.Point[] points = new Aspose.Imaging.Point[]
-                {
-                    new Aspose.Imaging.Point(50, 250),
-                    new Aspose.Imaging.Point(150, 50),
-                    new Aspose.Imaging.Point(250, 250),
-                    new Aspose.Imaging.Point(350, 50)
-                };
-
-                // Draw the curved line
-                graphics.DrawCurve(pen, points);
-
-                // Save the image to the specified path
-                image.Save(outputPath, bmpOptions);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -55,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP chart or diagram with smooth, anti‑aliased curves for reports or UI elements.
- * 2. When you want to programmatically draw a decorative wavy line on a bitmap for a game background or banner.
- * 3. When you must export a vector‑style curve as a raster BMP image while preserving visual quality using Aspose.Imaging.
- * 4. When you are creating custom icons or thumbnails that require precise curve rendering without jagged edges.
- * 5. When you need to automate the production of high‑resolution BMP assets with consistent smoothing settings across multiple images.
+ * 1. When you need to generate a BMP image with a smooth curved line for a custom UI element or diagram in a .NET application.
+ * 2. When you want to produce anti-aliased vector graphics for print-ready BMP files without using GDI+ directly.
+ * 3. When you are creating thumbnail previews of hand-drawn signatures or sketches that require smooth Bezier curves.
+ * 4. When you need to embed a high-quality curved line into a BMP asset for a game’s 2‑D sprite sheet.
+ * 5. When you are automating the generation of technical illustrations (e.g., flow-chart connectors) that must retain smoothness after being saved as BMP.
  */

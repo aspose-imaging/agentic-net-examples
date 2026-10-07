@@ -1,37 +1,43 @@
-// HOW-TO: Convert EMF Image From Memory Stream To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF Image to PDF from Memory Stream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.pdf";
+            string inputPath = Path.Combine("Input", "input.emf");
+            string outputPath = Path.Combine("Output", "output.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EMF image from a memory stream
-            byte[] emfBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(emfBytes))
-            using (Image emfImage = Image.Load(ms))
+            byte[] data = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(data))
             {
-                // Save as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                emfImage.Save(outputPath, pdfOptions);
+                using (Image image = Image.Load(ms))
+                {
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from vector graphics stored as EMF files without writing the image to disk first.
- * 2. When a web service receives an EMF file as a byte array and must return a PDF version to the client.
- * 3. When automating batch conversion of legacy EMF icons into searchable PDF documents for archival.
- * 4. When integrating Aspose.Imaging into a desktop application that loads EMF data from a database BLOB and saves it as PDF.
- * 5. When creating printable PDFs from EMF drawings that are generated on the fly in memory during runtime.
+ * 1. When you need to embed a Windows Metafile (EMF) into a PDF report without writing the file to disk first.
+ * 2. When a web service receives EMF data as a byte array and must return a PDF document to the client.
+ * 3. When automating batch conversion of EMF icons stored in a database to searchable PDF files.
+ * 4. When generating printable PDFs from dynamically created vector graphics in a C# application.
+ * 5. When preserving the original dimensions and white background of an EMF while converting it to PDF for archival purposes.
  */

@@ -1,10 +1,10 @@
-// HOW-TO: Set Gamma of CDR to 0.8 and Export as TIFF Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Gamma Of Cdr File To 0.8 And Save As Tiff In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -13,45 +13,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output.tif";
+            string inputPath = "Input/document.cdr";
+            string outputPath = "Output/corrected.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR document
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Rasterize CDR to a TIFF image in memory
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cdrImage.Width,
+                        PageHeight = cdrImage.Height
+                    }
+                };
+
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var rasterOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
-                    };
-                    cdr.Save(ms, rasterOptions);
+                    cdrImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load the rasterized image
-                    using (TiffImage tiff = (TiffImage)Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Apply gamma correction
-                        tiff.AdjustGamma(0.8f);
-
-                        // Save the corrected image as TIFF
-                        tiff.Save(outputPath);
+                        raster.AdjustGamma(0.8f);
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        raster.Save(outputPath, tiffOptions);
                     }
                 }
             }
@@ -65,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to adjust the brightness of a CorelDRAW (CDR) illustration before converting it to a high‑resolution TIFF for printing.
- * 2. When an automated workflow must rasterize vector CDR files and apply gamma correction to match a specific color profile for archival storage.
- * 3. When a batch process converts multiple CDR designs to TIFF while ensuring consistent gamma values for downstream image analysis.
- * 4. When integrating Aspose.Imaging into a C# application that prepares CDR assets for publishing platforms that only accept TIFF images with corrected gamma.
- * 5. When troubleshooting visual discrepancies by programmatically tweaking the gamma of a CDR‑derived image before saving it as TIFF.
+ * 1. When you need to correct the brightness of a CorelDRAW (CDR) illustration before archiving it as a high‑resolution TIFF for print production.
+ * 2. When a workflow requires converting vector CDR artwork to a raster format, applying gamma correction to match a target display profile, and saving the result as TIFF for downstream processing.
+ * 3. When preparing CDR graphics for OCR or image analysis, adjusting gamma ensures consistent contrast before the file is stored in a lossless TIFF container.
+ * 4. When integrating Aspose.Imaging into a C# application that must batch‑process CDR files, applying a 0.8 gamma and exporting to TIFF simplifies color‑balance standardization across all assets.
+ * 5. When a designer wants to export a CDR design with a specific gamma setting to TIFF for inclusion in a PDF portfolio, ensuring the final document retains the intended visual appearance.
  */

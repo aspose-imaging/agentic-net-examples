@@ -3,39 +3,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.eps";
-            string outputPath = @"C:\temp\output.psd";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample.psd";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            using (Image epsImage = Image.Load(inputPath))
             {
-                // Set PSD options with desired compression method
-                PsdOptions psdOptions = new PsdOptions
+                using (var options = new PsdOptions())
                 {
-                    CompressionMethod = CompressionMethod.RLE // Use RLE compression; change to CompressionMethod.Raw for no compression
-                };
-
-                // Save the image as PSD using the specified options
-                image.Save(outputPath, psdOptions);
+                    options.CompressionMethod = CompressionMethod.RLE;
+                    options.Source = new FileCreateSource(outputPath, false);
+                    epsImage.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector EPS logo into a Photoshop file while keeping file size low by applying RLE compression.
- * 2. When an automated workflow converts batch EPS artwork to layered PSD files for further editing in Adobe Photoshop, and you want to control the compression method.
- * 3. When a web service receives EPS uploads and must store them as PSDs with predictable compression for consistent rendering across platforms.
- * 4. When migrating legacy EPS assets to PSD format for a design system and you require lossless RLE compression to preserve image quality.
- * 5. When generating PSD previews from EPS files in a C# application and you need to specify the compression to balance speed and storage.
+ * 1. When a designer needs to turn vector EPS artwork into a Photoshop PSD file while keeping the file size low by applying RLE compression.
+ * 2. When an automated build process must batch‑convert EPS assets to PSDs for further editing in Photoshop without manual intervention.
+ * 3. When a web application uploads EPS logos and must store them as compressed PSDs to save storage space on the server.
+ * 4. When a printing workflow requires EPS files to be converted to PSDs with lossless compression before color‑proofing in Photoshop.
+ * 5. When a migration script moves legacy EPS graphics into a PSD‑based asset library and wants to ensure consistent compression across all files.
  */

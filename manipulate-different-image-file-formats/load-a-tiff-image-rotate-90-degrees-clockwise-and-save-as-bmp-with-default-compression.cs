@@ -2,49 +2,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.tif";
-            string outputPath = @"C:\temp\sample_rotated.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "Input\\image.tif";
+                string outputPath = "Output\\rotated.bmp";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        image.Save(outputPath, bmpOptions);
+                    }
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image, rotate, and save as BMP
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                TiffImage tiffImage = (TiffImage)image;
-                tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                tiffImage.Save(outputPath, new BmpOptions());
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system receives scanned TIFF pages that need to be displayed in portrait orientation on Windows, you can rotate them 90° clockwise and convert them to BMP for fast rendering.
- * 2. When generating thumbnails for a legacy printing workflow that only accepts BMP files, you can rotate the original TIFF and save it as a BMP with default compression.
- * 3. When integrating with a GIS application that requires BMP images oriented correctly, you can use this code to reorient TIFF map tiles before import.
- * 4. When automating batch processing of scanned invoices stored as TIFF, rotating them to match the company’s standard layout and converting to BMP simplifies downstream OCR processing.
- * 5. When preparing medical imaging data for a diagnostic tool that only reads BMP format, rotating the TIFF scans ensures the images appear upright without losing quality.
+ * 1. When a medical imaging system receives scanned TIFF files that need to be re‑oriented for display in a Windows application that only supports BMP format.
+ * 2. When a batch job must convert legacy TIFF maps into BMP thumbnails after rotating them to match the north‑up orientation.
+ * 3. When a document workflow requires rotating incoming TIFF invoices 90° clockwise before archiving them as BMP for compatibility with older reporting tools.
+ * 4. When a game asset pipeline needs to take high‑resolution TIFF textures, rotate them, and store them as BMP for fast loading in the engine.
+ * 5. When an automated script processes scanned forms, rotates each page, and saves the result as BMP to be consumed by a third‑party OCR service that only accepts BMP input.
  */

@@ -2,33 +2,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.dcm";
-            string outputPath = "sample.png";
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+            {
+                outputDir = ".";
+            }
+            Directory.CreateDirectory(outputDir);
 
-            // Load DICOM image, rotate 90 degrees clockwise, and save as PNG
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                image.Save(outputPath, new PngOptions());
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display a DICOM scan in portrait orientation on a web page, developers can rotate the image 90° clockwise and convert it to PNG for browser compatibility.
- * 2. When integrating radiology data into a reporting system that only accepts PNG files, developers must reorient the original DICOM image and save it as a PNG to preserve the correct view.
- * 3. When preparing DICOM images for machine‑learning pipelines that require uniformly oriented PNG inputs, the code rotates the scan and outputs a PNG that matches the expected layout.
- * 4. When a hospital’s PACS export tool must generate thumbnail previews for mobile devices, developers can rotate the DICOM slice and save it as a lightweight PNG.
- * 5. When automating batch processing of DICOM files to create printable documents, the rotation and PNG conversion ensure the images appear correctly on standard printers.
+ * 1. When a radiology system needs to display a DICOM scan in a web portal that only supports PNG, the image can be rotated correctly and saved as PNG.
+ * 2. When integrating a PACS viewer that expects upright images, developers can rotate the original DICOM orientation and convert it to PNG for consistent UI rendering.
+ * 3. When generating thumbnails of DICOM files for a patient dashboard, rotating the image to the proper orientation before saving as PNG ensures accurate preview.
+ * 4. When exporting DICOM images to a reporting tool that requires PNG format, applying a 90‑degree clockwise rotation fixes orientation issues caused by scanner metadata.
+ * 5. When automating batch processing of DICOM studies for archival, rotating each image and converting it to PNG simplifies storage and downstream image analysis.
  */

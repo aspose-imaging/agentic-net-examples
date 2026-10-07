@@ -1,9 +1,7 @@
-// HOW-TO: Verify Sharpen Filter Pixel Clamping When Coefficients Exceed Range in C# (Aspose.Imaging for .NET)
+// HOW-TO: Test Pixel Clamping for Convolution Filter with Large Kernel Coefficients in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -12,8 +10,24 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputDir = "TestImages";
+            string inputPath = Path.Combine(inputDir, "input.png");
+            string outputPath = Path.Combine(inputDir, "output.png");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            if (!File.Exists(inputPath))
+            {
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(new PngOptions(), 3, 3))
+                {
+                    int[] pixels = new int[9];
+                    int argb = unchecked((int)0xFF646464);
+                    for (int i = 0; i < pixels.Length; i++) pixels[i] = argb;
+                    img.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, 3, 3), pixels);
+                    img.Save(inputPath, new PngOptions());
+                }
+            }
 
             if (!File.Exists(inputPath))
             {
@@ -21,33 +35,35 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                double[,] kernel = new double[,] {
+                    {10, 10, 10},
+                    {10, 10, 10},
+                    {10, 10, 10}
+                };
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                image.Filter(image.Bounds, filterOptions);
+                image.Save(outputPath, new PngOptions());
+            }
 
-                var sharpenOptions = new SharpenFilterOptions(9, 10.0);
-                raster.Filter(raster.Bounds, sharpenOptions);
-
-                int[] resultPixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, raster.Width, raster.Height));
-                bool clamped = true;
-                foreach (int argb in resultPixels)
+            using (Aspose.Imaging.RasterImage result = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(outputPath))
+            {
+                int[] outPixels = result.LoadArgb32Pixels(result.Bounds);
+                bool allClamped = true;
+                foreach (int p in outPixels)
                 {
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    if (a < 0 || a > 255 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+                    int a = (p >> 24) & 0xFF;
+                    int r = (p >> 16) & 0xFF;
+                    int g = (p >> 8) & 0xFF;
+                    int b = p & 0xFF;
+                    if (a != 255 || r != 255 || g != 255 || b != 255)
                     {
-                        clamped = false;
+                        allClamped = false;
                         break;
                     }
                 }
-
-                Console.WriteLine(clamped ? "Clamping succeeded" : "Clamping failed");
-
-                raster.Save(outputPath, new PngOptions());
+                Console.WriteLine(allClamped ? "Test Passed" : "Test Failed");
             }
         }
         catch (Exception ex)
@@ -59,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that applying a high‑strength Sharpen filter to a PNG does not produce color values outside the 0‑255 range.
- * 2. When you want to create an automated test that validates Aspose.Imaging’s pixel clamping after using custom kernel coefficients.
- * 3. When your application processes user‑uploaded images and must guarantee that extreme filter settings never corrupt ARGB data.
- * 4. When you are debugging image quality issues caused by over‑sharpening and need to confirm that the library correctly limits pixel values.
- * 5. When integrating Aspose.Imaging into a CI pipeline to automatically check that filter operations preserve valid pixel ranges for all supported formats.
+ * 1. When you need to verify that applying a high‑gain convolution kernel does not produce invalid color values in a PNG image.
+ * 2. When you want to ensure your image‑processing pipeline correctly clamps pixel values after sharpening or edge‑detection filters in C#.
+ * 3. When you are writing automated tests to confirm that Aspose.Imaging prevents overflow when custom filter coefficients exceed the normal range.
+ * 4. When you need to generate a small test image, apply an extreme convolution, and check that the resulting ARGB values stay within 0‑255 bounds.
+ * 5. When you are debugging a bug where brightening filters produce negative or overly bright pixels and you require a reproducible unit test.
  */

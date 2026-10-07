@@ -1,38 +1,39 @@
-// HOW-TO: Flip WebP Image Horizontally and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Flip WebP Image Horizontally and Save as BMP Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.webp";
+        string outputPath = "output\\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Flip the image horizontally
-                webPImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                // Save the transformed image as BMP
-                webPImage.Save(outputPath, new BmpOptions());
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert user‑uploaded WebP graphics to BMP for legacy Windows applications while mirroring the image for a right‑to‑left layout.
- * 2. When generating thumbnails for a printing pipeline that requires BMP files and the source assets are stored as WebP, and the design calls for a horizontal flip.
- * 3. When processing scanned documents saved as WebP and you must flip them to correct orientation before saving them in BMP for OCR tools that only accept BMP input.
- * 4. When creating assets for a game engine that only supports BMP textures, and you have to mirror WebP sprites horizontally during the import process.
- * 5. When automating batch conversion of WebP icons to BMP format for a desktop UI, ensuring each icon is flipped to match the UI’s mirrored theme.
+ * 1. When a developer needs to display a mirrored version of a WebP graphic in a legacy Windows application that only supports BMP files.
+ * 2. When an e‑commerce site must generate horizontally flipped product thumbnails from WebP images and store them as BMP for compatibility with a third‑party imaging service.
+ * 3. When a game developer wants to create left‑handed sprite assets by flipping WebP textures and exporting them to BMP for the game engine’s asset pipeline.
+ * 4. When a document‑generation system requires converting WebP logos into BMP format after applying a horizontal flip to match branding guidelines.
+ * 5. When an automated batch job processes user‑uploaded WebP photos, mirrors them horizontally, and saves the results as BMP for archival in a format that preserves lossless quality.
  */

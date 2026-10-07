@@ -1,9 +1,8 @@
-// HOW-TO: Normalize Custom Convolution Kernel and Apply to JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Normalized Custom Convolution Kernel to JPEG Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -20,44 +19,48 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                double[,] kernel = new double[,]
-                {
-                    { 1, 2, 1 },
-                    { 2, 4, 2 },
-                    { 1, 2, 1 }
-                };
+            double[,] kernel = new double[,]
+            {
+                { 0, 0, 0, 0, 0 },
+                { 0, 0.04, 0.04, 0.04, 0 },
+                { 0, 0.04, 0.04, 0.04, 0 },
+                { 0, 0.04, 0.04, 0.04, 0 },
+                { 0, 0, 0, 0, 0 }
+            };
 
-                double sum = 0;
-                foreach (double value in kernel)
+            double sum = 0;
+            for (int i = 0; i < kernel.GetLength(0); i++)
+            {
+                for (int j = 0; j < kernel.GetLength(1); j++)
                 {
-                    sum += value;
+                    sum += kernel[i, j];
                 }
-                if (sum != 0)
+            }
+
+            if (sum != 0)
+            {
+                for (int i = 0; i < kernel.GetLength(0); i++)
                 {
-                    int rows = kernel.GetLength(0);
-                    int cols = kernel.GetLength(1);
-                    for (int i = 0; i < rows; i++)
+                    for (int j = 0; j < kernel.GetLength(1); j++)
                     {
-                        for (int j = 0; j < cols; j++)
-                        {
-                            kernel[i, j] /= sum;
-                        }
+                        kernel[i, j] /= sum;
                     }
                 }
+            }
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                image.Filter(image.Bounds, filterOptions);
+
+                var jpegOptions = new JpegOptions();
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -70,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to smooth a JPEG photo using a custom Gaussian‑like kernel while ensuring the filter does not change overall brightness.
- * 2. When you want to apply a user‑defined convolution matrix to an image and must normalize its coefficients to keep pixel values within the valid range.
- * 3. When you are building a C# image‑processing pipeline that requires consistent results across different kernels by scaling them to sum to one before filtering.
- * 4. When you need to programmatically enhance scanned documents in JPEG format with a blur or edge‑detect filter that you design yourself.
- * 5. When you are creating a batch‑processing tool that loads JPEG files, applies a normalized custom filter, and saves the output without losing image quality.
+ * 1. When you need to sharpen, blur, or edge‑detect a JPEG using a custom filter while preserving overall brightness by normalizing the kernel.
+ * 2. When you want to preprocess images for a machine‑learning pipeline in a .NET app by applying a user‑defined convolution mask that sums to one.
+ * 3. When you must batch‑process a folder of photos and ensure custom kernel coefficients are normalized to avoid unintended color shifts.
+ * 4. When you are building a photo‑editing tool that lets users create their own kernels and safely apply them to JPEG files in C#.
+ * 5. When you need to integrate image filtering into a C# service that loads, filters, and saves JPEG images without manually calculating kernel normalization.
  */

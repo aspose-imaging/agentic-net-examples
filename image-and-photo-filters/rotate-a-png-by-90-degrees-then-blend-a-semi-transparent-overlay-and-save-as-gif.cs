@@ -1,46 +1,49 @@
-// HOW-TO: Rotate PNG 90 Degrees, Add Transparent Overlay, Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate PNG 90 Degrees, Blend Transparent Overlay, Save As GIF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.png";
+        string overlayPath = "overlay.png";
         string outputPath = "output/output.gif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        if (!File.Exists(overlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (RasterImage baseImage = (RasterImage)Image.Load(inputPath))
             {
-                if (!baseImage.IsCached)
-                    baseImage.CacheData();
+                if (!baseImage.IsCached) baseImage.CacheData();
 
-                baseImage.Rotate(90f, true, Color.White);
+                baseImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                Source overlaySource = new FileCreateSource("overlay_temp.png", false);
-                PngOptions overlayOptions = new PngOptions() { Source = overlaySource };
-                using (RasterImage overlayImage = (RasterImage)Image.Create(overlayOptions, baseImage.Width, baseImage.Height))
+                using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
                 {
-                    Graphics graphics = new Graphics(overlayImage);
-                    graphics.Clear(Color.FromArgb(128, 255, 0, 0));
+                    if (!overlay.IsCached) overlay.CacheData();
 
-                    baseImage.Blend(new Point(0, 0), overlayImage, 128);
+                    baseImage.Blend(new Point(0, 0), overlay, 128);
                 }
 
-                GifOptions gifOptions = new GifOptions() { Source = new FileCreateSource(outputPath, false) };
+                Source outSource = new FileCreateSource(outputPath, false);
+                GifOptions gifOptions = new GifOptions() { Source = outSource };
                 baseImage.Save(outputPath, gifOptions);
             }
         }
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to rotate a product photo, apply a semi‑transparent color tint, and output it as a GIF for faster web delivery.
- * 2. When generating a series of rotated icons with a consistent overlay for a mobile app’s splash screen in C#.
- * 3. When converting scanned PNG documents that must be displayed in landscape orientation with a watermark overlay and saved as GIF for email attachments.
- * 4. When creating animated GIF frames that require each frame to be rotated and blended with a translucent overlay before assembling the animation.
- * 5. When a legacy system only accepts GIF images, and you must preprocess PNG assets by rotating them and adding a transparent overlay using Aspose.Imaging in .NET.
+ * 1. When you need to display a rotated product image with a watermark overlay on a website and deliver it as a lightweight GIF.
+ * 2. When you want to create animated GIF frames by rotating a base PNG and adding a semi‑transparent logo for branding.
+ * 3. When you must convert a scanned PNG diagram to a GIF while applying a 90° rotation and a translucent mask for visual emphasis.
+ * 4. When you are generating thumbnail previews that require a specific orientation and a semi‑transparent badge before saving in GIF format.
+ * 5. When you need to preprocess images for email newsletters by rotating them, blending a transparent overlay, and exporting as GIF to reduce file size.
  */

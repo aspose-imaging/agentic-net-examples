@@ -1,9 +1,7 @@
 // HOW-TO: Validate Convolution Kernel Sum Equals One Before Applying Filter in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,51 +9,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Define a custom convolution kernel
-            double[,] kernel = new double[,]
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                { 0.0, -1.0, 0.0 },
-                { -1.0, 5.0, -1.0 },
-                { 0.0, -1.0, 0.0 }
-            };
+                Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-            // Validate that the sum of kernel coefficients equals 1
-            double sum = 0.0;
-            foreach (double value in kernel)
-            {
-                sum += value;
-            }
+                double[,] kernel = new double[,]
+                {
+                    { 0.0, 0.2, 0.0 },
+                    { 0.2, 0.2, 0.2 },
+                    { 0.0, 0.2, 0.0 }
+                };
 
-            if (Math.Abs(sum - 1.0) > 1e-6)
-            {
-                Console.Error.WriteLine("Kernel coefficients must sum to 1.");
-                return;
-            }
+                double sum = 0.0;
+                foreach (double value in kernel)
+                {
+                    sum += value;
+                }
 
-            // Load the image, apply the filter, and save the result
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Apply custom convolution filter
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                image.Filter(image.Bounds, filterOptions);
+                if (Math.Abs(sum - 1.0) > 1e-6)
+                {
+                    Console.Error.WriteLine($"Kernel coefficients sum to {sum}, which is not equal to 1.");
+                    return;
+                }
 
-                // Save the processed image as PNG
-                var saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -67,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen a PNG image with a custom kernel while ensuring the filter does not unintentionally alter overall brightness.
- * 2. When processing user‑uploaded images in a web service and you must verify the convolution matrix is normalized before applying it with Aspose.Imaging.
- * 3. When building an automated batch job that applies edge‑enhancement to thousands of PNG files and you want to prevent runtime errors caused by invalid kernel sums.
- * 4. When creating a C# desktop application that lets designers experiment with custom filters and you need to guard against non‑unit‑sum kernels that could produce dark or washed‑out results.
- * 5. When integrating Aspose.Imaging into a CI pipeline to generate test images and you must programmatically confirm the convolution coefficients total one to maintain consistent test output.
+ * 1. When you need to ensure a custom blur or sharpening kernel does not unintentionally alter image brightness before applying it to a PNG in a .NET application.
+ * 2. When processing raster images in C# and you must verify that the convolution matrix is normalized to preserve overall pixel intensity.
+ * 3. When building an image‑processing pipeline that applies user‑defined filters and you want to catch invalid kernels early to avoid corrupted output files.
+ * 4. When converting or enhancing photographs programmatically and you need to guarantee the filter coefficients sum to 1 to maintain color balance.
+ * 5. When automating batch image edits and you require a safety check that prevents applying non‑normalized kernels that could cause over‑exposure or darkening.
  */

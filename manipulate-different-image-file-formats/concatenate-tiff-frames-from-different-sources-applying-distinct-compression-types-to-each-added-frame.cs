@@ -1,23 +1,28 @@
-// HOW-TO: Create Multi‑Page TIFF from PNG and JPEG with Different Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple TIFF Files with Different Compression per Frame in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath1 = @"c:\temp\input1.png";
-            string inputPath2 = @"c:\temp\input2.jpg";
-            string outputPath = @"c:\temp\output.tif";
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string outputPath = "output.tif";
 
-            // Verify that the source files exist
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -29,47 +34,39 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first source image
-            using (RasterImage srcImg1 = (RasterImage)Image.Load(inputPath1))
+            using (TiffImage src1 = (TiffImage)Image.Load(inputPath1))
+            using (TiffImage src2 = (TiffImage)Image.Load(inputPath2))
             {
-                // Define TIFF options for the first frame (LZW compression, RGB)
-                TiffOptions tiffOpts1 = new TiffOptions(TiffExpectedFormat.Default)
+                // First frame compression: LZW
+                TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default);
+                options1.Compression = TiffCompressions.Lzw;
+
+                int width1 = src1.ActiveFrame.Width;
+                int height1 = src1.ActiveFrame.Height;
+
+                using (TiffImage outTiff = (TiffImage)Image.Create(options1, width1, height1))
                 {
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    ByteOrder = TiffByteOrder.BigEndian,
-                    Compression = TiffCompressions.Lzw,
-                    Photometric = TiffPhotometrics.Rgb,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                };
+                    // Copy first frame pixels
+                    Color[] pixels1 = ((RasterImage)src1).LoadPixels(src1.ActiveFrame.Bounds);
+                    outTiff.ActiveFrame.SavePixels(outTiff.ActiveFrame.Bounds, pixels1);
 
-                // Create a TIFF frame from the first image with the above options
-                TiffFrame frame1 = new TiffFrame(srcImg1, tiffOpts1);
+                    // Second frame compression: Deflate
+                    TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default);
+                    options2.Compression = TiffCompressions.Deflate;
 
-                // Load the second source image
-                using (RasterImage srcImg2 = (RasterImage)Image.Load(inputPath2))
-                {
-                    // Define TIFF options for the second frame (CCITT Group 3, 1‑bit B/W)
-                    TiffOptions tiffOpts2 = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        BitsPerSample = new ushort[] { 1 },
-                        ByteOrder = TiffByteOrder.LittleEndian,
-                        Compression = TiffCompressions.CcittFax3,
-                        Photometric = TiffPhotometrics.MinIsBlack,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                    };
+                    int width2 = src2.ActiveFrame.Width;
+                    int height2 = src2.ActiveFrame.Height;
 
-                    // Create a TIFF frame from the second image with the above options
-                    TiffFrame frame2 = new TiffFrame(srcImg2, tiffOpts2);
+                    TiffFrame newFrame = new TiffFrame(options2, width2, height2);
 
-                    // Assemble the multi‑frame TIFF image
-                    using (TiffImage tiffImage = new TiffImage(new TiffFrame[] { frame1, frame2 }))
-                    {
-                        // Save the combined TIFF to the output path
-                        tiffImage.Save(outputPath);
-                    }
+                    // Copy second frame pixels
+                    Color[] pixels2 = ((RasterImage)src2).LoadPixels(src2.ActiveFrame.Bounds);
+                    newFrame.SavePixels(newFrame.Bounds, pixels2);
+
+                    outTiff.AddFrame(newFrame);
+                    outTiff.Save(outputPath);
                 }
             }
         }
@@ -82,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a multi‑page TIFF document that combines color PNG graphics and black‑and‑white JPEG scans, applying LZW compression to the color page and CCITT Group 3 compression to the monochrome page.
- * 2. When you are building a fax‑compatible archive where each page must use the appropriate compression method to minimize file size while preserving readability.
- * 3. When you want to bundle images from different sources into a single TIFF for medical imaging, using lossless compression for diagnostic images and bitonal compression for annotation pages.
- * 4. When you create a printable booklet that mixes high‑resolution photographs and line‑art, requiring separate compression settings for each page to meet publishing standards.
- * 5. When you develop a document‑management system that stores mixed‑format images as a single multi‑frame TIFF, assigning optimal compression per frame to reduce storage costs.
+ * 1. When you need to merge scanned documents from separate TIFF files into a single multi‑page TIFF while using LZW for the first page and Deflate for the second to meet archival and size‑reduction requirements.
+ * 2. When a medical imaging system must combine patient scans stored as individual TIFF frames, applying a lossless compression method appropriate for each modality.
+ * 3. When a publishing workflow requires assembling high‑resolution TIFF pages from different sources, assigning a specific compression to each page to balance quality and file size.
+ * 4. When an automated batch process creates a multi‑page TIFF report and wants to use a faster Deflate compression for later pages while keeping the first page in LZW for compatibility with legacy software.
+ * 5. When a GIS application concatenates raster TIFF layers from separate datasets and needs to specify distinct compression algorithms for each layer to optimize storage and rendering performance.
  */

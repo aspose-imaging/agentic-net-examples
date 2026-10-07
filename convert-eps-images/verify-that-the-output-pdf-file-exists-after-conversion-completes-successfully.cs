@@ -1,4 +1,4 @@
-// HOW-TO: Convert JPEG to PDF and Verify Output File Exists in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Convert JPG to PDF and Verify File Creation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,13 +6,13 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/output.pdf";
+            string inputPath = "input.jpg";
+            string outputPath = "output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,23 +22,28 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+            {
+                outputDir = ".";
+            }
+            Directory.CreateDirectory(outputDir);
 
-            // Load the image and convert to PDF
+            // Load image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
 
-            // Verify that the PDF was created
+            // Verify output PDF exists
             if (File.Exists(outputPath))
             {
-                Console.WriteLine($"PDF file successfully created: {outputPath}");
+                Console.WriteLine("PDF file created successfully.");
             }
             else
             {
-                Console.Error.WriteLine($"Failed to create PDF file: {outputPath}");
+                Console.Error.WriteLine("Failed to create PDF file.");
             }
         }
         catch (Exception ex)
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from a user‑uploaded JPEG image and confirm the file was created successfully.
- * 2. When automating batch processing of product photos to PDF for archival while ensuring each conversion succeeds.
- * 3. When integrating image‑to‑PDF conversion into a web service that must return an error if the PDF file is missing.
- * 4. When building a desktop utility that converts scanned JPEG documents to PDF and validates the output before further processing.
- * 5. When creating a scheduled task that transforms marketing JPEG assets into PDFs and logs any conversion failures.
+ * 1. When you need to generate a PDF report from user‑uploaded JPEG images and confirm the file was saved before sending a download link.
+ * 2. When an automated batch job must convert scanned JPG photos to PDF archives while ensuring the output folder exists and the PDF was created successfully.
+ * 3. When a web service processes incoming JPEG attachments, converts them to PDF with Aspose.Imaging, and validates the conversion to avoid returning broken files.
+ * 4. When a desktop application offers an “Export as PDF” feature for images and must check that the exported PDF is present on disk before displaying a success message.
+ * 5. When a CI/CD pipeline includes a step that transforms image assets to PDF format and needs to verify the artifact was produced to prevent downstream build failures.
  */

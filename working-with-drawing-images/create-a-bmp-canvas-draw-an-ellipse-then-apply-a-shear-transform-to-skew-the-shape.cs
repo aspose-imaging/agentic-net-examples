@@ -1,42 +1,33 @@
-// HOW-TO: Create BMP Image With Skewed Ellipse Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Canvas and Draw Sheared Ellipse in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string outputPath = "output\\canvas.bmp";
         try
         {
-            string outputPath = "Output/output.bmp";
-
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source, BitsPerPixel = 24 };
-
-            using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(options, 500, 500))
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            int width = 400;
+            int height = 300;
+            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Wheat);
-
-                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
-
-                Aspose.Imaging.Shapes.EllipseShape ellipse = new Aspose.Imaging.Shapes.EllipseShape(new Aspose.Imaging.RectangleF(50, 50, 300, 300));
-
-                Aspose.Imaging.Matrix shear = new Aspose.Imaging.Matrix(1, 0, 0.5f, 1, 0, 0);
-                ellipse.Transform(shear);
-
-                figure.AddShape(ellipse);
-                path.AddFigure(figure);
-
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), path);
-
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
+                Pen pen = new Pen(Color.Blue, 3);
+                Rectangle rect = new Rectangle(50, 50, 200, 150);
+                graphics.DrawEllipse(pen, rect);
+                Matrix shear = new Matrix(1, 0, 0.5f, 1, 0, 0);
+                graphics.MultiplyTransform(shear);
+                Pen pen2 = new Pen(Color.Red, 3);
+                graphics.DrawEllipse(pen2, rect);
                 canvas.Save();
             }
         }
@@ -49,9 +40,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail that contains a skewed ellipse for a custom UI element or icon.
- * 2. When creating test images for computer‑vision algorithms that require geometric distortion such as shear‑skewed shapes.
- * 3. When producing a simple graphic overlay, like a slanted badge or watermark, on a BMP background in a reporting tool.
- * 4. When building procedural game assets where an ellipse must be transformed to simulate perspective on a bitmap texture.
- * 5. When automating the creation of printable forms that include a sheared ellipse as a decorative or alignment guide.
+ * 1. When you need to programmatically generate a BMP file with a basic shape and a skewed version for custom UI icons or placeholders.
+ * 2. When you want to create test images that include geometric transformations, such as a sheared ellipse, to validate image‑processing pipelines.
+ * 3. When building a reporting tool that adds stylized, slanted graphics to BMP charts or diagrams without using external design software.
+ * 4. When producing raster assets for printing where a distorted ellipse simulates perspective or artistic effects directly from C# code.
+ * 5. When developing a game or simulation that requires on‑the‑fly generation of BMP sprites with transformed shapes for dynamic visual effects.
  */

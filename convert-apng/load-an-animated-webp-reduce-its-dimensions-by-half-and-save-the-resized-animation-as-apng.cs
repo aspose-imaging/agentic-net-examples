@@ -2,45 +2,34 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.webp";
-            string outputPath = "output.png";
+            string outputPath = "output.apng";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load animated WebP
-            using (WebPImage webp = new WebPImage(inputPath))
+            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
             {
-                // Calculate half dimensions
                 int newWidth = webp.Width / 2;
                 int newHeight = webp.Height / 2;
+                webp.Resize(newWidth, newHeight);
 
-                if (newWidth > 0 && newHeight > 0)
-                {
-                    // Resize all frames
-                    webp.Resize(newWidth, newHeight);
-                }
-
-                // Save as APNG with default options
-                webp.Save(outputPath, new ApngOptions());
+                ApngOptions options = new ApngOptions();
+                webp.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink an animated WebP banner for faster loading on mobile and deliver it as an APNG for broader browser compatibility.
- * 2. When converting user‑uploaded animated WebP stickers to a smaller APNG size for use in a chat application that only supports APNG.
- * 3. When preparing animated WebP assets for an email newsletter by reducing their dimensions and changing the format to APNG to meet email client restrictions.
- * 4. When optimizing animated WebP icons for a game UI, resizing them to half their original size and saving as APNG to match the engine’s texture requirements.
- * 5. When batch‑processing a library of animated WebP files to create lightweight APNG versions for a documentation site that prefers PNG sequences.
+ * 1. When you need to display a smaller version of an animated WebP on a mobile website, you can resize it and convert it to APNG for broader browser compatibility.
+ * 2. When an e‑learning platform requires animated illustrations in APNG format but only has source assets as animated WebP, this code halves the dimensions and performs the conversion.
+ * 3. When optimizing email newsletters that support APNG but not WebP, you can shrink the animation to reduce file size and save it as APNG using C#.
+ * 4. When a game UI needs low‑resolution animated icons, you can programmatically resize the original WebP animation and export it as APNG for use in the engine.
+ * 5. When a content‑management system automatically processes uploaded animated WebP files, this snippet can generate a half‑size APNG thumbnail for preview purposes.
  */

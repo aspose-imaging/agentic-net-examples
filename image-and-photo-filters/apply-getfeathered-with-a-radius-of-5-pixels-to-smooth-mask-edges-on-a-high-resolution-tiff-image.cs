@@ -1,21 +1,21 @@
-// HOW-TO: Apply 5‑Pixel Feather To Mask Edges Of TIFF With Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Feather Mask Edges on High Resolution TIFF with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,11 +26,13 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(0, 0))
-                    .GetFeathered(new FeatheringSettings { Size = 5 })
+                var settings = new MagicWandSettings(0, 0);
+                var featherSettings = new FeatheringSettings { Size = 5 };
+                MagicWandTool.Select(image, settings)
+                    .GetFeathered(featherSettings)
                     .Apply();
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -43,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften the boundaries of a selection mask in a large TIFF before printing to avoid harsh edges.
- * 2. When preparing satellite or aerial imagery in TIFF format for GIS analysis and you want smooth mask transitions to improve visual blending.
- * 3. When creating medical scan overlays in high‑resolution TIFF files and require feathered edges to prevent abrupt visual artifacts.
- * 4. When automating a batch process that refines scanned document masks in TIFFs to enhance OCR accuracy by smoothing edge noise.
- * 5. When developing a C# application that dynamically adjusts mask softness on TIFF images for web‑based image editors or viewers.
+ * 1. When you need to smooth the edges of a selection mask in a large TIFF before further processing or printing.
+ * 2. When preparing scanned documents for OCR and you want to reduce jagged mask borders that cause recognition errors.
+ * 3. When creating GIS raster layers and you need a soft transition between masked and unmasked areas to avoid visual artifacts.
+ * 4. When generating medical imaging reports and you must feather mask outlines to meet regulatory image quality standards.
+ * 5. When building a photo‑editing workflow that automatically applies a 5‑pixel feather to user‑drawn masks on high‑resolution images.
  */

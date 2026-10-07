@@ -1,49 +1,37 @@
-// HOW-TO: Resize BMP to 500x500, Apply Median Filter, and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP to 500x500, Apply Median Filter, Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.bmp";
+        string outputPath = "output/output.svg";
 
-        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load BMP image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 500x500 pixels
-                image.Resize(500, 500);
+                if (!image.IsCached) image.CacheData();
 
-                // Apply median filter (kernel size 5) to the entire image
-                var rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                image.Resize(500, 500, ResizeType.NearestNeighbourResample);
 
-                // Prepare SVG save options with rasterization settings
+                var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
+                image.Filter(image.Bounds, medianOptions);
+
                 var svgOptions = new SvgOptions();
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = rasterizationOptions;
-
-                // Save the processed image as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -56,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP graphics into scalable SVG files while reducing noise and standardizing them to a 500 × 500 pixel size for web thumbnails.
- * 2. When a batch job must preprocess scanned BMP documents by resizing and applying a median filter before embedding them in an SVG‑based report.
- * 3. When an application requires on‑the‑fly image cleanup of BMP icons, smoothing speckles with a median filter and exporting them as vector‑compatible SVG for UI scaling.
- * 4. When you are building a C# service that normalizes user‑uploaded BMP images to a fixed dimension, removes salt‑and‑pepper noise, and stores the result as SVG for responsive design.
- * 5. When generating SVG assets from BMP source files for print‑ready layouts, ensuring each image is uniformly sized and noise‑free using Aspose.Imaging in .NET.
+ * 1. When you need to convert a high‑resolution BMP photograph into a smaller 500 × 500 SVG graphic while reducing noise for web display.
+ * 2. When preparing icons from legacy BMP assets for responsive UI designs, you can resize them and apply a median filter before exporting to scalable SVG.
+ * 3. When cleaning up scanned BMP documents, applying a median filter and saving as SVG enables lossless vector rendering for printing.
+ * 4. When automating batch processing of BMP images to generate lightweight SVG thumbnails with noise reduction in a C# backend service.
+ * 5. When integrating Aspose.Imaging into a .NET application to transform raster BMP files into vector SVG files with consistent dimensions and filtered quality.
  */

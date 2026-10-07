@@ -2,42 +2,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output/output.tif";
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"c:\temp\input.tif";
-            string outputPath = @"c:\temp\output_resized_signed.tif";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
-            using (TiffImage image = (TiffImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize using Lanczos (AdaptiveResample) – here we halve the dimensions
                 int newWidth = image.Width / 2;
                 int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight, ResizeType.AdaptiveResample);
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                // Embed a digital signature with a password longer than four characters
-                string password = "StrongPwd123";
+                string password = "securePass";
                 image.EmbedDigitalSignature(password);
 
-                // Save the processed image
-                image.Save(outputPath);
+                TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -49,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system must reduce large TIFF scans for faster transmission while ensuring the file remains tamper‑evident with a password‑protected digital signature.
- * 2. When a publishing workflow needs to create smaller, high‑quality TIFF thumbnails for print previews and embed a signature to verify authorship.
- * 3. When a document management application archives scanned contracts as TIFFs, resizes them to save storage, and adds a secure digital signature to meet compliance requirements.
- * 4. When a GIS platform processes high‑resolution satellite TIFF layers, downsamples them using Lanczos for analysis and signs them to prevent unauthorized modifications.
- * 5. When an e‑commerce site generates product catalog TIFF images, halves their dimensions for web use and embeds a password‑protected signature to protect brand integrity.
+ * 1. When you need to reduce the file size of a high‑resolution TIFF for faster web delivery while preserving image quality using Lanczos resampling.
+ * 2. When you must protect a TIFF document by embedding a digital signature that requires a password longer than four characters for compliance or authenticity verification.
+ * 3. When an automated workflow processes scanned TIFF files, resizes them to half their dimensions, and secures them before storing them in an archive.
+ * 4. When a medical imaging system needs to downscale large TIFF scans and embed a password‑protected signature to ensure data integrity during transmission.
+ * 5. When a desktop application generates TIFF reports, resizes them for printing, and adds a digital signature to prevent tampering.
  */

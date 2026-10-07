@@ -1,101 +1,63 @@
-// HOW-TO: Apply Alpha Blending To Images In A Zip And Save To New Zip In C# (Aspose.Imaging for .NET)
+// HOW-TO: Alpha Blend Images From ZIP And Write To New ZIP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.IO.Compression;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputZipPath = "input.zip";
+        string outputZipPath = "output.zip";
+
         try
         {
-            // Hardcoded input and output ZIP paths
-            string inputZipPath = "input.zip";
-            string outputZipPath = "output.zip";
-
-            // Validate input ZIP existence
             if (!File.Exists(inputZipPath))
             {
                 Console.Error.WriteLine($"File not found: {inputZipPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath) ?? ".");
 
-            // Open input ZIP for reading
-            using (FileStream inputZipStream = new FileStream(inputZipPath, FileMode.Open, FileAccess.Read))
-            using (var inputArchive = new System.IO.Compression.ZipArchive(inputZipStream, System.IO.Compression.ZipArchiveMode.Read))
-            // Create output ZIP for writing
-            using (FileStream outputZipStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
-            using (var outputArchive = new System.IO.Compression.ZipArchive(outputZipStream, System.IO.Compression.ZipArchiveMode.Create))
+            using (FileStream outFs = new FileStream(outputZipPath, FileMode.Create))
+            using (ZipArchive outputArchive = new ZipArchive(outFs, ZipArchiveMode.Update))
+            using (ZipArchive inputArchive = ZipFile.OpenRead(inputZipPath))
             {
                 foreach (var entry in inputArchive.Entries)
                 {
-                    // Skip directories
                     if (string.IsNullOrEmpty(entry.Name))
                         continue;
 
-                    // Read entry into memory
                     using (var entryStream = entry.Open())
-                    using (var memory = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
-                        entryStream.CopyTo(memory);
-                        memory.Position = 0;
+                        entryStream.CopyTo(ms);
+                        ms.Position = 0;
 
-                        // Load image as RasterImage
-                        using (RasterImage image = (RasterImage)Image.Load(memory))
+                        using (RasterImage srcImage = (RasterImage)Image.Load(ms))
                         {
-                            // Apply alpha blending (50% opacity) using the image itself as overlay
-                            image.Blend(new Aspose.Imaging.Point(0, 0), image, 128);
+                            string tempCanvasPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                            Source canvasSource = new FileCreateSource(tempCanvasPath, false);
+                            PngOptions pngOptions = new PngOptions() { Source = canvasSource };
 
-                            // Determine appropriate save options based on file extension
-                            string ext = Path.GetExtension(entry.Name).ToLowerInvariant();
-                            ImageOptionsBase options;
-                            switch (ext)
+                            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, srcImage.Width, srcImage.Height))
                             {
-                                case ".jpg":
-                                case ".jpeg":
-                                    options = new JpegOptions();
-                                    break;
-                                case ".png":
-                                    options = new PngOptions();
-                                    break;
-                                case ".bmp":
-                                    options = new BmpOptions();
-                                    break;
-                                case ".gif":
-                                    options = new GifOptions();
-                                    break;
-                                case ".tif":
-                                case ".tiff":
-                                    options = new TiffOptions(TiffExpectedFormat.Default);
-                                    break;
-                                case ".webp":
-                                    options = new WebPOptions();
-                                    break;
-                                default:
-                                    // Fallback to JPEG for unsupported formats
-                                    options = new JpegOptions();
-                                    break;
+                                canvas.Blend(new Point(0, 0), srcImage, 128);
+                                canvas.Save();
                             }
 
-                            // Create entry in output ZIP and save processed image
+                            byte[] data = File.ReadAllBytes(tempCanvasPath);
                             var outEntry = outputArchive.CreateEntry(entry.Name);
                             using (var outEntryStream = outEntry.Open())
                             {
-                                image.Save(outEntryStream, options);
+                                outEntryStream.Write(data, 0, data.Length);
                             }
+
+                            File.Delete(tempCanvasPath);
                         }
                     }
                 }
@@ -110,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process a collection of PNG, JPEG, or BMP files stored in a ZIP archive and apply a uniform transparency effect before distributing them.
- * 2. When an e‑commerce platform wants to add a semi‑transparent watermark to all product images packaged in a ZIP file without extracting them to disk.
- * 3. When a mobile app generates animated GIF frames in a ZIP and you must blend each frame with a background color before creating the final animation.
- * 4. When a digital asset management system must convert TIFF and WebP images from an uploaded ZIP, apply alpha blending, and re‑package them for downstream workflows.
- * 5. When a CI/CD pipeline needs to automatically read image assets from a source ZIP, apply opacity adjustments using Aspose.Imaging, and store the processed results in a new ZIP for deployment.
+ * 1. When you need to batch‑process a collection of photos stored in a zip file and apply a semi‑transparent overlay to each image before distributing them.
+ * 2. When you want to create watermarked thumbnails from archived graphics by blending them with a custom canvas and repackaging the results.
+ * 3. When an application must read scanned documents from a compressed archive, apply a uniform opacity effect, and save the modified files back into another zip for downstream processing.
+ * 4. When you are building a server‑side service that receives a zip of user‑uploaded PNGs, applies a 50 % alpha blend to normalize appearance, and returns a new zip with the adjusted images.
+ * 5. When you need to automate the preparation of assets for a game engine by loading sprites from a zip, blending them onto a transparent background, and exporting the blended sprites into a new archive.
  */

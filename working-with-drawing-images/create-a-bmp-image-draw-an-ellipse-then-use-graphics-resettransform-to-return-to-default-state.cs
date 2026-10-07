@@ -1,45 +1,38 @@
-// HOW-TO: Create BMP Image, Draw Ellipse, Reset Graphics Transform in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Ellipse and Reset Graphics Transform in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "ellipse.bmp";
+
         try
         {
-            // Define output BMP file path
-            string outputPath = @"c:\temp\output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options and bind to the output file
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image with the specified options
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Clear the canvas with a background color
-                graphics.Clear(Color.Wheat);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
+                Rectangle rect = new Rectangle(20, 20, 160, 120);
+                graphics.DrawEllipse(pen, rect);
 
-                // Draw an ellipse using a blue pen
-                Pen ellipsePen = new Pen(Color.Blue, 3);
-                Rectangle ellipseBounds = new Rectangle(100, 100, 300, 200);
-                graphics.DrawEllipse(ellipsePen, ellipseBounds);
-
-                // Reset any transformations applied to the graphics object
                 graphics.ResetTransform();
 
-                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }
@@ -52,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a 24‑bit BMP file with a custom‑drawn ellipse for a report thumbnail.
- * 2. When you want to programmatically create a blank canvas, draw shapes, and ensure subsequent drawing starts from the default coordinate system.
- * 3. When you are building a server‑side image generation service that must output BMP images with precise dimensions and background colors.
- * 4. When you need to reset any applied transformations before adding more graphics to avoid cumulative scaling or rotation effects.
- * 5. When you are automating the creation of simple diagram elements such as ellipses for UI assets without using external design tools.
+ * 1. When you need to generate a BMP thumbnail that contains a centered ellipse for a reporting dashboard.
+ * 2. When you want to programmatically draw vector shapes on a bitmap and ensure subsequent drawing operations start from the default coordinate system.
+ * 3. When you are building a C# utility that creates simple diagram elements, such as ellipses, and must save them as BMP files for legacy applications.
+ * 4. When you require a reproducible way to clear transformations after drawing so that later graphics calls are not affected by previous scaling or rotation.
+ * 5. When you are automating the creation of test images for image‑processing algorithms that expect a BMP image with a known geometric primitive.
  */

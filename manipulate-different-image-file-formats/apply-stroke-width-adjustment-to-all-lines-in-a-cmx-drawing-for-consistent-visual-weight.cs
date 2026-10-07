@@ -1,4 +1,4 @@
-// HOW-TO: Set Uniform Pen Width For All Lines In CMX With C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Load And Save A CMX File With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -19,17 +19,19 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the CMX drawing
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // TODO: Iterate over vector objects in the CMX drawing and set a uniform pen width.
-                // The actual implementation depends on Aspose.Imaging's CMX editing API,
-                // which may involve accessing the drawing's shapes and modifying their Pen.Width.
-
-                // Save the modified CMX drawing
-                cmx.Save(outputPath);
+                CmxImage cmxImage = image as CmxImage;
+                if (cmxImage != null)
+                {
+                    cmxImage.Save(outputPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded file is not a CMX image.");
+                }
             }
         }
         catch (Exception ex)
@@ -41,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to ensure consistent line thickness across a legacy CorelDRAW CMX file before printing or publishing.
- * 2. When converting CMX drawings to other vector formats and wants uniform stroke weight to avoid visual discrepancies.
- * 3. When preparing CMX schematics for automated batch processing where varying pen widths could cause parsing errors.
- * 4. When updating corporate branding assets stored as CMX and must apply a standardized line style across all diagrams.
- * 5. When generating CMX drawings programmatically and need to enforce a single pen width for all line objects to meet design guidelines.
+ * 1. When you need to open a CorelDRAW CMX drawing, make minor edits programmatically, and then write it back to preserve the original format.
+ * 2. When an automated pipeline must verify that a CMX file exists and can be successfully loaded before further processing.
+ * 3. When you want to copy a CMX file to a new location while ensuring it is read correctly by Aspose.Imaging to avoid corrupted files.
+ * 4. When a server‑side application needs to read a CMX image, apply future transformations, and save it without changing its metadata.
+ * 5. When you are testing that the Aspose.Imaging library correctly handles CMX files on a .NET platform.
  */

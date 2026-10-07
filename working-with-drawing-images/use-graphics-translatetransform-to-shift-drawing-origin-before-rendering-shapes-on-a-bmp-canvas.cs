@@ -1,36 +1,35 @@
-// HOW-TO: Shift Drawing Origin with TranslateTransform and Draw Shapes on BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Shift Drawing Origin With TranslateTransform And Draw Shapes On BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            string outputPath = @"c:\temp\translated_output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            var source = new FileCreateSource(outputPath, false);
-            var bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
-            using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            int width = 200;
+            int height = 200;
+
+            using (Image canvas = Image.Create(options, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.TranslateTransform(50f, 50f);
-                graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2),
-                    new Aspose.Imaging.Rectangle(0, 0, 150, 100));
-                graphics.DrawEllipse(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
-                    new Aspose.Imaging.Rectangle(200, 0, 100, 100));
-                using (SolidBrush brush = new SolidBrush())
-                {
-                    brush.Color = Aspose.Imaging.Color.Green;
-                    brush.Opacity = 100;
-                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(0, 150, 200, 80));
-                }
+                Graphics graphics = new Graphics(canvas);
+                graphics.TranslateTransform(50, 30);
+
+                Pen pen = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(pen, 0, 0, 100, 50);
+
                 canvas.Save();
             }
         }
@@ -43,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a BMP image with multiple shapes positioned relative to a custom origin point.
- * 2. When you want to generate a report graphic that requires offsetting the coordinate system before drawing rectangles, ellipses, and filled areas.
- * 3. When you are building a thumbnail generator that must place watermarks or overlays at a specific offset on a 500 × 500 bitmap.
- * 4. When you need to programmatically produce a printable layout where all drawing commands share a common translation for consistent margins.
- * 5. When you are automating UI mock‑ups and need to shift the canvas origin to simplify the placement of vector shapes in C# using Aspose.Imaging.
+ * 1. When you need to offset graphics on a bitmap so that all drawn elements start from a custom origin, such as placing a logo 50 pixels right and 30 pixels down.
+ * 2. When generating programmatic reports that require precise positioning of rectangles or other shapes on a BMP image for layout consistency.
+ * 3. When creating a simple UI mock‑up where controls are drawn on a canvas and you want to shift the whole coordinate system instead of adjusting each shape individually.
+ * 4. When preprocessing images for printing and you must move the drawing area to accommodate printer margins on a BMP file.
+ * 5. When building a game map tile where the tile graphics need to be drawn relative to an offset origin to align with a larger world grid.
  */

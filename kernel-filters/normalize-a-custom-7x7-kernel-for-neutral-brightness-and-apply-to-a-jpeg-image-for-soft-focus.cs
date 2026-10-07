@@ -1,43 +1,51 @@
-// HOW-TO: Apply 7x7 Gaussian Blur Soft Focus to JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply a 7x7 Normalized Convolution Kernel for Soft Focus to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_softfocus.jpg";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the JPEG image
-            using (JpegImage jpegImage = new JpegImage(inputPath))
+            double[,] kernel = new double[,]
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)jpegImage;
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 },
+                { 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49, 1.0/49 }
+            };
 
-                // Apply a Gaussian blur with a 7x7 kernel (size = 7, sigma = 1.0)
-                // This provides a soft‑focus effect while keeping overall brightness neutral.
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(7, 1.0));
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                image.Filter(image.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a subtle soft‑focus effect on product photos stored as JPEGs before uploading them to an e‑commerce site.
- * 2. When you want to reduce image detail while keeping overall brightness neutral for a portrait retouching workflow in a C# application.
- * 3. When you are building an automated batch processor that applies a 7×7 Gaussian blur to scanned documents saved as JPEG to improve readability.
- * 4. When you need to generate a background‑blurred thumbnail from a high‑resolution JPEG for a gallery preview in a .NET web app.
- * 5. When you are preparing images for a machine‑learning dataset and require a consistent blur filter to augment training data without altering exposure.
+ * 1. When you need to blur a JPEG photo slightly to create a soft‑focus effect without changing its overall brightness.
+ * 2. When you want to apply a custom 7×7 averaging filter to reduce noise in a raster image before saving it as a high‑quality JPEG.
+ * 3. When you must process images in a batch script that normalizes the kernel so the filtered image retains the original exposure.
+ * 4. When you are building a C# application that programmatically loads, filters, and re‑encodes JPEG files using Aspose.Imaging.
+ * 5. When you need to ensure the output directory exists and handle missing input files gracefully while applying image convolution.
  */

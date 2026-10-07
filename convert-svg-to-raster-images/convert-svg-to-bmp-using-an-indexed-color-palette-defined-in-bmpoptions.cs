@@ -1,51 +1,33 @@
-// HOW-TO: Convert SVG To 8‑Bit Indexed BMP With Custom Palette In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to 8-Bit BMP with Indexed Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.bmp";
+            string inputPath = "Input\\image.svg";
+            string outputPath = "Output\\image.bmp";
 
-            // Verify that the input SVG file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options with an indexed (8‑bit) palette
-                var bmpOptions = new BmpOptions
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    BitsPerPixel = 8,
-                    // Use a standard 8‑bit grayscale palette (any indexed palette can be used)
-                    Palette = ColorPaletteHelper.Create8BitGrayscale(false)
-                };
-
-                // Configure rasterization of the vector SVG into a bitmap
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    // Use the original SVG size for rasterization
-                    PageSize = image.Size
-                };
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the rasterized image as BMP using the indexed palette
-                image.Save(outputPath, bmpOptions);
+                    bmpOptions.BitsPerPixel = 8;
+                    image.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -57,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector graphics on legacy systems that only support 8‑bit BMP files with an indexed color palette.
- * 2. When generating thumbnails for SVG icons to be stored in a database that requires BMP format with limited colors.
- * 3. When preparing graphics for embedded devices or printers that accept only indexed BMP images to reduce memory usage.
- * 4. When converting SVG logos to grayscale BMP files for batch processing in image analysis pipelines.
- * 5. When automating a workflow that rasterizes SVG diagrams into BMP files with a predefined palette for consistent visual output across platforms.
+ * 1. When you need to generate low-size BMP thumbnails from vector SVG assets for legacy Windows applications that only support 8-bit indexed colors.
+ * 2. When a game developer must convert scalable SVG icons into 256-color BMP sprites to meet the texture format requirements of an older engine.
+ * 3. When an automated reporting tool creates BMP charts from SVG diagrams and must limit the file size by using an 8-bit palette.
+ * 4. When a batch-processing script prepares SVG logos for printing on devices that only accept BMP files with indexed palettes.
+ * 5. When a migration utility transforms SVG UI elements into BMP resources for a .NET desktop application that relies on indexed-color images.
  */

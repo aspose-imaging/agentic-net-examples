@@ -1,53 +1,45 @@
-// HOW-TO: Convert PNG to SVG with Black Border Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to SVG with Black Stroke in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "Output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG raster image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(inputPath))
             {
-                // Create an SVG graphics canvas with the same dimensions as the PNG
-                int width = raster.Width;
-                int height = raster.Height;
-                int dpi = 96; // standard screen DPI
+                int width = pngImage.Width;
+                int height = pngImage.Height;
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-                // Set stroke color to black by drawing a rectangle border
-                graphics.DrawRectangle(new Pen(Color.Black, 1), 0, 0, width, height);
-
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-                // Finalize the SVG image
-                using (SvgImage svgImage = graphics.EndRecording())
+                using (SvgOptions createOptions = new SvgOptions())
                 {
-                    // Save the SVG file
-                    svgImage.Save(outputPath);
+                    createOptions.Source = new FileCreateSource(outputPath, false);
+
+                    using (Image svgImage = Image.Create(createOptions, width, height))
+                    {
+                        Pen blackPen = new Pen(Color.Black);
+                        Graphics graphics = new Graphics(svgImage);
+                        graphics.DrawImage(pngImage, new Point(0, 0));
+
+                        svgImage.Save();
+                    }
                 }
             }
         }
@@ -60,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a raster PNG into a scalable SVG for responsive web graphics while adding a visible black outline.
- * 2. When generating vector assets from existing PNG logos for print or UI design and you want a consistent border around the image.
- * 3. When automating batch conversion of product photos to SVG format for an online catalog that requires a uniform stroke for styling.
- * 4. When creating SVG placeholders that preserve the original PNG dimensions and need a black frame for visual separation in a UI mockup.
- * 5. When integrating image processing into a C# application that must output SVG files with a defined stroke color for downstream vector editing tools.
+ * 1. When you need to embed a raster logo into a scalable vector graphic for responsive web design, you can convert the PNG logo to an SVG with a black outline using Aspose.Imaging in C#.
+ * 2. When generating printable diagrams that require vector format but start from bitmap assets, this code lets you transform PNG icons into SVG files while applying a consistent black stroke.
+ * 3. When creating a batch process that prepares images for laser cutting or CNC machines, converting PNG patterns to SVG with a defined black border ensures the cutter interprets the paths correctly.
+ * 4. When developing a WPF or Xamarin app that loads vector assets at runtime, you can programmatically convert user‑uploaded PNGs to SVGs with a black outline to maintain visual fidelity across screen sizes.
+ * 5. When automating documentation generation where screenshots (PNG) must be included in SVG‑based flowcharts, this snippet converts each screenshot to SVG and adds a black stroke for clear separation.
  */

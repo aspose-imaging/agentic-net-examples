@@ -1,10 +1,9 @@
-// HOW-TO: Convert TIFF Text to Vector EMF and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert TIFF to PNG Using EMF Vector Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.png";
+            string inputPath = "Input/source.tif";
+            string outputPath = "Output/result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,28 +24,16 @@ class Program
 
             using (Image tiffImage = Image.Load(inputPath))
             {
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
+                EmfOptions emfOptions = new EmfOptions();
 
-                var frame = new Rectangle(0, 0, width, height);
-                var deviceSize = new Size(width, height);
-                var deviceSizeMm = new Size((int)(width / 100f), (int)(height / 100f));
-
-                EmfRecorderGraphics2D emfGraphics = new EmfRecorderGraphics2D(frame, deviceSize, deviceSizeMm);
-                emfGraphics.DrawImage((RasterImage)tiffImage,
-                    new Rectangle(0, 0, width, height),
-                    new Rectangle(0, 0, width, height),
-                    GraphicsUnit.Pixel);
-
-                using (EmfImage emfImage = emfGraphics.EndRecording())
+                using (Image emfImage = Image.Create(emfOptions, tiffImage.Width, tiffImage.Height))
                 {
-                    var pngOptions = new PngOptions
+                    Graphics graphics = new Graphics(emfImage);
+                    graphics.DrawImage(tiffImage, new Rectangle(0, 0, tiffImage.Width, tiffImage.Height));
+
+                    PngOptions pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            PageSize = new Size(width, height),
-                            BackgroundColor = Color.White
-                        }
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
                     emfImage.Save(outputPath, pngOptions);
@@ -62,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert scanned TIFF pages that contain searchable text into high‑resolution PNGs while keeping the text as scalable vector shapes.
- * 2. When generating thumbnail previews of TIFF documents for a web portal and want the text to remain crisp at any zoom level.
- * 3. When automating a batch process that extracts text‑rich graphics from TIFF files and saves them as PNGs with a white background for consistent printing.
- * 4. When integrating legacy TIFF assets into a modern C# application that requires PNG output but must preserve the original vector quality of embedded text.
- * 5. When creating PDF‑like visualizations from TIFF sources and need a PNG representation that can be further edited without losing text clarity.
+ * 1. When you need to preserve the quality of text from a scanned TIFF by rendering it as vector shapes before saving it as a high‑resolution PNG in a C# application.
+ * 2. When a reporting system must convert multi‑page TIFF documents into PNG thumbnails while keeping text crisp using Aspose.Imaging’s EMF rendering.
+ * 3. When you want to generate PNG images from legacy TIFF files for web display, ensuring that any embedded text remains scalable and loss‑less.
+ * 4. When automating a batch process that transforms archival TIFF images into PNG assets for a digital asset management pipeline, using vector‑based rendering to reduce file size.
+ * 5. When integrating image conversion into a .NET service that needs to render TIFF‑based diagrams as vector graphics and output them as PNG for downstream analytics or UI components.
  */

@@ -1,52 +1,77 @@
-// HOW-TO: Apply 3x3 Averaging Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Average Convolution Filter to PNG Template and Verify Smoothing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/template.png";
-        string outputPath = "output/smoothed.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the PNG template
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+            string inputPath = "template.png";
+            string outputPath = "output/smoothed.png";
 
-                // Define a 3x3 averaging kernel (each weight = 1/9)
-                double[,] kernel = new double[3, 3];
-                for (int i = 0; i < 3; i++)
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                int width = raster.Width;
+                int height = raster.Height;
+                Rectangle bounds = raster.Bounds;
+
+                int[] beforePixels = raster.LoadArgb32Pixels(bounds);
+
+                double[,] kernel = new double[3, 3]
                 {
-                    for (int j = 0; j < 3; j++)
+                    { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
+                    { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
+                    { 1.0 / 9, 1.0 / 9, 1.0 / 9 }
+                };
+
+                raster.Filter(bounds, new ConvolutionFilterOptions(kernel));
+
+                int[] afterPixels = raster.LoadArgb32Pixels(bounds);
+
+                double sumDiffBefore = 0;
+                double sumDiffAfter = 0;
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width - 1; x++)
                     {
-                        kernel[i, j] = 1.0 / 9.0;
+                        int idx = y * width + x;
+                        int idxRight = idx + 1;
+
+                        int p1 = beforePixels[idx];
+                        int p2 = beforePixels[idxRight];
+                        int p3 = afterPixels[idx];
+                        int p4 = afterPixels[idxRight];
+
+                        double intensity1 = ((p1 >> 16) & 0xFF) + ((p1 >> 8) & 0xFF) + (p1 & 0xFF);
+                        double intensity2 = ((p2 >> 16) & 0xFF) + ((p2 >> 8) & 0xFF) + (p2 & 0xFF);
+                        double intensity3 = ((p3 >> 16) & 0xFF) + ((p3 >> 8) & 0xFF) + (p3 & 0xFF);
+                        double intensity4 = ((p4 >> 16) & 0xFF) + ((p4 >> 8) & 0xFF) + (p4 & 0xFF);
+
+                        sumDiffBefore += Math.Abs(intensity1 - intensity2);
+                        sumDiffAfter += Math.Abs(intensity3 - intensity4);
                     }
                 }
 
-                // Apply the custom convolution filter to the entire image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                Console.WriteLine($"Total horizontal intensity difference before smoothing: {sumDiffBefore}");
+                Console.WriteLine($"Total horizontal intensity difference after smoothing: {sumDiffAfter}");
 
-                // Save the result as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -58,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to smooth a PNG template to reduce noise before adding dynamic graphics in a C# application.
- * 2. When you want to create a uniform blur effect on a raster image for background preprocessing in a .NET image pipeline.
- * 3. When you must apply a custom 3x3 averaging kernel to all pixels of a PNG to achieve consistent smoothing across the whole picture.
- * 4. When you are building a batch process that loads PNG files, applies a simple convolution filter, and saves the softened results automatically.
- * 5. When you require a quick way to verify that a convolution filter works correctly by comparing the original and smoothed PNG outputs in C#.
+ * 1. When you need to smooth a PNG template image before compositing it with other graphics in a C# application.
+ * 2. When you want to reduce visual noise in a scanned PNG document by applying a simple averaging kernel.
+ * 3. When you must programmatically confirm that a convolution filter produces uniform smoothing across all pixels of an image.
+ * 4. When you are preparing PNG assets for a machine‑learning pipeline and require consistent neighboring pixel intensities.
+ * 5. When you need to generate a smoothed version of a template for printing or web publishing while ensuring the filter was correctly applied.
  */

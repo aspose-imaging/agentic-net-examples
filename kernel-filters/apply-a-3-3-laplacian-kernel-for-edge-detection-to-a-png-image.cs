@@ -1,9 +1,10 @@
-// HOW-TO: Apply 3x3 Laplacian Edge Detection to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 3x3 Laplacian Edge Detection to PNG with Aspose Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,39 +12,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel operations
-                RasterImage raster = (RasterImage)image;
-
-                // Define a 3×3 Laplacian kernel
                 double[,] laplacianKernel = new double[,]
                 {
-                    { 0, -1,  0 },
-                    { -1, 4, -1 },
-                    { 0, -1,  0 }
+                    { -1, -1, -1 },
+                    { -1, 8, -1 },
+                    { -1, -1, -1 }
                 };
 
-                // Apply the convolution filter with the Laplacian kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(laplacianKernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(laplacianKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight edges in a PNG image for computer‑vision preprocessing.
- * 2. When you want to create a sketch‑like outline of a photo for UI thumbnails.
- * 3. When you must detect boundaries in scanned documents before OCR analysis.
- * 4. When you are building a custom filter pipeline and need a fast Laplacian convolution on raster images.
- * 5. When you need to generate edge maps for quality‑control inspection in manufacturing images.
+ * 1. When you need to highlight object boundaries in a PNG photograph for computer‑vision preprocessing.
+ * 2. When you want to generate a high‑contrast sketch effect from a PNG logo for UI thumbnails.
+ * 3. When you must detect edges in scanned documents saved as PNG before OCR to improve text extraction.
+ * 4. When you are building a diagnostic tool that visualizes structural defects in PNG‑based medical images.
+ * 5. When you need to preprocess PNG frames of a video stream with a Laplacian filter before motion analysis.
  */

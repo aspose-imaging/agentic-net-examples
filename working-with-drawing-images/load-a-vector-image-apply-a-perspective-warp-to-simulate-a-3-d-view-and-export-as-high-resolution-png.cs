@@ -1,9 +1,11 @@
-// HOW-TO: Apply Perspective Warp to SVG and Export High‑Resolution PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Perspective Warp to EPS and Export High-Resolution PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +13,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\warped.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,27 +24,31 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Cast to SvgImage to ensure the vector type is recognized
-                SvgImage svgImage = image as SvgImage;
+                int width = 2000;
+                int height = 2000;
 
-                // Configure rasterization options for high‑resolution output
-                var rasterOptions = new SvgRasterizationOptions
+                PngOptions pngOptions = new PngOptions
                 {
-                    PageSize = image.Size
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // TODO: Apply perspective warp to the vector image using the appropriate Aspose.Imaging API.
-                // This step would typically involve a transformation matrix or a dedicated warp method.
-
-                var pngOptions = new PngOptions
+                using (Image canvas = Image.Create(pngOptions, width, height))
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300) // high DPI
-                };
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Color.White);
 
-                image.Save(outputPath, pngOptions);
+                    Point[] destPoints = new Point[]
+                    {
+                        new Point(0, 0),
+                        new Point(width, 0),
+                        new Point((int)(width * 0.2), height)
+                    };
+
+                    graphics.DrawImage(vectorImage, destPoints);
+                    canvas.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to render a scalable vector graphic as a photorealistic 3‑D‑like image for product brochures, you can warp the SVG and save it as a high‑resolution PNG using Aspose.Imaging in C#.
- * 2. When a web application must generate thumbnail previews of architectural floor plans with a simulated perspective view, this code transforms the SVG and outputs a DPI‑300 PNG for crisp display.
- * 3. When an e‑learning platform wants to convert interactive SVG diagrams into printable high‑quality PNG slides that appear tilted or angled, the perspective warp and rasterization options provide the needed result.
- * 4. When a game developer requires pre‑rendered background assets from vector art with a forced‑perspective effect, the snippet creates high‑resolution PNGs that maintain visual fidelity.
- * 5. When a reporting tool needs to embed vector logos in reports with a 3‑D tilt and ensure they print sharply at 300 dpi, this C# example performs the warp and saves the PNG for inclusion.
+ * 1. When you need to convert a vector EPS logo into a high‑resolution PNG with a simulated 3‑D angle for web or print layouts.
+ * 2. When you want to render a scalable illustration as a raster image while applying a perspective distortion to fit a brochure’s slanted design.
+ * 3. When an e‑commerce platform requires product diagrams in PNG format that appear tilted to match a 3‑D product view.
+ * 4. When you must generate thumbnails of engineering drawings with a custom perspective for a CAD review portal.
+ * 5. When a reporting tool needs to embed EPS charts as high‑quality PNGs with a forced viewpoint to align with other visual elements.
  */

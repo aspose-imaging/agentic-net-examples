@@ -1,4 +1,4 @@
-// HOW-TO: Auto Mask Background From Image And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Automatically Remove Background from PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,55 +13,44 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input image and output folder
-        string inputPath = "input.jpg";
-        string outputFolder = "output";
+        string inputPath = "input\\image.png";
+        string outputPath = "output\\masked.png";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        string outputPath = Path.Combine(outputFolder, "masked.png");
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load source image as RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Auto-masking arguments (default strokes)
-                var autoArgs = new AutoMaskingArgs();
-
-                // Export options for PNG with transparency
-                var exportOptions = new PngOptions
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                // Configure masking options
-                var maskingOptions = new MaskingOptions
-                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    Args = autoArgs,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent
                 };
 
-                // Perform masking
-                var masking = new ImageMasking(image);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
+                ImageMasking masking = new ImageMasking(image);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
                 {
-                    // Get the foreground (masked object) image
-                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                    using (RasterImage foreground = (RasterImage)results[1].GetImage())
                     {
-                        // Save the masked image as PNG
-                        foreground.Save(outputPath, exportOptions);
+                        foreground.Save(outputPath, new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha
+                        });
                     }
                 }
             }
@@ -75,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically remove the background from photos and generate transparent PNGs for e‑commerce product listings.
- * 2. When you want to integrate a lightweight C# console tool that processes user‑provided image paths and outputs masked images without manual editing.
- * 3. When you are building a batch pipeline that extracts foreground objects from JPEGs using GraphCut segmentation for later compositing in design software.
- * 4. When you require a programmatic way to replace the original background with transparency and save the result in a specific output folder for web publishing.
- * 5. When you need to automate image preparation for machine‑learning datasets by creating PNG masks that isolate objects from varied source images.
+ * 1. When you need to batch‑process product photos to strip away their backgrounds and keep transparent PNGs for e‑commerce listings.
+ * 2. When you want to integrate automatic background removal into a CI pipeline that generates assets for a mobile app.
+ * 3. When you must extract the foreground of scanned documents or screenshots and save them as PNGs with alpha channels for further editing.
+ * 4. When you are building a command‑line tool that receives image paths and outputs masked images without manual selection of cutout regions.
+ * 5. When you require a fast, code‑only solution to replace image backgrounds with transparency using Aspose.Imaging’s graph‑cut algorithm.
  */

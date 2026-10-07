@@ -1,18 +1,18 @@
-// HOW-TO: How to Clear BMP and Draw Shapes with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Clear BMP And Draw Shapes With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"input.bmp";
-        string outputPath = @"output.bmp";
-
         try
         {
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,19 +21,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(50, 50, 200, 150));
-                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(300, 100, 150, 150));
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(400, 300));
+                Pen pen = new Pen(Color.Blue, 5);
+                graphics.DrawLine(pen, new Point(10, 10), new Point(200, 10));
+                graphics.DrawRectangle(pen, new Rectangle(20, 20, 100, 50));
+                graphics.DrawEllipse(pen, new Rectangle(150, 150, 80, 80));
 
-                FileCreateSource source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions { Source = source };
-                image.Save(outputPath, options);
+                using (SolidBrush brush = new SolidBrush(Color.Red))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(250, 20, 60, 60));
+                }
+
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically erase the contents of an existing BMP file and replace it with a white background before adding new graphics.
- * 2. When you want to overlay vector shapes such as rectangles, ellipses, and lines onto a bitmap image for generating custom diagrams or UI mock‑ups in a C# application.
- * 3. When you are building a batch‑processing tool that loads multiple BMP files, clears them, and draws consistent branding elements like logos or borders.
- * 4. When you need to create a simple drawing canvas from an input BMP, draw shapes with a specific pen width and color, and save the result as a new BMP for further processing.
- * 5. When you are integrating Aspose.Imaging into a .NET service that modifies scanned BMP documents by adding annotation lines or highlight shapes.
+ * 1. When you need to generate a white‑background BMP and overlay custom lines, rectangles, or ellipses for a report or UI thumbnail.
+ * 2. When you must programmatically replace the content of an existing BMP with new vector graphics such as logos or annotations in a C# application.
+ * 3. When creating test images that combine raster and vector elements, like a blue border and a red filled box, for automated image‑processing validation.
+ * 4. When building a server‑side service that receives BMP files, clears them, and draws shapes to highlight regions before saving the result.
+ * 5. When preparing printable BMP assets where you need to reset the canvas color and add precise geometric shapes for marketing materials.
  */

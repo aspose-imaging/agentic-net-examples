@@ -1,13 +1,11 @@
-// HOW-TO: Interactively Adjust Feather Radius for Image Masking in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Magic Wand Feather Radius Interactively and Save PNG Previews in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -15,63 +13,49 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputDirectory = "output";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
+            // Initial point for MagicWand selection (hardcoded)
+            int startX = 100;
+            int startY = 100;
+
+            int previewIndex = 1;
             while (true)
             {
                 Console.Write("Enter feather radius (or press Enter to exit): ");
                 string line = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(line))
+                {
                     break;
+                }
 
-                if (!int.TryParse(line, out int radius) || radius < 0)
+                if (!int.TryParse(line, out int featherRadius) || featherRadius < 0)
                 {
                     Console.WriteLine("Invalid radius. Please enter a non‑negative integer.");
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, $"masked_feather_{radius}.png");
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    var maskingOptions = new AutoMaskingGraphCutOptions
-                    {
-                        CalculateDefaultStrokes = true,
-                        FeatheringRadius = radius,
-                        Method = SegmentationMethod.GraphCut,
-                        Decompose = false,
-                        ExportOptions = new PngOptions
-                        {
-                            ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new StreamSource(new MemoryStream())
-                        },
-                        BackgroundReplacementColor = Color.Transparent
-                    };
+                    MagicWandTool.Select(image, new MagicWandSettings(startX, startY))
+                        .GetFeathered(new FeatheringSettings() { Size = featherRadius })
+                        .Apply();
 
-                    using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
-                    {
-                        using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                        {
-                            resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                        }
-                    }
+                    string outputPath = Path.Combine(outputDirectory, $"preview_{previewIndex}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    image.Save(outputPath, new PngOptions());
+                    Console.WriteLine($"Preview saved to: {outputPath}");
                 }
 
-                Console.WriteLine($"Masked image saved to: {outputPath}");
+                previewIndex++;
             }
         }
         catch (Exception ex)
@@ -83,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a desktop photo‑editing tool that lets users fine‑tune mask edges on a JPEG and instantly see the softened PNG result.
- * 2. When creating a batch script that processes a series of images and needs to experiment with different feather radii to achieve the best blend for each file.
- * 3. When generating PNG assets with soft‑edge cutouts for UI overlays, where the developer must control the feather radius to avoid harsh borders.
- * 4. When preparing images for compositing in video or graphics projects and wants to preview how varying feather sizes affect the transition between foreground and background.
- * 5. When developing a medical‑imaging application that extracts regions of interest from scans and requires adjustable feathering to smooth the mask for accurate analysis.
+ * 1. When a photo‑editing app needs users to fine‑tune a selection’s softness and instantly view the result as a PNG preview.
+ * 2. When an automated workflow must generate multiple mask variations with different feather radii for testing image segmentation quality.
+ * 3. When a desktop utility offers real‑time adjustment of Magic Wand selection edges before exporting the refined mask.
+ * 4. When a developer builds a UI that lets designers experiment with feather settings to achieve smooth transitions in cut‑out images.
+ * 5. When creating sample images for documentation or tutorials that demonstrate how changing feather radius affects the mask appearance.
  */

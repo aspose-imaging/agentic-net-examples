@@ -1,79 +1,68 @@
 // HOW-TO: Batch Convert Vector Files To PDF And SVG With Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace VectorBatchProcessor
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Define input and output directories (relative to the current working directory)
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in files)
+            try
             {
-                // Validate input file existence
-                if (!File.Exists(inputPath))
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\VectorInput";
+                string pdfOutputDirectory = @"C:\VectorOutput\PDF";
+                string svgOutputDirectory = @"C:\VectorOutput\SVG";
+
+                // Ensure output base directories exist
+                Directory.CreateDirectory(pdfOutputDirectory);
+                Directory.CreateDirectory(svgOutputDirectory);
+
+                // Get all files in the input directory
+                string[] inputFiles = Directory.GetFiles(inputDirectory);
+
+                foreach (string inputPath in inputFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Prepare output file paths for PDF and SVG
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string pdfOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-                string svgOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-                // Ensure directories for each output file exist
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
-
-                // Load the vector image
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-                {
-                    // Common vector rasterization options
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                    // Verify the input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageSize = image.Size
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
 
-                    // Save as PDF
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Load the vector image
+                    using (Image image = Image.Load(inputPath))
                     {
-                        VectorRasterizationOptions = vectorOptions
-                    };
-                    image.Save(pdfOutputPath, pdfOptions);
+                        // Prepare PDF output path
+                        string pdfFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                        string pdfOutputPath = Path.Combine(pdfOutputDirectory, pdfFileName);
+                        Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
+                        image.Save(pdfOutputPath, new PdfOptions());
 
-                    // Save as SVG
-                    SvgOptions svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions
-                    };
-                    image.Save(svgOutputPath, svgOptions);
+                        // Prepare SVG output path
+                        string svgFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                        string svgOutputPath = Path.Combine(svgOutputDirectory, svgFileName);
+                        Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
+                        image.Save(svgOutputPath, new SvgOptions());
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive a large collection of design assets, they can batch‑convert AI, EPS, or SVG drawings to PDF and SVG for long‑term storage using C# and Aspose.Imaging.
- * 2. When a web service must provide downloadable printable versions of user‑uploaded vector graphics, this code can automatically generate PDF and SVG files for each upload.
- * 3. When a migration project moves legacy vector files into a standardized document repository, developers can use the script to convert all files in a folder to PDF for viewing and SVG for editing.
- * 4. When an automated build pipeline has to include vector illustrations in both PDF reports and scalable web assets, the batch conversion ensures both formats are produced without manual steps.
- * 5. When a compliance system requires preserving the original appearance of vector diagrams while also offering a web‑friendly format, the code creates PDF for audit trails and SVG for browser rendering.
+ * 1. When a developer needs to archive a collection of design assets by saving each vector drawing as both PDF for document sharing and SVG for web scalability.
+ * 2. When an application must automatically generate printable PDFs and responsive SVGs from a folder of AI, EPS, or SVG source files without manual intervention.
+ * 3. When a migration script has to convert legacy vector formats into modern, searchable PDF archives while preserving the original SVG for future editing.
+ * 4. When a batch processing service needs to read any vector image, create a PDF version for client delivery, and an SVG version for integration into HTML pages.
+ * 5. When a developer wants to ensure that every vector file in a directory is saved in two archival formats to meet compliance or backup requirements.
  */

@@ -1,7 +1,8 @@
-// HOW-TO: Merge Two JPEG Images Vertically With 4:2:0 Subsampling In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge JPEG Images Vertically With 4:2:0 Subsampling In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,29 +14,27 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = "input1.jpg";
-            string inputPath2 = "input2.jpg";
-            string outputPath = "output.jpg";
-
-            // Validate input files
-            if (!File.Exists(inputPath1))
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+
+            foreach (string path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
 
-            // Ensure output directory exists
+            string outputPath = "output/merged_vertical.jpg";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            string[] inputPaths = new string[] { inputPath1, inputPath2 };
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -44,26 +43,16 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for vertical merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
-            }
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG options with 4:2:0 subsampling
             Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
                 Source = src,
-                Quality = 90,
-                HorizontalSampling = new byte[] { 2, 1, 1 },
-                VerticalSampling = new byte[] { 2, 1, 1 }
+                Quality = 90
             };
 
-            // Create bound JPEG canvas using Image.Create
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -77,7 +66,6 @@ class Program
                     }
                 }
 
-                // Save the merged image (bound image, so just Save())
                 canvas.Save();
             }
         }
@@ -90,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple JPEG photos into a single tall image while keeping the output file size low by applying 4:2:0 chroma subsampling.
- * 2. When generating printable photo strips or receipts that require vertically stacked JPEGs with consistent width and optimized compression.
- * 3. When creating a web‑ready collage of product images where the combined JPEG must meet bandwidth constraints through reduced chroma resolution.
- * 4. When automating the preparation of scanned document pages saved as JPEGs into one continuous page without sacrificing visual quality.
- * 5. When building a C# service that merges user‑uploaded JPEG avatars into a single banner and wants to use Aspose.Imaging to control JPEG quality and subsampling.
+ * 1. When you need to combine several product photos into a single tall banner while keeping the output JPEG small by using 4:2:0 chroma subsampling.
+ * 2. When generating a continuous scrollable image for a mobile app from multiple screenshots and want to minimize bandwidth with reduced JPEG size.
+ * 3. When creating a printable receipt image that stacks line‑item pictures vertically and must meet email attachment size limits.
+ * 4. When automating the assembly of scanned document pages into one JPEG for archiving, and you want to lower storage costs by applying subsampling.
+ * 5. When building a web‑service that merges user‑uploaded JPEGs into a single image for a slideshow and needs to deliver it quickly by reducing file size.
  */

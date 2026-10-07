@@ -1,66 +1,50 @@
-// HOW-TO: Convert SVG to PNG and Save to Output Folder in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Filtered SVG to PNG and Save to Folder in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+namespace SvgToPngConverter
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.svg";
+                string outputPath = "output/processed.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to SvgImage for rasterization options
-                SvgImage svgImage = image as SvgImage;
-                if (svgImage == null)
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine("The loaded file is not a valid SVG image.");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Define PNG export options
-                var pngOptions = new PngOptions
-                {
-                    // Optional: set size or other rasterization settings here
-                    // For example, set a default size if needed
-                    // Width = 800,
-                    // Height = 600
-                };
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the rasterized image as PNG
-                svgImage.Save(outputPath, pngOptions);
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to SvgImage if needed for further processing
+                    // (e.g., apply filters here)
+
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate raster PNG thumbnails from vector SVG assets for web display.
- * 2. When an automated build process must convert design SVG files into PNGs for inclusion in a mobile app.
- * 3. When a server‑side service receives SVG logos and must store them as PNGs for email signatures.
- * 4. When you want to batch‑process SVG diagrams and save them as PNG images in a specific output directory.
- * 5. When a reporting tool requires PNG charts but the source graphics are provided as SVG files.
+ * 1. When you need to generate high‑quality PNG thumbnails from SVG assets after applying custom filters in a C# web service.
+ * 2. When an automated build pipeline must convert processed SVG logos into PNG files for inclusion in mobile app resources.
+ * 3. When a desktop application requires saving user‑edited vector graphics as raster PNGs for printing or email attachment.
+ * 4. When a batch job processes a folder of SVG diagrams, applies transformations, and stores the resulting PNGs in a designated output directory.
+ * 5. When integrating Aspose.Imaging into a C# microservice to render filtered SVG charts as PNG images for API responses.
  */

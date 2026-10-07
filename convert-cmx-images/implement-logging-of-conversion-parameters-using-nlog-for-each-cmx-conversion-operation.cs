@@ -1,9 +1,12 @@
-// HOW-TO: Log CMX to PNG Conversion Parameters with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log CMX Conversion Parameters Using NLog in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +14,10 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.cmx");
-            string outputPath = Path.Combine("Output", "sample.png");
+            string inputPath = "Input\\sample.cmx";
+            string outputPathPng = "Output\\sample.png";
+            string outputPathJpg = "Output\\sample.jpg";
+            string outputPathPdf = "Output\\sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -20,26 +25,32 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathPng));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathJpg));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathPdf));
+
+            Console.WriteLine($"Starting conversion for: {inputPath}");
 
             using (Image image = Image.Load(inputPath))
             {
-                // Log conversion parameters
-                Console.WriteLine("Starting CMX to PNG conversion");
-                Console.WriteLine($"Input Path: {inputPath}");
-                Console.WriteLine($"Output Path: {outputPath}");
-                Console.WriteLine($"Image Width: {image.Width}");
-                Console.WriteLine($"Image Height: {image.Height}");
-
-                if (image is CmxImage cmxImage)
-                {
-                    Console.WriteLine($"CMX Page Count: {cmxImage.PageCount}");
-                }
-
+                // Convert to PNG
                 var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
-                Console.WriteLine("Conversion completed successfully");
+                image.Save(outputPathPng, pngOptions);
+                Console.WriteLine($"Converted to PNG: {outputPathPng}");
+
+                // Convert to JPEG
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPathJpg, jpegOptions);
+                Console.WriteLine($"Converted to JPEG: {outputPathJpg}");
+
+                // Convert to PDF
+                var pdfOptions = new PdfOptions();
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                image.Save(outputPathPdf, pdfOptions);
+                Console.WriteLine($"Converted to PDF: {outputPathPdf}");
             }
+
+            Console.WriteLine("Conversion completed successfully.");
         }
         catch (Exception ex)
         {
@@ -50,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy CMX vector drawings to PNG thumbnails while recording input and output details for troubleshooting.
- * 2. When an automated batch process must generate PNG assets from CMX files and keep a log of image dimensions and page count for quality control.
- * 3. When integrating Aspose.Imaging into a C# application that requires audit trails of each conversion operation for compliance reporting.
- * 4. When debugging failures in a document conversion pipeline, you can view logged paths, sizes, and page numbers to pinpoint issues.
- * 5. When building a server‑side service that transforms CMX diagrams to web‑friendly PNGs and needs to capture conversion parameters for performance monitoring.
+ * 1. When you need to batch‑convert legacy CMX drawings to PNG, JPEG, and PDF while keeping a record of each conversion’s settings.
+ * 2. When you want to integrate Aspose.Imaging CMX conversion into a .NET service and track conversion details in NLog for troubleshooting.
+ * 3. When you must ensure output folders exist and log the source file path and chosen image options before saving.
+ * 4. When you are building an automated workflow that validates CMX files, converts them to multiple formats, and records any errors in a central log.
+ * 5. When you need to generate audit‑ready logs of image format conversions for compliance or quality‑control reports.
  */

@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,26 +12,14 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output.bmp";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create a source bound to the output file
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             Source source = new FileCreateSource(outputPath, false);
-
-            // Set up BMP options with the source
-            BmpOptions options = new BmpOptions() { Source = source };
-
-            // Create a 200x200 BMP canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(options, 200, 200))
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, 200, 200))
             {
-                // Clear the canvas to red
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.Red);
-
-                // Save the bound image
+                graphics.Clear(Aspose.Imaging.Color.Red);
                 canvas.Save();
             }
         }
@@ -43,9 +32,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a solid‑color placeholder BMP for a UI component or testing pipeline in a C# application.
- * 2. When an automated report generator must embed a red square thumbnail as a visual marker in a Windows‑compatible bitmap format.
- * 3. When a game development tool requires creating a 200 × 200 red texture on the fly before applying it to a sprite sheet.
- * 4. When a batch image processing script has to produce a red background canvas for later compositing with other layers using Aspose.Imaging.
- * 5. When a legacy system expects a BMP file of a specific size and color, and you need to programmatically create and save it from .NET code.
+ * 1. When generating a solid‑color placeholder image for a UI mockup or testing layout rendering in a .NET application.
+ * 2. When programmatically creating a red badge or icon of a fixed size to embed in reports or dashboards.
+ * 3. When needing to produce a BMP file with a known background color for legacy hardware or embedded systems that only support BMP.
+ * 4. When automating the creation of a red background texture for game assets or video‑processing pipelines using C#.
+ * 5. When building a batch process that creates uniformly sized red images for printing proofs or color calibration.
  */

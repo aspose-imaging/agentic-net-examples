@@ -1,66 +1,58 @@
 // HOW-TO: Set Text Rendering Hint for Animated GIF Captions in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = "animated_caption.gif";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string frame1Path = "frame1.png";
+            string frame2Path = "frame2.png";
+            string outputPath = "output.gif";
 
-            // Create the first frame (required for GifImage constructor)
-            using (GifFrameBlock firstBlock = new GifFrameBlock(200, 200))
+            if (!File.Exists(frame1Path))
             {
-                // Fill the first frame with a white background
-                using (SolidBrush bgBrush = new SolidBrush(Color.White))
-                {
-                    Graphics g = new Graphics(firstBlock);
-                    g.FillRectangle(bgBrush, firstBlock.Bounds);
-                }
+                Console.Error.WriteLine($"File not found: {frame1Path}");
+                return;
+            }
+            if (!File.Exists(frame2Path))
+            {
+                Console.Error.WriteLine($"File not found: {frame2Path}");
+                return;
+            }
 
-                // Initialize the GIF image with the first frame
-                using (GifImage gifImage = new GifImage(firstBlock))
+            using (Aspose.Imaging.RasterImage frame1 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(frame1Path))
+            using (Aspose.Imaging.RasterImage frame2 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(frame2Path))
+            {
+                int width = frame1.Width;
+                int height = frame1.Height;
+
+                using (GifImage gif = (GifImage)Aspose.Imaging.Image.Create(new GifOptions(), width, height))
                 {
-                    // Add additional frames with captions
-                    for (int i = 0; i < 5; i++)
+                    gif.AddPage(frame1);
+                    gif.AddPage(frame2);
+
+                    for (int i = 0; i < gif.PageCount; i++)
                     {
-                        using (GifFrameBlock frame = new GifFrameBlock(200, 200))
+                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(gif.ActiveFrame);
+                        graphics.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAliasGridFit;
+
+                        using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Yellow))
                         {
-                            Graphics g = new Graphics(frame);
-                            // Improve text legibility
-                            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-
-                            // Fill frame background
-                            using (SolidBrush bg = new SolidBrush(Color.White))
-                            {
-                                g.FillRectangle(bg, frame.Bounds);
-                            }
-
-                            // Draw caption text
-                            using (SolidBrush textBrush = new SolidBrush(Color.Black))
-                            {
-                                Font font = new Font("Arial", 20);
-                                string caption = $"Frame {i + 1}";
-                                g.DrawString(caption, font, textBrush, new Point(10, 10));
-                            }
-
-                            // Append the frame to the GIF
-                            gifImage.AddBlock(frame);
+                            Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
+                            graphics.DrawString($"Frame {i + 1}", font, brush, new Aspose.Imaging.PointF(10, 10));
                         }
                     }
 
-                    // Save the animated GIF
-                    gifImage.Save(outputPath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    gif.Save(outputPath, new GifOptions());
                 }
             }
         }
@@ -73,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate an animated GIF with readable text captions for a slideshow or marketing email.
- * 2. When creating a GIF that displays subtitles or labels on each frame and you want the text to stay sharp on low‑resolution screens.
- * 3. When building a C# application that adds dynamic captions to product demo GIFs and must ensure the text remains legible after compression.
- * 4. When automating the production of GIF memes or tutorial animations where caption quality must not degrade due to anti‑aliasing.
- * 5. When integrating Aspose.Imaging into a reporting tool that outputs animated GIF charts with clear axis labels and titles.
+ * 1. When you need to add readable text labels to each frame of an animated GIF generated from PNG images using Aspose.Imaging in C#.
+ * 2. When you want to improve the visual quality of captions on GIF frames by applying anti‑alias grid‑fit rendering before saving the animation.
+ * 3. When you are creating a slideshow GIF where each slide requires a clear title or description overlaid on the image.
+ * 4. When you must ensure that text drawn on GIF frames remains sharp on low‑resolution displays or browsers that render GIFs.
+ * 5. When you are programmatically generating marketing GIFs with dynamic captions and need consistent text rendering across all frames.
  */

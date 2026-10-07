@@ -1,67 +1,64 @@
-// HOW-TO: Apply Gaussian Blur and Deconvolution to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur and Deconvolution to SVG and Export as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string tempPngPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                // Prepare rasterization options for converting SVG to raster
-                var rasterizationOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Rasterize SVG to a PNG in memory
-                using (var memoryStream = new MemoryStream())
+                var pngOptions = new PngOptions
                 {
-                    var pngSaveOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-                    svgImage.Save(memoryStream, pngSaveOptions);
-                    memoryStream.Position = 0;
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    // Load the rasterized image as a RasterImage
-                    using (Image rasterImageBase = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageBase;
+                svgImage.Save(tempPngPath, pngOptions);
 
-                        // Apply Gaussian blur filter
-                        rasterImage.Filter(
-                            rasterImage.Bounds,
-                            new GaussianBlurFilterOptions(5, 4.0));
+                using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(tempPngPath))
+                {
+                    var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                    raster.Filter(raster.Bounds, gaussianOptions);
 
-                        // Apply Gauss-Wiener deconvolution filter
-                        rasterImage.Filter(
-                            rasterImage.Bounds,
-                            new GaussWienerFilterOptions(5, 4.0));
+                    int size = 3;
+                    double sigma = 1.0;
+                    var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(size, sigma);
+                    var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.DeconvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, deconvOptions);
 
-                        // Save the processed image to the output path
-                        rasterImage.Save(outputPath);
-                    }
+                    raster.Save(outputPath);
+                }
+
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
                 }
             }
         }
@@ -74,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a vector graphic before converting it to a raster format for web display.
- * 2. When you want to sharpen details in an SVG after applying a blur to simulate depth‑of‑field effects.
- * 3. When preparing SVG logos for printing and require both smoothing and de‑blurring to meet quality standards.
- * 4. When automating a batch process that converts SVG icons to PNG thumbnails with consistent blur and deconvolution settings.
- * 5. When integrating image preprocessing into a C# application that analyses rasterized SVGs for computer‑vision tasks.
+ * 1. When you need to soften an SVG graphic with a Gaussian blur and then sharpen it using deconvolution before saving it as a PNG for web display.
+ * 2. When you want to preprocess vector artwork by rasterizing it, applying a Gaussian blur for smoothing, and then deconvolving to enhance edges for high‑quality printing.
+ * 3. When an application must convert SVG icons to high‑resolution PNG thumbnails while applying blur and deconvolution to improve visual consistency.
+ * 4. When a batch job processes SVG diagrams, adds a controlled blur, and restores detail with deconvolution before storing the results in a PNG cache.
+ * 5. When you are building a C# image‑processing pipeline that requires both blur and deblurring steps on vector images to prepare them for machine‑learning input.
  */

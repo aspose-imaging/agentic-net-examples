@@ -1,38 +1,49 @@
-// HOW-TO: Convert DjVu Document Pages To PNG Images In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages To PNG Images In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.djvu";
+        string outputDir = "Output";
+
         try
         {
-            string inputPath = "Input/sample.djvu";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = "Output";
             Directory.CreateDirectory(outputDir);
 
-            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                int pageCount = djvu.Pages.Length;
+                for (int i = 0; i < pageCount; i++)
                 {
-                    int pageIndex = 0;
-                    foreach (DjvuPage page in djvuImage.Pages)
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (RasterImage page = (RasterImage)djvu.Pages[i])
                     {
-                        string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        page.Save(outputPath, new PngOptions());
-
-                        pageIndex++;
+                        using (PngOptions pngOptions = new PngOptions())
+                        {
+                            page.Save(outputPath, pngOptions);
+                        }
                     }
                 }
             }
@@ -46,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract every page of a DjVu file and save them as high‑quality PNG images for web preview or further processing in a .NET application.
- * 2. When a document management system must batch‑convert DjVu archives into separate PNG files to create thumbnails for each page.
- * 3. When an OCR pipeline requires individual PNG pages from a multi‑page DjVu document to feed into a text‑recognition engine.
- * 4. When you want to archive each page of a DjVu manuscript as lossless PNG files while preserving the original page order using Aspose.Imaging for .NET.
- * 5. When a digital publishing workflow needs to split a DjVu e‑book into PNG assets that can be easily edited or annotated in downstream tools.
+ * 1. When you need to extract each page of a multi‑page DjVu document as separate PNG files for web preview or further image analysis.
+ * 2. When automating a workflow that converts scanned DjVu archives into lossless PNG images to preserve quality before OCR processing.
+ * 3. When building a .NET service that receives DjVu files and must generate thumbnail PNGs for each page to display in a document management system.
+ * 4. When migrating legacy DjVu manuals to a modern format by programmatically saving every page as PNG for inclusion in e‑learning platforms.
+ * 5. When creating a batch script that processes a folder of DjVu files and outputs page‑by‑page PNGs for archival or printing purposes.
  */

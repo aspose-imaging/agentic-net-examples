@@ -1,9 +1,9 @@
-// HOW-TO: Extract Patient Name From DICOM and Save Pages As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Save DICOM Image as PNG Using Patient Name for File Name in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -12,46 +12,27 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputDirectory = "Output";
-
+            string inputPath = Path.Combine("Input", "image.dcm");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDirectory));
-
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-
-                // Attempt to retrieve patient name from DICOM metadata.
-                // If unavailable, fallback to "Unknown".
                 string patientName = "Unknown";
-                try
-                {
-                    // Some DICOM implementations expose patient name via FileInfo.
-                    // Adjust according to actual API if different.
-                    var fileInfo = dicomImage.FileInfo;
-                    var propInfo = fileInfo?.GetType().GetProperty("PatientName");
-                    if (propInfo != null)
-                    {
-                        var value = propInfo.GetValue(fileInfo) as string;
-                        if (!string.IsNullOrEmpty(value))
-                            patientName = value.Replace(' ', '_');
-                    }
-                }
-                catch { /* ignore metadata extraction errors */ }
 
-                int pageIndex = 0;
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                foreach (char c in Path.GetInvalidFileNameChars())
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"{patientName}_page{pageIndex}.png");
-                    dicomPage.Save(outputPath, new PngOptions());
-                    pageIndex++;
+                    patientName = patientName.Replace(c, '_');
                 }
+
+                string outputFileName = $"{patientName}.png";
+                string outputPath = Path.Combine("Output", outputFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                dicom.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -63,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital needs to archive radiology studies as PNG files whose filenames include the patient’s name for quick identification.
- * 2. When a medical research team wants to batch‑convert multi‑frame DICOM files to PNG while preserving the patient name in each output file.
- * 3. When a PACS integration requires exporting individual DICOM pages to PNG images that are automatically labeled with the patient’s name for downstream processing.
- * 4. When building a web portal that displays DICOM images as PNG thumbnails and needs the filenames to reflect the patient name for sorting and searching.
- * 5. When a quality‑control script must generate PNG copies of DICOM pages and embed the patient name in the filenames to match audit‑log records.
+ * 1. When a radiology application needs to convert DICOM scans to PNG files and name each output with the patient’s name for easy identification.
+ * 2. When integrating a medical imaging pipeline that extracts metadata from DICOM files and creates human‑readable filenames for downstream reporting tools.
+ * 3. When automating the export of DICOM images to a web‑friendly format while preserving patient information in the file name for audit trails.
+ * 4. When building a batch script that processes a folder of DICOM studies and saves each image as a PNG named after the patient to simplify folder organization.
+ * 5. When developing a C# utility that reads DICOM metadata with Aspose.Imaging and generates PNG assets for electronic health record (EHR) systems that require patient‑named files.
  */

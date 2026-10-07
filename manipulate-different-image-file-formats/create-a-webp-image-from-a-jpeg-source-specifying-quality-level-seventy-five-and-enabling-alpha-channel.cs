@@ -1,4 +1,11 @@
-// HOW-TO: Convert JPEG to WebP with Quality 75 and Alpha Support in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to WebP with Quality 75 Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,42 +13,33 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output.webp";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.webp";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure WebP options: lossy compression with quality 75
-                var webpOptions = new WebPOptions
+                WebPOptions options = new WebPOptions
                 {
-                    Lossless = false,   // lossy compression enables alpha channel support when present
-                    Quality = 75f
+                    Quality = 75
                 };
 
-                // Save the image as WebP using the specified options
-                image.Save(outputPath, webpOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Output any error message without crashing the program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce page load times by converting high‑resolution JPEG photos to smaller WebP files while preserving visual quality at a 75 % compression level.
- * 2. When an e‑commerce platform wants to serve product images in WebP format with optional transparency for overlay effects, using C# and Aspose.Imaging.
- * 3. When a mobile app processes user‑uploaded JPEG pictures and must output WebP files that retain any existing alpha channel for stickers or masks.
- * 4. When a batch‑processing script must automatically generate WebP thumbnails from JPEG assets with a consistent quality setting for consistent branding.
- * 5. When a content management system integrates C# code to convert legacy JPEG assets to WebP to meet modern browser requirements without losing image fidelity.
+ * 1. When you need to reduce page load time by converting high‑resolution JPEG photos to smaller WebP files with a controlled quality level.
+ * 2. When preparing image assets for a mobile app that requires WebP format with lossless alpha support while keeping visual fidelity at 75 % quality.
+ * 3. When migrating a legacy photo gallery to modern web standards and want to automate JPEG‑to‑WebP conversion in a C# backend.
+ * 4. When generating thumbnails for an e‑commerce site and need consistent compression settings to balance size and quality.
+ * 5. When integrating Aspose.Imaging into a CI pipeline to batch‑process uploaded JPEGs into WebP for CDN distribution.
  */

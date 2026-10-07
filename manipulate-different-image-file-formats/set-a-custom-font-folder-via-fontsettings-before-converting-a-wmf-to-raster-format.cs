@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -11,47 +10,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input\\sample.wmf";
             string outputPath = "Output\\sample.png";
-            // Custom font folder
             string fontFolder = "Fonts";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set custom font folder for Aspose.Imaging
-            FontSettings.SetFontsFolders(new[] { fontFolder }, true);
+            FontSettings.SetFontsFolder(fontFolder);
 
-            // Load WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to WmfImage to access size property
-                WmfImage wmfImage = (WmfImage)image;
-
-                // Configure rasterization options
                 var rasterOptions = new WmfRasterizationOptions
                 {
                     BackgroundColor = Color.White,
-                    PageSize = wmfImage.Size,
-                    RenderMode = WmfRenderMode.Auto
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Set PNG save options with vector rasterization
-                var pngOptions = new PngOptions
+                using (var pngOptions = new PngOptions())
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save as raster PNG
-                image.Save(outputPath, pngOptions);
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -63,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to render a WMF diagram that uses fonts not installed on the server, you can point Aspose.Imaging to a custom font directory before converting it to PNG.
- * 2. When generating thumbnails of legacy vector graphics in a web application and the fonts are stored in a specific folder, this code ensures the text appears correctly in the raster image.
- * 3. When automating batch conversion of WMF files to PNG in a CI pipeline on a machine without the required fonts, setting FontSettings avoids missing‑glyph errors.
- * 4. When creating printable PNG assets from WMF logos that rely on corporate brand fonts located in a shared repository, the code loads those fonts before rasterization.
- * 5. When developing a desktop tool that converts user‑uploaded WMF files to PNG on a client PC with limited font installations, you can supply a custom font folder to preserve text layout.
+ * 1. When you need to render vector WMF diagrams that use proprietary fonts on a server that does not have those fonts installed, you can point Aspose.Imaging to a custom font folder and export the image as PNG.
+ * 2. When generating thumbnails for legacy Windows Metafile reports in a web application, setting a specific fonts directory ensures text appears correctly in the rasterized PNG output.
+ * 3. When automating batch conversion of WMF assets for a mobile app, you can supply a shared font repository so each conversion produces consistent typography without installing fonts on every build machine.
+ * 4. When creating PDF or HTML previews from WMF files in a document management system, using FontSettings lets you control which fonts are used before rasterizing the file to PNG for preview.
+ * 5. When troubleshooting missing glyphs in WMF to PNG conversions, directing Aspose.Imaging to a custom fonts folder helps isolate font‑related issues and produce accurate raster images.
  */

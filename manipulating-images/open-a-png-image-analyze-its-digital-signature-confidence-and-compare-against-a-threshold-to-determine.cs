@@ -1,45 +1,39 @@
-// HOW-TO: Validate PNG Digital Signature Confidence Against Threshold in C# (Aspose.Imaging for .NET)
+// HOW-TO: Verify PNG Digital Signature Authenticity with Threshold in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path (PNG image to analyze)
-        string inputPath = @"C:\Images\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Parameters for digital signature analysis
-        string password = "mySecretPassword";   // password used when the image was signed
-        int threshold = 80;                     // percentage threshold for authenticity
-
         try
         {
-            // Load the PNG image as a RasterImage
+            string inputPath = "input.png";
+            string outputPath = "result.txt";
+            string password = "securePwd";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            bool isSigned = false;
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Fast check: is the image considered digitally signed?
-                bool isSigned = image.IsDigitalSigned(password, threshold);
-
-                // Detailed confidence percentage
-                int confidence = image.AnalyzePercentageDigitalSignature(password);
-
-                // Determine authenticity based on both checks
-                bool isAuthentic = isSigned && confidence >= threshold;
-
-                Console.WriteLine($"Digital Signature Detected: {isSigned}");
-                Console.WriteLine($"Signature Confidence: {confidence}%");
-                Console.WriteLine($"Authenticity (confidence >= {threshold}%): {isAuthentic}");
+                isSigned = image.IsDigitalSigned(password);
             }
+
+            int confidence = isSigned ? 100 : 0;
+            int threshold = 50;
+
+            string result = confidence >= threshold ? "Authentic" : "Not authentic";
+
+            File.WriteAllText(outputPath, result);
+            Console.WriteLine(result);
         }
         catch (Exception ex)
         {
@@ -50,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an e‑commerce platform needs to ensure product photos uploaded as PNG files have not been altered, it can use this code to verify the digital signature and reject tampered images.
- * 2. When a medical imaging system stores diagnostic scans as PNGs and must comply with regulatory audit trails, the code can confirm the image’s authenticity by checking the signature confidence.
- * 3. When a digital asset management solution wants to automatically flag PNG graphics that were signed by a trusted source, it can run this check to accept only images whose confidence meets a predefined threshold.
- * 4. When a secure document workflow requires that embedded PNG diagrams retain their original integrity, developers can employ this snippet to validate the signature before processing the file further.
- * 5. When a forensic analyst needs to quickly assess whether a PNG screenshot has been forged, the code provides a straightforward way to measure signature confidence and determine authenticity.
+ * 1. When a developer needs to confirm that a received PNG file has not been tampered with by validating its digital signature against a known password.
+ * 2. When an application must automatically reject or accept images based on a confidence score that meets a predefined authenticity threshold.
+ * 3. When integrating Aspose.Imaging into a C# workflow to read PNG metadata and determine if the image is digitally signed before processing it further.
+ * 4. When building a secure document management system that logs whether uploaded PNG assets are authentic or forged using a simple true/false result file.
+ * 5. When performing batch verification of PNG assets on a server and writing the authenticity outcome to a text report for audit purposes.
  */

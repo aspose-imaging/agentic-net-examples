@@ -1,9 +1,10 @@
-// HOW-TO: Apply Varying Motion Blur to Each Page of a Multi‑Page PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Different Motion Blur Angles to Each Page of a Multi‑Page PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
+            string inputPath = "input_multi_page.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,26 +21,29 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                if (image is IMultipageImage multipage)
                 {
-                    Console.Error.WriteLine("No pages found in the image.");
-                    return;
-                }
+                    double[] angles = { 0, 45, 90, 135 };
+                    int kernelSize = 5;
 
-                for (int i = 0; i < multipage.PageCount; i++)
-                {
-                    using (RasterImage page = (RasterImage)multipage.Pages[i])
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        double angle = i * 30.0; // Varying angle per page
-                        var filterOptions = new MotionWienerFilterOptions(10, 1.0, angle);
-                        page.Filter(page.Bounds, filterOptions);
+                        double angle = angles[i % angles.Length];
+                        using (RasterImage page = (RasterImage)multipage.Pages[i])
+                        {
+                            double[,] kernel = ConvolutionFilter.GetBlurMotion(kernelSize, angle);
+                            var filterOptions = new ConvolutionFilterOptions(kernel);
+                            page.Filter(page.Bounds, filterOptions);
 
-                        string outputPath = $"output\\page{i + 1}.png";
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        var pngOptions = new PngOptions();
-                        page.Save(outputPath, pngOptions);
+                            string outputPath = Path.Combine("output_pages", $"page_{i + 1}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            page.Save(outputPath, new PngOptions());
+                        }
                     }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The input image is not a multi-page image.");
                 }
             }
         }
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a series of preview images from a multi‑page PNG, applying a different motion‑blur direction to each page for an animated effect.
- * 2. When a document‑processing pipeline must add a custom blur angle to every layer of a scanned multi‑page PNG before saving the pages as separate PNG files.
- * 3. When creating scientific visualizations that simulate motion across successive slices of a PNG stack by incrementally increasing the blur angle on each slice.
- * 4. When producing stylized thumbnails for a multi‑page PNG catalog, giving each thumbnail a unique motion‑blur angle to emphasize different product perspectives.
- * 5. When automating quality‑control tests that compare original and motion‑blurred versions of each page in a multi‑page PNG using C# and Aspose.Imaging.
+ * 1. When you need to add directional motion blur to every frame of a multi‑page PNG animation for visual effects.
+ * 2. When you must extract each page of a multi‑page PNG and save them as separate files after applying unique blur angles.
+ * 3. When creating a series of stylized thumbnails where each page receives a different blur direction to emphasize motion.
+ * 4. When preprocessing scanned document pages stored in a single PNG by applying angle‑specific blur to reduce scanning artifacts.
+ * 5. When generating test images for computer‑vision algorithms that require varied motion blur across multiple pages of the same PNG.
  */

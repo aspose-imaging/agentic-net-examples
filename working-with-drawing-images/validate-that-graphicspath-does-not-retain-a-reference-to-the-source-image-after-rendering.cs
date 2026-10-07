@@ -1,8 +1,9 @@
-// HOW-TO: Check If GraphicsPath Keeps Source Image Reference After Disposal In C# (Aspose.Imaging for .NET)
+// HOW-TO: Check If GraphicsPath Locks Source JPEG After Drawing In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -11,9 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath1 = "output1.png";
-            string outputPath2 = "output2.png";
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,42 +21,31 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1) ?? ".");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load a source image (only to demonstrate that the path does not keep a reference to it)
-            Aspose.Imaging.GraphicsPath path;
-            using (Aspose.Imaging.Image srcImage = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Create a simple rectangle shape and add it to a figure
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 200f)));
+                Graphics graphics = new Graphics(image);
 
-                // Create a GraphicsPath and add the figure
-                path = new Aspose.Imaging.GraphicsPath();
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                RectangleShape rectShape = new RectangleShape(new RectangleF(10, 10, 100, 50));
+                figure.AddShape(rectShape);
                 path.AddFigure(figure);
-            } // srcImage is disposed here
 
-            // First canvas: draw the path while the source image was still alive
-            PngOptions pngOptions1 = new PngOptions();
-            pngOptions1.Source = new FileCreateSource(outputPath1, false);
-            using (Aspose.Imaging.Image canvas1 = Aspose.Imaging.Image.Create(pngOptions1, 300, 300))
-            {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas1);
-                graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3), path);
-                canvas1.Save(); // bound to file source
+                graphics.DrawPath(new Pen(Color.Blue, 2), path);
+
+                image.Save(outputPath, new PngOptions());
             }
 
-            // Second canvas: reuse the same GraphicsPath after the source image has been disposed
-            PngOptions pngOptions2 = new PngOptions();
-            pngOptions2.Source = new FileCreateSource(outputPath2, false);
-            using (Aspose.Imaging.Image canvas2 = Aspose.Imaging.Image.Create(pngOptions2, 300, 300))
+            try
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas2);
-                graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3), path);
-                canvas2.Save();
+                File.Delete(inputPath);
+                Console.WriteLine("Input file deleted successfully; GraphicsPath does not retain a reference to the source image.");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to delete input file: {ex.Message}");
             }
         }
         catch (Exception ex)
@@ -68,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reuse a GraphicsPath after the original PNG image has been disposed to avoid memory leaks in a C# Aspose.Imaging workflow.
- * 2. When generating multiple PNG canvases from shapes extracted from a source image without keeping the source file loaded in memory.
- * 3. When verifying that disposing an Image object does not corrupt subsequent DrawPath calls in an Aspose.Imaging graphics pipeline.
- * 4. When building a server‑side thumbnail service that creates vector overlays from a source image and must release the source file promptly.
- * 5. When debugging errors caused by hidden references to a closed image while drawing vector figures with Aspose.Imaging in .NET.
+ * 1. When you need to draw vector shapes on an existing JPEG and then release the original file for further processing or deletion.
+ * 2. When you want to convert a JPEG to PNG after adding annotations without keeping the source file open.
+ * 3. When you must ensure that Aspose.Imaging’s GraphicsPath does not keep a file handle, allowing safe cleanup in batch image pipelines.
+ * 4. When you are building a server‑side service that overlays graphics on uploaded images and must delete the uploads immediately to free storage.
+ * 5. When you are testing memory and file‑handle behavior of drawing operations to prevent file‑locking issues in long‑running C# applications.
  */

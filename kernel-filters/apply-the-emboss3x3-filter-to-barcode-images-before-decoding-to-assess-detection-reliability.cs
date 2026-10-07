@@ -1,48 +1,42 @@
-// HOW-TO: How to Apply Emboss3x3 Filter to Barcode Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss3x3 Filter To Barcode PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\barcode.png";
-            string outputPath = @"C:\Images\barcode_embossed.png";
+            string inputPath = "barcode.png";
+            string outputPath = "filtered_barcode.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Apply the Emboss3x3 convolution filter to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3)
-                );
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
-
-            // TODO: Decode the barcode from the embossed image to assess detection reliability
-            // This step depends on the barcode decoding library you are using.
         }
         catch (Exception ex)
         {
@@ -53,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preprocess scanned barcode PNG files with an emboss effect before feeding them to a barcode decoder to evaluate detection robustness.
- * 2. When you want to automatically enhance barcode images stored on disk using Aspose.Imaging’s ConvolutionFilter.Emboss3x3 in a C# batch job.
- * 3. When you are building a test suite that simulates degraded barcode scans by applying a 3×3 emboss filter to JPEG barcodes and comparing decoding results.
- * 4. When you must ensure the output directory exists and save the embossed barcode as a new PNG using RasterImage.Save in a .NET application.
- * 5. When you are troubleshooting barcode recognition accuracy and need to apply a convolution filter to the image before invoking an external barcode reading library.
+ * 1. When you need to preprocess scanned barcode PNG files with an emboss effect to evaluate how the filter impacts detection accuracy before decoding.
+ * 2. When integrating Aspose.Imaging in a C# application to automatically apply a 3x3 emboss convolution to barcode images for visual quality testing.
+ * 3. When creating a batch workflow that reads barcode images, applies a convolution filter, and saves the result as PNG for further analysis.
+ * 4. When debugging barcode recognition algorithms by comparing raw and embossed images to understand filter‑induced artifacts.
+ * 5. When building a proof‑of‑concept that demonstrates how to use Aspose.Imaging’s Filter method with ConvolutionFilterOptions on raster images in .NET.
  */

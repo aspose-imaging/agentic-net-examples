@@ -1,45 +1,45 @@
-// HOW-TO: Extract EXIF Thumbnail From JPEG and Save As PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EXIF Thumbnail From JPEG And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.jpg";
-        string outputPath = "thumbnail.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output/thumbnail.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Get EXIF thumbnail
-                RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-                if (thumbnail == null)
+                var thumbRaster = jpegImage.ExifData?.Thumbnail;
+                if (thumbRaster == null)
                 {
-                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.Error.WriteLine("No EXIF thumbnail found.");
                     return;
                 }
 
-                // Save thumbnail as PNG
-                using (thumbnail)
+                using (thumbRaster)
                 {
-                    thumbnail.Save(outputPath, new PngOptions());
+                    var pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    thumbRaster.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate lightweight preview images for a photo gallery by extracting embedded EXIF thumbnails from high‑resolution JPEG files and converting them to PNG format.
- * 2. When building a digital asset management system that must display quick thumbnails without re‑encoding the original JPEG, using the stored EXIF thumbnail to improve performance.
- * 3. When creating a backup script that extracts and stores the original camera‑generated thumbnails from JPEG photos as separate PNG files for archival or analysis.
- * 4. When developing a mobile app that requires small PNG icons derived from the EXIF thumbnail of user‑uploaded JPEGs to reduce bandwidth and memory usage.
- * 5. When implementing a batch process that validates the presence of EXIF thumbnails in JPEGs and saves any found thumbnails as PNGs for further processing or quality checks.
+ * 1. When building a photo‑gallery app that shows quick previews, you can extract the embedded EXIF thumbnail from uploaded JPEGs and store it as a lightweight PNG for faster loading.
+ * 2. When creating a digital asset management system that indexes images, extracting the EXIF thumbnail allows you to generate low‑resolution previews without decoding the full‑size JPEG.
+ * 3. When developing a mobile‑friendly API that returns image thumbnails, you can use this code to read the JPEG’s EXIF thumbnail and deliver it as a PNG to ensure consistent format support.
+ * 4. When migrating legacy photo archives, extracting and saving EXIF thumbnails as separate PNG files helps preserve original preview data while converting the main images to new formats.
+ * 5. When implementing a backup solution that needs to verify image integrity, extracting the EXIF thumbnail and comparing it to a stored PNG can quickly detect corrupted JPEG files.
  */

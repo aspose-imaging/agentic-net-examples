@@ -1,62 +1,60 @@
-// HOW-TO: Measure SVG to PNG Conversion Time and File Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Measure SVG to PNG Conversion Time and Output Size in C# (Aspose.Imaging for .NET)
 using System;
-using System.Diagnostics;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\test.svg";
-        string outputPath = @"C:\temp\test.output.png";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Measure conversion duration
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Prepare rasterization options
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Preserve original size
-                    PageSize = image.Size
-                };
-
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save rasterized PNG
-                image.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            sw.Stop();
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-            // Log duration in milliseconds
-            Console.WriteLine($"Conversion duration: {sw.ElapsedMilliseconds} ms");
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-            // Log output file size
-            long fileSize = new FileInfo(outputPath).Length;
-            Console.WriteLine($"Output file size: {fileSize} bytes");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                using (Image image = Image.Load(inputPath))
+                using (var options = new PngOptions())
+                {
+                    image.Save(outputPath, options);
+                }
+
+                stopwatch.Stop();
+                long durationMs = stopwatch.ElapsedMilliseconds;
+                long fileSize = new FileInfo(outputPath).Length;
+
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' in {durationMs} ms, size: {fileSize} bytes.");
+            }
         }
         catch (Exception ex)
         {
@@ -67,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to benchmark how long an SVG rasterization to PNG takes in a .NET application.
- * 2. When you want to verify that the generated PNG meets specific file‑size limits for web deployment.
- * 3. When you are automating batch conversion of SVG assets and must log performance metrics for each file.
- * 4. When you are troubleshooting a slow image‑processing pipeline and require precise conversion duration and output size data.
- * 5. When you integrate Aspose.Imaging into a CI/CD workflow and need to record conversion time and file size for reporting.
+ * 1. When you need to benchmark how long each SVG file takes to rasterize to PNG in a batch processing pipeline.
+ * 2. When you want to log the resulting PNG file size to monitor storage usage after converting vector graphics.
+ * 3. When you are building an automated image conversion service that must report performance metrics for each request.
+ * 4. When you need to verify that SVG rasterization meets latency requirements for real‑time web applications.
+ * 5. When you are troubleshooting slow conversions and need both timing and output size data to pinpoint bottlenecks.
  */

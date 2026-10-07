@@ -1,42 +1,39 @@
-// HOW-TO: Increase Brightness of TIFF Image by 20 and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase TIFF Brightness by 20 and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.tif";
-        string outputPath = @"c:\temp\sample.adjusted.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.tif";
+            string outputPath = "output\\enhanced.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access AdjustBrightness
-                TiffImage tiffImage = (TiffImage)image;
-
-                // Increase brightness by 20 units (range -255 to 255)
-                tiffImage.AdjustBrightness(20);
-
-                // Save the result as PNG
-                PngOptions pngOptions = new PngOptions();
-                tiffImage.Save(outputPath, pngOptions);
+                var raster = image as RasterImage;
+                if (raster != null)
+                {
+                    raster.AdjustBrightness(20);
+                    var options = new PngOptions();
+                    raster.Save(outputPath, options);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Unsupported image format.");
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives low‑contrast TIFF scans and needs a brighter PNG version for web viewing.
- * 2. When a document management workflow converts scanned TIFF pages to PNG thumbnails and must boost visibility by adjusting brightness.
- * 3. When a batch script processes satellite TIFF imagery and requires a quick brightness increase before saving as PNG for GIS analysis.
- * 4. When an e‑commerce platform upgrades product photos from TIFF to PNG and wants to enhance brightness to match catalog standards.
- * 5. When a desktop application prepares archival TIFF files for presentation and needs to raise brightness by a fixed amount while converting to PNG.
+ * 1. When you need to brighten scanned TIFF documents by a fixed amount before converting them to PNG for web display.
+ * 2. When an application must automatically enhance low-light satellite TIFF images and store the result as lossless PNG files.
+ * 3. When a batch process has to adjust the brightness of medical TIFF scans by 20 units and output them in a PNG format for reporting tools.
+ * 4. When a C# service integrates Aspose.Imaging to improve the visibility of archival TIFF photos before delivering them as PNG thumbnails.
+ * 5. When developers want to programmatically increase the brightness of a TIFF image and save the edited version as PNG without using external image editors.
  */

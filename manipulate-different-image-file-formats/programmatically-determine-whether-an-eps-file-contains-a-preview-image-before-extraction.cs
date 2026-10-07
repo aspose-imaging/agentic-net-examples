@@ -1,73 +1,66 @@
-// HOW-TO: Check for and Extract EPS Raster Preview Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check If EPS File Contains a Preview Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace EpsPreviewChecker
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "preview.png";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.eps";
+                string outputPath = "output.txt";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                bool hasPreview = HasPreviewImage(inputPath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                File.WriteAllText(outputPath, hasPreview ? "Preview found" : "No preview");
+
+                Console.WriteLine(hasPreview ? "Preview found" : "No preview");
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Determine if a raster preview is present
-                bool hasPreview = image.HasRasterPreview;
-
-                Console.WriteLine($"Has raster preview: {hasPreview}");
-
-                if (hasPreview)
-                {
-                    // Retrieve the preview image (default format)
-                    using (var preview = image.GetPreviewImage())
-                    {
-                        if (preview != null)
-                        {
-                            // Save the preview image to the specified output path
-                            preview.Save(outputPath, new PngOptions());
-                            Console.WriteLine($"Preview image saved to: {outputPath}");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Preview image could not be retrieved.");
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No raster preview available in the EPS file.");
-                }
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
-        catch (Exception ex)
+
+        private static bool HasPreviewImage(string epsPath)
         {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            using (var stream = new FileStream(epsPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var reader = new StreamReader(stream))
+            {
+                string line;
+                // Read up to a reasonable number of lines to avoid scanning huge files unnecessarily
+                int maxLines = 1000;
+                int count = 0;
+                while (!reader.EndOfStream && count < maxLines)
+                {
+                    line = reader.ReadLine();
+                    if (line != null && line.StartsWith("%%BeginPreview", StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                    count++;
+                }
+            }
+            return false;
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify whether an EPS file contains an embedded raster preview before generating a thumbnail.
- * 2. When processing a batch of EPS graphics and you want to extract any available preview images to PNG for quick web display.
- * 3. When integrating a print workflow that must detect EPS preview images to decide if a fallback rasterization step is required.
- * 4. When building a document conversion tool that should only extract preview images from EPS files that actually include them, avoiding runtime errors.
- * 5. When automating quality control for incoming EPS assets and you need to confirm the presence of a preview image before further processing.
+ * 1. When converting EPS files to other formats, you can verify a preview exists before attempting extraction to avoid errors.
+ * 2. When generating thumbnails for a document management system, you can check for an EPS preview image to decide whether to use the embedded preview or render the vector data.
+ * 3. When batch‑processing print jobs, you can skip EPS files without previews to prevent unnecessary rasterization steps.
+ * 4. When validating user‑uploaded EPS assets in a web application, you can confirm a preview image is present to ensure a quick visual representation for the UI.
+ * 5. When archiving design assets, you can log which EPS files contain previews to prioritize those that already have raster previews for faster preview generation.
  */

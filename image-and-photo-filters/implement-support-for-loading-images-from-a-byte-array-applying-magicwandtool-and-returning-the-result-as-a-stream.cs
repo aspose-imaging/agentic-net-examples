@@ -1,10 +1,10 @@
-// HOW-TO: Load PNG From Array, Apply Magic Wand Selection, and Save To Stream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Load Image from Byte Array, Apply Magic Wand, Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,22 +25,16 @@ class Program
 
             byte[] imageBytes = File.ReadAllBytes(inputPath);
             using (MemoryStream inputStream = new MemoryStream(imageBytes))
+            using (RasterImage image = (RasterImage)Image.Load(inputStream))
             {
-                using (RasterImage image = (RasterImage)Image.Load(inputStream))
-                {
-                    MagicWandTool
-                        .Select(image, new MagicWandSettings(50, 50))
-                        .Apply();
+                // Apply MagicWand selection at point (10,10) and apply mask
+                MagicWandTool.Select(image, new MagicWandSettings(10, 10))
+                    .Apply();
 
-                    using (MemoryStream outputStream = new MemoryStream())
-                    {
-                        PngOptions pngOptions = new PngOptions
-                        {
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-                        image.Save(outputStream, pngOptions);
-                        File.WriteAllBytes(outputPath, outputStream.ToArray());
-                    }
+                using (MemoryStream outputStream = new MemoryStream())
+                {
+                    image.Save(outputStream, new PngOptions());
+                    File.WriteAllBytes(outputPath, outputStream.ToArray());
                 }
             }
         }
@@ -53,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to process an uploaded PNG image stored in memory, apply a magic‑wand selection, and return the edited image without writing intermediate files.
- * 2. When a web API receives image data as a byte array, you can use Aspose.Imaging to select regions based on color tolerance and stream the result back to the client.
- * 3. When converting raw image bytes from a database into a PNG with transparency after a magic‑wand cutout, this code loads, edits, and saves the image in a single memory stream.
- * 4. When building a desktop tool that lets users click a point to auto‑select similar pixels in a PNG and then export the selection as a new file, the example demonstrates the full load‑process‑save workflow.
- * 5. When integrating image processing into a background service that must avoid disk I/O, the snippet shows how to read, modify with MagicWandTool, and write the PNG entirely in memory.
+ * 1. When you need to process an uploaded image stored in memory, select a region with the Magic Wand tool and output a PNG without writing intermediate files.
+ * 2. When integrating Aspose.Imaging into a web API that receives image bytes, you can apply a Magic Wand selection to isolate an object and return the edited image as a stream.
+ * 3. When converting raw JPEG data retrieved from a database into a masked PNG for further analysis, this code loads the bytes, applies a Magic Wand mask, and saves the result.
+ * 4. When building a desktop application that lets users click a point to auto‑select similar colors and export the selection as a transparent PNG, the example demonstrates the required steps.
+ * 5. When automating batch processing of images stored in a cloud blob, you can read each file into a byte array, apply Magic Wand selection, and write the processed PNG back to storage.
  */

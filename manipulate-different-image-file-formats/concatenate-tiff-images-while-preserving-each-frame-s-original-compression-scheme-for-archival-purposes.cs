@@ -1,21 +1,32 @@
 // HOW-TO: Combine Multiple TIFF Files Preserving Original Compression in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath1 = @"c:\temp\input1.tif";
-        string inputPath2 = @"c:\temp\input2.tif";
-        string outputPath = @"c:\temp\output.tif";
-
         try
         {
-            // Verify that each input file exists
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string outputPath = "output.tif";
+
+            // Validate input files
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -27,22 +38,51 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the first TIFF image – this will become the combined image
-            using (TiffImage combined = (TiffImage)Image.Load(inputPath1))
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Load the second TIFF image
-                using (TiffImage second = (TiffImage)Image.Load(inputPath2))
-                {
-                    // Append all frames from the second image to the combined image.
-                    // The original compression of each frame is preserved.
-                    combined.Add(second);
-                }
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Save the concatenated TIFF image
-                combined.Save(outputPath);
+            // List of input TIFF files
+            List<string> inputFiles = new List<string> { inputPath1, inputPath2 };
+
+            TiffImage destinationImage = null;
+
+            foreach (string inputFile in inputFiles)
+            {
+                using (TiffImage sourceImage = (TiffImage)Image.Load(inputFile))
+                {
+                    // Initialize destination image on first iteration
+                    if (destinationImage == null)
+                    {
+                        // Use dimensions of the first frame of the first source image
+                        TiffFrame firstFrame = sourceImage.Frames[0];
+                        int width = firstFrame.Width;
+                        int height = firstFrame.Height;
+
+                        Source fileSource = new FileCreateSource(outputPath, false);
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = fileSource };
+
+                        destinationImage = (TiffImage)Image.Create(tiffOptions, width, height);
+                        // Remove the initially created empty frame
+                        destinationImage.RemoveFrame(0);
+                    }
+
+                    // Copy all frames from source to destination, preserving compression
+                    foreach (TiffFrame frame in sourceImage.Frames)
+                    {
+                        destinationImage.AddFrame(TiffFrame.CopyFrame(frame));
+                    }
+                }
+            }
+
+            // Save the concatenated TIFF
+            if (destinationImage != null)
+            {
+                destinationImage.Save();
+                destinationImage.Dispose();
             }
         }
         catch (Exception ex)
@@ -54,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge scanned document pages saved as separate TIFF files into a single multi‑page TIFF for archival while keeping each page’s original LZW or CCITT compression.
- * 2. When a medical imaging system produces individual TIFF slices and you must concatenate them into one file without re‑encoding to maintain lossless quality.
- * 3. When a digital preservation workflow requires combining TIFF images from different sources into a single archive file while preserving each frame’s original compression for authenticity.
- * 4. When an automated batch process has to append new TIFF pages to an existing multi‑page TIFF without recompressing the existing frames.
- * 5. When a GIS application stores raster layers as separate TIFF tiles and you need to stitch them into a single TIFF while retaining each tile’s compression for efficient storage.
+ * 1. When you need to archive scanned documents from different sources into a single multi‑page TIFF while keeping each page’s original LZW or CCITT compression.
+ * 2. When a medical imaging system must merge patient X‑ray TIFF files into one file without re‑encoding to maintain diagnostic quality.
+ * 3. When a legal firm wants to concatenate case‑related TIFF evidence files into a single archive while preserving the original compression for court admissibility.
+ * 4. When a batch processing tool combines satellite imagery TIFF tiles into a composite file without losing the original compression to reduce storage size.
+ * 5. When a digital preservation workflow consolidates historic TIFF photographs into one archive file while ensuring each frame’s compression remains unchanged.
  */

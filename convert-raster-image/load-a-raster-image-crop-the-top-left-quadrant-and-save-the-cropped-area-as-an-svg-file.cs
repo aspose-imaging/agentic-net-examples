@@ -1,48 +1,33 @@
-// HOW-TO: Crop Top Left Quadrant of PNG and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Top Left Quadrant of JPEG and Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access cropping
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Define top-left quadrant rectangle
-                int cropWidth = rasterImage.Width / 2;
-                int cropHeight = rasterImage.Height / 2;
-                var cropArea = new Rectangle(0, 0, cropWidth, cropHeight);
-
-                // Crop the image
-                rasterImage.Crop(cropArea);
-
-                // Save the cropped image as SVG
-                var svgOptions = new SvgOptions();
-                rasterImage.Save(outputPath, svgOptions);
+                int halfWidth = image.Width / 2;
+                int halfHeight = image.Height / 2;
+                image.Crop(0, halfWidth, 0, halfHeight);
+                var options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -54,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the upper‑left portion of a large PNG for use in a vector‑based web graphic.
- * 2. When generating scalable icons from raster screenshots by cropping a quadrant and converting it to SVG.
- * 3. When creating printable SVG assets from a specific region of a bitmap image in an automated C# workflow.
- * 4. When reducing file size by keeping only a quarter of an image and saving it in a resolution‑independent format.
- * 5. When integrating Aspose.Imaging into a batch process that trims images to a defined area and outputs them as SVG files.
+ * 1. When you need to extract the upper‑left quarter of a raster photo and embed it in a vector‑based report.
+ * 2. When generating lightweight SVG thumbnails from large JPEG images for responsive web pages.
+ * 3. When converting a specific region of a scanned document into scalable SVG for printing at any size.
+ * 4. When creating cut‑out graphics from a bitmap to be used in vector editing tools like Adobe Illustrator.
+ * 5. When automating batch processing to crop and vectorize image sections for a GIS mapping application.
  */

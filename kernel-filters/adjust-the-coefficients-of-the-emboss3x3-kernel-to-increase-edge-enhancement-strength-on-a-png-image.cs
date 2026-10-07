@@ -1,21 +1,19 @@
-// HOW-TO: Increase Emboss Edge Strength On PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase Emboss Edge Strength on PNG Using Custom Convolution Kernel in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,30 +22,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            double[,] customKernel = new double[,]
             {
-                RasterImage raster = (RasterImage)image;
+                { -4, -2, 0 },
+                { -2, 1, 2 },
+                { 0, 2, 4 }
+            };
 
-                double[,] originalKernel = ConvolutionFilter.Emboss3x3;
-                double strengthFactor = 2.0;
-                int rows = originalKernel.GetLength(0);
-                int cols = originalKernel.GetLength(1);
-                double[,] enhancedKernel = new double[rows, cols];
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < cols; j++)
-                    {
-                        enhancedKernel[i, j] = originalKernel[i, j] * strengthFactor;
-                    }
-                }
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel));
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(enhancedKernel));
-
-                PngOptions saveOptions = new PngOptions
+                PngOptions options = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-                image.Save(outputPath, saveOptions);
+
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -59,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to make the details of a PNG photograph stand out by intensifying the emboss effect for a sharper, more three‑dimensional look.
- * 2. When you want to programmatically enhance the edges of scanned documents in a batch process before archiving them as PNG files.
- * 3. When you are building a C# desktop application that applies custom convolution kernels to improve visual contrast in product images.
- * 4. When you need to adjust the strength of an existing emboss filter without creating a new kernel from scratch, using Aspose.Imaging’s built‑in Emboss3x3 matrix.
- * 5. When you are preparing PNG assets for a game or UI and require stronger edge definition to improve readability on high‑resolution displays.
+ * 1. When you need to sharpen the edges of a PNG photograph for a product catalog, you can apply a stronger emboss filter with a custom kernel using Aspose.Imaging in C#.
+ * 2. When preparing game textures, developers may enhance surface details by increasing emboss intensity on PNG assets through a convolution filter.
+ * 3. When creating stylized thumbnails for a web gallery, you can boost edge definition by adjusting the emboss kernel coefficients in C# code.
+ * 4. When preprocessing scanned documents to highlight text outlines, a custom emboss filter can make the characters more pronounced in PNG output.
+ * 5. When building an image‑editing tool that offers users adjustable emboss strength, you can implement the feature by modifying the kernel values with Aspose.Imaging’s ConvolutionFilterOptions.
  */

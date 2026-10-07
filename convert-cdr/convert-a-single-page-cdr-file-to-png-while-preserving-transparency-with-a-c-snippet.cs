@@ -2,40 +2,34 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample.png";
+            string inputPath = Path.Combine("Input", "sample.cdr");
+            string outputPath = Path.Combine("Output", "sample.png");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Get the first (single) page
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-
-                // Set PNG options (default preserves transparency)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the page as PNG
-                page.Save(outputPath, pngOptions);
+                using (PngOptions options = new PngOptions())
+                {
+                    options.ColorType = PngColorType.TruecolorWithAlpha;
+                    cdr.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer provides a CorelDRAW (CDR) logo that needs to be displayed on a website with a transparent background, a developer can use this code to convert the single‑page file to a PNG preserving the transparency.
- * 2. When an automated build pipeline must generate thumbnail previews of CDR assets for a digital asset management system, the snippet can convert each CDR page to a transparent PNG for quick preview rendering.
- * 3. When a Windows desktop application imports vector artwork from CorelDRAW and needs to embed it into a PDF or report as a raster image with no background, the code converts the CDR page to PNG while keeping the transparent layers.
- * 4. When a batch‑processing service processes user‑uploaded CDR files and stores them in a cloud storage bucket as web‑ready PNGs, this example shows how to read the file, ensure the output folder exists, and save the transparent PNG.
- * 5. When a migration script moves legacy CDR graphics into a modern content management system that only accepts PNG files, the developer can use this code to reliably convert each single‑page CDR while preserving its alpha channel.
+ * 1. When you need to display a CorelDRAW logo on a website without a background, you can convert the CDR to a PNG with an alpha channel.
+ * 2. When automating a batch process that extracts a single‑page illustration from a CDR file and saves it as a transparent PNG for use in UI assets.
+ * 3. When integrating legacy CDR artwork into a .NET desktop application that only supports PNG images with transparency.
+ * 4. When preparing print‑ready graphics for e‑commerce product listings that require PNG files with preserved transparent backgrounds.
+ * 5. When creating thumbnails of CDR designs for a content‑management system that stores images as PNG with alpha transparency.
  */

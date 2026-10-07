@@ -1,45 +1,41 @@
-// HOW-TO: Create PNG Mask From JPEG Using MagicWandTool In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Apply Magic Wand Selection To JPEG And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the JPEG image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask using MagicWandTool with default settings (reference point at 0,0)
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(0, 0))
-                    .Apply();
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0)).Apply();
 
-                // Save the masked image as PNG with alpha channel
-                image.Save(outputPath, new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
-                });
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a region of a JPEG and export it as a transparent PNG for web overlays.
- * 2. When you want to generate a mask automatically from the top‑left pixel of an image to create cut‑out graphics.
- * 3. When building a batch process that converts scanned JPEG photos into PNG assets with alpha for UI icons.
- * 4. When integrating Aspose.Imaging into a C# application to isolate foreground objects and save them with transparency.
- * 5. When preparing product images for e‑commerce platforms that require PNGs with transparent backgrounds derived from original JPEGs.
+ * 1. When you need to isolate a region of a JPEG image using the Magic Wand tool and export the result with transparency as a PNG for web graphics.
+ * 2. When you want to programmatically remove the background of a photo and keep the selected area in a lossless format for further editing.
+ * 3. When an application must convert user‑uploaded JPEGs into PNGs that preserve the selected object's shape with an alpha channel.
+ * 4. When you are building a batch process that extracts a specific area from images and stores them as PNGs for use in UI overlays.
+ * 5. When you need to generate masked PNG assets from existing JPEGs for printing or e‑commerce product previews.
  */

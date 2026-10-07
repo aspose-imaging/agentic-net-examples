@@ -1,60 +1,90 @@
 // HOW-TO: Extract Embedded Fonts from EMF and Generate Text Report in C# (Aspose.Imaging for .NET)
 using System;
+using System.Collections.Generic;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
+using System.Text;
 
-class Program
+namespace EmfFontExtractor
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "C:\\path\\to\\input.emf";
-        string outputPath = "C:\\path\\to\\fonts_report.txt";
-
-        try
+        static void Main()
         {
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths
+                string inputPath = "input.emf";
+                string outputPath = "fonts_report.txt";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (MetaImage image = (MetaImage)Image.Load(inputPath))
-            {
-                string[] usedFonts = image.GetUsedFonts();
-                string[] missedFonts = image.GetMissedFonts();
-
-                using (var writer = new StreamWriter(outputPath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    writer.WriteLine("Used Fonts:");
-                    foreach (var font in usedFonts)
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                // Read EMF file bytes
+                byte[] data = File.ReadAllBytes(inputPath);
+                int index = 0;
+                var fonts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                const uint EMR_CREATEFONTINDIRECTW = 0x2D; // 45
+
+                while (index + 8 <= data.Length)
+                {
+                    uint type = BitConverter.ToUInt32(data, index);
+                    uint size = BitConverter.ToUInt32(data, index + 4);
+
+                    if (size == 0 || index + size > data.Length)
                     {
-                        writer.WriteLine(font);
+                        // Corrupt record, break to avoid infinite loop
+                        break;
                     }
 
-                    writer.WriteLine();
-                    writer.WriteLine("Missed Fonts:");
-                    foreach (var font in missedFonts)
+                    if (type == EMR_CREATEFONTINDIRECTW && size >= 92 + 8)
                     {
-                        writer.WriteLine(font);
+                        // Face name starts at offset 36 from record start
+                        int faceOffset = index + 36;
+                        if (faceOffset + 64 <= data.Length)
+                        {
+                            string faceName = Encoding.Unicode.GetString(data, faceOffset, 64);
+                            int nullPos = faceName.IndexOf('\0');
+                            if (nullPos >= 0)
+                                faceName = faceName.Substring(0, nullPos);
+                            if (!string.IsNullOrWhiteSpace(faceName))
+                                fonts.Add(faceName);
+                        }
                     }
+
+                    index += (int)size;
                 }
+
+                // Write report
+                var lines = new List<string>();
+                lines.Add("Embedded Fonts Report");
+                lines.Add("=====================");
+                foreach (var font in fonts)
+                {
+                    lines.Add(font);
+                }
+
+                File.WriteAllLines(outputPath, lines, Encoding.UTF8);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to audit which fonts are actually embedded in an EMF vector graphic to ensure proper rendering on systems without those fonts.
- * 2. When preparing a compliance report that lists used and missing fonts in EMF files before publishing documents.
- * 3. When troubleshooting printing issues caused by unavailable fonts in EMF images by identifying which fonts are missing.
- * 4. When migrating legacy EMF assets to a new design workflow and you must verify that all required fonts are present.
- * 5. When building an automated tool that scans a batch of EMF files and creates a summary of font usage for asset management.
+ * 1. When you need to audit which fonts are embedded in a Windows Metafile (EMF) to verify licensing compliance.
+ * 2. When converting legacy EMF drawings to PDF and must list the fonts to ensure proper embedding.
+ * 3. When building a document‑processing pipeline that validates that all fonts referenced in EMF files are available on the target system.
+ * 4. When generating a summary of fonts used across multiple EMF assets for a design review or asset inventory.
+ * 5. When troubleshooting rendering problems in EMF files by extracting and examining the embedded font names.
  */

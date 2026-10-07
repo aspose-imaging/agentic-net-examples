@@ -1,60 +1,61 @@
-// HOW-TO: Remove Background From Vector Image With Error Handling In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background from SVG and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.cdr";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Check that the loaded image is a vector image
-                if (image is VectorImage vectorImage)
-                {
-                    try
-                    {
-                        // Attempt to remove background
-                        vectorImage.RemoveBackground();
-                    }
-                    catch (Exception ex)
-                    {
-                        // Handle case where background removal fails (e.g., no recognizable vector shapes)
-                        Console.Error.WriteLine($"Background removal failed: {ex.Message}");
-                        // Continue without background removal
-                    }
+            string inputPath = "input.svg";
+            string outputPath = "output\\result.png";
 
-                    // Save the result as PNG
-                    var pngOptions = new PngOptions();
-                    vectorImage.Save(outputPath, pngOptions);
-                }
-                else
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var image = Image.Load(inputPath))
+            {
+                var vectorImage = image as VectorImage;
+                if (vectorImage == null)
                 {
-                    Console.Error.WriteLine("The provided file is not a vector image.");
+                    Console.Error.WriteLine("The file does not contain a vector image.");
+                    return;
                 }
+
+                try
+                {
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"RemoveBackground failed: {ex.Message}");
+                    return;
+                }
+
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // General error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -62,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically strip the background from a CorelDRAW (.cdr) vector file and save it as a PNG while safely handling files that may not contain any vector shapes.
- * 2. When your application must verify that an input file exists and is a vector image before processing, preventing runtime crashes in batch image conversion jobs.
- * 3. When you want to integrate Aspose.Imaging’s RemoveBackground method into a C# service and gracefully log failures instead of terminating the workflow.
- * 4. When you are converting legacy vector graphics to raster PNGs for web display and need to ensure the output directory is created automatically.
- * 5. When you require a generic try‑catch structure around image loading and saving to capture unexpected errors such as unsupported formats or I/O issues.
+ * 1. When you need to automatically erase the background of an SVG file and export it as a transparent PNG for web graphics.
+ * 2. When your application must verify that an input file is a vector image before processing to avoid runtime errors.
+ * 3. When you want to handle cases where an SVG contains no recognizable shapes and gracefully report the failure.
+ * 4. When you need to rasterize vector artwork to a PNG with an alpha channel while preserving the original dimensions.
+ * 5. When you are building a batch conversion tool that creates PNG assets from SVGs and must log missing files or processing exceptions.
  */

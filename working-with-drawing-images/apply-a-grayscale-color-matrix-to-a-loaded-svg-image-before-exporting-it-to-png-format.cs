@@ -1,10 +1,9 @@
-// HOW-TO: Apply Grayscale Color Matrix to SVG and Export as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to Grayscale PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -13,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,29 +25,24 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary file for intermediate PNG rasterization
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-            // Load SVG and rasterize to temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions(); // default rasterization options
-                var pngSaveOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                svgImage.Save(tempPngPath, pngSaveOptions);
-            }
+                // Rasterize the vector image to a raster image
+                using (RasterImage rasterImage = (RasterImage)image)
+                {
+                    // Apply grayscale conversion
+                    rasterImage.Grayscale();
 
-            // Load the rasterized PNG, apply grayscale, and save to final output
-            using (PngImage pngImage = (PngImage)Image.Load(tempPngPath))
-            {
-                pngImage.Grayscale(); // Convert to grayscale
-                pngImage.Save(outputPath);
-            }
+                    // Prepare PNG save options (optional: enforce grayscale palette)
+                    var pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.Grayscale
+                    };
 
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
+                    // Save the result as PNG
+                    rasterImage.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a black‑and‑white version of a vector logo by converting an SVG file to a grayscale PNG for printing or web display.
- * 2. When you must transform user‑uploaded SVG icons into grayscale PNG thumbnails to match a dark UI theme in a C# application.
- * 3. When a reporting tool requires all chart images to be grayscale, so you convert the source SVG charts to grayscale PNGs using Aspose.Imaging.
- * 4. When you want to preprocess SVG diagrams for OCR or image‑analysis pipelines that accept only grayscale raster images, converting them to PNG first.
- * 5. When you need to store vector graphics as compact grayscale PNG files for mobile apps that cannot render SVG directly.
+ * 1. When you need to generate a black‑and‑white preview of a vector logo stored as SVG for a web thumbnail.
+ * 2. When a reporting tool requires all chart images in grayscale PNG to match a printed report’s style.
+ * 3. When an e‑commerce platform must convert user‑uploaded SVG icons to grayscale PNG for consistent UI theming.
+ * 4. When a batch job processes SVG assets and stores them as grayscale PNG files to reduce file size for mobile devices.
+ * 5. When a document generation system needs to embed SVG diagrams as grayscale PNGs to ensure compatibility with PDF viewers that only support raster images.
  */

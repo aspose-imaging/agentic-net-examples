@@ -1,36 +1,39 @@
-// HOW-TO: How To Reduce PSD Contrast By 20% And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Reduce PSD Contrast by 20 Percent and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.psd";
+        string outputPath = "Output/result.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.psd";
-            string outputPath = "output\\result.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image, adjust contrast, and save as PNG
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                // Lower contrast by 20%
-                raster.AdjustContrast(-20f);
-                image.Save(outputPath, new PngOptions());
+                Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                raster.AdjustContrast(-0.2f);
+
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to tone down the contrast of a Photoshop PSD before generating a web‑ready PNG thumbnail.
- * 2. When an automated image‑processing pipeline must convert high‑contrast PSD assets into softer PNGs for mobile apps.
- * 3. When a batch job has to prepare print‑ready PSD files with reduced contrast for a specific brand style guide and export them as PNG.
- * 4. When integrating Aspose.Imaging into a C# service that receives PSD uploads, adjusts visual intensity, and returns PNG previews to users.
- * 5. When creating a content‑management workflow that normalizes PSD contrast by 20 % and stores the resulting PNGs for faster CDN delivery.
+ * 1. When a web designer needs to tone down the contrast of a Photoshop PSD before publishing it as a lightweight PNG for faster page loads.
+ * 2. When an automated build pipeline must batch‑process PSD assets, lowering their contrast by 20 % to match a brand’s muted visual style and then export them to PNG for use in mobile apps.
+ * 3. When a digital archivist wants to preserve original PSD files while creating lower‑contrast PNG previews for quick browsing in a catalog.
+ * 4. When a game developer needs to reduce the harshness of UI textures stored in PSD format and convert them to PNG for inclusion in the game’s asset bundle.
+ * 5. When a content management system integrates Aspose.Imaging to dynamically adjust PSD image contrast and deliver PNG thumbnails to end users.
  */

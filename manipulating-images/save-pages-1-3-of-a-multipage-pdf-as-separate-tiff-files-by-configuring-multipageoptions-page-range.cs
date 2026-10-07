@@ -1,4 +1,4 @@
-// HOW-TO: Save Specific PDF Pages As Separate TIFF Files In C# (Aspose.Imaging for .NET)
+// HOW-TO: Save Specific PDF Pages as Separate TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,39 +7,28 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.pdf";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.pdf";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the PDF image
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
+
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Save pages 1‑3 (zero‑based indices 0‑2) as separate TIFF files
-                for (int pageIndex = 0; pageIndex < 3; pageIndex++)
+                for (int i = 1; i <= 3; i++)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page{pageIndex + 1}.tif");
-
-                    // Ensure the output directory exists
+                    string outputPath = Path.Combine(outputDir, $"Page{i}.tif");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure TIFF save options with MultiPageOptions for a single page
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        MultiPageOptions = new MultiPageOptions(new int[] { pageIndex })
-                    };
-
-                    // Save the selected page to TIFF
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
                     pdfImage.Save(outputPath, tiffOptions);
                 }
             }
@@ -53,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first three pages of a multi‑page PDF and store each page as an individual TIFF for archival or printing workflows.
- * 2. When a document management system requires separate high‑resolution TIFF images for each PDF page to comply with OCR or scanning standards.
- * 3. When generating thumbnails or preview images from selected PDF pages and saving them in TIFF format for use in a .NET web application.
- * 4. When converting specific PDF pages to TIFF to embed them into a legacy reporting tool that only accepts single‑page TIFF files.
- * 5. When automating batch processing that isolates particular pages of PDFs and saves them as TIFFs for downstream image analysis or machine‑learning pipelines.
+ * 1. When you need to archive the first three pages of a multi‑page PDF as individual high‑resolution TIFF images for legal or compliance records.
+ * 2. When a printing workflow requires extracting specific PDF pages and saving each as a separate TIFF to be processed by a raster image printer.
+ * 3. When an application must generate thumbnail previews by converting selected PDF pages to TIFF files for faster loading in a document viewer.
+ * 4. When a batch conversion tool must split a multi‑page PDF into separate TIFF files to feed into an OCR engine that only accepts single‑page TIFF inputs.
+ * 5. When a medical imaging system stores scanned PDF reports and needs to export particular pages as TIFFs for integration with legacy DICOM software.
  */

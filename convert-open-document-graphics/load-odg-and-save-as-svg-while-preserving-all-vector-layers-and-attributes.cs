@@ -10,32 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.odg";
-            string outputPath = "output\\output.svg";
+            string outputPath = "output.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    // Preserve original metadata and vector information
-                    KeepMetadata = true
-                };
-
-                // Save as SVG, preserving vector layers and attributes
-                image.Save(outputPath, svgOptions);
+                var options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an OpenDocument graphics file into a web page without losing its editable vector structure.
- * 2. When converting design assets from ODG to SVG for use in responsive UI components while keeping metadata.
- * 3. When automating batch processing of ODG diagrams to SVG for integration with JavaScript chart libraries.
- * 4. When preserving layer information from ODG files for later editing in vector graphics editors after conversion.
- * 5. When migrating legacy ODG illustrations to SVG format for compatibility with modern browsers and mobile devices.
+ * 1. When you need to embed an OpenDocument graphics file into a web page that only supports SVG, you can convert the ODG to SVG while keeping all vector information.
+ * 2. When a design workflow requires exchanging vector artwork between LibreOffice Draw and a browser‑based editor, this code preserves layers and attributes during the conversion.
+ * 3. When automating batch processing of ODG assets for a digital publishing pipeline, you can programmatically load each ODG and save it as an SVG for scalable rendering.
+ * 4. When creating a C# service that generates printable diagrams from ODG templates, converting to SVG ensures resolution‑independent output for PDF generation.
+ * 5. When integrating legacy ODG diagrams into a modern .NET application that uses SVG for charting or annotation, this snippet maintains the original vector structure.
  */

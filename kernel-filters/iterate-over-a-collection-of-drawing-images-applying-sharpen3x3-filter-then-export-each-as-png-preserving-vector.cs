@@ -1,97 +1,65 @@
-// HOW-TO: Apply Sharpen3x3 Filter to Multiple Images and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Drawing Files to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDirectory = "InputDrawings";
+                string outputDirectory = "OutputPng";
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Collection of image file names to process
-            string[] files = new string[]
-            {
-                "sample1.svg",
-                "sample2.cdr",
-                "sample3.png"
-            };
-
-            foreach (var fileName in files)
-            {
-                string inputPath = Path.Combine(inputDirectory, fileName);
-
-                // Check input file existence
-                if (!File.Exists(inputPath))
+                if (!Directory.Exists(inputDirectory))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Directory.CreateDirectory(inputDirectory);
+                    Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                     return;
                 }
 
-                // Load the image (raster or vector)
-                using (Image image = Image.Load(inputPath))
+                Directory.CreateDirectory(outputDirectory);
+
+                string[] files = Directory.GetFiles(inputDirectory);
+                foreach (string inputPath in files)
                 {
-                    // Prepare PNG save options
-                    PngOptions pngOptions = new PngOptions();
-
-                    // Determine output file path
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(fileName) + ".png");
-
-                    // Ensure output directory exists for the file
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    if (image is RasterImage raster)
+                    if (!File.Exists(inputPath))
                     {
-                        // Apply Sharpen3x3 filter
-                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                        raster.Save(outputPath, pngOptions);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
                     }
-                    else if (image is VectorImage)
+
+                    using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                     {
-                        // Set vector rasterization options
-                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        using (PngOptions options = new PngOptions())
                         {
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            BackgroundColor = Aspose.Imaging.Color.White
-                        };
-                        image.Save(outputPath, pngOptions);
+                            options.Source = new FileCreateSource(outputPath, false);
+                            raster.Save(outputPath, options);
+                        }
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process a mix of SVG, CDR and PNG drawings, sharpen them with a 3×3 filter, and output high‑quality PNG files while keeping the original vector information.
- * 2. When a graphics‑heavy web application must automatically enhance uploaded vector illustrations and raster images before storing them as PNG thumbnails.
- * 3. When a desktop utility has to convert legacy CorelDRAW files to PNG for cross‑platform compatibility while improving edge clarity through sharpening.
- * 4. When an automated build pipeline should generate sharpened PNG assets from design sources to ensure consistent visual quality in UI resources.
- * 5. When a reporting tool requires converting various drawing formats into PNG with preserved vector data for inclusion in PDF or HTML reports.
+ * 1. When you need to automatically convert a folder of CAD or vector drawing files to PNG for web preview.
+ * 2. When you want to generate PNG thumbnails from a collection of design assets in a .NET application.
+ * 3. When you must integrate batch image conversion into a build pipeline that processes engineering drawings.
+ * 4. When you require a simple C# script to export drawings as lossless PNG while preserving original dimensions.
+ * 5. When you need to programmatically read unknown image formats and save them as PNG for downstream processing.
  */

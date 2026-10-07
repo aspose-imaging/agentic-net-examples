@@ -1,4 +1,4 @@
-// HOW-TO: Apply Emboss 5x5 Convolution Filter to JPEG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss5x5 Filter to Remote Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,10 +8,14 @@ class Program
 {
     static void Main(string[] args)
     {
+        string url = "https://example.com/image.jpg";
+        string inputPath = "downloaded.jpg";
+        string outputPath = "output/embossed.png";
+
         try
         {
-            string inputPath = "sample.jpg";
-            string outputPath = "output.png";
+            var client = new System.Net.WebClient();
+            client.DownloadFile(url, inputPath);
 
             if (!File.Exists(inputPath))
             {
@@ -21,16 +25,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                if (!image.IsCached) image.CacheData();
 
-                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5);
+                image.Filter(image.Bounds, filterOptions);
 
-                PngOptions pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a stylized emboss effect to a JPEG photo before converting it to a PNG for web display.
- * 2. When you want to preprocess scanned documents with a 5x5 emboss filter to enhance edge contrast prior to archival storage.
- * 3. When building a batch image pipeline that automatically applies the Aspose.Imaging Emboss5x5 filter to user‑uploaded pictures and outputs PNG thumbnails.
- * 4. When creating a C# utility that transforms product images by embossing them to highlight texture details for e‑commerce catalogs.
- * 5. When developing a desktop application that lets users apply a classic emboss effect to their pictures and save the result in lossless PNG format.
+ * 1. When you need to download a JPEG from a web service, apply an emboss effect, and store the result as a PNG for web display.
+ * 2. When building an automated image‑processing pipeline that fetches remote photos, enhances texture with a 5×5 emboss filter, and saves them in lossless format.
+ * 3. When creating thumbnails with artistic emboss styling for a gallery that sources images via URLs.
+ * 4. When integrating Aspose.Imaging into a C# application to preprocess user‑uploaded images by applying a convolution filter before further analysis.
+ * 5. When generating embossed versions of product images retrieved from an online catalog for marketing materials.
  */

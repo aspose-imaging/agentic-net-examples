@@ -1,4 +1,4 @@
-// HOW-TO: Check JPEG Output Exists and Has Size After Converting CDR in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check If JPG Created From CDR Conversion Exists and Is Not Empty in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,56 +10,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.jpg";
+            string inputPath = "input.cdr";
+            string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with vector rasterization settings
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
-
-                // Save the image as JPEG
-                image.Save(outputPath, jpegOptions);
+                JpegOptions options = new JpegOptions();
+                image.Save(outputPath, options);
             }
 
-            // Verify that the JPEG file was created and has non‑zero size
-            if (File.Exists(outputPath))
+            if (File.Exists(outputPath) && new FileInfo(outputPath).Length > 0)
             {
-                long size = new FileInfo(outputPath).Length;
-                if (size > 0)
-                {
-                    Console.WriteLine($"JPEG file created successfully. Size: {size} bytes.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("JPEG file size is zero.");
-                }
+                Console.WriteLine("JPG file created successfully and has non-zero size.");
             }
             else
             {
-                Console.Error.WriteLine("JPEG file was not created.");
+                Console.Error.WriteLine("Failed to create JPG file or file is empty.");
             }
         }
         catch (Exception ex)
@@ -71,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an automated workflow converts CorelDRAW (.cdr) files to JPEGs and needs to confirm the output file was generated correctly before proceeding to the next step.
- * 2. When a batch processing script validates that each converted image is not empty, preventing downstream errors in a publishing pipeline.
- * 3. When a desktop application saves user‑edited CDR graphics as JPEG and must ensure the saved file exists and contains data before displaying it.
- * 4. When a CI/CD pipeline checks that image conversion jobs produce valid JPEG files with non‑zero size as part of quality‑gate testing.
- * 5. When a server‑side service processes uploaded CDR files and needs to verify successful JPEG creation to return a proper download link to the client.
+ * 1. When you need to programmatically confirm that a CorelDRAW file was successfully converted to a JPEG before further processing.
+ * 2. When an automated batch job must verify that each generated JPEG has actual image data and is not a zero‑byte placeholder.
+ * 3. When integrating Aspose.Imaging into a web service that returns a status message only after the output image file exists and contains data.
+ * 4. When building a desktop application that alerts users if the conversion failed or produced an empty file, preventing downstream errors.
+ * 5. When creating a CI/CD pipeline step that checks the integrity of image conversion artifacts to ensure build quality.
  */

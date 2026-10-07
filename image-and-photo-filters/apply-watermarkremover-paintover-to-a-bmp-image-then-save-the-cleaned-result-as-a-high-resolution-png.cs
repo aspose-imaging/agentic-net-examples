@@ -1,56 +1,46 @@
-// HOW-TO: Remove Watermark From BMP And Save As High Resolution PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Watermark from BMP and Save as High Resolution PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.bmp";
-        string outputPath = "output.png";
+        string outputPath = "output\\cleaned.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                RasterImage raster = (RasterImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image
-            using (BmpImage bmp = (BmpImage)Image.Load(inputPath))
-            {
-                // Create mask for watermark removal
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                // Example ellipse mask; adjust coordinates as needed
-                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 150)));
+                figure.AddShape(new RectangleShape(new RectangleF(0, 0, raster.Width, raster.Height)));
                 mask.AddFigure(figure);
 
-                // Configure Telea algorithm options
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-                // Remove watermark
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(bmp, options);
-                using (result)
+                using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
                 {
-                    // Set high‑resolution PNG options (e.g., 300 DPI)
                     var pngOptions = new PngOptions
                     {
+                        Source = new FileCreateSource(outputPath, false),
                         ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300)
                     };
-
-                    // Save the cleaned image as PNG
                     result.Save(outputPath, pngOptions);
                 }
             }
@@ -64,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean a scanned document that has a logo watermark and deliver it as a printable PNG.
- * 2. When an application must automatically strip watermarks from user‑uploaded BMP photos before storing them in a high‑resolution PNG archive.
- * 3. When a batch process converts legacy BMP assets with embedded watermarks into DPI‑aware PNGs for publishing.
- * 4. When a web service removes branding from product images and returns a 300 DPI PNG for e‑commerce platforms.
- * 5. When a desktop tool prepares watermark‑free PNGs for OCR engines that require high‑resolution input.
+ * 1. When you need to clean a scanned BMP document that contains a faint watermark before archiving it as a printable PNG.
+ * 2. When an application must automatically remove background logos from legacy BMP assets and output them at 300 DPI for high‑quality printing.
+ * 3. When a batch process converts watermarked BMP screenshots into transparent‑free PNGs for use in marketing materials.
+ * 4. When a digital‑forensics tool strips watermarks from BMP evidence files and stores the results in a lossless PNG format.
+ * 5. When a web service receives BMP uploads with embedded watermarks and needs to return a cleaned, high‑resolution PNG for downstream image analysis.
  */

@@ -1,35 +1,31 @@
-// HOW-TO: Convert EMF to PDF with Embedded Fonts and Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to PDF with Metadata and Embedded Fonts in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output/output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output\\output.pdf";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (EmfImage emf = (EmfImage)Image.Load(inputPath))
             {
-                // Prepare PDF options with embedded fonts
-                PdfOptions pdfOptions = new PdfOptions
+                var pdfOptions = new PdfOptions
                 {
                     PdfDocumentInfo = new PdfDocumentInfo
                     {
@@ -37,24 +33,7 @@ class Program
                         Title = "Document Title"
                     }
                 };
-
-                // Configure vector rasterization to preserve fonts
-                if (image is VectorImage)
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-                }
-
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                emf.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from vector EMF graphics while preserving the original fonts for accurate rendering.
- * 2. When a reporting system must embed author and title information into PDFs created from EMF diagrams for document management.
- * 3. When converting legacy Windows Metafile images to PDF for archiving, ensuring the output file size stays small by embedding fonts instead of rasterizing text.
- * 4. When automating batch processing of EMF assets in a C# application and you require consistent PDF metadata for indexing in content repositories.
- * 5. When building a document workflow that transforms design sketches saved as EMF into PDF files with proper metadata for compliance and audit trails.
+ * 1. When a Windows desktop application needs to export vector graphics stored as EMF files into searchable PDF reports that include author and title information.
+ * 2. When an automated document generation service must batch‑convert EMF diagrams to PDF while preserving font fidelity and embedding fonts for consistent rendering on any device.
+ * 3. When a legal or compliance system requires PDFs generated from EMF charts to contain proper metadata for archiving and audit trails.
+ * 4. When a reporting tool built in C# has to create printable PDFs from EMF logos and ensure the PDFs carry the correct author and document title for branding purposes.
+ * 5. When a cloud‑based workflow needs to transform user‑uploaded EMF files into PDF format with embedded fonts to avoid missing‑font issues in downstream viewers.
  */

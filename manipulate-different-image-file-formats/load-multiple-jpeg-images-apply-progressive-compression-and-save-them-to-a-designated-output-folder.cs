@@ -1,51 +1,54 @@
-// HOW-TO: Batch Convert JPEGs to Progressive JPEGs in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert JPEGs To Progressive Compression In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
         try
         {
-            // Get all JPEG files in the input folder
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.jpg");
+            string inputFolder = "InputImages";
+            string outputFolder = "OutputImages";
 
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputFolder))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                return;
+            }
+
+            Directory.CreateDirectory(outputFolder);
+
+            var jpegFiles = Directory.GetFiles(inputFolder, "*.*")
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (var inputPath in jpegFiles)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare the output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_progressive.jpg";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".jpg");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set JPEG options for progressive compression
-                    JpegOptions saveOptions = new JpegOptions
+                    JpegOptions jpegOptions = new JpegOptions
                     {
                         CompressionType = JpegCompressionMode.Progressive,
-                        Quality = 100 // Adjust quality as needed (1-100)
+                        Quality = 90
                     };
-
-                    // Save the image with the specified options
-                    image.Save(outputPath, saveOptions);
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -58,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce file size for web delivery by converting a folder of JPEG photos to progressive JPEGs using C#.
- * 2. When you want to automate the preparation of image assets for a photo‑gallery website, applying progressive compression to improve loading speed.
- * 3. When a desktop application must process user‑uploaded JPEGs in bulk and save optimized progressive versions to a specific output directory.
- * 4. When you are migrating legacy JPEG files to a format that supports incremental rendering for better user experience on slow connections.
- * 5. When you need to ensure all JPEG images in a batch are saved with a consistent quality setting while enabling progressive encoding for smoother display.
+ * 1. When you need to reduce file size of a large collection of JPEG photos for faster web page loading by converting them to progressive JPEGs using C#.
+ * 2. When an e‑commerce platform wants to batch‑process product images to enable progressive rendering on browsers while maintaining quality.
+ * 3. When a digital asset management system must archive thousands of JPEG files with progressive compression to save storage space.
+ * 4. When a mobile app backend needs to prepare user‑uploaded JPEGs for progressive download to improve perceived performance on slow networks.
+ * 5. When a photo‑editing workflow requires automatically applying a specific JPEG quality level and progressive mode to all images in a folder via Aspose.Imaging.
  */

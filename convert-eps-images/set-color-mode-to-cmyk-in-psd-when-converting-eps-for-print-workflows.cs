@@ -3,39 +3,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = Path.Combine("Input", "sample.eps");
+        string outputPath = Path.Combine("Output", "sample_cmyk.psd");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\Converted\sample_cmyk.psd";
-
-            // Verify that the input EPS file exists
-            if (!File.Exists(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PSD save options with CMYK color mode
-                var psdOptions = new PsdOptions
-                {
-                    ColorMode = ColorModes.Cmyk
-                };
-
-                // Save the image as a CMYK PSD file
-                image.Save(outputPath, psdOptions);
+                var psdOptions = new PsdOptions();
+                psdOptions.ColorMode = ColorModes.Cmyk;
+                epsImage.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a prepress system receives vector EPS artwork and must generate a CMYK PSD file for downstream printing pipelines using C#.
- * 2. When an automated branding tool needs to batch‑convert EPS logos to CMYK PSDs to ensure color accuracy in commercial print jobs.
- * 3. When a web service processes user‑uploaded EPS files and must store them as CMYK PSDs for integration with Adobe Photoshop workflows.
- * 4. When a digital asset management solution must normalize mixed‑mode images by converting EPS to CMYK PSD to maintain consistent color profiles.
- * 5. When a C# application prepares print‑ready files by changing the color mode of EPS graphics to CMYK before saving them as PSD for proofing.
+ * 1. When a pre‑press system receives vector EPS artwork and must generate a CMYK PSD file for downstream printing pipelines using C#.
+ * 2. When an automated branding tool needs to batch‑convert EPS logos into print‑ready CMYK PSDs without manual Photoshop intervention.
+ * 3. When a web service processes customer‑uploaded EPS designs and creates CMYK PSDs for color‑accurate proofing in a .NET application.
+ * 4. When a digital asset management workflow requires converting EPS files to CMYK PSD format to maintain color consistency for commercial print jobs.
+ * 5. When a C# desktop application must ensure that EPS illustrations are saved as CMYK PSDs to meet publisher specifications for offset printing.
  */

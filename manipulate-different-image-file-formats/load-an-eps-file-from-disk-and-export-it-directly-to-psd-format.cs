@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS to PSD Directly in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS File to PSD Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,35 +8,27 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.eps";
-        string outputPath = "sample.psd";
-
         try
         {
-            // Verify that the input EPS file exists
+            string inputPath = "input.eps";
+            string outputPath = "output.psd";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PSD save options (default settings)
-                var psdOptions = new PsdOptions();
-
-                // Save the image as PSD
-                image.Save(outputPath, psdOptions);
+                var options = new PsdOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -44,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to integrate vector EPS artwork into a Photoshop workflow by converting it to a PSD file in a .NET application.
- * 2. When an automated build process must batch‑convert design assets from EPS to PSD for downstream editing or compositing.
- * 3. When a web service receives EPS uploads and must store them as layered PSD files for client‑side preview or further manipulation.
- * 4. When migrating legacy EPS resources to modern Photoshop files without manual export, using C# code to streamline the conversion.
- * 5. When generating PSD mock‑ups from EPS logos or illustrations on the fly within a desktop or server‑side C# tool.
+ * 1. When a designer needs to open a vector EPS logo in Photoshop, a developer can use this code to convert the EPS to a PSD file programmatically.
+ * 2. When an automated publishing workflow must transform EPS artwork into layered PSD files for further editing, this snippet provides the necessary conversion in C#.
+ * 3. When a web service receives EPS uploads and must store them as PSDs for downstream processing, the code enables seamless server‑side conversion.
+ * 4. When a batch job has to migrate a legacy EPS asset library to Photoshop‑compatible PSD format, the example shows how to loop through files using Aspose.Imaging.
+ * 5. When a client application requires on‑the‑fly conversion of EPS graphics to PSD for preview or editing without manual intervention, this code performs the conversion in a single step.
  */

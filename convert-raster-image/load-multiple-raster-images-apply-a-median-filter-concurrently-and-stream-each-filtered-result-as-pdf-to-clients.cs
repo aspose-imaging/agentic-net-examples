@@ -1,80 +1,58 @@
-// HOW-TO: Apply Median Filter to Multiple Images in Parallel and Save as PDF C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter to Multiple Images and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new[]
-            {
-                @"C:\Images\image1.png",
-                @"C:\Images\image2.png",
-                @"C:\Images\image3.png"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Corresponding hardcoded output PDF paths
-            string[] outputPaths = new[]
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Output\image1.pdf",
-                @"C:\Output\image2.pdf",
-                @"C:\Output\image3.pdf"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Validate each input file exists; if any missing, write error and exit
-            for (int i = 0; i < inputPaths.Length; i++)
+            if (!Directory.Exists(outputDirectory))
             {
-                string inputPath = inputPaths[i];
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            Parallel.ForEach(files, inputPath =>
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-            }
 
-            // Process images concurrently
-            Parallel.ForEach(
-                // Create a range of indices to keep input and output aligned
-                Enumerable.Range(0, inputPaths.Length),
-                index =>
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    string inputPath = inputPaths[index];
-                    string outputPath = outputPaths[index];
+                    raster.Filter(raster.Bounds, new MedianFilterOptions(3));
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load the raster image
-                    using (Image image = Image.Load(inputPath))
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        // Cast to RasterImage to apply filter
-                        RasterImage rasterImage = (RasterImage)image;
-
-                        // Apply median filter with size 5 to the whole image
-                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                        // Prepare PDF save options
-                        PdfOptions pdfOptions = new PdfOptions();
-
-                        // Save filtered image to a memory stream as PDF
-                        using (MemoryStream pdfStream = new MemoryStream())
-                        {
-                            rasterImage.Save(pdfStream, pdfOptions);
-
-                            // At this point pdfStream contains the PDF data.
-                            // For demonstration, write the PDF to the output file.
-                            // In a real scenario, the stream would be sent to the client.
-                            File.WriteAllBytes(outputPath, pdfStream.ToArray());
-                        }
+                        raster.Save(outputPath, pdfOptions);
                     }
-                });
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -85,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to denoise a batch of PNG or JPEG photos on a server and deliver each cleaned version as a PDF report.
- * 2. When an e‑commerce platform must process product images concurrently to reduce noise before generating printable PDF catalogs.
- * 3. When a medical imaging system wants to apply a median filter to multiple scanned slides in parallel and export them as PDF for archival.
- * 4. When a document management workflow requires fast conversion of noisy raster scans into searchable PDF files using C# and Aspose.Imaging.
- * 5. When a cloud‑based API has to stream filtered image results as PDFs to multiple clients without blocking the main thread.
+ * 1. When you need to denoise a batch of scanned photos and deliver each cleaned version as a PDF to a web client.
+ * 2. When an automated service must process uploaded JPEG or PNG files, apply a median filter to reduce noise, and stream the results as PDFs without blocking the main thread.
+ * 3. When a document management system requires converting multiple raster images into searchable PDFs while applying a median filter to improve visual quality.
+ * 4. When you want to parallelize image preprocessing in a C# backend, applying a 3×3 median filter to each image before saving it as a PDF for archival.
+ * 5. When a cloud API receives various image formats, needs to filter out speckles, and must return each processed image in PDF format using Aspose.Imaging.
  */

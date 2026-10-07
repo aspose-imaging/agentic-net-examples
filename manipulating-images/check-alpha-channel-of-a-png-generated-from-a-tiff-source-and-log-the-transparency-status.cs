@@ -1,45 +1,45 @@
-// HOW-TO: Check If PNG Converted From TIFF Contains Alpha Channel In C# (Aspose.Imaging for .NET)
+// HOW-TO: Detect Transparency in PNG Converted from TIFF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\source.tif";
-            string outputPath = @"c:\temp\output.png";
+            string inputPath = "Input/source.tif";
+            string outputPath = "Output/result.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (Image tiffImage = Image.Load(inputPath))
             {
-                // Save as PNG
-                PngOptions pngOptions = new PngOptions();
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
                 tiffImage.Save(outputPath, pngOptions);
             }
 
-            // Load the generated PNG image
-            using (Image pngImage = Image.Load(outputPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(outputPath))
             {
-                PngImage png = (PngImage)pngImage;
-                bool hasAlpha = png.HasAlpha;
-                Console.WriteLine($"PNG generated from TIFF has alpha channel: {hasAlpha}");
+                int[] pixels = pngImage.LoadArgb32Pixels(pngImage.Bounds);
+                bool hasTransparency = pixels.Any(p => ((p >> 24) & 0xFF) < 255);
+                Console.WriteLine(hasTransparency
+                    ? "Image has transparency."
+                    : "Image is fully opaque.");
             }
         }
         catch (Exception ex)
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify whether a TIFF image that was converted to PNG retains transparency before using it in a web UI.
- * 2. When automating a batch process that converts scanned TIFF documents to PNG and you must log which files have an alpha channel for downstream compositing.
- * 3. When integrating Aspose.Imaging into a C# service that generates thumbnails and you need to know if the resulting PNG includes an alpha channel to decide background filling.
- * 4. When troubleshooting image import pipelines and you want to confirm that the conversion step does not unintentionally add or remove transparency information.
- * 5. When building a reporting tool that audits image assets, and you need to record the presence of an alpha channel for PNGs created from legacy TIFF sources.
+ * 1. When you need to verify whether a PNG created from a multi‑page TIFF contains any transparent pixels before publishing it on a website.
+ * 2. When automating a batch conversion pipeline and you must log images that lose or gain alpha channel information during TIFF‑to‑PNG conversion.
+ * 3. When generating thumbnails for a digital asset management system and you need to flag images that require a solid background because they are not fully opaque.
+ * 4. When preparing print‑ready files and you must ensure that converted PNGs do not contain unintended transparency that could affect color separations.
+ * 5. When debugging an image processing workflow and you want to quickly output the transparency status of a PNG after applying Aspose.Imaging conversion settings.
  */

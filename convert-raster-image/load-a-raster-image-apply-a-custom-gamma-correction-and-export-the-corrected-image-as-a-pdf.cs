@@ -1,54 +1,58 @@
-// HOW-TO: Apply Gamma Correction to PNG and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gamma Correction to PNG and Save as PDF using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\sample_corrected.pdf";
-
-        try
+        static void Main(string[] args)
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = Path.Combine("Input", "image.png");
+                string outputPath = Path.Combine("Output", "corrected.pdf");
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                    {
+                        raster.CacheData();
+                    }
+
+                    raster.AdjustGamma(2.2f);
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Cast to RasterCachedImage to access AdjustGamma
-                var rasterImage = (RasterCachedImage)image;
-
-                // Apply gamma correction (same coefficient for all channels)
-                rasterImage.AdjustGamma(2.2f);
-
-                // Save the corrected image as PDF
-                rasterImage.Save(outputPath, new PdfOptions());
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the brightness and contrast of a scanned PNG before embedding it in a PDF report.
- * 2. When you must convert a batch of product photos to PDF with consistent gamma for print‑ready output.
- * 3. When an application requires on‑the‑fly gamma adjustment of user‑uploaded images prior to generating a PDF invoice.
- * 4. When you are building a document generation service that normalizes image luminance before saving the final PDF.
- * 5. When you want to programmatically correct the gamma of a raster image and archive it as a searchable PDF using C#.
+ * 1. When you need to improve the visual brightness of a scanned PNG before embedding it in a PDF report.
+ * 2. When converting product photos to PDF brochures while applying a standard gamma of 2.2 for consistent display on screens.
+ * 3. When preparing images for print‑ready PDFs that require gamma correction to match printer color profiles.
+ * 4. When automating the generation of PDF invoices that include raster logos adjusted for proper contrast.
+ * 5. When building a batch process that normalizes gamma of user‑uploaded images and archives them as PDFs.
  */

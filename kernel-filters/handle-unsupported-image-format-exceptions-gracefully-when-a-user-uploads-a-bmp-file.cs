@@ -1,54 +1,37 @@
-// HOW-TO: Convert BMP to PNG in C# with Unsupported Format Handling (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to PNG in C# with Aspose.Imaging and Error Handling (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.png";
+        string inputPath = "Input\\sample.bmp";
+        string outputPath = "Output\\sample_converted.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, handling BMP-specific format issues
-            Image image;
-            try
+            using (Image image = Image.Load(inputPath))
             {
-                image = Image.Load(inputPath);
-            }
-            catch (BmpImageException bmpEx)
-            {
-                // Gracefully handle unsupported BMP format
-                Console.Error.WriteLine($"Unsupported BMP image: {bmpEx.Message}");
-                return;
-            }
-
-            // Use the loaded image
-            using (image)
-            {
-                // Save as PNG using default options
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                using (var options = new PngOptions())
+                {
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
         {
-            // Catch any other unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -56,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives user‑uploaded BMP files that may contain unsupported features, this code safely converts them to PNG while informing the user of format issues.
- * 2. When migrating legacy BMP assets to a modern PNG workflow, developers can use this snippet to batch‑process files and gracefully skip corrupted or unsupported BMPs.
- * 3. When building a desktop tool that lets users edit images, the code ensures that loading a BMP that Aspose.Imaging cannot parse does not crash the app.
- * 4. When integrating Aspose.Imaging into an automated pipeline that generates thumbnails, the example shows how to catch BMP format exceptions and still produce PNG outputs.
- * 5. When validating image uploads before storing them in a database, this pattern lets you verify the file exists, handle unsupported BMP formats, and store a universally supported PNG version.
+ * 1. When a web application receives user‑uploaded BMP files and must convert them to PNG for browser‑compatible display while gracefully handling unsupported format errors.
+ * 2. When a batch processing tool needs to read BMP images from a folder, convert them to lossless PNGs, and ensure the process continues even if a file is missing or corrupted.
+ * 3. When integrating Aspose.Imaging into a C# service that validates image uploads, converting BMP to PNG and logging any exceptions without crashing the service.
+ * 4. When building a desktop utility that transforms legacy BMP assets into PNG for modern UI themes, with automatic directory creation and error reporting.
+ * 5. When automating image migration in a .NET backend, converting BMP files to PNG while catching and reporting format‑specific exceptions to maintain data integrity.
  */

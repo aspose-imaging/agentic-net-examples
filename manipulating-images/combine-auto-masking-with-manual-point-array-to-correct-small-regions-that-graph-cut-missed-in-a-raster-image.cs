@@ -1,14 +1,15 @@
-// HOW-TO: Correct Graph Cut Masking Errors with Manual Point Array in C# (Aspose.Imaging for .NET)
+// HOW-TO: Refine Graph Cut Auto-Mask With Manual Points In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -16,102 +17,56 @@ class Program
     {
         try
         {
-            // Hard‑coded paths
-            string inputPath = "input.jpg";
+            string inputPath = "input.png";
             string outputPath = "output.png";
-            string finalOutputPath = "output_corrected.png";
 
-            // Validate input file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            // ---------- First pass: auto‑masking with default strokes ----------
-            MaskingResult results;
-            AutoMaskingGraphCutOptions autoOptions;
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
             {
-                autoOptions = new AutoMaskingGraphCutOptions
+                var autoOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    FeatheringRadius = (Math.Max(source.Width, source.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource("temp_auto.png", false)
+                        Source = new StreamSource(new MemoryStream())
                     },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                results = new ImageMasking(image).Decompose(autoOptions);
-            }
-
-            // Save the initial foreground result (optional)
-            using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-            {
-                resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-            }
-
-            // Retrieve default strokes for manual correction
-            Point[] backgroundStrokes = autoOptions.DefaultBackgroundStrokes;
-            Point[] foregroundStrokes = autoOptions.DefaultForegroundStrokes;
-            Rectangle[] objectRectangles = autoOptions.DefaultObjectsRectangles;
-
-            // ---------- Add manual correction points ----------
-            var correctedBackground = new List<Point>();
-            if (backgroundStrokes != null) correctedBackground.AddRange(backgroundStrokes);
-            correctedBackground.Add(new Point(100, 100));
-            correctedBackground.Add(new Point(150, 100));
-
-            var correctedForeground = new List<Point>();
-            if (foregroundStrokes != null) correctedForeground.AddRange(foregroundStrokes);
-            correctedForeground.Add(new Point(500, 200));
-
-            // ---------- Second pass: re‑run masking with combined points ----------
-            GraphCutMaskingOptions secondOptions = new GraphCutMaskingOptions
-            {
-                FeatheringRadius = 3,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = new PngOptions
+                using (MaskingResult autoResult = new ImageMasking(source).Decompose(autoOptions))
+                using (RasterImage autoForeground = (RasterImage)autoResult[1].GetImage())
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource("temp_second.png", false)
-                },
-                BackgroundReplacementColor = Color.Transparent,
-                Args = new AutoMaskingArgs
-                {
-                    ObjectsPoints = new Point[][]
+                    var points = new List<Point>
                     {
-                        correctedBackground.ToArray(),
-                        correctedForeground.ToArray()
-                    },
-                    ObjectsRectangles = objectRectangles
+                        new Point(30, 30),
+                        new Point(100, 100)
+                    };
+
+                    using (RasterImage manualCopy = (RasterImage)Image.Load(inputPath))
+                    {
+                        foreach (var pt in points)
+                        {
+                            MagicWandTool.Select(manualCopy, new MagicWandSettings(pt.X, pt.Y)).Apply();
+                        }
+
+                        autoForeground.Blend(new Point(0, 0), manualCopy, 255);
+                    }
+
+                    autoForeground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
-            };
-
-            using (RasterImage image2 = (RasterImage)Image.Load(inputPath))
-            {
-                results = new ImageMasking(image2).Decompose(secondOptions);
             }
-
-            // Save the final corrected foreground result
-            using (RasterImage finalImage = (RasterImage)results[1].GetImage())
-            {
-                finalImage.Save(finalOutputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-            }
-
-            // Clean up temporary files
-            if (File.Exists("temp_auto.png")) File.Delete("temp_auto.png");
-            if (File.Exists("temp_second.png")) File.Delete("temp_second.png");
         }
         catch (Exception ex)
         {
@@ -122,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically extract the foreground of a JPEG photo using Aspose.Imaging’s GraphCut algorithm but must fix small missed spots with a custom point array before saving as a transparent PNG.
- * 2. When you want to generate a mask for product images, apply auto‑masking, then manually refine edges around logos or text that the algorithm didn’t capture correctly.
- * 3. When building a batch‑processing tool that removes backgrounds from scanned documents and requires precise correction of tiny artifacts that remain after the initial auto‑mask.
- * 4. When integrating image segmentation into a C# web service and need to combine default strokes with user‑provided correction points to ensure clean cut‑outs for e‑commerce thumbnails.
- * 5. When creating a photo‑editing workflow that replaces the background with transparency, using Aspose.Imaging to auto‑mask and then applying a manual point array to perfect the mask for complex hair or fur details.
+ * 1. When you need to automatically remove a background from a PNG photograph but must manually fix small leftover areas that the Graph Cut algorithm missed.
+ * 2. When you want to generate a transparent PNG foreground by combining Aspose.Imaging’s auto‑masking with a custom list of points to fine‑tune the mask.
+ * 3. When processing product images for e‑commerce, you can use this code to quickly separate items from complex backgrounds and manually correct edge artifacts.
+ * 4. When preparing assets for a game engine, the technique lets you create clean alpha‑masked sprites while manually adjusting tiny regions that were incorrectly segmented.
+ * 5. When building a batch image‑processing tool, you can apply auto‑masking to each file and supply point coordinates to ensure precise foreground extraction for downstream AI analysis.
  */

@@ -1,53 +1,42 @@
-// HOW-TO: Create High DPI BMP with Custom Resolution and Draw Shapes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create High DPI BMP With Custom Resolution And Draw Shapes In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\Temp\highdpi_output.bmp";
-
-            // Ensure the output directory exists
+            string outputPath = "output/high_dpi.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options with high DPI (e.g., 300)
-            BmpOptions bmpOptions = new BmpOptions
+            BmpOptions options = new BmpOptions
             {
-                BitsPerPixel = 24,
-                Compression = BitmapCompression.Rgb,
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a 200x200 BMP image using the options
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            using (RasterImage image = (RasterImage)Image.Create(options, 800, 600))
             {
-                // Obtain a graphics object for drawing
+                image.HorizontalResolution = 300;
+                image.VerticalResolution = 300;
+
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Fill the background with light gray
-                SolidBrush backgroundBrush = new SolidBrush(Color.LightGray);
-                graphics.FillRectangle(backgroundBrush, image.Bounds);
+                Pen pen = new Pen(Color.Black, 5);
+                graphics.DrawRectangle(pen, new Rectangle(100, 100, 200, 150));
+                graphics.DrawEllipse(pen, new Rectangle(350, 100, 200, 150));
 
-                // Draw a red ellipse
-                SolidBrush redBrush = new SolidBrush(Color.Red);
-                graphics.FillEllipse(redBrush, new Rectangle(20, 20, 160, 160));
+                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(100, 300, 200, 150));
+                }
 
-                // Draw a blue rectangle
-                SolidBrush blueBrush = new SolidBrush(Color.Blue);
-                graphics.FillRectangle(blueBrush, new Rectangle(50, 150, 100, 30));
-
-                // Save the image (FileCreateSource handles the file path)
                 image.Save();
             }
         }
@@ -60,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a print‑ready 300 DPI BMP file programmatically for high‑quality brochures or flyers.
- * 2. When you must embed vector‑like graphics such as ellipses and rectangles into a BMP for use in legacy Windows applications.
- * 3. When an automated reporting tool has to produce high‑resolution bitmap charts that match a specific DPI setting.
- * 4. When a desktop utility creates thumbnails or watermarked BMP images while preserving the original resolution for downstream processing.
- * 5. When a batch conversion service needs to set the DPI of BMP files before saving them to a network share for archival purposes.
+ * 1. When generating printable graphics for brochures, a developer can create a 300 dpi BMP and draw rectangles, ellipses, and filled areas programmatically.
+ * 2. When preparing high‑resolution assets for a Windows desktop application, you can set the image’s horizontal and vertical resolution before saving it as BMP.
+ * 3. When automating the production of engineering diagrams that require precise DPI settings, this code lets you define the resolution and render vector‑like shapes onto a raster bitmap.
+ * 4. When converting design mockups into bitmap files for legacy systems that only accept BMP, you can control the DPI and add custom graphics using Aspose.Imaging.
+ * 5. When building a server‑side service that generates custom high‑DPI BMP thumbnails with shapes for printing pipelines, this approach ensures the output meets the required resolution standards.
  */

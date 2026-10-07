@@ -1,66 +1,56 @@
-// HOW-TO: Convert BMP to Grayscale PSD with RLE Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PSD and Verify File Creation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
-class Program
+namespace ImageConversion
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.eps";
+                string outputPath = "output/output.psd";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PSD save options
-                PsdOptions psdOptions = new PsdOptions
+                if (!File.Exists(inputPath))
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Grayscale
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as PSD
-                image.Save(outputPath, psdOptions);
-            }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Verify that the PSD file was created
-            if (File.Exists(outputPath))
-            {
-                Console.WriteLine("PSD file saved successfully.");
+                using (Image image = Image.Load(inputPath))
+                {
+                    PsdOptions options = new PsdOptions();
+                    image.Save(outputPath, options);
+                }
+
+                if (File.Exists(outputPath))
+                {
+                    Console.WriteLine("PSD file created successfully.");
+                }
+                else
+                {
+                    Console.Error.WriteLine($"Failed to create PSD file: {outputPath}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.Error.WriteLine("Failed to create PSD file.");
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a Photoshop PSD file from a bitmap image for further editing in Photoshop.
- * 2. When you want to verify that the converted PSD file was created successfully before continuing with downstream processing.
- * 3. When you require RLE compression and grayscale color mode to reduce the size of the resulting PSD file.
- * 4. When automating a batch workflow that converts multiple BMP images to PSD format using C#.
- * 5. When you must ensure the output directory exists and handle missing input files gracefully in an image conversion utility.
+ * 1. When you need to programmatically convert vector EPS artwork to a Photoshop PSD file for further editing in a .NET application.
+ * 2. When you must ensure that the converted PSD file was successfully written to disk before proceeding with downstream processing.
+ * 3. When automating a batch workflow that reads EPS files from a source folder, creates output directories, and saves them as PSDs using Aspose.Imaging.
+ * 4. When handling user‑uploaded EPS files in a web service and you want to validate the conversion result to avoid broken image links.
+ * 5. When integrating image conversion into a CI/CD pipeline and you need to confirm the PSD output exists to trigger subsequent build steps.
  */

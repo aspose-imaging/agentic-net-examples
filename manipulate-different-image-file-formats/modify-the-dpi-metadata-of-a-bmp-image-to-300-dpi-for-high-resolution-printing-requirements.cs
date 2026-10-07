@@ -2,39 +2,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output_300dpi.bmp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.bmp";
+            string outputPath = "output/output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to BmpImage to access SetResolution
-                BmpImage bmpImage = (BmpImage)image;
-
-                // Set DPI to 300x300
-                bmpImage.SetResolution(300.0, 300.0);
-
-                // Save the modified image
-                bmpImage.Save(outputPath);
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
+                {
+                    raster.HorizontalResolution = 300;
+                    raster.VerticalResolution = 300;
+                    raster.Save(outputPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
             }
         }
         catch (Exception ex)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing a BMP file for a commercial printer that requires 300 DPI, you can use this code to update the image’s resolution metadata before sending it to the press.
- * 2. When converting scanned documents saved as BMP to meet archival standards that mandate 300 DPI, the snippet ensures the DPI tag is corrected without altering pixel data.
- * 3. When generating high‑resolution product labels in a C# application, you can set the BMP’s DPI to 300 so the printed label appears sharp and correctly sized.
- * 4. When integrating Aspose.Imaging into a workflow that batches BMP assets for a marketing campaign, this code lets you uniformly enforce a 300 DPI setting across all images.
- * 5. When troubleshooting mismatched image sizes in a desktop publishing system, you can programmatically adjust the BMP DPI to 300 to align the on‑screen layout with the intended print dimensions.
+ * 1. When preparing BMP graphics for a brochure, a developer must increase the image DPI to 300 to meet print quality standards.
+ * 2. When converting scanned documents saved as BMP files, setting the horizontal and vertical resolution ensures they appear sharp on laser printers.
+ * 3. When integrating a legacy BMP asset into a .NET reporting tool, adjusting its DPI metadata prevents pixelation in the generated PDF.
+ * 4. When automating a batch process that uploads BMP images to a print‑on‑demand service, the code guarantees each file meets the required 300 DPI specification.
+ * 5. When troubleshooting low‑resolution output from a CAD export saved as BMP, a developer can use this snippet to correct the DPI without altering the pixel data.
  */

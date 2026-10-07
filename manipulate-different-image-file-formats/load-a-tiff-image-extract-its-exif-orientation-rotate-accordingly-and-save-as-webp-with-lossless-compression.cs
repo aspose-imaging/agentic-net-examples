@@ -1,9 +1,20 @@
-// HOW-TO: Convert TIFF to Lossless WebP with EXIF Orientation Correction in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert TIFF With EXIF Orientation To Lossless WebP In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Exif;
+using Aspose.Imaging.Exif.Enums;
 
 class Program
 {
@@ -11,64 +22,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.webp";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load TIFF image
-            using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                // Extract EXIF orientation if present
-                var exif = tiff.ExifData;
-                if (exif != null)
+                ushort orientation = 1;
+                if (image.ExifData != null)
                 {
-                    int? orientation = null;
                     try
                     {
-                        orientation = (int)exif.GetType().GetProperty("Orientation")?.GetValue(exif);
+                        var tagValue = image.ExifData.GetTagValue(ExifProperties.Orientation);
+                        orientation = Convert.ToUInt16(tagValue);
                     }
-                    catch { /* ignore if property not accessible */ }
-
-                    if (orientation.HasValue)
+                    catch
                     {
-                        // Apply rotation based on EXIF orientation
-                        switch (orientation.Value)
-                        {
-                            case 6: // Rotate 90 CW
-                                tiff.RotateFlip(Aspose.Imaging.RotateFlipType.Rotate90FlipNone);
-                                break;
-                            case 3: // Rotate 180
-                                tiff.RotateFlip(Aspose.Imaging.RotateFlipType.Rotate180FlipNone);
-                                break;
-                            case 8: // Rotate 270 CW
-                                tiff.RotateFlip(Aspose.Imaging.RotateFlipType.Rotate270FlipNone);
-                                break;
-                            default:
-                                // No rotation needed
-                                break;
-                        }
+                        // Tag not present; keep default orientation
                     }
                 }
 
-                // Prepare WebP options for lossless compression
-                WebPOptions webpOptions = new WebPOptions
+                RotateFlipType rotateFlip = RotateFlipType.RotateNoneFlipNone;
+                switch (orientation)
+                {
+                    case 2: rotateFlip = RotateFlipType.RotateNoneFlipX; break;
+                    case 3: rotateFlip = RotateFlipType.Rotate180FlipNone; break;
+                    case 4: rotateFlip = RotateFlipType.RotateNoneFlipY; break;
+                    case 5: rotateFlip = RotateFlipType.Rotate90FlipX; break;
+                    case 6: rotateFlip = RotateFlipType.Rotate90FlipNone; break;
+                    case 7: rotateFlip = RotateFlipType.Rotate90FlipY; break;
+                    case 8: rotateFlip = RotateFlipType.Rotate270FlipNone; break;
+                }
+
+                if (rotateFlip != RotateFlipType.RotateNoneFlipNone)
+                {
+                    image.RotateFlip(rotateFlip);
+                }
+
+                WebPOptions options = new WebPOptions
                 {
                     Lossless = true,
                     Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save as WebP
-                tiff.Save(outputPath, webpOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -80,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display scanned documents on the web and must correct camera rotation stored in EXIF before converting them to compact lossless WebP files.
- * 2. When a photo‑processing pipeline receives TIFF images from mobile devices and requires automatic orientation fixing and conversion to WebP to reduce bandwidth.
- * 3. When an e‑commerce site stores product images as TIFF and wants to generate lossless WebP thumbnails that respect the original orientation metadata.
- * 4. When a digital archiving system must preserve the exact visual appearance of TIFF scans while providing fast‑loading WebP versions for browsers.
- * 5. When a C# application integrates Aspose.Imaging to batch‑process TIFF files, applying EXIF‑based rotation and saving them as lossless WebP for cross‑platform compatibility.
+ * 1. When a web application needs to display user‑uploaded TIFF photos correctly oriented and serve them as small, lossless WebP files for faster page loads.
+ * 2. When a digital asset management system must normalize scanned documents by reading EXIF orientation, rotating them, and storing them in a modern WebP format.
+ * 3. When a batch‑processing script has to convert legacy TIFF images from cameras or scanners into WebP while preserving the original orientation for archival.
+ * 4. When an e‑commerce site wants to ensure product images captured in TIFF are automatically rotated based on EXIF data and delivered as lossless WebP to improve SEO and image quality.
+ * 5. When a mobile app backend processes incoming TIFF uploads, corrects their orientation, and saves them as WebP to reduce bandwidth without losing detail.
  */

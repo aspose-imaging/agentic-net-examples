@@ -1,8 +1,9 @@
-// HOW-TO: Create A Teal BMP With White Ellipse Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a 200x200 BMP with Teal Background and White Ellipse in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,19 +11,31 @@ class Program
     {
         try
         {
-            string outputPath = @"c:\temp\output.bmp";
+            string outputPath = "output\\image.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            var source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-            int width = 500;
-            int height = 500;
-            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(bmpOptions, width, height))
+
+            int width = 200;
+            int height = 200;
+
+            using (BmpOptions bmpOptions = new BmpOptions())
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Teal);
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.White, 2);
-                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(100, 100, 300, 300));
-                canvas.Save();
+                bmpOptions.BitsPerPixel = 32;
+
+                using (Image image = Image.Create(bmpOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.Teal);
+
+                    int ellipseWidth = width - 20;
+                    int ellipseHeight = height - 20;
+                    int x = (width - ellipseWidth) / 2;
+                    int y = (height - ellipseHeight) / 2;
+
+                    Pen pen = new Pen(Color.White);
+                    graphics.DrawEllipse(pen, x, y, ellipseWidth, ellipseHeight);
+
+                    image.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -34,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file as a background for a game UI and highlight a region with a white ellipse.
- * 2. When creating placeholder images for testing image processing pipelines that require a solid teal canvas with a centered ellipse.
- * 3. When automating the production of simple icons or badges in BMP format where a teal background and white circular outline are required.
- * 4. When preparing custom map markers that consist of a teal square and a white elliptical border for GIS applications.
- * 5. When building a reporting tool that adds a highlighted elliptical overlay to teal‑colored BMP charts before saving them.
+ * 1. When you need to generate a BMP icon with a solid teal background and a centered white ellipse for a desktop application's UI.
+ * 2. When you want to programmatically create a simple placeholder image for testing image‑processing pipelines that require BMP format.
+ * 3. When you need to produce a custom badge or logo in BMP format with a colored background and a circular highlight for embedding in reports.
+ * 4. When you are building a game and require a bitmap sprite sheet where each sprite is a teal canvas with a white circular marker.
+ * 5. When you need to automate the creation of BMP thumbnails with a consistent teal theme and an ellipse overlay for batch processing.
  */

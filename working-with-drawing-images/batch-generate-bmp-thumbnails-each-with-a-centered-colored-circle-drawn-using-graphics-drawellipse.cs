@@ -1,4 +1,4 @@
-// HOW-TO: Create BMP Thumbnails with Centered Colored Circle in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP thumbnails with centered colored circle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,12 +11,10 @@ class Program
     {
         try
         {
-            // Define base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -24,72 +22,50 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files from the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             foreach (string inputPath in files)
             {
-                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load source image
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image srcImage = Image.Load(inputPath))
                 {
-                    // Define thumbnail size
                     int thumbWidth = 150;
                     int thumbHeight = 150;
 
-                    // Prepare output path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory for this file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Create BMP options with a FileCreateSource
                     using (BmpOptions bmpOptions = new BmpOptions())
                     {
-                        bmpOptions.BitsPerPixel = 24;
-                        FileCreateSource source = new FileCreateSource(outputPath, false);
-                        bmpOptions.Source = source;
-
-                        // Create thumbnail canvas
-                        using (Image thumbImage = Image.Create(bmpOptions, thumbWidth, thumbHeight))
+                        bmpOptions.Source = new FileCreateSource(outputPath, false);
+                        using (Image canvas = Image.Create(bmpOptions, thumbWidth, thumbHeight))
                         {
-                            // Initialize graphics
-                            Graphics graphics = new Graphics(thumbImage);
+                            Graphics graphics = new Graphics(canvas);
                             graphics.Clear(Color.White);
+                            graphics.DrawImage(srcImage, 0, 0, thumbWidth, thumbHeight);
 
-                            // Draw scaled source image onto thumbnail
-                            graphics.DrawImage(
-                                (RasterImage)srcImage,
-                                new Rectangle(0, 0, thumbWidth, thumbHeight),
-                                new Rectangle(0, 0, srcImage.Width, srcImage.Height),
-                                GraphicsUnit.Pixel);
-
-                            // Draw centered colored circle
                             int radius = Math.Min(thumbWidth, thumbHeight) / 4;
                             int centerX = thumbWidth / 2;
                             int centerY = thumbHeight / 2;
-                            Rectangle circleRect = new Rectangle(
-                                centerX - radius,
-                                centerY - radius,
-                                radius * 2,
-                                radius * 2);
-                            graphics.DrawEllipse(new Pen(Color.Red, 3), circleRect);
+                            int ellipseX = centerX - radius;
+                            int ellipseY = centerY - radius;
+                            int ellipseDiameter = radius * 2;
 
-                            // Save the thumbnail (output path already bound via FileCreateSource)
-                            thumbImage.Save();
+                            Pen pen = new Pen(Color.Red, 3);
+                            graphics.DrawEllipse(pen, ellipseX, ellipseY, ellipseDiameter, ellipseDiameter);
+
+                            canvas.Save();
                         }
                     }
                 }
@@ -104,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a batch of 150 × 150 BMP preview images for a gallery and highlight each with a colored circle overlay.
- * 2. When an application must automatically create thumbnail icons for user‑uploaded pictures and add a visual marker for branding or status.
- * 3. When a reporting tool requires small BMP snapshots of larger images with a centered ellipse to indicate focus areas.
- * 4. When a legacy system only accepts BMP files, and you must produce consistent thumbnails with a custom graphic element using Aspose.Imaging in C#.
- * 5. When you want to preprocess a folder of images for a game asset pipeline, adding a colored circle to each thumbnail for quick identification.
+ * 1. When you need to generate 150 × 150 BMP preview images for a batch of photos and add a colored circle overlay to highlight each thumbnail.
+ * 2. When a legacy system only accepts BMP files and you must automatically produce small thumbnails with a visual marker for each image.
+ * 3. When you want to batch‑process images to create uniform square thumbnails with a white background and a centered ellipse for a product catalog.
+ * 4. When a reporting tool requires BMP thumbnails that include a colored circle to indicate status or selection in a batch of files.
+ * 5. When preparing sprite assets for a game that uses BMP format and you need to add a centered colored circle to each sprite automatically.
  */

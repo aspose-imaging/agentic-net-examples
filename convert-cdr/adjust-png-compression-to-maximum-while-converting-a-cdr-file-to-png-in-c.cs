@@ -1,19 +1,19 @@
 // HOW-TO: Convert CDR to PNG with Maximum Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.cdr";
+        string outputPath = "Output\\sample.png";
+
         try
         {
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,20 +22,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
+                    PngCompressionLevel = PngCompressionLevel.ZipLevel9
                 };
-
-                cdr.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to deliver high‑resolution vector artwork from CorelDRAW as a compact PNG for web publishing.
- * 2. When an automated build pipeline must batch‑convert CDR files to PNG while minimizing file size for faster downloads.
- * 3. When a C# application has to generate thumbnail previews of CDR documents with lossless compression for email attachments.
- * 4. When a digital asset management system stores CDR assets and requires on‑the‑fly conversion to PNG with maximum compression for archival.
- * 5. When a reporting tool extracts pages from CDR files and saves them as PNG images with the smallest possible footprint for PDF embedding.
+ * 1. When a designer needs to embed CorelDRAW (CDR) graphics into a web page and wants the smallest possible PNG files for faster loading.
+ * 2. When an automated build pipeline must batch‑convert CDR assets to PNG while applying the highest ZIP compression to meet storage quotas.
+ * 3. When a desktop application processes user‑uploaded CDR files and must save them as PNGs with maximum compression to reduce disk usage.
+ * 4. When a reporting tool generates PNG charts from CDR templates and requires the images to be as compact as possible for email attachments.
+ * 5. When a migration script moves legacy CDR artwork to a PNG‑based asset library and needs to preserve visual fidelity while minimizing file size.
  */

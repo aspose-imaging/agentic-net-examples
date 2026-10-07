@@ -1,9 +1,9 @@
-// HOW-TO: Apply Gaussian Blur to SVG and Export High‑Quality PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to SVG and Export as High Quality PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,9 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output/output.png";
-            string tempPath = "temp/temp.png";
+            string inputPath = "Input/vector.svg";
+            string outputPath = "Output/result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,29 +21,23 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                var tempOptions = new PngOptions();
-                vectorImage.Save(tempPath, tempOptions);
-            }
-
-            using (Image tempImage = Image.Load(tempPath))
-            {
-                RasterImage raster = (RasterImage)tempImage;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(2, 1.0));
-
-                var saveOptions = new PngOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    BitDepth = 8,
-                    FilterType = PngFilterType.Adaptive
-                };
-                raster.Save(outputPath, saveOptions);
-            }
+                    var pngOptions = new PngOptions();
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-            File.Delete(tempPath);
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                    {
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(2, 2));
+                        var finalOptions = new PngOptions();
+                        raster.Save(outputPath, finalOptions);
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo into a blurred PNG thumbnail for a web page while preserving transparency.
- * 2. When you want to generate high‑resolution PNG assets from vector illustrations with a soft focus effect for print or UI design.
- * 3. When an application must programmatically rasterize SVG icons, apply a Gaussian blur, and save them with optimal PNG compression settings.
- * 4. When you are building a batch‑processing tool that adds a subtle blur to vector graphics before uploading them to a digital asset management system.
- * 5. When you require a C# solution to render vector artwork, apply image filtering, and output a true‑color PNG with alpha channel for use in mobile apps.
+ * 1. When you need to soften the edges of a vector logo before embedding it in a web page as a PNG.
+ * 2. When you want to generate a blurred preview of an SVG illustration for a design mockup.
+ * 3. When you must convert scalable graphics to raster format with a consistent blur effect for printing.
+ * 4. When you are building an automated pipeline that processes SVG assets and outputs high‑resolution PNGs with a subtle Gaussian blur.
+ * 5. When you require a C# solution to apply image filters to vector files without using external graphics editors.
  */

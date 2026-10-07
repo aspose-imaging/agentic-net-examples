@@ -1,52 +1,52 @@
-// HOW-TO: Apply Gaussian Blur to CorelDRAW File and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to CorelDRAW and Export as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.cdr";
-        string outputPath = "output\\result.bmp";
+        string inputPath = "input.cdr";
+        string outputPath = "output.bmp";
 
-        // Ensure any runtime exception is reported cleanly
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CorelDRAW (CDR) file
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // Render the vector image to a BMP in memory
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    // Save the CDR image as BMP to the memory stream
-                    cdrImage.Save(ms, new BmpOptions());
-
-                    // Reset stream position for reading
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load the rendered BMP as a raster image
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Apply Gaussian blur filter to the entire image
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                        blurOptions.Radius = 5;
+                        blurOptions.Sigma = 1.0f;
 
-                        // Save the processed image to the final BMP file
-                        rasterImage.Save(outputPath);
+                        raster.Filter(raster.Bounds, blurOptions);
+
+                        var bmpOptions = new BmpOptions();
+                        raster.Save(outputPath, bmpOptions);
                     }
                 }
             }
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector CorelDRAW design into a raster BMP while adding a soft blur for print previews.
- * 2. When generating blurred thumbnails of CDR artwork for web galleries without using external graphics tools.
- * 3. When preprocessing CorelDRAW illustrations with a Gaussian blur before feeding them into a machine‑learning model that expects bitmap input.
- * 4. When automating a batch workflow that renders CDR files to BMP and applies a uniform blur to meet branding guidelines.
- * 5. When creating a blurred background layer from a CorelDRAW logo to overlay on UI components in a C# application.
+ * 1. When you need to programmatically soften vector artwork from a .cdr file before converting it to a bitmap for use in legacy Windows applications.
+ * 2. When an automated pipeline must batch‑process CorelDRAW designs, apply a blur effect, and generate BMP assets for printing or archival.
+ * 3. When a web service receives CDR uploads, applies a Gaussian blur for privacy masking, and returns the result as a BMP image.
+ * 4. When integrating Aspose.Imaging into a C# desktop tool that converts vector graphics to raster formats while applying custom image filters.
+ * 5. When creating thumbnails with a blur background from CorelDRAW files to embed in product catalogs that require BMP format.
  */

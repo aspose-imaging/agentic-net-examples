@@ -1,66 +1,55 @@
-// HOW-TO: Evaluate PNG Filter Types After Converting 16‑Bit to 8‑Bit with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to 8‑Bit PNG Converted from 16‑Bit in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input path
-            string inputPath = "C:\\temp\\input16bit.png";
+            string inputPath = "Input\\test16bit.png";
+            string tempPath = "Output\\temp8bit.png";
+            string outputPath = "Output\\filtered.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the 16‑bit PNG image
-            using (Image image = Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Convert 16-bit PNG to 8-bit PNG
+            using (Image original = Image.Load(inputPath))
             {
-                // Define the filter types to evaluate
-                PngFilterType[] filterTypes = new PngFilterType[]
+                using (var pngOptions = new PngOptions
                 {
-                    PngFilterType.None,
-                    PngFilterType.Up,
-                    PngFilterType.Sub,
-                    PngFilterType.Paeth,
-                    PngFilterType.Avg,
-                    PngFilterType.Adaptive
-                };
-
-                foreach (var filter in filterTypes)
+                    BitDepth = 8,
+                    Source = new FileCreateSource(tempPath, false)
+                })
                 {
-                    // Configure PNG save options: convert to 8‑bit and apply the current filter
-                    PngOptions options = new PngOptions
-                    {
-                        BitDepth = 8,                                 // Convert to 8‑bit per channel
-                        ColorType = PngColorType.TruecolorWithAlpha, // Preserve alpha channel
-                        FilterType = filter,
-                        CompressionLevel = 9                         // Maximum compression
-                    };
+                    original.Save(tempPath, pngOptions);
+                }
+            }
 
-                    // Hard‑coded output path for this filter
-                    string outputPath = $"C:\\temp\\output_{filter}.png";
+            // Apply Gaussian blur filter to the 8-bit image
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+            {
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save to a memory stream to report the resulting file size
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Save(ms, options);
-                        Console.WriteLine($"Filter: {filter}, output size: {ms.Length} bytes");
-                    }
-
-                    // Also save the image to disk for manual inspection
-                    image.Save(outputPath, options);
+                using (var outOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                })
+                {
+                    raster.Save(outputPath, outOptions);
                 }
             }
         }
@@ -73,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to determine which PNG filter produces the smallest file size after down‑sampling a 16‑bit PNG to 8‑bit using Aspose.Imaging in C#.
- * 2. When you want to verify that alpha transparency is preserved while converting high‑depth PNGs to standard 8‑bit PNGs with different filter settings.
- * 3. When you are optimizing PNG assets for web delivery and must compare compression results of various PNG filters after bit‑depth reduction.
- * 4. When you are debugging an image‑processing pipeline and need to ensure that the selected PNG filter does not corrupt color data during 16‑bit to 8‑bit conversion.
- * 5. When you are building a batch conversion tool that processes 16‑bit PNGs and selects the best filter automatically based on file size or quality metrics.
+ * 1. When you need to verify that image filters work correctly on 8‑bit PNGs that were originally 16‑bit, such as for quality‑control pipelines.
+ * 2. When converting high‑depth medical or scientific PNG images to standard 8‑bit for web display and then applying a blur effect.
+ * 3. When preprocessing large 16‑bit PNG assets for a game engine that only supports 8‑bit textures and requires smoothing.
+ * 4. When creating thumbnails of high‑dynamic‑range PNGs and need to reduce bit depth before applying a Gaussian blur to reduce noise.
+ * 5. When automating batch processing to downsample color depth and apply a blur filter for privacy‑preserving image sharing.
  */

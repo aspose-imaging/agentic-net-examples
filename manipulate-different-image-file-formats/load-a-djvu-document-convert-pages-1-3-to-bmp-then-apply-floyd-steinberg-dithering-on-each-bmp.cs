@@ -1,6 +1,7 @@
-// HOW-TO: Convert First Three DjVu Pages to Dithered BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert First Three DjVu Pages to Dithered BMP Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
@@ -10,37 +11,32 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = "sample.djvu";
+            string inputPath = "input.djvu";
+            string outputDir = "output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the DjVu document
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                var djvuImage = (DjvuImage)image;
-                int pagesToProcess = Math.Min(3, djvuImage.PageCount);
+            Directory.CreateDirectory(outputDir);
 
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            {
+                int pagesToProcess = Math.Min(3, djvu.Pages.Length);
                 for (int i = 0; i < pagesToProcess; i++)
                 {
-                    var page = (DjvuPage)djvuImage.Pages[i];
+                    RasterImage pageImage = (RasterImage)djvu.Pages[i];
+                    pageImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
 
-                    // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
+                    string bmpPath = Path.Combine(outputDir, $"page_{i + 1}.bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
 
-                    // Define output BMP file path
-                    string outputPath = Path.Combine("output", $"page{i + 1}.bmp");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the dithered page as BMP
-                    page.Save(outputPath, new BmpOptions());
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        pageImage.Save(bmpPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -53,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first few pages of a DjVu document and save them as BMP files for legacy systems that only support BMP.
- * 2. When you want to reduce the color depth of DjVu pages to 1‑bit using Floyd‑Steinberg dithering for printing on monochrome printers.
- * 3. When you are building a batch conversion tool that processes DjVu archives and creates low‑size BMP thumbnails for quick preview.
- * 4. When you must ensure consistent output by creating a dedicated output folder and handling missing input files gracefully in a C# application.
- * 5. When you are integrating Aspose.Imaging into a document‑processing pipeline that requires page‑by‑page manipulation and custom dithering before further analysis.
+ * 1. When you need to extract the first few pages of a DjVu document and save them as BMP files with Floyd‑Steinberg dithering for printing on monochrome devices.
+ * 2. When a legacy system only accepts BMP images and you must preprocess scanned DjVu pages to reduce file size while preserving visual detail using dithering.
+ * 3. When creating thumbnails for a DjVu‑based e‑book reader that requires BMP output with dithering to improve contrast on low‑color displays.
+ * 4. When automating batch conversion of DjVu archives to BMP for archival purposes, applying Floyd‑Steinberg dithering to maintain image quality after color depth reduction.
+ * 5. When developing a C# tool that needs to process the first three pages of a multi‑page DjVu file and output dithered BMPs for further analysis in image‑processing pipelines.
  */

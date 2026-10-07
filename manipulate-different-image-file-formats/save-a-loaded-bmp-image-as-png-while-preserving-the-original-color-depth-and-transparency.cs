@@ -1,57 +1,30 @@
-// HOW-TO: Convert BMP to PNG Preserving Color Depth and Transparency in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP Image to PNG While Preserving Color Depth in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.bmp";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Prepare PNG save options
-                var pngOptions = new PngOptions();
-
-                // Preserve original bit depth and transparency when possible
-                if (image is RasterImage raster)
-                {
-                    // BitDepth property expects values 1,2,4,8,16; clamp to nearest supported value
-                    int bits = raster.BitsPerPixel;
-                    if (bits > 16) bits = 16;
-                    else if (bits > 8) bits = 8;
-                    else if (bits > 4) bits = 4;
-                    else if (bits > 2) bits = 2;
-                    else bits = 1;
-
-                    pngOptions.BitDepth = (byte)bits;
-
-                    // Choose color type based on presence of alpha channel
-                    pngOptions.ColorType = raster.BitsPerPixel > 24
-                        ? PngColorType.TruecolorWithAlpha
-                        : PngColorType.Truecolor;
-                }
-
-                // Save as PNG preserving the determined options
-                image.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -63,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP assets to PNG for web delivery while keeping the original bit depth and any alpha channel intact.
- * 2. When a desktop application must batch‑process user‑uploaded BMP files and store them as lossless PNGs without losing color fidelity.
- * 3. When generating thumbnails from BMP screenshots for a reporting tool that requires PNG format with preserved transparency.
- * 4. When migrating a graphics library from BMP to PNG to reduce file size but still need to maintain the exact color palette for scientific visualization.
- * 5. When integrating Aspose.Imaging into a C# service that receives BMP images from IoT devices and must return PNGs that retain the original image’s bit depth and transparency.
+ * 1. When you need to convert legacy BMP graphics to PNG for web delivery without losing the original palette or alpha channel.
+ * 2. When an application must batch‑process user‑uploaded BMP files and store them as lossless PNGs while keeping transparency intact.
+ * 3. When migrating a desktop software’s assets from BMP to PNG to reduce file size but still require the exact color depth for accurate rendering.
+ * 4. When integrating Aspose.Imaging in a C# service that receives BMP images and must return PNGs that preserve the original image’s transparency for further compositing.
+ * 5. When automating a build pipeline that generates documentation screenshots in BMP and needs them saved as PNGs with the same visual fidelity.
  */

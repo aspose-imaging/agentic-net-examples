@@ -1,4 +1,4 @@
-// HOW-TO: Apply 5x5 Averaging Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply 5x5 Average Convolution Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,42 +8,33 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the PNG image as a raster image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                // Create a 5x5 averaging kernel
-                double[,] kernel = new double[5, 5];
-                for (int i = 0; i < 5; i++)
+                double[,] kernel = new double[,]
                 {
-                    for (int j = 0; j < 5; j++)
-                    {
-                        kernel[i, j] = 1.0 / 25.0;
-                    }
-                }
+                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                    { 0.04, 0.04, 0.04, 0.04, 0.04 }
+                };
 
-                // Apply the custom convolution filter
                 var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
                 var saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
@@ -57,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a scanned PNG photograph before OCR processing by applying a 5x5 averaging convolution filter.
- * 2. When you want to smooth texture maps in a game asset pipeline using C# and a custom 5x5 kernel.
- * 3. When you must create a uniform blur on medical imaging PNG files for anonymization with a convolution filter.
- * 4. When you are preparing PNG screenshots for a presentation and need a gentle smoothing filter applied programmatically.
- * 5. When you are building an automated batch job that normalizes sharp edges in PNG logos for web publishing using Aspose.Imaging.
+ * 1. When you need to reduce noise in a PNG image by smoothing it with a uniform blur in a C# application.
+ * 2. When you want to preprocess scanned documents before OCR by applying a box blur to even out pixel variations.
+ * 3. When you are building a photo‑editing tool that offers a simple blur effect for PNG files using Aspose.Imaging.
+ * 4. When you need to create a consistent visual style across a series of PNG assets by applying the same averaging filter programmatically.
+ * 5. When you are optimizing PNG graphics for web display and want to soften sharp edges without changing the file format.
  */

@@ -3,9 +3,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -14,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.eps";
-            string outputPath = "output.jpg";
+            string outputPath = "output\\inverted.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,45 +23,37 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                var rasterOptions = new EpsRasterizationOptions
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                };
+                    var pngOptions = new PngOptions();
+                    epsImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                using (RasterImage raster = (RasterImage)Image.Create(pngOptions, epsImage.Width, epsImage.Height))
-                {
-                    int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-                    for (int i = 0; i < pixels.Length; i++)
+                    using (var raster = (RasterImage)Image.Load(memoryStream))
                     {
-                        int argb = pixels[i];
-                        int a = (argb >> 24) & 0xFF;
-                        int r = (argb >> 16) & 0xFF;
-                        int g = (argb >> 8) & 0xFF;
-                        int b = argb & 0xFF;
+                        var bounds = raster.Bounds;
+                        int[] pixels = raster.LoadArgb32Pixels(bounds);
+                        for (int i = 0; i < pixels.Length; i++)
+                        {
+                            int argb = pixels[i];
+                            int a = (argb >> 24) & 0xFF;
+                            int r = (argb >> 16) & 0xFF;
+                            int g = (argb >> 8) & 0xFF;
+                            int b = argb & 0xFF;
 
-                        r = 255 - r;
-                        g = 255 - g;
-                        b = 255 - b;
+                            r = 255 - r;
+                            g = 255 - g;
+                            b = 255 - b;
 
-                        pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                            pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                        }
+                        raster.SaveArgb32Pixels(bounds, pixels);
+
+                        var jpegOptions = new JpegOptions { Quality = 100 };
+                        raster.Save(outputPath, jpegOptions);
                     }
-
-                    raster.SaveArgb32Pixels(raster.Bounds, pixels);
-
-                    var jpegOptions = new JpegOptions
-                    {
-                        Quality = 100
-                    };
-
-                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -75,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a negative‑style preview of a vector EPS logo for a web gallery and deliver it as a high‑quality JPEG.
- * 2. When an e‑commerce platform must display product illustrations with inverted colors to match a dark theme, converting EPS assets to JPEG on the fly.
- * 3. When a printing workflow requires a color‑inverted raster version of an EPS artwork for proofing, and the result must be saved with maximum JPEG quality.
- * 4. When a mobile app downloads EPS icons, applies a color inversion filter for accessibility, and stores them as JPEGs for faster rendering.
- * 5. When a batch‑processing script has to convert multiple EPS files to JPEG while applying a global color inversion to meet brand guidelines.
+ * 1. When you need to generate a negative version of a vector logo stored as EPS for printing proofs, you can invert its colors and export a high‑quality JPEG.
+ * 2. When a web application must display a preview of an EPS illustration with opposite colors for a dark‑mode theme, this code converts and saves the result as a JPEG.
+ * 3. When an automated workflow requires batch processing of EPS files to create high‑resolution JPEG thumbnails with inverted colors for visual testing, the snippet provides the needed steps.
+ * 4. When a digital asset management system needs to store a color‑inverted JPEG version of an EPS artwork for archival or comparison purposes, this approach handles the conversion.
+ * 5. When a marketing tool wants to apply a quick negative‑effect filter to EPS graphics before embedding them in email campaigns, the code produces a quality JPEG ready for distribution.
  */

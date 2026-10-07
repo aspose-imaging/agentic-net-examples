@@ -1,54 +1,42 @@
-// HOW-TO: Convert BMP to PDF with Inverted Colors Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Sharpen BMP Image and Save as PDF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "image.bmp");
+            string outputPath = Path.Combine("Output", "filtered.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Apply a simple custom color filter (invert colors)
-                if (image is RasterImage raster)
+                RasterCachedImage raster = image as RasterCachedImage;
+                if (raster != null)
                 {
-                    for (int y = 0; y < raster.Height; y++)
-                    {
-                        for (int x = 0; x < raster.Width; x++)
-                        {
-                            Color original = raster.GetPixel(x, y);
-                            Color inverted = Color.FromArgb(
-                                original.A,
-                                255 - original.R,
-                                255 - original.G,
-                                255 - original.B);
-                            raster.SetPixel(x, y, inverted);
-                        }
-                    }
+                    if (!raster.IsCached)
+                        raster.CacheData();
+
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
                 }
 
-                // Export the filtered image as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from a legacy BMP file while applying a negative‑image effect for visual emphasis.
- * 2. When an application must batch‑process scanned BMP documents, invert their colors for better contrast, and archive them as PDF files.
- * 3. When a web service receives BMP uploads, requires a color‑inverted preview, and returns the result as a PDF for client download.
- * 4. When a reporting tool creates PDF reports that include BMP graphics and wants to apply a custom color filter before embedding them.
- * 5. When a desktop utility converts user‑selected BMP images to PDF format and offers an option to invert colors for artistic or accessibility purposes.
+ * 1. When you need to enhance a scanned BMP diagram with a sharpen filter before embedding it in a PDF report.
+ * 2. When an application must programmatically convert legacy BMP assets to searchable PDF documents while improving visual clarity.
+ * 3. When a batch process has to apply a custom image filter to BMP files and generate PDF invoices for distribution.
+ * 4. When a web service receives BMP uploads, applies sharpening to improve readability, and returns the result as a PDF file.
+ * 5. When automating the preparation of print‑ready PDFs from BMP graphics, ensuring the images are sharpened for crisp output.
  */

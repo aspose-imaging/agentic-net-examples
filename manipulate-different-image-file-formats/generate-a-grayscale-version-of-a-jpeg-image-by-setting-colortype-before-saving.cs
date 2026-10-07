@@ -1,4 +1,4 @@
-// HOW-TO: Create Grayscale JPEG From Color Image Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to Grayscale Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,43 +7,30 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_grayscale.jpg";
+        string inputPath = "Input\\sample.jpg";
+        string outputPath = "Output\\sample_grayscale.jpg";
 
         try
         {
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options to produce a grayscale image
-                JpegOptions saveOptions = new JpegOptions
-                {
-                    // Set the color mode to Grayscale
-                    ColorType = JpegCompressionColorMode.Grayscale,
-                    // Optional: set quality (1-100)
-                    Quality = 100
-                };
-
-                // Save the image with the specified options
-                image.Save(outputPath, saveOptions);
+                JpegOptions options = new JpegOptions();
+                options.ColorType = JpegCompressionColorMode.Grayscale;
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert color photos to grayscale JPEGs for printing on monochrome printers.
- * 2. When preparing image assets for a machine‑learning model that requires single‑channel input.
- * 3. When reducing visual complexity of product images for faster web page loading while keeping JPEG format.
- * 4. When archiving scanned documents as grayscale JPEGs to save storage space without changing file type.
- * 5. When generating grayscale thumbnails for a gallery application that only supports JPEG output.
+ * 1. When you need to generate a black‑and‑white version of a color JPEG for printing or archival purposes.
+ * 2. When a web application must reduce file size by converting user‑uploaded photos to grayscale before storage.
+ * 3. When a medical imaging system requires grayscale JPEGs to comply with DICOM display standards.
+ * 4. When creating thumbnails for a gallery that should appear in grayscale to match a design theme.
+ * 5. When preprocessing images for machine‑learning models that expect single‑channel grayscale input.
  */

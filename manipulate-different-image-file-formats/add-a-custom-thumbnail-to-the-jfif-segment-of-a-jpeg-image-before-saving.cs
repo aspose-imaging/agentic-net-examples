@@ -1,12 +1,9 @@
-// HOW-TO: Add Custom Red Thumbnail to JPEG JFIF Segment Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom JFIF Thumbnail to JPEG Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -15,6 +12,7 @@ class Program
         try
         {
             string inputPath = "input.jpg";
+            string thumbnailPath = "thumb.jpg";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -23,24 +21,24 @@ class Program
                 return;
             }
 
+            if (!File.Exists(thumbnailPath))
+            {
+                Console.Error.WriteLine($"File not found: {thumbnailPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                PngOptions thumbOptions = new PngOptions();
-                thumbOptions.Source = new StreamSource(new MemoryStream(), false);
-
-                using (RasterImage thumb = (RasterImage)Image.Create(thumbOptions, 100, 100))
+                using (JpegImage thumbImg = (JpegImage)Image.Load(thumbnailPath))
                 {
-                    Graphics graphics = new Graphics(thumb);
-                    SolidBrush brush = new SolidBrush(Color.Red);
-                    graphics.FillRectangle(brush, thumb.Bounds);
-
-                    jpegImage.Jfif = new JFIFData();
-                    jpegImage.Jfif.Thumbnail = thumb;
-
-                    jpegImage.Save(outputPath);
+                    image.Jfif = new JFIFData();
+                    image.Jfif.Thumbnail = thumbImg;
                 }
+
+                JpegOptions saveOptions = new JpegOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a small preview image inside a JPEG file for faster loading in photo galleries.
- * 2. When you want to generate a red placeholder thumbnail for JPEGs that lack an existing thumbnail.
- * 3. When a digital asset management system requires a JFIF thumbnail to display image previews without decoding the full image.
- * 4. When you are creating JPEG files that must comply with legacy devices that read the JFIF thumbnail for quick preview.
- * 5. When you need to programmatically add or replace a JPEG's JFIF thumbnail in a batch processing pipeline using C#.
+ * 1. When you need to embed a preview thumbnail inside a JPEG file so photo‑management software can display a quick preview without loading the full image.
+ * 2. When generating JPEGs for digital cameras or mobile apps that require a JFIF thumbnail for compatibility with older devices.
+ * 3. When creating an image archive where each JPEG must contain a custom thumbnail representing a different resolution or watermark.
+ * 4. When updating existing JPEGs to include a new thumbnail without re‑encoding the entire image, preserving the original quality.
+ * 5. When building a C# service that programmatically adds product preview thumbnails to JPEG product images for e‑commerce platforms.
  */

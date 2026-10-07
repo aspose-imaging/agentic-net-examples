@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS File to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS File to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,25 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "sample.eps";
-            string outputPath = "result.png";
+            string inputPath = "input.eps";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and save as PNG
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                var options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector EPS artwork on a web page that only supports raster PNG images.
- * 2. When an automated batch process must convert incoming EPS design files to PNG thumbnails for a content management system.
- * 3. When a desktop application imports EPS logos and saves them as PNGs to embed in PDF reports.
- * 4. When a server‑side service receives EPS files from users and must generate PNG previews for quick preview in a UI.
- * 5. When you are migrating legacy EPS assets to a modern image pipeline that requires PNG format for machine‑learning preprocessing.
+ * 1. When you need to generate PNG previews of vector EPS artwork for a web gallery.
+ * 2. When a desktop application must export user‑uploaded EPS logos to PNG for printing or sharing.
+ * 3. When an automated build script converts design assets from EPS to PNG to include in documentation.
+ * 4. When a server‑side service processes EPS files and returns PNG thumbnails to client browsers.
+ * 5. When migrating legacy EPS resources to PNG format to improve compatibility with modern image viewers.
  */

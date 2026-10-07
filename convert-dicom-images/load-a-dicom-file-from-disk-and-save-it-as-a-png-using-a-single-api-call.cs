@@ -1,9 +1,8 @@
-// HOW-TO: Convert DICOM File to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM Image to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -11,24 +10,20 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.dcm";
-            string outputPath = "output\\converted.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load DICOM image and save as PNG in a single Save call
-            using (var dicomImage = (DicomImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                dicomImage.Save(outputPath, new PngOptions());
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -40,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display DICOM scans in a web browser that only supports PNG.
- * 2. When a hospital system must export patient radiology images to a format compatible with standard image viewers.
- * 3. When a developer wants to batch‑convert DICOM studies to PNG for inclusion in reports or presentations.
- * 4. When integrating DICOM data into a C# desktop app that processes images using common .NET libraries.
- * 5. When creating thumbnails of DICOM images for a PACS viewer without writing custom conversion code.
+ * 1. When a healthcare application needs to display radiology scans in a web browser, developers can convert DICOM files to PNG for easy rendering.
+ * 2. When integrating medical imaging data into a reporting system that only accepts standard image formats, the code enables batch conversion from DICOM to PNG.
+ * 3. When a developer wants to create thumbnails of DICOM studies for a PACS viewer, converting to PNG provides fast, lightweight preview images.
+ * 4. When exporting diagnostic images for patient portals or mobile apps, the conversion to PNG ensures compatibility across devices.
+ * 5. When performing image analysis with libraries that do not support DICOM, converting the files to PNG allows reuse of existing C# image‑processing pipelines.
  */

@@ -1,11 +1,12 @@
-// HOW-TO: Dim a CorelDRAW CDR Image, Check Alpha, and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Dim CDR Image Brightness, Check Alpha Channel, Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,49 +14,48 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cdr";
-            string outputPath = "output.tif";
+            string outputPath = "output/output.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (var cdr = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Rasterize CDR to a PNG in memory
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions
+                    cdr.Save(ms, new PngOptions
                     {
                         VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
                             PageHeight = cdr.Height
                         }
-                    };
-                    cdr.Save(ms, pngOptions);
+                    });
                     ms.Position = 0;
 
-                    // Load the rasterized image
-                    using (var raster = (RasterImage)Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Verify presence of alpha channel
-                        bool hasAlpha = raster.HasAlpha;
-                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
-
-                        // Reduce brightness (dim the image)
+                        // Reduce brightness
                         raster.AdjustBrightness(-50);
 
-                        // Save the result as TIFF
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        // Verify alpha channel
+                        if (raster.HasAlpha)
+                        {
+                            Console.WriteLine("Alpha channel is present.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Alpha channel is not present.");
+                        }
+
+                        // Save as TIFF
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                         raster.Save(outputPath, tiffOptions);
                     }
                 }
@@ -70,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically lower the brightness of a CorelDRAW CDR file before archiving it as a TIFF for print workflows.
- * 2. When you must confirm that a rasterized CDR image contains an alpha channel before applying further compositing or masking operations.
- * 3. When a batch process has to convert vector CDR drawings to lossless TIFFs while adjusting exposure for consistent visual appearance.
- * 4. When integrating a .NET service that receives CDR uploads, dims the artwork to meet branding guidelines, and stores the result in a TIFF repository.
- * 5. When automating image preprocessing for OCR or analysis, and you need to ensure the TIFF output is dimmed and retains transparency information.
+ * 1. When you need to lower the brightness of a CorelDRAW (CDR) file before archiving it as a TIFF for print workflows.
+ * 2. When you must confirm that a converted CDR image retains an alpha channel before further compositing.
+ * 3. When an automated pipeline has to transform vector CDR pages into raster PNG, adjust lighting, and output lossless TIFF files.
+ * 4. When a desktop application requires programmatic handling of CDR graphics to produce dimmed TIFF thumbnails with transparency information.
+ * 5. When a server‑side service processes user‑uploaded CDR artwork, reduces its brightness, validates transparency, and stores the result in a TIFF repository.
  */

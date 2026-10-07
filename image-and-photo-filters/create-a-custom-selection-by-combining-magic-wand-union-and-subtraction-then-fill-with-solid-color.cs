@@ -1,22 +1,20 @@
-// HOW-TO: Create Custom Magic Wand Selection with Union and Subtraction in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Custom Magic Wand Selection with Union Subtraction and Fill Color in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,18 +25,22 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(100, 100))
-                    .Union(new MagicWandSettings(200, 200))
-                    .Subtract(new MagicWandSettings(150, 150) { Threshold = 30 })
+                MagicWandTool.Select(image, new MagicWandSettings(10, 10))
+                    .Union(new MagicWandSettings(50, 50))
+                    .Subtract(new RectangleMask(20, 20, 30, 30))
                     .Apply();
 
-                Graphics graphics = new Graphics(image);
-                using (SolidBrush brush = new SolidBrush(Color.Red))
+                var rect = new Rectangle(0, 0, image.Width, image.Height);
+                int[] pixels = image.LoadArgb32Pixels(rect);
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    graphics.FillRectangle(brush, new RectangleF(0, 0, image.Width, image.Height));
+                    if ((pixels[i] & unchecked((int)0xFF000000)) == 0)
+                    {
+                        pixels[i] = unchecked((int)0xFFFF0000);
+                    }
                 }
-
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                image.SaveArgb32Pixels(rect, pixels);
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically isolate complex regions in a PNG image by merging and removing areas using Aspose.Imaging's Magic Wand tool.
- * 2. When you want to generate a mask that combines multiple color‑based selections and then apply a uniform solid‑color overlay for branding or highlighting.
- * 3. When an automated image‑processing pipeline must remove background sections with a specific tolerance and fill the remaining canvas with a solid color.
- * 4. When creating custom graphics for UI assets where you need to select irregular shapes, subtract unwanted parts, and repaint the whole image in C#.
- * 5. When converting scanned documents to PNG while applying a red fill to the selected content to emphasize regions for review.
+ * 1. When you need to programmatically select multiple non‑contiguous areas of a PNG and exclude a rectangular region before applying a solid color overlay.
+ * 2. When you want to replace all fully transparent pixels in an image with a specific opaque color such as red for printing or branding purposes.
+ * 3. When you are building an automated image‑pre‑processing pipeline that must isolate complex shapes using Magic Wand thresholds and then mask out unwanted sections.
+ * 4. When you need to generate a new PNG file where the background is removed and filled with a uniform color to meet UI design guidelines.
+ * 5. When you are creating a batch tool that applies custom selections and color fills to a set of images without manual Photoshop editing.
  */

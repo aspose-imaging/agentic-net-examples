@@ -4,49 +4,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-public class Program
+namespace EPSSizeComparison
 {
-    public static void Main(string[] args)
+    class Program
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/converted.psd";
-
-        try
+        static void Main()
         {
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.eps";
+                string outputPath = "output.psd";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image epsImage = Image.Load(inputPath))
-            {
-                using (var psdOptions = new PsdOptions())
+                if (!File.Exists(inputPath))
                 {
-                    epsImage.Save(outputPath, psdOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var psdOptions = new PsdOptions();
+                    image.Save(outputPath, psdOptions);
+                }
+
+                long epsSize = new FileInfo(inputPath).Length;
+                long psdSize = new FileInfo(outputPath).Length;
+
+                Console.WriteLine($"EPS file size: {epsSize} bytes");
+                Console.WriteLine($"PSD file size: {psdSize} bytes");
             }
-
-            var epsInfo = new FileInfo(inputPath);
-            var psdInfo = new FileInfo(outputPath);
-
-            Console.WriteLine($"EPS size: {epsInfo.Length} bytes");
-            Console.WriteLine($"PSD size: {psdInfo.Length} bytes");
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to assess storage impact of converting vector EPS artwork to raster PSD files in a .NET application.
- * 2. When you want to verify that a batch conversion process does not increase file size beyond a storage budget.
- * 3. When you are migrating legacy EPS assets to Photoshop PSD format and must compare original and converted sizes for archiving decisions.
- * 4. When you need to log EPS and PSD byte counts to monitor disk usage in an automated image processing pipeline.
- * 5. When you are troubleshooting unexpected size growth after converting EPS to PSD using Aspose.Imaging in C#.
+ * 1. When you need to evaluate storage requirements by measuring how an EPS vector file size changes after converting it to a PSD raster file in a C# application.
+ * 2. When you want to decide whether to keep original EPS assets or replace them with PSD versions for a digital asset management system based on their file size differences.
+ * 3. When performing batch processing to ensure that converted PSD files do not exceed size limits for cloud storage or email attachments.
+ * 4. When auditing a design workflow to verify that converting EPS artwork to Photoshop PSD does not significantly increase disk usage before archiving.
+ * 5. When building a reporting tool that logs the byte size of source EPS files and their PSD counterparts to monitor storage costs over time.
  */

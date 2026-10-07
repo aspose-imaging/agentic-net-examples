@@ -1,9 +1,9 @@
-// HOW-TO: Convert Multipage EPS to PDF with All Pages Preserved in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multipage EPS To Multipage PDF In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output/output.pdf";
+            string inputPath = "Input/multipage.eps";
+            string outputPath = "Output/multipage.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,19 +22,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
                 var pdfOptions = new PdfOptions();
-
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                image.Save(outputPath, pdfOptions);
+                epsImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from a multi‑page EPS artwork for printing or archiving.
- * 2. When an automated workflow must batch‑convert EPS design files into PDF documents while keeping each page intact.
- * 3. When a web service receives EPS files from users and must return a PDF version without losing vector quality.
- * 4. When integrating Aspose.Imaging into a C# application to transform multi‑page EPS reports into PDF for easy distribution.
- * 5. When migrating legacy EPS assets to PDF format for compliance or document management systems using .NET.
+ * 1. When you need to batch‑convert a multi‑page EPS design file into a searchable PDF for archiving or printing using C#.
+ * 2. When an application must preserve all pages of an EPS illustration while generating a PDF report for client delivery.
+ * 3. When a workflow automates the transformation of vector EPS assets into PDF documents for e‑commerce product catalogs.
+ * 4. When you integrate Aspose.Imaging into a .NET service that receives EPS uploads and returns PDF files without losing page order.
+ * 5. When you want to programmatically create PDF portfolios from multi‑page EPS files for legal or compliance documentation.
  */

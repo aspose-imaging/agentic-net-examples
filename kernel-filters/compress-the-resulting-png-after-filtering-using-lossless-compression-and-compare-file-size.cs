@@ -1,54 +1,46 @@
-// HOW-TO: Compress PNG with Maximum Lossless Compression and Compare File Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compress PNG with Maximum Lossless Zip Level and Compare File Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output_compressed.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure PNG options for lossless compression
-                var pngOptions = new PngOptions
+                using (PngImage png = (PngImage)image)
                 {
-                    CompressionLevel = 9,                         // Max compression
-                    FilterType = PngFilterType.Adaptive,          // Adaptive filter for best lossless result
-                    Progressive = true,                           // Optional progressive loading
-                    ColorType = PngColorType.TruecolorWithAlpha,  // Preserve color depth
-                    BitDepth = 8
-                };
-
-                // Save the compressed PNG
-                image.Save(outputPath, pngOptions);
+                    PngOptions options = new PngOptions
+                    {
+                        PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    png.Save(outputPath, options);
+                }
             }
 
-            // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
             Console.WriteLine($"Original size: {originalSize} bytes");
             Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            Console.WriteLine($"Size reduction: {originalSize - compressedSize} bytes");
+            Console.WriteLine($"Difference: {originalSize - compressedSize} bytes");
         }
         catch (Exception ex)
         {
@@ -59,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the storage footprint of PNG assets without losing image quality, such as optimizing web graphics before deployment.
- * 2. When you want to generate progressive PNG files that load gradually in browsers while keeping the original color depth.
- * 3. When you must compare the effectiveness of different PNG compression settings by measuring original and compressed file sizes.
- * 4. When you are building an automated image pipeline that validates that PNG files meet a maximum size threshold for mobile apps.
- * 5. When you need to ensure that a PNG image retains its alpha channel and true‑color data while applying the strongest lossless compression available in .NET.
+ * 1. When you need to reduce the storage footprint of PNG assets for a web application without sacrificing image quality, you can use this code to apply lossless Zip level 9 compression and see the size savings.
+ * 2. When preparing PNG images for email attachments or API responses, the snippet lets you compress them efficiently and verify that the compressed file meets size limits.
+ * 3. When building an automated image‑processing pipeline that must retain exact pixel data, you can employ this routine to apply maximum lossless compression and log the byte‑difference for reporting.
+ * 4. When migrating a large collection of PNG files to a cloud storage bucket, the code helps you compress each file on the fly and compare original versus compressed sizes to estimate cost reductions.
+ * 5. When debugging or benchmarking different PNG compression settings in a C# project, this example provides a quick way to apply the highest Zip level, save the result, and output the size comparison for analysis.
  */

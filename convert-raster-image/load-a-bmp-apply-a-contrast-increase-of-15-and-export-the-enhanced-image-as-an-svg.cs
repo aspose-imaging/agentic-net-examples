@@ -1,4 +1,4 @@
-// HOW-TO: Increase BMP Contrast By 15% And Save As SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase BMP Contrast By 15% And Export As SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,36 +7,38 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.svg";
+        string inputPath = "Input\\sample.bmp";
+        string outputPath = "Output\\enhanced.svg";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Adjust contrast by 15%
-                if (image is RasterImage rasterImage)
-                {
-                    rasterImage.AdjustContrast(15f);
-                }
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
 
-                // Save the enhanced image as SVG
-                var svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                raster.AdjustContrast(0.15f);
+
+                using (SvgOptions options = new SvgOptions())
+                {
+                    options.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = raster.Width,
+                        PageHeight = raster.Height
+                    };
+                    raster.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the visual clarity of a legacy BMP graphic before converting it to a scalable SVG for responsive web design.
- * 2. When an application must batch‑process scanned BMP files, boost their contrast by a specific percentage, and store the results as lightweight SVG vectors.
- * 3. When generating printable diagrams from BMP assets where higher contrast is required and the final format must be resolution‑independent SVG.
- * 4. When integrating image enhancement into a C# workflow that reads BMP icons, adjusts their contrast, and outputs SVG icons for modern UI themes.
- * 5. When migrating desktop‑only BMP resources to a cross‑platform SVG format while ensuring the contrast levels meet branding guidelines.
+ * 1. When you need to enhance the visual clarity of legacy BMP graphics before converting them to scalable SVG for web display.
+ * 2. When a desktop application must programmatically boost contrast of scanned bitmap images and store the result as vector‑friendly SVG files.
+ * 3. When an automated batch process has to prepare BMP assets for responsive UI by increasing contrast and raster‑to‑vector converting them with Aspose.Imaging in C#.
+ * 4. When a reporting tool requires high‑contrast bitmap charts to be embedded in SVG charts for resolution‑independent printing.
+ * 5. When a migration script upgrades old BMP icons by adjusting their contrast and saving them as SVG to reduce file size and improve scalability.
  */

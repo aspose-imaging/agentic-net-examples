@@ -1,39 +1,33 @@
-// HOW-TO: Export EMF to High Quality JPEG with 95% Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Export EMF as High Quality JPEG with 95% Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.emf";
-            string outputPath = "output\\sample.jpg";
+            string inputPath = "input.emf";
+            string outputPath = "output\\output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with quality 95
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 95
                 };
-
-                // Save as high‑quality JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -46,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EMF drawings into raster JPEG files for web display while preserving visual fidelity, they can use this code.
- * 2. When an application must generate printable thumbnails of EMF diagrams with a specific JPEG compression level of 95 percent, this snippet provides the required workflow.
- * 3. When integrating Aspose.Imaging into a C# service that archives engineering schematics as high‑quality JPEG images for archival storage, the code handles the conversion and quality setting.
- * 4. When a desktop tool requires batch processing of multiple EMF files into JPEGs with consistent 95 percent quality to maintain brand standards, the example shows how to load, configure, and save each image.
- * 5. When a reporting system needs to embed EMF charts into PDF or HTML reports as JPEG images without noticeable loss, this approach ensures the images are exported at a high quality setting.
+ * 1. When a developer needs to embed vector graphics from a Windows Metafile into a web page that only supports JPEG images, they can convert the EMF to a high‑quality JPEG using this code.
+ * 2. When generating thumbnails for reports and the source images are stored as EMF, the snippet lets you create JPEG previews with a controlled 95 % quality setting.
+ * 3. When migrating legacy design assets from EMF to a format suitable for mobile apps, this code provides a simple C# way to export them as JPEGs without losing visual fidelity.
+ * 4. When automating a batch process that converts EMF logos to JPEG for email newsletters, the example shows how to set the JPEG compression level to maintain crispness.
+ * 5. When integrating Aspose.Imaging into a document‑generation pipeline that outputs JPEG images, the snippet demonstrates loading an EMF and saving it with a specific quality parameter.
  */

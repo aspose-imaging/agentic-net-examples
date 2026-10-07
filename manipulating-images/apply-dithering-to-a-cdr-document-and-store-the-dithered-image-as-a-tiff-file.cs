@@ -3,52 +3,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.cdr";
+        string outputPath = "output.tiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR document
-            using (Image image = Image.Load(inputPath))
-            {
-                // Attempt to cast to a raster image to apply dithering
-                if (image is RasterImage rasterImage)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                    rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
-                }
-                else if (image is TiffImage tiffImage)
-                {
-                    // Apply threshold dithering with a 4‑bit palette as an alternative
-                    tiffImage.Dither(DitheringMethod.ThresholdDithering, 4, null);
-                }
-                else
-                {
-                    Console.Error.WriteLine("Unsupported image type for dithering.");
-                    return;
-                }
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Save the dithered image as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        raster.Save(outputPath, tiffOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a CorelDRAW (CDR) file to a high‑contrast black‑and‑white TIFF for printing or archival purposes.
- * 2. When you want to reduce file size by applying 1‑bit Floyd‑Steinberg dithering before storing the image as a TIFF.
- * 3. When your workflow requires automated batch processing of CDR graphics into TIFFs with consistent dithering across multiple documents.
- * 4. When you must generate TIFF images compatible with legacy scanners that only accept dithered 1‑bit or 4‑bit palettes.
- * 5. When you are building a .NET application that needs to programmatically apply threshold or Floyd‑Steinberg dithering to raster images and output them as TIFF files.
+ * 1. When you need to convert a CorelDRAW (.cdr) file to a high‑contrast black‑and‑white TIFF for printing or archival, applying Floyd‑Steinberg dithering to preserve detail.
+ * 2. When a batch process must rasterize vector CDR pages to PNG in memory before applying dithering and exporting to TIFF for compatibility with legacy imaging systems.
+ * 3. When you want to reduce file size while maintaining visual quality by dithering a CDR image before saving it as a TIFF for use in document management workflows.
+ * 4. When an application requires converting CDR graphics to a TIFF format that can be processed by OCR engines, using dithering to improve text legibility.
+ * 5. When you need to programmatically handle missing CDR files gracefully and generate a dithered TIFF output only after successful rasterization in a C# .NET environment.
  */

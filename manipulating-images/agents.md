@@ -17,37 +17,38 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using System;` (235/430 files)
-- `using System.IO;` (235/430 files)
-- `using Aspose.Imaging;` (230/430 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (186/430 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (47/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (45/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (43/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (33/430 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.FilterOptions;` (24/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (22/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cdr;` (21/430 files) ← category-specific
-- `using Aspose.Imaging.Masking;` (17/430 files) ← category-specific
-- `using Aspose.Imaging.Masking.Options;` (17/430 files) ← category-specific
-- `using Aspose.Imaging.Masking.Result;` (17/430 files) ← category-specific
-- `using System.Collections.Generic;` (14/430 files)
-- `using Aspose.Imaging.FileFormats.Jpeg;` (11/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (10/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (10/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (6/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (6/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (6/430 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (5/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (4/430 files) ← category-specific
-- `using System.Diagnostics;` (2/430 files)
-- `using System.Linq;` (2/430 files)
-- `using Aspose.Imaging.Shapes;` (1/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf.Emf.Records;` (1/430 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf.Emf.Objects;` (1/430 files) ← category-specific
-- `using Aspose.Imaging.CoreExceptions;` (1/430 files) ← category-specific
-- `using System.Text;` (1/430 files)
-- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/430 files) ← category-specific
+- `using System;` (237/425 files)
+- `using System.IO;` (237/425 files)
+- `using Aspose.Imaging;` (225/425 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (215/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (67/425 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (63/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (31/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (28/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (25/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cdr;` (24/425 files) ← category-specific
+- `using Aspose.Imaging.Masking;` (20/425 files) ← category-specific
+- `using Aspose.Imaging.Masking.Options;` (20/425 files) ← category-specific
+- `using Aspose.Imaging.Masking.Result;` (20/425 files) ← category-specific
+- `using System.Collections.Generic;` (16/425 files)
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (12/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (12/425 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (10/425 files) ← category-specific
+- `using System.Linq;` (9/425 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (8/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (8/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats;` (7/425 files) ← category-specific
+- `using System.Drawing.Drawing2D;` (6/425 files)
+- `using System.Drawing.Text;` (5/425 files)
+- `using Aspose.Imaging.FileFormats.Svg;` (3/425 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (3/425 files) ← category-specific
+- `using System.Diagnostics;` (2/425 files)
+- `using Aspose.Imaging.FileFormats.Emf;` (2/425 files) ← category-specific
+- `using Aspose.Imaging.Brushes;` (2/425 files) ← category-specific
+- `using Aspose.Imaging.Shapes;` (1/425 files) ← category-specific
+- `using Aspose.Imaging.MagicWand;` (1/425 files) ← category-specific
+- `using System.Net.Sockets;` (1/425 files)
+- `using System.Drawing;` (1/425 files)
 
 ## Files in this folder
 
@@ -55,35 +56,35 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 |------|----------|-------------|
 | [load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs](./load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Load a PNG image, apply auto‑masking Graph Cut with default strokes, and save as... |
 | [create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs](./create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Create AutoMaskingGraphCutOptions with custom feathering radius, apply to a PNG,... |
-| [define-a-point-array-for-manual-masking-use-it-on-a-png-and-save-the-processed-image.cs](./define-a-point-array-for-manual-masking-use-it-on-a-png-and-save-the-processed-image.cs) | `PngOptions`, `RasterImage` | Define a Point array for manual masking, use it on a PNG, and save the processed... |
+| [define-a-point-array-for-manual-masking-use-it-on-a-png-and-save-the-processed-image.cs](./define-a-point-array-for-manual-masking-use-it-on-a-png-and-save-the-processed-image.cs) | `MaskingOptions`, `PngOptions`, `RasterImage` | Define a Point array for manual masking, use it on a PNG, and save the processed... |
 | [reuse-previously-configured-automaskinggraphcutoptions-to-refine-background-removal-on-a-second-png-file.cs](./reuse-previously-configured-automaskinggraphcutoptions-to-refine-background-removal-on-a-second-png-file.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Reuse previously configured AutoMaskingGraphCutOptions to refine background remo... |
 | [supply-a-detectedobjectlist-converted-to-assumedobjectdata-for-improved-graph-cut-segmentation-on-a-raster-image.cs](./supply-a-detectedobjectlist-converted-to-assumedobjectdata-for-improved-graph-cut-segmentation-on-a-raster-image.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Supply a DetectedObjectList converted to AssumedObjectData for improved Graph Cu... |
-| [load-an-svg-vector-image-remove-its-background-using-default-analysis-and-save-as-png.cs](./load-an-svg-vector-image-remove-its-background-using-default-analysis-and-save-as-png.cs) | `PngOptions`, `SvgImage`, `SvgRasterizationOptions` | Load an SVG vector image, remove its background using default analysis, and save... |
-| [remove-background-from-an-emf-file-by-specifying-a-background-color-that-matches-unwanted-regions.cs](./remove-background-from-an-emf-file-by-specifying-a-background-color-that-matches-unwanted-regions.cs) | `EmfImage`, `MetaImage` | Remove background from an EMF file by specifying a background color that matches... |
-| [define-a-rectangular-area-for-selective-background-removal-in-a-cdr-vector-image-before-rasterization.cs](./define-a-rectangular-area-for-selective-background-removal-in-a-cdr-vector-image-before-rasterization.cs) | `CdrImage`, `MaskingOptions`, `PngOptions` | Define a rectangular area for selective background removal in a CDR vector image... |
-| [after-removing-background-from-a-vector-image-rasterize-it-to-png-using-pngoptions-with-default-compression.cs](./after-removing-background-from-a-vector-image-rasterize-it-to-png-using-pngoptions-with-default-compression.cs) | `PngOptions` | After removing background from a vector image, rasterize it to PNG using PngOpti... |
-| [batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs](./batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Batch process a folder of PNG files, applying auto‑masking Graph Cut with user‑d... |
-| [iterate-over-a-collection-of-svg-files-remove-backgrounds-rasterize-to-png-and-store-results-in-output-directory.cs](./iterate-over-a-collection-of-svg-files-remove-backgrounds-rasterize-to-png-and-store-results-in-output-directory.cs) | `PngOptions`, `SvgImage`, `SvgRasterizationOptions` | Iterate over a collection of SVG files, remove backgrounds, rasterize to PNG, an... |
-| [apply-median-filter-to-a-png-image-after-background-removal-to-reduce-residual-noise-before-saving.cs](./apply-median-filter-to-a-png-image-after-background-removal-to-reduce-residual-noise-before-saving.cs) | `MaskingOptions`, `PngOptions`, `RasterImage` | Apply median filter to a PNG image after background removal to reduce residual n... |
-| [combine-gauss-wiener-deblurring-with-bilateral-smoothing-on-a-raster-image-to-enhance-clarity-after-masking.cs](./combine-gauss-wiener-deblurring-with-bilateral-smoothing-on-a-raster-image-to-enhance-clarity-after-masking.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Combine Gauss‑Wiener deblurring with bilateral smoothing on a raster image to en... |
-| [use-motion-wiener-filter-on-a-png-that-suffered-motion-blur-then-apply-sharpening-for-edge-definition.cs](./use-motion-wiener-filter-on-a-png-that-suffered-motion-blur-then-apply-sharpening-for-edge-definition.cs) | `MotionWienerFilterOptions`, `RasterImage`, `SharpenFilterOptions` | Use Motion‑Wiener filter on a PNG that suffered motion blur, then apply sharpeni... |
-| [align-horizontal-and-vertical-dpi-of-a-raster-image-before-applying-any-correction-filters-for-consistent-scaling.cs](./align-horizontal-and-vertical-dpi-of-a-raster-image-before-applying-any-correction-filters-for-consistent-scaling.cs) |  | Align horizontal and vertical DPI of a raster image before applying any correcti... |
-| [create-bilateralsmoothingfilteroptions-with-size-parameter-set-to-5-apply-to-png-and-save-output.cs](./create-bilateralsmoothingfilteroptions-with-size-parameter-set-to-5-apply-to-png-and-save-output.cs) | `BilateralSmoothingFilterOptions`, `RasterImage` | Create BilateralSmoothingFilterOptions with size parameter set to 5, apply to PN... |
-| [apply-sharpenfilteroptions-after-median-filtering-to-accentuate-edges-in-a-cleaned-raster-image.cs](./apply-sharpenfilteroptions-after-median-filtering-to-accentuate-edges-in-a-cleaned-raster-image.cs) | `MedianFilterOptions`, `RasterImage`, `SharpenFilterOptions` | Apply SharpenFilterOptions after median filtering to accentuate edges in a clean... |
-| [load-multiple-emf-files-remove-backgrounds-using-specified-color-rasterize-each-to-png-and-log-processing-time.cs](./load-multiple-emf-files-remove-backgrounds-using-specified-color-rasterize-each-to-png-and-log-processing-time.cs) | `EmfImage`, `EmfRasterizationOptions`, `PngOptions` | Load multiple EMF files, remove backgrounds using specified color, rasterize eac... |
-| [implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to.cs](./implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to.cs) | `MaskingOptions`, `PngOptions`, `RasterImage` | Implement a console application that accepts image path arguments, applies auto‑... |
+| [load-an-svg-vector-image-remove-its-background-using-default-analysis-and-save-as-png.cs](./load-an-svg-vector-image-remove-its-background-using-default-analysis-and-save-as-png.cs) | `PngOptions`, `SvgImage` | Load an SVG vector image, remove its background using default analysis, and save... |
+| [remove-background-from-an-emf-file-by-specifying-a-background-color-that-matches-unwanted-regions.cs](./remove-background-from-an-emf-file-by-specifying-a-background-color-that-matches-unwanted-regions.cs) | `PngOptions`, `VectorRasterizationOptions` | Remove background from an EMF file by specifying a background color that matches... |
+| [define-a-rectangular-area-for-selective-background-removal-in-a-cdr-vector-image-before-rasterization.cs](./define-a-rectangular-area-for-selective-background-removal-in-a-cdr-vector-image-before-rasterization.cs) | `PngOptions`, `VectorRasterizationOptions` | Define a rectangular area for selective background removal in a CDR vector image... |
+| [after-removing-background-from-a-vector-image-rasterize-it-to-png-using-pngoptions-with-default-compression.cs](./after-removing-background-from-a-vector-image-rasterize-it-to-png-using-pngoptions-with-default-compression.cs) | `PngOptions`, `VectorRasterizationOptions` | After removing background from a vector image, rasterize it to PNG using PngOpti... |
+| [batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs](./batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs) | `GraphCutMaskingOptions`, `PngOptions`, `RasterImage` | Batch process a folder of PNG files, applying auto‑masking Graph Cut with user‑d... |
+| [iterate-over-a-collection-of-svg-files-remove-backgrounds-rasterize-to-png-and-store-results-in-output-directory.cs](./iterate-over-a-collection-of-svg-files-remove-backgrounds-rasterize-to-png-and-store-results-in-output-directory.cs) | `PngOptions`, `VectorRasterizationOptions` | Iterate over a collection of SVG files, remove backgrounds, rasterize to PNG, an... |
+| [apply-median-filter-to-a-png-image-after-background-removal-to-reduce-residual-noise-before-saving.cs](./apply-median-filter-to-a-png-image-after-background-removal-to-reduce-residual-noise-before-saving.cs) | `PngOptions`, `RasterImage` | Apply median filter to a PNG image after background removal to reduce residual n... |
+| [combine-gauss-wiener-deblurring-with-bilateral-smoothing-on-a-raster-image-to-enhance-clarity-after-masking.cs](./combine-gauss-wiener-deblurring-with-bilateral-smoothing-on-a-raster-image-to-enhance-clarity-after-masking.cs) | `AutoMaskingGraphCutOptions`, `BilateralSmoothingFilterOptions`, `PngOptions` | Combine Gauss‑Wiener deblurring with bilateral smoothing on a raster image to en... |
+| [use-motion-wiener-filter-on-a-png-that-suffered-motion-blur-then-apply-sharpening-for-edge-definition.cs](./use-motion-wiener-filter-on-a-png-that-suffered-motion-blur-then-apply-sharpening-for-edge-definition.cs) | `PngOptions`, `RasterImage` | Use Motion‑Wiener filter on a PNG that suffered motion blur, then apply sharpeni... |
+| [align-horizontal-and-vertical-dpi-of-a-raster-image-before-applying-any-correction-filters-for-consistent-scaling.cs](./align-horizontal-and-vertical-dpi-of-a-raster-image-before-applying-any-correction-filters-for-consistent-scaling.cs) | `JpegOptions`, `RasterImage` | Align horizontal and vertical DPI of a raster image before applying any correcti... |
+| [create-bilateralsmoothingfilteroptions-with-size-parameter-set-to-5-apply-to-png-and-save-output.cs](./create-bilateralsmoothingfilteroptions-with-size-parameter-set-to-5-apply-to-png-and-save-output.cs) | `PngOptions`, `RasterImage` | Create BilateralSmoothingFilterOptions with size parameter set to 5, apply to PN... |
+| [apply-sharpenfilteroptions-after-median-filtering-to-accentuate-edges-in-a-cleaned-raster-image.cs](./apply-sharpenfilteroptions-after-median-filtering-to-accentuate-edges-in-a-cleaned-raster-image.cs) | `JpegOptions`, `RasterImage` | Apply SharpenFilterOptions after median filtering to accentuate edges in a clean... |
+| [load-multiple-emf-files-remove-backgrounds-using-specified-color-rasterize-each-to-png-and-log-processing-time.cs](./load-multiple-emf-files-remove-backgrounds-using-specified-color-rasterize-each-to-png-and-log-processing-time.cs) | `PngOptions`, `VectorRasterizationOptions` | Load multiple EMF files, remove backgrounds using specified color, rasterize eac... |
+| [implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to.cs](./implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Implement a console application that accepts image path arguments, applies auto‑... |
 | [configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a-series-of.cs](./configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a-series-of.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Configure AutoMaskingGraphCutOptions to reuse strokes across iterations, improvi... |
 | [use-detectedobjectlist-from-a-prior-analysis-to-seed-graph-cut-algorithm-for-more-precise-background-segmentation.cs](./use-detectedobjectlist-from-a-prior-analysis-to-seed-graph-cut-algorithm-for-more-precise-background-segmentation.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Use DetectedObjectList from a prior analysis to seed Graph Cut algorithm for mor... |
-| [apply-median-filter-with-kernel-size-3-to-a-png-after-background-removal-to-smooth-minor-artifacts.cs](./apply-median-filter-with-kernel-size-3-to-a-png-after-background-removal-to-smooth-minor-artifacts.cs) | `MedianFilterOptions`, `RasterImage` | Apply median filter with kernel size 3 to a PNG after background removal to smoo... |
-| [run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during.cs](./run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during.cs) | `GaussWienerFilterOptions`, `RasterImage` | Run Gauss‑Wiener filter with default parameters on a rasterized vector image to ... |
-| [apply-motion-wiener-filter-with-motion-vector-set-to-horizontal-direction-on-a-png-captured-from-video.cs](./apply-motion-wiener-filter-with-motion-vector-set-to-horizontal-direction-on-a-png-captured-from-video.cs) | `MotionWienerFilterOptions`, `RasterImage` | Apply Motion‑Wiener filter with motion vector set to horizontal direction on a P... |
-| [combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and.cs](./combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and.cs) | `BilateralSmoothingFilterOptions`, `RasterImage`, `SharpenFilterOptions` | Combine bilateral smoothing and sharpening filters sequentially on a raster imag... |
-| [align-resolutions-of-a-loaded-svg-before-rasterization-to-ensure-consistent-dpi-in-the-resulting-png-file.cs](./align-resolutions-of-a-loaded-svg-before-rasterization-to-ensure-consistent-dpi-in-the-resulting-png-file.cs) | `PngOptions`, `SvgImage`, `SvgRasterizationOptions` | Align resolutions of a loaded SVG before rasterization to ensure consistent DPI ... |
-| [create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs](./create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs) | `PngOptions`, `RasterImage` | Create a reusable method that loads a raster image, applies auto‑masking, median... |
-| [develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background.cs](./develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background.cs) | `MaskingOptions`, `PngOptions`, `RasterImage` | Develop a unit test that verifies background removal on a PNG yields transparent... |
+| [apply-median-filter-with-kernel-size-3-to-a-png-after-background-removal-to-smooth-minor-artifacts.cs](./apply-median-filter-with-kernel-size-3-to-a-png-after-background-removal-to-smooth-minor-artifacts.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Apply median filter with kernel size 3 to a PNG after background removal to smoo... |
+| [run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during.cs](./run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during.cs) | `PngOptions`, `RasterImage` | Run Gauss‑Wiener filter with default parameters on a rasterized vector image to ... |
+| [process-a-batch-of-cdr-files-remove-backgrounds-using-area-selection-rasterize-to-png-and-compress-results.cs](./process-a-batch-of-cdr-files-remove-backgrounds-using-area-selection-rasterize-to-png-and-compress-results.cs) | `CdrImage`, `PngOptions`, `VectorRasterizationOptions` | Process a batch of CDR files, remove backgrounds using area selection, rasterize... |
+| [apply-motion-wiener-filter-with-motion-vector-set-to-horizontal-direction-on-a-png-captured-from-video.cs](./apply-motion-wiener-filter-with-motion-vector-set-to-horizontal-direction-on-a-png-captured-from-video.cs) | `PngOptions`, `RasterImage` | Apply Motion‑Wiener filter with motion vector set to horizontal direction on a P... |
+| [combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and.cs](./combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and.cs) | `JpegOptions`, `RasterImage` | Combine bilateral smoothing and sharpening filters sequentially on a raster imag... |
+| [align-resolutions-of-a-loaded-svg-before-rasterization-to-ensure-consistent-dpi-in-the-resulting-png-file.cs](./align-resolutions-of-a-loaded-svg-before-rasterization-to-ensure-consistent-dpi-in-the-resulting-png-file.cs) | `PngOptions`, `SvgImage`, `VectorRasterizationOptions` | Align resolutions of a loaded SVG before rasterization to ensure consistent DPI ... |
+| [create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs](./create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs) | `AutoMaskingGraphCutOptions`, `MedianFilterOptions`, `PngOptions` | Create a reusable method that loads a raster image, applies auto‑masking, median... |
+| [develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background.cs](./develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Develop a unit test that verifies background removal on a PNG yields transparent... |
 | [measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user-strokes.cs](./measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user-strokes.cs) | `AutoMaskingGraphCutOptions`, `PngOptions`, `RasterImage` | Measure performance difference between Graph Cut auto‑masking with default strok... |
-| [load-a-png-align-its-resolutions-then-apply-bilateral-smoothing-before-saving-to-preserve-aspect-ratio.cs](./load-a-png-align-its-resolutions-then-apply-bilateral-smoothing-before-saving-to-preserve-aspect-ratio.cs) | `BilateralSmoothingFilterOptions` | Load a PNG, align its resolutions, then apply bilateral smoothing before saving ... |
-| *...and 400 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/manipulating-images) |
+| *...and 395 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.9.0/manipulating-images) |
 
 ## Category Statistics
 - Total examples: 425
@@ -148,36 +149,6 @@ All tasks passed ✅
 
 
 
-## Operations Covered
-- Export PSD to PNG with custom fonts  
-- Load PSD image file  
-- Set custom fonts folder for rendering  
-- Generate APNG with smoothing mode enabled  
-- Apply Gaussian blur to CDR images  
-- Merge multiple images into multipage TIFF  
-- Binarize image using Bradley threshold algorithm  
-- Batch convert TIFF to PDF with anti‑aliasing  
-- Configure multiple font directories for TIFF‑to‑PDF conversion  
-- Rotate PNG image 45° with transparent background  
-
-## Supported Formats
-- **PSD** – source Photoshop file that is loaded and converted.  
-- **PNG** – input raster image and static output format.  
-- **APNG** – animated PNG format used for output with smoothing mode.  
-- **CDR** – CorelDRAW source files processed (blur applied).  
-- **TIFF** – source format and multipage container for merged images.  
-- **PDF** – target format for high‑quality TIFF‑to‑PDF conversion.  
-
-## API Classes Used
-- `Image` — base class for loading and saving images.  
-- `Image.Load(string)` — static method that reads an image file and returns an appropriate Image object.  
-- `RasterImage` — derived class that provides raster‑specific operations such as filters and binarization.  
-- `RasterImage.BinarizeBradley(int, int)` — applies the Bradley threshold algorithm to a raster image.  
-- `FontSettings` — static class for configuring custom font directories and refreshing the font cache.  
-- `FontSettings.SetFontsFolder(string)` — sets the folder that contains user‑defined fonts.  
-- `FontSettings.UpdateFonts()` — reloads the font collection after changes.
-
-
 ## Use Cases
 - When you need to **export a PSD file as PNG while preserving custom font appearance**, you can point Aspose.Imaging to a folder of user‑defined fonts with `FontSettings.SetFontsFolder`, load the PSD, and save it using `PngOptions` – this keeps the text rendering identical to the original design.  
 - If your workflow requires **applying Gaussian blur to multiple CDR files and merging the blurred results into a multipage TIFF**, load each `.cdr` file, apply `GaussianBlurFilter`, and add the processed images to a `TiffImage` collection before saving the combined document.  
@@ -190,41 +161,6 @@ Manipulating images often goes hand‑in‑hand with format conversion, so the e
 If you need to apply additional visual effects such as sharpening or color adjustments, the **[Image And Photo Filters](../image-and-photo-filters/)** category provides a wide range of filter options that can be combined with the Gaussian blur or Bradley threshold workflows shown above.  
 Finally, when you want to combine several processed pages into a single document, the **[Merge Images](../merge-images/)** category demonstrates techniques for stitching images together, which aligns naturally with the multipage TIFF merging scenario.
 
-
-## Get Started
-
-Ready to try Manipulating Images conversions on your own files with Aspose.Imaging for .NET?
-
-```bash
-dotnet add package Aspose.Imaging
-```
-
-| Resource | Link |
-|----------|------|
-| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
-| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
-| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
-| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
-
 <!-- AUTOGENERATED:START -->
-Updated: 2026-09-16 | Run: `20260723_031247` | Examples: 425
+Updated: 2026-10-02 | Run: `20261002_121623` | Examples: 425
 <!-- AUTOGENERATED:END -->
-
-## Developer Q&A
-
-### Q: How can I export a PSD file to PNG with custom fonts using Aspose.Imaging for .NET?  
-Load the PSD with `PsdImage`, add your fonts to a `FontSettings` object and assign it to the image, then save using `PngOptions`. → See: `add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs`
-
-### Q: What is the Aspose.Imaging code to apply a median filter to an APNG image in C#?  
-Open the APNG with `Image.Load`, create a `MedianFilter` and call `image.ApplyFilter(filter)`, then save with `ApngOptions`. → See: `apply-median-and-wiener-filters-to-images-saved-in-the-apng-format-for-enhanced-noise-reduction.cs`
-
-### Q: How do I batch convert multiple CDR files to individual PDF documents while preserving vector shapes using Aspose.Imaging?  
-Iterate over the CDR files, load each with `CdrImage`, set `PdfOptions` (including vector rasterization settings), and call `image.Save(pdfPath, pdfOptions)`. → See: `batch-export-emf-text-from-multiple-cdr-files-to-individual-pdf-documents-with-vector-shape-conversion.cs`
-
-### Q: How can I configure Aspose.Imaging to use several font folders when converting a TIFF to PDF in C#?  
-Create a `FontSettings` instance, add each directory via `FontSettings.AddFontFolder`, assign it to the TIFF image, and save with `PdfOptions`. → See: `configure-fontsettings-with-multiple-font-directories-for-tiff-to-pdf-conversion-to-support-diverse-scripts.cs`
-
-### Q: How do I deskew an image and save the corrected result as an APNG while keeping transparency using Aspose.Imaging?  
-Load the image, apply `DeskewFilter` with `image.ApplyFilter(new DeskewFilter())`, then save using `ApngOptions` which preserves the alpha channel. → See: `deskew-an-image-and-save-the-corrected-result-as-an-apng-file-preserving-visual-integrity.cs`

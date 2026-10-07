@@ -1,9 +1,8 @@
-// HOW-TO: Measure Performance of Drawing Shapes with Stopwatch in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Measure Drawing Performance With Stopwatch In Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,45 +10,42 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
+                graphics.DrawRectangle(pen, 50, 50, 200, 150);
+
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.Wheat);
-
-                    var stopwatch = new System.Diagnostics.Stopwatch();
-                    stopwatch.Start();
-
-                    graphics.DrawLine(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(450, 50));
-                    graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3), new Aspose.Imaging.Rectangle(100, 100, 300, 200));
-                    graphics.DrawEllipse(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2), new Aspose.Imaging.Rectangle(150, 150, 200, 100));
-
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Green))
-                    {
-                        graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(200, 300, 100, 50));
-                    }
-
-                    using (SolidBrush textBrush = new SolidBrush(Aspose.Imaging.Color.Purple))
-                    {
-                        graphics.DrawString(
-                            "Performance Test",
-                            new Aspose.Imaging.Font("Arial", 24),
-                            textBrush,
-                            new Aspose.Imaging.PointF(150, 400));
-                    }
-
-                    stopwatch.Stop();
-                    Console.WriteLine($"Drawing operations took {stopwatch.ElapsedMilliseconds} ms");
-
-                    image.Save();
+                    graphics.FillRectangle(brush, 300, 100, 150, 100);
                 }
+
+                var stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+
+                for (int i = 0; i < 100; i++)
+                {
+                    Aspose.Imaging.Pen p = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 1);
+                    graphics.DrawLine(p, 0, i, image.Width, i);
+                }
+
+                stopwatch.Stop();
+                Console.WriteLine($"Drawing time: {stopwatch.ElapsedMilliseconds} ms");
+
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -61,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to benchmark how long basic drawing commands (lines, rectangles, ellipses) take in a PNG image generated with Aspose.Imaging for .NET.
- * 2. When you want to compare the performance impact of different pen widths or brush fills while creating graphics for reports or UI assets.
- * 3. When you are optimizing a server‑side image generation service and need precise timing data to meet latency requirements.
- * 4. When you are profiling the rendering speed of text and shapes before scaling the image size for high‑resolution printing.
- * 5. When you need to log execution time of drawing operations to decide whether to cache pre‑rendered graphics in a web application.
+ * 1. When you need to benchmark how long bulk line‑drawing operations take on a PNG image using Aspose.Imaging in C#.
+ * 2. When you want to compare the performance impact of different pen colors or thicknesses before finalizing a graphics‑heavy report generation.
+ * 3. When you are optimizing a server‑side image‑processing service and need precise timing for each drawing loop to meet SLA requirements.
+ * 4. When you are profiling custom annotation tools that draw shapes on user‑uploaded images to ensure they remain responsive.
+ * 5. When you need to log execution time of drawing commands to decide whether to switch to a faster rendering technique or library.
  */

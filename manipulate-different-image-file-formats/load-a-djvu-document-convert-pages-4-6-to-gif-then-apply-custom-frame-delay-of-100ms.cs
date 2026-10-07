@@ -1,4 +1,4 @@
-// HOW-TO: Convert Specific DjVu Pages to Animated GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 4 to 6 Into GIF With Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\pages_4_6.gif";
+            string inputPath = "input.djvu";
+            string outputPath = Path.Combine("Output", "output.gif");
 
             if (!File.Exists(inputPath))
             {
@@ -25,12 +25,11 @@ class Program
 
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                var gifOptions = new GifOptions
+                using (GifOptions gifOptions = new GifOptions())
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 3, 4, 5 })
-                };
-
-                djvu.Save(outputPath, gifOptions);
+                    gifOptions.MultiPageOptions = new MultiPageOptions(new IntRange(3, 5));
+                    djvu.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -42,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract pages 4‑6 from a DjVu file and create an animated GIF for quick web preview.
- * 2. When you want to generate a lightweight GIF animation from selected DjVu pages to embed in documentation or tutorials.
- * 3. When you have a multi‑page DjVu e‑book and must produce a short GIF preview of a chapter for mobile users.
- * 4. When you need to convert scanned DjVu pages into a single GIF file to attach to an email without sending the large original document.
- * 5. When you are building a batch process that converts specific DjVu pages into GIFs for archival or content‑management systems.
+ * 1. When you need to extract a specific range of pages from a multi‑page DjVu file and create an animated GIF for quick web preview.
+ * 2. When you want to generate a lightweight GIF slideshow from selected DjVu pages to embed in a mobile application.
+ * 3. When building a document conversion service that must turn only certain DjVu pages into a single GIF file for email attachments.
+ * 4. When automating batch processing of DjVu documents, converting just the required pages to GIF to reduce storage and bandwidth usage.
+ * 5. When creating a digital archive and require a fast visual thumbnail animation of particular DjVu pages using C#.
  */

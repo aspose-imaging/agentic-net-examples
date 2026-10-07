@@ -1,30 +1,30 @@
-// HOW-TO: Apply Emboss3x3 Filter to PNG Image and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss 3x3 Filter to Image from URL in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Net.Http;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "sample.png";
-            string outputPath = "Output/processed.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            string inputUrl = "https://example.com/image.jpg";
+            string outputPath = "output.jpg";
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (HttpClient client = new HttpClient())
+            using (Stream stream = client.GetStreamAsync(inputUrl).Result)
+            using (Image image = Image.Load(stream))
             {
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-                raster.Save(outputPath);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -36,9 +36,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a three‑by‑three emboss effect to user‑uploaded PNG files before storing them on a server using C# and Aspose.Imaging.
- * 2. When you want to process scanned documents in memory, apply an emboss convolution filter for visual emphasis, and write the result directly to an output file without intermediate disk copies.
- * 3. When building a web API that receives an image stream, applies the Emboss3x3 filter, and returns the transformed image to the client in .NET.
- * 4. When creating a batch job that reads images from a folder, enhances their texture with an emboss effect, and saves the processed files to a designated output directory using Aspose.Imaging.
- * 5. When developing a desktop application that previews images with artistic filters, you can load the image, apply the Emboss3x3 convolution, and display or save the result without manual pixel manipulation.
+ * 1. When you need to add a stylized emboss effect to photos downloaded directly from a web service without writing the original file to disk.
+ * 2. When processing user‑uploaded images in a cloud‑based C# application and you want to transform them on the fly before storing them as JPEG.
+ * 3. When generating thumbnails with an embossed look for an online gallery by loading images from remote URLs.
+ * 4. When building a server‑side image pipeline that applies a convolution filter to streamed images to reduce I/O overhead.
+ * 5. When creating a batch job that reads images from an API, applies the Emboss3x3 filter, and saves the results for further analysis.
  */

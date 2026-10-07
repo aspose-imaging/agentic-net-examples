@@ -1,8 +1,9 @@
-// HOW-TO: Apply Emboss3x3 Filter to Grayscale PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss 3x3 Filter to Grayscale PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,36 +11,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/sample_embossed.png";
+            string inputPath = Path.Combine("Input", "image.png");
+            string outputPath = Path.Combine("Output", "embossed.png");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel operations
-                RasterImage raster = (RasterImage)image;
+                RasterCachedImage rci = (RasterCachedImage)image;
+                if (!rci.IsCached) rci.CacheData();
+                rci.Grayscale();
 
-                // Convert to grayscale
-                raster.Grayscale();
+                rci.Filter(rci.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                // Apply Emboss3x3 convolution filter
-                var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-                raster.Filter(raster.Bounds, embossOptions);
-
-                // Save the result as PNG
-                raster.Save(outputPath, new PngOptions());
+                rci.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight surface texture in a PNG by converting it to grayscale and applying an emboss effect for a stylized visual in a .NET application.
- * 2. When preparing product photos for a catalog where a subtle 3‑D relief is required, using Aspose.Imaging to grayscale the image and add an Emboss3x3 filter in C#.
- * 3. When generating game assets that need a hand‑drawn embossed look, you can convert color PNG sprites to grayscale and apply the Emboss3x3 convolution filter programmatically.
- * 4. When creating printable brochures and want to emphasize fine details of a grayscale diagram, the code lets you apply a texture‑enhancing emboss filter before saving the PNG.
- * 5. When automating batch processing of images to produce artistic black‑and‑white versions with highlighted edges, this C# routine uses Aspose.Imaging to grayscale and emboss each PNG file.
+ * 1. When you need to highlight surface texture in a PNG by converting it to grayscale and applying an Aspose.Imaging emboss filter for a stylized visual effect.
+ * 2. When preparing product photos for a catalog where a subtle 3‑D relief is required, and you want to automate the conversion and embossing of PNG images with C#.
+ * 3. When creating game assets that require a grayscale, embossed version of an image to serve as a height map, using Aspose.Imaging’s ConvolutionFilter in .NET.
+ * 4. When generating printable artwork where emphasizing edges and texture improves readability in monochrome prints, and you need a C# routine to grayscale and emboss PNG files.
+ * 5. When automating a batch process that converts color PNGs to grayscale and adds an emboss effect for a consistent branding style across a website, leveraging Aspose.Imaging for .NET.
  */

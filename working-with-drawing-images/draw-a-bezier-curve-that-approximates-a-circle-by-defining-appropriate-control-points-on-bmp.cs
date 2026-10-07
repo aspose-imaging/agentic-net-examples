@@ -1,71 +1,61 @@
-// HOW-TO: Draw a Circle Using Bezier Curves on BMP with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Circle Approximation with Bezier Curves in BMP using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\circle.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        string outputPath = "output.bmp";
         try
         {
-            // Set up BMP options with a file create source
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 500;
-            int height = 500;
-
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
+                Pen pen = new Pen(Aspose.Imaging.Color.Blue, 2);
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                Pen pen = new Pen(Color.Blue, 2);
+                float cx = 200f;
+                float cy = 200f;
+                float r = 150f;
+                float k = 0.5522847498f * r;
 
-                // Circle parameters
-                float cx = 250f;
-                float cy = 250f;
-                float r = 200f;
-                float k = 0.5522847498f * r; // Control point offset
-
-                // Right to Top
+                // Top-right quadrant
                 graphics.DrawBezier(pen,
-                    new Point((int)(cx + r), (int)cy),
-                    new Point((int)(cx + r), (int)(cy - k)),
-                    new Point((int)(cx + k), (int)(cy - r)),
-                    new Point((int)cx, (int)(cy - r)));
+                    new PointF(cx + r, cy),
+                    new PointF(cx + r, cy - k),
+                    new PointF(cx + k, cy - r),
+                    new PointF(cx, cy - r));
 
-                // Top to Left
+                // Top-left quadrant
                 graphics.DrawBezier(pen,
-                    new Point((int)cx, (int)(cy - r)),
-                    new Point((int)(cx - k), (int)(cy - r)),
-                    new Point((int)(cx - r), (int)(cy - k)),
-                    new Point((int)(cx - r), (int)cy));
+                    new PointF(cx, cy - r),
+                    new PointF(cx - k, cy - r),
+                    new PointF(cx - r, cy - k),
+                    new PointF(cx - r, cy));
 
-                // Left to Bottom
+                // Bottom-left quadrant
                 graphics.DrawBezier(pen,
-                    new Point((int)(cx - r), (int)cy),
-                    new Point((int)(cx - r), (int)(cy + k)),
-                    new Point((int)(cx - k), (int)(cy + r)),
-                    new Point((int)cx, (int)(cy + r)));
+                    new PointF(cx - r, cy),
+                    new PointF(cx - r, cy + k),
+                    new PointF(cx - k, cy + r),
+                    new PointF(cx, cy + r));
 
-                // Bottom to Right
+                // Bottom-right quadrant
                 graphics.DrawBezier(pen,
-                    new Point((int)cx, (int)(cy + r)),
-                    new Point((int)(cx + k), (int)(cy + r)),
-                    new Point((int)(cx + r), (int)(cy + k)),
-                    new Point((int)(cx + r), (int)cy));
-
-                // Save the image (output path already bound)
-                image.Save();
+                    new PointF(cx, cy + r),
+                    new PointF(cx + k, cy + r),
+                    new PointF(cx + r, cy + k),
+                    new PointF(cx + r, cy));
+                
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -77,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution BMP file containing a mathematically precise circle for use in engineering diagrams or printable assets, this code creates the shape with Bezier curves.
- * 2. When an application must programmatically render vector‑style graphics such as circular icons or gauges directly onto a bitmap without relying on external image editors, the example shows how to draw them with Aspose.Imaging.
- * 3. When a reporting tool requires dynamically generated circular charts or progress indicators embedded in BMP images for legacy systems that only accept BMP format, this approach provides a simple C# solution.
- * 4. When a game or simulation needs to create texture assets on the fly, such as circular masks or collision boundaries, the code demonstrates how to draw them using Bezier control points.
- * 5. When a developer is learning how to use Aspose.Imaging’s Graphics API to manipulate pixels, colors, and pens while approximating geometric shapes, this sample serves as a practical tutorial.
+ * 1. When you need to programmatically generate a high‑resolution BMP file containing a smooth circular shape without using rasterized images.
+ * 2. When you want to create vector‑like graphics in a bitmap by approximating circles with Bezier curves for precise control over stroke thickness.
+ * 3. When you are building a reporting tool that embeds circular diagrams into BMP charts and requires deterministic rendering via Aspose.Imaging.
+ * 4. When you need to export custom UI icons or symbols as BMP files and prefer drawing them with code rather than loading pre‑made assets.
+ * 5. When you are testing graphic algorithms and need a reproducible BMP image of a circle drawn using the same control‑point math across platforms.
  */

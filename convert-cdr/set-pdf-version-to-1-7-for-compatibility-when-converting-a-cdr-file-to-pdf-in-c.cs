@@ -7,36 +7,53 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.pdf";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Configure PDF options; default PDF version is 1.7
-                var pdfOptions = new PdfOptions
-                {
-                    PdfCoreOptions = new PdfCoreOptions()
-                    // No explicit PdfCompliance setting needed for PDF 1.7
-                };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+            if (files.Length == 0)
+            {
+                Console.WriteLine("No CDR files found in the Input directory.");
+                return;
+            }
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PDF documents from CorelDRAW files for client reporting while ensuring compatibility with PDF 1.7 readers.
- * 2. When automating a batch process that converts legacy CDR graphics to PDFs for archival in a document management system.
- * 3. When integrating image conversion into a C# web service that delivers printable PDFs from user‑uploaded CDR files.
- * 4. When preparing marketing assets by converting CDR logos to PDF format that complies with PDF 1.7 standards for print shops.
- * 5. When validating that a converted PDF meets the required version for downstream workflows such as digital signatures or PDF/A conversion.
+ * 1. When a designer needs to batch‑convert CorelDRAW (.cdr) artwork to PDF files that must be compatible with PDF 1.7 readers such as Adobe Acrobat 9 or later.
+ * 2. When an automated build pipeline must generate PDF documentation from CDR assets while ensuring the output adheres to the PDF 1.7 specification for regulatory compliance.
+ * 3. When a web service receives user‑uploaded CDR files and must return PDF versions that can be opened on all modern browsers and mobile devices supporting PDF 1.7.
+ * 4. When a legacy printing system requires PDFs saved with version 1.7 to preserve vector quality and color profiles from the original CDR files.
+ * 5. When a desktop application needs to programmatically convert multiple CDR files to PDF with Aspose.Imaging while explicitly setting the PDF version to avoid compatibility warnings in downstream tools.
  */

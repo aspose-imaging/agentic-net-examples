@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -11,40 +10,22 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.cmx";
-            string outputPath = @"C:\Images\sample_rotated.emf";
+            string inputPath = "input.cmx";
+            string outputPath = "output.emf";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Rotate the image 90 degrees clockwise
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Set up EMF rasterization options using the image size
-                var vectorOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Create EMF save options with the rasterization settings
-                var emfOptions = new EmfOptions
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
-
-                // Save the rotated image as EMF
-                image.Save(outputPath, emfOptions);
+                var options = new EmfOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -56,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application needs to display a CMX drawing rotated for landscape orientation and export it as a Windows Metafile for compatibility with legacy reporting tools.
- * 2. When a batch processing script must convert a library of CMX icons to EMF after rotating them to match a new UI layout.
- * 3. When a developer integrates Aspose.Imaging into a document generation system that requires rotated vector graphics in EMF format for inclusion in Word documents.
- * 4. When an automated build pipeline has to re‑orient technical illustrations stored as CMX files before embedding them into PDF reports that use EMF placeholders.
- * 5. When a GIS tool needs to adjust the orientation of vector map symbols saved as CMX and output them as EMF for use in Windows‑based mapping applications.
+ * 1. When a developer needs to display a CMX drawing in a Windows application that only supports EMF, they can rotate the vector and convert it.
+ * 2. When preparing printed reports that require landscape orientation, rotating the CMX artwork 90° and saving as EMF ensures correct layout.
+ * 3. When integrating legacy CAD data into a .NET reporting engine that consumes EMF, the code provides a quick way to re‑orient and export the graphics.
+ * 4. When automating batch processing of CMX files to match a corporate branding guideline that mandates a specific orientation, this snippet can be used in a scheduled job.
+ * 5. When a user uploads a CMX file to a web service and expects a rotated EMF preview for thumbnail generation, the code performs the transformation on the server.
  */

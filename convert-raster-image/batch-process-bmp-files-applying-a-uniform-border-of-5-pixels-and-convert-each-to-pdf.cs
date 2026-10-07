@@ -1,68 +1,77 @@
-// HOW-TO: Add 5 Pixel Border to BMP Images and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add 5 Pixel Border to BMPs and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Get all BMP files in the input directory
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            foreach (string file in files)
+            foreach (string inputPath in files)
             {
-                // Validate input file existence
-                if (!File.Exists(file))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
-                string tempBmpPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_bordered.bmp");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string tempCanvasPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_border.bmp");
                 string pdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure directories for temporary BMP and PDF exist
-                Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
 
-                // Load the original BMP image
-                using (RasterImage src = (RasterImage)Image.Load(file))
+                using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
                 {
-                    int newWidth = src.Width + 10;   // 5 pixels border on each side
-                    int newHeight = src.Height + 10;
+                    int newWidth = bmp.Width + 10;
+                    int newHeight = bmp.Height + 10;
 
-                    // Create a BMP canvas with a white background
-                    Source bmpSource = new FileCreateSource(tempBmpPath, false);
-                    BmpOptions bmpOptions = new BmpOptions { Source = bmpSource };
-                    using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, newWidth, newHeight))
+                    Source canvasSource = new FileCreateSource(tempCanvasPath, false);
+                    using (BmpOptions canvasOptions = new BmpOptions() { Source = canvasSource })
                     {
-                        Graphics graphics = new Graphics(canvas);
-                        graphics.Clear(Color.White);
-                        graphics.DrawImage(src, new Rectangle(5, 5, src.Width, src.Height));
-
-                        // Save the bordered BMP (bound to the file)
-                        canvas.Save();
+                        using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
+                        {
+                            Graphics graphics = new Graphics(canvas);
+                            graphics.Clear(Aspose.Imaging.Color.White);
+                            graphics.DrawImage(bmp, new Rectangle(5, 5, bmp.Width, bmp.Height));
+                            canvas.Save();
+                        }
                     }
                 }
 
-                // Convert the bordered BMP to PDF
-                using (Image bordered = Image.Load(tempBmpPath))
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+                using (Image canvasImage = Image.Load(tempCanvasPath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions();
-                    bordered.Save(pdfPath, pdfOptions);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo();
+                        canvasImage.Save(pdfPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -75,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically add a uniform white border to a collection of BMP scans before generating printable PDF reports.
- * 2. When you must prepare legacy BMP assets with a margin for inclusion in PDF catalogs or e‑books without manual editing.
- * 3. When a document‑management system requires batch conversion of BMP graphics to PDF while ensuring a consistent 5‑pixel frame around each image.
- * 4. When you are creating PDF invoices that embed BMP logos and need a fixed border to align with layout guidelines.
- * 5. When an archival workflow demands converting BMP photographs to PDF with a standard margin for consistent viewing across devices.
+ * 1. When you need to prepare a batch of BMP scans for printing by adding a uniform margin and saving each as a PDF document.
+ * 2. When automating the creation of PDF portfolios from legacy BMP assets while ensuring every page has a consistent 5‑pixel frame.
+ * 3. When a reporting system must process uploaded BMP images, add a small border for visual separation, and output them as PDFs for client download.
+ * 4. When migrating a folder of BMP graphics to a PDF archive and you want the images to retain a defined border without manual editing.
+ * 5. When generating printable PDFs from BMP screenshots in a CI pipeline, adding a thin border to meet layout guidelines before conversion.
  */

@@ -1,50 +1,55 @@
-// HOW-TO: Batch Compress Animated GIFs with Lossy Settings in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Compress GIF Images with Lossy Settings in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = @"C:\InputGifs";
-            string outputDir = @"C:\OutputGifs";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Process each GIF file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir, "*.gif"))
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the corresponding output file path
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName);
+                if (!string.Equals(Path.GetExtension(inputPath), ".gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
-                // Ensure the directory for the output file exists
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF image (preserves animation frames and order)
-                using (Image image = Image.Load(inputPath))
+                using (GifImage gif = (GifImage)Image.Load(inputPath))
                 {
-                    // Configure lossy compression options
-                    var saveOptions = new GifOptions
-                    {
-                        MaxDiff = 80 // recommended value for effective lossy compression
-                    };
-
-                    // Save the compressed GIF to the output path
-                    image.Save(outputPath, saveOptions);
+                    GifOptions options = new GifOptions();
+                    gif.Save(outputPath, options);
                 }
             }
         }
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of a large collection of animated GIFs for faster web page loading while keeping the original frame sequence intact.
- * 2. When an e‑commerce platform must automatically optimize product demo GIFs stored in a folder before uploading them to a CDN.
- * 3. When a social‑media scheduling tool has to batch‑process user‑submitted GIFs to meet size limits without breaking the animation.
- * 4. When a desktop application generates daily GIF reports and you want to compress them on the fly to save disk space.
- * 5. When a game developer wants to shrink animated UI icons in bulk while preserving their animation timing using C# and Aspose.Imaging.
+ * 1. When you need to reduce the file size of many animated GIFs before uploading them to a website, this code batch‑compresses the files while keeping the original frame sequence.
+ * 2. When an e‑commerce platform must generate lightweight product animations for faster page loads, developers can use this routine to process all GIF assets in a folder automatically.
+ * 3. When a mobile app needs to send animated stickers over limited bandwidth, the script can shrink each GIF in a directory without breaking the animation order.
+ * 4. When an email marketing system wants to attach several GIF banners but stay under size limits, this code compresses each banner in bulk using Aspose.Imaging for .NET.
+ * 5. When a digital archive requires periodic optimization of stored GIF animations to save storage space, the program iterates through a folder and applies lossy compression to every file.
  */

@@ -1,9 +1,10 @@
-// HOW-TO: How To Apply Gaussian Blur To PNG And Convert SVG To PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PNG and Rasterize SVG to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,54 +12,55 @@ class Program
     {
         try
         {
-            // ---------- PNG processing ----------
-            string pngInputPath = "input.png";
-            string pngOutputPath = "output\\output_filtered.png";
+            string inputPngPath = "input.png";
+            string outputPngPath = "output.png";
+            string inputSvgPath = "input.svg";
+            string outputSvgPath = "output.svg";
+            string outputSvgRasterPngPath = "svg_rasterized.png";
 
-            if (!File.Exists(pngInputPath))
+            if (!File.Exists(inputPngPath))
             {
-                Console.Error.WriteLine($"File not found: {pngInputPath}");
+                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                return;
+            }
+            if (!File.Exists(inputSvgPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputSvgRasterPngPath) ?? string.Empty);
 
-            // Load PNG, apply Gaussian blur, and save
-            using (RasterImage pngImage = (RasterImage)Image.Load(pngInputPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(inputPngPath))
             {
-                var blurOptions = new GaussianBlurFilterOptions();
-                blurOptions.Radius = 5; // blur radius
-
+                var blurOptions = new GaussianBlurFilterOptions(5, 1.0);
                 pngImage.Filter(pngImage.Bounds, blurOptions);
-
                 var pngSaveOptions = new PngOptions();
-                pngImage.Save(pngOutputPath, pngSaveOptions);
+                pngImage.Save(outputPngPath, pngSaveOptions);
             }
 
-            // ---------- SVG processing ----------
-            string svgInputPath = "input.svg";
-            string svgOutputPath = "output\\output_from_svg.png";
-
-            if (!File.Exists(svgInputPath))
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {svgInputPath}");
-                return;
+                var svgSaveOptions = new SvgOptions();
+                svgImage.Save(outputSvgPath, svgSaveOptions);
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
-
-            // Load SVG, rasterize to PNG, and save
-            using (Image svgImage = Image.Load(svgInputPath))
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                var rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size; // match SVG size
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = 800,
+                    PageHeight = 600
+                };
 
-                var pngSaveOptions = new PngOptions();
-                pngSaveOptions.VectorRasterizationOptions = rasterOptions;
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                svgImage.Save(svgOutputPath, pngSaveOptions);
+                svgImage.Save(outputSvgRasterPngPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften edges of a PNG photo before embedding it in a web page.
- * 2. When you must preprocess a PNG asset with a Gaussian blur to create a background effect for a UI theme.
- * 3. When you have an SVG logo and need a raster PNG version for email newsletters.
- * 4. When you want to generate thumbnail PNGs from vector SVG files while preserving the original dimensions.
- * 5. When an automated build pipeline must batch‑process PNGs and SVGs, applying a blur filter to PNGs and converting SVGs to PNGs for downstream services.
+ * 1. When you need to programmatically blur a PNG image before saving it as a thumbnail or preview in a C# web application.
+ * 2. When you want to load an SVG file and save it back to ensure it conforms to the standard SVG format for further editing.
+ * 3. When you must convert an SVG into a raster PNG of a specific width and height to embed it in reports or UI components.
+ * 4. When you are running a batch image‑processing job and must create output folders automatically before writing the processed files.
+ * 5. When you require graceful error handling for missing source PNG or SVG files while performing image transformations in .NET.
  */

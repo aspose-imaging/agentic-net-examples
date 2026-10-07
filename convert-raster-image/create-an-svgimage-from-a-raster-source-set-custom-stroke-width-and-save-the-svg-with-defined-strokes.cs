@@ -1,41 +1,44 @@
-// HOW-TO: Create SVG From BMP With Custom Border Stroke Width In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG from PNG with Custom Stroke Width in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96;
 
-                var svgGraphics = new SvgGraphics2D(width, height, dpi);
+                SvgOptions svgOptions = new SvgOptions();
 
-                var borderPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
-                svgGraphics.DrawRectangle(borderPen, 0, 0, width, height);
-
-                svgGraphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
-
-                using (SvgImage svgImage = svgGraphics.EndRecording())
+                using (Image svgImage = Image.Create(svgOptions, width, height))
                 {
+                    Graphics graphics = new Graphics(svgImage);
+                    graphics.Clear(Color.White);
+                    graphics.DrawImage(raster, new Point(0, 0));
+
+                    Pen pen = new Pen(Color.Black);
+                    pen.Width = 5;
+                    graphics.DrawRectangle(pen, 0, 0, width - 1, height - 1);
+
                     svgImage.Save(outputPath);
                 }
             }
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a bitmap logo into a scalable SVG document while adding a thick black outline for branding consistency.
- * 2. When generating printable vector graphics from scanned photos and you want a uniform border to match corporate style guidelines.
- * 3. When converting UI screenshots to SVG for responsive web design and require a defined stroke width around the image to preserve layout spacing.
- * 4. When automating batch processing of BMP assets to SVG format and need to ensure each output includes a consistent border for visual separation.
- * 5. When creating diagram assets programmatically in C# and want to overlay a custom‑width rectangle around a raster image before saving as SVG for further editing.
+ * 1. When you need to embed a PNG raster image into an SVG and draw a thick black border around it for web graphics.
+ * 2. When you want to convert user‑uploaded screenshots to scalable SVG files while adding a uniform stroke for documentation purposes.
+ * 3. When you must generate vector placeholders for bitmap logos, applying a 5‑pixel outline to keep the design resolution‑independent.
+ * 4. When an automated batch process adds a consistent border to icons before saving them as SVG for a UI component library.
+ * 5. When you are preparing printable assets that require a raster image inside an SVG with a defined stroke to meet branding guidelines.
  */

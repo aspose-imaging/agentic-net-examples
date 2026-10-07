@@ -1,10 +1,12 @@
-// HOW-TO: Batch Convert EMF Files to PNG at 300 DPI with Lossless Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to PNG at 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
@@ -36,27 +38,23 @@ class Program
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var vectorOptions = new EmfRasterizationOptions
+                    using (PngOptions options = new PngOptions())
                     {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    };
-
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions,
-                        ResolutionSettings = new ResolutionSetting(300, 300),
-                        PngCompressionLevel = PngCompressionLevel.ZipLevel0
-                    };
-
-                    image.Save(outputPath, pngOptions);
+                        options.Source = new FileCreateSource(outputPath, false);
+                        options.ResolutionSettings = new ResolutionSetting(300, 300);
+                        options.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -69,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of vector EMF drawings into high‑resolution PNG images for web publishing.
- * 2. When you must preserve the original quality by rasterizing EMF files at 300 DPI and using lossless PNG compression in a .NET batch process.
- * 3. When a reporting system generates charts as EMF files and you want to export them to PNG for inclusion in PDF reports.
- * 4. When you are building a migration tool that moves legacy EMF assets to a modern image format without manual intervention.
- * 5. When you need to create thumbnail previews of EMF files at a specific resolution for a file‑management application.
+ * 1. When you need to generate high‑resolution PNG thumbnails from a collection of vector EMF drawings for printing or web preview.
+ * 2. When a reporting system must export chart images stored as EMF into lossless PNGs with a consistent 300 DPI for PDF embedding.
+ * 3. When migrating legacy Windows Metafile assets to a modern image format while preserving vector quality and exact dimensions.
+ * 4. When an automated build pipeline processes design assets and requires batch rasterization of EMF files to PNG with white background.
+ * 5. When creating a digital archive of engineering diagrams and you need each file saved as a lossless PNG at a specific resolution.
  */

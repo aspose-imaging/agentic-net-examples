@@ -1,11 +1,9 @@
-// HOW-TO: Apply Gaussian Blur to SVG and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to High Quality JPEG in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,61 +11,38 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputPath = "output.jpg";
-            string tempPngPath = "temp.png";
+            string outputPath = "output/output.jpg";
+            string tempPath = "temp/temp.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            // Load SVG and rasterize to PNG
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White,
-                    SmoothingMode = SmoothingMode.AntiAlias
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                svgImage.Save(tempPngPath, pngOptions);
+                var pngOptions = new PngOptions();
+                vectorImage.Save(tempPath, pngOptions);
             }
 
-            // Load rasterized PNG, apply Gaussian blur, and save as high-quality JPEG
-            using (Image rasterImage = Image.Load(tempPngPath))
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
             {
-                var raster = (RasterImage)rasterImage;
-
-                // Apply soft-edge Gaussian blur (radius 5, sigma 2.0)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0));
-
                 var jpegOptions = new JpegOptions
                 {
-                    Quality = 95,
-                    // High-quality settings can be adjusted as needed
+                    Quality = 100,
+                    Source = new FileCreateSource(outputPath, false)
                 };
-
                 raster.Save(outputPath, jpegOptions);
             }
 
-            // Optionally delete temporary PNG file
-            if (File.Exists(tempPngPath))
+            if (File.Exists(tempPath))
             {
-                File.Delete(tempPngPath);
+                File.Delete(tempPath);
             }
         }
         catch (Exception ex)
@@ -79,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert scalable SVG icons into blurred JPEG banners for faster loading on browsers.
- * 2. When an e‑commerce platform wants to generate soft‑edge background images from vector product illustrations for promotional emails.
- * 3. When a reporting tool requires high‑quality JPEG snapshots of vector diagrams with a subtle blur effect for PDF export.
- * 4. When a mobile app creates stylized preview thumbnails from SVG assets by rasterizing, applying Gaussian blur, and compressing to JPEG.
- * 5. When a digital signage system preprocesses vector artwork into blurred JPEGs to achieve a smooth visual transition on large displays.
+ * 1. When you need to generate a high‑resolution JPEG thumbnail from an SVG logo for web pages without losing vector detail.
+ * 2. When a reporting system must embed vector diagrams as JPEG images in PDF reports that only accept raster formats.
+ * 3. When an e‑commerce platform converts product SVG icons into JPEGs for email newsletters that require JPEG attachments.
+ * 4. When a desktop application creates printable JPEG assets from user‑uploaded SVG artwork while preserving maximum quality.
+ * 5. When a batch process migrates a library of SVG assets to JPEG files for legacy systems that cannot render SVG.
  */

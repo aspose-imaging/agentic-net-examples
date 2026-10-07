@@ -6,41 +6,29 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\source.bmp";
-        string outputPath = @"C:\Images\resized.svg";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "input/input.bmp";
+            string outputPath = "output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 1200x1200 pixels
-                image.Resize(1200, 1200);
+                if (!image.IsCached)
+                    image.CacheData();
 
-                // Prepare SVG save options with rasterization settings
-                var svgOptions = new SvgOptions();
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    // Set the page size to match the resized image dimensions
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                image.Resize(1200, 1200, ResizeType.NearestNeighbourResample);
 
-                // Save the resized image as SVG
-                image.Save(outputPath, svgOptions);
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to shrink a high‑resolution BMP logo to a standard 1200 × 1200 size and store it as a scalable SVG for UI rendering.
- * 2. When a batch‑processing script must prepare BMP assets for web pages by resizing them and converting them to vector‑compatible SVG files.
- * 3. When an e‑learning platform wants to reduce the file size of BMP diagrams while keeping them editable in SVG format for responsive design.
- * 4. When a reporting tool generates charts as BMP images and then needs to embed them as SVG graphics in PDF or HTML reports.
- * 5. When a migration utility converts legacy BMP icons to 1200 × 1200 SVG icons to support high‑DPI displays in modern .NET applications.
+ * 1. When you need to generate a scalable vector version of a legacy BMP logo for responsive web design.
+ * 2. When an automated batch process must shrink large BMP scans to a fixed 1200‑pixel square before embedding them in SVG‑based reports.
+ * 3. When a desktop application has to convert user‑uploaded BMP drawings into SVG files that can be edited without loss of quality.
+ * 4. When a migration script must standardize image assets by resizing BMP textures and saving them as SVG for use in modern UI frameworks.
+ * 5. When a CI pipeline requires a quick C# step to transform BMP screenshots into 1200×1200 SVG thumbnails for documentation.
  */

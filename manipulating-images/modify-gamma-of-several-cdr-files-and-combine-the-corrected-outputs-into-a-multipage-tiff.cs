@@ -1,13 +1,11 @@
-// HOW-TO: Apply Gamma Correction to Multiple CDR Files and Create Multipage TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Gamma of Multiple CDR Files and Merge into Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,39 +13,35 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = {
-                "input1.cdr",
-                "input2.cdr",
-                "input3.cdr"
-            };
-
-            // Hardcoded output TIFF path
+            string[] inputPaths = { "input1.cdr", "input2.cdr", "input3.cdr" };
             string outputPath = "output.tif";
 
-            // Validate input files
-            foreach (var path in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Collect frames after gamma correction
-            List<TiffFrame> frames = new List<TiffFrame>();
-
-            foreach (var cdrPath in inputPaths)
+            string outDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outDir))
             {
-                // Load CDR vector image
-                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+                Directory.CreateDirectory(outDir);
+            }
+
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            TiffImage tiffImage = null;
+            float gammaValue = 1.2f;
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+
+                using (var cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Rasterize CDR to PNG in memory
-                    using (MemoryStream ms = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
                         var pngOptions = new PngOptions
                         {
@@ -60,46 +54,32 @@ class Program
                         cdr.Save(ms, pngOptions);
                         ms.Position = 0;
 
-                        // Load rasterized image
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        using (var raster = (RasterImage)Image.Load(ms))
                         {
-                            // Apply gamma correction (example gamma value 0.8)
-                            raster.AdjustGamma(0.8f);
+                            raster.AdjustGamma(gammaValue);
+                            if (!raster.IsCached) raster.CacheData();
 
-                            // Create a TIFF frame from the raster image
-                            TiffFrame frame = new TiffFrame(raster);
-                            frames.Add(frame);
+                            int width = raster.Width;
+                            int height = raster.Height;
+
+                            if (i == 0)
+                            {
+                                tiffImage = (TiffImage)Image.Create(tiffOptions, width, height);
+                            }
+                            else
+                            {
+                                tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
+                            }
+
+                            var frame = tiffImage.Frames[i];
+                            frame.SavePixels(frame.Bounds, raster.LoadPixels(raster.Bounds));
                         }
                     }
                 }
             }
 
-            if (frames.Count == 0)
-            {
-                Console.Error.WriteLine("No frames were created.");
-                return;
-            }
-
-            // Prepare TIFF options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-            // Create a TIFF image canvas with the size of the first frame
-            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, frames[0].Width, frames[0].Height))
-            {
-                // Remove the initially created empty frame
-                tiff.RemoveFrame(0);
-
-                // Add all processed frames
-                foreach (var frame in frames)
-                {
-                    tiff.AddFrame(frame);
-                }
-
-                // Save the multipage TIFF
-                tiff.Save(outputPath, tiffOptions);
-            }
+            tiffImage.Save(outputPath);
+            tiffImage.Dispose();
         }
         catch (Exception ex)
         {
@@ -110,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process several CorelDRAW (CDR) drawings, adjust their gamma for consistent brightness, and save them as a single multipage TIFF for printing or archival.
- * 2. When an application must convert vector CDR files to raster images, apply color‑correction, and combine the results into one TIFF document for easy distribution to clients.
- * 3. When a workflow requires automated preparation of CDR assets for a document management system, ensuring each page has uniform gamma before merging them into a multipage TIFF.
- * 4. When you are building a C# service that normalizes the visual appearance of multiple CDR illustrations and packages them into a TIFF stack for use in PDF generation or e‑publishing.
- * 5. When you need to programmatically rasterize, gamma‑adjust, and concatenate several CDR files into a single TIFF file for batch scanning or OCR processing.
+ * 1. When you need to correct the brightness of several CorelDRAW (CDR) drawings before creating a single multi‑page TIFF document for printing.
+ * 2. When an application must batch‑process CDR files, apply a gamma correction, and combine the results into a TIFF for archival or PDF conversion.
+ * 3. When a workflow requires converting vector CDR pages to raster PNG, adjusting gamma, and merging them into a multi‑page TIFF for use in document management systems.
+ * 4. When you want to automate the preparation of CDR artwork for a publishing pipeline, ensuring consistent gamma across pages and outputting a single TIFF file.
+ * 5. When a developer needs to validate the existence of input CDR files, apply image‑level gamma adjustment, and generate a combined TIFF without manually opening each file.
  */

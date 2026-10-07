@@ -1,4 +1,4 @@
-// HOW-TO: Get Page Count From DjVu File Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Get Page Count From DjVu Document In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,28 +8,20 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.djvu";
-        string outputPath = "output.tif";
-
         try
         {
+            string inputPath = "input.djvu";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-            {
-                int pageCount = djvuImage.PageCount;
-                Console.WriteLine($"Total pages: {pageCount}");
-                // Conversion logic can be added here.
+                int pageCount = djvu.Pages.Length;
+                Console.WriteLine($"Page count: {pageCount}");
             }
         }
         catch (Exception ex)
@@ -41,9 +33,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display the total number of pages in a DjVu document before further processing in a .NET application.
- * 2. When you want to verify that a DjVu file contains the expected page count prior to converting it to another format such as TIFF.
- * 3. When you are creating a batch job that logs page counts of multiple DjVu files for reporting or auditing purposes.
- * 4. When you must ensure the output directory exists before performing any image conversion on a DjVu document.
- * 5. When you need to handle missing DjVu files gracefully by checking file existence and reporting an error in a C# console program.
+ * 1. When you need to validate the number of pages in a DjVu file before batch converting it to another format.
+ * 2. When you want to display the total pages of a DjVu document in a C# desktop or web application.
+ * 3. When you must check page count to decide whether to split a large DjVu archive into smaller files.
+ * 4. When you are building a document management system that logs DjVu page statistics for auditing purposes.
+ * 5. When you need to ensure a DjVu file meets a required page limit before processing it with Aspose.Imaging.
  */

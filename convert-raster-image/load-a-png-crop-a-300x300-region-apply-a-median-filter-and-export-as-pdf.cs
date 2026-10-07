@@ -1,19 +1,18 @@
-// HOW-TO: Crop PNG, Apply Median Filter, and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop PNG to 300x300, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.png";
-        string outputPath = "Output/output.pdf";
-
         try
         {
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\result.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,17 +21,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
 
-                // Crop a 300x300 region from the top-left corner
-                raster.Crop(new Rectangle(0, 0, 300, 300));
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(0, 0, 300, 300);
+                raster.Crop(cropRect);
 
-                // Apply a median filter with size 5 to the entire image
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Save the processed image as PDF
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     raster.Save(outputPath, pdfOptions);
@@ -48,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a 300 × 300 thumbnail from a PNG, reduce noise with a median filter, and deliver the result as a PDF report.
- * 2. When generating printable PDFs from scanned PNG images while removing speckles by applying a median filter to a specific region.
- * 3. When creating a PDF catalog that shows a cropped portion of product images and requires noise reduction for clearer visuals.
- * 4. When automating a workflow that converts uploaded PNG logos into PDF assets after cropping and smoothing the image.
- * 5. When preprocessing PNG screenshots for documentation by cropping a focus area, denoising it, and exporting directly to PDF.
+ * 1. When you need to extract a 300 × 300 thumbnail from a PNG, reduce noise with a median filter, and embed it in a PDF report using C#.
+ * 2. When generating printable PDFs from scanned PNG images where you must crop a specific region and smooth the image before saving.
+ * 3. When creating PDF invoices that include a cleaned‑up logo extracted from a larger PNG file by cropping and applying noise reduction.
+ * 4. When preprocessing PNG screenshots for documentation, cropping the area of interest, applying a median filter to remove artifacts, and converting the result to PDF.
+ * 5. When automating batch conversion of PNG graphics to PDF pages while ensuring each page contains a centered, noise‑filtered 300 × 300 image.
  */

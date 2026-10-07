@@ -1,16 +1,16 @@
-// HOW-TO: Resize JPEG to PNG with High Quality Bicubic Scaling in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG Image with High Quality Bicubic Scaling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.jpg";
+            string inputPath = "input.png";
             string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
@@ -21,21 +21,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage src = (RasterImage)Image.Load(inputPath))
             {
-                int newWidth = sourceImage.Width * 2;
-                int newHeight = sourceImage.Height * 2;
+                int targetWidth = src.Width * 2;
+                int targetHeight = src.Height * 2;
 
-                PngOptions pngOptions = new PngOptions();
-
-                using (Image canvas = Image.Create(pngOptions, newWidth, newHeight))
+                using (Image dest = Image.Create(new PngOptions(), targetWidth, targetHeight))
                 {
-                    Graphics graphics = new Graphics(canvas);
+                    Graphics graphics = new Graphics(dest);
+                    graphics.Clear(Color.White);
                     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.DrawImage(src, new Rectangle(0, 0, targetWidth, targetHeight));
 
-                    graphics.DrawImage(sourceImage, new Rectangle(0, 0, newWidth, newHeight));
-
-                    canvas.Save(outputPath, pngOptions);
+                    dest.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to double the dimensions of a JPEG photo while preserving detail and save the result as a PNG for web use.
- * 2. When you want to generate high‑resolution thumbnails from user‑uploaded JPEGs and store them in lossless PNG format.
- * 3. When you are preparing product images for print by upscaling JPEGs with bicubic interpolation to avoid pixelation before converting to PNG.
- * 4. When you need to convert legacy JPEG assets to PNG with smoother scaling for inclusion in a mobile app’s UI.
- * 5. When you are building an image processing pipeline that requires consistent high‑quality resizing of JPEGs before applying further graphics operations.
+ * 1. When you need to double the dimensions of a PNG while preserving visual quality for print‑ready graphics.
+ * 2. When generating high‑resolution thumbnails from source images for a web gallery using Aspose.Imaging in C#.
+ * 3. When preparing images for machine‑learning training sets that require consistent upscale without pixelation.
+ * 4. When converting low‑resolution product photos to larger sizes for e‑commerce catalogs while maintaining smooth edges.
+ * 5. When programmatically enlarging scanned documents before applying OCR to improve character recognition accuracy.
  */

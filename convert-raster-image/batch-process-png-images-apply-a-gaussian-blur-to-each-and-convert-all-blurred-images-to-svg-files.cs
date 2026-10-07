@@ -3,67 +3,70 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
-
-            foreach (string inputPath in pngFiles)
+            try
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                string inputDirectory = "Input";
+                string outputDirectory = "Output";
+
+                if (!Directory.Exists(inputDirectory))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Directory.CreateDirectory(inputDirectory);
+                    Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                     return;
                 }
 
-                // Determine output SVG path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                if (!Directory.Exists(outputDirectory))
                 {
-                    // Apply Gaussian blur to the entire image
-                    RasterImage rasterImage = (RasterImage)image;
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    Directory.CreateDirectory(outputDirectory);
+                }
 
-                    // Prepare SVG rasterization options
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+                foreach (string inputPath in files)
+                {
+                    if (!File.Exists(inputPath))
                     {
-                        PageSize = image.Size
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
 
-                    // Save the blurred image as SVG
-                    image.Save(outputPath, new SvgOptions { VectorRasterizationOptions = rasterizationOptions });
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        RasterImage raster = (RasterImage)image;
+
+                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                        raster.Filter(raster.Bounds, blurOptions);
+
+                        var svgOptions = new SvgOptions();
+                        raster.Save(outputPath, svgOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur a collection of PNG assets and generate scalable SVG versions for web graphics.
- * 2. When preparing product images for a responsive website that requires vector files with a soft focus effect applied uniformly.
- * 3. When converting scanned PNG diagrams into SVG while applying a Gaussian blur to hide sensitive details before distribution.
- * 4. When creating a batch workflow that processes user‑uploaded PNG icons, adds a blur for a UI hover effect, and saves them as SVG for high‑resolution displays.
- * 5. When migrating legacy PNG artwork to SVG format and want to apply a consistent blur filter to all files in a single C# script.
+ * 1. When you need to automatically soften a large set of PNG icons before turning them into scalable SVG graphics for a web UI.
+ * 2. When a graphics pipeline must preprocess product photos with a Gaussian blur and then export them as vector SVG files for print‑ready layouts.
+ * 3. When a desktop application has to convert user‑uploaded PNG screenshots into blurred SVG diagrams for documentation generation.
+ * 4. When a batch job has to reduce file size of PNG assets by applying a blur filter and then save them as SVG to enable infinite scaling on high‑resolution displays.
+ * 5. When an automated build script must transform a folder of PNG maps into blurred SVG maps for use in interactive GIS applications.
  */

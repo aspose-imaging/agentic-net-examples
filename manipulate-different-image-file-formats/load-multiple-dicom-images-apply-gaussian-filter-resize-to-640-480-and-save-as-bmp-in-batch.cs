@@ -1,9 +1,9 @@
 // HOW-TO: Batch Convert DICOM to BMP with Gaussian Blur and Resize in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,41 +11,44 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            var dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
-            foreach (var inputPath in dicomFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
+                using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
                 {
-                    // Apply Gaussian blur filter
-                    dicomImage.Filter(dicomImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                    dicom.Filter(dicom.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+                    dicom.Resize(640, 480);
 
-                    // Resize to 640x480 using nearest neighbour resampling
-                    dicomImage.Resize(640, 480, Aspose.Imaging.ResizeType.NearestNeighbourResample);
-
-                    // Save as BMP
-                    var bmpOptions = new BmpOptions();
-                    dicomImage.Save(outputPath, bmpOptions);
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        dicom.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -58,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must preprocess a folder of DICOM scans by blurring and scaling them before exporting to BMP for legacy viewer compatibility.
- * 2. When a research pipeline needs to automate batch conversion of DICOM files to BMP while applying a Gaussian filter to reduce noise and standardizing the size to 640×480 for machine‑learning input.
- * 3. When a hospital IT system requires a C# script to resize and de‑identify DICOM images with a blur filter before storing them as BMP thumbnails in a PACS archive.
- * 4. When a developer wants to generate uniformly sized BMP assets from a collection of DICOM radiographs for inclusion in a web‑based reporting dashboard.
- * 5. When an imaging workflow must process multiple DICOM files in a directory, apply a Gaussian blur, resize them, and save the results as BMP files using Aspose.Imaging in .NET.
+ * 1. When a medical imaging application needs to preprocess a series of DICOM scans by smoothing and resizing them before converting to BMP for display in a Windows viewer.
+ * 2. When a radiology workflow requires batch conversion of DICOM files to a universally supported bitmap format while applying a Gaussian blur to reduce noise.
+ * 3. When a research project must standardize image dimensions (640×480) and apply a blur filter to DICOM images before feeding them into a machine‑learning model that only accepts BMP inputs.
+ * 4. When a hospital IT system needs to archive DICOM studies as BMP thumbnails with consistent size and softened edges for quick preview in a web portal.
+ * 5. When a developer wants to automate the processing of multiple DICOM files, applying a Gaussian filter and resizing them in one pass, then saving the results as BMP files for downstream legacy software.
  */

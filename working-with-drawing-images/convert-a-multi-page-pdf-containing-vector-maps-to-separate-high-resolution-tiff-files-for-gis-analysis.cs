@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,57 +12,41 @@ class Program
     {
         try
         {
-            // Hardcoded input PDF path
             string inputPath = "Input\\maps.pdf";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the PDF document
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
+
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Ensure the document is multipage
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                if (pdfImage is IMultipageImage multipage)
                 {
-                    Console.Error.WriteLine("No pages found in PDF.");
-                    return;
-                }
-
-                // Output directory for TIFF files
-                string outputDir = "Output";
-                Directory.CreateDirectory(outputDir);
-
-                // Process each page individually
-                for (int i = 0; i < multipage.PageCount; i++)
-                {
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure TIFF export options
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    int pageCount = multipage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        // Rasterize vector content at original PDF size
-                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                        tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.White,
-                            PageWidth = pdfImage.Width,
-                            PageHeight = pdfImage.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        },
-                        // Export only the current page
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
-                    };
+                            PageWidth = 3000,
+                            PageHeight = 3000
+                        };
+                        tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
 
-                    // Save the current page as a high‑resolution TIFF
-                    pdfImage.Save(outputPath, tiffOptions);
+                        pdfImage.Save(outputPath, tiffOptions);
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded file is not a multipage image.");
                 }
             }
         }
@@ -74,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS analyst needs each page of a vector map PDF as a separate high‑resolution TIFF for raster‑based spatial analysis.
- * 2. When a developer must automate the extraction of individual map sheets from a multi‑page PDF to feed into a legacy imaging system that only accepts TIFF.
- * 3. When a web service generates printable map tiles by converting PDF pages to TIFFs with preserved vector detail at the original size.
- * 4. When a batch job prepares archival copies of engineering drawings by rasterizing each PDF page to lossless TIFF files for long‑term storage.
- * 5. When an application needs to split a PDF containing cadastral maps into separate TIFF images for integration with third‑party GIS software.
+ * 1. When a GIS analyst needs to extract each page of a vector‑based PDF map into a separate high‑resolution TIFF for raster‑based spatial analysis.
+ * 2. When a developer wants to batch‑convert multi‑page engineering PDFs into individual LZW‑compressed TIFF files for long‑term archival.
+ * 3. When a mapping application requires converting PDF map layers to TIFF images with a white background and fixed pixel dimensions for efficient rendering.
+ * 4. When a data‑processing pipeline must rasterize vector PDF pages at 3000 × 3000 pixels to feed a machine‑learning model that expects TIFF input.
+ * 5. When an automated reporting system needs to split a PDF document into per‑page TIFF files for high‑quality printing or distribution.
  */

@@ -1,11 +1,9 @@
-// HOW-TO: Convert First Ten DjVu Pages to Animated GIF with Frame Delay in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Up to Ten DjVu Files to Animated GIFs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
@@ -13,49 +11,36 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/animated.gif";
+            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            if (!File.Exists(inputPath))
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.djvu");
+            int filesToProcess = Math.Min(10, inputFiles.Length);
+            int customFrameDelay = 200; // milliseconds (not used directly)
+
+            for (int i = 0; i < filesToProcess; i++)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (var stream = File.OpenRead(inputPath))
-            {
-                using (var djvu = new DjvuImage(stream))
+                string inputPath = inputFiles[i];
+                if (!File.Exists(inputPath))
                 {
-                    int pagesToConvert = Math.Min(djvu.PageCount, 10);
-                    if (pagesToConvert == 0)
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    DjvuImage djvu = (DjvuImage)image;
+                    int maxPageIndex = Math.Min(9, djvu.Pages.Length - 1);
+                    using (GifOptions gifOptions = new GifOptions())
                     {
-                        Console.Error.WriteLine("No pages to convert.");
-                        return;
-                    }
-
-                    var firstPage = (DjvuPage)djvu.Pages[0];
-                    var firstFrame = new GifFrameBlock((ushort)firstPage.Width, (ushort)firstPage.Height);
-                    var graphics = new Graphics(firstFrame);
-                    graphics.DrawImage(firstPage, new Point(0, 0));
-                    int frameDelay = 200; // milliseconds
-                    firstFrame.FrameTime = frameDelay;
-
-                    using (var gifImage = new GifImage(firstFrame))
-                    {
-                        for (int i = 1; i < pagesToConvert; i++)
-                        {
-                            var page = (DjvuPage)djvu.Pages[i];
-                            var frame = new GifFrameBlock((ushort)page.Width, (ushort)page.Height);
-                            var g = new Graphics(frame);
-                            g.DrawImage(page, new Point(0, 0));
-                            frame.FrameTime = frameDelay;
-                            gifImage.AddPage(frame);
-                        }
-
-                        var gifOptions = new GifOptions();
-                        gifImage.Save(outputPath, gifOptions);
+                        gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(0, maxPageIndex));
+                        djvu.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -69,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a short animated preview of a multi‑page DjVu document for web thumbnails, this code creates a GIF from the first ten pages with a consistent frame delay.
- * 2. When automating a document‑processing pipeline that extracts key pages from scanned books and turns them into an animated GIF for quick visual inspection, the example shows how to load DjVu, limit pages, and set frame timing.
- * 3. When building a C# desktop application that lets users export selected DjVu pages as an animated GIF slideshow, the snippet demonstrates batch conversion and custom frame‑rate control.
- * 4. When integrating Aspose.Imaging into a server‑side service that converts large DjVu files to lightweight GIF animations for email attachments, the code illustrates handling missing files and creating the output directory.
- * 5. When creating a batch job that processes a folder of DjVu files and produces animated GIFs with a fixed 200 ms delay per frame for consistent playback across browsers, this example provides the core conversion logic.
+ * 1. When you need to generate GIF previews of the first pages of multiple DjVu documents for a web gallery, processing up to ten files at once.
+ * 2. When you want to automate the conversion of a batch of scanned DjVu files into lightweight GIF animations with a custom frame delay for email attachments.
+ * 3. When a document management system must display animated GIF thumbnails of DjVu manuals and requires processing only the first ten files in a single run.
+ * 4. When you are building a C# utility that extracts the initial pages of DjVu e‑books and saves them as GIFs using a specified frame delay for slide‑show presentations.
+ * 5. When you need to create GIF versions of DjVu files for browser compatibility, limiting the conversion to ten files per batch and applying a custom delay between frames.
  */

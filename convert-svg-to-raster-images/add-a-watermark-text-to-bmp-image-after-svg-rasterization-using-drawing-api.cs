@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -11,57 +13,48 @@ class Program
     {
         try
         {
-            // Hardcoded input SVG and output BMP paths
-            string inputPath = "input.svg";
-            string outputPath = "output.bmp";
+            string inputSvgPath = "input.svg";
+            string outputBmpPath = "output.bmp";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            // Ensure output directory exists (null‑safe)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
 
-            // Rasterize SVG to BMP
-            using (Image svgImage = Image.Load(inputPath))
+            // Load SVG and rasterize to BMP
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                var bmpOptions = new BmpOptions();
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
+                var svg = (Aspose.Imaging.FileFormats.Svg.SvgImage)svgImage;
 
-                svgImage.Save(outputPath, bmpOptions);
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = svg.Width,
+                        PageHeight = svg.Height,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                svgImage.Save(outputBmpPath, bmpOptions);
             }
 
-            // Load the rasterized BMP and add watermark text
-            using (Image bmpImage = Image.Load(outputPath))
+            // Load the rasterized BMP and add watermark
+            using (Image bmpImage = Image.Load(outputBmpPath))
             {
-                RasterImage raster = (RasterImage)bmpImage;
-                Graphics graphics = new Graphics(raster);
+                var raster = (RasterImage)bmpImage;
+                var graphics = new Graphics(raster);
 
-                // Prepare brush for text drawing
-                using (SolidBrush brush = new SolidBrush())
+                var font = new Font("Arial", 36);
+                using (var brush = new SolidBrush(Color.Yellow))
                 {
-                    brush.Color = Color.Red;
-                    brush.Opacity = 100;
-
-                    // Draw watermark text
-                    graphics.DrawString(
-                        "Watermark",
-                        new Font("Arial", 48, FontStyle.Regular),
-                        brush,
-                        new PointF(10, 10));
+                    graphics.DrawString("Watermark", font, brush, new Point(10, 10));
                 }
 
-                // Save changes to the same BMP file
-                raster.Save();
+                raster.Save(outputBmpPath);
             }
         }
         catch (Exception ex)
@@ -73,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo to a BMP file and embed a visible copyright notice directly onto the image in a C# application.
- * 2. When generating printable assets where the source vector must be rasterized to BMP and a branding text must be overlaid before saving.
- * 3. When automating batch processing of SVG diagrams to BMP thumbnails and require each thumbnail to carry a watermark for security or tracking.
- * 4. When creating a server‑side service that receives SVG uploads, rasterizes them to BMP, and adds a custom watermark for client‑specific identification.
- * 5. When developing a desktop tool that lets users preview SVG artwork as BMP and apply editable text watermarks using Aspose.Imaging’s drawing API.
+ * 1. When you need to convert an SVG logo to a BMP file and embed a copyright notice directly onto the image in a .NET application.
+ * 2. When generating printable bitmap assets from vector graphics and you must add branding text before saving them to disk.
+ * 3. When automating batch processing of SVG icons to BMP format while applying a visible watermark for security or tracking purposes.
+ * 4. When creating thumbnails of vector drawings in BMP format and want to overlay a label or disclaimer using Aspose.Imaging’s drawing API.
+ * 5. When integrating image conversion and watermarking into a C# service that prepares graphics for legacy systems that only accept BMP files.
  */

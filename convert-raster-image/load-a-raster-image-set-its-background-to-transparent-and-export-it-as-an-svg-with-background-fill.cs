@@ -1,46 +1,42 @@
-// HOW-TO: Convert PNG to SVG with Transparent Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to Transparent SVG with Background Fill in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the raster image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\result.svg";
+
+            if (!File.Exists(inputPath))
             {
-                // Configure SVG rasterization options with transparent background
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    PageSize = image.Size
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Set up SVG save options
-                var saveOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save as SVG
-                image.Save(outputPath, saveOptions);
+            using (Image image = Image.Load(inputPath))
+            {
+                image.BackgroundColor = Color.Transparent;
+
+                using (SvgOptions svgOptions = new SvgOptions())
+                {
+                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
+                    image.Save(outputPath, svgOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,8 +49,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to embed a PNG logo into a web page as a scalable SVG without any background color.
- * 2. When converting scanned bitmap graphics to vector‑friendly SVG files while preserving transparency for overlay in UI designs.
- * 3. When preparing assets for responsive design, turning raster icons into SVGs that keep a transparent canvas for dynamic theming.
- * 4. When automating batch processing of product images to generate SVG versions that can be tinted or styled without a solid background.
- * 5. When integrating Aspose.Imaging in a C# application to export images for print‑ready PDFs where the SVG must have no background fill.
+ * 2. When generating vector graphics from user‑uploaded photos for print layouts while preserving transparency.
+ * 3. When creating responsive UI icons that must scale on high‑DPI screens and require a transparent canvas.
+ * 4. When converting scanned raster diagrams to SVG for editing in vector tools while keeping the background clear.
+ * 5. When automating batch processing of product images to produce transparent SVG assets for e‑commerce catalogs.
  */

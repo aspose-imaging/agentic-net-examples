@@ -2,37 +2,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.gif";
+            string inputPath = "Input/sample.webp";
+            string outputPath = "Output/result.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WebP image, apply EXIF orientation, and save as GIF
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rotate according to EXIF orientation if present
-                webPImage.AutoRotate();
+                WebPImage webp = image as WebPImage;
+                if (webp == null)
+                {
+                    Console.Error.WriteLine("Input is not a WebP image.");
+                    return;
+                }
 
-                // Save to GIF format
-                webPImage.Save(outputPath, new GifOptions());
+                using (GifOptions gifOptions = new GifOptions())
+                {
+                    gifOptions.ExifData = webp.ExifData;
+                    webp.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display user‑uploaded WebP photos in a legacy system that only supports GIF and must keep the original rotation.
- * 2. When converting images for email newsletters that require GIF format but the source WebP files contain EXIF orientation tags.
- * 3. When generating animated thumbnails from WebP assets for a web app that expects GIFs with correct orientation.
- * 4. When migrating a photo archive from WebP to GIF for compatibility with older browsers while preserving how the images were taken.
- * 5. When building a batch image‑processing tool that normalizes orientation and changes format from WebP to GIF for downstream processing.
+ * 1. When you need to display user‑uploaded WebP photos in a legacy web page that only supports GIF but must keep the original rotation.
+ * 2. When generating GIF previews from WebP assets while ensuring the images appear upright on devices that rely on EXIF orientation data.
+ * 3. When converting product images from WebP to GIF for email newsletters and you must retain the correct orientation without manually editing each file.
+ * 4. When building a batch‑processing tool that transforms a folder of WebP files into GIFs for a content management system while preserving metadata for SEO.
+ * 5. When creating a cross‑platform game asset pipeline that requires GIF sprites extracted from WebP textures and needs the original orientation to match design specifications.
  */

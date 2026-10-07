@@ -1,4 +1,4 @@
-// HOW-TO: Compress BMP to JPEG With 75% Quality And Get Size Reduction In C# (Aspose.Imaging for .NET)
+// HOW-TO: Compress JPEG to 75% Quality and Calculate Size Reduction in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,49 +7,36 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\output_75.jpg";
+            string inputPath = "Input\\sample.jpg";
+            string outputPath = "Output\\sample_compressed.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            long originalSize = new FileInfo(inputPath).Length;
+
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with 75% quality
-                JpegOptions jpegOptions = new JpegOptions
+                using (JpegOptions options = new JpegOptions())
                 {
-                    Quality = 75
-                };
-
-                // Save the image as JPEG with the specified quality
-                image.Save(outputPath, jpegOptions);
+                    options.Quality = 75;
+                    image.Save(outputPath, options);
+                }
             }
 
-            // Calculate file sizes and reduction percentage
-            long originalSize = new FileInfo(inputPath).Length;
-            long compressedSize = new FileInfo(outputPath).Length;
-
-            double reduction = 0;
-            if (originalSize > 0)
-            {
-                reduction = ((double)(originalSize - compressedSize) / originalSize) * 100;
-            }
-
+            long newSize = new FileInfo(outputPath).Length;
+            double reduction = (originalSize - newSize) * 100.0 / originalSize;
             Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {compressedSize} bytes");
+            Console.WriteLine($"Compressed size: {newSize} bytes");
             Console.WriteLine($"Size reduction: {reduction:F2}%");
         }
         catch (Exception ex)
@@ -61,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce storage costs by converting large BMP files to smaller JPEGs with a specific 75% quality setting in a .NET application.
- * 2. When you want to generate web‑optimized images and need to verify how much the file size shrinks after applying JPEG compression.
- * 3. When building an automated batch‑processing pipeline that must save images as JPEG at a controlled quality level and log the compression savings.
- * 4. When creating a photo‑upload feature that enforces a maximum file size by compressing incoming BMPs to JPEG at 75% quality and checking the reduction percentage.
- * 5. When testing different JPEG quality values to compare visual quality versus file size, and you need a quick C# snippet to measure the results.
+ * 1. When you need to reduce the storage footprint of high‑resolution JPEG photos before archiving them on a server.
+ * 2. When preparing images for faster web page loading by compressing JPEGs to a specific quality level and verifying the size savings.
+ * 3. When generating thumbnails for a mobile app and want to ensure the compressed JPEG meets a target file‑size reduction.
+ * 4. When automating batch processing of user‑uploaded pictures to enforce a maximum quality setting and report compression metrics.
+ * 5. When optimizing images for email attachments and need to calculate the percentage decrease to stay within size limits.
  */

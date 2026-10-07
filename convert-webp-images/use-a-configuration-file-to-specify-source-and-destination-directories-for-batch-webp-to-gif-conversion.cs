@@ -2,84 +2,83 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchWebpToGif
 {
-    // Configuration model matching the JSON file structure
     class Config
     {
         public string SourceDir { get; set; }
-        public string DestinationDir { get; set; }
+        public string DestDir { get; set; }
     }
 
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hard‑coded path to the configuration file
-            string configPath = "config.json";
-
-            // Verify the configuration file exists
-            if (!File.Exists(configPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {configPath}");
-                return;
-            }
+                // Hardcoded path to configuration file
+                string configPath = "config.json";
 
-            // Read and deserialize the JSON configuration
-            string json = File.ReadAllText(configPath);
-            Config config = JsonSerializer.Deserialize<Config>(json);
-
-            // Basic validation of the deserialized configuration
-            if (config == null ||
-                string.IsNullOrEmpty(config.SourceDir) ||
-                string.IsNullOrEmpty(config.DestinationDir))
-            {
-                Console.Error.WriteLine("Invalid configuration.");
-                return;
-            }
-
-            // Get all WebP files in the source directory
-            string[] webpFiles = Directory.GetFiles(config.SourceDir, "*.webp");
-
-            foreach (string inputPath in webpFiles)
-            {
-                // Ensure the input file still exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(configPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {configPath}");
                     return;
                 }
 
-                // Build the output GIF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-                string outputPath = Path.Combine(config.DestinationDir, outputFileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the WebP image and save it as GIF
-                using (WebPImage webPImage = new WebPImage(inputPath))
+                string configJson = File.ReadAllText(configPath);
+                Config config = JsonSerializer.Deserialize<Config>(configJson);
+                if (config == null || string.IsNullOrWhiteSpace(config.SourceDir) || string.IsNullOrWhiteSpace(config.DestDir))
                 {
-                    webPImage.Save(outputPath, new GifOptions());
+                    Console.Error.WriteLine("Invalid configuration.");
+                    return;
+                }
+
+                // Ensure source and destination directories exist
+                if (!Directory.Exists(config.SourceDir))
+                {
+                    Console.Error.WriteLine($"Directory not found: {config.SourceDir}");
+                    return;
+                }
+
+                Directory.CreateDirectory(config.DestDir);
+
+                // Process each WebP file in the source directory
+                foreach (string inputPath in Directory.GetFiles(config.SourceDir, "*.webp"))
+                {
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(config.DestDir, fileNameWithoutExt + ".gif");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Any unexpected error is reported without crashing
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a large collection of WebP graphics to animated GIFs for web deployment without hard‑coding paths.
- * 2. When your application must read source and target folders from a JSON settings file to allow non‑technical users to change directories.
- * 3. When you want to integrate Aspose.Imaging’s WebP and GIF support into a C# batch job that processes all files in a folder.
- * 4. When you are building a CI/CD pipeline that transforms WebP assets into GIFs as part of a build step using configurable paths.
- * 5. When you require error‑checked, directory‑aware image conversion that skips missing files and creates the output folder on the fly.
+ * 1. When a web application needs to generate animated GIF previews from a folder of WebP assets without hard‑coding paths.
+ * 2. When a CI/CD pipeline must automatically convert newly uploaded WebP files to GIF for legacy browsers using a configurable source and output directory.
+ * 3. When a desktop tool processes a large batch of product images stored in WebP format and saves the GIF versions to a separate folder defined in a JSON config.
+ * 4. When a developer wants to externalize the input and output locations for image conversion so non‑technical users can change directories without modifying code.
+ * 5. When an image‑processing microservice must read configuration at runtime to convert all WebP files in a directory to GIF for downstream video‑creation workflows.
  */

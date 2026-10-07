@@ -1,41 +1,28 @@
-// HOW-TO: Create 800x600 PNG With Red Ellipse Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 800x600 BMP Canvas and Draw Red Ellipse in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\ellipse.png";
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions { Source = source };
 
-            // Create PNG options (no source needed for image creation)
-            PngOptions pngOptions = new PngOptions();
-
-            // Create a new image with width 800 and height 600
-            using (Image image = Image.Create(pngOptions, 800, 600))
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 800, 600))
             {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
-
-                // Create a red pen with thickness 2
-                Pen redPen = new Pen(Color.Red, 2);
-
-                // Draw an ellipse bounded by the rectangle (100,100,600,400)
-                graphics.DrawEllipse(redPen, new Rectangle(100, 100, 600, 400));
-
-                // Save the image to the specified path
-                image.Save(outputPath);
+                Graphics graphics = new Graphics(canvas);
+                Pen pen = new Pen(Color.Red);
+                graphics.DrawEllipse(pen, new Rectangle(0, 0, 800, 600));
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -47,9 +34,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG placeholder image with a red ellipse for UI mockups in a C# web application.
- * 2. When you want to programmatically create a custom chart background by drawing shapes on an 800x600 canvas using Aspose.Imaging.
- * 3. When an automated report requires a simple vector illustration, such as a red ellipse, embedded in a PNG file generated on the server.
- * 4. When you need to produce test images for image‑processing algorithms that expect a known size and a red elliptical shape.
- * 5. When a desktop tool must export a drawing canvas with a red ellipse to PNG for further editing in graphic design software.
+ * 1. When you need to programmatically generate an 800 × 600 BMP image with a red ellipse for a placeholder or watermark in a C# application.
+ * 2. When creating dynamic graphics for reports or dashboards that require a simple red ellipse drawn on a bitmap canvas using Aspose.Imaging.
+ * 3. When automating test image production to verify image‑processing pipelines that expect a BMP file containing a known red ellipse shape.
+ * 4. When building a custom UI component in a .NET desktop app that draws a red ellipse on a canvas for visual feedback or branding.
+ * 5. When exporting a programmatically drawn shape to BMP format for compatibility with legacy systems that only accept BMP files.
  */

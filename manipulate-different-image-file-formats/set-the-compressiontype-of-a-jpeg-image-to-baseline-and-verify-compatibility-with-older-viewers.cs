@@ -1,4 +1,4 @@
-// HOW-TO: Save JPEG With Baseline Compression For Legacy Viewer Compatibility In C# (Aspose.Imaging for .NET)
+// HOW-TO: Set JPEG Compression to Baseline Mode in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,36 +7,28 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.jpg";
+        string outputPath = "Output\\sample_baseline.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output_baseline.jpg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set JPEG save options with Baseline compression
-                JpegOptions saveOptions = new JpegOptions
+                using (JpegOptions options = new JpegOptions())
                 {
-                    CompressionType = JpegCompressionMode.Baseline,
-                    Quality = 90 // optional quality setting
-                };
-
-                // Save the image as JPEG using the configured options
-                image.Save(outputPath, saveOptions);
+                    options.CompressionType = JpegCompressionMode.Baseline;
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert BMP files to JPEG that can be opened by older web browsers or legacy image viewers, you set the JPEG compression mode to Baseline.
- * 2. When an application must generate thumbnails for archival PDFs and ensure the JPEGs are compatible with legacy printing hardware, using Baseline compression guarantees compliance.
- * 3. When a photo‑sharing service wants to reduce file size while maintaining maximum compatibility across mobile devices released before 2010, saving with Baseline JPEG is required.
- * 4. When a batch‑processing script creates JPEG assets for an e‑learning platform that still uses outdated image libraries, configuring the CompressionType to Baseline prevents rendering errors.
- * 5. When you integrate Aspose.Imaging into a C# workflow that prepares product images for an older ERP system, setting Baseline compression ensures the ERP can display the images without conversion failures.
+ * 1. When you need to ensure a JPEG file can be opened by older browsers or legacy image viewers that only support baseline JPEG compression.
+ * 2. When you are preparing images for email attachments where some clients reject progressive JPEGs, so you convert them to baseline.
+ * 3. When you are archiving photos for long‑term storage and want maximum compatibility across different operating systems and devices.
+ * 4. When you are generating thumbnails for a web gallery and must guarantee that all users, regardless of their viewer version, can view the images.
+ * 5. When you are batch‑processing a collection of photos from a camera that saved them as progressive JPEGs and need to standardize them to baseline for a printing workflow.
  */

@@ -1,54 +1,45 @@
-// HOW-TO: Apply Semi Transparent Red Overlay to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Semi Transparent Red Overlay to PNG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\result.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input/input.png";
+            string outputPath = "output/output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
             {
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
+                var path = new GraphicsPath();
 
-                // Build a GraphicsPath covering the whole image
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(0, 0, image.Width, image.Height)));
+                var figure = new Figure();
+                var rectShape = new RectangleShape(new RectangleF(0, 0, inputImage.Width, inputImage.Height));
+                figure.AddShape(rectShape);
                 path.AddFigure(figure);
 
-                // Create a semi‑transparent red SolidBrush
-                using (SolidBrush brush = new SolidBrush(Color.Red))
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                 {
-                    brush.Opacity = 0.5f; // 50% opacity (0 = fully visible, 1 = fully opaque)
+                    var graphics = new Graphics(inputImage);
                     graphics.FillPath(brush, path);
                 }
 
-                // Save the modified image as PNG
-                PngOptions saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                var options = new PngOptions();
+                inputImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -60,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a semi‑transparent red tint over a PNG to highlight areas for a UI preview.
- * 2. When creating a visual warning overlay on product photos before publishing them on a website.
- * 3. When generating a red‑tinted thumbnail for error reporting in an automated image‑processing pipeline.
- * 4. When applying a colored overlay as a simple watermark without obscuring the original content.
- * 5. When testing color blending effects by programmatically filling an entire image with a partially opaque brush.
+ * 1. Use this code to add a semi‑transparent red watermark over a PNG photo for visual warnings or branding.
+ * 2. Use it to create a red overlay mask on an image that highlights a selected area in a C# desktop application.
+ * 3. Use it to generate a preview image with a red tint that indicates a processing error or invalid data.
+ * 4. Use it to overlay a red translucent layer on a map screenshot to emphasize a region in a reporting tool.
+ * 5. Use it to batch‑process PNG files, applying a consistent red tint for corporate visual identity across all assets.
  */

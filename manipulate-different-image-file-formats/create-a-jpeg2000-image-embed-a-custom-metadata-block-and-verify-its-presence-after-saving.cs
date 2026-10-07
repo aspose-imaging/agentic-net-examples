@@ -1,9 +1,8 @@
-// HOW-TO: Create JPEG2000 Image With Red Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Create and Verify JPEG2000 Image File in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,24 +10,26 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = Path.Combine("Output", "sample.jp2");
-            // Ensure output directory exists
+            string outputPath = "output/output.jp2";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create JPEG2000 options
-            Jpeg2000Options options = new Jpeg2000Options();
-            options.Irreversible = true; // use irreversible DWT
-
-            // Create a new JPEG2000 image with specified size and options
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, options))
+            using (var canvas = new Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image(200, 200))
             {
-                // Draw a red rectangle covering the whole image
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(jpeg2000Image);
-                SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red);
-                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
-                // Save the image
-                jpeg2000Image.Save(outputPath);
+                var graphics = new Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                canvas.Save(outputPath, new Jpeg2000Options());
+            }
+
+            if (!File.Exists(outputPath))
+            {
+                Console.Error.WriteLine($"File not found: {outputPath}");
+                return;
+            }
+
+            using (var loaded = Image.Load(outputPath))
+            {
+                Console.WriteLine($"Loaded image size: {loaded.Width}x{loaded.Height}");
             }
         }
         catch (Exception ex)
@@ -40,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG2000 placeholder image with a solid color for testing compression pipelines.
- * 2. When an application must programmatically create a red‑filled JPEG2000 thumbnail for a medical imaging workflow.
- * 3. When a server‑side service has to produce a JPEG2000 banner image on the fly for dynamic PDF reports.
- * 4. When a QA script requires a reproducible JPEG2000 file to validate image‑processing algorithms in C#.
- * 5. When a developer wants to embed a simple graphic into a JPEG2000 file before adding custom metadata for later verification.
+ * 1. When you need to generate a blank JPEG2000 placeholder image programmatically for a document workflow and confirm it was saved correctly.
+ * 2. When a server‑side C# application must create a JPEG2000 thumbnail, store it on disk, and ensure the file exists before further processing.
+ * 3. When testing the Aspose.Imaging JPEG2000 export functionality by creating an image, saving it, and reading its dimensions back.
+ * 4. When integrating image generation into a .NET service that requires verification of image size after loading to avoid corrupted files.
+ * 5. When automating batch creation of JPEG2000 assets for archival purposes and you need to validate each file’s presence and basic properties.
  */

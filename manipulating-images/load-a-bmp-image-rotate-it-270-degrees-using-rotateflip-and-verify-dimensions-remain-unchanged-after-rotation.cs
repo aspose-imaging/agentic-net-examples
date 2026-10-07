@@ -1,17 +1,19 @@
-// HOW-TO: Rotate BMP Image 270 Degrees In C# Without Changing Dimensions (Aspose.Imaging for .NET)
+// HOW-TO: Rotate BMP Image 270 Degrees with Aspose.Imaging and Keep Dimensions (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\sample_rotated.bmp";
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,21 +23,27 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Load BMP image, rotate, verify dimensions, and save
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
+                // Store original dimensions
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
 
-                // Rotate 270 degrees clockwise without flipping
+                // Rotate 270 degrees without flip
                 image.RotateFlip(RotateFlipType.Rotate270FlipNone);
 
-                // Verify dimensions remain unchanged
-                if (image.Width != originalWidth || image.Height != originalHeight)
+                // Verify dimensions unchanged
+                if (image.Width == originalWidth && image.Height == originalHeight)
                 {
-                    Console.Error.WriteLine("Dimensions changed after rotation.");
+                    Console.WriteLine("Dimensions unchanged after rotation.");
+                }
+                else
+                {
+                    Console.WriteLine($"Dimensions changed: original ({originalWidth}x{originalHeight}) -> rotated ({image.Width}x{image.Height})");
                 }
 
                 // Save the rotated image
@@ -51,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a BMP graphic in portrait orientation for a Windows desktop application while keeping the original pixel dimensions.
- * 2. When processing scanned documents that must be rotated 270° for correct reading but the layout size must stay the same for downstream layout engines.
- * 3. When generating thumbnails of BMP files for a web gallery and the source images are stored rotated, requiring a 270° rotation without altering width and height.
- * 4. When integrating legacy BMP assets into a game engine that expects images in a specific orientation but the engine relies on unchanged image dimensions.
- * 5. When automating batch image preparation for printing where BMP files need a 270° rotation and you must verify that the rotation does not affect the image's resolution.
+ * 1. When you need to display a BMP graphic that was saved in portrait orientation but must appear rotated 270° in a Windows application without altering its original width and height.
+ * 2. When a batch job processes scanned BMP documents and must rotate each page 270 degrees while preserving layout dimensions for downstream PDF conversion.
+ * 3. When integrating legacy BMP assets into a game engine that expects images rotated 270° but requires the same pixel dimensions for texture mapping.
+ * 4. When an automated reporting system rotates BMP charts 270° for printing on landscape paper while keeping the chart size unchanged.
+ * 5. When a photo‑editing tool offers a “rotate left” feature for BMP files and needs to verify that the image dimensions stay consistent after the operation.
  */

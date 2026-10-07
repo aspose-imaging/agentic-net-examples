@@ -1,54 +1,51 @@
-// HOW-TO: Convert CorelDRAW CDR to LZW Compressed TIFF with Horizontal Flip in C# (Aspose.Imaging for .NET)
+// HOW-TO: Flip CDR Image Horizontally and Save as LZW Compressed TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.tif";
+            string inputPath = "input.cdr";
+            string outputPath = "output/output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
             {
-                // Cast to CdrImage to access RotateFlip
-                var cdrImage = image as CdrImage;
-                if (cdrImage != null)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Apply a horizontal flip
-                    cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    cdr.Save(ms, new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    });
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                        raster.Save(outputPath, tiffOptions);
+                    }
                 }
-
-                // Configure TIFF options with LZW compression
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Lzw,
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    Photometric = TiffPhotometrics.Rgb,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous,
-                    ByteOrder = TiffByteOrder.LittleEndian
-                };
-
-                // Save the image as TIFF using the configured options
-                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a lossless, LZW‑compressed TIFF from a CorelDRAW CDR file for archival or printing workflows.
- * 2. When an application must programmatically mirror a CDR image horizontally before saving it in a format supported by downstream systems.
- * 3. When integrating Aspose.Imaging into a batch‑processing pipeline that converts legacy CDR graphics to TIFF for compatibility with document management platforms.
- * 4. When a web service receives CDR uploads and must return a TIFF with LZW compression to reduce file size while preserving image quality.
- * 5. When automating the preparation of CDR assets for GIS or medical imaging applications that require TIFF with specific photometric and planar settings.
+ * 1. When you need to convert a CorelDRAW (.cdr) file to a lossless TIFF for archival while mirroring the image horizontally.
+ * 2. When an application must generate LZW‑compressed TIFFs from vector CDR graphics for faster web delivery.
+ * 3. When a batch process has to flip CDR pages before storing them in a TIFF format compatible with legacy printing systems.
+ * 4. When you want to rasterize a CDR drawing to PNG in memory, apply a flip, and then output a compressed TIFF without creating intermediate files on disk.
+ * 5. When integrating Aspose.Imaging into a C# workflow to transform vector designs into TIFFs with LZW compression for efficient storage.
  */

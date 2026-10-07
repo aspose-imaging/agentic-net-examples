@@ -4,10 +4,10 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,65 +15,58 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source PNG as a raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // User‑defined strokes for auto‑masking (background then foreground points)
-                AutoMaskingArgs maskArgs = new AutoMaskingArgs
+                Point[][] userStrokes = new Point[][]
                 {
-                    ObjectsPoints = new Point[][]
+                    new Point[]
                     {
-                        new Point[] { new Point(50, 50), new Point(60, 50) },   // background points
-                        new Point[] { new Point(120, 120), new Point(130, 130) } // foreground points
+                        new Point(10, 10),
+                        new Point(200, 10),
+                        new Point(200, 200),
+                        new Point(10, 200)
                     }
                 };
 
-                // Export options for the masking operation (in‑memory PNG)
-                PngOptions exportOptions = new PngOptions
+                var maskingOptions = new GraphCutMaskingOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                // Configure auto‑masking with GraphCut and the user strokes
-                AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
-                {
-                    CalculateDefaultStrokes = false, // use provided strokes only
-                    FeatheringRadius = 3,
                     Method = SegmentationMethod.GraphCut,
+                    FeatheringRadius = 3,
                     Decompose = false,
-                    ExportOptions = exportOptions,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
                     BackgroundReplacementColor = Color.Transparent,
-                    Args = maskArgs
+                    Args = new AutoMaskingArgs
+                    {
+                        ObjectsPoints = userStrokes
+                    }
                 };
 
-                // Perform the masking operation
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+                ImageMasking masking = new ImageMasking(raster);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    // The foreground (object) is at index 1
-                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                    var saveOptions = new PngOptions
                     {
-                        // Align DPI: make vertical resolution equal to horizontal resolution of the original
-                        foreground.HorizontalResolution = image.HorizontalResolution;
-                        foreground.VerticalResolution = image.HorizontalResolution;
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        ResolutionSettings = new ResolutionSetting(raster.HorizontalResolution, raster.VerticalResolution)
+                    };
 
-                        // Save the masked foreground as PNG
-                        foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
+                    foreground.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -86,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove a background from a PNG image based on manually drawn points and keep the original image resolution for printing or UI display.
- * 2. When you want to generate a transparent PNG mask using Aspose.Imaging’s GraphCut algorithm after a user selects foreground and background strokes in a C# application.
- * 3. When you must ensure that a processed PNG retains the same DPI as the source file so that layout dimensions remain consistent across devices.
- * 4. When building an automated image‑preparation pipeline that extracts objects from photos and saves the result as a high‑quality PNG with alpha channel in .NET.
- * 5. When integrating user‑guided image segmentation into a desktop tool and need to export the masked image without altering its size or metadata.
+ * 1. When you need to isolate an object in a PNG using hand‑drawn strokes and keep the original image resolution for printing or further editing.
+ * 2. When a web application must remove backgrounds from user‑uploaded PNGs while maintaining the same DPI to ensure consistent layout across devices.
+ * 3. When generating product thumbnails that require precise auto‑masking based on designer‑provided points and need the output PNG to retain the source image’s pixel density.
+ * 4. When integrating a C# service that processes scanned PNG documents, applies graph‑cut segmentation, and saves the result with a transparent background without altering the document’s resolution.
+ * 5. When creating a batch tool that aligns the DPI of masked PNG assets with a target resolution to avoid scaling artifacts in downstream graphics pipelines.
  */

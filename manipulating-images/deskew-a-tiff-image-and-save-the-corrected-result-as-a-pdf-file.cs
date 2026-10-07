@@ -1,43 +1,38 @@
-// HOW-TO: How To Deskew A TIFF And Save As PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Deskew A TIFF Image And Convert To PDF Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = Path.Combine("Input", "sample.tif");
+        string outputPath = Path.Combine("Output", "deskewed.pdf");
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Deskew the image (applicable to raster images)
-                if (image is RasterImage raster)
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    // Do not resize, use LightGray as background
-                    raster.NormalizeAngle(false, Color.LightGray);
+                    raster.NormalizeAngle(false, Color.White);
                 }
 
-                // Save the corrected image as PDF
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When scanning legal documents that are slightly tilted, a developer can deskew the TIFF and output a clean PDF for archiving.
- * 2. When converting batches of scanned invoices from TIFF to searchable PDF, the code ensures each page is straightened before saving.
- * 3. When preparing medical records scanned as TIFF files, deskewing improves readability before generating PDF reports.
- * 4. When building a document management system that receives uploaded TIFF images, the routine automatically corrects orientation and stores them as PDFs.
- * 5. When automating the digitization workflow for historical archives, the code removes skew from TIFF scans and creates PDF files for distribution.
+ * 1. When a developer needs to correct the rotation of scanned TIFF documents before archiving them as searchable PDF files.
+ * 2. When an application must automatically straighten misaligned TIFF images from a scanner and output them as PDF reports.
+ * 3. When a workflow requires converting batch‑processed TIFF pages with skew into PDF for electronic filing or e‑signature.
+ * 4. When integrating Aspose.Imaging into a C# service that prepares deskewed PDFs for downstream OCR processing.
+ * 5. When a user wants to programmatically clean up skewed TIFF receipts and save them as compact PDF invoices.
  */

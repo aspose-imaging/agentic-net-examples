@@ -1,9 +1,16 @@
-// HOW-TO: Convert Animated GIF to WebP with Frame Delays in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi‑Frame GIF to Animated WebP with Loop Count in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
@@ -12,62 +19,22 @@ class Program
     {
         try
         {
-            // Input and output paths (relative)
-            string inputPath = "Input/animation.gif";
-            string outputPath = "Output/animation.webp";
+            string inputPath = "input.gif";
+            string outputPath = "Output\\output.webp";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑frame GIF
-            using (GifImage gif = (GifImage)Aspose.Imaging.Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Preserve loop count if available
-                int loopCount = gif.LoopsCount;
-
-                // Configure WebP options
-                WebPOptions webpOptions = new WebPOptions
-                {
-                    AnimLoopCount = (ushort)loopCount,
-                    Lossless = false,
-                    Quality = 80
-                };
-
-                // Create an empty WebP image with the same dimensions as the GIF
-                using (WebPImage webp = new WebPImage(gif.Width, gif.Height, webpOptions))
-                {
-                    int pageCount = gif.PageCount;
-
-                    // Iterate through each GIF frame
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        // Activate the current frame
-                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                        // Cast the active frame to a raster image for pixel data
-                        using (Aspose.Imaging.RasterImage frameRaster = (Aspose.Imaging.RasterImage)gif.ActiveFrame)
-                        {
-                            // Create a WebP frame block from the raster image
-                            WebPFrameBlock block = new WebPFrameBlock(frameRaster)
-                            {
-                                Duration = (short)((GifFrameBlock)gif.ActiveFrame).FrameTime
-                            };
-
-                            // Add the block to the WebP animation
-                            webp.AddBlock(block);
-                        }
-                    }
-
-                    // Save the animated WebP file
-                    webp.Save(outputPath);
-                }
+                var webpOptions = new WebPOptions();
+                webpOptions.AnimLoopCount = (ushort)gif.LoopsCount;
+                gif.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -79,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of an animated GIF for faster web loading while preserving its original frame timing, this C# code converts it to a WebP animation.
- * 2. When building a .NET image processing pipeline that must support modern browsers, you can transform legacy GIF animations into efficient WebP files using Aspose.Imaging.
- * 3. When creating a mobile app that displays animated content, this snippet generates WebP animations that keep the original GIF’s loop count and frame delays.
- * 4. When automating batch conversion of user‑uploaded GIFs to a more efficient format, the code retains the exact animation sequence in the resulting WebP files.
- * 5. When integrating Aspose.Imaging into a server‑side service that serves animated images, you can convert multi‑frame GIFs to WebP to improve loading speed without losing animation fidelity.
+ * 1. When you need to replace a legacy animated GIF with a smaller WebP animation while keeping the original frame timing and repeat behavior for faster web page loading.
+ * 2. When a mobile app must display an animated image and you want to use WebP to reduce bandwidth without losing the GIF’s animation sequence.
+ * 3. When an e‑commerce platform wants to generate product showcase animations from user‑uploaded GIFs and store them as WebP to improve SEO and page speed.
+ * 4. When a game developer converts sprite sheet animations stored as GIFs into WebP for smoother playback and consistent loop counts across devices.
+ * 5. When a content management system automates image processing and needs to preserve GIF loop settings while converting to WebP for modern browsers.
  */

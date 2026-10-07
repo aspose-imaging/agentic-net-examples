@@ -1,49 +1,40 @@
-// HOW-TO: Create BMP Image With Filled And Outlined Ellipse In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP With Filled Red Ellipse And Black Outline In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\ellipse_output.bmp";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath);
 
-            // Create a new BMP image (400x400)
-            using (Image image = Image.Create(bmpOptions, 400, 400))
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Rectangle ellipseRect = new Aspose.Imaging.Rectangle(20, 20, 160, 160);
 
-                // Define the bounding rectangle for the ellipse
-                Rectangle ellipseRect = new Rectangle(50, 50, 300, 200);
+                using (SolidBrush fillBrush = new SolidBrush(Aspose.Imaging.Color.Red))
+                {
+                    graphics.FillEllipse(fillBrush, ellipseRect);
+                }
 
-                // Fill the ellipse with a solid brush (light blue)
-                SolidBrush fillBrush = new SolidBrush(Color.LightBlue);
-                graphics.FillEllipse(fillBrush, ellipseRect);
-
-                // Outline the ellipse with a contrasting pen (dark blue, width 3)
-                Pen outlinePen = new Pen(Color.DarkBlue, 3);
+                Pen outlinePen = new Pen(Aspose.Imaging.Color.Black, 3);
                 graphics.DrawEllipse(outlinePen, ellipseRect);
 
-                // Save the image to the specified path
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file that contains a colored ellipse for a report or thumbnail in a C# desktop application.
- * 2. When you want to programmatically create a simple diagram, such as a highlighted area or button background, using Aspose.Imaging’s drawing API.
- * 3. When an automated process must produce a 24‑bit bitmap with a solid‑filled shape and a contrasting border for printing or legacy system compatibility.
- * 4. When you are building a game or UI prototype that requires dynamic creation of ellipse graphics without relying on external image assets.
- * 5. When you need to batch‑create placeholder images with consistent dimensions and styling (filled ellipse with outline) for testing image‑processing pipelines.
+ * 1. Use this code to generate a BMP icon containing a red filled ellipse with a black border for UI elements or placeholders.
+ * 2. Use it when you must supply legacy software with a bitmap image that includes a simple shape without using external design tools.
+ * 3. Use it to programmatically add a red circular badge with a black outline to a report or PDF that embeds BMP graphics.
+ * 4. Use it to create a known‑pattern BMP image for testing image‑processing or computer‑vision algorithms that detect ellipses.
+ * 5. Use it to dynamically generate sprite graphics for a game or simulation where a BMP ellipse is needed at runtime.
  */

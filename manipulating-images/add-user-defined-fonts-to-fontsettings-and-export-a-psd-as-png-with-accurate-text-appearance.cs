@@ -1,8 +1,10 @@
-// HOW-TO: Export PSD to PNG with Custom Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Export PSD to PNG with Custom Fonts Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,9 +12,9 @@ class Program
     {
         try
         {
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
-            string fontsFolder = "Fonts";
+            string inputPath = "Input/sample.psd";
+            string outputPath = "Output/sample.png";
+            string fontFolderPath = "Fonts";
 
             if (!File.Exists(inputPath))
             {
@@ -22,25 +24,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            FontSettings.SetFontsFolder(fontsFolder);
-            FontSettings.UpdateFonts();
-
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] args) =>
             {
-                var vectorOpts = new VectorRasterizationOptions
+                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return result.ToArray();
+            }, fontFolderPath);
 
-                var pngOptions = new PngOptions
+            using (var image = Image.Load(inputPath, loadOptions))
+            {
+                using (var pngOptions = new PngOptions())
                 {
-                    VectorRasterizationOptions = vectorOpts
-                };
-
-                image.Save(outputPath, pngOptions);
+                    pngOptions.Source = new FileCreateSource(outputPath, false);
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate thumbnail PNGs from PSD designs that use brand‑specific fonts stored in a custom folder.
- * 2. When an automated build pipeline converts layered Photoshop files to PNG for documentation while preserving exact text appearance with user‑defined fonts.
- * 3. When a desktop application batch‑processes PSD assets and must embed non‑system fonts to ensure consistent rendering across different machines.
- * 4. When a SaaS platform offers on‑the‑fly image previews of user‑uploaded PSD files and must load fonts from a dedicated directory to avoid missing‑glyph errors.
- * 5. When a migration script extracts vector text from PSDs and rasterizes it to PNG with precise rendering settings such as single‑bit per pixel and no smoothing.
+ * 1. When you need to convert a Photoshop PSD file to a PNG while ensuring that any missing fonts are supplied from a local folder so the text renders correctly.
+ * 2. When an automated image‑processing pipeline must generate web‑ready PNG previews of PSD designs that rely on custom corporate fonts not installed on the server.
+ * 3. When you are building a C# desktop application that loads user‑provided PSD files and saves them as PNGs, and you must embed private fonts to preserve branding.
+ * 4. When a cloud service processes batch PSD assets and must avoid font‑fallback issues by loading fonts from a specified directory before exporting to PNG.
+ * 5. When you want to programmatically render layered PSD artwork with accurate typography in a .NET environment without manually installing each font on the machine.
  */

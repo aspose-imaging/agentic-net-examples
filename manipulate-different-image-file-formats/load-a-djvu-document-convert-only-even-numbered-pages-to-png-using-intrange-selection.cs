@@ -1,9 +1,11 @@
-// HOW-TO: Convert Even‑Numbered DjVu Pages To PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Even Pages of DjVu to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,37 +13,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
+            string inputPath = "input.djvu";
             string outputDirectory = "Output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            // Load the DjVu document
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Iterate through pages
-                for (int i = 0; i < djvuImage.Pages.Length; i++)
+                int pageCount = djvu.Pages.Length;
+
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // Process only even-numbered pages (0‑based index)
-                    if (i % 2 == 0)
+                    // Convert only even-numbered pages (1-based indexing)
+                    if ((i + 1) % 2 != 0)
+                        continue;
+
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        DjvuPage page = (DjvuPage)djvuImage.Pages[i];
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
-                        page.Save(outputPath, new PngOptions());
+                        IntRange range = new IntRange(i, i);
+                        pngOptions.MultiPageOptions = new DjvuMultiPageOptions(range);
+                        djvu.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract only the even pages from a multi‑page DjVu file and save them as separate PNG images for web preview.
- * 2. When an archival system stores scanned documents in DjVu format but the downstream application only processes PNG files from every second page.
- * 3. When generating thumbnails for a digital library and you want to skip odd pages to reduce processing time.
- * 4. When converting a DjVu comic book where only the left‑hand pages (even numbers) should be exported to PNG for printing.
- * 5. When automating a batch job that extracts even‑numbered pages from DjVu reports and stores them in a folder for further analysis.
+ * 1. When you need to extract only the even-numbered pages from a multi‑page DjVu file and save them as high‑quality PNG images for web publishing.
+ * 2. When automating a workflow that processes scanned books in DjVu format but only the even pages contain the content you want to archive as PNG.
+ * 3. When generating thumbnails for every second page of a DjVu document to reduce storage while preserving visual fidelity.
+ * 4. When creating a batch conversion tool that skips odd pages to speed up processing of large DjVu archives and outputs PNG files for downstream image analysis.
+ * 5. When integrating Aspose.Imaging into a C# application to selectively export specific pages (e.g., even pages) from DjVu to PNG for printing or OCR pipelines.
  */

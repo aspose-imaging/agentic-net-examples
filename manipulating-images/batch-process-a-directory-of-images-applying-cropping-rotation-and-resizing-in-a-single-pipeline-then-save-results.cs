@@ -1,73 +1,48 @@
-// HOW-TO: Batch Crop and Rotate Images from Folder Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Crop Rotate and Resize Images in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
-
         try
         {
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
+
             // Ensure the base output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Enumerate all files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles(inputDir);
             foreach (string inputPath in files)
             {
-                // Validate that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName);
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Work with RasterImage for pixel‑level operations
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
-                    {
-                        Console.Error.WriteLine($"Unsupported image type: {inputPath}");
-                        continue;
-                    }
+                    // Crop 10 pixels from each side
+                    image.Crop(10, 10, 10, 10);
 
-                    // ----- Cropping -----
-                    // Crop to the central half of the image
-                    int cropWidth = raster.Width / 2;
-                    int cropHeight = raster.Height / 2;
-                    int cropX = (raster.Width - cropWidth) / 2;
-                    int cropY = (raster.Height - cropHeight) / 2;
-                    raster.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+                    // Rotate 90 degrees
+                    image.Rotate(90f);
 
-                    // ----- Rotation -----
-                    // Rotate 90 degrees clockwise without flipping
-                    raster.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    // Resize to 800x600
+                    image.Resize(800, 600);
 
-                    // ----- Resizing -----
-                    // Resize to a fixed size (e.g., 800x600)
-                    int newWidth = 800;
-                    int newHeight = 600;
-                    raster.Resize(newWidth, newHeight);
-
-                    // Prepare the output file path
-                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDir, fileName + "_processed.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed image as PNG
-                    PngOptions saveOptions = new PngOptions();
-                    raster.Save(outputPath, saveOptions);
+                    // Save the processed image
+                    image.Save(outputPath);
                 }
             }
         }
@@ -80,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically trim the central portion of every photo in a directory and rotate them 90° clockwise for a web gallery.
- * 2. When you want to preprocess scanned documents by cropping out margins and correcting orientation before archiving them in a batch job.
- * 3. When a set of product images must be standardized to a consistent view by applying the same central crop and rotation to all files programmatically.
- * 4. When generating thumbnails for a mobile app that require central cropping and a 90‑degree rotation without manual editing.
- * 5. When migrating a legacy image collection to a new system and you need to apply identical crop‑and‑rotate transformations to all images using C#.
+ * 1. When you need to automatically prepare a large set of product photos by trimming borders, rotating them to portrait orientation, and resizing them to web‑friendly dimensions before uploading to an e‑commerce site.
+ * 2. When you must preprocess scanned documents stored as TIFF files, removing unwanted margins, aligning the pages, and scaling them to a standard size for OCR or archival storage.
+ * 3. When a photo‑gallery application requires generating uniform thumbnails from mixed‑format images (JPEG, PNG, BMP) by cropping edges, rotating, and resizing them in a single batch operation.
+ * 4. When a batch of user‑submitted images needs to be normalized to 800×600 pixels with consistent orientation and trimmed edges before being fed into a machine‑learning model for image classification.
+ * 5. When you are migrating legacy image assets and want to apply the same cropping, rotation, and resizing rules to every file in a folder, saving the transformed copies to a separate output directory.
  */

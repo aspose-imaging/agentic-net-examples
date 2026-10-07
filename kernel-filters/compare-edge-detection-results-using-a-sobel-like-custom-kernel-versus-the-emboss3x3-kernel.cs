@@ -1,4 +1,4 @@
-// HOW-TO: Compare Sobel Custom Kernel Edge Detection with Emboss3x3 in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare Sobel Custom Kernel Edge Detection With Emboss3x3 In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,23 +8,20 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string sobelOutputPath = "output\\sobel.png";
-        string embossOutputPath = "output\\emboss.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPathSobel = "Output/sobel.png";
+            string outputPathEmboss = "Output/emboss.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(sobelOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(embossOutputPath));
-
-            // Apply Sobel-like custom kernel
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Sobel-like edge detection
+            using (RasterImage sobelImage = (RasterImage)Image.Load(inputPath))
             {
                 double[,] sobelKernel = new double[,]
                 {
@@ -32,23 +29,20 @@ class Program
                     { -2, 0, 2 },
                     { -1, 0, 1 }
                 };
-
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel));
-
-                PngOptions sobelOptions = new PngOptions();
-                raster.Save(sobelOutputPath, sobelOptions);
+                var sobelOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel);
+                sobelImage.Filter(sobelImage.Bounds, sobelOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathSobel));
+                sobelImage.Save(outputPathSobel);
             }
 
-            // Apply Emboss3x3 kernel
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Emboss3x3 edge detection
+            using (RasterImage embossImage = (RasterImage)Image.Load(inputPath))
             {
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-                PngOptions embossOptions = new PngOptions();
-                raster.Save(embossOutputPath, embossOptions);
+                var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                embossImage.Filter(embossImage.Bounds, embossOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathEmboss));
+                embossImage.Save(outputPathEmboss);
             }
         }
         catch (Exception ex)
@@ -60,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight edges in a PNG photograph for computer‑vision preprocessing, you can apply a Sobel‑like convolution filter using Aspose.Imaging in C#.
- * 2. When you want to generate a stylized emboss effect for product thumbnails and compare it against edge detection results, you can use the built‑in Emboss3x3 kernel with Aspose.Imaging.
- * 3. When evaluating which convolution kernel provides clearer contours for OCR preprocessing, you can run both Sobel and Emboss filters on the same image and save the outputs as separate PNG files.
- * 4. When building an automated quality‑control pipeline that flags images with weak edge contrast, you can compare the Sobel‑derived edge map to an emboss‑based version to decide if enhancement is required.
- * 5. When creating side‑by‑side visual comparisons for a UI that lets users choose their preferred edge‑enhancement style, you can generate Sobel and Emboss PNGs programmatically with Aspose.Imaging in .NET.
+ * 1. When you need to highlight horizontal and vertical edges in a PNG file using a Sobel‑like convolution kernel and compare the result to an emboss filter for visual analysis.
+ * 2. When you want to generate side‑by‑side edge‑detected images to decide which filter improves feature extraction for OCR preprocessing.
+ * 3. When you are developing a photo‑editing application that lets users toggle between a custom Sobel filter and the built‑in Emboss3x3 filter to preview artistic effects.
+ * 4. When you must automate quality‑control by applying two different convolution kernels to the same image and saving both outputs for later comparison.
+ * 5. When you are benchmarking the performance of a custom convolution matrix against Aspose.Imaging’s predefined Emboss3x3 filter in a C# workflow.
  */

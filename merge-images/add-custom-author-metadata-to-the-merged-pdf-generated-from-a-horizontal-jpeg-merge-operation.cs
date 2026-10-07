@@ -1,4 +1,4 @@
-// HOW-TO: Add Author Metadata to Horizontally Merged JPEG PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Author Metadata to Merged Horizontal JPEG PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,15 +14,9 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg" };
+            string outputPath = "merged.pdf";
 
-            // Validate each input file
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -32,13 +26,12 @@ class Program
                 }
             }
 
-            // Output PDF file
-            string outputPdfPath = "merged.pdf";
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
-
-            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -48,27 +41,26 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
+            int newWidth = 0;
+            int newHeight = 0;
             foreach (Size sz in sizes)
             {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
             }
 
-            // Temporary JPEG file that will hold the merged image
-            string tempJpegPath = "temp_merged.jpg";
-            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
-
-            // Create source for JPEG canvas
-            Source jpegSource = new FileCreateSource(tempJpegPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = jpegSource, Quality = 100 };
-
-            // Create JPEG canvas bound to the source
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            string tempCanvasPath = Path.Combine(Path.GetTempPath(), "temp_canvas.jpg");
+            string tempDir = Path.GetDirectoryName(tempCanvasPath);
+            if (!string.IsNullOrEmpty(tempDir))
             {
-                // Merge images horizontally onto the canvas
+                Directory.CreateDirectory(tempDir);
+            }
+
+            Source tempSource = new FileCreateSource(tempCanvasPath, true);
+            JpegOptions canvasOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, newWidth, newHeight))
+            {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
@@ -80,22 +72,11 @@ class Program
                     }
                 }
 
-                // Save the bound JPEG canvas
-                canvas.Save();
-            }
-
-            // Load the merged JPEG and save as PDF with custom author metadata
-            using (Image pdfSource = Image.Load(tempJpegPath))
-            {
                 PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo() { Author = "Custom Author" };
-                pdfSource.Save(outputPdfPath, pdfOptions);
-            }
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-            // Optionally delete the temporary JPEG file
-            if (File.Exists(tempJpegPath))
-            {
-                File.Delete(tempJpegPath);
+                canvas.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -107,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine several product photos side‑by‑side into a single PDF report and embed the creator’s name for compliance.
- * 2. When an application must generate a printable catalog by stitching landscape images horizontally and tag the PDF with author information for digital rights management.
- * 3. When a workflow requires converting a series of scanned receipts (JPEG) into one PDF document while preserving the author metadata for audit trails.
- * 4. When a web service creates a combined brochure from multiple JPEG banners and needs to set the PDF author field so the document can be searched by author in document management systems.
- * 5. When an automated script assembles marketing banners into a single PDF and adds custom author metadata to satisfy corporate branding guidelines.
+ * 1. When you need to combine multiple landscape-oriented JPEG photos into a single PDF report and embed the author's name for document tracking.
+ * 2. When an automated invoice system must stitch product images side-by-side and produce a PDF with author metadata for compliance auditing.
+ * 3. When a digital archive workflow requires creating a PDF from horizontally merged scanned pages while preserving author information for searchability.
+ * 4. When a web application generates a portfolio PDF from user-uploaded JPEGs and wants to set the author field to credit the creator.
+ * 5. When a batch processing script merges marketing banner images into one PDF and adds custom author metadata to satisfy branding guidelines.
  */

@@ -3,47 +3,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.svg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for low quality (no smoothing)
-                var rasterOptions = new SvgRasterizationOptions
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    PageSize = image.Size,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                };
-
-                // Set up BMP save options and attach rasterization options
-                var bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized BMP image
-                image.Save(outputPath, bmpOptions);
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    bmpOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to quickly generate thumbnail BMP images from SVG icons for a web dashboard without preserving fine details.
- * 2. When a server‑side C# application must batch‑convert large numbers of SVG diagrams to BMP format while minimizing CPU usage.
- * 3. When you are building a reporting tool that embeds BMP snapshots of vector graphics and prefer faster rendering over high‑resolution quality.
- * 4. When you want to reduce memory consumption during SVG to BMP conversion in a low‑power device or cloud function.
- * 5. When you need to create low‑quality BMP previews of SVG files for preview panes in a Windows desktop application.
+ * 1. When you need to quickly generate BMP previews from SVG icons for a desktop application where rendering speed is more important than visual fidelity.
+ * 2. When a server‑side C# service must batch‑convert large numbers of SVG diagrams to BMP files and wants to reduce CPU usage by lowering rasterization quality.
+ * 3. When exporting SVG charts to BMP for legacy reporting tools that only accept bitmap images, and you prefer a faster conversion at the cost of some detail.
+ * 4. When creating low‑resolution thumbnails of vector graphics for a web gallery using Aspose.Imaging, and you want the conversion to complete in milliseconds.
+ * 5. When integrating SVG assets into a game engine that requires BMP textures and you need a simple C# routine that trades image sharpness for quicker load times.
  */

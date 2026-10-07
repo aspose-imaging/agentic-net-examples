@@ -1,10 +1,8 @@
-// HOW-TO: Convert ODG to BMP with Transparency Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to 32‑Bit BMP With Alpha Channel In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -12,39 +10,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.bmp";
+            string inputPath = "input.odg";
+            string outputPath = "output.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure BMP options (default Bitfields compression supports transparency)
-                BmpOptions bmpOptions = new BmpOptions
+                using (RasterImage raster = (RasterImage)image)
                 {
-                    Compression = BitmapCompression.Bitfields
-                };
-
-                // Set rasterization options to preserve transparency
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                };
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the image as BMP
-                image.Save(outputPath, bmpOptions);
+                    var bmpOptions = new BmpOptions
+                    {
+                        BitsPerPixel = 32 // Preserve alpha channel
+                    };
+                    raster.Save(outputPath, bmpOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display OpenDocument graphics in a Windows application that only supports BMP files while keeping the original transparent background.
- * 2. When you are batch‑processing ODG illustrations for a legacy system that requires BMP images with alpha channel support.
- * 3. When you want to generate thumbnails of ODG drawings for a web gallery and need the thumbnails saved as BMP with transparent areas preserved.
- * 4. When you are migrating design assets from LibreOffice to a game engine that imports BMP textures and must retain transparency.
- * 5. When you need to programmatically convert ODG vector diagrams to BMP for printing workflows that require a raster format but still need the background to remain invisible.
+ * 1. When you need to display OpenDocument graphics in a Windows application that only supports BMP files while keeping the original transparent areas.
+ * 2. When exporting vector drawings from LibreOffice to a 32‑bit BMP for use in legacy reporting tools that require raster images with alpha channels.
+ * 3. When automating batch conversion of ODG assets to BMP thumbnails for a game engine that reads BMP textures and respects transparency.
+ * 4. When integrating Aspose.Imaging into a C# service that converts user‑uploaded ODG diagrams to BMP for email attachments without losing the overlay transparency.
+ * 5. When preparing printable previews of ODG illustrations in a .NET workflow that saves them as BMP files while preserving semi‑transparent layers for accurate visual fidelity.
  */

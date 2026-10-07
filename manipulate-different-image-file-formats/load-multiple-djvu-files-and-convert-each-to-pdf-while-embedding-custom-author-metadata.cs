@@ -12,43 +12,44 @@ class Program
     {
         try
         {
-            // Define relative input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Get all DjVu files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DjVu image
                 using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
                 {
-                    // Configure PDF options with custom author metadata
-                    PdfOptions pdfOptions = new PdfOptions
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        PdfDocumentInfo = new PdfDocumentInfo
-                        {
-                            Author = "Custom Author"
-                        }
-                    };
+                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                        pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                    // Save the DjVu as PDF
-                    djvuImage.Save(outputPath, pdfOptions);
+                        djvuImage.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive scanned DjVu documents as searchable PDFs and wants to tag each file with the author's name.
- * 2. When an application processes a folder of DjVu ebooks and converts them to PDF for distribution while preserving author information.
- * 3. When a legal firm batch‑converts client‑provided DjVu evidence files to PDF and adds custom author metadata for case management.
- * 4. When a developer builds a migration tool that transforms legacy DjVu image archives into PDF format with consistent author tags.
- * 5. When an automated workflow converts multiple DjVu graphics into PDFs for printing, ensuring the PDF metadata includes the designated author.
+ * 1. When you need to automate the conversion of a large collection of DjVu documents to searchable PDF files while setting a specific author name for each PDF.
+ * 2. When a document management system must ingest legacy DjVu scans and store them as PDFs with consistent author metadata for compliance reporting.
+ * 3. When a desktop application processes user‑uploaded DjVu files in bulk and generates PDFs that include a custom author tag for branding purposes.
+ * 4. When a migration script moves archival DjVu assets to PDF format and requires embedding author information to preserve attribution.
+ * 5. When a server‑side service converts multiple DjVu files to PDF on the fly and needs to add the same author metadata to all output documents for indexing.
  */

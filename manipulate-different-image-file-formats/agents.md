@@ -19,83 +19,81 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 - `using System;` (432/602 files)
 - `using System.IO;` (432/602 files)
-- `using Aspose.Imaging;` (408/602 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (379/602 files) ← category-specific
+- `using Aspose.Imaging;` (419/602 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (385/602 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (90/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (72/602 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Djvu;` (65/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (63/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (61/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (38/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (33/602 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (31/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (30/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (26/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Eps;` (22/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (21/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (19/602 files) ← category-specific
-- `using System.Collections.Generic;` (17/602 files)
-- `using Aspose.Imaging.FileFormats.Cdr;` (17/602 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (15/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (15/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (15/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg2000;` (13/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (11/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (9/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dng;` (9/602 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.FilterOptions;` (7/602 files) ← category-specific
-- `using System.Threading.Tasks;` (7/602 files)
-- `using Aspose.Imaging.ImageLoadOptions;` (7/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (7/602 files) ← category-specific
-- `using System.Linq;` (6/602 files)
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (6/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tga;` (6/602 files) ← category-specific
-- `using Aspose.Imaging.Exif;` (6/602 files) ← category-specific
-- `using System.Text;` (4/602 files)
-- `using Aspose.Imaging.FileFormats.Wmf;` (4/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats;` (3/602 files) ← category-specific
-- `using System.Text.Json;` (3/602 files)
-- `using Aspose.Imaging.Shapes;` (3/602 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.PathResources;` (2/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (63/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (52/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (39/602 files) ← category-specific
+- `using System.Linq;` (33/602 files)
+- `using Aspose.Imaging.FileFormats.Pdf;` (32/602 files) ← category-specific
+- `using System.Collections.Generic;` (28/602 files)
+- `using Aspose.Imaging.FileFormats.Webp;` (28/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (18/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (16/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (15/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Eps;` (12/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cdr;` (10/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (10/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (8/602 files) ← category-specific
+- `using System.Text;` (7/602 files)
+- `using Aspose.Imaging.FileFormats.Psd;` (7/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dng;` (6/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (5/602 files) ← category-specific
+- `using System.Threading.Tasks;` (5/602 files)
+- `using Aspose.Imaging.Brushes;` (4/602 files) ← category-specific
+- `using Aspose.Imaging.Exif;` (3/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (3/602 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (3/602 files) ← category-specific
+- `using System.IO.Compression;` (2/602 files)
+- `using Aspose.Imaging.FileFormats;` (1/602 files) ← category-specific
+- `using Aspose.Imaging.MagicWand;` (1/602 files) ← category-specific
 - `using Aspose.Imaging.MagicWand.ImageMasks;` (1/602 files) ← category-specific
-- `using System.Globalization;` (1/602 files)
-- `using System.Net.Http;` (1/602 files)
+- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/602 files) ← category-specific
+- `using Aspose.Imaging.Shapes;` (1/602 files) ← category-specific
+- `using System.Xml.Linq;` (1/602 files)
 - `using Aspose.Imaging.FileFormats.BigTiff;` (1/602 files) ← category-specific
+- `using System.Diagnostics;` (1/602 files)
 - `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/602 files) ← category-specific
+- `using Aspose.Imaging.Exif.Enums;` (1/602 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [load-a-bmp-image-from-the-file-system-and-retrieve-its-pixel-dimensions-for-processing.cs](./load-a-bmp-image-from-the-file-system-and-retrieve-its-pixel-dimensions-for-processing.cs) | `BmpImage` | Load a BMP image from the file system and retrieve its pixel dimensions for proc... |
-| [save-a-loaded-bmp-image-as-png-while-preserving-the-original-color-depth-and-transparency.cs](./save-a-loaded-bmp-image-as-png-while-preserving-the-original-color-depth-and-transparency.cs) | `PngOptions` | Save a loaded BMP image as PNG while preserving the original color depth and tra... |
+| [load-a-bmp-image-from-the-file-system-and-retrieve-its-pixel-dimensions-for-processing.cs](./load-a-bmp-image-from-the-file-system-and-retrieve-its-pixel-dimensions-for-processing.cs) |  | Load a BMP image from the file system and retrieve its pixel dimensions for proc... |
+| [save-a-loaded-bmp-image-as-png-while-preserving-the-original-color-depth-and-transparency.cs](./save-a-loaded-bmp-image-as-png-while-preserving-the-original-color-depth-and-transparency.cs) | `PngOptions`, `RasterImage` | Save a loaded BMP image as PNG while preserving the original color depth and tra... |
 | [convert-bmp-files-to-jpeg-using-configurable-compression-quality-via-the-net-imaging-api.cs](./convert-bmp-files-to-jpeg-using-configurable-compression-quality-via-the-net-imaging-api.cs) | `JpegOptions` | Convert BMP files to JPEG using configurable compression quality via the .NET im... |
-| [resize-a-bmp-image-to-a-specific-width-and-height-while-maintaining-its-aspect-ratio.cs](./resize-a-bmp-image-to-a-specific-width-and-height-while-maintaining-its-aspect-ratio.cs) | `BmpOptions` | Resize a BMP image to a specific width and height while maintaining its aspect r... |
+| [resize-a-bmp-image-to-a-specific-width-and-height-while-maintaining-its-aspect-ratio.cs](./resize-a-bmp-image-to-a-specific-width-and-height-while-maintaining-its-aspect-ratio.cs) |  | Resize a BMP image to a specific width and height while maintaining its aspect r... |
 | [rotate-a-bmp-image-by-arbitrary-degrees-and-fill-empty-areas-with-a-transparent-background.cs](./rotate-a-bmp-image-by-arbitrary-degrees-and-fill-empty-areas-with-a-transparent-background.cs) | `BmpOptions`, `RasterImage` | Rotate a BMP image by arbitrary degrees and fill empty areas with a transparent ... |
-| [flip-a-bmp-image-horizontally-and-vertically-to-create-mirrored-versions-for-ui-assets.cs](./flip-a-bmp-image-horizontally-and-vertically-to-create-mirrored-versions-for-ui-assets.cs) | `BmpOptions` | Flip a BMP image horizontally and vertically to create mirrored versions for UI ... |
+| [flip-a-bmp-image-horizontally-and-vertically-to-create-mirrored-versions-for-ui-assets.cs](./flip-a-bmp-image-horizontally-and-vertically-to-create-mirrored-versions-for-ui-assets.cs) | `BmpOptions`, `RasterImage` | Flip a BMP image horizontally and vertically to create mirrored versions for UI ... |
 | [change-bmp-image-color-depth-from-24-bit-to-8-bit-indexed-palette-using-dithering-options.cs](./change-bmp-image-color-depth-from-24-bit-to-8-bit-indexed-palette-using-dithering-options.cs) | `BmpOptions`, `RasterImage` | Change BMP image color depth from 24‑bit to 8‑bit indexed palette using ditherin... |
-| [apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs](./apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs) | `TiffImage`, `TiffOptions` | Apply a grayscale filter to a BMP image and export the result as TIFF for archiv... |
-| [adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs](./adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs) | `BmpImage` | Adjust brightness and contrast of a BMP image with custom parameters and save th... |
-| [add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs](./add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs) | `BmpImage`, `BmpOptions`, `Graphics` | Add a textual watermark to a BMP image at the bottom‑right corner with configura... |
-| [overlay-a-semi-transparent-logo-onto-a-bmp-background-for-branding-across-multiple-assets.cs](./overlay-a-semi-transparent-logo-onto-a-bmp-background-for-branding-across-multiple-assets.cs) | `BmpImage`, `BmpOptions`, `RasterImage` | Overlay a semi‑transparent logo onto a BMP background for branding across multip... |
-| [crop-a-rectangular-region-from-a-bmp-image-using-pixel-coordinates-and-export-the-cropped-piece.cs](./crop-a-rectangular-region-from-a-bmp-image-using-pixel-coordinates-and-export-the-cropped-piece.cs) |  | Crop a rectangular region from a BMP image using pixel coordinates and export th... |
-| [extract-exif-metadata-from-a-bmp-file-and-write-the-details-to-a-json-document.cs](./extract-exif-metadata-from-a-bmp-file-and-write-the-details-to-a-json-document.cs) | `JsonSerializerOptions` | Extract EXIF metadata from a BMP file and write the details to a JSON document. |
-| [modify-the-dpi-metadata-of-a-bmp-image-to-300-dpi-for-high-resolution-printing-requirements.cs](./modify-the-dpi-metadata-of-a-bmp-image-to-300-dpi-for-high-resolution-printing-requirements.cs) | `BmpImage` | Modify the DPI metadata of a BMP image to 300 DPI for high‑resolution printing r... |
+| [apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs](./apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs) | `RasterImage`, `TiffOptions` | Apply a grayscale filter to a BMP image and export the result as TIFF for archiv... |
+| [adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs](./adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs) | `RasterImage` | Adjust brightness and contrast of a BMP image with custom parameters and save th... |
+| [add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs](./add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Add a textual watermark to a BMP image at the bottom‑right corner with configura... |
+| [overlay-a-semi-transparent-logo-onto-a-bmp-background-for-branding-across-multiple-assets.cs](./overlay-a-semi-transparent-logo-onto-a-bmp-background-for-branding-across-multiple-assets.cs) | `BmpOptions`, `RasterImage` | Overlay a semi‑transparent logo onto a BMP background for branding across multip... |
+| [crop-a-rectangular-region-from-a-bmp-image-using-pixel-coordinates-and-export-the-cropped-piece.cs](./crop-a-rectangular-region-from-a-bmp-image-using-pixel-coordinates-and-export-the-cropped-piece.cs) | `BmpOptions`, `RasterImage` | Crop a rectangular region from a BMP image using pixel coordinates and export th... |
+| [extract-exif-metadata-from-a-bmp-file-and-write-the-details-to-a-json-document.cs](./extract-exif-metadata-from-a-bmp-file-and-write-the-details-to-a-json-document.cs) |  | Extract EXIF metadata from a BMP file and write the details to a JSON document. |
+| [modify-the-dpi-metadata-of-a-bmp-image-to-300-dpi-for-high-resolution-printing-requirements.cs](./modify-the-dpi-metadata-of-a-bmp-image-to-300-dpi-for-high-resolution-printing-requirements.cs) |  | Modify the DPI metadata of a BMP image to 300 DPI for high‑resolution printing r... |
 | [batch-convert-all-bmp-files-in-a-directory-to-webp-format-using-lossless-compression.cs](./batch-convert-all-bmp-files-in-a-directory-to-webp-format-using-lossless-compression.cs) | `WebPOptions` | Batch convert all BMP files in a directory to WebP format using lossless compres... |
-| [generate-thumbnail-previews-of-bmp-images-with-a-fixed-size-for-gallery-display.cs](./generate-thumbnail-previews-of-bmp-images-with-a-fixed-size-for-gallery-display.cs) | `BmpOptions`, `RasterImage` | Generate thumbnail previews of BMP images with a fixed size for gallery display. |
-| [apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs](./apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs) | `GaussianBlurFilterOptions`, `RasterImage` | Apply a Gaussian blur effect to a BMP image for background softening in design m... |
+| [generate-thumbnail-previews-of-bmp-images-with-a-fixed-size-for-gallery-display.cs](./generate-thumbnail-previews-of-bmp-images-with-a-fixed-size-for-gallery-display.cs) | `BmpOptions` | Generate thumbnail previews of BMP images with a fixed size for gallery display. |
+| [apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs](./apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs) | `BmpOptions`, `RasterImage` | Apply a Gaussian blur effect to a BMP image for background softening in design m... |
 | [detect-and-automatically-remove-solid-color-borders-from-a-bmp-image-before-further-processing.cs](./detect-and-automatically-remove-solid-color-borders-from-a-bmp-image-before-further-processing.cs) | `BmpOptions`, `RasterImage` | Detect and automatically remove solid color borders from a BMP image before furt... |
 | [convert-multiple-bmp-images-into-a-multi-page-tiff-by-stacking-them-sequentially.cs](./convert-multiple-bmp-images-into-a-multi-page-tiff-by-stacking-them-sequentially.cs) | `RasterImage`, `TiffFrame`, `TiffImage` | Convert multiple BMP images into a multi‑page TIFF by stacking them sequentially... |
 | [export-a-bmp-image-to-a-pdf-document-preserving-resolution-and-embedding-it-as-a-single-page.cs](./export-a-bmp-image-to-a-pdf-document-preserving-resolution-and-embedding-it-as-a-single-page.cs) | `PdfOptions` | Export a BMP image to a PDF document preserving resolution and embedding it as a... |
-| [load-a-cmx-vector-file-and-enumerate-its-drawing-objects-for-analysis.cs](./load-a-cmx-vector-file-and-enumerate-its-drawing-objects-for-analysis.cs) | `CmxImage` | Load a CMX vector file and enumerate its drawing objects for analysis. |
-| [convert-a-cmx-file-to-svg-format-while-preserving-vector-shapes-and-text-elements.cs](./convert-a-cmx-file-to-svg-format-while-preserving-vector-shapes-and-text-elements.cs) | `CmxImage`, `CmxRasterizationOptions`, `SvgOptions` | Convert a CMX file to SVG format while preserving vector shapes and text element... |
-| [export-a-cmx-drawing-to-pdf-with-vector-fidelity-and-embedded-fonts-support.cs](./export-a-cmx-drawing-to-pdf-with-vector-fidelity-and-embedded-fonts-support.cs) | `CmxRasterizationOptions`, `PdfOptions` | Export a CMX drawing to PDF with vector fidelity and embedded fonts support. |
-| [rasterize-a-cmx-vector-image-to-png-at-a-specified-dpi-for-web-usage.cs](./rasterize-a-cmx-vector-image-to-png-at-a-specified-dpi-for-web-usage.cs) | `CmxImage`, `CmxRasterizationOptions`, `PngOptions` | Rasterize a CMX vector image to PNG at a specified DPI for web usage. |
-| [change-cmx-drawing-background-color-to-transparent-and-save-as-png-with-alpha-channel.cs](./change-cmx-drawing-background-color-to-transparent-and-save-as-png-with-alpha-channel.cs) | `CmxImage`, `CmxRasterizationOptions`, `PngOptions` | Change CMX drawing background color to transparent and save as PNG with alpha ch... |
-| [scale-a-cmx-drawing-uniformly-by-a-factor-of-two-while-maintaining-line-thickness-proportions.cs](./scale-a-cmx-drawing-uniformly-by-a-factor-of-two-while-maintaining-line-thickness-proportions.cs) | `CmxImage` | Scale a CMX drawing uniformly by a factor of two while maintaining line thicknes... |
-| [rotate-cmx-vector-content-90-degrees-clockwise-and-export-the-rotated-version-as-emf.cs](./rotate-cmx-vector-content-90-degrees-clockwise-and-export-the-rotated-version-as-emf.cs) | `EmfOptions`, `EmfRasterizationOptions` | Rotate CMX vector content 90 degrees clockwise and export the rotated version as... |
+| [load-a-cmx-vector-file-and-enumerate-its-drawing-objects-for-analysis.cs](./load-a-cmx-vector-file-and-enumerate-its-drawing-objects-for-analysis.cs) |  | Load a CMX vector file and enumerate its drawing objects for analysis. |
+| [convert-a-cmx-file-to-svg-format-while-preserving-vector-shapes-and-text-elements.cs](./convert-a-cmx-file-to-svg-format-while-preserving-vector-shapes-and-text-elements.cs) | `SvgOptions` | Convert a CMX file to SVG format while preserving vector shapes and text element... |
+| [export-a-cmx-drawing-to-pdf-with-vector-fidelity-and-embedded-fonts-support.cs](./export-a-cmx-drawing-to-pdf-with-vector-fidelity-and-embedded-fonts-support.cs) | `PdfOptions` | Export a CMX drawing to PDF with vector fidelity and embedded fonts support. |
+| [rasterize-a-cmx-vector-image-to-png-at-a-specified-dpi-for-web-usage.cs](./rasterize-a-cmx-vector-image-to-png-at-a-specified-dpi-for-web-usage.cs) | `PngOptions`, `VectorRasterizationOptions` | Rasterize a CMX vector image to PNG at a specified DPI for web usage. |
+| [change-cmx-drawing-background-color-to-transparent-and-save-as-png-with-alpha-channel.cs](./change-cmx-drawing-background-color-to-transparent-and-save-as-png-with-alpha-channel.cs) | `CmxImage`, `PngOptions`, `VectorRasterizationOptions` | Change CMX drawing background color to transparent and save as PNG with alpha ch... |
+| [scale-a-cmx-drawing-uniformly-by-a-factor-of-two-while-maintaining-line-thickness-proportions.cs](./scale-a-cmx-drawing-uniformly-by-a-factor-of-two-while-maintaining-line-thickness-proportions.cs) |  | Scale a CMX drawing uniformly by a factor of two while maintaining line thicknes... |
+| [rotate-cmx-vector-content-90-degrees-clockwise-and-export-the-rotated-version-as-emf.cs](./rotate-cmx-vector-content-90-degrees-clockwise-and-export-the-rotated-version-as-emf.cs) | `EmfOptions` | Rotate CMX vector content 90 degrees clockwise and export the rotated version as... |
 | [merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs](./merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs) | `CmxImage`, `PngOptions`, `RasterImage` | Merge multiple CMX files into a single composite drawing preserving layer order. |
 | [extract-text-strings-from-a-cmx-file-and-output-them-to-a-plain-text-file-for-indexing.cs](./extract-text-strings-from-a-cmx-file-and-output-them-to-a-plain-text-file-for-indexing.cs) | `CmxImage` | Extract text strings from a CMX file and output them to a plain text file for in... |
-| [apply-stroke-width-adjustment-to-all-lines-in-a-cmx-drawing-for-consistent-visual-weight.cs](./apply-stroke-width-adjustment-to-all-lines-in-a-cmx-drawing-for-consistent-visual-weight.cs) | `CmxImage` | Apply stroke width adjustment to all lines in a CMX drawing for consistent visua... |
-| *...and 572 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/manipulate-different-image-file-formats) |
+| [apply-stroke-width-adjustment-to-all-lines-in-a-cmx-drawing-for-consistent-visual-weight.cs](./apply-stroke-width-adjustment-to-all-lines-in-a-cmx-drawing-for-consistent-visual-weight.cs) |  | Apply stroke width adjustment to all lines in a CMX drawing for consistent visua... |
+| *...and 572 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.9.0/manipulate-different-image-file-formats) |
 
 ## Category Statistics
 - Total examples: 602
@@ -151,6 +149,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `PngImage`
 - `PngOptions`
 - `PsdOptions`
+- `RasterCachedImage`
 - `RasterCachedMultipageImage`
 - `RasterImage`
 - `SharpenFilterOptions`
@@ -182,85 +181,11 @@ All tasks passed ✅
 - An e‑commerce platform generates product thumbnails on the fly and must output them in WebP for browsers while keeping the original files in their native formats, illustrating multi‑format imaging dotnet in a real‑time pipeline.  
 - A desktop application imports legacy BMP assets and exports them as high‑quality PNGs for modern UI design, leveraging the provided code to handle batch image format manipulation C#.  
 - A scientific research tool collects microscopy images in proprietary formats and needs to archive them as lossless PNGs, demonstrating multi‑format imaging dotnet for accurate data preservation.  
-- An automated reporting system compiles charts generated in SVG and embeds them into PDF reports, requiring conversion from SVG to raster formats such as JPEG, which the examples cover through image format manipulation C# techniques.  
+- An automated reporting system compiles charts generated in SVG and embeds them into PDF reports, requiring conversion from SVG to raster formats such as JPEG, which the examples cover through image format manipulation C# techniques.
 
 ## Related Categories  
 The techniques demonstrated here complement the **Convert Image Formats** category, where developers learn to transform images between specific file types with fine‑grained control. For scenarios that demand reduced file sizes after conversion, the **Image Compression** examples provide strategies to balance quality and storage. When preserving or extracting metadata during format changes, the **Image Metadata** section offers guidance on handling EXIF and other tags. Together, these adjacent categories give a comprehensive toolkit for any .NET developer working on multi‑format imaging workflows.
 
-
-## Operations Covered
-- Extract TIFF clipping paths to SVG  
-- Export each TIFF frame’s paths as SVG files  
-- Convert JPEG2000 images to PNG  
-- Process large JPEG2000 collection in parallel  
-- Apply memory‑strategy optimization while converting images  
-- Resize EPS file and export to high‑resolution PNG  
-- Convert animated GIF to WebP preserving frame delays  
-- Preserve GIF loop count when saving as WebP  
-- Create a blank 800 × 600 WebP image  
-- Save WebP image using default options  
-- Generate APNG animation from PNG source frames  
-
-## Supported Formats
-- **TIFF** – loaded to read clipping‑path resources.  
-- **SVG** – target format for exported clipping paths.  
-- **JPEG2000** – source format for batch conversion to PNG.  
-- **PNG** – target format for JPEG2000 conversion and for APNG generation.  
-- **EPS** – source vector format that is resized and rasterized to PNG.  
-- **WebP** – target format for GIF conversion and for creating a blank image.  
-- **GIF** – source animated format whose frames and delays are transferred to WebP.  
-- **APNG** – animated PNG created from supplied source data.  
-
-## API Classes Used
-- `Image.Load` — static method that loads an image file and returns the appropriate format‑specific object.  
-- `TiffImage` — represents a multi‑frame TIFF image and provides access to its frames and path resources.  
-- `PathResource` — encapsulates a clipping‑path resource stored in a TIFF frame.  
-- `SvgImage` — used to create or write SVG content for exported paths.  
-- `WebPImage` — creates a new WebP image or loads an existing one.  
-- `WebPOptions` — holds saving options (e.g., compression) for WebP images.  
-- `PngOptions` — holds saving options for PNG output.  
-- `GifImage` — loads an animated GIF and gives access to its frames and metadata.  
-- `GifFrame` — represents a single frame of a GIF, including delay information.  
-- `Jpeg2000Image` — loads JPEG2000 files for further processing.  
-- `ImageOptions` — base class for format‑specific saving options.  
-- `Image.Save` — instance method that writes the image to a file using the supplied options.  
-- `Parallel.ForEach` — .NET parallel loop used to process many images concurrently (memory‑strategy optimization).
-
-
-## Get Started
-
-Ready to try Manipulate Different Image File Formats conversions on your own files with Aspose.Imaging for .NET?
-
-```bash
-dotnet add package Aspose.Imaging
-```
-
-| Resource | Link |
-|----------|------|
-| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet Package | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
-| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
-| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
-| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
-
 <!-- AUTOGENERATED:START -->
-Updated: 2026-09-16 | Run: `20260722_145105` | Examples: 602
+Updated: 2026-10-02 | Run: `20261002_070800` | Examples: 602
 <!-- AUTOGENERATED:END -->
-
-## Developer Q&A
-
-### Q: How can I extract clipping paths from each frame of a TIFF file and export them as separate SVG files using Aspose.Imaging for .NET?  
-Use `TiffImage` to load the TIFF, iterate its `Frames`, access each frame’s `PathResources`, and save each path with `SvgImage.Save`. → See: `access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs`
-
-### Q: What is the best way to batch convert a folder of TIFF images to WebP files with a timestamp suffix in the filenames using Aspose.Imaging C#?  
-Load each TIFF with `Image.Load`, create `WebpOptions`, append `DateTime.Now.Ticks` to the output name, and call `image.Save(outputPath, webpOptions)`. → See: `batch-convert-a-collection-of-tiff-files-to-webp-naming-each-output-file-with-a-timestamp-suffix.cs`
-
-### Q: How do I export a BMP image to a PSD file using RLE compression for smaller size with Aspose.Imaging in C#?  
-Instantiate `PsdOptions`, set `CompressionMethod = CompressionMethod.Rle`, then call `image.Save(outputPath, psdOptions)`. → See: `configure-psdoptions-compressionmethod-to-rle-for-high-quality-psd-export-and-efficient-file-size.cs`
-
-### Q: How can I apply a Gaussian blur filter to a DICOM image and then save the result as a GIF using Aspose.Imaging for .NET?  
-Load the DICOM with `Image.Load`, apply `image.ApplyFilter(new GaussianBlurFilter())`, and save using `GifOptions` via `image.Save(outputPath, gifOptions)`. → See: `load-a-dicom-image-apply-gaussian-blur-filter-then-save-as-gif-with-default-settings.cs`
-
-### Q: How do I convert only the even-numbered pages of a DjVu document to PNG images using Aspose.Imaging in C#?  
-Open the DjVu file with `DjvuImage`, loop through `djvuImage.Frames` using an even index step, and save each selected frame with `PngOptions` via `frame.Save(outputPath, pngOptions)`. → See: `load-a-djvu-document-convert-only-even-numbered-pages-to-png-using-intrange-selection.cs`

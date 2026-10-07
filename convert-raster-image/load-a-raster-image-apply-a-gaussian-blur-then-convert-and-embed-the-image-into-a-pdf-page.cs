@@ -2,40 +2,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.pdf";
+            string inputPath = Path.Combine("Input", "image.png");
+            string outputPath = Path.Combine("Output", "result.pdf");
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
 
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the blurred image embedded in a PDF page
-                var pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report that includes a softened version of a product photo for a marketing brochure.
- * 2. When you want to preprocess scanned documents by blurring sensitive details before embedding them into a PDF for secure sharing.
- * 3. When creating printable PDFs where background images require a Gaussian blur to reduce visual noise and improve text readability.
- * 4. When automating a workflow that converts PNG assets to PDF while applying a blur effect to meet branding style guidelines.
- * 5. When developing an application that archives images as PDFs and needs to apply a consistent blur filter to all images for aesthetic consistency.
+ * 1. When you need to generate a PDF report that includes a softened version of a product photo to reduce visual noise.
+ * 2. When creating printable marketing brochures where PNG logos must be blurred for watermark effects before embedding in PDF pages.
+ * 3. When automating document workflows that require converting scanned PNG images into PDF while applying a Gaussian blur to hide sensitive details.
+ * 4. When developing a C# application that prepares PDF invoices and wants to blur background images to keep the focus on text.
+ * 5. When building a batch processing tool that processes PNG screenshots, applies a blur filter, and stores the results as PDF files for archival.
  */

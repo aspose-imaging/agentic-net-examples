@@ -1,46 +1,38 @@
-// HOW-TO: Increase TIFF Contrast and Apply Floyd Steinberg Dithering to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust TIFF Contrast And Apply Floyd Steinberg Dithering To PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output\\result.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.tif";
-            string outputPath = @"c:\temp\sample_processed.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)tiff;
+                raster.AdjustContrast(1.2f);
+                raster.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to TiffImage to access TIFF‑specific methods
-                TiffImage tiffImage = (TiffImage)image;
-
-                // Adjust contrast (example value: 50)
-                tiffImage.AdjustContrast(50f);
-
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette (black & white)
-                tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
-
-                // Save the processed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                tiffImage.Save(outputPath, pngOptions);
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the readability of scanned TIFF documents by boosting contrast before converting them to black‑and‑white PNGs for web display.
- * 2. When preparing high‑resolution TIFF scans for OCR, applying contrast enhancement and Floyd‑Steinberg dithering creates a clean 1‑bit PNG that reduces recognition errors.
- * 3. When generating printable line‑art from a colored TIFF, adjusting contrast and dithering produces a crisp monochrome PNG suitable for laser printers.
- * 4. When archiving legacy TIFF images in a space‑efficient format, the code increases contrast and dithers to a 1‑bit PNG, cutting file size while preserving detail.
- * 5. When building a C# image‑processing pipeline that must automatically convert incoming TIFF files to PNG with consistent contrast and binary dithering for downstream analysis.
+ * 1. When you need to improve the visual clarity of a scanned TIFF document before converting it to a web‑friendly PNG, you can adjust its contrast and apply Floyd‑Steinberg dithering in C#.
+ * 2. When preparing high‑resolution medical or engineering TIFF images for display on low‑color‑depth devices, you can reduce the contrast range and dither them to an 8‑bit PNG using Aspose.Imaging.
+ * 3. When automating a batch process that converts legacy TIFF assets to PNG while preserving detail through contrast enhancement and error‑diffusion dithering, this code provides a reliable solution.
+ * 4. When generating printable PNG thumbnails from large TIFF files and need to maintain sharp edges on limited palettes, applying contrast adjustment followed by Floyd‑Steinberg dithering ensures quality results.
+ * 5. When integrating image preprocessing into a C# application that receives TIFF uploads and must output optimized PNGs for web galleries, the contrast and dithering steps help reduce file size without sacrificing visual fidelity.
  */

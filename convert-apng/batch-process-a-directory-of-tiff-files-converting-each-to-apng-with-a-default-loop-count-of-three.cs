@@ -3,45 +3,74 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            foreach (string tiffFilePath in tiffFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Build input and output paths
-                string inputPath = tiffFilePath;
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(tiffFilePath) + ".png");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                // Verify input file exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var file in files)
+            {
+                if (!file.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) &&
+                    !file.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string inputPath = file;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".apng");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save as APNG with 3 loops
-                using (Image image = Image.Load(inputPath))
+                using (Image tiffImage = Image.Load(inputPath))
                 {
-                    var apngOptions = new ApngOptions
+                    RasterImage raster = tiffImage as RasterImage;
+                    if (raster == null)
                     {
-                        NumPlays = 3 // default loop count
+                        Console.Error.WriteLine($"Unsupported image type: {inputPath}");
+                        continue;
+                    }
+
+                    ApngOptions options = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        NumPlays = 3,
+                        ColorType = PngColorType.TruecolorWithAlpha
                     };
-                    image.Save(outputPath, apngOptions);
+
+                    using (ApngImage apng = (ApngImage)Image.Create(options, raster.Width, raster.Height))
+                    {
+                        apng.RemoveAllFrames();
+                        apng.AddFrame(raster);
+                        apng.Save();
+                    }
                 }
             }
         }
@@ -54,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically turn a collection of scanned TIFF pages into looping animated PNGs for web galleries.
- * 2. When a reporting system generates multi‑page TIFF charts and you want to display them as short looping animations in a dashboard.
- * 3. When migrating legacy TIFF assets to a modern format that supports animation and you require a fixed three‑loop playback for consistency.
- * 4. When building a batch image‑processing tool that processes all TIFF files in a folder and outputs APNG files ready for mobile apps.
- * 5. When integrating Aspose.Imaging into a C# service that must convert incoming TIFF uploads to animated PNGs with a predefined loop count.
+ * 1. When you need to transform a collection of multi‑page TIFF scans into looping animated PNGs for web galleries using C#.
+ * 2. When an automated build process must generate lightweight APNG assets from high‑resolution TIFF source files for mobile apps.
+ * 3. When a server‑side service has to convert uploaded TIFF images to APNG with a preset three‑loop animation for email newsletters.
+ * 4. When migrating legacy TIFF documentation to modern animated PNG format while preserving a consistent loop count across all files.
+ * 5. When creating a batch script that processes a folder of TIFF files and outputs APNGs ready for inclusion in HTML5 canvases.
  */

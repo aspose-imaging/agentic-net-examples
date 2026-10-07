@@ -1,4 +1,4 @@
-// HOW-TO: Convert DICOM File To PNG Byte Array In ASP.NET Core (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM Image to PNG in ASP.NET Core API C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,29 +10,24 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/sample.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
-            {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions();
-                    dicomImage.Save(memoryStream, pngOptions);
-                    byte[] pngBytes = memoryStream.ToArray();
+            string inputPath = "Input/sample.dcm";
+            string outputPath = "Output/sample.png";
 
-                    File.WriteAllBytes(outputPath, pngBytes);
-                    Console.WriteLine($"PNG byte array length: {pngBytes.Length}");
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            {
+                using (PngOptions options = new PngOptions())
+                {
+                    dicom.Save(outputPath, options);
                 }
             }
         }
@@ -45,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging web service needs to deliver DICOM scans as PNG images for browser display.
- * 2. When integrating a PACS system with a .NET API that must provide thumbnails of DICOM studies as PNG byte streams.
- * 3. When building a telemedicine portal that converts uploaded DICOM files to PNG for inclusion in patient reports.
- * 4. When creating a microservice that transforms DICOM images into PNG for downstream AI models that accept raster formats.
- * 5. When developing a mobile app backend that fetches DICOM scans from storage and returns them as PNG byte arrays to reduce client‑side processing.
+ * 1. When a healthcare web service needs to deliver radiology scans as PNG thumbnails to browsers.
+ * 2. When a PACS integration requires converting DICOM files to PNG for storage in a non‑medical image repository.
+ * 3. When a mobile app consumes an ASP.NET Core endpoint that returns PNG byte arrays instead of raw DICOM data.
+ * 4. When a reporting tool must embed DICOM images into PDF documents that only support PNG format.
+ * 5. When an automated pipeline processes incoming DICOM files and exposes them via a REST API as PNG streams for downstream analytics.
  */

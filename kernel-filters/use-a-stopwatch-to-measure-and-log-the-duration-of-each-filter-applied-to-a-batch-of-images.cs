@@ -1,74 +1,57 @@
-// HOW-TO: Measure Execution Time Of Multiple Image Filters In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Measure Execution Time of Gaussian Blur Filter on Multiple Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using System.Drawing;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input\";
-            string outputDir = @"C:\Images\Output\";
+            string inputDir = "InputImages";
+            string outputDir = "OutputImages";
 
-            // List of image files to process
-            string[] imageFiles = new[]
+            if (!Directory.Exists(inputDir))
             {
-                "sample1.png",
-                "sample2.png"
-            };
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
 
-            // Define filter configurations
-            var filters = new (string suffix, FilterOptionsBase options)[]
+            if (!Directory.Exists(outputDir))
             {
-                ("Median", new MedianFilterOptions(5)),
-                ("Bilateral", new BilateralSmoothingFilterOptions(5)),
-                ("Gaussian", new GaussianBlurFilterOptions(5, 4.0)),
-                ("Sharpen", new SharpenFilterOptions(5, 4.0))
-            };
+                Directory.CreateDirectory(outputDir);
+            }
 
-            foreach (var fileName in imageFiles)
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string inputPath in files)
             {
-                string inputPath = Path.Combine(inputDir, fileName);
-
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the image once per file
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_filtered.jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access Filter method
-                    RasterImage rasterImage = (RasterImage)image;
-
-                    foreach (var (suffix, options) in filters)
+                    RasterImage raster = image as RasterImage;
+                    if (raster == null)
                     {
-                        // Measure filter application time
-                        Stopwatch sw = Stopwatch.StartNew();
-
-                        rasterImage.Filter(rasterImage.Bounds, options);
-
-                        sw.Stop();
-                        Console.WriteLine($"Applied {suffix} filter to {fileName} in {sw.ElapsedMilliseconds} ms.");
-
-                        // Prepare output path
-                        string outputFileName = Path.GetFileNameWithoutExtension(fileName) + "." + suffix + ".png";
-                        string outputPath = Path.Combine(outputDir, outputFileName);
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the processed image
-                        rasterImage.Save(outputPath);
+                        Console.Error.WriteLine($"Skipping non-raster image: {inputPath}");
+                        continue;
                     }
+
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    var jpegOptions = new JpegOptions { Quality = 90 };
+                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -81,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to benchmark how long median, bilateral, Gaussian, and sharpen filters take on a set of PNG files before optimizing a photo‑editing pipeline.
- * 2. When processing a batch of product images you want to log the performance of each filter to ensure the server meets SLA requirements.
- * 3. When comparing different smoothing techniques on JPEG thumbnails you need precise timing data to choose the most efficient filter for a web service.
- * 4. When integrating Aspose.Imaging into an automated quality‑control system you must record filter execution times to detect performance regressions.
- * 5. When building a desktop application that applies multiple filters to user‑selected images you want to display the elapsed time for each operation to improve user experience.
+ * 1. When you need to benchmark how long a Gaussian blur filter takes on a batch of JPEG files to optimize image‑processing performance.
+ * 2. When you want to log the processing time for each image in a batch to generate detailed performance reports for a C# imaging pipeline.
+ * 3. When you are comparing different filter parameters or algorithms and require precise timing data to select the most efficient option.
+ * 4. When you must ensure that image‑filtering operations meet service‑level agreements in a server‑side C# application.
+ * 5. When you are troubleshooting slow image conversions and need to isolate the time spent on each filter step.
  */

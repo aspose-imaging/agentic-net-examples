@@ -1,52 +1,54 @@
-// HOW-TO: Crop EMF Image Border and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop EMF Border and Save as PDF Using C# Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.pdf";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = Path.Combine("Input", "image.emf");
+            string outputPath = Path.Combine("Output", "cropped.pdf");
+            string tempPngPath = Path.Combine("Output", "temp.png");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access cropping functionality
-                EmfImage emfImage = (EmfImage)image;
+                var pngOptions = new PngOptions();
+                emfImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Define a rectangle that removes a 10‑pixel border from each side
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
                 int border = 10;
-                var cropRect = new Aspose.Imaging.Rectangle(
-                    border,
-                    border,
-                    emfImage.Width - 2 * border,
-                    emfImage.Height - 2 * border);
+                int newWidth = raster.Width - 2 * border;
+                int newHeight = raster.Height - 2 * border;
+                if (newWidth > 0 && newHeight > 0)
+                {
+                    var cropRect = new Aspose.Imaging.Rectangle(border, border, newWidth, newHeight);
+                    raster.Crop(cropRect);
+                }
 
-                // Crop the image
-                emfImage.Crop(cropRect);
-
-                // Prepare PDF save options
                 var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
+            }
 
-                // Save the cropped image as PDF
-                emfImage.Save(outputPath, pdfOptions);
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -59,8 +61,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to remove unwanted whitespace from a vector EMF logo before embedding it in a PDF report.
- * 2. When generating printable PDFs from EMF diagrams and you must trim a fixed border to fit page margins.
- * 3. When automating batch conversion of EMF icons to PDF thumbnails and require consistent cropping of each image.
- * 4. When a web service receives EMF files and must deliver a clean PDF version without the original file’s margin artifacts.
- * 5. When integrating Aspose.Imaging in a C# application to preprocess EMF drawings for archival PDFs with precise border removal.
+ * 2. When an application must convert legacy EMF diagrams to PDF while trimming the image edges for a cleaner layout.
+ * 3. When generating printable PDFs from EMF icons and you want to automatically crop a fixed border around each icon.
+ * 4. When automating document workflows that require rasterizing EMF files, cropping them, and saving the result as PDF using C#.
+ * 5. When integrating Aspose.Imaging into a .NET service to preprocess EMF graphics by removing margins and delivering them as PDF files.
  */

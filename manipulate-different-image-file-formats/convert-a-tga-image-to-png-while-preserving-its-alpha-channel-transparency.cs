@@ -3,33 +3,31 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.tga";
-        string outputPath = "output.png";
+        string inputPath = "Input\\image.tga";
+        string outputPath = "Output\\image.png";
 
         try
         {
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            string? outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Save the image as PNG, preserving alpha channel
-                image.Save(outputPath, new PngOptions());
+                using (PngOptions options = new PngOptions())
+                {
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -41,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display game textures originally saved as TGA files on a web page that only supports PNG with transparent backgrounds.
- * 2. When migrating legacy assets from a graphics pipeline that uses TGA to a modern UI framework that requires PNG images with preserved alpha channels.
- * 3. When automating a batch conversion of TGA sprites for a mobile app, ensuring the transparency remains intact for proper rendering.
- * 4. When integrating third‑party TGA resources into a C# desktop application that only loads PNG files with alpha support.
- * 5. When preparing print‑ready assets by converting TGA logos to PNG while keeping their transparent margins for layout software.
+ * 1. When you need to display legacy TGA textures in a modern web application that only supports PNG with transparent backgrounds.
+ * 2. When converting game asset files from TGA to PNG while keeping the alpha channel for proper sprite blending.
+ * 3. When preparing print‑ready graphics that originate as TGA files but must be delivered as PNGs with preserved transparency.
+ * 4. When automating a batch process that migrates TGA icons to PNG format for use in a Windows desktop application.
+ * 5. When integrating third‑party TGA images into a C# reporting tool that renders PNG images with alpha channels.
  */

@@ -1,8 +1,10 @@
-// HOW-TO: Batch Remove Watermarks From PNG Images Using Ellipse Mask And Telea In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Elliptical Mask with Telea Inpainting to PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
@@ -13,8 +15,8 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputImages";
-            string outputDirectory = "OutputImages";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -23,10 +25,7 @@ class Program
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(outputDirectory);
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
             foreach (string inputPath in files)
@@ -38,24 +37,33 @@ class Program
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_cleaned.png");
-
+                string outputPath = Path.Combine(outputDirectory, fileName + "_masked.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (var image = Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    var pngImage = (PngImage)image;
+                    RasterImage raster = (RasterImage)image;
 
-                    var mask = new GraphicsPath();
-                    var figure = new Figure();
-                    figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 150)));
+                    GraphicsPath mask = new GraphicsPath();
+                    Figure figure = new Figure();
+
+                    int ellipseX = raster.Width / 4;
+                    int ellipseY = raster.Height / 4;
+                    int ellipseWidth = raster.Width / 2;
+                    int ellipseHeight = raster.Height / 2;
+                    RectangleF rect = new RectangleF(ellipseX, ellipseY, ellipseWidth, ellipseHeight);
+                    figure.AddShape(new EllipseShape(rect));
                     mask.AddFigure(figure);
 
-                    var options = new TeleaWatermarkOptions(mask);
+                    TeleaWatermarkOptions options = new TeleaWatermarkOptions(mask);
 
-                    using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                    using (RasterImage result = WatermarkRemover.PaintOver(raster, options))
                     {
-                        result.Save(outputPath);
+                        PngOptions saveOptions = new PngOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        result.Save(outputPath, saveOptions);
                     }
                 }
             }
@@ -69,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically clean a large collection of product photos in PNG format by removing watermarks inside a specific elliptical region using the Telea inpainting algorithm.
- * 2. When a web service must preprocess user‑uploaded PNG images to erase logo overlays that appear in a fixed ellipse before storing them in a CDN.
- * 3. When a desktop application has to batch‑process scanned PNG documents, removing stamps that are consistently placed within the same elliptical area.
- * 4. When a game developer wants to strip placeholder watermarks from sprite sheets saved as PNGs, applying the same ellipse mask to every frame.
- * 5. When an archival tool needs to restore old PNG images by filling removed watermark areas with surrounding pixels using Telea inpainting across an entire folder.
+ * 1. When you need to automatically hide the central region of dozens of PNG product photos by applying the same elliptical mask and filling the masked area with Telea inpainting.
+ * 2. When you must process a large collection of scanned PNG documents to obscure sensitive information inside a consistent ellipse while preserving surrounding details using Aspose.Imaging in C#.
+ * 3. When you want to generate uniform circular thumbnails from a folder of PNG images by masking each image with an ellipse and repairing the masked pixels with the Telea algorithm.
+ * 4. When you are building a batch workflow that removes watermarks or logos located in the middle of PNG files by applying an ellipse mask and reconstructing the area with Telea inpainting.
+ * 5. When you need to prepare PNG assets for a game or UI by batch‑applying an elliptical cut‑out and smoothly filling the cut‑out area using the Telea algorithm to maintain visual quality.
  */

@@ -2,40 +2,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input\\sample.bmp";
+            string outputPath = "Output\\result.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Apply median filter with size 5 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                // Save the processed image as PDF
-                image.Save(outputPath, new PdfOptions());
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a scanned BMP image before embedding it in a PDF report.
- * 2. When converting legacy BMP graphics to PDF while applying a median filter to improve visual quality.
- * 3. When automating a workflow that cleans up bitmap screenshots and stores the results as searchable PDF files.
- * 4. When preparing BMP‑based medical scans for archival by smoothing artifacts and saving them in PDF format.
- * 5. When building a C# application that processes user‑uploaded BMP files, removes speckle noise, and returns a PDF document.
+ * 1. When you need to reduce noise in a scanned BMP document before converting it to a searchable PDF.
+ * 2. When a legacy system outputs BMP images that must be filtered and bundled as PDF reports in a .NET application.
+ * 3. When preparing medical imaging BMP files for archival, applying a median filter to smooth artifacts and saving them as PDF for compliance.
+ * 4. When generating printable PDFs from BMP graphics while preserving image quality by removing speckle noise with a median filter.
+ * 5. When automating batch processing of BMP assets, applying noise reduction and exporting the results directly to PDF using C# and Aspose.Imaging.
  */

@@ -1,11 +1,17 @@
-// HOW-TO: Add a New TIFF Frame with LZW Compression and Custom DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom Sized LZW Compressed TIFF Frame with Resolution in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input\\source.tif";
-            string outputPath = "output\\result.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output/output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,41 +28,34 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load existing TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Define options for the new frame
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                frameOptions.Compression = TiffCompressions.Lzw;
-                frameOptions.Photometric = TiffPhotometrics.Rgb;
-                frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-                frameOptions.ResolutionUnit = TiffResolutionUnits.Inch;
-                frameOptions.Xresolution = new TiffRational(300, 1); // 300 DPI
-                frameOptions.Yresolution = new TiffRational(300, 1); // 300 DPI
+                // Define custom dimensions for the new frame
+                int newWidth = 800;
+                int newHeight = 600;
 
-                // Create new frame with custom dimensions
-                int frameWidth = 200;
-                int frameHeight = 200;
-                TiffFrame newFrame = new TiffFrame(frameOptions, frameWidth, frameHeight);
+                // Create TiffOptions for the new frame with LZW compression and resolution settings
+                using (TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb))
+                {
+                    frameOptions.Xresolution = new TiffRational(300, 1);
+                    frameOptions.Yresolution = new TiffRational(300, 1);
+                    frameOptions.ResolutionUnit = TiffResolutionUnits.Inch;
 
-                // Optional: fill the frame with a gradient
-                LinearGradientBrush gradient = new LinearGradientBrush(
-                    new Point(0, 0),
-                    new Point(newFrame.Width, newFrame.Height),
-                    Color.Blue,
-                    Color.Yellow);
-                Graphics graphics = new Graphics(newFrame);
-                graphics.FillRectangle(gradient, newFrame.Bounds);
+                    TiffFrame newFrame = new TiffFrame(frameOptions, newWidth, newHeight);
+                    tiffImage.AddFrame(newFrame);
+                }
 
-                // Add the new frame to the TIFF image
-                tiffImage.AddFrame(newFrame);
+                // Save the updated TIFF with desired options
+                using (TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb))
+                {
+                    saveOptions.Xresolution = new TiffRational(300, 1);
+                    saveOptions.Yresolution = new TiffRational(300, 1);
+                    saveOptions.ResolutionUnit = TiffResolutionUnits.Inch;
 
-                // Save the updated TIFF image
-                tiffImage.Save(outputPath);
+                    tiffImage.Save(outputPath, saveOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -68,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create or append a high‑resolution page to an existing multi‑page TIFF document, such as adding a scanned invoice to a batch file.
- * 2. When you must generate a TIFF thumbnail with specific dimensions and LZW compression for faster web preview while preserving image quality.
- * 3. When you are preparing printable graphics that require exact 300 DPI resolution and lossless compression for professional publishing workflows.
- * 4. When you are archiving medical or scientific images in a TIFF container and need each frame to use LZW compression and standardized DPI for compliance.
- * 5. When you are building a GIS or mapping application that stores raster tiles as TIFF frames with custom size and resolution settings for accurate georeferencing.
+ * 1. When you need to append a new page of specific width and height to an existing multi‑page TIFF for printing at 300 dpi using LZW compression.
+ * 2. When generating a multi‑resolution TIFF document where each frame must have its own resolution metadata and lossless compression in a C# application.
+ * 3. When converting scanned images into a single TIFF file and want to add a blank canvas of custom dimensions as a placeholder frame.
+ * 4. When creating a TIFF archive for archival purposes and must ensure each added frame uses LZW compression and standardized inch resolution settings.
+ * 5. When automating the preparation of TIFF files for GIS or medical imaging systems that require exact pixel dimensions and resolution tags per frame.
  */

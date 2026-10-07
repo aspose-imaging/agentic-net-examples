@@ -1,46 +1,46 @@
-// HOW-TO: Limit Watermark Removal Processing Time on Large TIFFs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Limit Watermark Removal Time on Large TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input/input.tif";
+        string outputPath = "output/processed.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output\\result.tif";
-
-            if (!File.Exists(inputPath))
+            using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (var image = Image.Load(inputPath))
-            {
-                var raster = (RasterImage)image;
-
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                figure.AddShape(new RectangleShape(new RectangleF(0, 0, 100, 100)));
                 mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
-                {
-                    MaxPaintingAttempts = 1
-                };
+                var options = new ContentAwareFillWatermarkOptions(mask);
+                options.MaxPaintingAttempts = 1;
 
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
+                var result = WatermarkRemover.PaintOver((RasterImage)image, options);
                 using (result)
                 {
-                    result.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    result.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing multi‑megapixel TIFF scans and need to remove watermarks quickly without exhausting CPU time.
- * 2. When integrating Aspose.Imaging into a document‑management system that must handle batch watermark removal on large TIFF files within strict performance budgets.
- * 3. When developing a C# service that cleans up scanned legal documents and wants to cap the number of painting attempts to avoid long delays.
- * 4. When optimizing a server‑side image pipeline that receives high‑resolution TIFFs and requires fast watermark erasure to meet SLA response times.
- * 5. When building a desktop utility for archivists that strips watermarks from large TIFF images while ensuring the operation completes promptly.
+ * 1. When processing multi‑gigabyte scanned TIFF documents that contain watermarks, you can limit the removal algorithm to a single painting attempt to keep the operation fast.
+ * 2. When integrating Aspose.Imaging into a document‑archiving pipeline, setting MaxPaintingAttempts to 1 prevents long pauses while cleaning watermarks from large TIFF images.
+ * 3. When building a web service that accepts high‑resolution TIFF uploads, you can use this code to quickly strip watermarks without exhausting server resources.
+ * 4. When performing batch conversion of TIFF files with embedded watermarks, limiting painting attempts ensures consistent processing time across all files.
+ * 5. When developing a desktop utility for users to clean confidential TIFF scans, the single‑attempt setting helps maintain a responsive UI even on very large images.
  */

@@ -1,6 +1,7 @@
 // HOW-TO: Generate Multiple Rotated BMP Images from a Base Shape in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -10,57 +11,37 @@ class Program
     {
         try
         {
-            // Output directory for all generated BMP files
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
 
-            // Path for the base image containing the original shape
-            string basePath = Path.Combine(outputDir, "base.bmp");
+            int width = 200;
+            int height = 200;
+            int shapeSize = 100;
+            int[] angles = new int[] { 0, 90, 180, 270 };
 
-            // Create a BMP image with a simple rectangle shape
-            var bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(basePath, false);
-            using (Aspose.Imaging.Image baseImage = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
+            foreach (int angle in angles)
             {
-                var graphics = new Aspose.Imaging.Graphics(baseImage);
-                graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
-                    new Aspose.Imaging.Rectangle(50, 50, 100, 100));
-                // Image is bound to the file source; just call Save()
-                baseImage.Save();
-            }
+                string outputPath = Path.Combine(outputDirectory, $"rotated_{angle}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Verify the base image was created before loading it
-            if (!File.Exists(basePath))
-            {
-                Console.Error.WriteLine($"File not found: {basePath}");
-                return;
-            }
+                BmpOptions options = new BmpOptions();
+                options.Source = new FileCreateSource(outputPath, false);
 
-            // Define the set of rotations to apply
-            var rotations = new[]
-            {
-                Aspose.Imaging.RotateFlipType.Rotate90FlipNone,
-                Aspose.Imaging.RotateFlipType.Rotate180FlipNone,
-                Aspose.Imaging.RotateFlipType.Rotate270FlipNone,
-                Aspose.Imaging.RotateFlipType.RotateNoneFlipX,
-                Aspose.Imaging.RotateFlipType.RotateNoneFlipY
-            };
-
-            // Generate a rotated BMP for each rotation type
-            foreach (var rot in rotations)
-            {
-                string outPath = Path.Combine(outputDir, $"rotated_{rot}.bmp");
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-
-                // Load the base image, apply rotation, and save
-                using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(basePath))
+                using (Image image = Image.Create(options, width, height))
                 {
-                    img.RotateFlip(rot);
-                    img.Save(outPath, new BmpOptions());
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+
+                    graphics.TranslateTransform(width / 2f, height / 2f);
+                    graphics.RotateTransform(angle);
+                    graphics.TranslateTransform(-width / 2f, -height / 2f);
+
+                    Pen pen = new Pen(Color.Black);
+                    int x = (width - shapeSize) / 2;
+                    int y = (height - shapeSize) / 2;
+                    graphics.DrawRectangle(pen, x, y, shapeSize, shapeSize);
+
+                    image.Save();
                 }
             }
         }
@@ -73,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a set of BMP icons that show a logo at different angles for a UI theme.
- * 2. When you want to pre‑rotate a graphic for printing on labels that require 90°, 180°, and 270° orientations.
- * 3. When a game engine requires separate sprite sheets for each rotation of a character’s silhouette stored as BMP files.
- * 4. When an automated testing suite must verify image‑processing algorithms using known rotated reference BMPs.
- * 5. When a document generation system must embed the same diagram in several pages, each rotated differently, without performing runtime transformations.
+ * 1. When you need to create a series of BMP icons showing a logo at 0°, 90°, 180°, and 270° for a desktop application's toolbar.
+ * 2. When generating test images for automated visual regression testing that require the same shape rotated at fixed angles.
+ * 3. When preparing sprite sheets for a game where each frame is a rotated version of a base object stored as separate BMP files.
+ * 4. When producing documentation screenshots that illustrate how a diagram looks after different rotations without manually editing each image.
+ * 5. When batch-exporting engineering diagrams as BMP files with precise rotation for inclusion in legacy CAD systems that only accept BMP format.
  */

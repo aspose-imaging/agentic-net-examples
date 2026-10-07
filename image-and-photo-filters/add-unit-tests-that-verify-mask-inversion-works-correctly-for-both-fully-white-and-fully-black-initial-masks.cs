@@ -1,10 +1,11 @@
-// HOW-TO: How To Test ImageGrayscaleMask Inversion For White And Black Masks In C# (Aspose.Imaging for .NET)
+// HOW-TO: Verify PNG Mask Inversion for White and Black Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.MagicWand;
 
 class Program
 {
@@ -13,87 +14,103 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = "input.png";
-            string outputPathWhite = "output/output_white.png";
-            string outputPathBlack = "output/output_black.png";
+            string baseDir = Path.Combine(Directory.GetCurrentDirectory(), "MaskInversionTests");
+            string inputWhitePath = Path.Combine(baseDir, "input_white.png");
+            string inputBlackPath = Path.Combine(baseDir, "input_black.png");
+            string outputFromWhitePath = Path.Combine(baseDir, "output_from_white.png");
+            string outputFromBlackPath = Path.Combine(baseDir, "output_from_black.png");
 
-            // Input file existence check
-            if (!File.Exists(inputPath))
+            // Ensure directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(inputWhitePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(inputBlackPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFromWhitePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFromBlackPath));
+
+            // Create a 10x10 white image
+            if (!File.Exists(inputWhitePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                var whiteOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new FileCreateSource(inputWhitePath, false)
+                };
+                using (RasterImage whiteImg = (RasterImage)Image.Create(whiteOptions, 10, 10))
+                {
+                    int[] whitePixels = new int[10 * 10];
+                    for (int i = 0; i < whitePixels.Length; i++) whitePixels[i] = unchecked((int)0xFFFFFFFF);
+                    whiteImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), whitePixels);
+                    whiteImg.Save();
+                }
+            }
+
+            // Create a 10x10 black image
+            if (!File.Exists(inputBlackPath))
+            {
+                var blackOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new FileCreateSource(inputBlackPath, false)
+                };
+                using (RasterImage blackImg = (RasterImage)Image.Create(blackOptions, 10, 10))
+                {
+                    int[] blackPixels = new int[10 * 10];
+                    for (int i = 0; i < blackPixels.Length; i++) blackPixels[i] = unchecked((int)0xFF000000);
+                    blackImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), blackPixels);
+                    blackImg.Save();
+                }
+            }
+
+            // Test inversion on white mask
+            if (!File.Exists(inputWhitePath))
+            {
+                Console.Error.WriteLine($"File not found: {inputWhitePath}");
                 return;
             }
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathWhite));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathBlack));
-
-            // Test 1: Fully white mask inversion
-            ImageGrayscaleMask whiteMask = new ImageGrayscaleMask(10, 10);
-            // Fill mask with opaque (255)
-            for (int y = 0; y < whiteMask.Height; y++)
+            using (RasterImage imgWhite = (RasterImage)Image.Load(inputWhitePath))
             {
-                for (int x = 0; x < whiteMask.Width; x++)
+                MagicWandTool.Select(imgWhite, new MagicWandSettings(0, 0))
+                    .Invert()
+                    .Apply();
+                imgWhite.Save(outputFromWhitePath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+            }
+
+            // Verify result for white mask inversion (should become black)
+            bool whiteTestPassed = false;
+            if (File.Exists(outputFromWhitePath))
+            {
+                using (RasterImage resultWhite = (RasterImage)Image.Load(outputFromWhitePath))
                 {
-                    whiteMask[x, y] = 255;
+                    var pixel = resultWhite.GetPixel(0, 0);
+                    whiteTestPassed = pixel.ToArgb() == unchecked((int)0xFF000000);
                 }
             }
+            Console.WriteLine(whiteTestPassed ? "TestWhiteMaskInversion Passed" : "TestWhiteMaskInversion Failed");
 
-            // Invert mask
-            ImageGrayscaleMask invertedWhite = whiteMask.Invert();
-
-            // Verify all pixels are transparent (0)
-            bool whiteTestPassed = true;
-            for (int y = 0; y < invertedWhite.Height; y++)
+            // Test inversion on black mask
+            if (!File.Exists(inputBlackPath))
             {
-                for (int x = 0; x < invertedWhite.Width; x++)
+                Console.Error.WriteLine($"File not found: {inputBlackPath}");
+                return;
+            }
+            using (RasterImage imgBlack = (RasterImage)Image.Load(inputBlackPath))
+            {
+                MagicWandTool.Select(imgBlack, new MagicWandSettings(0, 0))
+                    .Invert()
+                    .Apply();
+                imgBlack.Save(outputFromBlackPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+            }
+
+            // Verify result for black mask inversion (should become white)
+            bool blackTestPassed = false;
+            if (File.Exists(outputFromBlackPath))
+            {
+                using (RasterImage resultBlack = (RasterImage)Image.Load(outputFromBlackPath))
                 {
-                    if (invertedWhite.GetByteOpacity(x, y) != 0)
-                    {
-                        whiteTestPassed = false;
-                        break;
-                    }
+                    var pixel = resultBlack.GetPixel(0, 0);
+                    blackTestPassed = pixel.ToArgb() == unchecked((int)0xFFFFFFFF);
                 }
-                if (!whiteTestPassed) break;
             }
-
-            Console.WriteLine($"White mask inversion test passed: {whiteTestPassed}");
-
-            // Optionally save the inverted mask as a PNG for visual inspection
-            using (RasterImage img = (RasterImage)Image.Create(new PngOptions { Source = new FileCreateSource(outputPathWhite, false) }, invertedWhite.Width, invertedWhite.Height))
-            {
-                img.Save();
-            }
-
-            // Test 2: Fully black mask inversion
-            ImageGrayscaleMask blackMask = new ImageGrayscaleMask(10, 10);
-            // By default mask is transparent (0), ensure it is fully black (already 0)
-
-            // Invert mask
-            ImageGrayscaleMask invertedBlack = blackMask.Invert();
-
-            // Verify all pixels are opaque (255)
-            bool blackTestPassed = true;
-            for (int y = 0; y < invertedBlack.Height; y++)
-            {
-                for (int x = 0; x < invertedBlack.Width; x++)
-                {
-                    if (invertedBlack.GetByteOpacity(x, y) != 255)
-                    {
-                        blackTestPassed = false;
-                        break;
-                    }
-                }
-                if (!blackTestPassed) break;
-            }
-
-            Console.WriteLine($"Black mask inversion test passed: {blackTestPassed}");
-
-            // Optionally save the inverted mask as a PNG for visual inspection
-            using (RasterImage img = (RasterImage)Image.Create(new PngOptions { Source = new FileCreateSource(outputPathBlack, false) }, invertedBlack.Width, invertedBlack.Height))
-            {
-                img.Save();
-            }
+            Console.WriteLine(blackTestPassed ? "TestBlackMaskInversion Passed" : "TestBlackMaskInversion Failed");
         }
         catch (Exception ex)
         {
@@ -104,9 +121,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a fully opaque (white) grayscale mask becomes completely transparent after inversion, you can write a unit test using Aspose.Imaging to validate the behavior.
- * 2. When verifying that a fully transparent (black) mask correctly turns fully opaque after calling the Invert method, a C# unit test helps prevent regression in image masking logic.
- * 3. When integrating mask inversion into an automated image processing pipeline, testing both extreme mask states guarantees reliable results for downstream compositing.
- * 4. When debugging custom watermark or alpha‑channel manipulation code, confirming mask inversion with unit tests speeds up identification of logical errors.
- * 5. When building a library that supports PNG export with proper alpha handling, unit tests for white and black mask inversion ensure compliance with the Aspose.Imaging API.
+ * 1. When you need to ensure that a PNG mask correctly flips from fully opaque to fully transparent using Aspose.Imaging unit tests.
+ * 2. When validating that mask inversion works for both white (opaque) and black (transparent) source images in automated CI pipelines.
+ * 3. When creating regression tests to detect bugs in the Aspose.Imaging MagicWand mask handling for different color types.
+ * 4. When preparing sample images and verifying that the SaveArgb32Pixels method produces the expected inverted mask results.
+ * 5. When integrating image preprocessing steps that require reliable mask inversion before further analysis or compositing.
  */

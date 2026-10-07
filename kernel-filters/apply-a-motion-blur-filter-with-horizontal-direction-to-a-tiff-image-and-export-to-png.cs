@@ -2,43 +2,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\sample.MotionBlur.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input\\image.tif";
+        string outputPath = "output\\result.png";
 
         try
         {
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Cast to TiffImage to access the Filter method
-                TiffImage tiffImage = (TiffImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply a motion blur (motion Wiener) filter with horizontal direction (angle = 0)
-                // Parameters: length = 10, sigma = 1.0, angle = 0 degrees
-                var motionOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-                tiffImage.Filter(tiffImage.Bounds, motionOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the result as PNG
-                tiffImage.Save(outputPath, new PngOptions());
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                double[,] kernel = new double[,]
+                {
+                    { 0, 0, 0, 0, 0 },
+                    { 0.2, 0.2, 0.2, 0.2, 0.2 },
+                    { 0, 0, 0, 0, 0 },
+                    { 0, 0, 0, 0, 0 },
+                    { 0, 0, 0, 0, 0 }
+                };
+
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce motion artifacts in scanned documents by adding a horizontal blur before converting them from TIFF to PNG for web display.
- * 2. When a batch process must transform high‑resolution TIFF photographs into PNG thumbnails with a consistent motion‑blur effect for artistic styling.
- * 3. When an automated workflow requires applying a motion‑Wiener filter to satellite TIFF imagery to simulate camera shake before archiving the result as PNG.
- * 4. When a .NET application has to preprocess medical TIFF scans with a horizontal blur to anonymize fine details and then export them as PNG for reporting.
- * 5. When you want to programmatically enhance legacy TIFF graphics with a subtle horizontal motion blur and save them as PNG files for inclusion in a cross‑platform UI.
+ * 1. When you need to simulate camera motion by blurring a scanned TIFF and deliver the result as a PNG for web display.
+ * 2. When converting high‑resolution TIFF scans of documents into lightweight PNGs while adding a horizontal blur to hide sensitive details.
+ * 3. When preprocessing satellite or aerial TIFF imagery with a horizontal motion effect before embedding it in a PNG map overlay.
+ * 4. When creating stylized product photos from TIFF assets by applying a horizontal blur and exporting to PNG for e‑commerce platforms.
+ * 5. When automating a batch job that reads TIFF files, applies a motion‑blur filter, and saves the output as PNG for downstream image‑analysis pipelines.
  */

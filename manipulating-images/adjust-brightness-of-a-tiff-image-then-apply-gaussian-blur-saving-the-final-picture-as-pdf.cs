@@ -1,9 +1,8 @@
-// HOW-TO: Increase TIFF Brightness, Apply Gaussian Blur, Export to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase TIFF Brightness and Apply Gaussian Blur Then Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -12,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.tif";
-            string outputPath = "Output/result.pdf";
+            string inputPath = Path.Combine("Input", "image.tif");
+            string outputPath = Path.Combine("Output", "result.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -26,12 +25,13 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-
                 raster.AdjustBrightness(50);
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                raster.Filter(raster.Bounds, blurOptions);
 
                 PdfOptions pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance a scanned TIFF document’s visibility before archiving it as a PDF.
- * 2. When preparing medical imaging TIFF files for presentation by brightening and smoothing them for PDF reports.
- * 3. When converting low‑contrast TIFF photographs to PDF with a subtle blur to reduce noise.
- * 4. When automating batch processing of TIFF receipts to improve readability and store them as PDFs.
- * 5. When creating PDF portfolios from TIFF graphics that require brightness correction and a smoothing filter.
+ * 1. When you need to enhance a scanned TIFF document’s visibility by brightening it, blur background noise, and deliver the result as a searchable PDF for archiving.
+ * 2. When converting legacy TIFF maps or blueprints to PDF while adjusting exposure and smoothing details to improve readability on digital devices.
+ * 3. When preparing medical imaging TIFF files for patient reports, increasing contrast, reducing speckle with Gaussian blur, and exporting to PDF for secure sharing.
+ * 4. When automating a batch workflow that normalizes lighting of product photos stored as TIFF, applies a subtle blur for aesthetic effect, and generates PDF catalogs.
+ * 5. When integrating Aspose.Imaging into a C# application to preprocess scanned receipts (brightening, noise reduction) before saving them as PDF invoices.
  */

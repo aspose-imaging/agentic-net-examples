@@ -1,4 +1,4 @@
-// HOW-TO: How To Apply Emboss Filter To PNG Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Filter to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,25 +8,43 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output_emboss.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "C:\\Images\\sample.png";
-            string outputPath = "C:\\Images\\sample_emboss.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Emboss effect is not available in Aspose.Imaging filter options.
-                throw new NotSupportedException("Emboss filter is not supported by Aspose.Imaging.");
+                double[,] embossKernel = new double[,]
+                {
+                    { -2, -1, 0 },
+                    { -1, 1, 1 },
+                    { 0, 1, 2 }
+                };
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -38,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to load a PNG image, verify the file exists, and create an output directory before applying filters in a C# WPF application.
- * 2. When you want to display a user‑friendly error if the emboss filter is not supported by Aspose.Imaging.
- * 3. When you must cast the loaded image to a RasterImage to ensure raster‑based operations like embossing can be performed.
- * 4. When you need to catch exceptions such as FileNotFound or NotSupportedException while processing images in a .NET desktop app.
- * 5. When you are prototyping real‑time preview of image effects and need a baseline code snippet that checks filter availability.
+ * 1. When a developer needs to add a realistic embossed effect to user‑uploaded photos and save the result as a high‑quality JPEG.
+ * 2. When an image‑processing pipeline must transform raster images with a custom convolution kernel before publishing them to a web gallery.
+ * 3. When a WPF desktop application wants to let users preview an emboss effect on a bitmap in real time using Aspose.Imaging.
+ * 4. When a batch job has to process a directory of images, apply the emboss filter, and output JPEG files with a specific compression quality.
+ * 5. When a programmer wants to experiment with custom convolution kernels without writing low‑level pixel loops, leveraging Aspose.Imaging’s FilterOptions.
  */

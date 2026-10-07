@@ -1,64 +1,57 @@
-// HOW-TO: Apply Median Filter And Auto‑Mask Image With GraphCut In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter and Auto Mask Image to PNG with Transparency in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output\\masked.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
                 // Apply median filter with kernel size 5
-                image.Filter(image.Bounds, new MedianFilterOptions(5));
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Prepare masking export options (in‑memory)
-                var exportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                // Configure auto‑masking options (GraphCut)
+                // Configure auto masking options
                 var maskingOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    FeatheringRadius = (Math.Max(raster.Width, raster.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = exportOptions,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                // Perform masking
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                var masking = new ImageMasking(raster);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    // Save the foreground (masked) image
-                    foreground.Save(outputPath, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    });
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -71,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove noise from a noisy photograph before extracting the foreground for a product catalog, you can apply a 5‑pixel median filter and then auto‑mask the subject using GraphCut in C#.
- * 2. When preparing images for transparent PNG overlays in a web application, you can denoise the source JPEG, segment the foreground, and export a PNG with an alpha channel using Aspose.Imaging.
- * 3. When building an automated image‑processing pipeline that separates objects from complex backgrounds in scanned documents, you can use the median filter to smooth speckles and then perform GraphCut segmentation to obtain clean masks.
- * 4. When creating visual assets for mobile games where background removal must be fast and reliable, you can apply a median filter to reduce artifacts and generate a transparent PNG mask programmatically in .NET.
- * 5. When integrating image cleanup and foreground extraction into a document‑management system, you can use this code to pre‑process images, automatically generate masks, and store the results as lossless PNG files.
+ * 1. When you need to remove salt‑and‑pepper noise from a JPEG before extracting the foreground for a product catalog image with a transparent background.
+ * 2. When you want to automatically segment a scanned photograph into foreground and background using graph‑cut segmentation while preserving edge detail.
+ * 3. When you are preparing images for web overlays and must generate PNG files with an alpha channel after denoising and auto‑masking.
+ * 4. When you process batch photos in a C# application and require a single call to filter and mask each image to create cut‑out assets for UI design.
+ * 5. When you need to improve segmentation accuracy on noisy medical or satellite images by applying a median filter before performing auto‑masking.
  */

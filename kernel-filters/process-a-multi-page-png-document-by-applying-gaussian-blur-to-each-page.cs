@@ -1,46 +1,53 @@
 // HOW-TO: Apply Gaussian Blur to Each Page of a Multi‑Page PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output\\blurred.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                if (image is IMultipageImage multipage)
-                {
-                    for (int i = 0; i < multipage.PageCount; i++)
-                    {
-                        RasterImage page = (RasterImage)multipage.Pages[i];
-                        page.Filter(page.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                    }
+                Directory.CreateDirectory(outputDir);
+            }
 
-                    var saveOptions = new ApngOptions();
-                    image.Save(outputPath, saveOptions);
-                }
-                else
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                Aspose.Imaging.IMultipageImage multipage = image as Aspose.Imaging.IMultipageImage;
+                if (multipage == null)
                 {
-                    RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    Console.Error.WriteLine("The input image is not a multi-page image.");
+                    return;
                 }
+
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    using (Aspose.Imaging.Image page = multipage.Pages[i])
+                    {
+                        Aspose.Imaging.RasterImage raster = page as Aspose.Imaging.RasterImage;
+                        if (raster != null)
+                        {
+                            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0);
+                            raster.Filter(raster.Bounds, blurOptions);
+                        }
+                    }
+                }
+
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften the visual details of every frame in an animated PNG before publishing it on a website.
- * 2. When you want to automatically apply a consistent blur effect to each page of a multi‑page scanned document saved as PNG for privacy redaction.
- * 3. When generating a blurred preview of a large APNG sprite sheet in a C# application to improve loading performance.
- * 4. When creating a batch process that adds Gaussian blur to both single‑page and multi‑page PNG files using Aspose.Imaging.
- * 5. When preparing PNG assets for a game UI where each animation frame must have a uniform blur radius applied programmatically.
+ * 1. When you need to soften the visual details of every frame in a multi‑page PNG before publishing it online.
+ * 2. When you want to automatically blur sensitive information on each page of a scanned PDF saved as a PNG sequence using C#.
+ * 3. When you are creating a stylized slideshow where each slide (PNG page) requires a consistent Gaussian blur effect applied programmatically.
+ * 4. When you must preprocess multi‑page PNG assets for a game engine, applying a blur filter to reduce aliasing on all layers.
+ * 5. When you are building a document‑processing pipeline that extracts, blurs, and re‑saves multi‑page PNG files with Aspose.Imaging in .NET.
  */

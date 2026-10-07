@@ -1,10 +1,10 @@
-// HOW-TO: Convert Selected DjVu Pages to PDF with Low Memory in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Selected Pages of Multiple DjVu Files to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,58 +12,46 @@ class Program
     {
         try
         {
-            // Hard‑coded input DjVu files and corresponding output PDF files with page ranges
-            var jobs = new[]
-            {
-                new
-                {
-                    InputPath = @"C:\Data\doc1.djvu",
-                    OutputPath = @"C:\Data\doc1_selected.pdf",
-                    // Pages 1 to 3 (inclusive)
-                    PageRanges = new[] { new IntRange(1, 3) }
-                },
-                new
-                {
-                    InputPath = @"C:\Data\doc2.djvu",
-                    OutputPath = @"C:\Data\doc2_selected.pdf",
-                    // Pages 2,4,5 (non‑contiguous)
-                    PageRanges = new[] { new IntRange(2, 2), new IntRange(4, 5) }
-                }
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            foreach (var job in jobs)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
-                if (!File.Exists(job.InputPath))
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {job.InputPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(job.OutputPath));
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure low‑memory loading (e.g., 1 MB buffer)
-                var loadOptions = new LoadOptions
+                var loadOptions = new LoadOptions { BufferSizeHint = 1024 * 1024 };
+
+                using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    BufferSizeHint = 1 * 1024 * 1024 // 1 MB
-                };
+                    var djvuImage = (DjvuImage)image;
 
-                // Load DjVu document with the low‑memory options
-                using (var stream = File.OpenRead(job.InputPath))
-                using (var djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
-                {
-                    // Prepare multi‑page options for the required page ranges
-                    var multiPageOptions = new DjvuMultiPageOptions(job.PageRanges);
-
-                    // Set up PDF saving options and attach the multi‑page options
-                    var pdfOptions = new PdfOptions
+                    using (var pdfOptions = new PdfOptions())
                     {
-                        MultiPageOptions = multiPageOptions
-                    };
-
-                    // Save selected pages as a PDF
-                    djvuImage.Save(job.OutputPath, pdfOptions);
+                        pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(0, 2));
+                        djvuImage.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -76,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract only certain pages from large DjVu documents without loading the entire file into memory, this code lets you convert those pages to PDF efficiently.
- * 2. When processing a batch of scanned books stored as DjVu files on a server, you can use this approach to generate separate PDF files for specific chapters while keeping memory usage low.
- * 3. When building a document‑conversion service that must handle many DjVu uploads, the low‑memory loading ensures the service remains responsive even with high‑resolution files.
- * 4. When creating PDFs for legal or archival purposes that require only selected pages from multi‑page DjVu files, this code automates the extraction and conversion.
- * 5. When integrating DjVu to PDF conversion into a desktop application that runs on machines with limited RAM, the buffer‑size hint prevents out‑of‑memory errors while processing multiple files.
+ * 1. When you need to batch‑convert large DjVu documents to PDF while only keeping the first three pages to reduce file size.
+ * 2. When a server‑side C# application must process many DjVu files with limited RAM by using a buffer‑size hint.
+ * 3. When you want to extract a specific page range from each DjVu file and save it as a multi‑page PDF for archival.
+ * 4. When automating a workflow that reads DjVu scans from an input folder, converts them to PDF, and stores the results in an output folder.
+ * 5. When integrating Aspose.Imaging into a .NET service that must release resources promptly after converting DjVu to PDF to avoid memory leaks.
  */
