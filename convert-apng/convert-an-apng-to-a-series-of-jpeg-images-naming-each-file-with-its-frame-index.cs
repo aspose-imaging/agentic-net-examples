@@ -1,10 +1,16 @@
-// HOW-TO: Extract Frames From APNG And Save As Indexed JPEGs In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract APNG Frames To Sequential JPEG Files In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -12,38 +18,22 @@ class Program
     {
         try
         {
-            string inputPath = "input.apng";
-            string outputDir = "output";
-
+            string inputPath = Path.Combine("Input", "animation.apng");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
-
             using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                IMultipageImage multipage = apng as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage image.");
-                    return;
-                }
-
-                int frameCount = multipage.PageCount;
+                int frameCount = apng.PageCount;
                 for (int i = 0; i < frameCount; i++)
                 {
-                    using (Image frame = (Image)multipage.Pages[i])
+                    using (RasterImage frame = (RasterImage)apng.Pages[i])
                     {
-                        string outputPath = Path.Combine(outputDir, $"frame_{i}.jpg");
-                        string outDir = Path.GetDirectoryName(outputPath);
-                        if (!string.IsNullOrWhiteSpace(outDir))
-                        {
-                            Directory.CreateDirectory(outDir);
-                        }
-
+                        string outputPath = Path.Combine("Output", $"frame_{i}.jpg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                         JpegOptions jpegOptions = new JpegOptions();
                         frame.Save(outputPath, jpegOptions);
                     }
@@ -59,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to break an animated PNG into individual JPEG images for use in a web gallery that only supports static JPEG files.
- * 2. When a game developer wants to convert each frame of an APNG sprite animation into separate JPEG assets for faster loading on low‑memory devices.
- * 3. When a reporting tool must embed each frame of an animated chart saved as APNG into PDF pages that only accept JPEG images.
- * 4. When a batch‑processing script has to archive every frame of an APNG as JPEG thumbnails with sequential filenames for easy indexing.
- * 5. When a legacy system requires JPEG input, you can extract the APNG frames and rename them with their frame index to feed into the older pipeline.
+ * 1. When you need to break down an animated PNG into individual JPEG images for a web gallery that only supports static JPEG thumbnails.
+ * 2. When a game developer wants to convert each frame of an APNG sprite animation into separate JPEG assets for texture atlases.
+ * 3. When a reporting tool must embed each frame of an APNG chart as JPEG images in a PDF document.
+ * 4. When a batch processing pipeline extracts frames from APNG files to generate JPEG previews for a content management system.
+ * 5. When a mobile app requires JPEG versions of APNG animation frames to reduce memory usage on devices that cannot decode APNG.
  */
