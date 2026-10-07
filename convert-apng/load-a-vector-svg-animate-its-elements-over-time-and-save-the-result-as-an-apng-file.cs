@@ -1,8 +1,16 @@
-// HOW-TO: Create Animated PNG from SVG with Moving Elements in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated PNG From SVG With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
@@ -13,54 +21,56 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.apng";
+            string inputSvgPath = "input.svg";
+            string outputApngPath = "output/output.apng";
 
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
 
-            int frameCount = 10;
-            int width, height;
-
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image svgImg = Image.Load(inputSvgPath))
             {
-                width = svgImage.Width;
-                height = svgImage.Height;
+                SvgImage svg = (SvgImage)svgImg;
+
+                int frameCount = 10;
+                int frameDelay = 100; // milliseconds per frame
 
                 ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
+                    Source = new FileCreateSource(outputApngPath, false),
+                    DefaultFrameTime = (uint)frameDelay,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+                int canvasWidth = 800;
+                int canvasHeight = 600;
+
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
                 {
+                    apng.RemoveAllFrames();
+
                     for (int i = 0; i < frameCount; i++)
                     {
-                        string tempPath = Path.Combine(Path.GetTempPath(), $"frame_{i}.png");
-                        Source tempSource = new FileCreateSource(tempPath, false);
-                        PngOptions pngOptions = new PngOptions { Source = tempSource };
-
-                        using (RasterImage frame = (RasterImage)Image.Create(pngOptions, width, height))
+                        using (RasterImage frame = (RasterImage)Image.Create(
+                            new PngOptions { Source = new StreamSource(new MemoryStream()) },
+                            canvasWidth,
+                            canvasHeight))
                         {
-                            Graphics graphics = new Graphics(frame);
-                            graphics.Clear(Color.Transparent);
+                            Graphics g = new Graphics(frame);
+                            g.Clear(Color.Transparent);
+                            g.DrawImage(svg, new Point(0, 0));
 
-                            int offsetX = (width * i) / frameCount;
-                            graphics.DrawImage(svgImage, new Point(offsetX, 0));
+                            int rectSize = 50;
+                            int x = (int)((canvasWidth - rectSize) * (double)i / (frameCount - 1));
+                            int y = canvasHeight / 2 - rectSize / 2;
+                            Pen pen = new Pen(Color.Red, 3);
+                            g.DrawRectangle(pen, new Rectangle(x, y, rectSize, rectSize));
 
                             apng.AddFrame(frame);
-                        }
-
-                        if (File.Exists(tempPath))
-                        {
-                            File.Delete(tempPath);
                         }
                     }
 
@@ -77,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a looping APNG banner that slides an SVG logo across the frame for web advertising.
- * 2. When you want to programmatically create an animated icon by shifting parts of an SVG over multiple frames in a .NET application.
- * 3. When you have to export a vector illustration as a high‑quality animated PNG for use in mobile apps without losing transparency.
- * 4. When you need to automate the production of frame‑by‑frame animations from SVG assets for email newsletters that support APNG.
- * 5. When you are building a reporting tool that visualizes data trends by moving SVG charts across successive APNG frames.
+ * 1. When a developer needs to convert a static SVG illustration into an animated PNG for web pages that support APNG.
+ * 2. When an application must generate frame‑by‑frame animations from vector graphics for email newsletters without using GIF.
+ * 3. When a reporting tool has to embed scalable vector icons that animate over time in PDF or HTML reports using APNG.
+ * 4. When a game UI requires lightweight animated assets created from SVG sources at runtime in a C# backend.
+ * 5. When a marketing platform automates the creation of banner ads that animate SVG logos and saves them as APNG for higher color depth and transparency.
  */

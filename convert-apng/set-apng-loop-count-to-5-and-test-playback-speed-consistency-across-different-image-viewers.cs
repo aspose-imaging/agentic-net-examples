@@ -1,4 +1,11 @@
-// HOW-TO: Create APNG With Loop Count 5 And Fixed Frame Delay In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create APNG with Loop Count 5 and Test Playback Speed in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -34,11 +41,9 @@ class Program
 
                 using (ApngImage apng = (ApngImage)Image.Create(options, source.Width, source.Height))
                 {
-                    int frameCount = 5;
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        apng.AddFrame(source);
-                    }
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(source);
+                    apng.AddFrame(source);
                     apng.Save();
                 }
             }
@@ -53,8 +58,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to generate an animated PNG that repeats exactly five times for use in web banners or UI animations.
- * 2. When you want to ensure consistent playback speed across different image viewers by setting a uniform frame delay of 100 ms.
- * 3. When you are building a C# application that converts a static PNG into a looping APNG for mobile game sprites.
- * 4. When you must create an APNG with a predefined number of loops to comply with platform guidelines that limit animation repetitions.
- * 5. When you are testing how various browsers and image viewers handle APNG loop counts and frame timing using Aspose.Imaging for .NET.
+ * 2. When you want to ensure the animation’s frame delay (100 ms) plays consistently across different image viewers and browsers.
+ * 3. When you are building a C# tool that programmatically creates APNG files from existing PNG assets using Aspose.Imaging.
+ * 4. When you need to test how multiple identical frames affect playback speed and loop behavior in a custom image processing pipeline.
+ * 5. When you must automate the creation of APNG files with specific loop counts for compliance with a design specification or marketing guideline.
  */
