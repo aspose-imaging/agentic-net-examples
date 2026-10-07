@@ -1,10 +1,16 @@
 // HOW-TO: Create APNG with Custom Loop Count and Frame Delay in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -22,26 +28,20 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
             {
                 ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // frame delay in milliseconds
-                    NumPlays = 5, // custom loop count
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    NumPlays = 3,
+                    DefaultFrameTime = 200
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, source.Width, source.Height))
                 {
-                    apng.RemoveAllFrames();
-                    apng.AddFrame(sourceImage);
+                    apng.AddFrame(source);
                     apng.Save();
                 }
             }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate an animated PNG that repeats a specific number of times instead of looping forever.
- * 2. When you want to control the speed of each frame in an APNG by setting a custom delay in milliseconds.
- * 3. When integrating Aspose.Imaging into a C# application to convert a static PNG into an animated PNG with defined playback settings.
- * 4. When creating lightweight web animations where precise loop counts and timing are required for user experience or branding guidelines.
- * 5. When automating batch processing of images to produce APNG files with consistent frame timing and loop behavior for mobile or game assets.
+ * 1. When you need to generate an animated PNG that repeats a specific number of times, such as a banner that should loop three times.
+ * 2. When you want to control the speed of each frame in an APNG by setting a uniform delay, for example to synchronize animation with audio.
+ * 3. When converting a static PNG into an animated PNG and need to embed it directly into a web page with precise playback settings.
+ * 4. When building a game UI where an animated icon must stop after a set number of cycles to conserve resources.
+ * 5. When creating marketing assets that require a consistent animation loop and timing across different devices without manual editing.
  */
