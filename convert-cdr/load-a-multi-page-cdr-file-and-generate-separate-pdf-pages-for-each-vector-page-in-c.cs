@@ -1,42 +1,53 @@
-// HOW-TO: Extract Each Page from a Multi‑Page CDR to Separate PDFs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Each Page from Multi‑Page CDR to Separate PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputDirectory = "output";
-
         try
         {
+            string inputPath = "input.cdr";
+            string outputDir = "output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (Image image = Image.Load(inputPath))
+            using (var cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
             {
-                if (image is not IMultipageImage multipageImage)
+                if (cdr is IMultipageImage multipage)
                 {
-                    Console.Error.WriteLine("The loaded file is not a multipage image.");
-                    return;
+                    int pageCount = multipage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
+                    {
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.pdf");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        var pdfOptions = new PdfOptions
+                        {
+                            MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                        };
+
+                        cdr.Save(outputPath, pdfOptions);
+                    }
                 }
-
-                int pageNumber = 0;
-                foreach (var page in multipageImage.Pages)
+                else
                 {
-                    pageNumber++;
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.pdf");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    var pdfOptions = new PdfOptions();
-                    page.Save(outputPath, pdfOptions);
+                    Console.Error.WriteLine("The loaded file does not support multiple pages.");
                 }
             }
         }
@@ -49,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to split a multi‑page CorelDRAW (CDR) document into individual PDF files for separate printing or distribution.
- * 2. When an automated workflow must convert each vector page of a CDR file into PDFs for downstream processing such as OCR or digital signing.
- * 3. When a web service receives uploaded CDR files and must store each page as a standalone PDF for easy preview in browsers.
- * 4. When a desktop application has to archive each page of a complex CDR design as separate PDF pages to meet regulatory document‑management requirements.
- * 5. When a batch job processes a folder of CDR files and extracts every page into PDFs to integrate with a document‑management system that only accepts PDF format.
+ * 1. When a designer needs to share individual pages of a CorelDRAW (CDR) document as separate PDF files for client review.
+ * 2. When an automated workflow must convert each vector page of a multi‑page CDR archive into standalone PDFs for printing or archiving.
+ * 3. When a web application processes uploaded CDR files and must generate per‑page PDF downloads for end users.
+ * 4. When a batch script extracts pages from a large CDR catalog to create PDF chapters that can be indexed by search engines.
+ * 5. When a document management system stores CDR files and requires separate PDF pages for metadata tagging and version control.
  */
