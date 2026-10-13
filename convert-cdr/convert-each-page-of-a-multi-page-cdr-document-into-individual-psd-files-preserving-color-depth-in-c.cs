@@ -1,9 +1,15 @@
 // HOW-TO: Convert Multi‑Page CDR to Separate PSD Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -26,17 +32,16 @@ class Program
             {
                 if (image is IMultipageImage multipage)
                 {
-                    for (int i = 0; i < multipage.PageCount; i++)
+                    int pageCount = multipage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        var page = multipage.Pages[i] as Image;
-                        if (page == null) continue;
-
                         string outputPath = Path.Combine(outputDir, $"page_{i + 1}.psd");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        using (var options = new PsdOptions())
+                        using (PsdOptions options = new PsdOptions())
                         {
-                            page.Save(outputPath, options);
+                            options.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
+                            image.Save(outputPath, options);
                         }
                     }
                 }
@@ -45,7 +50,7 @@ class Program
                     string outputPath = Path.Combine(outputDir, "page_1.psd");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (var options = new PsdOptions())
+                    using (PsdOptions options = new PsdOptions())
                     {
                         image.Save(outputPath, options);
                     }
@@ -61,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to extract each page of a multi‑page CorelDRAW (CDR) file as an individual Photoshop (PSD) document for further editing.
- * 2. When an automated batch process must convert CDR files into separate PSD files while preserving the original color depth.
- * 3. When a publishing workflow requires splitting vector CDR artwork into raster PSD pages for print preparation.
- * 4. When a migration tool has to transform a portfolio of CDR pages into standalone PSD files to integrate with Photoshop‑based pipelines.
- * 5. When a cloud service processes user‑uploaded CDR files and needs to deliver each page as a separate PSD for downstream image analysis.
+ * 1. When a design team needs to extract each page of a CorelDRAW (CDR) file as high‑color‑depth Photoshop (PSD) layers for further editing in Photoshop.
+ * 2. When an automated workflow must batch‑process multi‑page CDR documents and generate individual PSD files for archival or publishing pipelines.
+ * 3. When a web service receives CDR uploads and must split them into separate PSD images to display each page on a website without losing color information.
+ * 4. When a conversion utility has to handle both single‑page and multi‑page CDR files, ensuring each page is saved as a standalone PSD using Aspose.Imaging in C#.
+ * 5. When a developer integrates image conversion into a .NET application and needs to preserve the original color depth while exporting each CDR page to Photoshop format.
  */
