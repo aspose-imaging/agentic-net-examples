@@ -1,4 +1,11 @@
-// HOW-TO: Asynchronously Convert CorelDRAW CDR to PDF in C# for Responsive UI (Aspose.Imaging for .NET)
+// HOW-TO: Asynchronously Convert CorelDRAW CDR to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -7,12 +14,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static async Task Main(string[] args)
+    static async Task Main()
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.pdf";
+            string inputPath = "input/input.cdr";
+            string outputPath = "output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -40,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows Forms application needs to load large CorelDRAW files without freezing the interface, this async conversion lets the UI stay responsive while generating a PDF.
- * 2. When a web service processes user‑uploaded CDR designs and must return PDF previews quickly, the code runs the conversion on a background thread to avoid blocking request threads.
- * 3. When an automated batch job creates PDF archives from a folder of CDR assets but must continue handling other tasks, the asynchronous pattern ensures the job doesn’t monopolize CPU resources.
- * 4. When integrating Aspose.Imaging into a WPF editor that lets users edit vector graphics and export them as PDFs, using Task.Run keeps the export operation smooth and cancellable.
- * 5. When building a mobile‑friendly .NET MAUI app that converts design files to PDF on the device, the async approach prevents the app from becoming unresponsive during the conversion.
+ * 1. When a desktop application needs to let users open CorelDRAW files and export them as PDFs without freezing the UI.
+ * 2. When a web service processes uploaded CDR designs and returns PDF previews while handling multiple requests concurrently.
+ * 3. When an automated batch job converts a folder of CDR drawings to PDFs on a background thread to keep the main process responsive.
+ * 4. When integrating Aspose.Imaging into a WPF app to provide real‑time PDF conversion of vector graphics while the user continues editing.
+ * 5. When building a Windows Forms tool that validates the existence of a CDR file, creates the output directory, and saves the PDF asynchronously to improve performance.
  */
