@@ -1,4 +1,11 @@
-// HOW-TO: Convert EPS to PDF with Custom Page Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set Custom PDF Page Size While Converting EPS to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.eps";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -37,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to embed an EPS illustration into a PDF report and must set the PDF page dimensions to match the original artwork.
- * 2. When an automated publishing system converts vector EPS logos to PDF files sized for standard A4 or Letter paper before sending them to a print service.
- * 3. When a web application generates PDF invoices that include EPS diagrams and requires consistent page sizing for proper layout across browsers.
- * 4. When a batch processing script converts a library of EPS files to PDF while specifying custom page widths for integration into an e‑book format.
- * 5. When a document management workflow extracts EPS drawings from CAD exports and saves them as PDFs with predefined page sizes for archival compliance.
+ * 1. When you need to embed an EPS illustration into a PDF report with a specific page dimension.
+ * 2. When generating printable PDFs from vector EPS logos that must match a predefined paper size.
+ * 3. When automating batch conversion of EPS files to PDFs for a publishing workflow that requires uniform page layouts.
+ * 4. When creating PDF invoices that include EPS graphics and must conform to standard A4 or Letter page sizes.
+ * 5. When developing a web service that receives EPS uploads and returns PDFs sized for mobile device screens.
  */
