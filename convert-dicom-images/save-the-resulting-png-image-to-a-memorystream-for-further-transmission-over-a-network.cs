@@ -1,38 +1,50 @@
-// HOW-TO: Convert TIFF to PNG and Save to MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Save PNG Image to MemoryStream for Network Transmission in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace ImageConversion
+namespace ImageConversionExample
 {
     class Program
     {
         static void Main()
         {
+            string inputPath = "input/compressed_image.png";
+            string outputPath = "output/result.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             try
             {
-                string inputPath = "input.tif";
-                string outputPath = "output/output.png";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save to disk as PNG
-                    image.Save(outputPath, new PngOptions());
-
-                    // Save to MemoryStream for transmission
-                    using (MemoryStream ms = new MemoryStream())
+                    using (MemoryStream memoryStream = new MemoryStream())
                     {
-                        image.Save(ms, new PngOptions());
-                        Console.WriteLine($"PNG saved to MemoryStream, length = {ms.Length} bytes");
+                        PngOptions pngOptions = new PngOptions();
+                        image.Save(memoryStream, pngOptions);
+
+                        // Reset stream position if needed for further processing
+                        memoryStream.Position = 0;
+
+                        // Example: write the PNG bytes to a file (optional)
+                        File.WriteAllBytes(outputPath, memoryStream.ToArray());
+
+                        // The memoryStream now contains the PNG image ready for network transmission
+                        // byte[] pngData = memoryStream.ToArray();
                     }
                 }
             }
@@ -46,9 +58,9 @@ namespace ImageConversion
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert high‑resolution TIFF scans to lightweight PNGs for sending over a web API without writing temporary files.
- * 2. When an application must generate PNG thumbnails from TIFF documents and stream them directly to a client browser.
- * 3. When a microservice processes uploaded TIFF images and returns the PNG data in a response payload using a MemoryStream.
- * 4. When you want to store converted PNG bytes in a database or message queue after converting from TIFF.
- * 5. When a background job converts TIFF files to PNG and passes the image data to another service via TCP/IP without touching the file system.
+ * 1. When you need to convert a local PNG file into a byte array for sending it over a REST API without writing intermediate files.
+ * 2. When you want to embed a PNG image into a message queue payload such as RabbitMQ or Azure Service Bus.
+ * 3. When you are building a real‑time streaming service that streams PNG frames directly from memory to a client application.
+ * 4. When you must pass a PNG image to another .NET component that expects a Stream, such as an email attachment or a cloud storage SDK.
+ * 5. When you are implementing a microservice that receives an image, processes it with Aspose.Imaging, and returns the result as a MemoryStream to the caller.
  */
