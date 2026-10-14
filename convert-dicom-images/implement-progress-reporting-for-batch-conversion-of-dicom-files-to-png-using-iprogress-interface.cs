@@ -1,10 +1,17 @@
-// HOW-TO: Report Progress While Converting DICOM Batch to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Report Progress While Converting DICOM Files to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BatchDicomToPng
+namespace DicomBatchConverter
 {
     class Program
     {
@@ -13,14 +20,30 @@ namespace BatchDicomToPng
             try
             {
                 // Hardcoded input and output directories
-                string inputDirectory = "input";
-                string outputDirectory = "output";
+                string inputDirectory = "InputDicom";
+                string outputDirectory = "OutputPng";
+
+                // Get all DICOM files in the input directory
+                string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+                int totalFiles = dicomFiles.Length;
 
                 // Progress reporter
-                IProgress<int> progress = new Progress<int>(p =>
-                    Console.WriteLine($"Progress: {p}%"));
+                IProgress<int> progress = new Progress<int>(percent =>
+                {
+                    Console.WriteLine($"Progress: {percent}%");
+                });
 
-                ConvertBatch(inputDirectory, outputDirectory, progress);
+                for (int i = 0; i < totalFiles; i++)
+                {
+                    string inputPath = dicomFiles[i];
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    ConvertDicomToPng(inputPath, outputPath);
+
+                    int percentComplete = (int)(((i + 1) / (double)totalFiles) * 100);
+                    progress.Report(percentComplete);
+                }
             }
             catch (Exception ex)
             {
@@ -28,48 +51,22 @@ namespace BatchDicomToPng
             }
         }
 
-        static void ConvertBatch(string inputDir, string outputDir, IProgress<int> progress)
+        static void ConvertDicomToPng(string inputPath, string outputPath)
         {
-            // Ensure the input directory exists
-            if (!Directory.Exists(inputDir))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"Input directory not found: {inputDir}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Get all DICOM files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.dcm");
-            int total = files.Length;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            for (int i = 0; i < total; i++)
+            // Load DICOM image and save as PNG
+            using (Image image = Image.Load(inputPath))
             {
-                string inputPath = files[i];
-
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Determine output path
-                string outputPath = Path.Combine(
-                    outputDir,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load DICOM and save as PNG
-                using (Image image = Image.Load(inputPath))
-                {
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
-                }
-
-                // Report progress
-                int percent = (int)((i + 1) * 100.0 / total);
-                progress?.Report(percent);
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
     }
@@ -77,9 +74,9 @@ namespace BatchDicomToPng
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert dozens of DICOM scans to PNG thumbnails while showing a percentage complete in the console.
- * 2. When a radiology workflow automates exporting patient study files to a web‑friendly format and wants real‑time progress feedback for monitoring.
- * 3. When a desktop tool processes large DICOM directories and must ensure the output folder exists before saving each PNG image.
- * 4. When a developer integrates Aspose.Imaging into a C# service that reports conversion status to a UI or logging system using the IProgress interface.
- * 5. When a batch script must handle missing files gracefully and provide error messages while converting DICOM images to PNG for further analysis.
+ * 1. When a radiology software needs to batch‑convert thousands of DICOM scans to PNG for web preview while showing users a percentage complete.
+ * 2. When a medical research pipeline processes DICOM images on a server and wants to log conversion progress to monitor performance.
+ * 3. When a desktop application lets clinicians select a folder of DICOM files and displays real‑time progress as each image is saved as PNG.
+ * 4. When an automated build script converts DICOM assets to PNG for documentation and needs a simple progress callback to detect stalls.
+ * 5. When a cloud service ingests DICOM uploads, converts them to PNG thumbnails, and reports conversion status back to the client UI.
  */
