@@ -1,47 +1,43 @@
-// HOW-TO: Convert EPS to Grayscale PNG and SVG with Format Validation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Validate EPS Image Before Converting to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPngPath = Path.Combine("output", "output.png");
-        string outputSvgPath = Path.Combine("output", "output.svg");
-
         try
         {
+            string inputPath = Path.Combine("Input", "sample.eps");
+            string outputPath = Path.Combine("Output", "sample.pdf");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                if (!(image is EpsImage))
+                if (!(image is Aspose.Imaging.FileFormats.Eps.EpsImage))
                 {
-                    Console.Error.WriteLine("Loaded image is not EPS format.");
+                    Console.Error.WriteLine("Loaded image is not an EPS file.");
                     return;
                 }
 
-                // Save as PNG with Grayscale palette
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.Grayscale
-                };
-                image.Save(outputPngPath, pngOptions);
-
-                // Save as SVG
-                Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
-                var svgOptions = new SvgOptions();
-                image.Save(outputSvgPath, svgOptions);
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure an uploaded file is a genuine EPS before converting it to a grayscale PNG for printing pipelines.
- * 2. When a web service must transform vector EPS artwork into scalable SVG files for responsive web display while confirming the source format.
- * 3. When automating batch processing of design assets, you want to validate each EPS and generate both a low‑color PNG preview and an SVG version for cataloging.
- * 4. When integrating Aspose.Imaging into a C# application that receives unknown image types, you can check for EPS and safely export to PNG and SVG without runtime errors.
- * 5. When creating a document conversion tool that requires format safety checks, this code guarantees only EPS files are processed before saving them as grayscale PNG thumbnails and editable SVG graphics.
+ * 1. When you need to verify that an uploaded file is a genuine EPS before converting it to a PDF report.
+ * 2. When automating batch processing of vector EPS graphics to PDF while ensuring only supported formats are handled.
+ * 3. When building a web service that accepts user‑submitted EPS files and must confirm the format prior to rendering them as PDFs.
+ * 4. When integrating Aspose.Imaging into a desktop application that converts design assets from EPS to PDF only after confirming the file type.
+ * 5. When creating a CI pipeline that validates EPS resources and converts them to PDF for documentation generation.
  */
