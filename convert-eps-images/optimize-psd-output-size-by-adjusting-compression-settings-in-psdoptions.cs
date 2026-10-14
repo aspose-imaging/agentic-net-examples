@@ -1,4 +1,11 @@
-// HOW-TO: How to Reduce PSD File Size Using RLE Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Reduce PSD File Size Using RLE Compression In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/optimized.psd";
+            string inputPath = "input.jpg";
+            string outputPath = "output.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -24,7 +31,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var options = new PsdOptions
+                PsdOptions options = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE
                 };
@@ -40,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert high‑resolution PNG assets to layered PSD files while keeping the output size low for faster uploads.
- * 2. When a web service must generate PSD previews from user‑uploaded PNGs and bandwidth constraints require RLE compression.
- * 3. When automating a design pipeline that stores intermediate images as PSD and you want to minimize disk usage without losing layer information.
- * 4. When integrating Aspose.Imaging in a C# application to export PNG graphics to PSD for Photoshop compatibility while optimizing storage.
- * 5. When building a batch‑processing tool that processes many PNG files into PSDs and you need to ensure each file is compressed using RLE to reduce overall archive size.
+ * 1. When you need to convert high‑resolution JPEG photos to layered PSD files while keeping the resulting file size small for faster web uploads.
+ * 2. When an automated image‑processing pipeline must generate PSD assets from user‑uploaded JPEGs and you want to minimize storage costs by applying RLE compression.
+ * 3. When a desktop application creates PSD previews from JPEG thumbnails and requires reduced disk usage without losing layer information.
+ * 4. When a batch job processes thousands of JPEG images into PSD format for a design workflow and you need to ensure the output files fit within a limited archive size.
+ * 5. When integrating Aspose.Imaging in a C# service that delivers PSD files to clients, and you want to optimize network transfer by using the most efficient compression method.
  */
