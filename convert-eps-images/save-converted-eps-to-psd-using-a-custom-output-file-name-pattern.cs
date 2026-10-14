@@ -1,4 +1,11 @@
 // HOW-TO: Convert EPS to PSD with Custom Output Filename in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -39,9 +46,9 @@ namespace EpsToPsdConverter
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to batch‑convert EPS artwork to editable Photoshop PSD files while naming the outputs according to a specific pattern.
- * 2. When an automated build script must generate PSD previews of vector EPS logos for a web‑based asset library.
- * 3. When a content management system imports EPS files and stores them as PSDs to allow layer‑based editing in downstream tools.
- * 4. When a Windows service processes incoming EPS files from a scanner and saves them as PSDs in a designated folder with a custom naming convention.
- * 5. When a migration tool moves legacy EPS graphics to a Photoshop workflow and requires programmatic control over the output file path and format.
+ * 1. When a designer needs to programmatically convert vector EPS artwork into a Photoshop PSD file with a specific naming convention for downstream editing.
+ * 2. When an automated build pipeline must generate PSD previews from EPS assets and store them in a structured folder hierarchy using custom file names.
+ * 3. When a web service receives EPS uploads and must save them as PSD files with unique identifiers to avoid filename collisions.
+ * 4. When a batch processing tool processes a large collection of EPS logos and saves each as a PSD using a pattern that includes the original name and a conversion suffix.
+ * 5. When integrating Aspose.Imaging into a C# application to convert EPS files to PSD while ensuring the output directory is created automatically if it does not exist.
  */
