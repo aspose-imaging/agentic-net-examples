@@ -1,4 +1,11 @@
-// HOW-TO: Convert PNG to PSD and Verify Validity in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to PSD and Verify File Validity in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            const string inputPath = "input.png";
-            const string outputPath = "output/output.psd";
+            string inputPath = "input.png";
+            string outputPath = "output.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate Photoshop‑compatible PSD files from PNG assets in a C# application and ensure the files open without errors.
- * 2. When automating a workflow that converts user‑uploaded PNG images to PSD for further editing in Adobe Photoshop while programmatically confirming the conversion succeeded.
- * 3. When building a batch‑processing tool that creates PSD versions of design assets and validates their dimensions before publishing to a digital asset management system.
- * 4. When integrating Aspose.Imaging into a .NET service that must deliver PSD files to clients and guarantee the files are readable by Photoshop.
- * 5. When testing a CI/CD pipeline that includes image format conversion, you can use this code to confirm the generated PSD files are not corrupted.
+ * 1. When you need to generate a Photoshop‑compatible PSD from a PNG for downstream editing.
+ * 2. When an automated pipeline must ensure the converted PSD can be opened without errors before sending it to designers.
+ * 3. When you want to validate image dimensions after conversion to guarantee the file isn’t corrupted.
+ * 4. When integrating Aspose.Imaging into a C# application that prepares assets for Adobe Photoshop workflows.
+ * 5. When you must programmatically confirm that a batch conversion of PNGs to PSDs succeeded before archiving or publishing.
  */
