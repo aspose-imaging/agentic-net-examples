@@ -1,4 +1,11 @@
-// HOW-TO: Convert EPS to PDF/A-1b While Preserving Vector Paths in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF/A-1b while Preserving Vector Paths in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.eps");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -43,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an EPS illustration into a PDF/A‑1b compliant archive without rasterizing the artwork, this code converts the file while keeping the vector data editable.
- * 2. When a publishing workflow requires batch conversion of EPS logos to PDF for print‑ready documents, you can use this snippet to generate high‑quality PDFs that retain scalability.
- * 3. When a legal or archival system mandates PDF/A‑1b compliance for stored graphics, the example shows how to transform EPS files into compliant PDFs without losing vector fidelity.
- * 4. When integrating Aspose.Imaging into a C# application that processes incoming EPS files from designers, this code enables you to produce PDF outputs that can still be edited in vector editors.
- * 5. When automating document generation where EPS charts must be included in PDFs that pass accessibility checks, the snippet ensures the charts remain vector‑based for crisp rendering at any zoom level.
+ * 1. When you need to embed an EPS illustration into a PDF/A‑1b compliant document for archival without losing editability.
+ * 2. When a printing workflow requires converting vector EPS logos to PDF while keeping the paths editable for later modifications.
+ * 3. When generating PDF reports from design assets and you must ensure the output meets PDF/A‑1b standards for legal compliance.
+ * 4. When automating batch conversion of EPS files to PDFs in a C# application and you want the resulting PDFs to retain scalable vector graphics.
+ * 5. When integrating Aspose.Imaging into a .NET service that transforms EPS drawings into PDFs for downstream CAD or graphic editing tools.
  */
