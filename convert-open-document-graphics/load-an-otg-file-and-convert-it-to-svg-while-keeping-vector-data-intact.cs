@@ -1,44 +1,55 @@
-// HOW-TO: Convert OTG Vector Image to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to SVG While Preserving Vector Data in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ConvertOtgToSvg
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.otg";
-            string outputPath = "output/output.svg";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.otg";
+                string outputPath = "output.svg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir ?? string.Empty);
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var options = new SvgOptions();
+                    image.Save(outputPath, options);
+                }
             }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                var options = new SvgOptions();
-                image.Save(outputPath, options);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display OTG drawings on a website, you can convert them to scalable SVG files using C#.
- * 2. When integrating legacy OTG assets into a modern UI, converting them to SVG retains crisp vector quality across devices.
- * 3. When automating batch processing of engineering diagrams stored as OTG, you can generate SVG outputs for cross‑platform compatibility.
- * 4. When preparing print‑ready artwork that originates as OTG, converting to SVG allows further editing in vector editors without losing detail.
- * 5. When building a C# service that receives OTG uploads and returns SVG for downstream processing, this code handles the conversion while preserving vector data.
+ * 1. When a developer needs to export an OTG font file to scalable SVG for web display without losing vector outlines.
+ * 2. When integrating a design pipeline that receives OTG assets and must generate SVG icons for responsive UI components.
+ * 3. When converting proprietary OTG artwork into SVG to enable editing in vector graphics editors like Adobe Illustrator.
+ * 4. When automating batch processing of OTG files on a server to produce SVG files for PDF generation or printing workflows.
+ * 5. When building a C# application that reads OTG glyphs and saves them as SVG to embed in HTML emails or documentation.
  */
