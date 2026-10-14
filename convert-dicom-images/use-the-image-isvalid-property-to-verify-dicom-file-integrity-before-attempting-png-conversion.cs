@@ -1,4 +1,11 @@
-// HOW-TO: Convert DICOM to PNG in C# with Image.IsValid Check (Aspose.Imaging for .NET)
+// HOW-TO: Validate DICOM File and Convert to PNG Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.dcm");
-            string outputPath = Path.Combine("Output", "sample.png");
+            string inputPath = "Input/sample.dcm";
+            string outputPath = "Output/sample.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,7 +30,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                using (var pngOptions = new PngOptions())
                 {
                     image.Save(outputPath, pngOptions);
                 }
@@ -38,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display DICOM scans as web‑friendly PNG thumbnails after confirming the file is valid.
- * 2. When a hospital system must validate the integrity of incoming DICOM files before converting them to PNG for archival.
- * 3. When a developer creates a batch process that transforms radiology images into PNGs for machine‑learning preprocessing while skipping corrupted files.
- * 4. When an integration service extracts diagnostic images from PACS and converts them to PNG for inclusion in patient reports after an IsValid check.
- * 5. When a desktop tool allows clinicians to open DICOM files and save them as PNGs only after confirming the image is valid.
+ * 1. When a healthcare application needs to ensure a DICOM image is not corrupted before displaying it as a PNG thumbnail in a web portal.
+ * 2. When a radiology PACS system must batch‑process DICOM scans and store them as PNG files for integration with non‑medical image viewers.
+ * 3. When a developer builds a diagnostic reporting tool that extracts PNG snapshots from DICOM files while checking file integrity to avoid runtime errors.
+ * 4. When an electronic health record (EHR) platform requires conversion of validated DICOM images to PNG for secure archival and quick preview.
+ * 5. When a mobile app downloads DICOM files from a server and needs to verify they are valid before converting them to PNG for on‑device rendering.
  */
