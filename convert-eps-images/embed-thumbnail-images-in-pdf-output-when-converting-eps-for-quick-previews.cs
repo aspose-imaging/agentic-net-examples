@@ -1,9 +1,15 @@
-// HOW-TO: Convert EPS to PDF with PNG Thumbnail Preview in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PDF from EPS with Embedded Thumbnail Preview in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.eps");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -24,30 +30,34 @@ class Program
 
             using (Image epsImage = Image.Load(inputPath))
             {
-                var thumbOptions = new PngOptions
+                int width = epsImage.Width;
+                int height = epsImage.Height;
+
+                int thumbWidth = 200;
+                int thumbHeight = (int)((double)height / width * thumbWidth);
+
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    var thumbOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = 200,
-                        PageHeight = 200
-                    }
-                };
+                        PageWidth = thumbWidth,
+                        PageHeight = thumbHeight
+                    };
 
-                using (var thumbStream = new MemoryStream())
-                {
-                    epsImage.Save(thumbStream, thumbOptions);
-                    thumbStream.Position = 0;
-
-                    using (Image thumbImage = Image.Load(thumbStream))
+                    var fullOptions = new VectorRasterizationOptions
                     {
-                        var pdfOptions = new PdfOptions
-                        {
-                            PdfDocumentInfo = new PdfDocumentInfo()
-                        };
+                        BackgroundColor = Color.White,
+                        PageWidth = width,
+                        PageHeight = height
+                    };
 
-                        epsImage.Save(outputPath, pdfOptions);
-                    }
+                    pdfOptions.MultiPageOptions = new MultiPageOptions
+                    {
+                        PageRasterizationOptions = new VectorRasterizationOptions[] { thumbOptions, fullOptions }
+                    };
+
+                    epsImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -60,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF from an EPS logo and include a small PNG preview for faster document browsing in a C# application.
- * 2. When building a report generator that converts vector illustrations to PDFs while providing thumbnail images for thumbnail galleries or file explorers.
- * 3. When integrating Aspose.Imaging into a document management system to store EPS artwork as searchable PDFs with embedded preview images for end‑users.
- * 4. When creating an automated batch process that converts a collection of EPS files to PDFs and produces 200 × 200 PNG thumbnails for quick visual verification.
- * 5. When developing a web service that receives EPS uploads, converts them to PDF, and returns a lightweight PNG preview for preview panes without loading the full PDF.
+ * 1. When a web application needs to display a small preview of an EPS artwork before the user downloads the full‑size PDF, this code generates a thumbnail page followed by the full‑resolution page.
+ * 2. When an automated document pipeline converts legacy EPS files to searchable PDFs and wants the first page to act as a quick visual index, the snippet creates a multi‑page PDF with a scaled‑down preview.
+ * 3. When a desktop publishing tool must embed a low‑resolution preview of a vector logo inside a PDF for faster loading on low‑bandwidth devices, this example rasterizes the EPS at two sizes and saves them together.
+ * 4. When a batch job processes a folder of EPS graphics and needs each output PDF to contain a thumbnail for thumbnail‑viewers or file explorers, the code demonstrates how to set page dimensions and background color using Aspose.Imaging.
+ * 5. When integrating Aspose.Imaging into a C# service that converts customer‑uploaded EPS files to PDFs while providing an immediate preview image in the same document, this sample shows the required options and error handling.
  */
