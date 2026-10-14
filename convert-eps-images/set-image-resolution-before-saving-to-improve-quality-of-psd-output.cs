@@ -1,8 +1,16 @@
-// HOW-TO: Set Image DPI to 300 and Save as PSD in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set Image Resolution Before Saving JPEG to PSD in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -24,13 +32,9 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.HorizontalResolution = 300;
-                raster.VerticalResolution = 300;
-
                 PsdOptions options = new PsdOptions();
                 options.Source = new FileCreateSource(outputPath, false);
-
+                options.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
                 image.Save(outputPath, options);
             }
         }
@@ -43,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a JPEG to a Photoshop PSD file while increasing the DPI to 300 for high‑resolution printing.
- * 2. When preparing images for a print‑ready PDF workflow and must ensure the source raster has 300 dpi before saving as PSD.
- * 3. When a graphics application requires consistent horizontal and vertical resolution across layers, and you use Aspose.Imaging to set both to 300 dpi.
- * 4. When automating batch processing of photos to meet publishing standards that demand 300 dpi PSD files generated from JPEGs.
- * 5. When integrating image conversion into a C# service that must preserve image quality by adjusting resolution before exporting to PSD format.
+ * 1. When you need to convert a high‑resolution JPEG into a Photoshop PSD file while preserving print‑ready DPI settings.
+ * 2. When generating PSD assets for a design workflow that requires a specific 300 dpi resolution for accurate scaling.
+ * 3. When automating batch processing of images to ensure the output PSD files meet publishing standards for magazines or brochures.
+ * 4. When creating layered PSD files from source photos and must set the resolution before saving to avoid blurry prints.
+ * 5. When integrating Aspose.Imaging into a C# application to produce PSD files with custom resolution for downstream editing in Photoshop.
  */
