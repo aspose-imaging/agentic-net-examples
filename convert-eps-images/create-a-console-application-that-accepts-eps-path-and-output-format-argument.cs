@@ -1,79 +1,80 @@
-// HOW-TO: Convert EPS to PNG, JPG, PDF, SVG, or PSD in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS File to PDF PNG JPEG TIFF with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace EpsConverter
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = args[0];
+            string format = args[1].ToLower();
+            string outputPath = Path.Combine("Output", $"output.{format}");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            if (!File.Exists(inputPath))
             {
-                // Hardcoded input and base output paths
-                string inputPath = "input.eps";
-                string format = args[0]; // No args.Length validation per priority rules
-                string outputPath = $"output.{format}";
-
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Load EPS image
-                using (Image image = Image.Load(inputPath))
-                {
-                    switch (format.ToLower())
-                    {
-                        case "png":
-                            var pngOptions = new PngOptions();
-                            image.Save(outputPath, pngOptions);
-                            break;
-                        case "jpg":
-                        case "jpeg":
-                            var jpegOptions = new JpegOptions();
-                            image.Save(outputPath, jpegOptions);
-                            break;
-                        case "pdf":
-                            var pdfOptions = new PdfOptions();
-                            image.Save(outputPath, pdfOptions);
-                            break;
-                        case "svg":
-                            var svgOptions = new SvgOptions();
-                            image.Save(outputPath, svgOptions);
-                            break;
-                        case "psd":
-                            var psdOptions = new PsdOptions();
-                            image.Save(outputPath, psdOptions);
-                            break;
-                        default:
-                            Console.Error.WriteLine($"Unsupported format: {format}");
-                            return;
-                    }
-                }
-
-                Console.WriteLine($"Conversion completed: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                switch (format)
+                {
+                    case "pdf":
+                        epsImage.Save(outputPath, new PdfOptions());
+                        break;
+                    case "png":
+                        epsImage.Save(outputPath, new PngOptions());
+                        break;
+                    case "jpg":
+                    case "jpeg":
+                        epsImage.Save(outputPath, new JpegOptions());
+                        break;
+                    case "tiff":
+                        epsImage.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                        break;
+                    case "bmp":
+                        epsImage.Save(outputPath, new BmpOptions());
+                        break;
+                    case "gif":
+                        epsImage.Save(outputPath, new GifOptions());
+                        break;
+                    case "webp":
+                        epsImage.Save(outputPath, new WebPOptions());
+                        break;
+                    default:
+                        Console.Error.WriteLine($"Unsupported format: {format}");
+                        break;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert legacy EPS artwork to web‑friendly PNG or JPEG images in a C# automation script.
- * 2. When a reporting tool must embed vector EPS diagrams into PDF documents generated by a .NET application.
- * 3. When an e‑commerce platform requires converting EPS logos to scalable SVG files for responsive web design.
- * 4. When a digital asset management system needs to store EPS files as Photoshop PSD layers for further editing.
- * 5. When a command‑line utility must allow users to specify the desired output format for EPS conversion at runtime.
+ * 1. When you need a command‑line tool to convert legacy EPS artwork into PDF for printing or archiving in a .NET application.
+ * 2. When a web service must dynamically transform EPS logos into PNG or JPEG thumbnails for display on websites.
+ * 3. When an automated build pipeline has to batch‑convert EPS diagrams to TIFF for inclusion in documentation PDFs.
+ * 4. When a desktop utility must allow users to choose an output format such as BMP or GIF from an EPS source file.
+ * 5. When integrating Aspose.Imaging into a C# console app to programmatically convert EPS files to WebP for optimized web delivery.
  */
