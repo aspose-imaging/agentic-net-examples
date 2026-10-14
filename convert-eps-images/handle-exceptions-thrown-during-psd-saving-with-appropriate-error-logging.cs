@@ -1,62 +1,59 @@
-// HOW-TO: How To Convert JPEG To PSD With Error Handling In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Save JPEG As PSD With Error Handling In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace PsdsaveExample
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "input.jpg";
+            string outputPath = "output.psd";
+
+            if (!File.Exists(inputPath))
             {
-                // Hardcoded input and output paths
-                string inputPath = "input.jpg";
-                string outputPath = "output.psd";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+            var outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var psdOptions = new PsdOptions();
+                try
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    image.Save(outputPath, psdOptions);
                 }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                catch (Exception ex)
                 {
-                    // Prepare PSD options
-                    var psdOptions = new PsdOptions();
-
-                    // Save as PSD with error handling
-                    try
-                    {
-                        image.Save(outputPath, psdOptions);
-                    }
-                    catch (Exception saveEx)
-                    {
-                        Console.Error.WriteLine($"Error saving PSD: {saveEx.Message}");
-                        return;
-                    }
+                    Console.Error.WriteLine($"Error saving PSD: {ex.Message}");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically transform user‑uploaded JPEG photos into layered PSD files while ensuring missing files are reported.
- * 2. When an automated batch job must save images as Photoshop files and log any failures without crashing the service.
- * 3. When a web API receives image paths and must create PSD output, creating the target folder if it does not exist.
- * 4. When integrating Aspose.Imaging into a desktop application that requires graceful handling of save errors to display meaningful messages to users.
- * 5. When building a migration tool that converts legacy JPEG assets to PSD format and needs robust exception handling for file‑system and library errors.
+ * 1. When you need to convert user‑uploaded JPEG images to Photoshop PSD files while ensuring any file‑system or format errors are logged.
+ * 2. When an automated image‑processing pipeline must create editable PSD layers from JPEG sources and gracefully handle missing input files.
+ * 3. When building a desktop application that lets users export pictures to PSD format and you want to capture save‑operation exceptions for troubleshooting.
+ * 4. When integrating Aspose.Imaging into a server‑side service that generates PSD previews from JPEG thumbnails and must avoid crashes on invalid paths.
+ * 5. When performing batch conversion of JPEG assets to PSD in a scheduled job and you require reliable error reporting for each conversion step.
  */
