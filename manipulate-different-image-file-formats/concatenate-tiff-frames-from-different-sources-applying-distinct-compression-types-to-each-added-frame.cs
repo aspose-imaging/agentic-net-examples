@@ -3,70 +3,67 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath1 = "input1.tif";
+        string inputPath2 = "input2.tif";
+        string outputPath = "output/combined.tif";
+
+        if (!File.Exists(inputPath1))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath1 = "input1.tif";
-            string inputPath2 = "input2.tif";
-            string outputPath = "output.tif";
-
-            if (!File.Exists(inputPath1))
+            using (Aspose.Imaging.RasterImage img1 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath1))
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
+                int width = img1.Width;
+                int height = img1.Height;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (TiffImage src1 = (TiffImage)Image.Load(inputPath1))
-            using (TiffImage src2 = (TiffImage)Image.Load(inputPath2))
-            {
-                // First frame compression: LZW
-                TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default);
-                options1.Compression = TiffCompressions.Lzw;
-
-                int width1 = src1.ActiveFrame.Width;
-                int height1 = src1.ActiveFrame.Height;
-
-                using (TiffImage outTiff = (TiffImage)Image.Create(options1, width1, height1))
+                FileCreateSource outSource = new FileCreateSource(outputPath, false);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    // Copy first frame pixels
-                    Color[] pixels1 = ((RasterImage)src1).LoadPixels(src1.ActiveFrame.Bounds);
-                    outTiff.ActiveFrame.SavePixels(outTiff.ActiveFrame.Bounds, pixels1);
+                    Source = outSource,
+                    Compression = TiffCompressions.Lzw
+                };
 
-                    // Second frame compression: Deflate
-                    TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default);
-                    options2.Compression = TiffCompressions.Deflate;
+                using (TiffImage tiffImage = (TiffImage)Aspose.Imaging.Image.Create(tiffOptions, width, height))
+                {
+                    tiffImage.SaveArgb32Pixels(tiffImage.Bounds, img1.LoadArgb32Pixels(img1.Bounds));
 
-                    int width2 = src2.ActiveFrame.Width;
-                    int height2 = src2.ActiveFrame.Height;
+                    using (Aspose.Imaging.RasterImage img2 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath2))
+                    {
+                        TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default)
+                        {
+                            Compression = TiffCompressions.Jpeg
+                        };
+                        TiffFrame frame2 = new TiffFrame(frameOptions, img2.Width, img2.Height);
+                        frame2.SaveArgb32Pixels(frame2.Bounds, img2.LoadArgb32Pixels(img2.Bounds));
+                        tiffImage.AddFrame(frame2);
+                    }
 
-                    TiffFrame newFrame = new TiffFrame(options2, width2, height2);
-
-                    // Copy second frame pixels
-                    Color[] pixels2 = ((RasterImage)src2).LoadPixels(src2.ActiveFrame.Bounds);
-                    newFrame.SavePixels(newFrame.Bounds, pixels2);
-
-                    outTiff.AddFrame(newFrame);
-                    outTiff.Save(outputPath);
+                    tiffImage.Save();
                 }
             }
         }
@@ -79,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge scanned documents from separate TIFF files into a single multi‑page TIFF while using LZW for the first page and Deflate for the second to meet archival and size‑reduction requirements.
- * 2. When a medical imaging system must combine patient scans stored as individual TIFF frames, applying a lossless compression method appropriate for each modality.
- * 3. When a publishing workflow requires assembling high‑resolution TIFF pages from different sources, assigning a specific compression to each page to balance quality and file size.
- * 4. When an automated batch process creates a multi‑page TIFF report and wants to use a faster Deflate compression for later pages while keeping the first page in LZW for compatibility with legacy software.
- * 5. When a GIS application concatenates raster TIFF layers from separate datasets and needs to specify distinct compression algorithms for each layer to optimize storage and rendering performance.
+ * 1. When you need to merge scanned documents stored as separate TIFF files into a single multi‑page TIFF while using LZW compression for the first page and JPEG compression for the second page.
+ * 2. When creating a PDF‑like bundle of medical images where each image must retain its own optimal compression to balance quality and file size.
+ * 3. When generating a multi‑page TIFF archive for archival purposes and want to apply lossless compression to the cover page and lossy compression to the remaining pages.
+ * 4. When building a document management system that combines TIFF images from different sources and requires different compression algorithms for each frame to meet storage policies.
+ * 5. When automating the preparation of TIFF image sequences for printing, assigning LZW compression to high‑resolution pages and JPEG compression to lower‑resolution pages to reduce overall file size.
  */
