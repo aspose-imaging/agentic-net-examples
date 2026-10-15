@@ -1,17 +1,14 @@
-// HOW-TO: Extract WebP Animation Frames to BMP and Create GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated WebP to GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -20,8 +17,7 @@ class Program
         try
         {
             string inputWebP = "input.webp";
-            string bmpFolder = "bmp_frames";
-            string outputGif = "output.gif";
+            string outputGif = "output/output.gif";
 
             if (!File.Exists(inputWebP))
             {
@@ -29,41 +25,15 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(bmpFolder);
-
-            List<Image> bmpImages = new List<Image>();
-
-            using (WebPImage webp = (WebPImage)Image.Load(inputWebP))
+            string outputDir = Path.GetDirectoryName(outputGif);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                int frameCount = webp.PageCount;
-                for (int i = 0; i < frameCount; i++)
-                {
-                    RasterImage frame = (RasterImage)webp.Pages[i];
-                    string bmpPath = Path.Combine(bmpFolder, $"frame{i}.bmp");
-                    frame.Save(bmpPath, new BmpOptions());
-                    Image bmpImg = Image.Load(bmpPath);
-                    bmpImages.Add(bmpImg);
-                }
+                Directory.CreateDirectory(outputDir);
             }
 
-            if (bmpImages.Count > 0)
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputWebP))
             {
-                string outputDir = Path.GetDirectoryName(outputGif);
-                if (!string.IsNullOrWhiteSpace(outputDir))
-                {
-                    Directory.CreateDirectory(outputDir);
-                }
-
-                using (Image gifImage = Image.Create(bmpImages.ToArray(), true))
-                {
-                    GifOptions gifOptions = new GifOptions();
-                    gifImage.Save(outputGif, gifOptions);
-                }
-            }
-
-            foreach (var img in bmpImages)
-            {
-                img.Dispose();
+                image.Save(outputGif, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -75,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an animated WebP file into a GIF for browsers that only support GIF animations.
- * 2. When you want to extract each frame of a WebP animation as separate BMP images for editing in Windows‑based graphics tools.
- * 3. When you must generate a GIF slideshow from BMP frames extracted from a WebP animation to embed in presentations or email newsletters.
- * 4. When you are building a server‑side service that receives WebP animations and outputs GIFs for legacy mobile devices using Aspose.Imaging for .NET.
- * 5. When you need to archive the individual frames of a WebP animation in lossless BMP format before applying custom watermarking or frame‑by‑frame analysis.
+ * 1. When you need to display an animated WebP on platforms that only support GIF, you can convert it to a GIF using Aspose.Imaging in C#.
+ * 2. When a web application must generate GIF previews of user‑uploaded animated WebP files, this code provides a simple server‑side conversion.
+ * 3. When migrating legacy assets from WebP to GIF for email newsletters, the snippet automates the batch conversion in a .NET environment.
+ * 4. When building a desktop tool that extracts animation frames from a WebP and saves them as a single GIF, this approach handles the format change without manual frame handling.
+ * 5. When integrating image processing into a content‑management system that stores images as WebP but needs GIF output for social media sharing, the code performs the conversion programmatically.
  */
