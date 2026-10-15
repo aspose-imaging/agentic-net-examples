@@ -1,4 +1,11 @@
-// HOW-TO: Create Multipage TIFF From Multiple PSD Files In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multipage TIFF from Multiple PSD Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,46 +19,41 @@ class Program
     {
         try
         {
-            string inputPath1 = "psd1.psd";
-            string inputPath2 = "psd2.psd";
-            string inputPath3 = "psd3.psd";
-            string outputPath = "output/multipage.tif";
+            string inputPsd1 = "psd1.psd";
+            string inputPsd2 = "psd2.psd";
+            string inputPsd3 = "psd3.psd";
+            string outputTiff = "output/multipage.tif";
 
-            if (!File.Exists(inputPath1))
+            if (!File.Exists(inputPsd1)) { Console.Error.WriteLine($"File not found: {inputPsd1}"); return; }
+            if (!File.Exists(inputPsd2)) { Console.Error.WriteLine($"File not found: {inputPsd2}"); return; }
+            if (!File.Exists(inputPsd3)) { Console.Error.WriteLine($"File not found: {inputPsd3}"); return; }
+
+            int width, height;
+            using (Image firstPsd = Image.Load(inputPsd1))
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-            if (!File.Exists(inputPath3))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath3}");
-                return;
+                width = firstPsd.Width;
+                height = firstPsd.Height;
             }
 
-            using (Image img1 = Image.Load(inputPath1))
-            using (Image img2 = Image.Load(inputPath2))
-            using (Image img3 = Image.Load(inputPath3))
-            {
-                RasterImage raster1 = (RasterImage)img1;
-                RasterImage raster2 = (RasterImage)img2;
-                RasterImage raster3 = (RasterImage)img3;
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTiff));
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, raster1.Width, raster1.Height))
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+            {
+                using (RasterImage psd1 = (RasterImage)Image.Load(inputPsd1))
                 {
-                    tiff.SavePixels(tiff.ActiveFrame.Bounds, raster1.LoadPixels(raster1.Bounds));
-
-                    tiff.AddPage(raster2);
-                    tiff.AddPage(raster3);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    tiff.Save(outputPath);
+                    tiff.AddPage(psd1);
                 }
+                using (RasterImage psd2 = (RasterImage)Image.Load(inputPsd2))
+                {
+                    tiff.AddPage(psd2);
+                }
+                using (RasterImage psd3 = (RasterImage)Image.Load(inputPsd3))
+                {
+                    tiff.AddPage(psd3);
+                }
+
+                tiff.Save(outputTiff, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several Photoshop PSD files into a single multi‑page TIFF for printing or archival purposes.
- * 2. When a document management system requires a high‑resolution multi‑page TIFF that contains each page sourced from separate PSD assets.
- * 3. When generating a PDF‑like document where each page is designed in Photoshop and must be bundled into a TIFF for compatibility with legacy imaging software.
- * 4. When automating the creation of a multi‑page scan where each scanned image is edited in PSD and then merged into one TIFF for batch processing.
- * 5. When exporting a series of design mockups from PSD to a single TIFF to reduce file‑handling overhead in a C# image‑processing pipeline.
+ * 1. When you need to combine several Photoshop PSD files into a single multi‑page TIFF for archival or printing purposes.
+ * 2. When generating a document where each page is a separate Photoshop design and must be delivered as one TIFF file.
+ * 3. When automating batch conversion of PSD assets into a multi‑page TIFF for use in desktop publishing workflows.
+ * 4. When creating a searchable PDF‑like image stack by first merging PSD files into a multi‑page TIFF before further processing.
+ * 5. When integrating Photoshop output into a medical or engineering imaging system that requires multi‑page TIFF input.
  */
