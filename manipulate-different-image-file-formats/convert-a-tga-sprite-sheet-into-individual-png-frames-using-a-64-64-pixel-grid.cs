@@ -1,9 +1,14 @@
-// HOW-TO: Extract 64x64 PNG Frames from a TGA Sprite Sheet in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract 64x64 PNG Frames From TGA Sprite Sheet In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +16,10 @@ class Program
     {
         try
         {
-            string inputPath = "sprite.tga";
-            string outputDir = "Frames";
+            string inputPath = Path.Combine("Input", "spritesheet.tga");
+            string outputDirectory = Path.Combine("Output");
+
+            Directory.CreateDirectory(outputDirectory);
 
             if (!File.Exists(inputPath))
             {
@@ -20,39 +27,34 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
-
-            using (RasterImage sheet = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image sheetImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                int frameWidth = 64;
-                int frameHeight = 64;
-                int columns = sheet.Width / frameWidth;
-                int rows = sheet.Height / frameHeight;
+                int sheetWidth = sheetImage.Width;
+                int sheetHeight = sheetImage.Height;
+                int tileSize = 64;
+                int frameIndex = 0;
 
-                int[] sheetPixels = sheet.LoadArgb32Pixels(new Rectangle(0, 0, sheet.Width, sheet.Height));
-
-                for (int row = 0; row < rows; row++)
+                for (int y = 0; y < sheetHeight; y += tileSize)
                 {
-                    for (int col = 0; col < columns; col++)
+                    for (int x = 0; x < sheetWidth; x += tileSize)
                     {
-                        int[] framePixels = new int[frameWidth * frameHeight];
-                        for (int y = 0; y < frameHeight; y++)
-                        {
-                            int srcY = row * frameHeight + y;
-                            Array.Copy(sheetPixels, srcY * sheet.Width + col * frameWidth, framePixels, y * frameWidth, frameWidth);
-                        }
+                        int tileWidth = Math.Min(tileSize, sheetWidth - x);
+                        int tileHeight = Math.Min(tileSize, sheetHeight - y);
 
-                        string outputPath = Path.Combine(outputDir, $"frame_{row}_{col}.png");
-
-                        PngOptions options = new PngOptions
+                        using (Aspose.Imaging.Image tileImage = Aspose.Imaging.Image.Load(inputPath))
                         {
-                            Source = new FileCreateSource(outputPath, false)
-                        };
+                            Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(x, y, tileWidth, tileHeight);
+                            ((Aspose.Imaging.RasterImage)tileImage).Crop(rect);
 
-                        using (Image frameImage = Image.Create(options, frameWidth, frameHeight))
-                        {
-                            ((RasterImage)frameImage).SaveArgb32Pixels(new Rectangle(0, 0, frameWidth, frameHeight), framePixels);
-                            frameImage.Save();
+                            string outputPath = Path.Combine(outputDirectory, $"frame_{frameIndex:D4}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            using (var pngOptions = new PngOptions())
+                            {
+                                tileImage.Save(outputPath, pngOptions);
+                            }
+
+                            frameIndex++;
                         }
                     }
                 }
@@ -67,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to break a large TGA sprite sheet into individual PNG images for use in a game engine.
- * 2. When you want to generate separate animation frames from a tiled texture atlas for UI animations.
- * 3. When you must convert legacy TGA assets to web‑friendly PNG files while preserving a fixed 64×64 grid layout.
- * 4. When you are preprocessing sprite sheets for a mobile app that only supports PNG image sequences.
- * 5. When you automate the extraction of sprite frames to feed into a machine‑learning model that requires individual PNG inputs.
+ * 1. When you need to break a large TGA sprite sheet into individual 64‑pixel PNG images for game animation.
+ * 2. When you want to automate the extraction of sprite frames for a 2D game engine that only supports PNG textures.
+ * 3. When you have legacy TGA assets and must convert each tile to PNG to integrate with modern UI frameworks.
+ * 4. When you need to generate a sequence of PNG files from a tiled sprite sheet for use in video editing or GIF creation.
+ * 5. When you are building a batch processing tool that slices any sized sprite sheet into fixed‑size PNG tiles for texture atlases.
  */
