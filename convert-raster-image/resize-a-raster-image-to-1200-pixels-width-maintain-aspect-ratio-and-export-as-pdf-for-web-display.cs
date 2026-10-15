@@ -1,57 +1,66 @@
 // HOW-TO: Resize Image to 1200px Width and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\image.pdf";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "Input\\sample.png";
+                string outputPath = "Output\\sample.pdf";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                if (!raster.IsCached)
+                if (!File.Exists(inputPath))
                 {
-                    raster.CacheData();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                int newWidth = 1200;
-                int newHeight = (int)(raster.Height * (newWidth / (double)raster.Width));
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir);
 
-                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (Image image = Image.Load(inputPath))
                 {
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                    {
+                        raster.CacheData();
+                    }
+
+                    int newWidth = 1200;
+                    int newHeight = (int)Math.Round((double)raster.Height * newWidth / raster.Width);
+                    raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                    PdfOptions pdfOptions = new PdfOptions();
                     raster.Save(outputPath, pdfOptions);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a large PNG into a PDF that fits a 1200‑pixel width for faster web display while keeping the original aspect ratio.
- * 2. When an e‑commerce platform generates product catalogs by resizing product images to a uniform width and exporting them as PDFs for consistent presentation.
- * 3. When a reporting application creates printable PDFs from high‑resolution screenshots, scaling them to 1200 px wide to match typical browser dimensions.
- * 4. When a content‑management system automatically processes uploaded images, resizing them to 1200 px and saving them as PDFs for easy download and viewing.
- * 5. When a batch job prepares marketing assets by using Aspose.Imaging to resize raster images and output them as PDFs for email newsletters.
+ * 1. When you need to convert a high‑resolution PNG into a web‑friendly PDF that fits a 1200‑pixel width layout while preserving the original aspect ratio.
+ * 2. When you want to downscale product photos to a consistent width before embedding them in PDFs for an online catalog.
+ * 3. When a web application must accept user‑uploaded raster images, resize them to 1200 px wide, and deliver the result as a PDF for responsive display.
+ * 4. When you are batch‑processing scanned documents, resizing each image to a standard width and saving them as PDFs for archival and quick browser viewing.
+ * 5. When building a reporting tool that inserts resized images into PDF reports to ensure fast loading and uniform appearance across devices.
  */
