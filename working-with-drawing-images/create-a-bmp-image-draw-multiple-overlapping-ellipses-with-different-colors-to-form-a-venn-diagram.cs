@@ -1,4 +1,11 @@
-// HOW-TO: Create BMP Venn Diagram with Overlapping Colored Ellipses in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Venn Diagram with Overlapping Transparent Ellipses in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,40 +16,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output\\venn_diagram.bmp";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
         try
         {
-            int width = 500;
-            int height = 400;
-            BmpOptions bmpOptions = new BmpOptions();
+            string outputPath = "output/venn_diagram.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (Image image = Image.Create(new BmpOptions(), 500, 500))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                using (SolidBrush brush1 = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                // First ellipse - Red
+                using (SolidBrush brushRed = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                 {
-                    graphics.FillEllipse(brush1, 100, 100, 200, 200);
+                    RectangleF rectRed = new RectangleF(100, 150, 200, 200);
+                    graphics.FillEllipse(brushRed, rectRed);
                 }
 
-                using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(128, 0, 255, 0)))
+                // Second ellipse - Green
+                using (SolidBrush brushGreen = new SolidBrush(Color.FromArgb(128, 0, 255, 0)))
                 {
-                    graphics.FillEllipse(brush2, 200, 100, 200, 200);
+                    RectangleF rectGreen = new RectangleF(200, 150, 200, 200);
+                    graphics.FillEllipse(brushGreen, rectGreen);
                 }
 
-                using (SolidBrush brush3 = new SolidBrush(Color.FromArgb(128, 0, 0, 255)))
+                // Third ellipse - Blue
+                using (SolidBrush brushBlue = new SolidBrush(Color.FromArgb(128, 0, 0, 255)))
                 {
-                    graphics.FillEllipse(brush3, 150, 180, 200, 200);
+                    RectangleF rectBlue = new RectangleF(150, 250, 200, 200);
+                    graphics.FillEllipse(brushBlue, rectBlue);
                 }
 
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawEllipse(pen, 100, 100, 200, 200);
-                graphics.DrawEllipse(pen, 200, 100, 200, 200);
-                graphics.DrawEllipse(pen, 150, 180, 200, 200);
-
-                image.Save(outputPath, bmpOptions);
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -54,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP image that visualizes set relationships as a Venn diagram for reports or presentations.
- * 2. When you want to programmatically draw semi‑transparent overlapping circles with custom colors for data visualization in a .NET application.
- * 3. When you need to create a simple bitmap file with outlined ellipses for educational material or tutorials on set theory.
- * 4. When you are building a server‑side service that produces BMP graphics for dynamic charts without relying on external design tools.
- * 5. When you require a reproducible way to export a Venn‑style diagram to BMP format for further processing or printing.
+ * 1. When you need to generate a BMP file that visualizes set relationships as a Venn diagram for reports or presentations.
+ * 2. When you want to programmatically draw overlapping colored shapes with alpha blending to illustrate data intersections in a .NET application.
+ * 3. When you must create a static image for a UI component that requires transparent ellipses to highlight shared areas without using external graphic tools.
+ * 4. When you are automating the production of educational graphics, such as biology or math diagrams, directly from C# code using Aspose.Imaging.
+ * 5. When you need to export a custom diagram to BMP format for legacy systems that only accept uncompressed bitmap images.
  */
