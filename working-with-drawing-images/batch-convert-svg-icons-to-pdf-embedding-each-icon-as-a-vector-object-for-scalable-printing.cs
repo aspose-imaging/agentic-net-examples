@@ -1,4 +1,11 @@
 // HOW-TO: Batch Convert SVG Icons to PDF with Vector Preservation in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,14 +20,14 @@ namespace SvgToPdfBatch
             try
             {
                 // Hardcoded input and output directories
-                string inputDirectory = @"C:\SvgIcons";
-                string outputDirectory = @"C:\PdfIcons";
+                string inputDirectory = "input_svgs";
+                string outputDirectory = "output_pdfs";
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(outputDirectory);
 
                 // Get all SVG files in the input directory
-                string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg", SearchOption.TopDirectoryOnly);
+                string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
                 foreach (string inputPath in svgFiles)
                 {
@@ -32,10 +39,10 @@ namespace SvgToPdfBatch
                     }
 
                     // Determine output PDF path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Ensure the output directory for this file exists
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Load SVG image
@@ -45,8 +52,6 @@ namespace SvgToPdfBatch
                         var pdfOptions = new PdfOptions();
                         image.Save(outputPath, pdfOptions);
                     }
-
-                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
             catch (Exception ex)
@@ -59,9 +64,9 @@ namespace SvgToPdfBatch
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDF catalogs from a folder of SVG icons while keeping them scalable for high‑resolution output.
- * 2. When an automated build process must transform design assets into PDF for inclusion in marketing materials without rasterizing the graphics.
- * 3. When a web application exports user‑uploaded SVG logos as PDF files for legal documents that require vector fidelity.
- * 4. When a CI/CD pipeline creates PDF documentation from SVG diagrams to ensure crisp rendering on any device.
- * 5. When a desktop utility prepares a batch of SVG UI assets for laser‑cutting or embossing by converting them to vector‑based PDFs.
+ * 1. When you need to generate print‑ready PDFs from a library of SVG icons while keeping them fully scalable for high‑resolution output.
+ * 2. When an automated build process must convert dozens of SVG assets into PDFs for inclusion in a corporate style guide.
+ * 3. When a web application exports user‑uploaded SVG graphics as vector PDFs for offline viewing or archival.
+ * 4. When a designer wants to batch‑process SVG logo files into PDFs to send to a commercial printer without rasterizing the artwork.
+ * 5. When a CI/CD pipeline requires converting SVG UI assets to PDF documents for documentation generation in a .NET environment.
  */
