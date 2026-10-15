@@ -3,12 +3,11 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-28
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
@@ -17,28 +16,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string maskPath = "mask.bmp";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputMaskPath = "output/mask.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(maskPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(10, 10))
-                    .Apply();
+                MagicWandTool.Select(image, new MagicWandSettings(10, 10)).Apply();
 
-                var bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 8;
-
-                image.Save(maskPath, bmpOptions);
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 8
+                };
+                image.Save(outputMaskPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to isolate a region selected with Aspose.Imaging's MagicWandTool and store it as an 8‑bit grayscale BMP for later compositing or analysis.
- * 2. When building a batch workflow that reuses the same selection mask on multiple images, saving the mask once as a BMP reduces processing time.
- * 3. When performing background removal, exporting the MagicWand selection to a separate BMP allows you to apply the mask to different layers or formats without recalculating it.
- * 4. When integrating with third‑party tools that only accept grayscale BMP masks, this code converts the MagicWand selection into the required format.
- * 5. When debugging image‑segmentation algorithms, saving the generated mask as a BMP lets you visually inspect the selection and compare results across runs.
+ * 1. When you need to isolate a region of a JPEG and store the selection as a reusable grayscale BMP mask for later background‑removal processing.
+ * 2. When you want to generate a compact 8‑bit BMP mask from a Magic Wand selection to feed into a machine‑learning model that expects binary masks.
+ * 3. When an automated pipeline must save the Magic Wand selection as a separate image so the same mask can be applied to multiple source files without re‑computing the selection.
+ * 4. When building a web service that extracts object outlines from uploaded photos and returns the result as a BMP mask for client‑side compositing.
+ * 5. When you need a reusable mask file for batch editing tasks, such as applying filters or adjustments only inside the selected area across many images.
  */
