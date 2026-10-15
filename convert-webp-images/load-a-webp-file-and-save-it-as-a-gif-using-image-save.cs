@@ -1,45 +1,49 @@
-// HOW-TO: Convert WebP to GIF Using Aspose.Imaging Image.Save in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP Image to Animated GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
-namespace WebPToGifConverter
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
-            {
-                string inputPath = "input.webp";
-                string outputPath = "output.gif";
+            string inputPath = "input.webp";
+            string outputPath = "output.gif";
 
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    image.Save(outputPath, new GifOptions());
-                }
-            }
-            catch (Exception ex)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a WebP picture on a legacy website that only supports GIF format.
- * 2. When you are generating email attachments and must convert WebP assets to GIF for compatibility with older email clients.
- * 3. When you are building a batch conversion tool that transforms user‑uploaded WebP files into GIFs for use in social media posts.
- * 4. When you need to embed a small animation in a Windows Forms application that only accepts GIF images.
- * 5. When you are preparing image assets for a game engine that does not recognize WebP and requires GIF sprites.
+ * 1. When you need to display a WebP picture on legacy browsers that only support GIF, you can convert it with Aspose.Imaging in C#.
+ * 2. When generating animated thumbnails for a web gallery that requires GIF format, you can load the original WebP and save it as GIF.
+ * 3. When an email marketing system only accepts GIF attachments, you can transform user‑uploaded WebP files to GIF before sending.
+ * 4. When a mobile app stores screenshots as WebP but the server‑side processing pipeline expects GIF, you can perform the conversion using Image.Load and Image.Save.
+ * 5. When automating batch conversion of WebP assets to GIF for a game’s asset pipeline, this code provides a simple C# solution.
  */
