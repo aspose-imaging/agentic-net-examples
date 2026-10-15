@@ -1,26 +1,33 @@
-// HOW-TO: Add Custom JFIF Thumbnail to JPEG Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom JFIF Thumbnail to JPEG Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string thumbnailPath = "thumb.jpg";
+        string outputPath = "output/output.jpg";
+
         try
         {
-            string inputPath = "input.jpg";
-            string thumbnailPath = "thumb.jpg";
-            string outputPath = "output.jpg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
@@ -29,16 +36,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                using (JpegImage thumbImg = (JpegImage)Image.Load(thumbnailPath))
+                using (JpegImage thumbImage = (JpegImage)Image.Load(thumbnailPath))
                 {
-                    image.Jfif = new JFIFData();
-                    image.Jfif.Thumbnail = thumbImg;
+                    if (jpegImage.Jfif == null)
+                    {
+                        jpegImage.Jfif = new JFIFData();
+                    }
+                    jpegImage.Jfif.Thumbnail = thumbImage;
                 }
 
-                JpegOptions saveOptions = new JpegOptions();
-                image.Save(outputPath, saveOptions);
+                JpegOptions options = new JpegOptions();
+                options.Source = new FileCreateSource(outputPath, false);
+                jpegImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -50,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a preview thumbnail inside a JPEG file so photo‑management software can display a quick preview without loading the full image.
- * 2. When generating JPEGs for digital cameras or mobile apps that require a JFIF thumbnail for compatibility with older devices.
- * 3. When creating an image archive where each JPEG must contain a custom thumbnail representing a different resolution or watermark.
- * 4. When updating existing JPEGs to include a new thumbnail without re‑encoding the entire image, preserving the original quality.
- * 5. When building a C# service that programmatically adds product preview thumbnails to JPEG product images for e‑commerce platforms.
+ * 1. When you need to embed a preview thumbnail in a JPEG’s JFIF segment for faster image browsing in photo management software.
+ * 2. When generating JPEG files that must display a custom thumbnail on devices that read the JFIF metadata, such as digital cameras or media players.
+ * 3. When creating a batch process that adds company logos as thumbnails to existing JPEGs for branding purposes.
+ * 4. When converting high‑resolution images to JPEG while preserving a low‑resolution thumbnail for quick preview in web galleries.
+ * 5. When updating legacy JPEG files to include a new thumbnail without altering the main image data, ensuring compatibility with older JPEG viewers.
  */
