@@ -3,13 +3,12 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
@@ -18,45 +17,45 @@ class Program
     {
         try
         {
-            string frame1 = "frame1.bmp";
-            string frame2 = "frame2.bmp";
-            string frame3 = "frame3.bmp";
-            string outputPath = "output\\animated.webp";
+            string inputPath1 = "frame1.bmp";
+            string inputPath2 = "frame2.bmp";
+            string inputPath3 = "frame3.bmp";
 
-            if (!File.Exists(frame1))
+            if (!File.Exists(inputPath1))
             {
-                Console.Error.WriteLine($"File not found: {frame1}");
+                Console.Error.WriteLine($"File not found: {inputPath1}");
                 return;
             }
-            if (!File.Exists(frame2))
+            if (!File.Exists(inputPath2))
             {
-                Console.Error.WriteLine($"File not found: {frame2}");
+                Console.Error.WriteLine($"File not found: {inputPath2}");
                 return;
             }
-            if (!File.Exists(frame3))
+            if (!File.Exists(inputPath3))
             {
-                Console.Error.WriteLine($"File not found: {frame3}");
+                Console.Error.WriteLine($"File not found: {inputPath3}");
                 return;
             }
+
+            string outputPath = "output/animation.webp";
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage firstFrame = (RasterImage)Image.Load(frame1))
+            using (Image firstImg = Image.Load(inputPath1))
             {
-                using (WebPImage webp = new WebPImage(firstFrame))
+                RasterImage firstRaster = firstImg as RasterImage;
+                using (WebPImage webp = new WebPImage(firstRaster))
                 {
-                    webp.Options.AnimLoopCount = 0;
-                    webp.Options.Lossless = false;
-                    webp.Options.Quality = 80;
-
-                    using (RasterImage secondFrame = (RasterImage)Image.Load(frame2))
+                    using (Image img2 = Image.Load(inputPath2))
                     {
-                        webp.AddPage(secondFrame);
+                        RasterImage raster2 = img2 as RasterImage;
+                        webp.AddPage(raster2);
                     }
 
-                    using (RasterImage thirdFrame = (RasterImage)Image.Load(frame3))
+                    using (Image img3 = Image.Load(inputPath3))
                     {
-                        webp.AddPage(thirdFrame);
+                        RasterImage raster3 = img3 as RasterImage;
+                        webp.AddPage(raster3);
                     }
 
                     webp.Save(outputPath);
@@ -72,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a series of BMP screenshots into a single animated WebP file for lightweight web delivery.
- * 2. When you want to generate an animated WebP banner from BMP assets while controlling loop count and quality using Aspose.Imaging in a C# application.
- * 3. When a game developer must package multiple BMP sprite frames into an animated WebP texture to reduce file size on mobile devices.
- * 4. When an e‑learning platform creates step‑by‑step tutorial animations by stitching BMP diagrams into an animated WebP with Aspose.Imaging.
- * 5. When a reporting tool assembles BMP chart images into an animated WebP slideshow for embedding in HTML emails.
+ * 1. When you need to convert a series of legacy BMP frames into a single animated WebP file for faster loading on web pages.
+ * 2. When you want to generate animated stickers for messaging apps by combining BMP assets into a WebP animation using C#.
+ * 3. When you have game sprite sheets saved as separate BMP files and require a compact animated WebP for cross‑platform deployment.
+ * 4. When you must compress a step‑by‑step tutorial captured as BMP screenshots into an animated WebP to embed in documentation.
+ * 5. When you are building a product showcase that animates multiple BMP renders into a WebP animation for smooth playback on mobile devices.
  */
