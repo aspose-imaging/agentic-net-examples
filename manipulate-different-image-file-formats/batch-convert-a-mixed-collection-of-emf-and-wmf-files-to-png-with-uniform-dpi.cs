@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert EMF and WMF Files to PNG with Specified DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF And WMF Files To PNG With 300 DPI In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Linq;
@@ -12,9 +19,9 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            int targetDpi = 300;
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -23,28 +30,33 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            var files = Directory.GetFiles(inputDirectory)
-                .Where(f => f.EndsWith(".emf", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => string.Equals(Path.GetExtension(f), ".emf", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(Path.GetExtension(f), ".wmf", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
+                using (PngOptions options = new PngOptions())
                 {
-                    PngOptions options = new PngOptions();
-                    options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(targetDpi, targetDpi);
+                    options.ResolutionSettings = new ResolutionSetting(300, 300);
                     image.Save(outputPath, options);
                 }
             }
@@ -58,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to prepare vector drawings from legacy Windows Metafile formats for high‑resolution web publishing, they can batch convert EMF and WMF to PNG at 300 DPI.
- * 2. When an automated build pipeline must generate print‑ready raster images from design assets stored as EMF/WMF, this code creates uniform‑DPI PNGs for downstream printing tools.
- * 3. When a document management system imports mixed Metafile graphics and requires all images to be stored as lossless PNGs with consistent resolution, the script processes the entire input folder in one run.
- * 4. When a migration project moves legacy engineering diagrams from EMF/WMF to a modern image repository, the code ensures each diagram is rasterized at the target DPI for accurate scaling.
- * 5. When a desktop application needs to display Metafile icons on high‑DPI monitors, developers can pre‑convert the icons to PNG at the desired DPI to avoid runtime scaling issues.
+ * 1. When a developer needs to generate high‑resolution PNG thumbnails from a legacy collection of vector EMF and WMF graphics for a web gallery.
+ * 2. When an automated build process must convert all Windows Metafile assets in a project folder to PNG with a consistent 300 dpi for printing purposes.
+ * 3. When a migration script has to replace EMF/WMF icons with PNG equivalents while preserving visual quality across different screen densities.
+ * 4. When a reporting tool requires rasterized PNG images of vector diagrams at a fixed DPI to embed them in PDF reports.
+ * 5. When a batch job processes user‑uploaded EMF or WMF files and stores them as PNGs with uniform resolution for downstream image‑processing pipelines.
  */
