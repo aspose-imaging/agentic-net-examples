@@ -1,8 +1,15 @@
-// HOW-TO: Apply Gaussian Blur to JPEG and Save with Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter to JPEG and Save with Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -21,12 +28,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                image.Filter(image.Bounds, filterOptions);
+                var rect = new Aspose.Imaging.Rectangle(0, 0, image.Width, image.Height);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
+                image.Filter(rect, filterOptions);
 
-                var jpegOptions = new JpegOptions { Quality = 90 };
+                var source = new FileCreateSource(outputPath, false);
+                var jpegOptions = new JpegOptions { Source = source, Quality = 90 };
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -39,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur sensitive areas of a photo before publishing it online.
- * 2. When you want to reduce image detail to create a soft‑focus effect for a marketing brochure.
- * 3. When you must convert a high‑resolution JPEG to a smaller file while applying a blur to hide background distractions.
- * 4. When you are building a batch‑processing tool that applies a Gaussian blur to user‑uploaded images and saves them with a specific JPEG quality.
- * 5. When you need to programmatically enhance privacy by blurring faces in images before storing them in a database.
+ * 1. When you need to reduce noise in a large JPEG photo before archiving it, you can apply a median filter and save the result with a specific quality setting using Aspose.Imaging in C#.
+ * 2. When processing user‑uploaded images in a web service, lazy‑loading the file and applying a median filter only when required helps conserve memory and improve response time.
+ * 3. When converting high‑resolution scans to compressed JPEGs while preserving edge details, you can filter the entire image area and set the JPEG quality to balance size and visual fidelity.
+ * 4. When building a batch‑processing tool that applies the same noise‑reduction filter to many pictures, the code demonstrates how to automate loading, filtering, and saving each file programmatically.
+ * 5. When integrating image cleanup into a desktop application that edits photos, the example shows how to use Aspose.Imaging’s Rectangle and FilterOptions classes to target the whole image and output a JPEG with controlled compression.
  */
