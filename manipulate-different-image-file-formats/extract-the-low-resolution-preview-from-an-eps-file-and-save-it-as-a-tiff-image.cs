@@ -1,94 +1,53 @@
-// HOW-TO: Extract EPS Low Resolution Preview and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EPS Preview Image and Save As TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Text;
+using Aspose.Imaging.ImageOptions;
 
-namespace EpsPreviewExtractor
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\preview.tiff";
+
+            if (!File.Exists(inputPath))
             {
-                // Hardcoded input and output paths
-                string inputPath = @"C:\Input\sample.eps";
-                string outputPath = @"C:\Output\preview.tif";
-
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Read all bytes from the EPS file
-                byte[] epsBytes = File.ReadAllBytes(inputPath);
-                string epsText = Encoding.ASCII.GetString(epsBytes);
-
-                // Locate the BeginPreview marker
-                const string beginMarker = "%%BeginPreview";
-                const string endMarker = "%%EndPreview";
-
-                int beginIndex = epsText.IndexOf(beginMarker, StringComparison.Ordinal);
-                if (beginIndex == -1)
-                {
-                    Console.Error.WriteLine("BeginPreview marker not found.");
-                    return;
-                }
-
-                // Find the end of the line after BeginPreview
-                int lineEnd = epsText.IndexOf('\n', beginIndex);
-                if (lineEnd == -1)
-                {
-                    Console.Error.WriteLine("Malformed BeginPreview line.");
-                    return;
-                }
-
-                // Locate EndPreview marker after BeginPreview
-                int endIndex = epsText.IndexOf(endMarker, lineEnd, StringComparison.Ordinal);
-                if (endIndex == -1)
-                {
-                    Console.Error.WriteLine("EndPreview marker not found.");
-                    return;
-                }
-
-                // Calculate byte positions
-                // Convert character indices to byte indices (ASCII => 1 byte per char)
-                int previewStartByte = lineEnd + 1; // start after newline
-                int previewEndByte = endIndex; // start of EndPreview
-
-                if (previewStartByte >= previewEndByte || previewEndByte > epsBytes.Length)
-                {
-                    Console.Error.WriteLine("Invalid preview data boundaries.");
-                    return;
-                }
-
-                // Extract preview bytes
-                int previewLength = previewEndByte - previewStartByte;
-                byte[] previewBytes = new byte[previewLength];
-                Array.Copy(epsBytes, previewStartByte, previewBytes, 0, previewLength);
-
-                // Save the preview as TIFF
-                File.WriteAllBytes(outputPath, previewBytes);
-                Console.WriteLine($"Preview extracted to: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                using (Aspose.Imaging.Image preview = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.TIFF))
+                {
+                    var tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+                    preview.Save(outputPath, tiffOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow needs to generate quick‑look thumbnails of EPS artwork for a web catalog, developers can extract the embedded preview and save it as a TIFF file.
- * 2. When a document management system stores EPS files but requires a low‑resolution image for preview panes, this code provides a fast way to create the preview image in C#.
- * 3. When an automated batch process must create printable low‑resolution versions of EPS logos for proofing, extracting the preview and converting it to TIFF simplifies the pipeline.
- * 4. When a legacy design archive contains EPS files without separate preview images, developers can use this snippet to generate TIFF previews for archival indexing.
- * 5. When a Windows desktop application needs to display EPS content in a control that only supports raster formats, extracting the EPS preview and saving it as TIFF enables immediate rendering.
+ * 1. When a publishing workflow needs to generate quick thumbnail previews of EPS artwork for a web gallery, this code extracts the EPS preview and saves it as a TIFF.
+ * 2. When a document management system must store a low‑resolution representation of vector EPS files for faster indexing, the snippet creates a TIFF preview that can be indexed quickly.
+ * 3. When an e‑commerce platform wants to display product illustrations stored as EPS but requires a raster format for compatibility with older browsers, the code converts the EPS preview to a TIFF image.
+ * 4. When a batch‑processing tool needs to archive EPS files with a preview image for quality‑control checks, this example extracts the preview and writes it to a TIFF file.
+ * 5. When a digital asset pipeline must generate printable low‑resolution previews of EPS logos for proofing before high‑resolution rendering, the snippet provides a TIFF preview using Aspose.Imaging in C#.
  */
