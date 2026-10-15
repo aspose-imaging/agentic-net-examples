@@ -1,4 +1,11 @@
-// HOW-TO: Create 1024x768 BMP Image and Save to File in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 1024x768 BMP Image With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,15 +16,15 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
         try
         {
-            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "output.bmp");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-            using (Image image = Image.Create(options, 1024, 768))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 1024, 768))
             {
-                image.Save();
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -29,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blank BMP canvas of a specific resolution for a reporting tool that requires a 1024x768 bitmap file.
- * 2. When an application must programmatically create a BMP placeholder image for a document generation workflow without loading an existing picture.
- * 3. When you want to produce a BMP file on the server side for legacy systems that only accept uncompressed bitmap formats.
- * 4. When a desktop utility needs to export a custom-sized bitmap for printing or further processing using Aspose.Imaging in C#.
- * 5. When you are automating the creation of a BMP thumbnail of exact dimensions to embed in a Windows application’s resources.
+ * 1. When you need to generate a blank BMP canvas of a specific size for a reporting tool that later overlays charts or text.
+ * 2. When an automated batch process must create placeholder bitmap files for testing image‑processing pipelines.
+ * 3. When a desktop application requires programmatic creation of a BMP file to be used as a texture in a game engine.
+ * 4. When a server‑side service must produce a BMP image on the fly to embed in a PDF generated with Aspose.PDF.
+ * 5. When you want to initialize a BMP file at a known path before populating it with pixel data from a camera feed.
  */
