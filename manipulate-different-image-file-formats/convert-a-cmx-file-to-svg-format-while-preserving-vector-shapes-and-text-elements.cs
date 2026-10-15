@@ -1,4 +1,11 @@
 // HOW-TO: Convert CMX Vector File to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -23,8 +30,8 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                var options = new SvgOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -36,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate legacy CorelDRAW CMX artwork to web‑ready SVG graphics without losing vector paths or editable text.
- * 2. When an automated build process must batch‑convert CMX design files to scalable SVGs for responsive UI assets.
- * 3. When a document management system stores CMX files and you want to generate SVG previews for fast browser rendering.
- * 4. When integrating a C# application that imports CMX drawings and exports them as SVG for further processing in vector editors.
- * 5. When creating a conversion tool that preserves original text elements while turning CMX files into SVG for printing workflows.
+ * 1. When you need to migrate legacy CorelDRAW CMX artwork to a web‑friendly SVG format for responsive design.
+ * 2. When an automated pipeline must batch‑convert CMX drawings to scalable vectors without losing text editability.
+ * 3. When integrating CMX support into a C# application that generates printable PDFs from SVG assets.
+ * 4. When preserving exact vector shapes and embedded fonts from a CMX source is required for high‑quality branding materials.
+ * 5. When a cloud service processes user‑uploaded CMX files and returns SVG for preview in browsers.
  */
