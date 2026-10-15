@@ -1,20 +1,26 @@
-// HOW-TO: Normalize Sharpening Kernel and Apply Convolution Filter to JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Normalize Sharpening Kernel to Preserve Brightness When Filtering JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,40 +29,46 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            double[,] kernel = new double[,]
             {
-                double[,] kernel = new double[,]
-                {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
-                };
+                { 0, -1, 0 },
+                { -1, 5, -1 },
+                { 0, -1, 0 }
+            };
 
-                double sum = 0;
+            double sum = 0;
+            for (int i = 0; i < kernel.GetLength(0); i++)
+            {
+                for (int j = 0; j < kernel.GetLength(1); j++)
+                {
+                    sum += kernel[i, j];
+                }
+            }
+
+            if (Math.Abs(sum) > 1e-6)
+            {
+                double factor = 1.0 / sum;
                 for (int i = 0; i < kernel.GetLength(0); i++)
                 {
                     for (int j = 0; j < kernel.GetLength(1); j++)
                     {
-                        sum += kernel[i, j];
+                        kernel[i, j] *= factor;
                     }
                 }
+            }
 
-                double factor = sum != 0 ? sum : 1;
-                double[,] normalizedKernel = new double[3, 3];
-                for (int i = 0; i < 3; i++)
+            using (Image img = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)img;
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var jpegOptions = new JpegOptions
                 {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        normalizedKernel[i, j] = kernel[i, j] / factor;
-                    }
-                }
-
-                var filterOptions = new ConvolutionFilterOptions(normalizedKernel);
-                image.Filter(image.Bounds, filterOptions);
-
-                var jpegOptions = new JpegOptions();
-                jpegOptions.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, jpegOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the details of a JPEG photo while keeping its overall brightness unchanged using Aspose.Imaging in C#.
- * 2. When you want to apply a custom 3x3 sharpening filter to batch‑process images without introducing over‑exposure.
- * 3. When you must normalize a convolution kernel to avoid brightness shifts before saving the result as a new JPEG file.
- * 4. When you are building an automated image‑processing pipeline that sharpens pictures and writes them directly to disk with Aspose.Imaging.
- * 5. When you need to ensure a sharpening operation works on any JPEG input, handling missing files and creating output directories safely.
+ * 1. When you need to sharpen a JPEG image in a C# application while keeping the overall brightness unchanged.
+ * 2. When you want to apply a custom 3x3 convolution filter with Aspose.Imaging and ensure the image luminance remains consistent.
+ * 3. When processing a batch of photos and must maintain consistent exposure after applying a sharpening kernel to each JPEG.
+ * 4. When building a web API that returns sharpened JPEGs and you need the output to have the same brightness as the original.
+ * 5. When creating a desktop photo‑enhancement tool that uses Aspose.Imaging to sharpen pictures without altering their perceived brightness.
  */
