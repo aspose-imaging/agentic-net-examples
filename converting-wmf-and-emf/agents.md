@@ -21,18 +21,16 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `using System.IO;` (29/29 files)
 - `using Aspose.Imaging;` (29/29 files) ← category-specific
 - `using Aspose.Imaging.ImageOptions;` (28/29 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (6/29 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (6/29 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (5/29 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (5/29 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (4/29 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Tiff.Enums;` (4/29 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (3/29 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (3/29 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (2/29 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (4/29 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (4/29 files) ← category-specific
+- `using System.Net.Http;` (2/29 files)
+- `using Aspose.Imaging.FileFormats.Tiff;` (2/29 files) ← category-specific
 - `using System.Threading.Tasks;` (2/29 files)
-- `using Aspose.Imaging.FileFormats.Tiff;` (1/29 files) ← category-specific
-- `using System.Net;` (1/29 files)
 - `using System.IO.Compression;` (1/29 files)
-- `using System.Net.Http;` (1/29 files)
-- `using Aspose.Imaging.FileFormats.Pdf;` (1/29 files) ← category-specific
 
 ## Files in this folder
 
@@ -47,18 +45,18 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [convert-wmf-to-png-with-transparent-background-ensuring-the-alpha-channel-is-retained.cs](./convert-wmf-to-png-with-transparent-background-ensuring-the-alpha-channel-is-retained.cs) | `PngOptions`, `WmfRasterizationOptions` | Convert WMF to PNG with transparent background, ensuring the alpha channel is re... |
 | [convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs](./convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs) | `PngOptions`, `WmfRasterizationOptions` | Convert a WMF file to PNG and apply a custom scaling factor of 0.5 during raster... |
 | [resize-a-wmf-image-during-conversion-to-png-setting-width-and-height-to-800-pixels-each.cs](./resize-a-wmf-image-during-conversion-to-png-setting-width-and-height-to-800-pixels-each.cs) | `PngOptions`, `WmfRasterizationOptions` | Resize a WMF image during conversion to PNG, setting width and height to 800 pix... |
-| [set-dpi-to-300-when-rasterizing-wmf-to-jpeg-to-improve-print-quality.cs](./set-dpi-to-300-when-rasterizing-wmf-to-jpeg-to-improve-print-quality.cs) | `JpegOptions`, `WmfRasterizationOptions` | Set DPI to 300 when rasterizing WMF to JPEG to improve print quality. |
+| [set-dpi-to-300-when-rasterizing-wmf-to-jpeg-to-improve-print-quality.cs](./set-dpi-to-300-when-rasterizing-wmf-to-jpeg-to-improve-print-quality.cs) | `JpegOptions`, `VectorRasterizationOptions` | Set DPI to 300 when rasterizing WMF to JPEG to improve print quality. |
 | [convert-wmf-to-jpeg-with-progressive-encoding-to-enable-incremental-loading-in-browsers.cs](./convert-wmf-to-jpeg-with-progressive-encoding-to-enable-incremental-loading-in-browsers.cs) | `JpegOptions` | Convert WMF to JPEG with progressive encoding to enable incremental loading in b... |
 | [convert-wmf-to-pdf-embedding-the-vector-data-to-retain-scalability-in-the-resulting-document.cs](./convert-wmf-to-pdf-embedding-the-vector-data-to-retain-scalability-in-the-resulting-document.cs) | `PdfOptions` | Convert WMF to PDF, embedding the vector data to retain scalability in the resul... |
 | [convert-wmf-to-bmp-with-24-bit-color-depth-to-ensure-full-color-representation.cs](./convert-wmf-to-bmp-with-24-bit-color-depth-to-ensure-full-color-representation.cs) | `BmpOptions` | Convert WMF to BMP with 24‑bit color depth to ensure full color representation. |
 | [convert-emf-to-png-using-anti-aliasing-to-smooth-edges-and-improve-visual-fidelity.cs](./convert-emf-to-png-using-anti-aliasing-to-smooth-edges-and-improve-visual-fidelity.cs) | `PngOptions`, `VectorRasterizationOptions` | Convert EMF to PNG using anti‑aliasing to smooth edges and improve visual fideli... |
-| [convert-emf-to-png-and-embed-icc-color-profile-for-consistent-display-across-devices.cs](./convert-emf-to-png-and-embed-icc-color-profile-for-consistent-display-across-devices.cs) | `PngOptions`, `VectorRasterizationOptions` | Convert EMF to PNG and embed ICC color profile for consistent display across dev... |
+| [convert-emf-to-png-and-embed-icc-color-profile-for-consistent-display-across-devices.cs](./convert-emf-to-png-and-embed-icc-color-profile-for-consistent-display-across-devices.cs) | `PngOptions` | Convert EMF to PNG and embed ICC color profile for consistent display across dev... |
 | [use-a-custom-color-profile-when-converting-emf-to-jpeg-to-maintain-color-accuracy.cs](./use-a-custom-color-profile-when-converting-emf-to-jpeg-to-maintain-color-accuracy.cs) | `JpegOptions` | Use a custom color profile when converting EMF to JPEG to maintain color accurac... |
-| [export-emf-as-a-high-quality-jpeg-using-a-quality-setting-of-95-percent.cs](./export-emf-as-a-high-quality-jpeg-using-a-quality-setting-of-95-percent.cs) | `JpegOptions` | Export EMF as a high‑quality JPEG using a quality setting of 95 percent. |
-| [apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs](./apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs) | `Graphics`, `JpegImage`, `JpegOptions` | Apply a custom background color when converting transparent EMF files to JPEG fo... |
+| [export-emf-as-a-high-quality-jpeg-using-a-quality-setting-of-95-percent.cs](./export-emf-as-a-high-quality-jpeg-using-a-quality-setting-of-95-percent.cs) | `EmfImage`, `JpegOptions` | Export EMF as a high‑quality JPEG using a quality setting of 95 percent. |
+| [apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs](./apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs) | `JpegOptions`, `VectorRasterizationOptions` | Apply a custom background color when converting transparent EMF files to JPEG fo... |
 | [convert-emf-to-gif-with-a-limited-color-palette-of-256-colors.cs](./convert-emf-to-gif-with-a-limited-color-palette-of-256-colors.cs) | `GifOptions` | Convert EMF to GIF with a limited color palette of 256 colors. |
-| [convert-emf-to-jpeg-and-embed-exif-metadata-for-camera-information.cs](./convert-emf-to-jpeg-and-embed-exif-metadata-for-camera-information.cs) | `JpegOptions`, `VectorRasterizationOptions` | Convert EMF to JPEG and embed EXIF metadata for camera information. |
-| [apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs](./apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs) | `BmpOptions` | Apply a grayscale filter during conversion of EMF to BMP to produce monochrome o... |
+| [convert-emf-to-jpeg-and-embed-exif-metadata-for-camera-information.cs](./convert-emf-to-jpeg-and-embed-exif-metadata-for-camera-information.cs) | `JpegImage`, `JpegOptions` | Convert EMF to JPEG and embed EXIF metadata for camera information. |
+| [apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs](./apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs) | `BmpOptions`, `RasterImage` | Apply a grayscale filter during conversion of EMF to BMP to produce monochrome o... |
 | [export-emf-to-tiff-using-ccitt-group-4-compression-for-black-and-white-images.cs](./export-emf-to-tiff-using-ccitt-group-4-compression-for-black-and-white-images.cs) | `TiffOptions`, `VectorRasterizationOptions` | Export EMF to TIFF using CCITT Group 4 compression for black‑and‑white images. |
 | [batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs](./batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs) | `TiffOptions`, `VectorRasterizationOptions` | Batch convert EMF files to TIFF, applying LZW compression and setting resolution... |
 | [batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs](./batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs) |  | Batch process a folder of WMF files, converting each to BMP while preserving ori... |
@@ -66,7 +64,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [perform-parallel-conversion-of-multiple-wmf-files-to-jpeg-using-parallel-foreach-for-speed.cs](./perform-parallel-conversion-of-multiple-wmf-files-to-jpeg-using-parallel-foreach-for-speed.cs) | `JpegOptions` | Perform parallel conversion of multiple WMF files to JPEG using Parallel.ForEach... |
 | [perform-asynchronous-conversion-of-wmf-files-to-jpeg-using-a-task-based-programming-model.cs](./perform-asynchronous-conversion-of-wmf-files-to-jpeg-using-a-task-based-programming-model.cs) | `JpegOptions` | Perform asynchronous conversion of WMF files to JPEG using a Task‑based programm... |
 | [convert-a-multi-page-emf-document-to-a-series-of-png-files-one-per-page.cs](./convert-a-multi-page-emf-document-to-a-series-of-png-files-one-per-page.cs) | `MultiPageOptions`, `PngOptions` | Convert a multi‑page EMF document to a series of PNG files, one per page. |
-| [set-image-rotation-angle-to-90-degrees-while-converting-emf-to-png.cs](./set-image-rotation-angle-to-90-degrees-while-converting-emf-to-png.cs) | `EmfImage`, `PngOptions` | Set image rotation angle to 90 degrees while converting EMF to PNG. |
+| [set-image-rotation-angle-to-90-degrees-while-converting-emf-to-png.cs](./set-image-rotation-angle-to-90-degrees-while-converting-emf-to-png.cs) | `PngOptions` | Set image rotation angle to 90 degrees while converting EMF to PNG. |
 
 ## Category Statistics
 - Total examples: 29
@@ -86,6 +84,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `MultiPageOptions`
 - `PdfOptions`
 - `PngOptions`
+- `RasterImage`
 - `TiffOptions`
 - `VectorRasterizationOptions`
 - `WmfImage`
@@ -108,5 +107,5 @@ All tasks passed ✅
 The conversion utilities in this folder complement the **Image Format Conversion** examples, where you can see how to move between raster and vector formats beyond WMF and EMF. If you need to manipulate the visual content before conversion, the **Image Editing** category offers cropping, resizing, and color adjustments that can be applied to the metafile data. For scenarios that involve rendering WMF or EMF files onto other canvases, the **Graphics Rendering** examples demonstrate drawing metafiles onto PDFs or other image types, providing a natural next step after conversion. Together, these sections give a complete workflow for handling Windows metafiles in .NET applications.
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-10-07 | Run: `20261002_062844` | Examples: 29
+Updated: 2026-10-15 | Run: `20261015_035808` | Examples: 29
 <!-- AUTOGENERATED:END -->
