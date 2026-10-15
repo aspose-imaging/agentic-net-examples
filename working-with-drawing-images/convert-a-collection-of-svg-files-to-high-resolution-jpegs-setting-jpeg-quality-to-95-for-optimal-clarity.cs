@@ -1,72 +1,88 @@
 // HOW-TO: Batch Convert SVG Files to High-Resolution JPEGs with 95% Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-namespace SvgToJpegConverter
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                // Hardcoded input and output directories
-                string inputDirectory = @"C:\InputSvgs";
-                string outputDirectory = @"C:\OutputJpegs";
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
                 Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Get all SVG files in the input directory
-                string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-                foreach (string inputPath in svgFiles)
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(inputPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
+                        Quality = 95,
+                        ResolutionSettings = new ResolutionSetting(300, 300)
+                    };
 
-                    // Determine output file path with .jpg extension
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load SVG image
-                    using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        // Set JPEG options with high quality and resolution
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = 95,
-                            ResolutionSettings = new ResolutionSetting(300, 300)
-                        };
+                        BackgroundColor = Color.White,
+                        PageWidth = (image as SvgImage)?.Width ?? 800,
+                        PageHeight = (image as SvgImage)?.Height ?? 600
+                    };
 
-                        // Save as JPEG
-                        svgImage.Save(outputPath, jpegOptions);
-                    }
+                    jpegOptions.VectorRasterizationOptions = rasterOptions;
+
+                    image.Save(outputPath, jpegOptions);
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate print‑ready JPEG images from a folder of vector SVG logos for marketing materials.
- * 2. When an e‑commerce platform requires high‑resolution product photos, converting designer‑provided SVG assets to JPEGs with 300 dpi and 95% quality.
- * 3. When automating the preparation of SVG icons for mobile apps that only support raster JPEG images at a specific resolution.
- * 4. When migrating a legacy website’s SVG graphics to JPEG format to improve compatibility with older browsers while preserving visual fidelity.
- * 5. When creating a batch processing script that reads multiple SVG files from a directory and saves them as high‑quality JPEGs for archival or reporting purposes.
+ * 1. When you need to generate print‑ready JPEG images from a folder of SVG logos while preserving sharpness at 300 dpi.
+ * 2. When an e‑commerce platform requires bulk conversion of vector product illustrations to compressed JPEG thumbnails with consistent 95% quality.
+ * 3. When a reporting tool must transform SVG charts into high‑resolution JPEGs for inclusion in PDF documents.
+ * 4. When migrating legacy SVG assets to a JPEG‑based web gallery and you want to automate the process using C# and Aspose.Imaging.
+ * 5. When a desktop application needs to rasterize multiple SVG icons into JPEG files with a white background and specific resolution settings.
  */
