@@ -1,32 +1,42 @@
-// HOW-TO: Remove Motion Blur from PNG and Sharpen Edges Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Motion Blur from PNG and Sharpen Edges Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 0.5));
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(5, 1.0, 0.5));
+                raster.Filter(raster.Bounds, new SharpenFilterOptions());
 
                 PngOptions options = new PngOptions();
+                options.Source = new FileCreateSource(outputPath, false);
                 raster.Save(outputPath, options);
             }
         }
@@ -39,9 +49,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to restore a motion‑blurred PNG captured from a moving camera and improve its clarity in a C# application.
- * 2. When processing scanned documents that appear smeared due to camera shake, and you want to deblur and sharpen them before saving as PNG.
- * 3. When preparing product photos for an e‑commerce site, removing blur caused by handheld shooting and enhancing edge definition using Aspose.Imaging filters.
- * 4. When building an automated image‑processing pipeline that receives PNG files from drones, you can apply a Motion‑Wiener filter followed by sharpening to make details more visible.
- * 5. When creating a desktop tool for photographers to batch‑fix blurry PNG images, you can use the Motion‑Wiener and Sharpen filters in C# to improve image quality.
+ * 1. When a photo taken from a moving vehicle appears blurry, a developer can use this code to deblur the PNG and enhance its edges before displaying it in a web app.
+ * 2. When processing scanned documents that were captured with camera shake, the Motion Wiener filter followed by sharpening restores readability of the PNG files in an automated batch workflow.
+ * 3. When preparing product images for an e‑commerce site, the code removes motion blur caused by handheld shooting and sharpens details to meet catalog quality standards.
+ * 4. When building a desktop application that restores old digital artwork saved as PNG, the filter sequence cleans up blur and improves edge definition for better visual fidelity.
+ * 5. When integrating image cleanup into a C# microservice that receives user‑uploaded PNGs, the routine automatically reduces motion blur and applies sharpening before storing the files.
  */
