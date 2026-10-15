@@ -1,45 +1,51 @@
-// HOW-TO: Handle Exception When Loading Non‑Image File With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Handle Loading Non‑Image Files With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
 
-class Program
+namespace TiffConcatenationSample
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = Path.Combine("templates", "nonimage.txt");
-            string outputPath = Path.Combine("Output", "result.png");
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "templates/nonimage.txt";
+                string outputPath = "output/result.tiff";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                var image = Image.Load(inputPath);
+                image.Save(outputPath);
             }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to safely attempt to convert a user‑uploaded text file to PNG without crashing the application.
- * 2. When processing batch jobs that read files from a templates folder and you must log errors for unsupported formats.
- * 3. When building a web service that accepts arbitrary file paths and you want to return a clear error if the file is not a valid image.
- * 4. When automating document generation and you need to verify that each source file is an image before applying PNG options.
- * 5. When integrating Aspose.Imaging into a legacy system and you must gracefully handle cases where the expected image file is missing or corrupted.
+ * 1. When you need to verify that a user‑uploaded file is a valid image before converting it to a TIFF document.
+ * 2. When a batch job processes files from a templates folder and must skip or report non‑image files without crashing the application.
+ * 3. When you want to automatically create the output directory and log an error if the source file is missing or not an image.
+ * 4. When integrating Aspose.Imaging into a C# service that concatenates images and must catch exceptions from unsupported formats such as .txt files.
+ * 5. When building a robust image‑processing pipeline that gracefully handles corrupted or wrong‑type files and provides clear error messages.
  */
