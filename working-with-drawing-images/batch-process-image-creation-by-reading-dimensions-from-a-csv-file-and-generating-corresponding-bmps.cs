@@ -1,11 +1,18 @@
 // HOW-TO: Generate Multiple BMP Images from CSV Dimensions Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BatchImageCreator
+namespace BatchBmpGenerator
 {
     class Program
     {
@@ -13,63 +20,50 @@ namespace BatchImageCreator
         {
             try
             {
-                // Hardcoded input CSV and output directory
-                string inputCsvPath = "input.csv";
+                // Hardcoded paths
+                string csvPath = "input.csv";
                 string outputDirectory = "output";
 
-                // Verify input CSV exists
-                if (!File.Exists(inputCsvPath))
+                // Verify CSV file exists
+                if (!File.Exists(csvPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputCsvPath}");
+                    Console.Error.WriteLine($"File not found: {csvPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                // Ensure output base directory exists
                 Directory.CreateDirectory(outputDirectory);
 
                 // Read all lines from CSV
-                string[] lines = File.ReadAllLines(inputCsvPath);
-                foreach (string rawLine in lines)
+                var lines = File.ReadAllLines(csvPath);
+                foreach (var line in lines)
                 {
-                    string line = rawLine.Trim();
-                    if (string.IsNullOrEmpty(line))
-                        continue; // skip empty lines
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
 
                     // Expect format: width,height
-                    string[] parts = line.Split(',');
-                    if (parts.Length != 2)
-                    {
-                        Console.Error.WriteLine($"Invalid line format (expected width,height): {line}");
+                    var parts = line.Split(',');
+                    if (parts.Length < 2)
                         continue;
-                    }
 
                     if (!int.TryParse(parts[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int width) ||
                         !int.TryParse(parts[1].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int height))
                     {
-                        Console.Error.WriteLine($"Invalid dimensions on line: {line}");
                         continue;
                     }
 
-                    // Prepare output file path
-                    string outputFileName = $"image_{width}x{height}.bmp";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure directory for this output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Create BMP image
-                    BmpOptions bmpOptions = new BmpOptions
+                    // Create BMP options
+                    var bmpOptions = new BmpOptions
                     {
                         BitsPerPixel = 24
                     };
 
-                    using (Image image = Image.Create(bmpOptions, width, height))
+                    // Create image
+                    using (var image = Image.Create(bmpOptions, width, height))
                     {
-                        // Optionally fill with a solid color (white)
-                        image.Save(outputPath);
+                        // Optional: fill with white background
+                        image.Save(Path.Combine(outputDirectory, $"image_{width}x{height}.bmp"));
                     }
-
-                    Console.WriteLine($"Created: {outputPath}");
                 }
             }
             catch (Exception ex)
@@ -82,9 +76,9 @@ namespace BatchImageCreator
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a set of placeholder BMP files with specific widths and heights listed in a CSV for testing UI layouts.
- * 2. When an automated pipeline must generate device‑specific splash screens from dimension data stored in a spreadsheet.
- * 3. When a reporting tool requires a batch of blank images sized to match chart dimensions defined in a CSV file.
- * 4. When a game developer wants to pre‑render texture atlases of exact pixel sizes based on a configuration list.
- * 5. When a legacy system expects BMP assets named by their dimensions and you must produce them programmatically from a CSV source.
+ * 1. When you need to automatically create placeholder BMP files of specific sizes listed in a CSV for testing UI layouts.
+ * 2. When a batch job must produce a set of bitmap assets for a game engine based on dimensions stored in a CSV configuration file.
+ * 3. When you want to generate printable thumbnail BMPs for a catalog where the required widths and heights are supplied by a data source.
+ * 4. When an automated pipeline has to create blank canvas images for later drawing operations, reading size parameters from a CSV.
+ * 5. When you need to pre‑populate a folder with BMP files of various resolutions for performance benchmarking of image‑processing code.
  */
