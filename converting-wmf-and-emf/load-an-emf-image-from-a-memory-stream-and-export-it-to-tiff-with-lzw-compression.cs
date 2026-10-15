@@ -1,20 +1,26 @@
-// HOW-TO: Convert EMF to TIFF with LZW Compression Using MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF Stream to LZW Compressed TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string inputPath = "input.emf";
-        string outputPath = "output/output.tif";
-
         try
         {
+            string inputPath = "Input/sample.emf";
+            string outputPath = "Output/output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,13 +29,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var ms = new MemoryStream(File.ReadAllBytes(inputPath)))
+            byte[] emfBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(emfBytes))
             {
                 using (Image image = Image.Load(ms))
                 {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    image.Save(outputPath, tiffOptions);
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb))
+                    {
+                        image.Save(outputPath, tiffOptions);
+                    }
                 }
             }
         }
@@ -42,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector EMF logo into a lossless TIFF document for archival purposes.
- * 2. When a reporting system generates charts as EMF files and you must convert them to TIFF for compatibility with legacy printers.
- * 3. When you want to compress large EMF drawings into smaller LZW‑compressed TIFF files to reduce storage costs.
- * 4. When processing EMF images received over a network stream and saving them as TIFF without writing the original file to disk.
- * 5. When automating batch conversion of EMF assets to TIFF in a C# application that requires the LZW compression option for TIFF compliance.
+ * 1. When a developer needs to read an EMF vector graphic from a byte array or network stream and store it as a loss‑less, LZW‑compressed TIFF for archival or further processing.
+ * 2. When a Windows application must convert user‑generated EMF drawings into a TIFF format that can be opened by non‑Windows platforms without losing quality.
+ * 3. When a batch job processes scanned documents that include embedded EMF logos and must output a single TIFF file with LZW compression to reduce file size.
+ * 4. When a reporting tool generates charts as EMF in memory and the final report requires the images in TIFF for compatibility with PDF or print workflows.
+ * 5. When a cloud service receives EMF files via API, loads them from a memory stream, and needs to deliver LZW‑compressed TIFFs to clients for efficient download.
  */
