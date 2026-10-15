@@ -1,4 +1,11 @@
 // HOW-TO: Convert DICOM to TIFF with Gamma Adjustment Based on Resolution in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.dcm";
-            string outputPath = "output/output.tiff";
+            string inputPath = Path.Combine("Input", "sample.dcm");
+            string outputPath = Path.Combine("Output", "result.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -23,25 +30,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                double hRes = dicomImage.HorizontalResolution;
-                double vRes = dicomImage.VerticalResolution;
+                double hRes = dicom.HorizontalResolution;
+                double vRes = dicom.VerticalResolution;
 
                 float gamma = 1.0f;
                 if (vRes != 0)
                 {
                     gamma = (float)(hRes / vRes);
-                    if (gamma <= 0) gamma = 1.0f;
                 }
 
-                if (dicomImage is RasterImage raster)
+                if (dicom is RasterImage raster)
                 {
                     raster.AdjustGamma(gamma);
                 }
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
+                dicom.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to export DICOM scans to TIFF for compatibility while preserving visual fidelity by adjusting gamma based on image resolution.
- * 2. When a radiology workflow requires batch conversion of DICOM files to high‑resolution TIFFs and wants automatic gamma correction to match horizontal and vertical DPI.
- * 3. When a developer integrates Aspose.Imaging into a C# service that receives DICOM images and must deliver them as TIFFs for downstream archival systems that expect correct aspect‑ratio rendering.
- * 4. When a research tool processes DICOM images and needs to normalize brightness by computing a gamma factor from the image’s horizontal and vertical resolution before saving as TIFF.
- * 5. When a hospital’s PACS integration needs to convert DICOM studies to TIFF for printing on devices that rely on resolution metadata and proper gamma settings.
+ * 1. When a radiology application needs to export DICOM scans to TIFF for archival while automatically correcting brightness based on the image’s horizontal and vertical resolution.
+ * 2. When a medical imaging workflow requires converting patient DICOM images to a widely supported TIFF format and applying gamma correction to ensure consistent visual appearance across different viewers.
+ * 3. When a developer wants to preprocess DICOM images for machine‑learning models by normalizing gamma using the resolution ratio before saving them as TIFF files.
+ * 4. When a hospital’s reporting system must generate printable TIFF copies of DICOM studies and needs to adjust gamma so that printed images match the original diagnostic quality.
+ * 5. When integrating Aspose.Imaging into a C# application to batch‑convert DICOM files to TIFF while preserving resolution metadata and applying automatic gamma adjustment for accurate display.
  */
