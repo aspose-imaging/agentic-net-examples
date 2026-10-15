@@ -1,8 +1,15 @@
 // HOW-TO: Merge Multiple JPEGs Vertically and Strip Metadata in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,17 +21,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
             string outputPath = "merged.jpg";
 
-            // Validate input files
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -33,16 +33,10 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -50,24 +44,16 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
+            int newWidth = sizes.Max(s => s.Width);
+            int newHeight = sizes.Sum(s => s.Height);
 
-            // Create output source and options
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = source,
-                Quality = 100,
-                KeepMetadata = false
-            };
+            JpegOptions options = new JpegOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
-            // Create canvas and merge images
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(options, newWidth, newHeight))
             {
                 int offsetY = 0;
-                foreach (string path in inputPaths)
+                foreach (var path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -77,7 +63,8 @@ class Program
                     }
                 }
 
-                // Save the merged image (already bound to source)
+                canvas.ExifData = null;
+                canvas.Jfif = null;
                 canvas.Save();
             }
         }
@@ -90,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine scanned pages stored as separate JPEG files into a single long image for printing or web viewing while eliminating EXIF data to keep the file lightweight.
- * 2. When creating a continuous photo strip from multiple camera shots for a social media post and want to remove location and camera metadata to protect privacy.
- * 3. When generating a single tall banner from several product images for an e‑commerce site and need to reduce bandwidth by stripping all JPEG metadata.
- * 4. When preprocessing images for a machine‑learning pipeline that requires a single JPEG input without any embedded metadata that could bias the model.
- * 5. When automating archival of vertically stacked receipts in C# and want to merge them into one JPEG file while ensuring the final file has the smallest possible size.
+ * 1. When you need to combine several JPEG photos into a single vertical strip for a web gallery while minimizing file size by removing EXIF and JFIF data.
+ * 2. When preparing product images for an e‑commerce site, you can merge variant shots and strip metadata to comply with privacy policies and improve page load speed.
+ * 3. When generating printable photo collages in a desktop application, removing metadata ensures the final JPEG contains only the pixel data needed for printing.
+ * 4. When sending merged screenshots via email, stripping metadata reduces the attachment size and prevents accidental leakage of device information.
+ * 5. When creating image assets for a mobile app, merging JPEGs and clearing metadata helps meet app store size limits and protects user privacy.
  */
