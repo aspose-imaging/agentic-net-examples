@@ -1,9 +1,15 @@
-// HOW-TO: Batch Dither TIFF Images to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Dither TIFF Images to PNG Using Floyd Steinberg in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,38 +17,23 @@ class Program
     {
         try
         {
-            string inputFolder = "input";
-            string outputFolder = "output";
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in files)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Process .tif files
+            foreach (string filePath in Directory.GetFiles(inputFolder, "*.tif"))
             {
-                string ext = Path.GetExtension(filePath).ToLowerInvariant();
-                if (ext != ".tif" && ext != ".tiff")
-                    continue;
+                ProcessFile(filePath, outputFolder);
+            }
 
-                string inputPath = filePath;
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    if (image is RasterImage raster)
-                    {
-                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
-                    }
-
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
-                }
+            // Process .tiff files
+            foreach (string filePath in Directory.GetFiles(inputFolder, "*.tiff"))
+            {
+                ProcessFile(filePath, outputFolder);
             }
         }
         catch (Exception ex)
@@ -50,13 +41,47 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    static void ProcessFile(string inputPath, string outputFolder)
+    {
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Determine output path
+        string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load, dither, and save the image
+        using (Image image = Image.Load(inputPath))
+        {
+            if (image is RasterImage rasterImage)
+            {
+                // Apply Floyd‑Steinberg dithering with 8‑bit palette (256 colors)
+                rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+
+                // Save as PNG
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
+            }
+            else
+            {
+                Console.Error.WriteLine($"Unsupported image type: {inputPath}");
+            }
+        }
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a collection of high‑resolution TIFF scans into web‑friendly PNGs while applying Floyd‑Steinberg dithering to preserve visual detail.
- * 2. When an automated workflow must process all TIFF files in a directory and output dithered PNGs for archival or publishing pipelines.
- * 3. When you want to reduce file size of TIFF images by dithering them to an 8‑bit palette before saving as PNG in a .NET application.
- * 4. When a desktop utility has to batch‑process scanned documents, applying raster dithering and converting them to PNG for compatibility with browsers.
- * 5. When integrating Aspose.Imaging into a C# service that monitors a folder, converts each new TIFF to a dithered PNG, and stores the results in an output directory.
+ * 1. When you need to convert a large collection of high‑resolution TIFF scans into web‑friendly PNG files while preserving visual detail through Floyd‑Steinberg dithering.
+ * 2. When an archival workflow requires batch processing of TIFF documents to reduce file size and maintain color fidelity for online publishing.
+ * 3. When a desktop application must automatically transform incoming TIFF assets into 8‑bit PNGs for use in a graphics pipeline that only supports PNG input.
+ * 4. When a server‑side service needs to generate PNG thumbnails from TIFF images with consistent dithering to ensure uniform appearance across browsers.
+ * 5. When a migration script has to replace legacy TIFF images with PNG equivalents in a content management system while applying a standard 256‑color palette.
  */
