@@ -1,9 +1,15 @@
-// HOW-TO: Merge Multiple JPEGs Horizontally Aligned Top Left In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Side By Side Aligning Top Left In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -14,60 +20,60 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "merged.jpg";
+            string inputDirectory = "input";
+            string outputPath = "output/merged.jpg";
 
-            // Validate input files
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                if (!File.Exists(inputPath))
+                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
+                return;
+            }
+
+            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
+
+            if (imageFiles.Length == 0)
+            {
+                Console.Error.WriteLine("No JPEG images found in the input directory.");
+                return;
+            }
+
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string file in imageFiles)
+            {
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
-            }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Collect image sizes
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(file))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge (top-left alignment)
             int canvasWidth = sizes.Sum(s => s.Width);
             int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create output source and options
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create canvas and merge images
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (string file in imageFiles)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(file))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the merged image
                 canvas.Save();
             }
         }
@@ -80,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a horizontal photo collage where all JPEG images start from the top‑left corner to maintain a consistent layout for a web gallery.
- * 2. When generating product catalog pages that combine several product photos into a single JPEG banner with uniform alignment.
- * 3. When stitching scanned JPEG pages into one wide image for printing, ensuring each page aligns at the top edge.
- * 4. When building a sprite sheet of UI icons stored as JPEGs, aligning them to the top‑left to simplify coordinate calculations.
- * 5. When preparing a batch of marketing images for an email newsletter, merging them side‑by‑side with top‑left alignment to avoid gaps.
+ * 1. When you need to create a single panoramic JPEG from a series of product photos for an e‑commerce catalog.
+ * 2. When you want to combine scanned receipts into one image to simplify archival and printing.
+ * 3. When generating a side‑by‑side comparison chart of before‑and‑after screenshots for documentation.
+ * 4. When assembling multiple camera captures into a single banner image for a web page layout.
+ * 5. When batch‑processing a folder of JPEGs to produce a composite image with consistent top‑left alignment for automated reporting.
  */
