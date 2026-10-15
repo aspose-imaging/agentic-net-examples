@@ -1,93 +1,75 @@
-// HOW-TO: Apply 45 Degree Rotation and Gaussian Blur to SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate SVG 45 Degrees and Apply Gaussian Blur to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Xml.Linq;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-namespace SvgProcessor
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "input.svg";
+            string outputPath = "output/output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Hardcoded input and output paths
-                string inputPath = "input.svg";
-                string outputPath = "output.svg";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Check if input file exists
-                if (!File.Exists(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-                // Load SVG document
-                XDocument svgDoc = XDocument.Load(inputPath);
-                XNamespace ns = svgDoc.Root?.Name.Namespace ?? XNamespace.None;
-
-                // Ensure <defs> element exists
-                XElement defs = svgDoc.Root.Element(ns + "defs");
-                if (defs == null)
-                {
-                    defs = new XElement(ns + "defs");
-                    svgDoc.Root.AddFirst(defs);
-                }
-
-                // Add Gaussian blur filter
-                XElement filter = new XElement(ns + "filter",
-                    new XAttribute("id", "gaussianBlur"),
-                    new XElement(ns + "feGaussianBlur",
-                        new XAttribute("stdDeviation", "5")
-                    )
-                );
-                defs.Add(filter);
-
-                // Create a group that applies rotation and blur
-                XElement group = new XElement(ns + "g",
-                    new XAttribute("transform", "rotate(45)"),
-                    new XAttribute("filter", "url(#gaussianBlur)")
-                );
-
-                // Move existing children (except defs) into the group
-                var children = svgDoc.Root.Elements();
-                var toMove = new System.Collections.Generic.List<XElement>();
-                foreach (var elem in children)
-                {
-                    if (elem != defs)
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        toMove.Add(elem);
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.Rotate(45f, true, Color.White);
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions());
+
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
-
-                foreach (var elem in toMove)
-                {
-                    elem.Remove();
-                    group.Add(elem);
-                }
-
-                // Add the group back to the root
-                svgDoc.Root.Add(group);
-
-                // Save the modified SVG
-                svgDoc.Save(outputPath);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically add a 45‑degree rotation and soft blur to an SVG logo before embedding it in a web page.
- * 2. When generating dynamic SVG graphics for a dashboard and you want to apply a Gaussian blur filter to highlight rotated elements.
- * 3. When converting vector assets for print and you must apply a blur effect after rotating the artwork to meet design specifications.
- * 4. When creating an SVG‑based animation where objects are rotated and blurred on‑the‑fly using C# without external image editors.
- * 5. When building a server‑side service that processes uploaded SVG files, adds a rotation and blur, and returns the modified file to the client.
+ * 1. When you need to generate a rotated and softened thumbnail of an SVG logo for a web page, you can use this code to rasterize, rotate 45°, apply Gaussian blur, and save as PNG.
+ * 2. When creating print‑ready assets that require a slight tilt and smooth blur effect on vector illustrations, this approach converts the SVG to a raster image, rotates it, blurs it, and outputs a high‑quality PNG.
+ * 3. When building a C# service that automatically processes user‑uploaded SVG icons by adding a decorative blur and a fixed 45° rotation before storing them as PNG files.
+ * 4. When preparing graphics for a mobile app where vector icons must be pre‑rotated and softened to match a design theme, the code handles the conversion and filtering in one pipeline.
+ * 5. When implementing a batch job that standardizes a collection of SVG diagrams by applying a consistent rotation and Gaussian blur, then exporting them to PNG for downstream analytics or reporting.
  */

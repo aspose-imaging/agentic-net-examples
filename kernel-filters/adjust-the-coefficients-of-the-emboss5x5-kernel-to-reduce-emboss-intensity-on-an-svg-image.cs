@@ -1,61 +1,69 @@
 // HOW-TO: Reduce Emboss Filter Intensity on SVG When Converting to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output/output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (var memoryStream = new MemoryStream())
+                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
+
+                double[,] emboss5x5 = new double[,]
                 {
-                    var pngOptions = new PngOptions();
-                    var rasterOptions = new SvgRasterizationOptions
+                    { -0.5, -0.5, -0.5, -0.5, 0.0 },
+                    { -0.5, -0.5, -0.5, 0.0, 0.5 },
+                    { -0.5, -0.5, 0.0, 0.5, 0.5 },
+                    { -0.5, 0.0, 0.5, 0.5, 0.5 },
+                    { 0.0, 0.5, 0.5, 0.5, 0.5 }
+                };
+
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height
+                };
+
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                using (var ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
                     {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-                    image.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(emboss5x5);
+                        raster.Filter(raster.Bounds, filterOptions);
 
-                    using (Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(memoryStream))
-                    {
-                        double[,] originalKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
-                        int rows = originalKernel.GetLength(0);
-                        int cols = originalKernel.GetLength(1);
-                        double[,] adjustedKernel = new double[rows, cols];
-                        for (int i = 0; i < rows; i++)
-                        {
-                            for (int j = 0; j < cols; j++)
-                            {
-                                adjustedKernel[i, j] = originalKernel[i, j] * 0.5;
-                            }
-                        }
-
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(adjustedKernel);
-                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                        var outOptions = new PngOptions();
-                        rasterImage.Save(outputPath, outOptions);
+                        var outPngOptions = new PngOptions();
+                        raster.Save(outputPath, outPngOptions);
                     }
                 }
             }
@@ -69,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo to a PNG thumbnail and want a subtle emboss effect for a web UI using Aspose.Imaging in C#.
- * 2. When rasterizing vector graphics for print and the default emboss is too harsh, so you scale down the kernel to achieve a softer shadow.
- * 3. When generating icons from SVG files for a mobile app and the built‑in emboss filter creates overly pronounced edges, requiring a reduced intensity.
- * 4. When processing a batch of SVG assets for a game and you must tone down the emboss to match the game's art style without losing depth.
- * 5. When creating PDF reports that embed PNG versions of SVG diagrams and you need a gentle emboss to add visual depth without distracting the reader.
+ * 1. When you need to convert an SVG diagram to a PNG thumbnail while applying a subtle emboss effect for a polished UI.
+ * 2. When you want to rasterize vector graphics and control the emboss strength to avoid overly harsh shadows in a web report.
+ * 3. When generating product catalog images from SVG logos and need a gentle 3‑D look without losing detail.
+ * 4. When preprocessing SVG assets for a game UI and require a lightweight emboss filter that doesn’t dominate the artwork.
+ * 5. When automating batch conversion of SVG icons to PNGs with a customized convolution kernel to match a brand’s soft emboss style.
  */

@@ -1,9 +1,16 @@
-// HOW-TO: Apply Emboss 3x3 Filter to PNG Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss 3x3 Filter to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -24,11 +31,13 @@ class Program
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                raster.Save(outputPath, new PngOptions());
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a subtle 3‑D embossed effect to product photos stored as PNG files before uploading them to an e‑commerce site.
- * 2. When you want to preprocess scanned PNG documents to highlight edges for better visual inspection in a desktop C# application.
- * 3. When you are generating stylized thumbnails for an image gallery and require an emboss filter to make the PNG images stand out.
- * 4. When you need to apply a convolution filter to a PNG sprite sheet in a game‑development pipeline using Aspose.Imaging for C#.
- * 5. When you are creating a batch script that automatically enhances PNG graphics with an emboss effect for printing marketing brochures.
+ * 1. When you need to add a subtle embossed effect to product photos stored as PNG files before uploading them to an e‑commerce site.
+ * 2. When you want to preprocess scanned documents by applying a 3×3 emboss convolution to highlight edges for better visual inspection.
+ * 3. When you are building a desktop application that generates stylized thumbnails and requires a quick C# method to emboss PNG images.
+ * 4. When you must automate batch processing of PNG assets and need to apply the built‑in Emboss3x3 filter using Aspose.Imaging without external libraries.
+ * 5. When you are creating a visual tutorial and need to demonstrate how a convolution filter can transform a PNG image in a .NET environment.
  */

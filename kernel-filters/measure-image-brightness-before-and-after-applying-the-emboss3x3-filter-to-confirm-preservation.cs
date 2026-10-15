@@ -1,17 +1,27 @@
-// HOW-TO: Measure Image Brightness Before and After Emboss3x3 Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: Measure Image Brightness Before and After Emboss Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output\\embossed.png";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,40 +30,48 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath);
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-            if (!raster.IsCached)
+            using (Image image = Image.Load(inputPath))
             {
-                raster.CacheData();
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
+                Rectangle bounds = raster.Bounds;
+                double sumBefore = 0;
+                int totalPixels = bounds.Width * bounds.Height;
+
+                for (int y = bounds.Y; y < bounds.Y + bounds.Height; y++)
+                {
+                    for (int x = bounds.X; x < bounds.X + bounds.Width; x++)
+                    {
+                        Color c = raster.GetPixel(x, y);
+                        sumBefore += (c.R + c.G + c.B) / 3.0;
+                    }
+                }
+
+                double brightnessBefore = sumBefore / totalPixels;
+
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                double sumAfter = 0;
+                for (int y = bounds.Y; y < bounds.Y + bounds.Height; y++)
+                {
+                    for (int x = bounds.X; x < bounds.X + bounds.Width; x++)
+                    {
+                        Color c = raster.GetPixel(x, y);
+                        sumAfter += (c.R + c.G + c.B) / 3.0;
+                    }
+                }
+
+                double brightnessAfter = sumAfter / totalPixels;
+
+                Console.WriteLine($"Brightness before: {brightnessBefore:F2}");
+                Console.WriteLine($"Brightness after: {brightnessAfter:F2}");
+
+                raster.Save(outputPath, new PngOptions());
             }
-
-            int[] pixelsBefore = raster.LoadArgb32Pixels(raster.Bounds);
-            double sumBefore = 0;
-            foreach (int argb in pixelsBefore)
-            {
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                sumBefore += (r + g + b) / 3.0;
-            }
-            double brightnessBefore = sumBefore / pixelsBefore.Length;
-
-            int[] pixelsAfter = raster.LoadArgb32Pixels(raster.Bounds);
-            double sumAfter = 0;
-            foreach (int argb in pixelsAfter)
-            {
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                sumAfter += (r + g + b) / 3.0;
-            }
-            double brightnessAfter = sumAfter / pixelsAfter.Length;
-
-            Console.WriteLine($"Brightness before: {brightnessBefore:F2}");
-            Console.WriteLine($"Brightness after: {brightnessAfter:F2}");
-
-            var options = new JpegOptions { Quality = 90 };
-            image.Save(outputPath, options);
         }
         catch (Exception ex)
         {
@@ -64,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify that applying the Emboss3x3 filter does not unintentionally alter overall image brightness in a C# image‑processing pipeline.
- * 2. When you want to log or display the average luminance of a JPEG before and after a filter operation for quality‑control reports.
- * 3. When building an automated batch process that compares pre‑ and post‑filter brightness to ensure consistent visual appearance across thousands of images.
- * 4. When debugging a photo‑editing application to confirm that a custom filter preserves the original exposure level.
- * 5. When creating a unit test that asserts the Emboss3x3 filter maintains the average brightness within an acceptable tolerance.
+ * 1. When you need to verify that applying an emboss convolution filter does not unintentionally darken or brighten a JPEG photo in a .NET application.
+ * 2. When you want to log the average luminance of an image before and after processing to ensure consistent visual quality across PNG exports.
+ * 3. When building an automated image‑processing pipeline that must compare pre‑ and post‑filter brightness to trigger alerts for out‑of‑range results.
+ * 4. When creating a desktop tool that lets users preview the effect of the Emboss3x3 filter and see quantitative brightness changes in real time.
+ * 5. When performing regression testing of Aspose.Imaging’s convolution filters to confirm that future library updates preserve overall image brightness.
  */

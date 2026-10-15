@@ -1,8 +1,15 @@
-// HOW-TO: Create Custom Convolution Filter with User-Defined Kernel in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom 3x3 Convolution Filter to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,48 +28,41 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Console.WriteLine("Enter kernel size (odd integer):");
-            if (!int.TryParse(Console.ReadLine(), out int size) || size <= 0 || size % 2 == 0)
+            Console.WriteLine("Enter 9 kernel coefficients for a 3x3 filter, separated by spaces:");
+            string line = Console.ReadLine();
+            if (line == null)
             {
-                Console.Error.WriteLine("Invalid kernel size.");
+                Console.Error.WriteLine("No input received.");
                 return;
             }
 
-            double[,] kernel = new double[size, size];
-            Console.WriteLine($"Enter {size * size} kernel values row by row, separated by spaces:");
-            for (int i = 0; i < size; i++)
+            string[] parts = line.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 9)
             {
-                string line = Console.ReadLine();
-                if (line == null)
-                {
-                    Console.Error.WriteLine("Insufficient input.");
-                    return;
-                }
-                string[] parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != size)
-                {
-                    Console.Error.WriteLine($"Expected {size} values for row {i + 1}.");
-                    return;
-                }
-                for (int j = 0; j < size; j++)
-                {
-                    if (!double.TryParse(parts[j], out double value))
-                    {
-                        Console.Error.WriteLine($"Invalid number at row {i + 1}, column {j + 1}.");
-                        return;
-                    }
-                    kernel[i, j] = value;
-                }
+                Console.Error.WriteLine("Exactly 9 coefficients required.");
+                return;
             }
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            double[,] customKernel = new double[3, 3];
+            for (int i = 0; i < 9; i++)
             {
-                var filterOptions = new ConvolutionFilterOptions(kernel);
-                image.Filter(image.Bounds, filterOptions);
-                image.Save(outputPath, new PngOptions());
+                if (!double.TryParse(parts[i], out double value))
+                {
+                    Console.Error.WriteLine($"Invalid number: {parts[i]}");
+                    return;
+                }
+                customKernel[i / 3, i % 3] = value;
             }
 
-            Console.WriteLine("Filtering completed successfully.");
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                if (!image.IsCached)
+                    image.CacheData();
+
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
+                image.Filter(image.Bounds, options);
+                image.Save(outputPath);
+            }
         }
         catch (Exception ex)
         {
@@ -73,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to let users fine‑tune a convolution filter by entering their own kernel values for PNG images.
- * 2. When you want to apply a custom blur, sharpen, or edge‑detection effect to an image using Aspose.Imaging based on runtime user input.
- * 3. When a photo‑editing tool must validate odd‑sized kernels and reject invalid entries before processing the image.
- * 4. When you need to dynamically generate a filter matrix from a UI form and apply it to a raster image without hard‑coding the coefficients.
- * 5. When an automated batch process requires reading a user‑specified kernel from the console to produce a filtered output PNG file.
+ * 1. When a developer needs to let end‑users adjust sharpening, edge detection, or blur strength by entering their own 3×3 kernel values in a Windows console or UI before processing a JPEG image.
+ * 2. When building a photo‑editing desktop application that requires dynamic convolution filters, such as custom emboss or motion‑blur effects, based on user‑provided coefficients.
+ * 3. When integrating Aspose.Imaging into a C# workflow to apply a user‑defined convolution matrix to raster images for scientific image analysis or custom preprocessing.
+ * 4. When creating a batch‑processing tool that reads an input image, prompts the operator for nine kernel numbers, applies the filter, and saves the filtered result without manual image editing software.
+ * 5. When implementing a prototype that demonstrates how to convert user input into a double[,] kernel and use Aspose.Imaging’s ConvolutionFilterOptions to modify image pixels in real time.
  */

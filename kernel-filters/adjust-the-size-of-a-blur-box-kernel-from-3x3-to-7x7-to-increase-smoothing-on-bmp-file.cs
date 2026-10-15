@@ -1,7 +1,16 @@
-// HOW-TO: Increase BMP Smoothing By Applying 7x7 Blur Kernel In C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase BMP Blur Smoothing with 7x7 Kernel in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -9,7 +18,7 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.bmp";
+            string inputPath = "Input\\sample.bmp";
             string outputPath = "Output\\blurred.bmp";
 
             if (!File.Exists(inputPath))
@@ -20,23 +29,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            double[,] customKernel = new double[7, 7];
+            double value = 1.0 / 49.0;
+            for (int i = 0; i < 7; i++)
+                for (int j = 0; j < 7; j++)
+                    customKernel[i, j] = value;
+
+            using (BmpImage image = (BmpImage)Image.Load(inputPath))
             {
-                if (!image.IsCached) image.CacheData();
-
-                double[,] kernel = new double[7, 7];
-                double value = 1.0 / 49.0;
-                for (int i = 0; i < 7; i++)
-                {
-                    for (int j = 0; j < 7; j++)
-                    {
-                        kernel[i, j] = value;
-                    }
-                }
-
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                image.Filter(image.Bounds, filterOptions);
-                image.Save(outputPath);
+                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel));
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -48,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften harsh edges in a BMP photograph for a printing workflow, you can use a 7×7 convolution blur with Aspose.Imaging in C#.
- * 2. When preparing BMP assets for a game’s background, applying a larger blur kernel reduces visual noise without changing the file format.
- * 3. When creating a pre‑processing step for OCR on scanned BMP documents, increasing the blur size helps eliminate speckles that hinder text recognition.
- * 4. When generating thumbnail previews of BMP images for a web gallery, a 7×7 blur can smooth details to achieve a consistent visual style.
- * 5. When integrating image smoothing into an automated C# batch job that processes BMP files, the convolution filter provides a simple way to enhance overall image quality.
+ * 1. When a developer needs to reduce noise in a BMP photograph for a desktop publishing workflow, they can apply a 7x7 convolution blur using Aspose.Imaging in C#.
+ * 2. When preparing BMP assets for a game’s background, a programmer may want a stronger smoothing effect to create a soft‑focus look, which this 7x7 kernel code provides.
+ * 3. When converting scanned BMP documents into a more uniform appearance before OCR, applying a larger blur kernel helps eliminate speckles and uneven lighting.
+ * 4. When generating thumbnail previews of BMP images for a web gallery, a developer can use the 7x7 blur to create a visually pleasing, less detailed version quickly.
+ * 5. When implementing a custom image‑processing pipeline that requires consistent smoothing across multiple BMP files, this code demonstrates how to set a custom 7x7 kernel with Aspose.Imaging in C#.
  */

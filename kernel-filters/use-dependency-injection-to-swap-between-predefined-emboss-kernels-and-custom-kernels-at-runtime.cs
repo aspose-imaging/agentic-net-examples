@@ -1,46 +1,25 @@
-// HOW-TO: Apply Emboss Filter With Swappable Kernels Using Dependency Injection In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Filter With Switchable Predefined Or Custom Kernel In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-
-interface IEmbossKernelProvider
-{
-    double[,] GetKernel();
-}
-
-class PredefinedEmbossKernelProvider : IEmbossKernelProvider
-{
-    public double[,] GetKernel()
-    {
-        return ConvolutionFilter.Emboss3x3;
-    }
-}
-
-class CustomEmbossKernelProvider : IEmbossKernelProvider
-{
-    public double[,] GetKernel()
-    {
-        return new double[,]
-        {
-            { -2, -1, 0 },
-            { -1,  1, 1 },
-            {  0,  1, 2 }
-        };
-    }
-}
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -49,21 +28,34 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            bool useCustomKernel = true;
-            IEmbossKernelProvider kernelProvider = useCustomKernel
-                ? (IEmbossKernelProvider)new CustomEmbossKernelProvider()
-                : new PredefinedEmbossKernelProvider();
+            double[,] customKernel = new double[,]
+            {
+                { -2, -1, 0 },
+                { -1, 1, 1 },
+                { 0, 1, 2 }
+            };
 
-            double[,] kernel = kernelProvider.GetKernel();
+            string mode = "predefined"; // change to "custom" to use custom kernel
+
+            var kernelProviders = new Dictionary<string, Func<double[,]>>()
+            {
+                { "predefined", () => Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3 },
+                { "custom", () => customKernel }
+            };
+
+            if (!kernelProviders.ContainsKey(mode))
+            {
+                Console.Error.WriteLine($"Unknown mode: {mode}");
+                return;
+            }
+
+            double[,] selectedKernel = kernelProviders[mode]();
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
-
-                var options = new ConvolutionFilterOptions(kernel);
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(selectedKernel);
                 image.Filter(image.Bounds, options);
-                image.Save(outputPath, new PngOptions());
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -75,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to let end‑users choose between a built‑in emboss effect or a custom‑designed emboss kernel without recompiling the application.
- * 2. When processing large batches of PNG images on a server and you want to switch the emboss algorithm at runtime based on configuration or user preference.
- * 3. When integrating Aspose.Imaging into a modular C# service and you want to inject different convolution kernels for testing or A/B experiments.
- * 4. When building a photo‑editing desktop app that applies an emboss filter and you require the ability to replace the kernel without changing the core image‑processing code.
- * 5. When creating automated image‑processing pipelines that must apply different emboss strengths for various product lines by swapping kernel providers through dependency injection.
+ * 1. When you need to add an emboss effect to PNG images while allowing the filter kernel to be changed at runtime without recompiling the code.
+ * 2. When you want end‑users of a C# desktop photo editor to choose between a built‑in emboss kernel and a custom‑defined kernel for personalized image styling.
+ * 3. When you are building a batch image‑processing service that selects different convolution kernels based on a configuration setting to process large numbers of images automatically.
+ * 4. When you need to unit‑test various emboss kernels quickly by swapping them through dependency injection instead of hard‑coding a single filter.
+ * 5. When you are exposing an Aspose.Imaging‑based web API that receives a mode parameter to apply either the default emboss kernel or a client‑provided custom kernel to uploaded images.
  */

@@ -1,60 +1,63 @@
-// HOW-TO: Restore Details of a Blurred SVG Using Deconvolution Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Restore Details In A Blurred SVG Using Deconvolution Filter In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = "input\\image.svg";
+        string outputPath = "output\\restored.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
                 SvgImage svgImage = image as SvgImage;
                 if (svgImage == null)
                 {
-                    Console.Error.WriteLine("Input file is not a valid SVG image.");
+                    Console.Error.WriteLine("The input file is not a valid SVG image.");
                     return;
                 }
 
-                string tempPngPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
-
-                PngOptions pngOptions = new PngOptions();
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageWidth = svgImage.Width;
-                rasterOptions.PageHeight = svgImage.Height;
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                svgImage.Save(tempPngPath, pngOptions);
-
-                using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+                var pngOptions = new PngOptions
                 {
-                    int size = 3;
-                    double sigma = 1.0;
-                    DeconvolutionFilterOptions deconvOptions = new DeconvolutionFilterOptions(ConvolutionFilter.GetGaussian(size, sigma));
-                    rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-                    rasterImage.Save(outputPath);
-                }
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height
+                    }
+                };
 
-                if (File.Exists(tempPngPath))
+                using (var ms = new MemoryStream())
                 {
-                    File.Delete(tempPngPath);
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(3, 1.0)));
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.DeconvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(3, 1.0)));
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -67,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen a blurry SVG logo before embedding it in a PDF, you can rasterize the SVG and apply a deconvolution filter with Aspose.Imaging in C#.
- * 2. When a web application must convert user‑uploaded SVG diagrams to high‑quality PNG thumbnails while restoring lost details, this code provides an automated solution.
- * 3. When a batch process has to improve the readability of scanned vector graphics that were saved as SVGs with motion blur, the deconvolution filter can recover edges programmatically.
- * 4. When generating print‑ready assets from SVG artwork, you may need to enhance fine lines after rasterization to meet DPI requirements, using Aspose’s Gaussian deconvolution in C#.
- * 5. When a digital asset management system requires restoring clarity to blurred SVG icons before storing them as PNGs, this approach applies a convolution‑based deconvolution filter automatically.
+ * 1. When you receive a blurred SVG logo from a designer and need to sharpen it programmatically before embedding it in a PDF, you can use this code to apply a deconvolution filter and export a clear PNG.
+ * 2. When an automated pipeline processes scanned vector graphics that appear fuzzy due to compression, the snippet restores fine details by rasterizing the SVG and applying a Gaussian deconvolution filter in C#.
+ * 3. When a web service must convert user‑uploaded SVG icons into high‑quality PNG thumbnails while improving readability, the deconvolution filter helps enhance edges before saving.
+ * 4. When a desktop application needs to batch‑process SVG diagrams that were exported with low resolution, this approach restores sharpness and saves the results as PNG files using Aspose.Imaging.
+ * 5. When you are building a C# utility to clean up blurred vector illustrations for print production, the code demonstrates how to rasterize the SVG, apply Gaussian deconvolution, and output a print‑ready PNG.
  */

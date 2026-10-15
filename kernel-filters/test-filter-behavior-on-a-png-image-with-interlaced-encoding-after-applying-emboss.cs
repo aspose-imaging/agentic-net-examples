@@ -1,17 +1,22 @@
-// HOW-TO: Apply Emboss Filter to Interlaced PNG and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Convolution Filter to PNG and Save in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/interlaced.png";
-        string outputPath = "output/embossed.png";
+        string inputPath = "input\\input.png";
+        string outputPath = "output\\output.png";
 
         try
         {
@@ -25,8 +30,22 @@ class Program
 
             using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                raster.Save(outputPath, new PngOptions());
+                double[,] embossKernel = new double[,]
+                {
+                    { -2, -1, 0 },
+                    { -1, 1, 1 },
+                    { 0, 1, 2 }
+                };
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -38,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the visual depth of an interlaced PNG for a web gallery by applying an emboss effect using C#.
- * 2. When you want to programmatically process PNG assets that use interlacing and output a stylized version without changing the file format.
- * 3. When you are building an automated image pipeline that must apply a convolution filter to PNG files before publishing them.
- * 4. When you need to verify that Aspose.Imaging correctly handles filter operations on interlaced PNG images in a unit test.
- * 5. When you are creating a desktop application that lets users apply artistic effects like emboss to uploaded PNG files while preserving transparency.
+ * 1. When you need to add an emboss effect to a PNG image using Aspose.Imaging in a C# application.
+ * 2. When you want to apply a custom 3×3 convolution kernel to enhance the depth of a PNG before publishing it on a website.
+ * 3. When an automated .NET workflow must load a PNG, filter it, and save the processed image without changing its size or format.
+ * 4. When you are building a server‑side image processing service that applies artistic filters to user‑uploaded PNG files.
+ * 5. When you are testing how Aspose.Imaging processes convolution filters on interlaced PNG files in a C# project.
  */

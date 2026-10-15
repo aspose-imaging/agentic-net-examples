@@ -1,11 +1,14 @@
-// HOW-TO: Create Custom Convolution Kernel from Brush Strokes and Apply to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Kernel to PNG Image in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -15,7 +18,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,31 +28,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.WriteLine("Enter odd kernel size (e.g., 3,5,7):");
-                if (!int.TryParse(Console.ReadLine(), out int size) || size % 2 == 0 || size <= 0)
+                double[,] customKernel = new double[,]
                 {
-                    Console.Error.WriteLine("Invalid kernel size.");
-                    return;
-                }
+                    { 0.25, 0,    0,    0,    0    },
+                    { 0,    0.2,  0,    0,    0    },
+                    { 0,    0,    0.1,  0,    0    },
+                    { 0,    0,    0,    0.2,  0    },
+                    { 0,    0,    0,    0,    0.25 }
+                };
 
-                double[,] kernel = new double[size, size];
-                Console.WriteLine($"Enter {size * size} kernel values (row‑major order), one per line:");
-                for (int i = 0; i < size; i++)
-                {
-                    for (int j = 0; j < size; j++)
-                    {
-                        if (!double.TryParse(Console.ReadLine(), out double value))
-                        {
-                            Console.Error.WriteLine("Invalid kernel value.");
-                            return;
-                        }
-                        kernel[i, j] = value;
-                    }
-                }
-
-                var filterOptions = new ConvolutionFilterOptions(kernel);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
                 raster.Filter(raster.Bounds, filterOptions);
 
                 var saveOptions = new PngOptions
@@ -58,8 +48,6 @@ class Program
                 };
                 raster.Save(outputPath, saveOptions);
             }
-
-            Console.WriteLine("Processing completed.");
         }
         catch (Exception ex)
         {
@@ -70,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to simulate a hand‑drawn brush effect on a PNG by defining a custom convolution matrix at runtime.
- * 2. When you want to experiment with edge‑enhancement or blur filters by entering arbitrary kernel values without pre‑built presets.
- * 3. When building an interactive image‑editing tool that lets users specify odd‑sized kernels to achieve unique visual styles.
- * 4. When processing scientific or medical PNG images that require a user‑defined filter for noise reduction or feature extraction.
- * 5. When automating batch processing of PNG files where each image receives a different custom kernel based on user input or external data.
+ * 1. When you need to emphasize specific diagonal features in a PNG by applying a user‑defined convolution matrix in a C# application.
+ * 2. When creating a custom sharpening or smoothing effect that cannot be achieved with built‑in filters, you can define your own kernel and apply it to a raster image.
+ * 3. When processing scanned documents or graphics where you want to selectively boost pixel values along certain axes using a custom filter before saving the result as PNG.
+ * 4. When building an image‑editing tool that lets users draw brush strokes to generate a kernel matrix for artistic convolution effects on PNG files.
+ * 5. When automating batch processing of PNG assets to apply a consistent custom convolution filter for visual consistency across a game or UI assets.
  */

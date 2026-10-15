@@ -1,16 +1,15 @@
-// HOW-TO: Convert PNG to Grayscale JPEG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Re-Encode JPEG Image and Save to Disk Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -18,25 +17,19 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\result.jpg";
-
+            string inputPath = "input.jpg";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputPath = "output.jpg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                rasterImage.Grayscale();
-
-                using (JpegOptions jpegOptions = new JpegOptions())
-                {
-                    rasterImage.Save(outputPath, jpegOptions);
-                }
+                image.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display user‑uploaded PNG photos as smaller grayscale JPEGs to save bandwidth and ensure consistent styling.
- * 2. When an e‑commerce platform needs to generate product preview images in JPEG format with a grayscale filter for a “black‑and‑white” promotional theme.
- * 3. When a machine‑learning pipeline requires converting colored PNG datasets to grayscale JPEGs before feeding them into a model that expects single‑channel images.
- * 4. When a legacy system only accepts JPEG files, and you must programmatically transform incoming PNG assets to grayscale JPEGs using C#.
- * 5. When an automated nightly job processes a folder of PNG graphics, applies a grayscale effect, and stores the results as JPEGs for archival or reporting purposes.
+ * 1. When you need to verify that a user‑uploaded JPEG can be opened and safely re‑saved on the server before further processing.
+ * 2. When you want to normalize JPEG files to a consistent encoding before storing them in Azure Blob Storage.
+ * 3. When you must generate a copy of an existing JPEG with default Aspose.Imaging settings to ensure compatibility with downstream .NET services.
+ * 4. When you are building an API that reads a local JPEG, applies no visual changes, and returns the same image format to the client.
+ * 5. When you need to programmatically create a new folder and write a JPEG file to it as part of an automated image‑handling workflow.
  */

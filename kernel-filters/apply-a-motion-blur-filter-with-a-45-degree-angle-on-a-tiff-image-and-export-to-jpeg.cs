@@ -1,8 +1,17 @@
 // HOW-TO: Apply 45 Degree Motion Blur to TIFF and Save as JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
@@ -13,8 +22,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output/output.jpg";
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/result.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,12 +33,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                double[,] kernel = ConvolutionFilter.GetBlurMotion(5, 45.0);
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                RasterImage raster = (RasterImage)tiffImage;
 
-                JpegOptions jpegOptions = new JpegOptions
+                double[,] kernel = ConvolutionFilter.GetBlurMotion(5, 45);
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var jpegOptions = new JpegOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
@@ -45,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a directional motion‑blur effect to a high‑resolution TIFF scan before delivering it as a smaller JPEG for web preview.
- * 2. When converting legacy multi‑page TIFF documents to JPEG while applying a 45° blur to hide sensitive details.
- * 3. When creating stylized thumbnails from TIFF photographs by applying a motion blur and saving them in JPEG format for faster loading.
- * 4. When automating a batch process that prepares TIFF assets for mobile apps, adding a diagonal blur to reduce visual noise and outputting JPEG files.
- * 5. When integrating Aspose.Imaging in a C# service that receives TIFF uploads, applies a 5‑pixel motion blur at 45 degrees, and returns compressed JPEG images to clients.
+ * 1. When you need to add a realistic motion‑blur effect to a scanned TIFF document before delivering it as a smaller JPEG for web preview.
+ * 2. When a batch process must convert high‑resolution TIFF photos to JPEG while applying a 45° directional blur to hide sensitive details.
+ * 3. When an imaging pipeline requires applying a custom convolution filter to a TIFF image and then exporting the result in JPEG format for mobile apps.
+ * 4. When you want to programmatically enhance archival TIFF images with a diagonal motion blur and reduce file size by saving them as JPEG using Aspose.Imaging for .NET.
+ * 5. When a digital asset management system needs to generate JPEG thumbnails with a 45‑degree motion blur from original TIFF files for artistic effect.
  */

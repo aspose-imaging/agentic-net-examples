@@ -1,11 +1,17 @@
-// HOW-TO: Apply Gaussian Blur and Custom Edge Detection to SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Blur Then Edge Detection to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -14,10 +20,8 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string tempDir = "temp";
-            string outputDir = "output";
-            string tempPngPath = Path.Combine(tempDir, "temp.png");
-            string outputPath = Path.Combine(outputDir, "output.png");
+            string tempPath = "temp/temp.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,30 +29,27 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(tempDir);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rasterize SVG to PNG
+            // Convert SVG to PNG
             using (Image svgImage = Image.Load(inputPath))
             {
+                SvgImage svg = (SvgImage)svgImage;
                 var pngOptions = new PngOptions();
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    BackgroundColor = Color.White
-                };
-                pngOptions.VectorRasterizationOptions = rasterizationOptions;
-                svgImage.Save(tempPngPath, pngOptions);
+                svg.Save(tempPath, pngOptions);
             }
 
             // Load raster image and apply filters
-            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            using (Image rasterImage = Image.Load(tempPath))
             {
-                // Predefined Gaussian blur filter
-                var blurOptions = new GaussianBlurFilterOptions(5, 1.0);
-                raster.Filter(raster.Bounds, blurOptions);
+                RasterImage raster = (RasterImage)rasterImage;
+
+                // Predefined blur filter (Box blur 5x5)
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5)));
 
                 // Custom edge‑detection kernel
                 double[,] edgeKernel = new double[,]
@@ -57,12 +58,13 @@ class Program
                     { -1,  8, -1 },
                     { -1, -1, -1 }
                 };
-                var edgeOptions = new ConvolutionFilterOptions(edgeKernel);
-                raster.Filter(raster.Bounds, edgeOptions);
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
 
                 // Save final image
-                var finalPngOptions = new PngOptions();
-                raster.Save(outputPath, finalPngOptions);
+                var outPngOptions = new PngOptions();
+                raster.Save(outputPath, outPngOptions);
             }
         }
         catch (Exception ex)
@@ -74,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to smooth an SVG graphic and then highlight its outlines before converting it to a PNG for web thumbnails.
- * 2. When generating printable assets where a blurred background and sharp edge accent are required from vector illustrations.
- * 3. When preprocessing SVG icons for machine‑learning models that expect raster images with edge‑enhanced features.
- * 4. When creating custom map tiles that require a softened base layer and emphasized road edges using Aspose.Imaging in a .NET service.
- * 5. When automating a batch workflow that converts vector logos to PNGs with built‑in blur and edge‑detection filters for branding guidelines.
+ * 1. When you need to convert vector SVG graphics to raster PNG files while applying a soft blur before further processing.
+ * 2. When you want to highlight the outlines of an SVG image by applying a custom edge‑detection kernel after rasterization.
+ * 3. When building a C# image‑processing pipeline that requires sequential filters such as blur and edge detection on the same picture.
+ * 4. When preparing SVG assets for web thumbnails or previews that need both smoothing and edge emphasis using Aspose.Imaging.
+ * 5. When automating batch conversion of SVG icons into PNGs with built‑in filters to improve visual clarity for UI design.
  */

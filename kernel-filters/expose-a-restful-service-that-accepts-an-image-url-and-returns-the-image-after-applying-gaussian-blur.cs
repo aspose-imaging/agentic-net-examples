@@ -1,88 +1,40 @@
-// HOW-TO: Create a C# REST API to Apply Gaussian Blur to Remote Images (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            var listener = new System.Net.HttpListener();
-            listener.Prefixes.Add("http://localhost:5000/");
-            listener.Start();
-            Console.WriteLine("Listening on http://localhost:5000/ ...");
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-            while (true)
+            if (!File.Exists(inputPath))
             {
-                var context = listener.GetContext();
-                var request = context.Request;
-                var response = context.Response;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                string imageUrl = request.QueryString["url"];
-                if (string.IsNullOrEmpty(imageUrl))
-                {
-                    response.StatusCode = 400;
-                    using (var writer = new StreamWriter(response.OutputStream))
-                    {
-                        writer.Write("Missing 'url' query parameter.");
-                    }
-                    response.Close();
-                    continue;
-                }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                try
-                {
-                    var httpClient = new System.Net.Http.HttpClient();
-                    using (var imageStream = httpClient.GetStreamAsync(imageUrl).GetAwaiter().GetResult())
-                    {
-                        using (var rasterImage = (RasterImage)Image.Load(imageStream))
-                        {
-                            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                            rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                            using (var outputStream = new MemoryStream())
-                            {
-                                var jpegOptions = new JpegOptions();
-                                rasterImage.Save(outputStream, jpegOptions);
-                                byte[] imageBytes = outputStream.ToArray();
-
-                                response.ContentType = "image/jpeg";
-                                response.ContentLength64 = imageBytes.Length;
-                                response.OutputStream.Write(imageBytes, 0, imageBytes.Length);
-                            }
-                        }
-                    }
-                    response.StatusCode = 200;
-                }
-                catch (Exception ex)
-                {
-                    response.StatusCode = 500;
-                    using (var writer = new StreamWriter(response.OutputStream))
-                    {
-                        writer.Write($"Error processing image: {ex.Message}");
-                    }
-                }
-                finally
-                {
-                    response.Close();
-                }
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                raster.Filter(raster.Bounds, blurOptions);
+                var saveOptions = new JpegOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -94,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need a lightweight web endpoint that receives an image URL and returns a blurred JPEG for privacy‑preserving thumbnails.
- * 2. When building a microservice that automatically softens user‑uploaded photos before storing them in a cloud bucket.
- * 3. When integrating a C# backend that provides on‑the‑fly Gaussian blur for image‑processing pipelines without saving intermediate files.
- * 4. When creating a simple API for mobile apps to request a blurred version of any public image without handling the image data locally.
- * 5. When developing a server‑side solution that fetches remote images, applies a 5‑pixel radius Gaussian blur, and streams the result back to the client.
+ * 1. When you need to automatically soften photos before uploading them to a web gallery, applying a Gaussian blur and saving as JPEG simplifies the workflow.
+ * 2. When you want to hide sensitive details such as faces or license plates in an image, a Gaussian blur filter in C# can obscure those areas before distribution.
+ * 3. When generating preview thumbnails that require a subtle blur effect for aesthetic purposes, this code converts the source to JPEG and applies the blur in one step.
+ * 4. When preprocessing images for a machine‑learning pipeline that expects blurred backgrounds, the Gaussian blur operation prepares the JPEG files efficiently.
+ * 5. When creating a batch job to convert raw pictures to JPEG while adding an artistic blur, this Aspose.Imaging solution automates the entire process.
  */

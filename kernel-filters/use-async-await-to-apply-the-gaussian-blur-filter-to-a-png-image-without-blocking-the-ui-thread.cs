@@ -1,9 +1,16 @@
-// HOW-TO: Apply Gaussian Blur to PNG Image Asynchronously in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PNG Asynchronously in C# with Aspose Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,30 +29,33 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-            {
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                raster.Filter(raster.Bounds, blurOptions);
-
-                var saveOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, saveOptions);
-            }
+            ProcessAsync(inputPath, outputPath).GetAwaiter().GetResult();
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    static async Task ProcessAsync(string inputPath, string outputPath)
+    {
+        await Task.Run(() =>
+        {
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                raster.Filter(raster.Bounds, options);
+                raster.Save(outputPath, new PngOptions());
+            }
+        });
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When developing a Windows Forms or WPF photo editor that must blur PNG pictures while keeping the UI responsive.
- * 2. When creating a desktop or mobile app that processes user‑uploaded PNG files and needs to apply a Gaussian blur without blocking the main thread.
- * 3. When implementing a batch image‑processing feature that runs on a UI thread and requires asynchronous execution to avoid UI freezes.
- * 4. When integrating Aspose.Imaging into a real‑time preview where users can adjust blur radius and see results instantly without lag.
- * 5. When building an automated graphics pipeline that applies a Gaussian blur to PNG assets in the background while the application continues handling other tasks.
+ * 1. When you need to blur a user‑uploaded PNG in a WPF or WinForms app without freezing the UI.
+ * 2. When you want to preprocess images on a background thread before saving them to disk in a desktop application.
+ * 3. When you are building a photo‑editing feature that applies a Gaussian blur filter to PNG files while keeping the UI responsive.
+ * 4. When you need to integrate Aspose.Imaging’s GaussianBlurFilterOptions into an asynchronous workflow for batch image processing.
+ * 5. When you must ensure that image loading, filtering, and saving occur off the main thread to improve performance in a C# application.
  */

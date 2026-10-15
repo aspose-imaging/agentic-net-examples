@@ -1,11 +1,17 @@
-// HOW-TO: Apply JSON Defined Convolution Kernel to Multiple SVG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply JSON Defined Convolution Kernel To Batch SVG To PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,9 +19,9 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputSvgs";
-            string outputDirectory = "OutputSvgs";
-            string configPath = "kernels.json";
+            string configPath = "config.json";
+            string inputFolder = "input_svgs";
+            string outputFolder = "output_pngs";
 
             if (!File.Exists(configPath))
             {
@@ -23,65 +29,55 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputFolder);
 
-            // Parse kernel matrix from JSON (simple numeric extraction)
             string json = File.ReadAllText(configPath);
             List<double> numbers = new List<double>();
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            string currentNumber = "";
             bool inNumber = false;
             foreach (char c in json)
             {
-                if (char.IsDigit(c) || c == '-' || c == '.' || c == 'e' || c == 'E')
+                if (char.IsDigit(c) || c == '-' || c == '.')
                 {
-                    sb.Append(c);
+                    currentNumber += c;
                     inNumber = true;
                 }
                 else
                 {
                     if (inNumber)
                     {
-                        if (double.TryParse(sb.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
-                        {
+                        if (double.TryParse(currentNumber, out double val))
                             numbers.Add(val);
-                        }
-                        sb.Clear();
+                        currentNumber = "";
                         inNumber = false;
                     }
                 }
             }
-            if (inNumber && sb.Length > 0)
-            {
-                if (double.TryParse(sb.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
-                {
-                    numbers.Add(val);
-                }
-            }
+            if (inNumber && double.TryParse(currentNumber, out double lastVal))
+                numbers.Add(lastVal);
 
             if (numbers.Count == 0)
             {
-                Console.Error.WriteLine("No kernel data found in configuration.");
+                Console.Error.WriteLine("No kernel data found in config.");
                 return;
             }
 
-            int size = (int)Math.Sqrt(numbers.Count);
-            if (size * size != numbers.Count)
+            int kernelSize = (int)Math.Sqrt(numbers.Count);
+            if (kernelSize * kernelSize != numbers.Count || kernelSize % 2 == 0)
             {
-                Console.Error.WriteLine("Kernel matrix is not square.");
+                Console.Error.WriteLine("Kernel must be a square matrix with odd dimensions.");
                 return;
             }
 
-            double[,] kernel = new double[size, size];
-            int index = 0;
-            for (int i = 0; i < size; i++)
+            double[,] kernel = new double[kernelSize, kernelSize];
+            for (int i = 0; i < numbers.Count; i++)
             {
-                for (int j = 0; j < size; j++)
-                {
-                    kernel[i, j] = numbers[index++];
-                }
+                int row = i / kernelSize;
+                int col = i % kernelSize;
+                kernel[row, col] = numbers[i];
             }
 
-            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
             foreach (string inputPath in svgFiles)
             {
                 if (!File.Exists(inputPath))
@@ -90,32 +86,69 @@ class Program
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + "_filtered.png");
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load SVG and rasterize to temporary PNG
-                string tempPng = Path.Combine(outputDirectory, Guid.NewGuid().ToString() + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPng));
-
-                using (Image svgImage = Image.Load(inputPath))
+                using (Image img = Image.Load(inputPath))
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions();
-                    svgImage.Save(tempPng, pngOptions);
-                }
+                    SvgImage svg = (SvgImage)img;
 
-                // Load raster image, apply convolution filter, and save result
-                using (RasterImage raster = (RasterImage)Image.Load(tempPng))
-                {
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                    raster.Filter(raster.Bounds, filterOptions);
-                    raster.Save(outputPath);
-                }
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new SvgRasterizationOptions
+                            {
+                                PageWidth = svg.Width,
+                                PageHeight = svg.Height
+                            }
+                        };
+                        svg.Save(ms, pngOptions);
+                        ms.Position = 0;
 
-                // Clean up temporary file
-                if (File.Exists(tempPng))
-                {
-                    File.Delete(tempPng);
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            int width = raster.Width;
+                            int height = raster.Height;
+                            int[] originalPixels = raster.LoadArgb32Pixels(raster.Bounds);
+                            int[] newPixels = new int[originalPixels.Length];
+                            int kHalf = kernelSize / 2;
+
+                            Array.Copy(originalPixels, newPixels, originalPixels.Length);
+
+                            for (int y = kHalf; y < height - kHalf; y++)
+                            {
+                                for (int x = kHalf; x < width - kHalf; x++)
+                                {
+                                    double sumA = 0, sumR = 0, sumG = 0, sumB = 0;
+                                    for (int ky = 0; ky < kernelSize; ky++)
+                                    {
+                                        for (int kx = 0; kx < kernelSize; kx++)
+                                        {
+                                            int srcX = x + kx - kHalf;
+                                            int srcY = y + ky - kHalf;
+                                            int pixel = originalPixels[srcY * width + srcX];
+                                            double k = kernel[ky, kx];
+
+                                            sumA += ((pixel >> 24) & 0xFF) * k;
+                                            sumR += ((pixel >> 16) & 0xFF) * k;
+                                            sumG += ((pixel >> 8) & 0xFF) * k;
+                                            sumB += (pixel & 0xFF) * k;
+                                        }
+                                    }
+
+                                    int a = Math.Clamp((int)Math.Round(sumA), 0, 255);
+                                    int r = Math.Clamp((int)Math.Round(sumR), 0, 255);
+                                    int g = Math.Clamp((int)Math.Round(sumG), 0, 255);
+                                    int b = Math.Clamp((int)Math.Round(sumB), 0, 255);
+                                    newPixels[y * width + x] = (a << 24) | (r << 16) | (g << 8) | b;
+                                }
+                            }
+
+                            raster.SaveArgb32Pixels(raster.Bounds, newPixels);
+                            raster.Save(outputPath, new PngOptions());
+                        }
+                    }
                 }
             }
         }
@@ -128,9 +161,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process SVG icons with a custom blur or sharpen filter defined in a JSON kernel file using Aspose.Imaging for .NET.
- * 2. When you want to automate the application of a user‑provided convolution matrix to a collection of vector graphics before converting them to raster formats.
- * 3. When a graphics pipeline requires loading filter parameters from a configuration file and applying the same effect to every SVG asset in a folder.
- * 4. When you are building a CI/CD step that validates visual consistency by applying a predefined kernel to all SVG diagrams stored in source control.
- * 5. When you need to read numeric kernel values from a JSON file and programmatically apply the filter to multiple SVG images without manual editing.
+ * 1. When you need to programmatically sharpen or blur a collection of SVG graphics using a custom filter defined in a JSON file before converting them to PNG.
+ * 2. When you want to automate image preprocessing for a web app by reading a kernel matrix from configuration and applying it to every SVG in a folder.
+ * 3. When you must ensure consistent image effects across dozens of vector assets by loading the same convolution parameters from JSON and rendering the results as raster PNGs.
+ * 4. When you are building a CI pipeline that validates visual quality by applying a custom kernel to SVGs and comparing the generated PNG outputs.
+ * 5. When you need to let non‑technical users edit a JSON file to change the filter strength and have your C# code automatically re‑process all SVG files with the new kernel.
  */

@@ -1,10 +1,15 @@
 // HOW-TO: Resize PNG to Half Size and Apply Emboss Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,7 +18,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "Output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,16 +28,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (PngImage png = (PngImage)Image.Load(inputPath))
             {
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight);
+                int newWidth = png.Width / 2;
+                int newHeight = png.Height / 2;
+                png.Resize(newWidth, newHeight);
 
-                image.Filter(image.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
 
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                png.Filter(png.Bounds, filterOptions);
+                png.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -44,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller, stylized thumbnails of PNG photos for a web gallery, you can resize them and add an emboss effect with Aspose.Imaging in C#.
- * 2. When preparing product images for an e‑commerce site, you may want to halve the resolution to reduce load time and give a subtle 3‑D look by applying the Emboss3x3 filter.
- * 3. When creating printable assets that require a consistent size and artistic edge, developers can programmatically shrink PNG files and emboss them before saving.
- * 4. When automating batch processing of user‑uploaded PNGs, you can use this code to standardize dimensions and enhance visual depth without manual editing.
- * 5. When building a C# desktop application that previews images with a classic embossed style, the routine resizes the image and applies the filter in real time.
+ * 1. When you need to generate smaller preview thumbnails of PNG graphics while adding a stylized emboss effect for a web gallery.
+ * 2. When preparing product images for a mobile app, you may resize them to half their original dimensions and apply an emboss filter to enhance visual depth.
+ * 3. When creating printable assets, you might reduce PNG file size for faster upload and use an emboss filter to give the image a subtle 3‑D appearance.
+ * 4. When processing user‑uploaded PNGs on a server, you can automatically shrink them and apply an emboss effect before storing them in a content‑delivery network.
+ * 5. When building a desktop photo‑editing tool in C#, you can use Aspose.Imaging to resize PNG files and apply the Emboss3x3 convolution filter as part of an image‑enhancement pipeline.
  */
