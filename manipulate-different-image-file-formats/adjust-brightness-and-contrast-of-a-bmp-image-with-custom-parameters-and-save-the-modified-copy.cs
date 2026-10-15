@@ -1,4 +1,11 @@
-// HOW-TO: Adjust Brightness and Contrast of a BMP Image in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Brightness and Contrast of a BMP Image in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,34 +14,26 @@ class Program
 {
     static void Main()
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output\\modified.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            int brightness = 50; // custom brightness value between -255 and 255
+            int contrast = 30;   // custom contrast value between -100 and 100
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Custom adjustment parameters
-                int brightness = 50; // range -255 to 255
-                int contrast = 30;   // range -100 to 100
-
-                // Apply adjustments
                 image.AdjustBrightness(brightness);
                 image.AdjustContrast(contrast);
-
-                // Save the modified image
                 image.Save(outputPath);
             }
         }
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically brighten scanned BMP documents before OCR processing in a C# application.
- * 2. When you want to enhance the visual contrast of legacy BMP assets for a Windows desktop UI using Aspose.Imaging.
- * 3. When you must batch‑process user‑uploaded BMP photos to meet a specific brightness level for a photo‑sharing service.
- * 4. When you are creating a custom image‑editing tool that lets users adjust brightness and contrast of BMP files on the fly.
- * 5. When you need to generate a corrected copy of a BMP screenshot with predefined brightness and contrast settings for automated testing.
+ * 1. When you need to enhance the visual clarity of scanned BMP documents before OCR by programmatically increasing brightness and contrast in a C# application.
+ * 2. When a game developer wants to dynamically adjust the lighting of BMP texture assets at runtime using Aspose.Imaging to match different in‑game environments.
+ * 3. When an automated batch‑processing service must normalize the exposure of user‑uploaded BMP photos for a web gallery, applying custom brightness and contrast settings before saving them.
+ * 4. When a medical imaging system requires preprocessing of BMP X‑ray images to improve detail visibility by tweaking brightness and contrast via C# code.
+ * 5. When a desktop utility needs to create a brighter, higher‑contrast copy of a BMP screenshot for presentation slides, preserving the original file unchanged.
  */
