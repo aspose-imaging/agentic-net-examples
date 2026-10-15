@@ -1,41 +1,48 @@
 // HOW-TO: Crop Image to Central Square and Convert to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input/input.jpg";
+        string outputPath = "Output/output.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int size = Math.Min(raster.Width, raster.Height);
+                int offsetX = (raster.Width - size) / 2;
+                int offsetY = (raster.Height - size) / 2;
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(offsetX, offsetY, size, size);
+                raster.Crop(cropRect);
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                int width = image.Width;
-                int height = image.Height;
-                int size = Math.Min(width, height);
-
-                int leftShift = (width - size) / 2;
-                int rightShift = width - size - leftShift;
-                int topShift = (height - size) / 2;
-                int bottomShift = height - size - topShift;
-
-                image.Crop(leftShift, rightShift, topShift, bottomShift);
-
-                var options = new SvgOptions();
-                image.Save(outputPath, options);
+                var svgOptions = new SvgOptions();
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a perfectly centered square thumbnail from a rectangular PNG and embed it as scalable vector graphics in a web page.
- * 2. When preparing product photos for a mobile app that requires square SVG icons derived from original raster images.
- * 3. When converting scanned documents or photos to SVG while ensuring the visual focus remains centered and square for consistent layout.
- * 4. When automating batch processing to crop user‑uploaded images to a square region before saving them as SVG for responsive design.
- * 5. When creating vector‑based logos from existing raster artwork, cropping the central area to a square to maintain aspect ratio before conversion.
+ * 1. When you need to generate a square SVG logo from a rectangular JPEG photo for responsive web design.
+ * 2. When you must preprocess scanned documents by extracting the central square area before vectorizing them for printing.
+ * 3. When creating thumbnails that require a centered square crop and conversion to scalable SVG for UI icons.
+ * 4. When automating batch processing of product images to ensure a uniform square aspect ratio in SVG format for e‑commerce catalogs.
+ * 5. When integrating image handling in a C# application that needs to cache raster data, crop to the middle region, and output vector graphics for further editing.
  */
