@@ -1,58 +1,58 @@
 // HOW-TO: Export EPS to Grayscale PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
-class Program
+namespace EpsToGrayscalePng
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.png";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.eps";
+                string outputPath = "output/output.png";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (PngOptions options = new PngOptions
+                if (!File.Exists(inputPath))
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.Grayscale,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pngOptions = new PngOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                })
-                {
-                    image.Save(outputPath, options);
+                        ColorType = PngColorType.Grayscale
+                    };
+                    image.Save(outputPath, pngOptions);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EPS artwork into a lightweight grayscale PNG for web thumbnails.
- * 2. When you must ensure consistent color output across platforms by forcing PNG to grayscale during batch processing.
- * 3. When generating print‑ready preview images from EPS files while preserving only luminance information.
- * 4. When creating PDF or document pipelines that require EPS pages converted to grayscale PNG for OCR preprocessing.
- * 5. When automating a CI/CD build that transforms design assets (EPS) into grayscale PNGs for documentation or UI assets.
+ * 1. When a design workflow requires converting vector EPS artwork to a lightweight grayscale PNG for web preview or email attachment, this code provides a quick C# solution.
+ * 2. When generating print‑ready assets that must have consistent color depth across platforms, developers can use the snippet to force EPS files into a single‑channel PNG.
+ * 3. When building an automated batch job that extracts EPS logos from a repository and stores them as grayscale PNG thumbnails for a catalog, the code handles the conversion reliably.
+ * 4. When a mobile app needs to display EPS diagrams but only supports PNG images, converting them to grayscale reduces file size while preserving detail, and this example shows how to do it in .NET.
+ * 5. When performing image analysis that expects a single‑channel input, developers can first convert EPS source files to grayscale PNGs using Aspose.Imaging to ensure uniform input data.
  */
