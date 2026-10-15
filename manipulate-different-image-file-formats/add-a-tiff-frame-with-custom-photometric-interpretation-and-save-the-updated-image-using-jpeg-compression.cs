@@ -1,9 +1,9 @@
-// HOW-TO: Add a New TIFF Frame with RGB Photometric and JPEG Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add a TIFF Frame with RGB Photometric and JPEG Compression in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -17,34 +17,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output\\output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
+            if (!File.Exists(inputPath))
             {
-                int width = tiffImage.ActiveFrame.Width;
-                int height = tiffImage.ActiveFrame.Height;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int width = tiff.ActiveFrame.Width;
+                int height = tiff.ActiveFrame.Height;
 
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                frameOptions.Compression = TiffCompressions.Jpeg;
                 frameOptions.Photometric = TiffPhotometrics.Rgb;
+                frameOptions.Compression = TiffCompressions.Jpeg;
 
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
-                tiffImage.AddFrame(newFrame);
+                using (TiffFrame newFrame = new TiffFrame(frameOptions, width, height))
+                {
+                    RasterImage sourceRaster = (RasterImage)tiff.ActiveFrame;
+                    var pixels = sourceRaster.LoadPixels(sourceRaster.Bounds);
+                    newFrame.SavePixels(newFrame.Bounds, pixels);
+                    tiff.AddFrame(newFrame);
+                }
 
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                 saveOptions.Compression = TiffCompressions.Jpeg;
-                tiffImage.Save(outputPath, saveOptions);
+                saveOptions.Photometric = TiffPhotometrics.Rgb;
+
+                tiff.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to append an extra page to an existing multi‑page TIFF while preserving color accuracy using RGB photometric interpretation.
- * 2. When you want to create a TIFF document that combines original images with a newly generated frame and store the whole file using JPEG compression to reduce file size.
- * 3. When a scanning application must add a blank or processed frame to a TIFF stack and ensure the output remains compatible with JPEG‑compressed TIFF viewers.
- * 4. When a medical imaging workflow requires inserting a diagnostic overlay as a separate TIFF frame with specific photometric settings and saving the result efficiently.
- * 5. When a web service generates multi‑page TIFF reports and needs to add a summary page with RGB colors while keeping the overall file size low by using JPEG compression.
+ * 1. When you need to create a multi‑page TIFF document and want each new page stored using RGB photometric interpretation with JPEG compression to reduce file size in a C# application.
+ * 2. When converting scanned grayscale images to color TIFF frames while applying JPEG compression for faster web delivery using Aspose.Imaging for .NET.
+ * 3. When adding a processed image as an additional frame to an existing TIFF file and ensuring the whole file uses JPEG compression to maintain compatibility with imaging software.
+ * 4. When building a document archiving system that stores each page as a TIFF frame with RGB color space and JPEG compression to balance quality and storage efficiency.
+ * 5. When integrating image processing pipelines that require inserting new frames into TIFF files with specific photometric settings and saving the result with JPEG compression in a .NET environment.
  */
