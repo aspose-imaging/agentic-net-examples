@@ -1,11 +1,17 @@
-// HOW-TO: Export each frame of a multi-page TIFF to BMP with original DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Export Each Frame of a Multi‑Page TIFF to BMP with Original DPI in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,34 +19,34 @@ class Program
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputDirectory = "output_frames";
-
+            string inputPath = "Input/multipage.tif";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            string outputDir = "Output";
 
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                double dpiX = tiff.HorizontalResolution;
-                double dpiY = tiff.VerticalResolution;
-
-                for (int i = 0; i < tiff.Frames.Count(); i++)
+                int index = 0;
+                foreach (var frame in tiff.Frames)
                 {
-                    var frame = tiff.Frames[i];
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
-
+                    string outputPath = Path.Combine(outputDir, $"frame_{index}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    BmpOptions bmpOptions = new BmpOptions();
-                    bmpOptions.BitsPerPixel = 24;
-                    bmpOptions.ResolutionSettings = new ResolutionSetting(dpiX, dpiY);
+                    using (BmpOptions bmpOptions = new BmpOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        BitsPerPixel = 24,
+                        ResolutionSettings = new ResolutionSetting(tiff.HorizontalResolution, tiff.VerticalResolution)
+                    })
+                    {
+                        frame.Save(outputPath, bmpOptions);
+                    }
 
-                    frame.Save(outputPath, bmpOptions);
+                    index++;
                 }
             }
         }
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to split a multi‑page scanned TIFF into individual BMP files for a legacy application that only accepts BMP images while keeping the original print resolution.
- * 2. When an imaging pipeline must extract each page of a multi‑page TIFF for separate processing, such as OCR or analysis, and the DPI information must be retained for accurate measurements.
- * 3. When a document management system stores high‑resolution TIFF archives and requires conversion of each page to BMP for thumbnail generation without losing the original DPI settings.
- * 4. When a medical imaging workflow needs to export each frame of a multi‑frame TIFF (e.g., radiology scans) to BMP files for compatibility with older diagnostic software that relies on DPI metadata.
- * 5. When a game‑development toolchain extracts sprite sheets saved as multi‑page TIFFs and converts each frame to BMP while preserving DPI to maintain correct scaling in the engine.
+ * 1. When you need to split a scanned multi‑page document saved as a TIFF into individual BMP images for legacy Windows applications that only accept BMP files.
+ * 2. When preserving the original DPI of each page is required for accurate printing or measurement after converting the TIFF frames to BMP.
+ * 3. When processing medical or engineering TIFF files and you must extract each layer as a separate high‑resolution BMP for further analysis in custom C# tools.
+ * 4. When automating a workflow that converts multi‑page TIFF archives into BMP thumbnails while keeping the source resolution for quality‑controlled archives.
+ * 5. When integrating Aspose.Imaging in a .NET service that receives multi‑page TIFF uploads and needs to store each page as a BMP with the same pixel density for downstream processing.
  */
