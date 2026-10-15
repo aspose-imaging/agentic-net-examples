@@ -1,72 +1,66 @@
-// HOW-TO: Batch Convert JPEG2000 Images to JPEG with 80% Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert JPEG2000 Images to JPEG with 80 Percent Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchConvertJpeg2000ToJpeg
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDir = @"C:\InputJpeg2000";
+                string outputDir = @"C:\OutputJpeg";
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                string[] files = Directory.GetFiles(inputDir, "*.jp2", SearchOption.TopDirectoryOnly);
+                foreach (string inputPath in files)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-                if (ext != ".jp2" && ext != ".j2k" && ext != ".jpx" && ext != ".jpf")
-                {
-                    continue;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    using (JpegOptions jpegOptions = new JpegOptions())
+                    if (!File.Exists(inputPath))
                     {
-                        jpegOptions.Quality = 80;
-                        image.Save(outputPath, jpegOptions);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
+
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDir, fileName + ".jpg");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        JpegOptions options = new JpegOptions
+                        {
+                            Quality = 80
+                        };
+                        image.Save(outputPath, options);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a legacy archive of JPEG2000 files to standard JPEG format for compatibility with web browsers, you can use this code to convert them in bulk with a consistent 80% quality setting.
- * 2. When preparing high‑resolution medical or satellite images stored as JP2 for faster preview thumbnails, the batch conversion to JPEG reduces file size while preserving acceptable visual quality.
- * 3. When automating a nightly build that packages image assets, this script can transform all incoming JPEG2000 assets into JPEGs with uniform compression, ensuring the output folder contains ready‑to‑use files.
- * 4. When integrating Aspose.Imaging into a C# application that receives user‑uploaded JPX or J2K files, you can instantly re‑encode them to JPEG with a predefined quality to simplify downstream processing.
- * 5. When creating a migration tool to move digital assets from a content management system that stores JPEG2000 to one that only supports JPEG, the code provides a simple way to batch convert and preserve naming conventions.
+ * 1. When you need to migrate a legacy archive of JPEG2000 files to standard JPEG format for compatibility with web browsers.
+ * 2. When you want to reduce file size of high‑resolution JPEG2000 photos by saving them as JPEG with a specific 80 % compression quality.
+ * 3. When you have to process a folder of medical or satellite images in JP2 format and generate JPEG copies for quick preview in a desktop application.
+ * 4. When an automated build pipeline must convert incoming JP2 assets to JPEG before they are uploaded to a content‑delivery network.
+ * 5. When a Windows service needs to batch‑convert user‑uploaded JP2 images to JPEG while preserving the original filenames.
  */
