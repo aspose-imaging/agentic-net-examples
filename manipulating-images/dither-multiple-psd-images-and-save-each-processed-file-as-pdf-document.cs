@@ -1,9 +1,18 @@
-// HOW-TO: Dither PSD Images and Save as PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Dither PSD Files and Convert Them to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging;
 
 class Program
 {
@@ -11,14 +20,17 @@ class Program
     {
         try
         {
-            string[] inputPaths = {
-                @"C:\Images\image1.psd",
-                @"C:\Images\image2.psd"
-            };
+            // Hardcoded input and output directories
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            string outputDirectory = @"C:\ProcessedPdf";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-            foreach (var inputPath in inputPaths)
+            // Get all PSD files in the input folder
+            string[] inputPaths = Directory.GetFiles(inputFolder, "*.psd");
+
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -26,16 +38,24 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    if (image is RasterImage raster)
+                    // Cast to RasterImage for dithering
+                    if (image is RasterImage rasterImage)
                     {
-                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+                        // Apply Floyd‑Steinberg dithering with 256 colors (BitCount = 8)
+                        rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 8);
                     }
 
+                    // Prepare output PDF path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PDF
                     var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
@@ -50,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a batch of Photoshop PSD files into print‑ready PDF documents while applying Floyd‑Steinberg dithering to reduce color depth.
- * 2. When you want to generate lightweight PDF previews of high‑resolution PSD artwork for quick sharing or web display.
- * 3. When an automated workflow must process multiple PSD layers, apply 8‑bit dithering, and store the results as PDFs for archival purposes.
- * 4. When a desktop application requires converting user‑uploaded PSD files to PDFs with consistent dithering to ensure uniform appearance across different printers.
- * 5. When you are building a server‑side service that receives PSD files, dithers them to reduce file size, and returns PDF versions for downstream processing.
+ * 1. When you need to prepare a set of Photoshop PSD designs for printing by applying Floyd‑Steinberg dithering and exporting each as a PDF file using C#.
+ * 2. When an automated workflow must reduce the color depth of many PSD assets to 256 colors before archiving them as PDFs for size‑constrained distribution.
+ * 3. When a web service processes user‑uploaded PSD files, applies dithering to improve visual quality on low‑color displays, and returns the result as PDF documents.
+ * 4. When a desktop application has to convert a folder of layered PSD images into PDF reports while ensuring consistent dithering across all pages.
+ * 5. When a batch script needs to guarantee that every PSD in a directory is saved as a PDF with the same dithering settings for compliance with a publishing pipeline.
  */
