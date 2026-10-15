@@ -1,82 +1,66 @@
-// HOW-TO: Compare Center Pixel Before and After Edge Detection on PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare Center Pixel Values Before and After Edge Detection in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                int width = raster.Width;
-                int height = raster.Height;
-                int centerX = width / 2;
-                int centerY = height / 2;
+                int centerX = raster.Width / 2;
+                int centerY = raster.Height / 2;
 
-                var region = new Rectangle(centerX - 1, centerY - 1, 3, 3);
-                int[] originalPixels = raster.LoadArgb32Pixels(region);
-                int beforePixel = originalPixels[4];
+                int[] before = raster.LoadArgb32Pixels(new Rectangle(centerX, centerY, 1, 1));
 
-                double[,] kernel = new double[,]
+                double[,] edgeKernel = new double[,]
                 {
                     { -1, -1, -1 },
-                    { -1,  8, -1 },
+                    { -1, 8, -1 },
                     { -1, -1, -1 }
                 };
 
-                double sumA = 0, sumR = 0, sumG = 0, sumB = 0;
-                for (int ky = 0; ky < 3; ky++)
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                int[] after = raster.LoadArgb32Pixels(new Rectangle(centerX, centerY, 1, 1));
+
+                int beforeVal = before[0];
+                int afterVal = after[0];
+                int diff = beforeVal - afterVal;
+
+                Console.WriteLine($"Center pixel before: 0x{beforeVal:X8}");
+                Console.WriteLine($"Center pixel after: 0x{afterVal:X8}");
+                Console.WriteLine($"Difference (before - after): {diff}");
+
+                var saveOptions = new PngOptions
                 {
-                    for (int kx = 0; kx < 3; kx++)
-                    {
-                        int srcIdx = ky * 3 + kx;
-                        int argb = originalPixels[srcIdx];
-                        double coeff = kernel[ky, kx];
-
-                        byte a = (byte)((argb >> 24) & 0xFF);
-                        byte r = (byte)((argb >> 16) & 0xFF);
-                        byte g = (byte)((argb >> 8) & 0xFF);
-                        byte b = (byte)(argb & 0xFF);
-
-                        sumA += coeff * a;
-                        sumR += coeff * r;
-                        sumG += coeff * g;
-                        sumB += coeff * b;
-                    }
-                }
-
-                int aC = (int)Math.Round(sumA);
-                int rC = (int)Math.Round(sumR);
-                int gC = (int)Math.Round(sumG);
-                int bC = (int)Math.Round(sumB);
-
-                aC = Math.Max(0, Math.Min(255, aC));
-                rC = Math.Max(0, Math.Min(255, rC));
-                gC = Math.Max(0, Math.Min(255, gC));
-                bC = Math.Max(0, Math.Min(255, bC));
-
-                int afterPixel = (aC << 24) | (rC << 16) | (gC << 8) | bC;
-
-                Console.WriteLine($"Central pixel before: 0x{beforePixel:X8}");
-                Console.WriteLine($"Central pixel after: 0x{afterPixel:X8}");
-
-                originalPixels[4] = afterPixel;
-                raster.SaveArgb32Pixels(region, originalPixels);
-                raster.Save(outputPath);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -88,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Use this code to verify that an edge‑detection filter alters the intensity of the central pixel in a PNG image.
- * 2. Apply it to log pixel‑level differences for debugging image‑processing pipelines in a C# application.
- * 3. Employ the routine in automated tests that compare original and filtered images for quality assurance.
- * 4. Extract a 3×3 region around the image center and apply a custom convolution kernel for scientific analysis.
- * 5. Generate a report of pixel changes after applying sharpening or edge‑enhancement operations in a .NET project.
+ * 1. When you need to verify how an edge‑detection filter changes the exact color of a specific pixel in a PNG image during automated quality checks.
+ * 2. When building a diagnostic tool that logs pixel‑level differences to detect processing errors after applying convolution kernels in C#.
+ * 3. When creating a before‑and‑after visual comparison for a computer‑vision pipeline that uses Aspose.Imaging to ensure edge detection is applied correctly.
+ * 4. When developing a batch script that processes images, applies an edge filter, and records the central pixel change to monitor consistency across large datasets.
+ * 5. When troubleshooting image‑processing algorithms by isolating the effect of a custom kernel on a known pixel location and saving the resulting image for review.
  */
