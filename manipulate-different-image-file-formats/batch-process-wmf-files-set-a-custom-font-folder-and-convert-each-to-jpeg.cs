@@ -1,4 +1,11 @@
 // HOW-TO: Batch Convert WMF Files to JPEG with Custom Font Folder in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,41 +21,48 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
-            string fontFolder = "Fonts";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+            string fontFolder = Path.Combine(baseDir, "Fonts");
 
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            var wmfFiles = Directory.GetFiles(inputDir, "*.wmf");
-            foreach (var wmfPath in wmfFiles)
+            if (!Directory.Exists(fontFolder))
             {
-                if (!File.Exists(wmfPath))
+                Directory.CreateDirectory(fontFolder);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {wmfPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDir, Path.ChangeExtension(Path.GetFileName(wmfPath), ".jpg"));
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg"));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 var loadOptions = new LoadOptions();
-                loadOptions.AddCustomFontSource((args) =>
+                loadOptions.AddCustomFontSource(args =>
                 {
                     var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                    if (args != null && args.Length > 0 && args[0] is string folder && Directory.Exists(folder))
+                    if (args != null && args.Length > 0 && args[0] is string fontsPath && Directory.Exists(fontsPath))
                     {
-                        foreach (var fontFile in Directory.GetFiles(folder))
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
                         {
                             byte[] fontBytes = File.ReadAllBytes(fontFile);
                             string fontName = Path.GetFileNameWithoutExtension(fontFile);
@@ -58,10 +72,10 @@ class Program
                     return result.ToArray();
                 }, fontFolder);
 
-                using (WmfImage wmfImage = (WmfImage)Image.Load(wmfPath, loadOptions))
+                using (Image image = Image.Load(inputPath, loadOptions))
                 {
                     var jpegOptions = new JpegOptions();
-                    wmfImage.Save(outputPath, jpegOptions);
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -74,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a collection of legacy WMF drawings to JPEG images while ensuring the correct fonts are applied from a specific directory.
- * 2. When a reporting system must generate thumbnail previews of WMF charts stored on a server and the fonts used are not installed on the machine.
- * 3. When migrating a design archive that contains WMF files to a web‑friendly format and you have custom corporate fonts located in a separate folder.
- * 4. When building a batch image processing pipeline that reads WMF files, applies custom font resources, and outputs high‑quality JPEGs for use in PDFs or email.
- * 5. When automating the preparation of WMF assets for a mobile app, requiring conversion to JPEG and loading fonts from a bundled font folder to preserve text appearance.
+ * 1. When you need to automatically convert a large collection of legacy WMF vector drawings into JPEG images for web display while ensuring the correct fonts are used.
+ * 2. When your application must process WMF files stored in a specific input folder and output JPEGs to another folder without manual intervention.
+ * 3. When the WMF files reference custom TrueType fonts that are not installed on the system, and you need to point Aspose.Imaging to a custom font directory.
+ * 4. When you want to integrate a batch image conversion step into a build or deployment pipeline that prepares assets for mobile or desktop applications.
+ * 5. When you are building a document‑to‑image service that receives WMF uploads, applies corporate fonts, and returns JPEG thumbnails for preview.
  */
