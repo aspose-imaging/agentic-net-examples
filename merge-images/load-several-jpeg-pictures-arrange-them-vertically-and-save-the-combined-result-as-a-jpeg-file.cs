@@ -1,9 +1,15 @@
 // HOW-TO: Combine Multiple JPEG Images Vertically Into a Single JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -14,42 +20,51 @@ class Program
     {
         try
         {
-            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-            string outputPath = "combined.jpg";
-
-            foreach (var path in inputPaths)
+            string[] inputPaths = new string[]
             {
-                if (!File.Exists(path))
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "output/combined.jpg";
+
+            foreach (string inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    sizes.Add(img.Size);
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
+            int maxWidth = widths.Max();
+            int totalHeight = heights.Sum();
 
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
-                foreach (var path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
                     {
-                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
@@ -66,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a photo strip from a series of JPEG shots for a printable collage.
- * 2. When generating a single tall banner image from individual product photos for an e‑commerce catalog.
- * 3. When assembling scanned document pages saved as JPEGs into one continuous image for archival.
- * 4. When building a vertical slideshow thumbnail that merges several screenshots into one JPEG file.
- * 5. When preparing a combined receipt image from multiple JPEG receipts for automated processing.
+ * 1. When you need to create a photo strip or collage by stacking several JPEG photos one on top of another for printing or web display.
+ * 2. When generating a single image that contains sequential screenshots or scanned pages saved as JPEGs for documentation or reporting.
+ * 3. When building a thumbnail strip for a product gallery where each product photo is a separate JPEG that must appear in a vertical list.
+ * 4. When preprocessing images for a machine‑learning pipeline that expects one tall JPEG containing all training samples stacked vertically.
+ * 5. When merging daily camera snapshots taken throughout the day into one continuous JPEG timeline for archival or monitoring purposes.
  */
