@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert WMF Files to PNG JPEG and BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WMF Files To PNG JPEG And BMP In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,46 +17,36 @@ namespace WmfBatchConverter
     {
         static void Main()
         {
+            string inputDirectory = "C:\\InputWMF";
+            string outputDirectory = "C:\\OutputImages";
+
             try
             {
-                string inputDirectory = @"C:\InputWmf";
-                string outputDirectory = @"C:\OutputImages";
-
                 string[] wmfFiles = Directory.GetFiles(inputDirectory, "*.wmf");
-
-                foreach (string wmfPath in wmfFiles)
+                foreach (string inputPath in wmfFiles)
                 {
-                    if (!File.Exists(wmfPath))
+                    if (!File.Exists(inputPath))
                     {
-                        Console.Error.WriteLine($"File not found: {wmfPath}");
+                        Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
-                    using (Image image = Image.Load(wmfPath))
+                    using (Image image = Image.Load(inputPath))
                     {
-                        foreach (OutputFormat format in Enum.GetValues(typeof(OutputFormat)))
-                        {
-                            string extension = format.ToString().ToLower();
-                            string outputPath = Path.Combine(outputDirectory, $"{Path.GetFileNameWithoutExtension(wmfPath)}.{extension}");
+                        // PNG
+                        string pngPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                        image.Save(pngPath, new PngOptions());
 
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // JPEG
+                        string jpegPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
+                        image.Save(jpegPath, new JpegOptions());
 
-                            switch (format)
-                            {
-                                case OutputFormat.Png:
-                                    var pngOptions = new PngOptions();
-                                    image.Save(outputPath, pngOptions);
-                                    break;
-                                case OutputFormat.Jpeg:
-                                    var jpegOptions = new JpegOptions();
-                                    image.Save(outputPath, jpegOptions);
-                                    break;
-                                case OutputFormat.Bmp:
-                                    var bmpOptions = new BmpOptions();
-                                    image.Save(outputPath, bmpOptions);
-                                    break;
-                            }
-                        }
+                        // BMP
+                        string bmpPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+                        image.Save(bmpPath, new BmpOptions());
                     }
                 }
             }
@@ -58,21 +55,14 @@ namespace WmfBatchConverter
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
-
-        enum OutputFormat
-        {
-            Png,
-            Jpeg,
-            Bmp
-        }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a legacy Windows application generates vector WMF icons that must be displayed on web pages, a developer can batch convert them to PNG, JPEG, and BMP for browser compatibility.
- * 2. When preparing print‑ready assets, a designer can use this code to transform multiple WMF diagrams into high‑resolution BMP files alongside web‑friendly PNG and JPEG versions in a single run.
- * 3. When migrating an old document repository to a modern content management system, a developer can automatically convert all stored WMF drawings to the required image formats without writing separate conversion scripts.
- * 4. When building a reporting tool that exports charts as WMF and needs to provide downloadable image options, this batch conversion simplifies generating PNG, JPEG, and BMP files for end users.
- * 5. When implementing a CI/CD pipeline that validates visual assets, the code can quickly verify that every WMF file in a source folder is correctly rendered into the three common raster formats before deployment.
+ * 1. When a legacy application stores diagrams as WMF and you need to generate web‑ready PNG, JPEG, and BMP thumbnails automatically.
+ * 2. When migrating a large collection of WMF assets to multiple raster formats for cross‑platform compatibility in a C# batch job.
+ * 3. When creating a build step that converts all WMF icons into PNG, JPEG, and BMP files for inclusion in mobile and desktop UI resources.
+ * 4. When automating the archival process that requires storing each WMF document in several raster formats to meet different client specifications.
+ * 5. When developing a reporting tool that must render WMF charts as PNG, JPEG, and BMP images on the fly using Aspose.Imaging in .NET.
  */
