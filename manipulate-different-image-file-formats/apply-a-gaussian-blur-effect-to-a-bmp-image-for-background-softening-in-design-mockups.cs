@@ -1,19 +1,25 @@
-// HOW-TO: Apply Gaussian Blur to BMP Image for Design Mockups in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to BMP Image in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output\\output.bmp";
+
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output\\blurred.bmp";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,14 +30,11 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                if (!image.IsCached) image.CacheData();
-
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
-                blurOptions.Radius = 5;
-                blurOptions.Sigma = 2.0f;
-
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
                 image.Filter(image.Bounds, blurOptions);
-                image.Save(outputPath, new BmpOptions());
+
+                BmpOptions bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften the background of a BMP screenshot before embedding it in a UI prototype.
- * 2. When generating blurred placeholders for high‑resolution BMP assets to improve perceived loading speed in web design.
- * 3. When preparing mockup images for print layouts where the foreground must stay sharp while the BMP background is gently blurred.
- * 4. When creating a series of BMP frames with a consistent Gaussian blur effect for a simple animation or transition.
- * 5. When automating the preprocessing of BMP textures in a game‑development pipeline to achieve a depth‑of‑field look without manual editing.
+ * 1. When you need to soften the background of a BMP mockup for a UI design, you can use this code to apply a Gaussian blur quickly.
+ * 2. When generating low‑resolution preview thumbnails of BMP assets, applying a blur can reduce visual noise before scaling.
+ * 3. When preparing BMP images for print layouts that require a subtle background effect, the Gaussian blur filter creates a smooth backdrop.
+ * 4. When automating batch processing of BMP files to create blurred placeholders for lazy‑loading web pages, this snippet handles each image efficiently.
+ * 5. When integrating image editing into a C# desktop application, you can use the code to let users apply a Gaussian blur to their BMP photos for creative effects.
  */
