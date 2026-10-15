@@ -1,9 +1,18 @@
-// HOW-TO: Apply Gaussian Blur to JPEG Images in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter to JPEG Images in C# Blazor WebAssembly (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -20,17 +29,20 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
+                // Apply median filter with kernel size 3
+                image.Filter(image.Bounds, new MedianFilterOptions(3));
 
-                image.Filter(image.Bounds, new GaussianBlurFilterOptions(5, 1.0));
-
-                var saveOptions = new JpegOptions();
-                image.Save(outputPath, saveOptions);
+                Source src = new FileCreateSource(outputPath, false);
+                JpegOptions options = new JpegOptions() { Source = src, Quality = 90 };
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -42,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Blazor WebAssembly app needs to let users upload photos and automatically soften them with a Gaussian blur before saving as JPEG.
- * 2. When you want to perform client‑side image preprocessing in C# to reduce detail for privacy or artistic effect without sending the file to a server.
- * 3. When an online photo editor requires fast, cached raster image handling and needs to apply a blur filter to large JPEGs directly in the browser.
- * 4. When you must ensure uploaded images are processed locally, applying a Gaussian blur with specific radius and sigma values before storing them in a cloud bucket.
- * 5. When a C# web application needs to convert raw user uploads into optimized JPEGs after applying a blur filter for thumbnails or preview images.
+ * 1. When you need to reduce salt‑and‑pepper noise in user‑uploaded JPEG photos directly in a Blazor WebAssembly app before saving them to the server.
+ * 2. When you want to apply a lightweight client‑side median filter to improve image quality for preview thumbnails in a C# web application.
+ * 3. When you must ensure consistent JPEG compression quality (e.g., 90) after noise reduction without round‑tripping through a backend service.
+ * 4. When you are building an offline image editing tool in Blazor that lets users clean up scanned documents by smoothing pixel artifacts.
+ * 5. When you require a simple C# solution to process and re‑encode uploaded pictures with a 3×3 kernel filter to meet UI performance constraints.
  */
