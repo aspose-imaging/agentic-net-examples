@@ -1,4 +1,11 @@
-// HOW-TO: Convert PDF With Vector Charts To SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PDF Chart to SVG with Vector Preservation in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,12 +13,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.pdf";
-            string outputPath = "output.svg";
+            string inputPath = "Input\\chart.pdf";
+            string outputPath = "Output\\chart.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -23,8 +30,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var options = new SvgOptions();
-                image.Save(outputPath, options);
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -36,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display PDF‑generated scientific charts on a web page without losing axis lines or data labels, you can convert the PDF to SVG for scalable, interactive graphics.
- * 2. When building a reporting dashboard that pulls PDF reports and wants to embed the charts as responsive SVG elements, this code automates the conversion in a C# backend.
- * 3. When migrating legacy PDF documentation containing vector diagrams to a modern HTML5 site, converting the files to SVG preserves the quality and enables CSS styling.
- * 4. When creating an e‑learning platform that extracts vector charts from PDF textbooks for interactive manipulation, the conversion to SVG allows zoom‑in without pixelation.
- * 5. When developing a cross‑platform mobile app that needs to render PDF chart assets as lightweight SVGs to reduce bundle size and improve rendering speed, this snippet provides the necessary transformation.
+ * 1. When you need to embed a PDF‑generated chart into a responsive web page without losing vector quality, you can convert the PDF to SVG using C# and Aspose.Imaging.
+ * 2. When an analytics dashboard requires scalable chart graphics that retain axis lines and data labels for zooming and panning, this code transforms the source PDF into an interactive SVG.
+ * 3. When you must automate the migration of legacy PDF reports to modern HTML5 visualizations, the snippet extracts the vector chart and saves it as SVG for seamless integration.
+ * 4. When a mobile app needs lightweight, resolution‑independent chart assets, converting the PDF chart to SVG via C# reduces file size while preserving all vector elements.
+ * 5. When a content management system stores charts as PDFs but the front‑end expects SVG for CSS styling and scripting, this code programmatically performs the format conversion.
  */
