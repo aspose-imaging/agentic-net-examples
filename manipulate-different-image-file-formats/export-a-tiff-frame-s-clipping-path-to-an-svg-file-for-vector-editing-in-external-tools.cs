@@ -1,17 +1,16 @@
-// HOW-TO: Export TIFF Frame Clipping Path to SVG with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Export TIFF Clipping Path to SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -19,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.svg";
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/clip.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -28,22 +27,28 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                TiffFrame frame = tiffImage.Frames[0];
-                tiffImage.ActiveFrame = frame;
-
-                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
-                    frame.PathResources.ToArray(),
-                    frame.Size);
-
-                var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
-                svgGraphics.DrawPath(new Pen(Color.Black), graphicsPath);
-
-                using (SvgImage svgImage = svgGraphics.EndRecording())
+                TiffFrame frame = tiff.ActiveFrame;
+                var pathResources = frame.PathResources;
+                if (pathResources == null || pathResources.Count == 0)
                 {
+                    Console.Error.WriteLine("No clipping path found in the TIFF frame.");
+                    return;
+                }
+
+                var pathResource = pathResources[0];
+                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
+                    new[] { pathResource }, frame.Size);
+
+                var svgOptions = new SvgOptions();
+                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(svgOptions, frame.Width, frame.Height))
+                {
+                    var graphics = new Aspose.Imaging.Graphics(svgImage);
+                    var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black);
+                    graphics.DrawPath(pen, graphicsPath);
                     svgImage.Save(outputPath);
                 }
             }
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a vector clipping path from a multi‑page TIFF and edit it in Illustrator or Inkscape, this code converts the first frame’s path to an SVG file.
- * 2. When a printing workflow requires the TIFF’s cut‑out shape for spot‑color registration, you can export the clipping path as SVG for precise vector manipulation.
- * 3. When automating a document‑digitization pipeline, you may want to isolate the TIFF image’s vector mask and save it as SVG for downstream CAD or GIS processing.
- * 4. When building a web application that lets users refine TIFF‑based graphics, you can generate an SVG representation of the frame’s clipping path for browser‑based editing.
- * 5. When integrating Aspose.Imaging into a C# service that prepares assets for laser‑cutting, exporting the TIFF clipping path to SVG provides a scalable vector file for the cutter’s software.
+ * 1. When you need to edit a TIFF image's vector clipping mask in Illustrator, you can extract it as an SVG file.
+ * 2. When converting legacy scanned documents that contain clipping paths into scalable vector graphics for web display.
+ * 3. When preparing print‑ready assets and you must separate the clipping path from a multi‑page TIFF for further vector editing.
+ * 4. When automating a workflow that moves region‑of‑interest data from TIFF frames into SVG for use in CAD or GIS tools.
+ * 5. When building a C# application that validates the presence of a clipping path in a TIFF and exports it for downstream vector processing.
  */
