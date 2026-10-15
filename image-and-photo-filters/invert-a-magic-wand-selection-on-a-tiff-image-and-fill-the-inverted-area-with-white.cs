@@ -1,4 +1,11 @@
-// HOW-TO: Invert Magic Wand Selection on TIFF and Fill Inverted Area with White in C# (Aspose.Imaging for .NET)
+// HOW-TO: Invert Magic Wand Selection on TIFF and Fill with White in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,43 +13,42 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Invert selection using Magic Wand at point (0,0)
                 MagicWandTool.Select(image, new MagicWandSettings(0, 0))
                     .Invert()
                     .Apply();
 
-                // Fill the entire image with white
-                int width = image.Width;
-                int height = image.Height;
-                int totalPixels = width * height;
-                Aspose.Imaging.Color[] whitePixels = new Aspose.Imaging.Color[totalPixels];
-                for (int i = 0; i < totalPixels; i++)
+                Color[] pixels = image.LoadPixels(image.Bounds);
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    whitePixels[i] = Aspose.Imaging.Color.White;
+                    if (pixels[i].A == 0)
+                    {
+                        pixels[i] = Color.White;
+                    }
                 }
-                image.SavePixels(new Aspose.Imaging.Rectangle(0, 0, width, height), whitePixels);
+                image.SavePixels(image.Bounds, pixels);
 
-                // Save the result as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
@@ -56,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove a colored background from a scanned TIFF document and replace it with a solid white canvas using C#.
- * 2. When preparing TIFF images for OCR and you must ensure that all non‑selected regions are white to improve text recognition accuracy.
- * 3. When cleaning up old map scans by selecting a specific color range with the Magic Wand tool, inverting the selection, and painting the remaining area white.
- * 4. When generating a white‑filled mask from a TIFF image for later compositing or layering in a graphics processing pipeline.
- * 5. When automating batch processing of TIFF files to standardize the background color to white before archiving or publishing.
+ * 1. When you need to remove unwanted background from a scanned TIFF document by selecting the foreground with a magic wand, inverting the selection, and filling the rest with white.
+ * 2. When preparing TIFF images for OCR, you can invert a magic wand selection to isolate text areas and replace transparent regions with white to improve recognition accuracy.
+ * 3. When converting multi‑page TIFFs that contain transparent margins, this code lets you fill those margins with white after inverting the selection.
+ * 4. When cleaning up old fax TIFF files that have irregular transparent spots, you can use the magic wand inversion to turn those spots into a solid white background.
+ * 5. When generating printable TIFFs from images with alpha channels, the technique fills all fully transparent pixels with white after inverting the initial selection.
  */
