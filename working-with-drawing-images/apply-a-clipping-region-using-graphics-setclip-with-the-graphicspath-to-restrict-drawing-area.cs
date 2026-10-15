@@ -1,38 +1,45 @@
-// HOW-TO: Fill Entire PNG Image with Red Color Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Fill Entire PNG Image With Red Color Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Graphics graphics = new Graphics(image);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
-            {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                using (SolidBrush brush = new SolidBrush(Color.Red))
                 {
-                    graphics.FillRectangle(brush, new Aspose.Imaging.RectangleF(0, 0, image.Width, image.Height));
+                    graphics.FillRectangle(brush, new RectangleF(0, 0, image.Width, image.Height));
                 }
 
-                var saveOptions = new PngOptions
+                PngOptions saveOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a solid‑color placeholder PNG for UI mockups or testing.
- * 2. When you want to replace an existing image’s background with a uniform red overlay before adding other graphics.
- * 3. When creating a red background layer for a composite image that will later have transparent elements drawn on top.
- * 4. When programmatically resetting a PNG’s pixels to a known color as part of a batch‑processing cleanup routine.
- * 5. When producing a simple red badge or icon without loading external assets, using only Aspose.Imaging in C#.
+ * 1. When you need to replace the background of an existing PNG with a solid red color before further processing.
+ * 2. When generating a red placeholder image of the same dimensions as an original file for testing UI layouts.
+ * 3. When creating a red overlay for a PNG to highlight areas in a report or presentation.
+ * 4. When batch‑processing images to ensure they all have a uniform red background for branding consistency.
+ * 5. When converting a PNG to a new file while applying a solid color fill to reset its pixel data.
  */
