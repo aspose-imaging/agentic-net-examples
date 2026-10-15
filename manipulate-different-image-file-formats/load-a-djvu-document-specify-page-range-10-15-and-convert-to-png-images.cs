@@ -1,10 +1,18 @@
-// HOW-TO: Convert DjVu Pages 10 to 15 to PNG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 10 To 15 To PNG Images In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,8 +20,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.djvu";
-            string outputDir = "output";
+            string inputPath = "Input\\sample.djvu";
+            string outputDirectory = "Output";
 
             if (!File.Exists(inputPath))
             {
@@ -21,27 +29,29 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 int startPage = 10;
                 int endPage = 15;
 
-                int pageCount = djvu.Pages.Length;
-                if (startPage < 1) startPage = 1;
-                if (endPage > pageCount) endPage = pageCount;
-
                 for (int i = startPage; i <= endPage; i++)
                 {
-                    var page = djvu.Pages[i - 1];
-                    string outputPath = Path.Combine(outputDir, $"page_{i}.png");
+                    if (i < 0 || i >= djvu.Pages.Length)
+                    {
+                        Console.Error.WriteLine($"Page index out of range: {i}");
+                        continue;
+                    }
+
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (PngOptions options = new PngOptions())
+                    using (var options = new PngOptions())
                     {
+                        options.MultiPageOptions = new DjvuMultiPageOptions(i);
                         options.Source = new FileCreateSource(outputPath, false);
-                        page.Save(outputPath, options);
+                        djvu.Save(outputPath, options);
                     }
                 }
             }
@@ -55,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific range of pages from a multi‑page DjVu document and save each page as a high‑quality PNG for web preview.
- * 2. When you want to automate batch conversion of selected DjVu pages to PNG files in a .NET application without manual editing.
- * 3. When you are building a document‑processing pipeline that requires converting only pages 10‑15 of a scanned DjVu archive into PNG thumbnails.
- * 4. When you must generate separate PNG images for a subset of DjVu pages to feed into OCR or image‑analysis tools.
- * 5. When you need to programmatically create PNG assets from a DjVu file for inclusion in a mobile app’s asset bundle, limiting the conversion to a defined page range.
+ * 1. When you need to extract a subset of pages from a multi‑page DjVu file and save them as separate PNG files for web preview.
+ * 2. When you want to generate high‑resolution PNG thumbnails of specific DjVu pages for a document management system.
+ * 3. When you are building a batch conversion tool that processes only selected pages of scanned DjVu archives into PNG for archival purposes.
+ * 4. When you need to programmatically convert DjVu pages 10‑15 into PNG to feed into an OCR pipeline that only supports PNG input.
+ * 5. When you are creating a custom viewer that loads only certain DjVu pages and renders them as PNG images for faster loading on mobile devices.
  */
