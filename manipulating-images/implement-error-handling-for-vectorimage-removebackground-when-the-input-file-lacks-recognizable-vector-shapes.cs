@@ -1,9 +1,17 @@
-// HOW-TO: Remove Background from SVG and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background From SVG And Save As Transparent PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,7 +20,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output\\result.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,12 +30,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
                 var vectorImage = image as VectorImage;
                 if (vectorImage == null)
                 {
-                    Console.Error.WriteLine("The file does not contain a vector image.");
+                    Console.Error.WriteLine("The provided file is not a vector image.");
                     return;
                 }
 
@@ -37,7 +45,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"RemoveBackground failed: {ex.Message}");
+                    Console.Error.WriteLine($"Background removal failed: {ex.Message}");
                     return;
                 }
 
@@ -47,7 +55,7 @@ class Program
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.Transparent,
-                        PageSize = image.Size
+                        PageSize = vectorImage.Size
                     }
                 };
 
@@ -63,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically erase the background of an SVG file and export it as a transparent PNG for web graphics.
- * 2. When your application must verify that an input file is a vector image before processing to avoid runtime errors.
- * 3. When you want to handle cases where an SVG contains no recognizable shapes and gracefully report the failure.
- * 4. When you need to rasterize vector artwork to a PNG with an alpha channel while preserving the original dimensions.
- * 5. When you are building a batch conversion tool that creates PNG assets from SVGs and must log missing files or processing exceptions.
+ * 1. When you need to automatically strip the background from an SVG file that may contain only raster elements and convert it to a PNG with transparency in a .NET application.
+ * 2. When your web service must validate that an uploaded image is a vector format before attempting background removal to avoid processing errors.
+ * 3. When you want to generate PNG thumbnails from user‑provided SVG logos while ensuring any unsupported shapes are gracefully handled.
+ * 4. When building a batch conversion tool that processes a folder of SVG files, removes their backgrounds, and saves the results as PNGs without crashing on invalid files.
+ * 5. When integrating Aspose.Imaging into a C# workflow to detect missing vector data, report the issue, and continue processing other images.
  */
