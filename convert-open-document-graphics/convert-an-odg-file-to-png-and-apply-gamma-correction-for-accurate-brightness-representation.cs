@@ -1,4 +1,11 @@
-// HOW-TO: Convert ODG to PNG with Gamma Correction Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PNG with Gamma Correction in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.odg";
-            string outputPath = "Output/sample.png";
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.png");
 
             if (!File.Exists(inputPath))
             {
@@ -21,28 +28,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image odgImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                using (var ms = new MemoryStream())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
-                image.Save(outputPath, pngOptions);
-            }
+                    var pngOptions = new PngOptions();
+                    odgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
-            {
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        if (!raster.IsCached) raster.CacheData();
+                        raster.AdjustGamma(2.2f);
+                        raster.Save(outputPath);
+                    }
                 }
-                raster.AdjustGamma(2.2f);
-                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OpenDocument Graphics (ODG) diagram on a web page, you can convert it to a PNG and adjust gamma so the colors appear with correct brightness across browsers.
- * 2. When generating thumbnails for a document management system, converting ODG files to PNG and applying gamma correction ensures consistent visual quality on different monitors.
- * 3. When preparing print‑ready assets from ODG drawings, rasterizing them to PNG and correcting gamma helps match the intended brightness before sending to a printer.
- * 4. When integrating ODG support into a C# desktop application, using Aspose.Imaging to convert and gamma‑adjust the image allows seamless viewing alongside other raster formats.
- * 5. When automating batch processing of design files, converting each ODG to PNG with gamma correction prevents washed‑out images in downstream image‑processing pipelines.
+ * 1. When you need to display OpenDocument graphics on the web, you can convert the ODG file to a PNG image and adjust its gamma so the colors appear with correct brightness across browsers.
+ * 2. When generating thumbnails for a document management system, you can use this code to transform ODG drawings into PNG thumbnails while applying gamma correction to ensure consistent visual quality.
+ * 3. When preparing print‑ready assets from ODG source files, applying a 2.2 gamma correction before saving as PNG helps match the perceived brightness of the final printed output.
+ * 4. When integrating Aspose.Imaging into a C# application that processes user‑uploaded ODG files, this snippet converts them to PNG and normalizes brightness, making the images suitable for further analysis or storage.
+ * 5. When building a batch conversion tool for legacy OpenDocument graphics, you can automate the conversion to PNG and apply gamma correction to maintain accurate color representation on modern displays.
  */
