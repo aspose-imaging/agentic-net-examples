@@ -1,14 +1,17 @@
 // HOW-TO: Convert DjVu Pages 2 To 4 To PNG And Merge Into PDF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -16,47 +19,34 @@ class Program
     {
         try
         {
-            string inputDjvuPath = "input.djvu";
-            string outputFolder = "output";
-            string pngFolder = Path.Combine(outputFolder, "pngs");
-            string pdfPath = Path.Combine(outputFolder, "merged.pdf");
-
-            if (!File.Exists(inputDjvuPath))
+            string inputPath = "input.djvu";
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputDjvuPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(pngFolder);
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
+            // Convert pages 2-4 to PNG
             List<string> pngPaths = new List<string>();
-
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputDjvuPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                int startPage = 1; // page index 1 = page 2
-                int endPage = 3;   // page index 3 = page 4
-
-                for (int i = startPage; i <= endPage && i < djvu.Pages.Length; i++)
+                for (int pageIndex = 1; pageIndex <= 3; pageIndex++) // pages 2,3,4 (0‑based)
                 {
-                    string pngPath = Path.Combine(pngFolder, $"page_{i + 1}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    string pngPath = $"page{pageIndex + 1}.png";
+                    pngPaths.Add(pngPath);
+
+                    string pngDir = Path.GetDirectoryName(pngPath);
+                    Directory.CreateDirectory(pngDir ?? ".");
 
                     PngOptions pngOptions = new PngOptions
                     {
-                        Source = new FileCreateSource(pngPath, false)
+                        MultiPageOptions = new DjvuMultiPageOptions(pageIndex)
                     };
-
-                    djvu.Pages[i].Save(pngPath, pngOptions);
-                    pngPaths.Add(pngPath);
+                    djvu.Save(pngPath, pngOptions);
                 }
             }
 
-            // Load PNGs to calculate canvas size
-            List<RasterImage> pngImages = new List<RasterImage>();
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-
+            // Verify PNG files exist
             foreach (string pngPath in pngPaths)
             {
                 if (!File.Exists(pngPath))
@@ -64,28 +54,32 @@ class Program
                     Console.Error.WriteLine($"File not found: {pngPath}");
                     return;
                 }
-
-                RasterImage img = (RasterImage)Image.Load(pngPath);
-                pngImages.Add(img);
-                canvasWidth = Math.Max(canvasWidth, img.Width);
-                canvasHeight += img.Height;
             }
 
-            // Create canvas
-            PngOptions canvasOptions = new PngOptions();
-            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            // Load PNG images
+            List<Image> images = new List<Image>();
+            foreach (string pngPath in pngPaths)
             {
-                int offsetY = 0;
-                foreach (RasterImage img in pngImages)
-                {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                    img.Dispose();
-                }
+                Image img = Image.Load(pngPath);
+                images.Add(img);
+            }
 
-                PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(pdfPath, pdfOptions);
+            // Prepare PDF output
+            string pdfPath = "merged.pdf";
+            string pdfDir = Path.GetDirectoryName(pdfPath);
+            Directory.CreateDirectory(pdfDir ?? ".");
+
+            PdfOptions pdfOptions = new PdfOptions();
+
+            using (Image pdf = Image.Create(images.ToArray(), true))
+            {
+                pdf.Save(pdfPath, pdfOptions);
+            }
+
+            // Dispose loaded images
+            foreach (var img in images)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -97,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract specific pages from a DjVu document and save them as high‑quality PNG images for web preview or further editing.
- * 2. When you want to create a PDF that contains only selected pages of a multi‑page DjVu file, such as a subset of a scanned book.
- * 3. When an application must automate the conversion of DjVu pages to PNG before applying image‑processing algorithms like OCR or watermarking.
- * 4. When you need to generate a printable PDF from a range of DjVu pages while preserving the original resolution of each page.
- * 5. When a workflow requires batch processing of DjVu files, converting chosen pages to PNG and then combining them into a single PDF report.
+ * 1. When you need to extract specific pages from a DjVu document and create high‑quality PNG images for web preview.
+ * 2. When you must combine selected DjVu pages into a single PDF for easier distribution or printing.
+ * 3. When an archival workflow requires converting multi‑page DjVu scans to individual PNG files before further processing.
+ * 4. When a reporting tool needs to embed only certain DjVu pages as images and then generate a consolidated PDF report.
+ * 5. When a document management system must programmatically transform DjVu pages into PDF while preserving page order and image fidelity.
  */
