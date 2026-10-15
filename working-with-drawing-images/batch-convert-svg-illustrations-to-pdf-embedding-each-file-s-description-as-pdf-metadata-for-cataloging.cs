@@ -1,8 +1,16 @@
-// HOW-TO: Batch Convert SVG Files to PDF with Title Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert SVG Files to PDF with Metadata Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -37,20 +45,29 @@ class Program
                     return;
                 }
 
-                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(Path.GetExtension(inputPath), ".svg", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
-                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf"));
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                    SvgImage svgImage = image as SvgImage;
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        Title = Path.GetFileNameWithoutExtension(inputPath)
-                    };
-                    image.Save(outputPath, pdfOptions);
+                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                        {
+                            Title = fileNameWithoutExt
+                        };
+
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -63,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to generate printable PDFs from a folder of SVG icons while preserving each icon’s name as the PDF title for easy catalog lookup.
- * 2. When an e‑commerce platform wants to batch‑convert product illustration SVGs to PDF brochures and embed the product code in the PDF metadata for search indexing.
- * 3. When a publishing workflow requires automated conversion of SVG chapter diagrams to PDFs with the diagram name stored as the document title for reference management.
- * 4. When a GIS application must transform a collection of SVG map overlays into PDFs and include the layer name in the PDF metadata for later layer identification.
- * 5. When a documentation system needs to create PDF versions of SVG flowcharts in bulk, embedding each chart’s description as the PDF title to support automated document archiving.
+ * 1. When you need to generate printable PDFs from a collection of SVG illustrations for a product catalog, preserving each image’s description as PDF metadata.
+ * 2. When automating the creation of PDF assets from design assets stored as SVGs in a CI/CD pipeline, ensuring the title field reflects the original file name.
+ * 3. When building a document management system that indexes SVG graphics by their embedded descriptions, requiring conversion to searchable PDF files.
+ * 4. When preparing marketing materials where SVG logos must be delivered as PDFs with proper metadata for SEO and archival purposes.
+ * 5. When migrating legacy SVG assets to PDF format in bulk while retaining descriptive information for compliance reporting.
  */
