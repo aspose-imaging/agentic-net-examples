@@ -1,10 +1,18 @@
-// HOW-TO: Batch Convert SVG to Edge Map PNG Using Custom Sobel Kernels in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Horizontal and Vertical Edge Detection to SVGs in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,67 +20,57 @@ class Program
     {
         try
         {
-            string[] inputPaths = new string[]
+            string inputFolder = "input_svgs";
+            string outputFolder = "output_edges";
+
+            Directory.CreateDirectory(outputFolder);
+
+            foreach (string svgPath in Directory.GetFiles(inputFolder, "*.svg"))
             {
-                "input1.svg",
-                "input2.svg"
-            };
-            string outputDirectory = "output";
-
-            foreach (string inputPath in inputPaths)
-            {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(svgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {svgPath}");
+                    return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string tempPngPath = Path.Combine(outputDirectory, fileName + "_temp.png");
-                string outputPath = Path.Combine(outputDirectory, fileName + "_edge.png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Rasterize SVG to PNG
-                using (Image svgImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(svgPath))
                 {
-                    var pngOptions = new PngOptions();
-                    svgImage.Save(tempPngPath, pngOptions);
-                }
-
-                // Load raster image and apply edge detection kernels
-                using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-                {
-                    double[,] kernelHorizontal = new double[,]
+                    using (MemoryStream pngStream = new MemoryStream())
                     {
-                        { -1, 0, 1 },
-                        { -2, 0, 2 },
-                        { -1, 0, 1 }
-                    };
+                        PngOptions pngOptions = new PngOptions();
+                        svgImage.Save(pngStream, pngOptions);
+                        pngStream.Position = 0;
 
-                    double[,] kernelVertical = new double[,]
-                    {
-                        { -1, -2, -1 },
-                        {  0,  0,  0 },
-                        {  1,  2,  1 }
-                    };
+                        var kernels = new Dictionary<string, double[,]>
+                        {
+                            { "horizontal", new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } } },
+                            { "vertical",   new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } } }
+                        };
 
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernelHorizontal));
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernelVertical));
+                        foreach (var kvp in kernels)
+                        {
+                            string orientation = kvp.Key;
+                            double[,] kernel = kvp.Value;
 
-                    var outOptions = new PngOptions();
-                    raster.Save(outputPath, outOptions);
-                }
+                            pngStream.Position = 0;
+                            using (Image rasterImg = Image.Load(pngStream))
+                            {
+                                RasterImage raster = rasterImg as RasterImage;
+                                if (raster == null)
+                                {
+                                    Console.Error.WriteLine($"Failed to rasterize: {svgPath}");
+                                    continue;
+                                }
 
-                // Clean up temporary file
-                try
-                {
-                    File.Delete(tempPngPath);
-                }
-                catch
-                {
-                    // Ignore any errors during cleanup
+                                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                                string outputPath = Path.Combine(outputFolder,
+                                    Path.GetFileNameWithoutExtension(svgPath) + "_" + orientation + ".png");
+                                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                                raster.Save(outputPath, new PngOptions());
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -85,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate edge detection maps from a collection of SVG illustrations for computer‑vision preprocessing.
- * 2. When you want to rasterize vector graphics to PNG before applying Sobel filters in a .NET batch workflow.
- * 3. When you must automate the creation of horizontal and vertical edge images for feature extraction in machine‑learning pipelines.
- * 4. When you require a quick way to produce edge‑highlighted PNGs from SVG logos for UI thumbnails or visual analysis.
- * 5. When you are building a server‑side service that processes uploaded SVG files and returns edge‑detected PNGs for downstream image‑processing tasks.
+ * 1. When you need to automatically generate edge maps from a collection of SVG icons for computer‑vision preprocessing.
+ * 2. When you want to convert vector graphics to raster PNGs and extract horizontal and vertical edges for feature extraction in a machine‑learning pipeline.
+ * 3. When you are building a batch workflow that creates stylized line‑art versions of SVG illustrations for printing or web thumbnails.
+ * 4. When you must analyze the shape outlines of SVG diagrams by applying custom Sobel‑like kernels to detect edges in different orientations.
+ * 5. When you require a C# solution that processes multiple SVG files, rasterizes them, and outputs edge‑detected images for quality‑control or visual testing.
  */
