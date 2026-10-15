@@ -1,10 +1,16 @@
-// HOW-TO: Rotate Image 30 Degrees And Save As GIF To MemoryStream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate PNG 30 Degrees and Save as GIF Using MemoryStream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging;
 
 class Program
 {
@@ -23,16 +29,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rotate 30 degrees with black background, resize proportionally
-                image.Rotate(30f, true, Aspose.Imaging.Color.Black);
-
-                using (MemoryStream ms = new MemoryStream())
+                if (image is RasterImage rasterImage)
                 {
-                    var gifOptions = new GifOptions();
-                    image.Save(ms, gifOptions);
-                    File.WriteAllBytes(outputPath, ms.ToArray());
+                    // Rotate 30 degrees, resize proportionally, fill background with black
+                    rasterImage.Rotate(30f, true, Color.Black);
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        var gifOptions = new GifOptions();
+                        rasterImage.Save(memoryStream, gifOptions);
+                        File.WriteAllBytes(outputPath, memoryStream.ToArray());
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a raster image.");
                 }
             }
         }
@@ -45,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a rotated PNG as a GIF on a web page without writing the file to disk first.
- * 2. When you must generate a GIF thumbnail that is rotated by a specific angle and store it in memory for further processing or transmission.
- * 3. When an API requires a GIF payload with a black background after rotation, and you want to create it directly from a raster image in C#.
- * 4. When you are building a batch job that converts user‑uploaded PNGs to rotated GIFs and streams them to another service.
- * 5. When you want to apply a 30‑degree rotation with a solid background to an image and keep the result in a MemoryStream for embedding in emails or PDFs.
+ * 1. When you need to generate a rotated GIF thumbnail from a PNG for web display without writing intermediate files.
+ * 2. When you must rotate an image by a specific angle and preserve a solid background color for animated GIF creation.
+ * 3. When you want to process images in memory to avoid disk I/O before saving the result as a GIF in a .NET application.
+ * 4. When you are converting raster images to GIF format after applying transformations such as rotation and background fill.
+ * 5. When you need to ensure the output GIF fits a specific orientation and background for email newsletters or social media posts.
  */
