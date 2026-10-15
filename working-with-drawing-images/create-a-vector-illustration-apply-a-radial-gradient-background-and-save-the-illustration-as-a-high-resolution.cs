@@ -1,10 +1,20 @@
-// HOW-TO: Create High-Resolution TIFF with Radial Gradient and Vector Shapes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Radial Gradient Vector Illustration and Save as High‑Resolution TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -19,40 +29,55 @@ class Program
             int height = 2000;
 
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            using (Image image = Image.Create(tiffOptions, width, height))
-            {
-                RasterImage raster = (RasterImage)image;
-                int[] pixels = new int[width * height];
-                double maxDist = Math.Sqrt((width / 2.0) * (width / 2.0) + (height / 2.0) * (height / 2.0));
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
+            tiffOptions.Compression = TiffCompressions.None;
+            tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
 
-                for (int y = 0; y < height; y++)
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+            {
+                Graphics graphics = new Graphics(tiffImage);
+
+                int centerX = width / 2;
+                int centerY = height / 2;
+                int maxRadius = Math.Min(width, height) / 2;
+                int steps = 100;
+
+                for (int i = 0; i < steps; i++)
                 {
-                    for (int x = 0; x < width; x++)
+                    float radius = maxRadius * (steps - i) / (float)steps;
+                    byte r = (byte)(255 * i / steps);
+                    byte g = (byte)(255 * i / steps);
+                    byte b = 255;
+                    Color color = Color.FromArgb(255, r, g, b);
+                    using (SolidBrush brush = new SolidBrush(color))
                     {
-                        int idx = y * width + x;
-                        double dx = x - width / 2.0;
-                        double dy = y - height / 2.0;
-                        double dist = Math.Sqrt(dx * dx + dy * dy);
-                        double t = Math.Min(1.0, dist / maxDist);
-                        int r = (int)(255 * t);
-                        int g = (int)(255 * t);
-                        int b = 255;
-                        pixels[idx] = Color.FromArgb(255, r, g, b).ToArgb();
+                        graphics.FillEllipse(brush, centerX - radius, centerY - radius, radius * 2, radius * 2);
                     }
                 }
 
-                raster.SaveArgb32Pixels(raster.Bounds, pixels);
-
-                Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(Color.Red, 5);
-                graphics.DrawEllipse(pen, (width / 2) - 200, (height / 2) - 200, 400, 400);
-
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Yellow)))
+                PointF[] starPoints = new PointF[]
                 {
-                    graphics.FillEllipse(brush, (width / 2) - 100, (height / 2) - 100, 200, 200);
-                }
+                    new PointF(centerX, centerY - 300),
+                    new PointF(centerX + 115, centerY - 115),
+                    new PointF(centerX + 300, centerY - 100),
+                    new PointF(centerX + 150, centerY + 50),
+                    new PointF(centerX + 200, centerY + 300),
+                    new PointF(centerX, centerY + 150),
+                    new PointF(centerX - 200, centerY + 300),
+                    new PointF(centerX - 150, centerY + 50),
+                    new PointF(centerX - 300, centerY - 100),
+                    new PointF(centerX - 115, centerY - 115)
+                };
 
-                image.Save(outputPath, tiffOptions);
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new PolygonShape(starPoints));
+                path.AddFigure(figure);
+
+                Pen pen = new Pen(Color.Black, 5);
+                graphics.DrawPath(pen, path);
+
+                tiffImage.Save();
             }
         }
         catch (Exception ex)
@@ -64,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable poster‑size image with a smooth radial background and vector graphics for a marketing campaign.
- * 2. When you want to programmatically create a high‑resolution TIFF for archival or publishing workflows that require lossless quality.
- * 3. When you need to add custom shapes like ellipses on top of a gradient background for scientific visualizations or diagrams.
- * 4. When you are building a server‑side service that produces on‑the‑fly graphics for PDF reports or print‑ready files.
- * 5. When you must automate the creation of large‑format images with specific color blends and transparent overlays for branding assets.
+ * 1. When you need to generate a scalable vector graphic with a smooth radial gradient background for print‑ready brochures and export it as a 300 DPI TIFF file using C#.
+ * 2. When a desktop application must programmatically create high‑resolution background images for product packaging and store them in an uncompressed TIFF format for quality control.
+ * 3. When an automated report generator requires a vector‑based illustration with a color‑fade effect that can be saved as a lossless TIFF for archival in a document management system.
+ * 4. When a scientific visualization tool needs to render a radial color map as a vector image and output it as a high‑resolution TIFF for inclusion in journal publications.
+ * 5. When a web service creates custom greeting‑card designs with gradient graphics and needs to deliver the final artwork as a high‑DPI TIFF for professional printing.
  */
