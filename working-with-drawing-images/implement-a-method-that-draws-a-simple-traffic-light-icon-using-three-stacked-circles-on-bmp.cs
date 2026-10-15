@@ -1,11 +1,18 @@
-// HOW-TO: Create a Traffic Light BMP Image with Three Colored Circles in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a BMP Traffic Light Icon with Stacked Circles in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -14,52 +21,64 @@ class Program
         try
         {
             string outputPath = "output/traffic_light.bmp";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int radius = 30;
-            int diameter = radius * 2;
-            int marginX = 10;
-            int marginY = 10;
+            // Define image dimensions
+            int circleRadius = 30;
+            int circleDiameter = circleRadius * 2;
             int spacing = 10;
-            int width = marginX * 2 + diameter;
-            int height = marginY * 2 + 3 * diameter + 2 * spacing;
+            int width = 80;
+            int height = (circleDiameter * 3) + (spacing * 2) + 20; // extra padding
 
+            // Create BMP image bound to output file
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
-
             using (Image image = Image.Create(bmpOptions, width, height))
             {
+                // Initialize graphics
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.Black);
+                graphics.Clear(Color.Black);
 
-                int x = marginX;
-                int y = marginY;
-
-                using (SolidBrush brushRed = new SolidBrush(Aspose.Imaging.Color.Red))
+                // Draw traffic light housing
+                using (SolidBrush housingBrush = new SolidBrush(Color.DarkGray))
                 {
-                    graphics.FillEllipse(brushRed, x, y, diameter, diameter);
+                    graphics.FillRectangle(housingBrush, new Rectangle(10, 10, width - 20, height - 20));
                 }
 
-                y += diameter + spacing;
-                using (SolidBrush brushYellow = new SolidBrush(Aspose.Imaging.Color.Yellow))
+                // Pen for circle outlines
+                Pen outlinePen = new Pen(Color.Black, 2);
+
+                // Positions for circles
+                int startX = (width / 2) - circleRadius;
+                int startY = 20;
+
+                // Red light
+                using (SolidBrush redBrush = new SolidBrush(Color.Red))
                 {
-                    graphics.FillEllipse(brushYellow, x, y, diameter, diameter);
+                    Rectangle redRect = new Rectangle(startX, startY, circleDiameter, circleDiameter);
+                    graphics.FillEllipse(redBrush, redRect);
+                    graphics.DrawEllipse(outlinePen, redRect);
                 }
 
-                y += diameter + spacing;
-                using (SolidBrush brushGreen = new SolidBrush(Aspose.Imaging.Color.Lime))
+                // Yellow light
+                using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
                 {
-                    graphics.FillEllipse(brushGreen, x, y, diameter, diameter);
+                    Rectangle yellowRect = new Rectangle(startX, startY + circleDiameter + spacing, circleDiameter, circleDiameter);
+                    graphics.FillEllipse(yellowBrush, yellowRect);
+                    graphics.DrawEllipse(outlinePen, yellowRect);
                 }
 
-                Pen pen = new Pen(Aspose.Imaging.Color.White, 2);
-                y = marginY;
-                for (int i = 0; i < 3; i++)
+                // Green light
+                using (SolidBrush greenBrush = new SolidBrush(Color.Lime))
                 {
-                    graphics.DrawEllipse(pen, x, y, diameter, diameter);
-                    y += diameter + spacing;
+                    Rectangle greenRect = new Rectangle(startX, startY + (circleDiameter + spacing) * 2, circleDiameter, circleDiameter);
+                    graphics.FillEllipse(greenBrush, greenRect);
+                    graphics.DrawEllipse(outlinePen, greenRect);
                 }
 
+                // Save the image (output already bound)
                 image.Save();
             }
         }
@@ -72,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple traffic‑light icon as a BMP file for a Windows desktop UI or embedded display without using external graphics tools.
- * 2. When an application must programmatically create status indicators (red, yellow, green) for dashboards or monitoring panels and store them as BMP images for fast loading.
- * 3. When you are building a simulation of road traffic and require lightweight bitmap symbols for vehicles or signals that can be drawn on the fly with Aspose.Imaging in C#.
- * 4. When you want to produce custom icons for printable manuals or documentation where a BMP with solid colored circles is required for compatibility with legacy printers.
- * 5. When an IoT device’s firmware needs to generate a BMP representation of a traffic light for a small screen, using only basic drawing primitives provided by Aspose.Imaging.
+ * 1. When you need to programmatically generate a simple traffic‑light BMP image for a dashboard or simulation without relying on pre‑made assets.
+ * 2. When you want to create a custom icon that can be saved as a BMP file and used in legacy Windows applications or shortcuts.
+ * 3. When you require a lightweight, three‑circle traffic signal graphic for printing or low‑resolution displays in a .NET project.
+ * 4. When you are teaching or learning how to draw shapes, fill brushes, and use pens with Aspose.Imaging in C#.
+ * 5. When you must produce a traffic‑light symbol on the fly for automated reports, status monitors, or IoT device visualizations.
  */
