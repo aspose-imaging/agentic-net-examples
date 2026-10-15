@@ -1,22 +1,26 @@
-// HOW-TO: Blend Red Overlay Onto JPEG Using Memory Streams In C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend Two Images With 50% Opacity From Memory Streams In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,35 +29,43 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            byte[] inputBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream inputStream = new MemoryStream(inputBytes))
+            // Load background image from memory stream
+            using (FileStream fileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            using (MemoryStream inputStream = new MemoryStream())
             {
-                using (RasterImage sourceImage = (RasterImage)Image.Load(inputStream))
+                fileStream.CopyTo(inputStream);
+                inputStream.Position = 0;
+
+                using (RasterImage background = (RasterImage)Image.Load(inputStream))
                 {
+                    // Load overlay image (same source for demonstration)
+                    using (FileStream overlayFileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
                     using (MemoryStream overlayStream = new MemoryStream())
                     {
-                        BmpOptions bmpOptions = new BmpOptions
-                        {
-                            Source = new StreamSource(overlayStream)
-                        };
-                        using (RasterImage overlay = (RasterImage)Image.Create(bmpOptions, sourceImage.Width, sourceImage.Height))
-                        {
-                            Graphics graphics = new Graphics(overlay);
-                            graphics.Clear(Aspose.Imaging.Color.Empty);
-                            graphics.FillRectangle(new SolidBrush(Aspose.Imaging.Color.Red), new Rectangle(0, 0, overlay.Width, overlay.Height));
+                        overlayFileStream.CopyTo(overlayStream);
+                        overlayStream.Position = 0;
 
-                            sourceImage.Blend(new Point(0, 0), overlay, 128);
-                        }
-
-                        using (MemoryStream outputStream = new MemoryStream())
+                        using (RasterImage overlay = (RasterImage)Image.Load(overlayStream))
                         {
-                            PngOptions pngOptions = new PngOptions
-                            {
-                                Source = new StreamSource(outputStream)
-                            };
-                            sourceImage.Save(outputStream, pngOptions);
-                            File.WriteAllBytes(outputPath, outputStream.ToArray());
+                            // Calculate center position
+                            int posX = (background.Width - overlay.Width) / 2;
+                            int posY = (background.Height - overlay.Height) / 2;
+                            Aspose.Imaging.Point location = new Aspose.Imaging.Point(posX, posY);
+
+                            // Apply alpha blending with 50% opacity (127)
+                            background.Blend(location, overlay, 127);
                         }
+                    }
+
+                    // Save result to output memory stream
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        Source outSource = new StreamSource(outputStream);
+                        PngOptions pngOptions = new PngOptions() { Source = outSource };
+                        background.Save(outputStream, pngOptions);
+
+                        // Write output stream to file
+                        File.WriteAllBytes(outputPath, outputStream.ToArray());
                     }
                 }
             }
@@ -67,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a semi‑transparent red overlay to a JPEG that is loaded from a byte array and then save the result as a PNG in memory.
- * 2. When you want to perform alpha blending between a source image and a programmatically created bitmap without creating intermediate files on disk.
- * 3. When you are processing images received from a web service and must combine them with a colored mask before returning the data as a stream.
- * 4. When you are building a server‑side image conversion pipeline that converts uploaded JPEGs to PNGs with custom blending effects while keeping the entire workflow in memory.
- * 5. When you need to generate a PNG stream for further transmission (e.g., HTTP response) after applying a 50 % opacity blend of a red rectangle over the original image.
+ * 1. When you need to overlay a logo onto a photo stored in a byte array before saving it as a PNG file.
+ * 2. When generating dynamic watermarks on images received from a web API without creating temporary files on disk.
+ * 3. When creating composite thumbnails by blending two pictures in memory for a gallery preview.
+ * 4. When applying semi‑transparent UI elements onto background images in a desktop application.
+ * 5. When processing scanned documents and adding a translucent stamp directly from streams for compliance.
  */
