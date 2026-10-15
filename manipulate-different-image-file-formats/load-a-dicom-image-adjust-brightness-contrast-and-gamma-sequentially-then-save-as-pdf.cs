@@ -1,17 +1,25 @@
-// HOW-TO: Adjust Brightness Contrast and Gamma of DICOM and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Brightness Contrast Gamma of DICOM and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.dcm");
-            string outputPath = Path.Combine("Output", "result.pdf");
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,27 +29,15 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
-
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
-
-                raster.AdjustBrightness(50);
-                raster.AdjustContrast(0.2f);
-                raster.AdjustGamma(1.1f);
+                image.AdjustBrightness(50);
+                image.AdjustContrast(20f);
+                image.AdjustGamma(1.2f);
 
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    raster.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -54,9 +50,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application needs to enhance a DICOM X‑ray image’s visibility before archiving it as a searchable PDF report.
- * 2. When a healthcare integration service must programmatically adjust the brightness, contrast, and gamma of medical scans and deliver them to clinicians in PDF format.
- * 3. When a C# desktop tool converts DICOM files to PDF while applying visual corrections to meet diagnostic imaging standards.
- * 4. When an automated batch process prepares DICOM images for patient records by normalizing image tones and exporting them as PDFs.
- * 5. When a telemedicine platform requires on‑the‑fly image enhancement of DICOM scans before embedding them in PDF documents for remote review.
+ * 1. When a medical imaging application needs to enhance a DICOM scan’s visibility before archiving it as a PDF report.
+ * 2. When a radiology workflow requires batch processing to normalize brightness, contrast, and gamma of DICOM files for consistent print quality.
+ * 3. When a healthcare web service must convert patient DICOM images to searchable PDF documents after applying visual adjustments.
+ * 4. When a diagnostic tool wants to display clearer DICOM images on screens with varying lighting by programmatically tweaking image parameters and exporting to PDF.
+ * 5. When a hospital’s document management system needs to store processed DICOM images as PDFs to integrate with non‑medical document viewers.
  */
