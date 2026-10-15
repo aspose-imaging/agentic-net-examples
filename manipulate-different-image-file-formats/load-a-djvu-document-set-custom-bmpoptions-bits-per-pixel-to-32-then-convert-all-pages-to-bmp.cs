@@ -1,10 +1,16 @@
-// HOW-TO: Convert DjVu Document Pages to 32‑Bit BMP Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages To 32‑Bit BMP Images In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -27,14 +33,14 @@ class Program
             {
                 for (int i = 0; i < djvu.Pages.Length; i++)
                 {
-                    var page = djvu.Pages[i];
                     string outputPath = Path.Combine(outputDir, $"page_{i + 1}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (BmpOptions bmpOptions = new BmpOptions())
-                    {
-                        page.Save(outputPath, bmpOptions);
-                    }
+                    BmpOptions bmpOptions = new BmpOptions();
+                    bmpOptions.BitsPerPixel = 32;
+                    bmpOptions.MultiPageOptions = new DjvuMultiPageOptions(i);
+
+                    djvu.Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu file and save them as high‑color‑depth BMP files for further editing in Windows graphics tools.
- * 2. When a legacy application only accepts BMP images, you can programmatically convert DjVu documents to 32‑bit BMPs before importing them.
- * 3. When automating a batch process that archives scanned documents, converting DjVu pages to BMP ensures compatibility with systems that do not support DjVu.
- * 4. When preparing DjVu content for printing on devices that require BMP format, you can generate per‑page BMP files with Aspose.Imaging in C#.
- * 5. When performing image analysis on individual DjVu pages, converting each page to BMP allows you to use standard .NET image libraries that work with BMP data.
+ * 1. When you need to extract each page of a multi‑page DjVu document as a high‑color‑depth BMP for printing or archival.
+ * 2. When a Windows desktop application requires 32‑bit BMP files from scanned DjVu files to preserve transparency or alpha channel data.
+ * 3. When batch‑processing a library of DjVu ebooks to generate BMP thumbnails for a document management system.
+ * 4. When converting DjVu technical drawings to BMP so they can be edited in legacy graphics tools that only support BMP.
+ * 5. When preparing DjVu pages for a machine‑vision pipeline that expects 32‑bit BMP input for accurate pixel analysis.
  */
