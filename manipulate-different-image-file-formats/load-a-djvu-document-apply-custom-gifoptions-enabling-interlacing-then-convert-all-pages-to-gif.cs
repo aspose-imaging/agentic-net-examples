@@ -1,55 +1,57 @@
-// HOW-TO: Convert DjVu Pages to Interlaced GIF Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document To Interlaced GIF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
 
-class Program
+namespace DjvuToGifConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.djvu";
-            string outputDirectory = "Output";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input/input.djvu";
+                string outputPath = "output/output.gif";
 
-            Directory.CreateDirectory(outputDirectory);
-
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-            {
-                for (int i = 0; i < djvu.Pages.Length; i++)
+                if (!File.Exists(inputPath))
                 {
-                    var page = djvu.Pages[i];
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    GifOptions gifOptions = new GifOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    GifOptions options = new GifOptions
                     {
                         Interlaced = true
                     };
-                    page.Save(outputPath, gifOptions);
+                    image.Save(outputPath, options);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract every page from a multi‑page DjVu file and save them as interlaced GIFs for progressive display on websites.
- * 2. When a C# service processes uploaded DjVu manuals and converts each page to GIF format with interlacing to reduce perceived loading time.
- * 3. When you are building a document preview feature that generates lightweight GIF thumbnails from DjVu pages using Aspose.Imaging.
- * 4. When migrating legacy DjVu archives to a format supported by older browsers, converting each page to an interlaced GIF for compatibility.
- * 5. When automating batch conversion of DjVu slideshows into GIF images that can be embedded in email newsletters without requiring external plugins.
+ * 1. When you need to display scanned DjVu pages on web browsers that only support interlaced GIF images.
+ * 2. When you want to create smaller, progressively loading GIF previews of DjVu documents for faster page rendering.
+ * 3. When a document management system must archive DjVu files as GIFs with interlacing to preserve visual quality during bandwidth‑limited transfers.
+ * 4. When converting multi‑page DjVu reports into a single GIF file for embedding in email newsletters or social media posts.
+ * 5. When automating a batch process that transforms DjVu manuals into interlaced GIFs for compatibility with legacy image viewers.
  */
