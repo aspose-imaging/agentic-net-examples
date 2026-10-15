@@ -1,10 +1,17 @@
-// HOW-TO: Convert OTG Image to PNG with Proper Resource Disposal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PNG with Automatic Resource Disposal in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace OTGToPngConverter
+namespace OtgToPngConverter
 {
     class Program
     {
@@ -38,9 +45,9 @@ namespace OTGToPngConverter
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy OTG design files to web‑friendly PNGs in a .NET batch process while ensuring memory is released promptly.
- * 2. When building an automated image pipeline that reads OTG assets from a folder and outputs PNG thumbnails without leaking unmanaged resources.
- * 3. When integrating Aspose.Imaging into a C# service that receives OTG uploads and must store them as PNGs for downstream reporting.
- * 4. When migrating a desktop application to .NET Core and want to safely handle large OTG files by wrapping the Image object in a using statement.
- * 5. When creating a command‑line utility that validates the existence of an OTG file, creates the output directory, and saves a PNG while handling exceptions gracefully.
+ * 1. When you need to convert legacy OTG graphics to modern PNG files in a desktop C# application while ensuring memory is released promptly.
+ * 2. When building an automated image‑processing pipeline that reads OTG assets from a folder and outputs PNGs for web display, using a using block prevents resource leaks.
+ * 3. When integrating Aspose.Imaging into a server‑side service that receives OTG uploads and returns PNG thumbnails, proper disposal avoids exhausting server resources.
+ * 4. When migrating a legacy design workflow to .NET and must batch‑convert multiple OTG drawings to PNG without leaving file handles open.
+ * 5. When creating a command‑line utility for designers to quickly export OTG diagrams as PNGs, wrapping the Image object in a using statement guarantees clean cleanup after each conversion.
  */
