@@ -1,58 +1,68 @@
-// HOW-TO: Apply Gaussian Blur Followed by Emboss Filter to SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur and Emboss Filters to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = image as Aspose.Imaging.FileFormats.Svg.SvgImage;
-                if (svgImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load SVG image.");
-                    return;
-                }
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-                using (var ms = new MemoryStream())
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                // Rasterize SVG to PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions();
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = 800,
+                            PageHeight = 600,
+                            BackgroundColor = Color.White
+                        }
+                    };
                     svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(ms))
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
                     {
-                        Aspose.Imaging.RasterImage rasterImage = rasterImg as Aspose.Imaging.RasterImage;
-                        if (rasterImage == null)
-                        {
-                            Console.Error.WriteLine("Failed to rasterize SVG.");
-                            return;
-                        }
-
-                        var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                        // Apply Gaussian blur filter
+                        var gaussianOptions = new ConvolutionFilterOptions(ConvolutionFilter.GetGaussian(3, 1.0));
                         rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
 
-                        var embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-                        var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+                        // Apply Emboss3x3 filter
+                        var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
                         rasterImage.Filter(rasterImage.Bounds, embossOptions);
 
-                        rasterImage.Save(outputPath, pngOptions);
+                        // Save the processed image
+                        var saveOptions = new PngOptions();
+                        rasterImage.Save(outputPath, saveOptions);
                     }
                 }
             }
@@ -66,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a soft‑focused, embossed version of a vector logo for a website banner.
- * 2. When generating stylized icons where the original SVG must be rasterized to PNG with a blur and emboss effect for a mobile app.
- * 3. When preprocessing SVG illustrations for print materials, adding a subtle blur before embossing to enhance depth perception.
- * 4. When building an automated pipeline that converts SVG assets to PNG thumbnails with artistic effects for an e‑commerce catalog.
- * 5. When implementing a custom image filter in a C# desktop application that applies sequential Gaussian blur and emboss filters to user‑uploaded SVG files.
+ * 1. When you need to generate a stylized thumbnail of an SVG logo by blurring and embossing it before exporting to PNG for web display.
+ * 2. When creating print‑ready assets where a subtle Gaussian blur followed by an emboss effect enhances depth perception of vector illustrations.
+ * 3. When preprocessing SVG icons for a game UI, applying blur and emboss to achieve a polished, three‑dimensional look in the final PNG sprites.
+ * 4. When automating batch conversion of SVG diagrams to PNG with artistic effects for inclusion in marketing brochures.
+ * 5. When building a C# service that dynamically renders user‑uploaded SVGs with custom filter chains (blur then emboss) before serving them as PNG images.
  */
