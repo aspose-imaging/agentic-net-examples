@@ -1,47 +1,40 @@
-// HOW-TO: Convert WebP to BMP and Store in MemoryStream Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Save PNG As BMP To MemoryStream Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "input.webp";
-            string outputPath = "output\\output.bmp";
+            string inputPath = Path.Combine("Input", "sample.png");
+            string outputPath = Path.Combine("Output", "converted.bmp");
 
-            // Input validation
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WebP image
-            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Convert to BMP and save to MemoryStream
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
                     BmpOptions bmpOptions = new BmpOptions();
-                    webpImage.Save(memoryStream, bmpOptions);
-
-                    // Example: write the BMP from memory to a file
-                    memoryStream.Position = 0;
-                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        memoryStream.CopyTo(fileStream);
-                    }
-
-                    // At this point, memoryStream contains the BMP data for further in‑memory processing
+                    image.Save(ms, bmpOptions);
+                    // Further in‑memory processing can be done with the MemoryStream here.
                 }
             }
         }
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert uploaded WebP images to BMP format for a legacy Windows application without writing temporary files to disk.
- * 2. When you want to process the BMP data in‑memory (e.g., apply filters or embed into a PDF) before saving or transmitting it.
- * 3. When you are building a web service that receives WebP payloads and must return BMP streams to client browsers that only support BMP.
- * 4. When you need to batch‑convert a folder of WebP files to BMP while keeping the intermediate results in memory to improve performance.
- * 5. When you are integrating Aspose.Imaging into a cloud function where disk I/O is restricted, so you store the converted BMP in a MemoryStream for further manipulation.
+ * 1. When you need to convert a user‑uploaded PNG to BMP for a legacy system without creating a temporary file on disk.
+ * 2. When you want to apply additional image processing or filters directly on the BMP data held in a MemoryStream.
+ * 3. When you must send BMP image bytes over a network or API call that expects a stream rather than a file path.
+ * 4. When you are generating on‑the‑fly thumbnails and require the BMP image as an in‑memory byte array for further manipulation.
+ * 5. When your application runs in a sandboxed or cloud environment where disk I/O is restricted, so all conversion must stay in memory.
  */

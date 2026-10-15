@@ -1,42 +1,46 @@
-// HOW-TO: Crop PNG Image To Centered Square Region In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Crop PNG Image to Centered Square Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\image.png";
-        string outputPath = "Output\\cropped.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output\\cropped.png";
+
+            if (!File.Exists(inputPath))
             {
-                var raster = (Aspose.Imaging.RasterImage)image;
-                if (!raster.IsCached) raster.CacheData();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                int side = Math.Min(raster.Width, raster.Height);
-                int x = (raster.Width - side) / 2;
-                int y = (raster.Height - side) / 2;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(x, y, side, side);
-                raster.Crop(rect);
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                int width = image.Width;
+                int height = image.Height;
+                int size = Math.Min(width, height);
 
-                using (var options = new PngOptions())
-                {
-                    raster.Save(outputPath, options);
-                }
+                int leftShift = (width - size) / 2;
+                int rightShift = width - size - leftShift;
+                int topShift = (height - size) / 2;
+                int bottomShift = height - size - topShift;
+
+                image.Crop(leftShift, rightShift, topShift, bottomShift);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a square thumbnail from user‑uploaded PNG photos for a profile gallery.
- * 2. When you must prepare a centered square PNG for printing on merchandise where only the central area should be visible.
- * 3. When an application requires cropping scanned PNG documents to a uniform square size before further processing.
- * 4. When you want to ensure consistent aspect ratio for PNG assets in a mobile game UI by cropping them to a centered square.
- * 5. When you need to batch‑process PNG screenshots, removing excess borders and saving the result as a new PNG file.
+ * 1. When you need to generate square thumbnails from user‑uploaded PNG photos for a web gallery.
+ * 2. When you must prepare profile pictures that are perfectly centered and square before saving them to a database.
+ * 3. When you are creating assets for a mobile app that requires square PNG icons derived from larger images.
+ * 4. When you need to standardize image dimensions for a machine‑learning model that expects square inputs.
+ * 5. When you want to batch‑process product images to fit a consistent square layout on an e‑commerce site.
  */
