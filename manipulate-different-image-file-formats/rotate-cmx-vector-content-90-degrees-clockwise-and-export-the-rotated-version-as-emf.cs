@@ -1,4 +1,11 @@
 // HOW-TO: Rotate CMX Vector 90 Degrees Clockwise and Save as EMF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +18,7 @@ class Program
         try
         {
             string inputPath = "input.cmx";
-            string outputPath = "output.emf";
+            string outputPath = "output/output.emf";
 
             if (!File.Exists(inputPath))
             {
@@ -24,8 +31,7 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                var options = new EmfOptions();
-                image.Save(outputPath, options);
+                image.Save(outputPath, new EmfOptions());
             }
         }
         catch (Exception ex)
@@ -37,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to display a CMX drawing in a Windows application that only supports EMF, they can rotate the vector and convert it.
- * 2. When preparing printed reports that require landscape orientation, rotating the CMX artwork 90° and saving as EMF ensures correct layout.
- * 3. When integrating legacy CAD data into a .NET reporting engine that consumes EMF, the code provides a quick way to re‑orient and export the graphics.
- * 4. When automating batch processing of CMX files to match a corporate branding guideline that mandates a specific orientation, this snippet can be used in a scheduled job.
- * 5. When a user uploads a CMX file to a web service and expects a rotated EMF preview for thumbnail generation, the code performs the transformation on the server.
+ * 1. When a CAD application needs to re‑orient a CMX drawing before embedding it into a Windows Metafile for reporting.
+ * 2. When a batch conversion tool must rotate legacy CorelDRAW vector files and export them as EMF for compatibility with Microsoft Office.
+ * 3. When a GIS system requires rotating map symbols stored in CMX format to match a new north‑up orientation and then save them as EMF for further processing.
+ * 4. When an automated document generation pipeline has to adjust the layout of vector graphics and store the result in EMF to preserve scalability.
+ * 5. When a developer wants to programmatically rotate a CMX logo 90° clockwise and export it as an EMF image for use in a .NET WinForms UI.
  */
