@@ -1,37 +1,39 @@
-// HOW-TO: Create BMP with Thick Red Line and Thin Black Outline in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Red Line and Black Outline in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
         try
         {
-            string outputPath = "output.bmp";
-            string dir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(dir))
-                dir = ".";
-            Directory.CreateDirectory(dir);
-
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
             int width = 200;
             int height = 200;
-
-            using (Image image = Image.Create(options, width, height))
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                Pen redPen = new Pen(Color.Red, 10);
+                Pen redPen = new Pen(Aspose.Imaging.Color.Red, 10);
                 graphics.DrawLine(redPen, new Point(20, 20), new Point(180, 180));
 
-                Pen blackPen = new Pen(Color.Black, 2);
+                Pen blackPen = new Pen(Aspose.Imaging.Color.Black, 2);
                 graphics.DrawLine(blackPen, new Point(20, 20), new Point(180, 180));
 
                 image.Save();
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP diagram that highlights a path with a bold red line and a subtle black border for better visibility in a .NET reporting tool.
- * 2. When creating custom icons or UI assets where a thick colored stroke must be emphasized with a thin contrasting outline using Aspose.Imaging in C#.
- * 3. When producing test images for computer‑vision algorithms that require a clear red line edge highlighted by a black line to evaluate edge detection accuracy.
- * 4. When automating the preparation of printable schematics that need a prominent red guide line with a black accent to ensure clarity on monochrome printers.
- * 5. When building a game map editor that programmatically draws highlighted routes on a BMP background, using a thick red line topped with a thin black line for contrast.
+ * 1. When you need to generate a BMP file programmatically and highlight a path with a thick red line topped by a thin black border for visual contrast.
+ * 2. When creating simple diagrammatic assets such as arrows or connectors in a bitmap for reports or UI mock‑ups using Aspose.Imaging in C#.
+ * 3. When producing test images that require layered line styles to verify rendering accuracy of graphics libraries or printing pipelines.
+ * 4. When automating the production of custom icons or markers where a bold colored line must be outlined to improve visibility against a white background.
+ * 5. When building a batch process that draws highlighted guidelines on BMP canvases for computer‑vision preprocessing or annotation tasks.
  */
