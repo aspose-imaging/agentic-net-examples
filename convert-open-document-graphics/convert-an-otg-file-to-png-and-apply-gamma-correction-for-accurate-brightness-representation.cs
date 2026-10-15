@@ -1,43 +1,65 @@
-// HOW-TO: Convert OTG to PNG with Gamma Correction Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PNG with Gamma Correction in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
+
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string inputPath = Path.Combine(inputDirectory, "input.otg");
+        string outputPath = Path.Combine(outputDirectory, "output.png");
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = Path.Combine("Input", "sample.otg");
-            string outputPath = Path.Combine("Output", "sample.png");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image otgImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var rasterOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = otgImage.Width,
+                        PageHeight = otgImage.Height
+                    }
                 };
-                image.Save(outputPath, pngOptions);
+                otgImage.Save(outputPath, pngOptions);
             }
 
-            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(outputPath))
             {
+                if (!raster.IsCached) raster.CacheData();
                 raster.AdjustGamma(2.2f);
                 raster.Save(outputPath);
             }
@@ -51,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OTG vector diagram on the web, you can rasterize it to a PNG and adjust gamma so the colors appear with correct brightness across browsers.
- * 2. When a printing workflow requires converting proprietary OTG files to PNG thumbnails while ensuring the brightness matches the original design, this code automates the process in C#.
- * 3. When integrating a CAD viewer that only supports raster images, you can use this snippet to transform OTG drawings into PNGs and apply gamma correction for accurate visual representation.
- * 4. When building an automated asset pipeline that ingests OTG graphics and outputs PNG assets for mobile apps, the gamma adjustment ensures consistent appearance on devices with different display calibrations.
- * 5. When creating a batch conversion tool to prepare OTG files for machine‑learning image analysis, converting to PNG and normalizing gamma helps maintain consistent pixel intensity for reliable model training.
+ * 1. When you need to display an OTG vector graphic on a web page that only supports PNG images, you can convert it and adjust brightness with gamma correction.
+ * 2. When preparing print‑ready assets, applying gamma correction ensures the PNG’s brightness matches the original OTG’s appearance.
+ * 3. When integrating legacy OTG files into a modern C# application that processes raster images, you can rasterize them to PNG and normalize luminance.
+ * 4. When creating thumbnails of OTG drawings for a gallery, converting to PNG and correcting gamma gives consistent visual quality across devices.
+ * 5. When automating a batch workflow that ingests OTG files and outputs PNGs for machine‑learning image analysis, gamma adjustment helps maintain accurate pixel intensity.
  */
