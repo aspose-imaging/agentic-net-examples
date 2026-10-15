@@ -1,10 +1,17 @@
-// HOW-TO: Batch Convert BMP Images To Lossless WebP In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to Lossless WebP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BatchConvertBmpToWebp
+namespace BatchBmpToWebp
 {
     class Program
     {
@@ -12,30 +19,38 @@ namespace BatchConvertBmpToWebp
         {
             try
             {
-                string inputDirectory = "C:\\InputImages";
-                string outputDirectory = "C:\\OutputImages";
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\InputImages";
+                string outputDirectory = @"C:\OutputImages";
 
+                // Get all BMP files in the input directory
                 string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-                foreach (string inputPath in bmpFiles)
+                foreach (string bmpFilePath in bmpFiles)
                 {
-                    if (!File.Exists(inputPath))
+                    // Validate input file existence
+                    if (!File.Exists(bmpFilePath))
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        Console.Error.WriteLine($"File not found: {bmpFilePath}");
                         return;
                     }
 
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                    // Determine output file path with .webp extension
+                    string outputFilePath = Path.Combine(
+                        outputDirectory,
+                        Path.GetFileNameWithoutExtension(bmpFilePath) + ".webp");
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
 
-                    using (Image image = Image.Load(inputPath))
+                    // Load BMP image and save as WebP with lossless compression
+                    using (Image image = Image.Load(bmpFilePath))
                     {
                         WebPOptions options = new WebPOptions
                         {
                             Lossless = true
                         };
-                        image.Save(outputPath, options);
+                        image.Save(outputFilePath, options);
                     }
                 }
             }
@@ -49,9 +64,9 @@ namespace BatchConvertBmpToWebp
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink a legacy collection of BMP graphics for faster web delivery without losing visual quality.
- * 2. When an automated build process must convert newly generated BMP screenshots into WebP files for storage optimization.
- * 3. When a desktop application has to prepare user‑uploaded BMP pictures for a cloud service that only accepts WebP format.
- * 4. When migrating a digital asset library, you want to batch‑process BMP files into lossless WebP to reduce disk space while preserving exact colors.
- * 5. When creating a nightly batch job that converts any BMP files placed in a folder into WebP for a content‑management workflow.
+ * 1. When you need to shrink a large collection of legacy BMP assets for a web site while preserving pixel‑perfect quality, you can batch convert them to lossless WebP using C# and Aspose.Imaging.
+ * 2. When automating a build pipeline that generates thumbnails from BMP source files, converting them to WebP reduces file size without visual loss, speeding up page loads.
+ * 3. When migrating a desktop application’s image resources from BMP to a modern web‑friendly format, this code lets you process an entire folder in one run.
+ * 4. When preparing images for a mobile app that only supports WebP, you can quickly convert all BMP files on a server to lossless WebP before deployment.
+ * 5. When archiving design assets and you want to keep the original detail while minimizing storage, batch converting BMPs to lossless WebP with C# provides efficient compression.
  */
