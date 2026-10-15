@@ -1,7 +1,13 @@
-// HOW-TO: Create SVG From PNG With 2-Pixel Stroke Border In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG From PNG With 2‑Pixel Stroke Border In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
@@ -12,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "input.png");
-            string outputPath = Path.Combine("Output", "output.svg");
+            string inputPath = Path.Combine("Input", "image.png");
+            string outputPath = Path.Combine("Output", "image.svg");
 
             if (!File.Exists(inputPath))
             {
@@ -23,27 +29,25 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image pngImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image pngImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)pngImage;
-                if (!raster.IsCached) raster.CacheData();
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)pngImage;
+                int width = raster.Width;
+                int height = raster.Height;
 
-                using (SvgOptions svgOptions = new SvgOptions())
+                SvgOptions svgOptions = new SvgOptions();
+
+                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(svgOptions, width, height))
                 {
-                    svgOptions.Source = new FileCreateSource(outputPath, false);
-                    using (Image svgImage = Image.Create(svgOptions, raster.Width, raster.Height))
-                    {
-                        Graphics graphics = new Graphics(svgImage);
-                        graphics.Clear(Color.White);
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(svgImage);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0));
 
-                        Pen pen = new Pen(Color.Black);
-                        pen.Width = 2;
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black);
+                    pen.Width = 2;
+                    graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(0, 0, width, height));
 
-                        graphics.DrawImage(raster, new Point(0, 0));
-                        graphics.DrawRectangle(pen, new Rectangle(0, 0, raster.Width, raster.Height));
-
-                        svgImage.Save();
-                    }
+                    svgImage.Save(outputPath);
                 }
             }
         }
@@ -56,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a raster PNG into a scalable SVG for responsive web graphics while adding a visible border.
- * 2. When converting legacy PNG assets to SVG format to reduce file size and enable infinite scaling in a C# application.
- * 3. When generating vector outlines around bitmap images for printing or PDF export where a consistent 2-pixel stroke is required.
- * 4. When automating batch processing of PNG logos into SVG files with a uniform border for branding guidelines.
- * 5. When creating SVG placeholders that display a PNG thumbnail with a black frame for UI mockups in .NET projects.
+ * 1. When you need to convert a raster PNG logo into a scalable SVG file and add a consistent 2‑pixel outline for branding purposes.
+ * 2. When generating vector graphics for web pages from existing PNG assets while ensuring a uniform border thickness across different screen resolutions.
+ * 3. When creating printable SVG diagrams from PNG screenshots and requiring a precise 2‑pixel stroke to meet design specifications.
+ * 4. When automating batch processing of PNG icons to SVG format with a defined border for use in UI libraries that rely on vector shapes.
+ * 5. When integrating Aspose.Imaging in a C# application to transform raster images into SVGs and programmatically apply a custom stroke width for consistent styling.
  */
