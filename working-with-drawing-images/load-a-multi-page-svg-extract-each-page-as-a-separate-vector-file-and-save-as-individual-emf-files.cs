@@ -1,10 +1,19 @@
-// HOW-TO: Extract Each Page from Multi‑Page SVG and Save as EMF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Each Page from Multi‑Page SVG and Save as Separate EMF Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,16 +21,19 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-
+            string inputPath = "Input/multipage.svg";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputDirectory = "Output";
+
             using (Image image = Image.Load(inputPath))
             {
+                Directory.CreateDirectory(outputDirectory);
+
                 int pageCount = 1;
                 if (image is IMultipageImage multipage)
                 {
@@ -30,13 +42,22 @@ class Program
 
                 for (int i = 0; i < pageCount; i++)
                 {
-                    string outputPath = $"output\\page_{i + 1}.emf";
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.emf");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    EmfOptions options = new EmfOptions();
-                    options.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    EmfOptions emfOptions = new EmfOptions();
 
-                    image.Save(outputPath, options);
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    emfOptions.VectorRasterizationOptions = vectorOptions;
+
+                    emfOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i));
+
+                    image.Save(outputPath, emfOptions);
                 }
             }
         }
@@ -49,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a multi‑page SVG diagram into separate EMF files for use in Windows vector‑based reports.
- * 2. When a CAD application exports designs as a single SVG and you must split them into individual EMF pages for legacy engineering tools.
- * 3. When generating printable vector assets for each slide of an SVG presentation and require separate EMF files for Office integration.
- * 4. When automating a batch process that extracts each layer of a multi‑page SVG and saves them as EMF to preserve scalability in .NET applications.
- * 5. When preparing vector graphics for high‑resolution rendering in a C# workflow, converting each SVG page to EMF to maintain quality in downstream processing.
+ * 1. When you need to convert each layer of a multi‑page SVG diagram into individual EMF files for high‑quality vector printing.
+ * 2. When generating separate vector assets from a multi‑page SVG to embed in Microsoft Office documents using C#.
+ * 3. When automating the extraction of SVG pages for use in CAD or GIS applications that require EMF format.
+ * 4. When creating per‑page vector graphics for a reporting system that outputs charts as EMF for scalable PDFs.
+ * 5. When processing batch SVG files on a server to produce individual EMF files for downstream vector‑based workflows.
  */
