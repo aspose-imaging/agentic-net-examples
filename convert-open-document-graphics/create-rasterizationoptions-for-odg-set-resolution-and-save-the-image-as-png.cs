@@ -1,20 +1,25 @@
-// HOW-TO: Convert ODG to PNG with 300 DPI Rasterization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PNG with Custom Resolution Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.odg";
+        string outputPath = "Output\\sample.png";
+
         try
         {
-            string inputPath = "Input/sample.odg";
-            string outputPath = "Output/sample.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,18 +30,18 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PngOptions options = new PngOptions())
+                var pngOptions = new PngOptions
                 {
-                    options.Source = new FileCreateSource(outputPath, false);
-                    options.ResolutionSettings = new ResolutionSetting(300, 300);
-                    options.VectorRasterizationOptions = new OdgRasterizationOptions
+                    VectorRasterizationOptions = new OdgRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    };
-                    image.Save(outputPath, options);
-                }
+                    },
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution PNG thumbnails from OpenDocument graphics (ODG) files in a C# application.
- * 2. When exporting ODG diagrams to PNG for web display while preserving exact page dimensions and a white background.
- * 3. When batch‑processing ODG assets to PNG with a fixed 300 dpi resolution for print‑ready output.
- * 4. When integrating Aspose.Imaging into a document conversion service that must rasterize vector ODG pages to raster PNG images.
- * 5. When creating PNG previews of ODG files in a Windows desktop tool that requires setting custom rasterization options such as page size and background color.
+ * 1. When you need to generate high‑resolution PNG thumbnails from OpenDocument graphics (ODG) files for web previews.
+ * 2. When an application must batch‑convert ODG drawings to PNG while preserving a white background for consistent display.
+ * 3. When exporting vector ODG diagrams to raster PNG images at 300 dpi for printing or PDF embedding.
+ * 4. When integrating Aspose.Imaging into a C# service that receives ODG uploads and returns PNG files with specific page dimensions.
+ * 5. When automating the creation of PNG assets from ODG source files with controlled resolution for UI assets or documentation.
  */
