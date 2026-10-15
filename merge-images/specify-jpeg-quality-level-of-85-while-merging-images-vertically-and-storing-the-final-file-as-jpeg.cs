@@ -1,4 +1,11 @@
-// HOW-TO: Merge Multiple JPEG Images Vertically With Quality 85 In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Vertically with Quality 85 in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -15,43 +22,40 @@ class Program
         try
         {
             string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-            string outputPath = "merged.jpg";
+            string outputPath = "output/merged.jpg";
 
-            foreach (var path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
-            List<int> widths = new List<int>();
-            List<int> heights = new List<int>();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            foreach (var path in inputPaths)
+            var sizes = new List<(int Width, int Height)>();
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
-                    widths.Add(img.Width);
-                    heights.Add(img.Height);
+                    sizes.Add((img.Width, img.Height));
                 }
             }
 
-            int canvasWidth = widths.Max();
-            int canvasHeight = heights.Sum();
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            int maxWidth = sizes.Max(s => s.Width);
+            int totalHeight = sizes.Sum(s => s.Height);
 
             Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 85 };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
-                foreach (var path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -70,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several product photos into a single tall JPEG for a catalog while keeping a specific compression quality of 85.
- * 2. When generating a continuous scrollable banner from multiple advertisement images and want the final JPEG to have consistent quality for web delivery.
- * 3. When creating a printable receipt that stacks scanned pages vertically and requires a controlled JPEG quality to balance file size and readability.
- * 4. When assembling a series of screenshots into one image for bug reports, ensuring the output JPEG uses a defined quality level to avoid loss of detail.
- * 5. When preprocessing images for a machine‑learning pipeline that expects a single JPEG input with a known quality setting, merging the source images vertically before inference.
+ * 1. When you need to create a single high‑quality JPEG photo strip from several individual photos for printing or web galleries.
+ * 2. When an e‑commerce platform must combine product images into one vertical catalog page while controlling compression to preserve detail.
+ * 3. When a reporting tool generates a combined receipt or invoice image from separate scanned pages and requires a specific JPEG quality setting.
+ * 4. When a mobile app server stitches user‑uploaded screenshots into a single JPEG thumbnail and wants to limit file size by setting quality to 85.
+ * 5. When a digital signage system assembles multiple advertisement banners into one vertical JPEG banner and needs consistent compression across the output.
  */
