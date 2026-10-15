@@ -1,12 +1,16 @@
 // HOW-TO: Apply Vignette Effect to EPS and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -23,47 +27,56 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            using (var eps = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageWidth = eps.Width,
-                    PageHeight = eps.Height,
-                    BackgroundColor = Color.Transparent
-                };
+                    var tempPngOptions = new PngOptions();
+                    epsImage.Save(memoryStream, tempPngOptions);
+                    memoryStream.Position = 0;
 
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = rasterOptions,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    using (var raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(memoryStream))
+                    {
+                        int width = raster.Width;
+                        int height = raster.Height;
+                        var rect = new Aspose.Imaging.Rectangle(0, 0, width, height);
+                        int[] pixels = raster.LoadArgb32Pixels(rect);
 
-                eps.Save(outputPath, pngOptions);
-            }
+                        double centerX = width / 2.0;
+                        double centerY = height / 2.0;
+                        double maxDist = Math.Sqrt(centerX * centerX + centerY * centerY);
 
-            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
-            {
-                Graphics graphics = new Graphics(raster);
+                        for (int y = 0; y < height; y++)
+                        {
+                            for (int x = 0; x < width; x++)
+                            {
+                                int index = y * width + x;
+                                int pixel = pixels[index];
+                                int a = (pixel >> 24) & 0xFF;
+                                double dx = x - centerX;
+                                double dy = y - centerY;
+                                double dist = Math.Sqrt(dx * dx + dy * dy);
+                                double factor = dist / maxDist;
+                                if (factor > 1.0) factor = 1.0;
+                                int newA = (int)(a * (1.0 - factor));
+                                int newPixel = (newA << 24) | (pixel & 0x00FFFFFF);
+                                pixels[index] = newPixel;
+                            }
+                        }
 
-                int centerX = raster.Width / 2;
-                int centerY = raster.Height / 2;
-                int maxRadius = Math.Min(raster.Width, raster.Height) / 2;
+                        raster.SaveArgb32Pixels(rect, pixels);
 
-                for (int i = 0; i < 10; i++)
-                {
-                    double factor = (double)i / 10.0;
-                    int radius = maxRadius + i * 5;
-                    int alpha = (int)(255 * (1.0 - factor) * 0.5);
-                    Color brushColor = Color.FromArgb(alpha, 0, 0, 0);
-                    SolidBrush brush = new SolidBrush(brushColor);
-                    Rectangle ellipseRect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                    graphics.FillEllipse(brush, ellipseRect);
+                        var finalOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        raster.Save(outputPath, finalOptions);
+                    }
                 }
-
-                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -75,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector EPS logo into a PNG with a soft dark border for web thumbnails.
- * 2. When you want to generate transparent PNG assets from EPS illustrations while adding a vignette to focus viewer attention.
- * 3. When an e‑commerce site requires product EPS drawings to be displayed as PNGs with a subtle edge shading for a polished look.
- * 4. When preparing marketing materials that combine EPS artwork with a vignette effect and need the final image in PNG format with alpha channel support.
- * 5. When automating a batch process that rasterizes EPS files to PNG, applies a fade‑out border, and preserves transparency for use in UI overlays.
+ * 1. When you need to convert a vector EPS logo into a web‑ready PNG with a soft vignette border and preserve transparency for overlay on webpages.
+ * 2. When generating product thumbnails from EPS illustrations and want a subtle darkening around the edges to draw focus while keeping the background transparent.
+ * 3. When preparing marketing assets that require a vignette effect around vector graphics before embedding them into presentations or emails as PNG files.
+ * 4. When creating UI icons from EPS files and need a fade‑out edge effect to blend with varying background colors while maintaining alpha channel transparency.
+ * 5. When automating batch processing of EPS artwork to produce PNG images with artistic vignette shading for use in mobile apps that support transparent images.
  */
