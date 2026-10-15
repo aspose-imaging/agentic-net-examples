@@ -1,21 +1,26 @@
-// HOW-TO: How To Sharpen A PNG And Compare Histograms In C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare PNG Histogram Before and After Sharpen Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,47 +31,55 @@ class Program
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                int[] beforePixels = raster.LoadArgb32Pixels(raster.Bounds);
-                var beforeHistogram = new Dictionary<int, int>();
-                foreach (int pixel in beforePixels)
+                int width = raster.Width;
+                int height = raster.Height;
+                Rectangle bounds = new Rectangle(0, 0, width, height);
+
+                int[] originalPixels = raster.LoadArgb32Pixels(bounds);
+                int[] originalHist = new int[256];
+                foreach (int pixel in originalPixels)
                 {
-                    if (beforeHistogram.ContainsKey(pixel))
-                        beforeHistogram[pixel]++;
-                    else
-                        beforeHistogram[pixel] = 1;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    int intensity = (r + g + b) / 3;
+                    originalHist[intensity]++;
                 }
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3);
-                raster.Filter(raster.Bounds, filterOptions);
-
-                int[] afterPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                var afterHistogram = new Dictionary<int, int>();
-                foreach (int pixel in afterPixels)
+                double[,] sharpenKernel = new double[,]
                 {
-                    if (afterHistogram.ContainsKey(pixel))
-                        afterHistogram[pixel]++;
-                    else
-                        afterHistogram[pixel] = 1;
-                }
-
-                Console.WriteLine("Histogram before processing:");
-                foreach (var kvp in beforeHistogram)
-                {
-                    Console.WriteLine($"Pixel 0x{kvp.Key:X8}: {kvp.Value}");
-                }
-
-                Console.WriteLine("\nHistogram after processing:");
-                foreach (var kvp in afterHistogram)
-                {
-                    Console.WriteLine($"Pixel 0x{kvp.Key:X8}: {kvp.Value}");
-                }
-
-                var saveOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
+                    {  0, -1,  0 },
+                    { -1,  5, -1 },
+                    {  0, -1,  0 }
                 };
+                var filterOptions = new ConvolutionFilterOptions(sharpenKernel);
+                raster.Filter(bounds, filterOptions);
+
+                var saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
+
+                int[] processedPixels = raster.LoadArgb32Pixels(bounds);
+                int[] processedHist = new int[256];
+                foreach (int pixel in processedPixels)
+                {
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    int intensity = (r + g + b) / 3;
+                    processedHist[intensity]++;
+                }
+
+                Console.WriteLine("Original Histogram:");
+                for (int i = 0; i < 256; i++)
+                {
+                    Console.WriteLine($"{i}: {originalHist[i]}");
+                }
+
+                Console.WriteLine("Processed Histogram:");
+                for (int i = 0; i < 256; i++)
+                {
+                    Console.WriteLine($"{i}: {processedHist[i]}");
+                }
             }
         }
         catch (Exception ex)
@@ -78,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the sharpness of a PNG image before displaying it in a web application and want to verify the effect by analyzing pixel distribution.
- * 2. When you are building an automated image‑processing pipeline that applies a 3×3 sharpen filter to PNG files and logs before‑and‑after histograms for quality control.
- * 3. When you want to compare the color composition of an original PNG with its sharpened version to ensure no unwanted color shifts occur.
- * 4. When you are developing a desktop tool that lets users preview the impact of sharpening on PNG graphics and see statistical changes in pixel frequencies.
- * 5. When you need to programmatically generate a sharpened PNG and store histogram data for later image‑analysis or machine‑learning tasks.
+ * 1. When you need to evaluate how a sharpening filter affects the brightness distribution of a PNG image for quality control.
+ * 2. When building an automated pipeline that sharpens scanned photos and verifies the change by comparing pre‑ and post‑filter histograms.
+ * 3. When creating a diagnostic tool in C# that logs intensity histogram shifts after applying a convolution filter to detect over‑sharpening.
+ * 4. When generating side‑by‑side comparisons of original and processed PNGs to demonstrate the visual impact of a 3×3 sharpen kernel.
+ * 5. When performing batch image enhancement with Aspose.Imaging and need to ensure each file’s histogram stays within acceptable limits after processing.
  */
