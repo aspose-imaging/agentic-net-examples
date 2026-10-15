@@ -1,9 +1,16 @@
-// HOW-TO: Create Multiple BMP Images with Centered Red Circles of Varying Radii in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate Multiple BMP Images with Centered Colored Circles in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
@@ -16,28 +23,29 @@ class Program
             string outputDir = "OutputImages";
             Directory.CreateDirectory(outputDir);
 
-            int[] radii = new int[] { 20, 40, 60, 80, 100 };
+            List<int> radii = new List<int> { 20, 40, 60, 80 };
+            int canvasSize = 200;
+
             foreach (int radius in radii)
             {
-                int width = radius * 2 + 20;
-                int height = width;
-                string outputPath = Path.Combine(outputDir, $"circle_{radius}.bmp");
+                string fileName = $"circle_{radius}.bmp";
+                string outputPath = Path.Combine(outputDir, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 Source source = new FileCreateSource(outputPath, false);
                 BmpOptions options = new BmpOptions() { Source = source };
 
-                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
+                using (RasterImage canvas = (RasterImage)Image.Create(options, canvasSize, canvasSize))
                 {
                     Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.Clear(Color.White);
 
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                    using (SolidBrush circleBrush = new SolidBrush(Color.Red))
                     {
-                        int left = (width - radius * 2) / 2;
-                        int top = (height - radius * 2) / 2;
-                        Rectangle rect = new Rectangle(left, top, radius * 2, radius * 2);
-                        graphics.FillEllipse(brush, rect);
+                        int diameter = radius * 2;
+                        int x = (canvasSize - diameter) / 2;
+                        int y = (canvasSize - diameter) / 2;
+                        graphics.FillEllipse(circleBrush, x, y, diameter, diameter);
                     }
 
                     canvas.Save();
@@ -53,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a batch of BMP icons that display centered red circles of different sizes for UI testing or prototyping.
- * 2. When you want to programmatically produce placeholder graphics for documentation that require a simple centered shape in a raster format.
- * 3. When you are creating game assets where each BMP file represents a target area with a specific radius for level design.
- * 4. When you need calibration images for computer‑vision algorithms that require circles of known dimensions saved as BMP files.
- * 5. When you must export simple vector‑like shapes to BMP format for legacy systems that only accept raster images.
+ * 1. When you need to create a set of BMP icons that display circles of different sizes for UI testing or design previews.
+ * 2. When generating placeholder graphics for a game level editor that requires centered red circles with varying radii.
+ * 3. When producing batch image assets for printing calibration where each BMP must contain a precise circle diameter.
+ * 4. When automating the creation of sample data for computer‑vision algorithms that detect circular shapes in raster images.
+ * 5. When building a reporting tool that outputs BMP charts with circles representing data points of different magnitudes.
  */
