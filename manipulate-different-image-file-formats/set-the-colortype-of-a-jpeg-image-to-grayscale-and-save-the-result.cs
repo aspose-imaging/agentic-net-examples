@@ -1,4 +1,11 @@
-// HOW-TO: Convert JPEG Image To Grayscale And Save With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to Grayscale Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/source.jpg";
-            string outputPath = "Output/grayscale.jpg";
+            string inputPath = "Input\\image.jpg";
+            string outputPath = "Output\\image_grayscale.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,14 +29,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                image.Grayscale();
-
-                using (JpegOptions options = new JpegOptions())
+                var jpegOptions = new JpegOptions
                 {
-                    image.Save(outputPath, options);
-                }
+                    ColorType = JpegCompressionColorMode.Grayscale
+                };
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate black‑and‑white previews of user‑uploaded JPEG photos for a web gallery.
- * 2. When you must reduce the file size of JPEG images for email attachments by converting them to grayscale.
- * 3. When preparing scanned color JPEG documents for OCR, converting them to a single‑channel grayscale improves recognition accuracy.
- * 4. When creating print‑ready assets that require a single‑channel image to meet publishing specifications.
- * 5. When standardizing a batch of product JPEG images to grayscale before uploading them to an e‑commerce platform.
+ * 1. When you need to reduce file size for web thumbnails by converting color JPEGs to grayscale before uploading.
+ * 2. When generating print‑ready documents that require all images in grayscale to meet publishing standards.
+ * 3. When creating a batch script that normalizes a photo archive to grayscale for consistent visual style in a gallery.
+ * 4. When preprocessing images for machine‑learning models that expect single‑channel grayscale input.
+ * 5. When developing a C# desktop application that saves user‑edited photos as grayscale JPEGs for artistic effects.
  */
