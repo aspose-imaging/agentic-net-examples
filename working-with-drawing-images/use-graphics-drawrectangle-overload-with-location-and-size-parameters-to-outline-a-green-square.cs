@@ -1,15 +1,22 @@
-// HOW-TO: Draw a Green Square on an Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Green Square Outline on an Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.jpg";
-        string outputPath = "output/output.png";
+        string outputPath = "output.png";
 
         if (!File.Exists(inputPath))
         {
@@ -29,8 +36,7 @@ class Program
                 int y = 50;
                 int size = 100;
                 graphics.DrawRectangle(pen, x, y, size, size);
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -42,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to highlight a specific area of a JPEG photo by drawing a green square overlay before saving it as a PNG.
- * 2. When you want to programmatically add a visual marker to images for quality‑control reports in a .NET application.
- * 3. When you are generating annotated screenshots where a green rectangle indicates a region of interest for documentation purposes.
- * 4. When you need to create a simple graphic overlay, such as a green border around a logo, and export the result in lossless PNG format.
- * 5. When you are building an image‑processing pipeline that draws geometric shapes on raster images to prepare them for further analysis or machine‑learning training.
+ * 1. When you need to highlight a specific region in a JPEG photo by drawing a green square before converting it to PNG for web display.
+ * 2. When generating annotated screenshots for documentation and you want to outline UI elements with a green rectangle using C#.
+ * 3. When creating a simple visual marker on product images to indicate a selected item in an e‑commerce catalog.
+ * 4. When implementing a basic image‑processing step that adds a green border around detected objects in a raster image.
+ * 5. When building a batch script that adds a green square overlay to multiple images for quality‑control review.
  */
