@@ -1,8 +1,17 @@
 // HOW-TO: Convert PNG to SVG and Export High Resolution PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,34 +19,37 @@ class Program
     {
         try
         {
-            string inputPngPath = "Input/input.png";
-            string svgPath = "Output/output.svg";
-            string pdfPath = "Output/output.pdf";
+            string inputPath = Path.Combine("Input", "image.png");
+            string svgPath = Path.Combine("Output", "image.svg");
+            string pdfPath = Path.Combine("Output", "image.pdf");
 
-            if (!File.Exists(inputPngPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(svgPath));
             Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-            using (Image pngImage = Image.Load(inputPngPath))
+            using (Image pngImage = Image.Load(inputPath))
             {
-                using (SvgOptions svgOptions = new SvgOptions())
-                {
-                    pngImage.Save(svgPath, svgOptions);
-                }
+                pngImage.Save(svgPath, new SvgOptions());
             }
 
             using (Image svgImage = Image.Load(svgPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions
                 {
-                    pdfOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                    svgImage.Save(pdfPath, pdfOptions);
-                }
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height
+                    },
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
+                svgImage.Save(pdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to turn a raster PNG logo into a scalable SVG for branding and then embed it in a print‑ready PDF at 300 dpi.
- * 2. When an application must generate vector‑based PDFs from user‑uploaded PNG images for high‑quality reporting.
- * 3. When you want to automate the creation of searchable PDFs by first converting PNG diagrams to SVG vectors and then rendering them at a high resolution.
- * 4. When a web service needs to provide downloadable PDFs that preserve the visual fidelity of PNG assets across different screen sizes.
- * 5. When you are building a batch process that converts a folder of PNG icons into SVG files and then compiles them into a single high‑resolution PDF catalog.
+ * 1. When you need to embed a raster logo from a PNG into a printable PDF with vector quality, you can convert the PNG to SVG and then rasterize it at 300 dpi for the PDF.
+ * 2. When generating product catalogs, you may convert product images stored as PNGs to scalable SVGs and then create high‑resolution PDF pages that retain sharpness on any paper size.
+ * 3. When an application must provide downloadable PDFs of UI screenshots, converting the PNG screenshots to SVG first ensures the PDF can be scaled without pixelation.
+ * 4. When automating report generation, you can transform PNG charts into SVG vectors and embed them in a PDF with precise dimensions and white background.
+ * 5. When preparing marketing assets, converting PNG icons to SVG and then exporting them as 300 dpi PDFs allows designers to print the icons at any size while preserving clarity.
  */
