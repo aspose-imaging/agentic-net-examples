@@ -1,4 +1,11 @@
-// HOW-TO: Convert CorelDRAW CDR to PDF with Vector Shapes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PDF via EMF Vector Export in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,9 @@ class Program
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.pdf";
+            string inputPath = "input/input.cdr";
+            string outputPath = "output/output.pdf";
+            string tempEmfPath = "output/temp.emf";
 
             if (!File.Exists(inputPath))
             {
@@ -20,12 +28,21 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempEmfPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image cdrImage = Image.Load(inputPath))
+            {
+                var emfOptions = new EmfOptions();
+                cdrImage.Save(tempEmfPath, emfOptions);
+            }
+
+            using (Image emfImage = Image.Load(tempEmfPath))
             {
                 var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                emfImage.Save(outputPath, pdfOptions);
             }
+
+            File.Delete(tempEmfPath);
         }
         catch (Exception ex)
         {
@@ -36,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF from a CorelDRAW design while preserving editable vector graphics.
- * 2. When an application must batch‑convert customer‑provided CDR files to PDF for archiving without rasterizing the artwork.
- * 3. When a web service offers on‑the‑fly preview of CDR drawings in PDF format for browsers that only support PDF viewing.
- * 4. When integrating a document workflow that extracts vector‑based content from CDR files to embed in reports or invoices as scalable graphics.
- * 5. When automating the migration of legacy CorelDRAW assets to a PDF‑based catalog while keeping text as selectable, searchable vector objects.
+ * 1. When you need to embed editable vector graphics from a CorelDRAW design into a PDF report without losing quality.
+ * 2. When an automated workflow must convert batch CDR files to searchable PDF documents for archiving.
+ * 3. When a web service generates PDFs from user‑uploaded CDR files and must preserve text as selectable vector objects.
+ * 4. When a desktop application extracts vector shapes from a CDR drawing to create printable PDFs for marketing materials.
+ * 5. When a migration script transforms legacy CDR assets into PDF format while keeping the original EMF vector data for future editing.
  */
