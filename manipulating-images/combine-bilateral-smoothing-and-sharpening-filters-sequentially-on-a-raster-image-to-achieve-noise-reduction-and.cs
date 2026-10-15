@@ -1,49 +1,63 @@
-// HOW-TO: Apply Bilateral Smoothing Followed By Sharpen Filter To JPEG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Bilateral Smoothing Followed By Sharpen Filter To PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.jpg";
-                string outputPath = "output.jpg";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
-                {
-                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions());
-                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
-                    image.Save(outputPath, new JpegOptions());
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                // Apply bilateral smoothing filter
+                image.Filter(
+                    image.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions());
+
+                // Apply sharpening filter
+                image.Filter(
+                    image.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                // Save the processed image
+                PngOptions saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noisy JPEG photos taken in low light while preserving edge detail for a web gallery, you can apply bilateral smoothing then sharpening with Aspose.Imaging in C#.
- * 2. When preparing product images for an e‑commerce site, you can reduce sensor noise and enhance product outlines before saving the final JPEG using the combined filters.
- * 3. When processing scanned documents that contain grainy backgrounds, the code can smooth the background and sharpen text edges to improve readability.
- * 4. When building a desktop photo‑editing tool that offers a “noise‑reduce and sharpen” feature, this snippet demonstrates how to implement it with Aspose.Imaging’s filter API.
- * 5. When automating batch conversion of raw camera files to JPEGs with consistent noise reduction and edge clarity, the bilateral smoothing followed by a sharpen filter ensures uniform quality across all images.
+ * 1. When you need to clean up noisy scanned PNG photos while preserving edge detail for a web gallery.
+ * 2. When processing medical imaging PNGs where reducing grain but keeping sharp anatomical boundaries is required.
+ * 3. When preparing product photos for e‑commerce, applying noise reduction and then sharpening to make items look crisp.
+ * 4. When automating batch enhancement of PNG screenshots from UI tests, smoothing artifacts before sharpening UI elements.
+ * 5. When improving satellite PNG imagery by removing sensor noise and enhancing terrain edges for better visual analysis.
  */

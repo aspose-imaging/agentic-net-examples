@@ -1,7 +1,17 @@
-// HOW-TO: Apply Gaussian Blur to PSD and Save as PNG with Text Anti-Alias in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to PSD and Save as PNG with Text Rendering Hint in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,35 +20,33 @@ class Program
         string inputPath = "input.psd";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                var raster = image as Aspose.Imaging.RasterImage;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = image as RasterImage;
                 if (raster == null)
                 {
                     Console.Error.WriteLine("Failed to load raster image.");
                     return;
                 }
 
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
-                blurOptions.Radius = 5;
-                blurOptions.Sigma = 1.0;
-
+                var blurOptions = new GaussianBlurFilterOptions(5, 2.0);
                 raster.Filter(raster.Bounds, blurOptions);
 
-                var graphics = new Aspose.Imaging.Graphics(raster);
-                graphics.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAliasGridFit;
+                Graphics graphics = new Graphics(raster);
+                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
                 var pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(outputPath, false);
                 raster.Save(outputPath, pngOptions);
             }
         }
@@ -51,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften a Photoshop PSD background before generating a PNG thumbnail for a web gallery.
- * 2. When you want to apply a Gaussian blur to a PSD layer and preserve crisp anti‑aliased text in the exported PNG.
- * 3. When an automated pipeline must convert edited PSD files to PNG while ensuring text is rendered with GridFit smoothing.
- * 4. When you are building a C# service that processes PSD assets, blurs them for privacy, and outputs PNGs for mobile apps.
- * 5. When you require programmatic control over image filters and text rendering hints while converting PSD to PNG using Aspose.Imaging.
+ * 1. When you need to soften a Photoshop PSD before generating a web‑ready PNG thumbnail.
+ * 2. When you want to improve the appearance of overlaid text by applying anti‑aliasing after blurring an image.
+ * 3. When you must convert a layered PSD file to a flat PNG while applying a Gaussian blur filter in a C# batch process.
+ * 4. When you are preparing assets for a UI mockup and require a blurred background with crisp, anti‑aliased labels.
+ * 5. When you automate image preprocessing for a machine‑learning pipeline that expects blurred PNG inputs from original PSD sources.
  */

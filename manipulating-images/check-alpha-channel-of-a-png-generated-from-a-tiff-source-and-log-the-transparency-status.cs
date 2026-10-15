@@ -1,10 +1,15 @@
-// HOW-TO: Detect Transparency in PNG Converted from TIFF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Check PNG Transparency After Converting TIFF to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,33 +18,39 @@ class Program
     {
         try
         {
-            string inputPath = "Input/source.tif";
-            string outputPath = "Output/result.png";
+            string tiffPath = "Input/source.tif";
+            string pngPath = "Output/result.png";
 
-            if (!File.Exists(inputPath))
+            if (!File.Exists(tiffPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {tiffPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
 
-            using (Image tiffImage = Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(tiffPath))
             {
-                var pngOptions = new PngOptions
+                using (PngOptions pngOptions = new PngOptions { Source = new FileCreateSource(pngPath, false) })
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-                tiffImage.Save(outputPath, pngOptions);
+                    tiffImage.Save(pngPath, pngOptions);
+                }
             }
 
-            using (RasterImage pngImage = (RasterImage)Image.Load(outputPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(pngPath))
             {
                 int[] pixels = pngImage.LoadArgb32Pixels(pngImage.Bounds);
-                bool hasTransparency = pixels.Any(p => ((p >> 24) & 0xFF) < 255);
-                Console.WriteLine(hasTransparency
-                    ? "Image has transparency."
-                    : "Image is fully opaque.");
+                bool hasAlpha = false;
+                foreach (int pixel in pixels)
+                {
+                    int alpha = (pixel >> 24) & 0xFF;
+                    if (alpha != 255)
+                    {
+                        hasAlpha = true;
+                        break;
+                    }
+                }
+                Console.WriteLine(hasAlpha ? "PNG has transparency." : "PNG is fully opaque.");
             }
         }
         catch (Exception ex)
@@ -51,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify whether a PNG created from a multi‑page TIFF contains any transparent pixels before publishing it on a website.
- * 2. When automating a batch conversion pipeline and you must log images that lose or gain alpha channel information during TIFF‑to‑PNG conversion.
- * 3. When generating thumbnails for a digital asset management system and you need to flag images that require a solid background because they are not fully opaque.
- * 4. When preparing print‑ready files and you must ensure that converted PNGs do not contain unintended transparency that could affect color separations.
- * 5. When debugging an image processing workflow and you want to quickly output the transparency status of a PNG after applying Aspose.Imaging conversion settings.
+ * 1. When you need to verify whether a PNG generated from a TIFF contains any transparent pixels before displaying it on a website.
+ * 2. When you want to ensure that images converted for PDF creation remain fully opaque to prevent rendering artifacts.
+ * 3. When an automated batch job must log the transparency status of exported PNGs to decide if additional compositing steps are required.
+ * 4. When integrating a legacy TIFF asset pipeline and you must detect transparency to apply the correct background handling.
+ * 5. When performing quality checks on exported PNGs to confirm they comply with branding guidelines that forbid semi‑transparent graphics.
  */

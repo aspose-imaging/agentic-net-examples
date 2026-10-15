@@ -1,58 +1,63 @@
-// HOW-TO: Deskew TIFF Images And Convert To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Deskew TIFF Images and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputTiffFolder";
+            string outputFolder = @"C:\OutputPdfFolder";
 
-            if (!Directory.Exists(inputDirectory))
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Get all TIFF files in the input folder
+            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string filePath in tiffFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                if (extension != ".tif" && extension != ".tiff")
+                    continue;
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string file in files)
-            {
-                if (!file.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) && !file.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                // Verify input file exists
+                if (!File.Exists(filePath))
                 {
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     continue;
                 }
 
-                string inputPath = file;
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                // Prepare output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                // Load, deskew, and save as PDF
+                using (Image image = Image.Load(filePath))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    raster.NormalizeAngle(false, Color.White);
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    if (image is RasterImage rasterImage)
                     {
-                        image.Save(outputPath, pdfOptions);
+                        rasterImage.NormalizeAngle();
+                        PdfOptions pdfOptions = new PdfOptions();
+                        rasterImage.Save(outputPath, pdfOptions);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Unsupported image type for file: {filePath}");
                     }
                 }
             }
@@ -66,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you receive scanned TIFF documents that are slightly rotated and need to be corrected and stored as searchable PDFs for an electronic filing system.
- * 2. When an application must automatically process a folder of multi‑page TIFF invoices, straighten each page, and generate individual PDF files for downstream accounting software.
- * 3. When a document management workflow requires batch deskewing of TIFF blueprints before converting them to PDF for easier viewing and sharing with clients.
- * 4. When a legal firm needs to normalize the orientation of scanned case files in TIFF format and archive them as PDF files using C# and Aspose.Imaging.
- * 5. When a healthcare system must clean up scanned medical records saved as TIFF, remove skew, and convert them to PDF for integration with electronic health record (EHR) platforms.
+ * 1. When you need to automatically correct the orientation of scanned documents stored as TIFF files and produce PDF versions for archiving.
+ * 2. When a batch of scanned invoices in a folder must be deskewed before converting them to PDF for electronic workflow integration.
+ * 3. When a document management system requires converting multi‑page TIFF scans to PDF while ensuring each page is properly aligned using C#.
+ * 4. When you want to preprocess a collection of TIFF images from a scanner, remove skew, and generate PDF files for easy distribution to clients.
+ * 5. When a legal or medical records application must normalize the angle of TIFF scans and save them as PDFs for compliance and viewing on any device.
  */

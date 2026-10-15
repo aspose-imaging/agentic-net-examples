@@ -1,8 +1,17 @@
-// HOW-TO: Crop JPEG Image With Pixel Offsets And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop JPEG Image with Offsets and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 namespace ImageCropper
 {
@@ -10,11 +19,11 @@ namespace ImageCropper
     {
         static void Main()
         {
-            string inputPath = "input\\photo.jpg";
-            string outputPath = "output\\cropped.png";
-
             try
             {
+                string inputPath = "input.jpg";
+                string outputPath = "output\\cropped.png";
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -30,7 +39,6 @@ namespace ImageCropper
                         rasterImage.CacheData();
                     }
 
-                    // Offsets: left, right, top, bottom (in pixels)
                     int left = 10;
                     int right = 10;
                     int top = 10;
@@ -50,9 +58,9 @@ namespace ImageCropper
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove a uniform border from a JPEG photo before uploading it to a website, you can crop the image by specifying left, right, top, and bottom pixel offsets and then save the result as a PNG for loss‑less quality.
- * 2. When generating thumbnails for a gallery, you may want to trim unwanted edges from the original JPEG and output a PNG thumbnail that preserves transparency and sharpness.
- * 3. When processing scanned documents that contain extra margins, you can programmatically crop the JPEG scans using pixel offsets and store the cleaned‑up version as a PNG for archival.
- * 4. When preparing images for a mobile app that requires PNG assets, you can crop the source JPEG to focus on the central subject and convert it to PNG in a single C# routine.
- * 5. When automating a batch job that standardizes image dimensions, you can use the code to trim a fixed number of pixels from each side of JPEG files and save the uniformly cropped results as PNG files.
+ * 1. When you need to remove unwanted borders from a scanned JPEG photo before converting it to a PNG for web display.
+ * 2. When an e‑commerce platform must generate thumbnail PNGs from product JPEGs by cropping a fixed number of pixels on each side.
+ * 3. When a batch‑processing tool has to trim a uniform margin from uploaded JPEG avatars and store the result as lossless PNG files.
+ * 4. When a reporting system extracts a specific region from a JPEG chart by applying left, top, right, and bottom offsets and saves it as a PNG for inclusion in PDFs.
+ * 5. When a mobile app backend prepares user‑submitted JPEG images by cropping them to a standard size and converting them to PNG for consistent rendering across devices.
  */

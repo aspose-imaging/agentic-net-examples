@@ -1,4 +1,11 @@
-// HOW-TO: Auto Mask Image With Graph Cut And Median Filter In C# (Aspose.Imaging for .NET)
+// HOW-TO: Auto‑Mask PNG With GraphCut And Apply Median Filter In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,11 +21,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output\\result.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -43,12 +50,11 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+                using (RasterImage masked = (RasterImage)maskingResult[1].GetImage())
                 {
-                    var medianOptions = new MedianFilterOptions(3);
-                    foreground.Filter(foreground.Bounds, medianOptions);
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    masked.Filter(masked.Bounds, new MedianFilterOptions(3));
+                    masked.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -61,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically remove the background from a JPEG photo and save the foreground as a transparent PNG for web thumbnails.
- * 2. When you want to isolate objects in scanned documents, apply a median filter to reduce noise, and export the result with an alpha channel for further composition.
- * 3. When building a batch processing tool that extracts subjects from product images, cleans up edges with graph‑cut segmentation, and outputs high‑quality PNGs for e‑commerce catalogs.
- * 4. When creating a C# application that prepares images for machine‑learning pipelines by generating clean foreground masks and smoothing them to improve model accuracy.
- * 5. When developing a photo‑editing feature that lets users quickly separate people from backgrounds, apply noise reduction, and save the edited layer as a PNG with transparency.
+ * 1. When you need to remove a complex background from a PNG photograph and keep only the foreground subject with a transparent edge.
+ * 2. When you want to preprocess scanned documents by automatically segmenting text regions and smoothing noise before further OCR processing.
+ * 3. When you are building a web service that receives user‑uploaded images and must return a clean, masked PNG with reduced speckle artifacts.
+ * 4. When you need to prepare product photos for e‑commerce by extracting items from their original backgrounds and applying a median filter to smooth color transitions.
+ * 5. When you are developing a desktop utility that batch‑processes raster images to generate alpha‑channel masks and improve visual quality for graphic designers.
  */

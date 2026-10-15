@@ -1,4 +1,11 @@
 // HOW-TO: Batch Sharpen PNG Images and Overwrite Originals Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,19 +17,13 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputPngs";
-            string outputDirectory = "InputPngs";
+            string inputDirectory = "PngImages";
 
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
                 Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
@@ -32,7 +33,7 @@ class Program
                 if (!File.Exists(filePath))
                 {
                     Console.Error.WriteLine($"File not found: {filePath}");
-                    continue;
+                    return;
                 }
 
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
@@ -40,9 +41,7 @@ class Program
                 using (RasterImage raster = (RasterImage)Image.Load(filePath))
                 {
                     raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
-
-                    PngOptions options = new PngOptions();
-                    raster.Save(filePath, options);
+                    raster.Save(filePath, new PngOptions());
                 }
             }
         }
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically improve the clarity of a large set of product photos stored as PNGs before publishing them on an e‑commerce site.
- * 2. When a desktop application must process user‑uploaded screenshots, apply a sharpening filter, and replace the original files to save disk space.
- * 3. When a batch job is required to enhance scanned documents in PNG format for better OCR accuracy by sharpening the images in place.
- * 4. When a photo‑editing tool wants to provide a one‑click “sharpen all” feature that loops through a folder of PNG assets and overwrites each with the enhanced version.
- * 5. When a CI/CD pipeline needs to prepare marketing assets by sharpening PNG graphics during the build process without creating duplicate files.
+ * 1. When you need to improve the visual clarity of a large set of PNG photos before publishing them on a website.
+ * 2. When an automated build process must apply a sharpening filter to every PNG asset in a folder to meet quality standards.
+ * 3. When a desktop application has to replace existing PNG thumbnails with sharpened versions to enhance user experience.
+ * 4. When a migration script has to batch‑process product images, applying sharpening and saving them back to the same file paths.
+ * 5. When a content management system requires on‑the‑fly enhancement of uploaded PNG files without creating duplicate copies.
  */

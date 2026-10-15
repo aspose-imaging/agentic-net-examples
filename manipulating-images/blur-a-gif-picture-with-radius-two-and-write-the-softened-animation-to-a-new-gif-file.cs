@@ -1,9 +1,18 @@
-// HOW-TO: Blur a GIF with Gaussian Radius 2 and Save in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to Animated GIF and Save New GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -20,22 +29,19 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                int frameCount = gif.PageCount;
-                for (int i = 0; i < frameCount; i++)
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[i];
-                    RasterImage frame = (RasterImage)gif.ActiveFrame;
-                    var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(2, 1.0);
-                    frame.Filter(frame.Bounds, blurOptions);
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    RasterImage raster = (RasterImage)gif.ActiveFrame;
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(2, 2));
                 }
 
-                GifOptions options = new GifOptions();
-                gif.Save(outputPath, options);
+                GifOptions gifOptions = new GifOptions();
+                gif.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften a looping GIF animation for a website banner without changing its frame count, you can apply a Gaussian blur of radius two using Aspose.Imaging in C#.
- * 2. When creating a privacy‑preserving preview of an animated GIF, developers can blur each frame before saving the new GIF file.
- * 3. When preparing animated GIF assets for a mobile app that requires a subtle visual effect, you can programmatically apply a radius‑2 blur to all frames with Aspose.Imaging.
- * 4. When an e‑learning platform wants to highlight focus areas by de‑emphasizing background motion in GIF tutorials, this code blurs the entire animation while preserving timing.
- * 5. When automating a batch process that reduces visual noise in user‑generated GIFs, you can use the Gaussian blur filter on each frame and output a softened GIF.
+ * 1. When you need to soften the edges of each frame in an animated GIF for a smoother visual effect in a web banner.
+ * 2. When you want to reduce visual noise in a GIF animation before embedding it in a mobile app using C# and Aspose.Imaging.
+ * 3. When you are creating a stylized transition effect by applying a consistent blur radius to all frames of a GIF for a marketing email.
+ * 4. When you must preprocess user‑uploaded GIFs to meet a design guideline that requires a subtle blur across the entire animation.
+ * 5. When you are building an automated pipeline that reads GIF files, applies a Gaussian blur filter, and saves the result as a new GIF for archival purposes.
  */

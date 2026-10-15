@@ -1,9 +1,15 @@
 // HOW-TO: Apply Median Then Sharpen Filter to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -12,26 +18,32 @@ class Program
         string inputPath = "input.jpg";
         string outputPath = "output\\output.jpg";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Apply median filter with size 3
-                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply sharpen filter
-                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the processed image as JPEG
-                image.Save(outputPath, new JpegOptions());
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a scanned JPEG photo before enhancing its edges for a clearer presentation.
- * 2. When preparing product images for an e‑commerce site, you can clean up grainy JPEGs and sharpen details to improve visual appeal.
- * 3. When processing medical imaging scans saved as JPEG, applying median filtering followed by sharpening helps highlight anatomical structures while suppressing artifacts.
- * 4. When automating batch image cleanup in a C# application, this code removes speckles and accentuates edges before saving the optimized JPEGs.
- * 5. When creating thumbnails for a gallery, you can first denoise the source JPEG and then sharpen it to retain crispness at smaller sizes.
+ * 1. When you need to reduce noise in a scanned photo before highlighting edges for a product catalog, you can apply a median filter followed by a sharpen filter using Aspose.Imaging in C#.
+ * 2. When preparing medical imaging thumbnails where speckle noise must be removed and subtle details emphasized, this code cleans the raster image and sharpens it before saving as JPEG.
+ * 3. When automating batch processing of security camera snapshots to improve clarity for facial recognition, the median filter smooths grain and the sharpen filter accentuates facial features.
+ * 4. When converting low‑resolution screenshots into higher‑quality JPEGs for documentation, the combined filters remove pixelation and make text edges crisper.
+ * 5. When building a web service that receives user‑uploaded photos and returns a cleaned, edge‑enhanced JPEG for social media sharing, the code demonstrates the required filtering steps in C#.
  */

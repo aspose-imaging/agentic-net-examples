@@ -1,4 +1,11 @@
-// HOW-TO: Increase TIFF Image Contrast by 30 Percent and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase TIFF Image Contrast by 30% and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,26 +15,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.tif");
-        string outputPath = Path.Combine("Output", "result.pdf");
+        string inputPath = "Input\\sample.tif";
+        string outputPath = "Output\\result.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
                 raster.AdjustContrast(30f);
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the readability of scanned TIFF documents before distributing them as PDF reports.
- * 2. When a batch process must boost the contrast of medical imaging TIFF files and archive them in PDF format for electronic health records.
- * 3. When an application converts high‑resolution TIFF photographs to PDF while applying a 30 % contrast increase to improve visual impact.
- * 4. When a document management system requires on‑the‑fly contrast correction of uploaded TIFF files before saving them as searchable PDFs.
- * 5. When a developer wants to use Aspose.Imaging in C# to programmatically adjust TIFF image contrast and generate PDF outputs for printing.
+ * 1. When you need to enhance the visibility of scanned documents stored as TIFF files before distributing them as PDF reports.
+ * 2. When a web application must automatically improve the contrast of uploaded TIFF images and deliver the results in a PDF format for easier viewing.
+ * 3. When a batch processing script has to prepare high‑contrast PDFs from legacy TIFF archives for archival or compliance purposes.
+ * 4. When a desktop utility needs to adjust the contrast of medical imaging TIFF files and export them as PDFs for patient records.
+ * 5. When an automated workflow requires converting low‑contrast TIFF graphics to printable PDFs with a 30 percent contrast boost using Aspose.Imaging in C#.
  */

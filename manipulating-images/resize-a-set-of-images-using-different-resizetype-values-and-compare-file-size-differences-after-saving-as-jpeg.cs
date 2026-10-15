@@ -1,4 +1,11 @@
-// HOW-TO: Resize Images with Different ResizeTypes and Compare JPEG File Sizes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare JPEG File Sizes After Resizing Images With Different Algorithms In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -11,35 +18,20 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string[] inputFiles = { "input1.png", "input2.png" };
+            string outputRoot = "Output";
+            Directory.CreateDirectory(outputRoot);
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] inputFiles = Directory.GetFiles(inputDirectory);
-            if (inputFiles.Length == 0)
-            {
-                Console.WriteLine("No input files found.");
-                return;
-            }
-
-            List<ResizeType> resizeTypes = new List<ResizeType>
+            var resizeTypes = new List<ResizeType>
             {
                 ResizeType.NearestNeighbourResample,
                 ResizeType.LanczosResample
             };
 
-            foreach (string inputPath in inputFiles)
+            int newWidth = 800;
+            int newHeight = 600;
+
+            foreach (var inputPath in inputFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -47,31 +39,36 @@ class Program
                     return;
                 }
 
-                foreach (ResizeType rtype in resizeTypes)
+                var sizeMap = new Dictionary<ResizeType, long>();
+
+                foreach (var rt in resizeTypes)
                 {
-                    using (Image image = Image.Load(inputPath))
+                    using (Image img = Image.Load(inputPath))
                     {
-                        int newWidth = Math.Max(1, image.Width / 2);
-                        int newHeight = Math.Max(1, image.Height / 2);
-                        image.Resize(newWidth, newHeight, rtype);
+                        img.Resize(newWidth, newHeight, rt);
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{rt}.jpg";
+                        string outputPath = Path.Combine(outputRoot, outputFileName);
+                        string outDir = Path.GetDirectoryName(outputPath);
+                        Directory.CreateDirectory(outDir ?? ".");
 
-                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{rtype}.jpg");
-
-                        string outputDir = Path.GetDirectoryName(outputPath);
-                        if (!string.IsNullOrEmpty(outputDir))
+                        JpegOptions jpegOptions = new JpegOptions
                         {
-                            Directory.CreateDirectory(outputDir);
-                        }
+                            Quality = 90
+                        };
+                        img.Save(outputPath, jpegOptions);
 
-                        JpegOptions jpegOptions = new JpegOptions();
-                        jpegOptions.Quality = 90;
-
-                        image.Save(outputPath, jpegOptions);
-
-                        long fileSize = new FileInfo(outputPath).Length;
-                        Console.WriteLine($"Resized ({rtype}) {fileNameWithoutExt} -> {outputPath}, Size: {fileSize} bytes");
+                        long size = new FileInfo(outputPath).Length;
+                        sizeMap[rt] = size;
+                        Console.WriteLine($"{outputFileName}: {size} bytes");
                     }
+                }
+
+                if (sizeMap.Count == resizeTypes.Count)
+                {
+                    var rt1 = resizeTypes[0];
+                    var rt2 = resizeTypes[1];
+                    long diff = sizeMap[rt2] - sizeMap[rt1];
+                    Console.WriteLine($"{Path.GetFileName(inputPath)} size difference ({rt2} - {rt1}): {diff} bytes");
                 }
             }
         }
@@ -84,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate smaller thumbnail versions of photos using various resampling algorithms and evaluate which algorithm yields the best balance of quality and file size.
- * 2. When you are building an automated batch‑processing pipeline that must downscale a collection of images and store them as JPEGs for web delivery.
- * 3. When you want to compare the compression efficiency of NearestNeighbourResample versus LanczosResample on the same image set before choosing a default resize method.
- * 4. When you have to ensure that resized images do not become zero‑pixel dimensions by enforcing a minimum width and height during the resize operation.
- * 5. When you need to programmatically create separate output files for each resize algorithm so you can analyze storage savings in a .NET application.
+ * 1. When you need to generate thumbnails of various sizes and evaluate which resampling algorithm yields the smallest JPEG file for web performance.
+ * 2. When you are building an image‑processing pipeline that must choose between nearest‑neighbour and Lanczos resampling to balance quality and bandwidth.
+ * 3. When you want to batch‑process a collection of PNG files, resize them to a fixed dimension, and compare the resulting JPEG sizes for storage optimization.
+ * 4. When you are testing how different ResizeType settings affect output file size before deciding on a default algorithm for a photo‑gallery application.
+ * 5. When you need to programmatically save resized images as JPEG with a specific quality level and log the byte size for each resampling method.
  */

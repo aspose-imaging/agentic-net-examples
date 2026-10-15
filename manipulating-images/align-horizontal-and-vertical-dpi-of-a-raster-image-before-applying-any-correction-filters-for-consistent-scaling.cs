@@ -1,48 +1,62 @@
-// HOW-TO: Align Horizontal and Vertical DPI of JPEG with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Align Image DPI and Apply Median Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.jpg";
+                string outputPath = "output/output.jpg";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    double hDpi = image.HorizontalResolution;
+                    double vDpi = image.VerticalResolution;
+                    double alignedDpi = Math.Max(hDpi, vDpi);
+                    image.HorizontalResolution = alignedDpi;
+                    image.VerticalResolution = alignedDpi;
+
+                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+
+                    JpegOptions saveOptions = new JpegOptions();
+                    image.Save(outputPath, saveOptions);
+                }
             }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            catch (Exception ex)
             {
-                double targetDpi = Math.Max(image.HorizontalResolution, image.VerticalResolution);
-                image.HorizontalResolution = targetDpi;
-                image.VerticalResolution = targetDpi;
-
-                JpegOptions options = new JpegOptions();
-                image.Save(outputPath, options);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure a JPEG photo prints at the correct size by making its horizontal and vertical DPI identical.
- * 2. When preparing images for a web gallery that requires consistent scaling across devices, you must normalize the DPI before applying any correction filters.
- * 3. When a batch processing pipeline must standardize image resolution to avoid distortion after resizing or rotating operations.
- * 4. When integrating Aspose.Imaging into a C# application that imports scanned documents with mismatched DPI values and needs uniform resolution for OCR.
- * 5. When converting images from various sources to a single DPI setting to maintain aspect‑ratio consistency in a PDF generation workflow.
+ * 1. When preparing scanned documents for printing, a developer can align the horizontal and vertical DPI and apply a median filter to remove noise before saving as a JPEG.
+ * 2. When normalizing images from different cameras, a developer can set a common DPI value to ensure consistent scaling across the dataset.
+ * 3. When preprocessing photos for a web gallery, a developer can equalize DPI and denoise the image to improve visual quality while keeping file size low.
+ * 4. When converting legacy raster images to a standardized format, a developer can synchronize DPI and apply a median filter to preserve detail before exporting to JPEG.
+ * 5. When building an automated image pipeline that applies correction filters, a developer can first align DPI to avoid distortion and then use a median filter for noise reduction.
  */

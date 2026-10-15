@@ -1,9 +1,15 @@
-// HOW-TO: Dither PSD Image and Convert to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PSD to PDF With Floyd Steinberg Dithering In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,7 +18,7 @@ class Program
         try
         {
             string inputPath = "Input\\sample.psd";
-            string outputPath = "Output\\processed.pdf";
+            string outputPath = "Output\\result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -24,17 +30,12 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var raster = (RasterCachedImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
+                RasterImage raster = (RasterImage)image;
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
 
-                raster.Dither(DitheringMethod.ThresholdDithering, 0, null);
+                PdfOptions pdfOptions = new PdfOptions();
 
-                var pdfOptions = new PdfOptions();
-
-                raster.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce color banding in a Photoshop PSD before generating a printable PDF report.
- * 2. When an automated workflow must convert cached PSD files to PDF while applying threshold dithering for consistent monochrome output.
- * 3. When a web service processes user‑uploaded PSD files, applies dithering to meet PDF/A compliance, and returns the PDF to the client.
- * 4. When a desktop application prepares design assets by caching large PSD layers, dithering them, and exporting to PDF for archival storage.
- * 5. When a batch job iterates over a folder of PSD files, applies dithering to improve visual quality, and saves each as a PDF for distribution.
+ * 1. When you need to generate a printable PDF from a Photoshop PSD while preserving visual detail by applying Floyd‑Steinberg dithering in a C# application.
+ * 2. When an automated batch process must convert multiple layered PSD files to PDF format and reduce color banding using Aspose.Imaging’s raster dithering.
+ * 3. When a web service creates PDF previews of uploaded PSD artwork and wants to improve contrast on low‑color devices by dithering the image before saving.
+ * 4. When a desktop utility converts high‑resolution PSD graphics to PDF for archiving, ensuring consistent output by applying an 8‑bit Floyd‑Steinberg dithering step.
+ * 5. When integrating Aspose.Imaging into a C# workflow to transform PSD files into PDF documents with controlled color reduction for faster loading on mobile browsers.
  */

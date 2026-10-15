@@ -1,52 +1,45 @@
-// HOW-TO: Rotate BMP Image 270 Degrees with Aspose.Imaging and Keep Dimensions (Aspose.Imaging for .NET)
+// HOW-TO: Rotate BMP Image 270 Degrees Without Changing Dimensions in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Store original dimensions
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
 
-                // Rotate 270 degrees without flip
                 image.RotateFlip(RotateFlipType.Rotate270FlipNone);
 
-                // Verify dimensions unchanged
-                if (image.Width == originalWidth && image.Height == originalHeight)
+                if (image.Width != originalWidth || image.Height != originalHeight)
                 {
-                    Console.WriteLine("Dimensions unchanged after rotation.");
-                }
-                else
-                {
-                    Console.WriteLine($"Dimensions changed: original ({originalWidth}x{originalHeight}) -> rotated ({image.Width}x{image.Height})");
+                    Console.Error.WriteLine("Dimensions changed after rotation.");
                 }
 
-                // Save the rotated image
                 image.Save(outputPath);
             }
         }
@@ -59,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a BMP graphic that was saved in portrait orientation but must appear rotated 270° in a Windows application without altering its original width and height.
- * 2. When a batch job processes scanned BMP documents and must rotate each page 270 degrees while preserving layout dimensions for downstream PDF conversion.
- * 3. When integrating legacy BMP assets into a game engine that expects images rotated 270° but requires the same pixel dimensions for texture mapping.
- * 4. When an automated reporting system rotates BMP charts 270° for printing on landscape paper while keeping the chart size unchanged.
- * 5. When a photo‑editing tool offers a “rotate left” feature for BMP files and needs to verify that the image dimensions stay consistent after the operation.
+ * 1. When you need to display a BMP graphic in portrait orientation on a UI that expects the original width and height.
+ * 2. When processing scanned documents that were saved upside‑down and must be rotated 270° while preserving the original page size for PDF conversion.
+ * 3. When preparing game assets stored as BMP files for a sprite sheet that requires a specific rotation but cannot change the sprite dimensions.
+ * 4. When automating batch image adjustments for a legacy system that only accepts BMP files of a fixed resolution, and you must rotate them without altering size.
+ * 5. When validating that a custom RotateFlip operation does not unintentionally resize BMP images before sending them to a printing service.
  */

@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert BMP Images to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Files to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,37 +13,35 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded source and destination folders
-            string sourceFolder = @"C:\Images\Source";
-            string destinationFolder = @"C:\Images\Output";
+            // Hardcoded input and output folders
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            // Get all BMP files in the source folder
-            string[] bmpFiles = Directory.GetFiles(sourceFolder, "*.bmp");
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
 
-            foreach (string inputPath in bmpFiles)
+            foreach (string bmpPath in bmpFiles)
             {
-                if (!File.Exists(inputPath))
+                // Verify input file exists
+                if (!File.Exists(bmpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
+                    return;
                 }
 
-                // Load the BMP image
-                using (Image image = Image.Load(inputPath))
+                // Prepare output path with same filename but .png extension
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(bmpPath) + ".png");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load BMP image and save as PNG
+                using (Image image = Image.Load(bmpPath))
                 {
-                    // Prepare output path with .png extension, preserving filename
-                    string outputPath = Path.Combine(
-                        destinationFolder,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PNG
                     image.Save(outputPath, new PngOptions());
                 }
             }
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a legacy collection of BMP files to the more web‑friendly PNG format while keeping the original file names.
- * 2. When an automated build process must generate PNG assets from BMP sources for faster page load times in a web application.
- * 3. When a desktop utility has to process dozens of user‑uploaded BMP screenshots and store them as lossless PNGs for archival.
- * 4. When a server‑side service converts incoming BMP images to PNG before feeding them into a machine‑learning pipeline that only accepts PNG.
- * 5. When a batch job prepares image assets for a mobile app by converting BMP icons to PNG while preserving naming conventions.
+ * 1. When you need to migrate a legacy collection of BMP assets to PNG for web delivery while keeping the original file names.
+ * 2. When an automated build process must generate PNG thumbnails from BMP source images stored in a folder.
+ * 3. When a desktop application imports user‑uploaded BMP pictures and saves them as PNG to reduce file size without losing naming consistency.
+ * 4. When a server‑side service processes a batch of scanned BMP documents and converts them to lossless PNG for archival storage.
+ * 5. When a migration script updates an image repository by converting all BMP files to PNG to ensure compatibility with modern image viewers.
  */

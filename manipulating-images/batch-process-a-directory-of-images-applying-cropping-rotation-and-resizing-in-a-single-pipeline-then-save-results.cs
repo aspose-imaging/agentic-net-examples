@@ -1,21 +1,38 @@
-// HOW-TO: Batch Crop Rotate and Resize Images in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Crop Rotate and Resize Images in a Folder Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            string[] files = Directory.GetFiles(inputDir);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory);
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -24,25 +41,50 @@ class Program
                     continue;
                 }
 
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string extension = Path.GetExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_processed" + extension);
 
-                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Crop 10 pixels from each side
-                    image.Crop(10, 10, 10, 10);
+                    if (image is RasterImage rasterImage)
+                    {
+                        if (!rasterImage.IsCached)
+                        {
+                            rasterImage.CacheData();
+                        }
 
-                    // Rotate 90 degrees
-                    image.Rotate(90f);
+                        // Crop 50 pixels from each side if possible
+                        int cropLeft = 50;
+                        int cropTop = 50;
+                        int cropRight = 50;
+                        int cropBottom = 50;
+                        int newWidth = rasterImage.Width - cropLeft - cropRight;
+                        int newHeight = rasterImage.Height - cropTop - cropBottom;
 
-                    // Resize to 800x600
-                    image.Resize(800, 600);
+                        if (newWidth > 0 && newHeight > 0)
+                        {
+                            Rectangle cropRect = new Rectangle(cropLeft, cropTop, newWidth, newHeight);
+                            rasterImage.Crop(cropRect);
+                        }
 
-                    // Save the processed image
-                    image.Save(outputPath);
+                        // Rotate 90 degrees clockwise with white background
+                        rasterImage.Rotate(90f, true, Color.White);
+
+                        // Resize to half of current dimensions
+                        int resizeWidth = rasterImage.Width / 2;
+                        int resizeHeight = rasterImage.Height / 2;
+                        rasterImage.Resize(resizeWidth, resizeHeight, ResizeType.NearestNeighbourResample);
+
+                        rasterImage.Save(outputPath);
+                    }
+                    else
+                    {
+                        // For non‑raster images, simply save a copy
+                        image.Save(outputPath);
+                    }
                 }
             }
         }
@@ -55,9 +97,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically prepare a large set of product photos by trimming borders, rotating them to portrait orientation, and resizing them to web‑friendly dimensions before uploading to an e‑commerce site.
- * 2. When you must preprocess scanned documents stored as TIFF files, removing unwanted margins, aligning the pages, and scaling them to a standard size for OCR or archival storage.
- * 3. When a photo‑gallery application requires generating uniform thumbnails from mixed‑format images (JPEG, PNG, BMP) by cropping edges, rotating, and resizing them in a single batch operation.
- * 4. When a batch of user‑submitted images needs to be normalized to 800×600 pixels with consistent orientation and trimmed edges before being fed into a machine‑learning model for image classification.
- * 5. When you are migrating legacy image assets and want to apply the same cropping, rotation, and resizing rules to every file in a folder, saving the transformed copies to a separate output directory.
+ * 1. When you need to automatically trim borders, rotate, and resize dozens of JPEG or PNG photos stored in a folder before uploading them to a web gallery.
+ * 2. When a document management system must preprocess scanned TIFF files by cropping edges, aligning orientation, and scaling them to a standard size during import.
+ * 3. When an e‑commerce platform wants to generate uniformly sized product thumbnails from a batch of high‑resolution images on the server side.
+ * 4. When a mobile app backend has to prepare user‑submitted images by removing unwanted margins, correcting rotation, and reducing dimensions to meet API size limits.
+ * 5. When a reporting tool requires batch conversion of raw camera RAW files into smaller, correctly oriented PNGs for inclusion in PDF reports.
  */

@@ -1,6 +1,14 @@
-// HOW-TO: Deskew Multiple GIF Images and Create Animated GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Deskew Multiple GIF Images and Combine into Animated GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
@@ -11,57 +19,43 @@ class Program
     {
         try
         {
-            // Hardcoded input GIF paths
-            string[] inputPaths = { "input1.gif", "input2.gif", "input3.gif" };
-            // Hardcoded output GIF path
-            string outputPath = "output.gif";
+            string input1 = "input1.gif";
+            string input2 = "input2.gif";
+            string input3 = "input3.gif";
+            string outputPath = "output\\merged.gif";
 
-            // Verify each input file exists
-            foreach (string inputPath in inputPaths)
+            List<string> inputPaths = new List<string> { input1, input2, input3 };
+
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Load first image to determine canvas size
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (GifImage outputGif = (GifImage)Image.Load(inputPaths[0]))
             {
-                if (!firstImage.IsCached) firstImage.CacheData();
-                firstImage.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
-                int canvasWidth = firstImage.Width;
-                int canvasHeight = firstImage.Height;
+                RasterImage firstFrame = (RasterImage)outputGif.ActiveFrame;
+                if (!firstFrame.IsCached) firstFrame.CacheData();
+                firstFrame.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
+
+                for (int i = 1; i < inputPaths.Count; i++)
+                {
+                    using (GifImage srcGif = (GifImage)Image.Load(inputPaths[i]))
+                    {
+                        RasterImage frame = (RasterImage)srcGif.ActiveFrame;
+                        if (!frame.IsCached) frame.CacheData();
+                        frame.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
+                        outputGif.AddPage(frame);
+                    }
+                }
 
                 GifOptions gifOptions = new GifOptions();
-
-                using (GifImage outputGif = (GifImage)Image.Create(gifOptions, canvasWidth, canvasHeight))
-                {
-                    // Add first frame
-                    outputGif.AddPage(firstImage);
-
-                    // Process remaining images
-                    for (int i = 1; i < inputPaths.Length; i++)
-                    {
-                        using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
-                        {
-                            if (!img.IsCached) img.CacheData();
-                            img.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
-                            outputGif.AddPage(img);
-                        }
-                    }
-
-                    // Ensure output directory exists
-                    string outputDir = Path.GetDirectoryName(outputPath);
-                    if (!string.IsNullOrWhiteSpace(outputDir))
-                    {
-                        Directory.CreateDirectory(outputDir);
-                    }
-
-                    // Save animated GIF
-                    outputGif.Save(outputPath, gifOptions);
-                }
+                outputGif.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -73,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the rotation of scanned GIF frames and combine them into a single animated GIF for a web slideshow.
- * 2. When building a C# application that processes user‑uploaded GIF photos, straightens each image, and outputs an animated preview.
- * 3. When automating the creation of animated GIF banners from a series of misaligned product images in an e‑commerce platform.
- * 4. When generating time‑lapse animations from security camera GIF snapshots that require deskewing before merging.
- * 5. When developing a reporting tool that consolidates multiple rotated GIF charts into a single animated GIF for easy distribution.
+ * 1. When you need to automatically straighten scanned GIF frames before creating an animated banner for a website.
+ * 2. When a batch of user‑uploaded GIF screenshots must be deskewed and merged into a single looping animation for a mobile app.
+ * 3. When generating a time‑lapse GIF from multiple camera captures that are slightly rotated, requiring deskewing and consolidation.
+ * 4. When preparing product demo GIFs that were captured at different angles, and you want to align them and combine them into one animated file.
+ * 5. When processing archival GIF images to correct orientation and produce a compact animated GIF for email newsletters.
  */

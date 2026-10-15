@@ -1,4 +1,11 @@
-// HOW-TO: Resize JPEG Images to Max 1200 Pixels Using Lanczos in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize Multiple JPEG Images to Max 1200 Pixels Using Lanczos in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -27,54 +34,52 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.jpg"))
+            string[] patterns = new[] { "*.jpg", "*.jpeg" };
+            foreach (string pattern in patterns)
             {
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in Directory.GetFiles(inputDirectory, pattern))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    int originalWidth = image.Width;
-                    int originalHeight = image.Height;
-                    int newWidth = originalWidth;
-                    int newHeight = originalHeight;
-
-                    const int maxDimension = 1200;
-
-                    if (originalWidth >= originalHeight)
+                    if (!File.Exists(inputPath))
                     {
-                        if (originalWidth > maxDimension)
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        int newWidth = image.Width;
+                        int newHeight = image.Height;
+
+                        if (image.Width >= image.Height)
                         {
-                            newWidth = maxDimension;
-                            newHeight = (int)(originalHeight * (maxDimension / (double)originalWidth));
+                            if (image.Width > 1200)
+                            {
+                                newWidth = 1200;
+                                newHeight = (int)((double)image.Height * 1200 / image.Width);
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (originalHeight > maxDimension)
+                        else
                         {
-                            newHeight = maxDimension;
-                            newWidth = (int)(originalWidth * (maxDimension / (double)originalHeight));
+                            if (image.Height > 1200)
+                            {
+                                newHeight = 1200;
+                                newWidth = (int)((double)image.Width * 1200 / image.Height);
+                            }
                         }
-                    }
 
-                    if (newWidth != originalWidth || newHeight != originalHeight)
-                    {
-                        image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-                    }
+                        if (newWidth != image.Width || newHeight != image.Height)
+                        {
+                            image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                        }
 
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    image.Save(outputPath, jpegOptions);
+                        JpegOptions options = new JpegOptions();
+                        options.Source = new FileCreateSource(outputPath, false);
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -87,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑resize a folder of JPEG photos for web galleries while preserving quality with the Lanczos filter.
- * 2. When you must ensure all uploaded user images fit within a 1200‑pixel limit before storing them in a CMS.
- * 3. When you want to generate thumbnail‑ready versions of product photos without distorting aspect ratios in a .NET application.
- * 4. When you are preparing images for email newsletters and need to reduce file size by limiting dimensions using Aspose.Imaging.
- * 5. When you automate image preprocessing for a machine‑learning pipeline that requires a consistent maximum size for JPEG inputs.
+ * 1. When you need to prepare a batch of user‑uploaded JPEG photos for a web gallery so that no image exceeds 1200 px while preserving quality with Lanczos resampling.
+ * 2. When an e‑commerce platform must automatically downsize product photos to a maximum dimension before storing them in a CDN to reduce bandwidth.
+ * 3. When a mobile app backend processes incoming JPEG attachments and must ensure they fit within a 1200 px limit for faster download on low‑speed connections.
+ * 4. When a digital asset management system requires periodic resizing of legacy JPEG files to a uniform size for consistent thumbnail generation.
+ * 5. When a photo‑printing service needs to validate and resize customer‑submitted JPEG images to a 1200 px maximum before applying further image‑processing steps.
  */

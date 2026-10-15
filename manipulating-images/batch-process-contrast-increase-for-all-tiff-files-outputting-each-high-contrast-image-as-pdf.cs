@@ -1,8 +1,17 @@
-// HOW-TO: Batch Increase Contrast of TIFF Files and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Increase Contrast of TIFF Images and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -10,44 +19,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "input";
-            string outputDirectory = "output";
+            string inputDir = @"C:\InputTiffs";
+            string outputDir = @"C:\OutputPdfs";
 
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
-            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
-            tiffFiles.CopyTo(allTiffFiles, 0);
-            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
+            string[] tiffFiles1 = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles2 = Directory.GetFiles(inputDir, "*.tiff");
+            var allFiles = new List<string>();
+            allFiles.AddRange(tiffFiles1);
+            allFiles.AddRange(tiffFiles2);
 
-            foreach (string inputPath in allTiffFiles)
+            foreach (var inputPath in allFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Increase contrast (value can be adjusted as needed)
-                    if (image is RasterImage rasterImage)
+                    if (image is RasterImage raster)
                     {
-                        rasterImage.AdjustContrast(50); // increase contrast by 50%
+                        raster.AdjustContrast(50);
                     }
 
-                    // Prepare output PDF path
-                    string outputPath = Path.Combine(
-                        outputDirectory,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
 
-                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as PDF
                     var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
@@ -62,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically enhance the visual clarity of a large set of scanned TIFF documents before archiving them as PDFs.
- * 2. When a medical imaging workflow requires batch contrast boosting of radiology TIFF images and saving them as PDFs for easier distribution.
- * 3. When a publishing system must prepare high‑contrast TIFF artwork for print‑ready PDF output without manual editing.
- * 4. When a legal firm wants to improve readability of multi‑page TIFF evidence files and store them as PDFs for case management.
- * 5. When a cloud service processes user‑uploaded TIFF photos, applies a contrast filter, and returns PDF versions for download.
+ * 1. When you need to automatically enhance the visual clarity of a large collection of scanned TIFF documents before archiving them as searchable PDFs.
+ * 2. When a medical imaging workflow requires batch processing of radiology TIFF files to improve contrast and convert them to PDF for easier distribution to clinicians.
+ * 3. When a legal firm wants to increase the readability of multi‑page TIFF contracts and output each file as a PDF for client review.
+ * 4. When a printing service must prepare high‑contrast TIFF artwork for PDF preview without manually editing each image.
+ * 5. When an automated document management system needs to standardize incoming TIFF scans by adjusting contrast and storing them in PDF format for long‑term storage.
  */

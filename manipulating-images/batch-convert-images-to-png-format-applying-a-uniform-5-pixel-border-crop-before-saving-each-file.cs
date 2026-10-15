@@ -1,67 +1,54 @@
 // HOW-TO: Batch Convert Images to PNG with 5 Pixel Border Crop in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = "input";
+            string outputPath = "output";
 
-            if (!Directory.Exists(inputDirectory))
+            foreach (string filePath in Directory.GetFiles(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
-                    if (!image.IsCached)
-                    {
-                        image.CacheData();
-                    }
-
                     int newWidth = image.Width - 10;
                     int newHeight = image.Height - 10;
-                    if (newWidth > 0 && newHeight > 0)
+
+                    if (newWidth <= 0 || newHeight <= 0)
                     {
-                        Rectangle cropRect = new Rectangle(5, 5, newWidth, newHeight);
-                        image.Crop(cropRect);
+                        Console.Error.WriteLine($"Image too small to crop: {filePath}");
+                        continue;
                     }
 
-                    using (PngOptions options = new PngOptions())
-                    {
-                        options.Source = new FileCreateSource(outputPath, false);
-                        image.Save(outputPath, options);
-                    }
+                    var cropRect = new Aspose.Imaging.Rectangle(5, 5, newWidth, newHeight);
+                    image.Crop(cropRect);
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                    string outFile = Path.Combine(outputPath, fileNameWithoutExt + ".png");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outFile));
+
+                    var pngOptions = new PngOptions();
+                    image.Save(outFile, pngOptions);
                 }
             }
         }
@@ -74,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a large set of photos for a web gallery by converting them to PNG and removing a uniform 5‑pixel border from each image.
- * 2. When an e‑commerce platform requires product images in PNG format with consistent cropping to align thumbnails across the catalog.
- * 3. When a mobile app processes user‑uploaded pictures and must batch‑convert them to PNG while trimming unwanted edges before storage.
- * 4. When a document generation system automatically converts scanned pages to PNG and removes a fixed margin to improve layout consistency.
- * 5. When a digital asset management workflow needs to standardize diverse image files to PNG and apply the same border crop to all assets in a folder.
+ * 1. When you need to prepare a set of product photos for an e‑commerce site by removing a uniform border and saving them as lightweight PNG files.
+ * 2. When a desktop application must automatically process scanned documents, trim a 5‑pixel margin, and store the results in PNG for consistent display.
+ * 3. When a batch job has to convert legacy image assets to PNG while ensuring all images have the same cropped dimensions for a mobile app.
+ * 4. When you want to generate thumbnail‑ready PNGs from a folder of mixed‑format images, cropping the edges to eliminate unwanted frames.
+ * 5. When a server‑side service processes user‑uploaded pictures, strips a small border, and saves them in PNG to preserve transparency and reduce file size.
  */

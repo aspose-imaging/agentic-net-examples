@@ -1,59 +1,69 @@
 // HOW-TO: Batch Rotate TIFF Images 90 Degrees and Convert to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
-namespace TiffBatchProcessor
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
+            // Hardcoded input and output directories
+            string inputDirectory = "input";
+            string outputDirectory = "output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+
+            foreach (string inputPath in tiffFiles)
             {
-                string inputDirectory = "input";
-                string outputDirectory = "output";
-
-                var tiffFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
-                    .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
-                                f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase));
-
-                foreach (var inputPath in tiffFiles)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
-                    string outputPath = Path.ChangeExtension(Path.Combine(outputDirectory, relativePath), ".png");
+                // Determine output PNG path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (var image = Image.Load(inputPath))
-                    {
-                        image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                        var pngOptions = new PngOptions();
-                        image.Save(outputPath, pngOptions);
-                    }
+                // Load the TIFF image, rotate, and save as PNG
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    image.Save(outputPath, new PngOptions());
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically re‑orient a large collection of scanned TIFF documents and deliver them as web‑friendly PNG files.
- * 2. When a migration script must convert legacy multi‑page TIFF archives to single‑page PNG images while applying a 90° rotation for correct display.
- * 3. When an image‑processing pipeline has to process all TIFF files in nested folders, rotate them, and store the results in a separate output directory preserving the folder structure.
- * 4. When you want to use Aspose.Imaging in a C# application to batch‑convert medical imaging TIFFs to PNG after correcting orientation for downstream analysis.
- * 5. When a desktop utility must read TIFF files, apply a clockwise rotation, and save them as lossless PNGs for inclusion in a PDF report.
+ * 1. When you need to automatically rotate a collection of scanned TIFF documents 90° and save them as PNG files for web display.
+ * 2. When a photo‑processing pipeline must convert legacy TIFF assets to PNG while correcting orientation before uploading to a content management system.
+ * 3. When a desktop application has to batch‑process medical imaging TIFF files, rotate them for proper viewing, and store the results in a lossless PNG format.
+ * 4. When you want to streamline the preparation of TIFF maps for GIS software by rotating them and exporting to PNG for faster rendering.
+ * 5. When an automated build script must ensure all TIFF icons are correctly oriented and converted to PNG for inclusion in a Windows application’s resources.
  */

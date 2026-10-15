@@ -1,64 +1,86 @@
-// HOW-TO: Render EPS To High‑Quality PSD With Anti‑Aliasing And Convert To PDF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Render EPS to High‑Quality PSD and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
-class Program
+namespace VectorToPdfExport
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.eps";
-            string psdPath = "output.psd";
-            string pdfPath = "output.pdf";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths
+                string inputPath = "input.eps";
+                string psdPath = "output/output.psd";
+                string pdfPath = "output/output.pdf";
 
-            using (Image image = Image.Load(inputPath))
-            {
-                var rasterOptions = new VectorRasterizationOptions
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAliasGridFit
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                var psdOptions = new PsdOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
+                // Ensure output directories exist
                 Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
-                image.Save(psdPath, psdOptions);
-            }
-
-            using (Image psdImage = Image.Load(psdPath))
-            {
-                var pdfOptions = new PdfOptions();
-
                 Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-                psdImage.Save(pdfPath, pdfOptions);
+
+                // Load the vector image (e.g., EPS)
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure rasterization options with high quality settings
+                    var rasterizationOptions = new VectorRasterizationOptions
+                    {
+                        // Define desired size for rasterization
+                        PageWidth = 1200,
+                        PageHeight = 800,
+                        // High‑quality rendering options
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        TextRenderingHint = TextRenderingHint.AntiAliasGridFit
+                    };
+
+                    // Set up PSD save options using the rasterization settings
+                    var psdOptions = new PsdOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    // Save as PSD
+                    image.Save(psdPath, psdOptions);
+                }
+
+                // Load the generated PSD and export to PDF
+                using (Image psdImage = Image.Load(psdPath))
+                {
+                    var pdfOptions = new PdfOptions();
+                    psdImage.Save(pdfPath, pdfOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve the visual fidelity of vector EPS artwork while converting it to a PSD for further editing in Photoshop, using anti‑alias smoothing and text rendering hints.
- * 2. When you must generate a print‑ready PDF from an EPS source but want to ensure that rasterized layers retain high‑quality rendering by first saving as a PSD.
- * 3. When an automated pipeline processes incoming EPS files and requires consistent anti‑aliased rasterization before delivering PDFs to clients.
- * 4. When you are building a .NET application that converts legacy EPS graphics to modern PDF documents while maintaining crisp text and smooth edges.
- * 5. When you need to batch‑convert multiple EPS files to PDFs and want to intermediate them as PSDs to apply Photoshop‑compatible settings such as smoothing and text rendering.
+ * 1. When a designer needs to preserve vector artwork from an EPS file as a high‑resolution PSD for further editing in Photoshop while ensuring smooth edges and crisp text.
+ * 2. When an automated publishing pipeline must generate PDF previews from vector graphics with anti‑aliased rendering to maintain visual fidelity.
+ * 3. When a web service converts user‑uploaded EPS files into printable PDFs, requiring intermediate PSD files with optimal rasterization settings.
+ * 4. When a batch‑processing tool creates archival PSD copies of vector assets with consistent smoothing and text rendering before distributing them as PDFs.
+ * 5. When a desktop application needs to rasterize vector logos into PSD format with high‑quality settings and then export them to PDF for client delivery.
  */

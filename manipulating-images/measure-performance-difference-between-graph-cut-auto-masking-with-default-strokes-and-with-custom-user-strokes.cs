@@ -1,6 +1,14 @@
-// HOW-TO: Compare Graph Cut Auto Masking Performance With Default vs Custom Strokes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Compare Graph Cut Auto Masking Speed with Default and Custom Strokes in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -13,12 +21,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputDefaultPath = "output\\default.png";
-        string outputCustomPath = "output\\custom.png";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputDefaultPath = "output\\default.png";
+            string outputCustomPath = "output\\custom.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,8 +36,12 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputDefaultPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputCustomPath));
 
+            Stopwatch swDefault = new Stopwatch();
+            Stopwatch swCustom = new Stopwatch();
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // Default strokes
                 var defaultOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
@@ -44,19 +56,15 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                DateTime startDefault = DateTime.Now;
-                using (MaskingResult defaultResult = new ImageMasking(image).Decompose(defaultOptions))
-                using (RasterImage defaultForeground = (RasterImage)defaultResult[1].GetImage())
+                swDefault.Start();
+                using (MaskingResult result = new ImageMasking(image).Decompose(defaultOptions))
+                using (RasterImage foreground = (RasterImage)result[1].GetImage())
                 {
-                    defaultForeground.Save(outputDefaultPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    swDefault.Stop();
+                    foreground.Save(outputDefaultPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
-                DateTime endDefault = DateTime.Now;
-                TimeSpan durationDefault = endDefault - startDefault;
-                Console.WriteLine($"Default strokes masking time: {durationDefault.TotalMilliseconds} ms");
 
-                var customPoints = new Point[][] { new Point[] { new Point(image.Width / 2, image.Height / 2) } };
-                var customArgs = new AutoMaskingArgs { ObjectsPoints = customPoints };
-
+                // Custom strokes
                 var customOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = false,
@@ -69,19 +77,26 @@ class Program
                         Source = new StreamSource(new MemoryStream())
                     },
                     BackgroundReplacementColor = Color.Transparent,
-                    Args = customArgs
+                    Args = new AutoMaskingArgs
+                    {
+                        ObjectsPoints = new Point[][]
+                        {
+                            new Point[] { new Point(image.Width / 2, image.Height / 2) }
+                        }
+                    }
                 };
 
-                DateTime startCustom = DateTime.Now;
-                using (MaskingResult customResult = new ImageMasking(image).Decompose(customOptions))
-                using (RasterImage customForeground = (RasterImage)customResult[1].GetImage())
+                swCustom.Start();
+                using (MaskingResult result = new ImageMasking(image).Decompose(customOptions))
+                using (RasterImage foreground = (RasterImage)result[1].GetImage())
                 {
-                    customForeground.Save(outputCustomPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    swCustom.Stop();
+                    foreground.Save(outputCustomPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
-                DateTime endCustom = DateTime.Now;
-                TimeSpan durationCustom = endCustom - startCustom;
-                Console.WriteLine($"Custom strokes masking time: {durationCustom.TotalMilliseconds} ms");
             }
+
+            Console.WriteLine($"Default strokes time: {swDefault.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Custom strokes time: {swCustom.ElapsedMilliseconds} ms");
         }
         catch (Exception ex)
         {
@@ -92,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to benchmark how quickly Aspose.Imaging’s Graph Cut auto‑masking generates a foreground using default system‑generated strokes versus user‑defined strokes on the same JPEG.
- * 2. When you want to evaluate whether adding custom stroke input improves segmentation speed for batch processing of product photos in a C# application.
- * 3. When you are comparing the runtime impact of default versus custom stroke configurations before integrating auto‑masking into an image‑editing workflow.
- * 4. When you must demonstrate performance differences of Graph Cut segmentation for transparent PNG export in a proof‑of‑concept for a web service.
- * 5. When you are optimizing resource usage by measuring execution time of default and custom stroke masking to choose the most efficient option for a desktop photo‑enhancement tool.
+ * 1. When you need to benchmark how default auto‑masking strokes affect processing time versus user‑defined strokes for JPEG images in a C# application.
+ * 2. When you want to evaluate the performance impact of Graph Cut segmentation before integrating it into an automated background removal pipeline.
+ * 3. When you are comparing memory usage and execution speed of Aspose.Imaging’s AutoMaskingGraphCutOptions with and without custom stroke input for batch image processing.
+ * 4. When you need to decide whether to enable CalculateDefaultStrokes for faster prototyping or require manual strokes for more accurate results in a photo‑editing tool.
+ * 5. When you are measuring the time saved by using default strokes to generate PNG masks with transparency for downstream compositing tasks.
  */

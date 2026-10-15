@@ -1,11 +1,17 @@
-// HOW-TO: Batch Convert EMF to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF to PNG with Transparent Background and Timing in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -13,30 +19,27 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputEmf";
-            string outputDirectory = "OutputPng";
+            string inputFolder = "input";
+            string outputFolder = "output";
 
-            if (!Directory.Exists(inputDirectory))
+            Directory.CreateDirectory(outputFolder);
+
+            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+            foreach (string emfPath in emfFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            Directory.CreateDirectory(outputDirectory);
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(emfPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {emfPath}");
+                    continue;
                 }
+
+                string fileName = Path.GetFileNameWithoutExtension(emfPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(emfPath))
                 {
                     VectorImage vectorImage = image as VectorImage;
                     if (vectorImage != null)
@@ -44,17 +47,13 @@ class Program
                         vectorImage.RemoveBackground(new RemoveBackgroundSettings());
                     }
 
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                     PngOptions pngOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
                         VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.Transparent,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
+                            PageSize = image.Size
                         }
                     };
 
@@ -62,7 +61,7 @@ class Program
                 }
 
                 sw.Stop();
-                Console.WriteLine($"Processed {Path.GetFileName(inputPath)} in {sw.ElapsedMilliseconds} ms.");
+                Console.WriteLine($"Processed {emfPath} in {sw.ElapsedMilliseconds} ms");
             }
         }
         catch (Exception ex)
@@ -74,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a folder of vector EMF drawings into PNG images with transparent backgrounds for web display.
- * 2. When you want to automatically remove any solid background from EMF files before rasterizing them for inclusion in a PDF report.
- * 3. When you have to process large numbers of EMF icons and generate PNG assets while measuring the time each conversion takes.
- * 4. When you need to integrate a C# routine that prepares EMF graphics for mobile apps by producing PNG files with alpha channels.
- * 5. When you are building a batch image pipeline that cleans up legacy EMF files and outputs high‑quality PNGs for a content management system.
+ * 1. When you need to process a folder of vector EMF drawings and generate PNG thumbnails with a transparent background for web previews.
+ * 2. When you want to automatically strip any background color from legacy EMF icons before embedding them in a UI that uses alpha blending.
+ * 3. When you have to measure the performance of rasterizing vector graphics to raster images in a batch job for capacity planning.
+ * 4. When you are building a migration tool that converts old Windows Metafile assets to modern PNG files while preserving size and transparency.
+ * 5. When you need to log the time taken for each conversion to identify slow‑processing files in a large graphics pipeline.
  */

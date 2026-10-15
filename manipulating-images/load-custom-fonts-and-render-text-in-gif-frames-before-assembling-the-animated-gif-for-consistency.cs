@@ -1,10 +1,18 @@
-// HOW-TO: Create Animated GIF From PNG Frames With Custom Fonts In C# (Aspose.Imaging for .NET)
+// HOW-TO: Load Custom Fonts and Render Text in Animated GIF with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -13,100 +21,58 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string fontFolder = "fonts";
-            string frame1Path = "frame1.png";
-            string frame2Path = "frame2.png";
-            string outputPath = "output.gif";
+            string inputGifPath = "input\\source.gif";
+            string outputGifPath = "output\\animated.gif";
+            string fontFolderPath = "fonts";
 
-            // Input file existence checks
-            if (!File.Exists(frame1Path))
+            if (!File.Exists(inputGifPath))
             {
-                Console.Error.WriteLine($"File not found: {frame1Path}");
-                return;
-            }
-            if (!File.Exists(frame2Path))
-            {
-                Console.Error.WriteLine($"File not found: {frame2Path}");
+                Console.Error.WriteLine($"File not found: {inputGifPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
-            // Load first frame with custom fonts and draw text
-            var loadOptions1 = new LoadOptions();
-            loadOptions1.AddCustomFontSource((args) =>
+            LoadOptions loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] args) =>
             {
+                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
                 string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
                 if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
-                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    foreach (var file in Directory.GetFiles(fontsPath))
                     {
-                        byte[] fontBytes = File.ReadAllBytes(fontFile);
-                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                        byte[] data = File.ReadAllBytes(file);
+                        string name = Path.GetFileNameWithoutExtension(file);
+                        fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
                     }
                 }
-                return result.ToArray();
-            }, fontFolder);
+                return fonts.ToArray();
+            }, fontFolderPath);
 
-            using (RasterImage firstImg = (RasterImage)Image.Load(frame1Path, loadOptions1))
+            using (GifImage gif = (GifImage)Image.Load(inputGifPath, loadOptions))
             {
-                var graphics = new Graphics(firstImg);
-                var font = new Font("CustomFont", 24);
-                using (var brush = new SolidBrush(Color.Black))
+                string[] fontFiles = Directory.GetFiles(fontFolderPath);
+                if (fontFiles.Length == 0)
                 {
-                    graphics.DrawString("Sample Text", font, brush, new PointF(10, 10));
+                    Console.Error.WriteLine("No font files found in the font folder.");
+                    return;
                 }
+                string firstFontName = Path.GetFileNameWithoutExtension(fontFiles[0]);
 
-                int width = firstImg.Width;
-                int height = firstImg.Height;
-
-                var gifOptions = new GifOptions();
-
-                using (GifImage gif = (GifImage)Image.Create(gifOptions, width, height))
+                Font font = new Font(firstFontName, 24);
+                using (SolidBrush brush = new SolidBrush(Color.Black))
                 {
-                    gif.AddPage(firstImg);
-
-                    // Load second frame with custom fonts and draw text
-                    var loadOptions2 = new LoadOptions();
-                    loadOptions2.AddCustomFontSource((args) =>
+                    foreach (var page in gif.Pages)
                     {
-                        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-                        {
-                            foreach (var fontFile in Directory.GetFiles(fontsPath))
-                            {
-                                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-                            }
-                        }
-                        return result.ToArray();
-                    }, fontFolder);
-
-                    using (RasterImage secondImg = (RasterImage)Image.Load(frame2Path, loadOptions2))
-                    {
-                        var graphics2 = new Graphics(secondImg);
-                        var font2 = new Font("CustomFont", 24);
-                        using (var brush2 = new SolidBrush(Color.Black))
-                        {
-                            graphics2.DrawString("Sample Text", font2, brush2, new PointF(10, 10));
-                        }
-
-                        gif.AddPage(secondImg);
+                        gif.ActiveFrame = (GifFrameBlock)page;
+                        Graphics graphics = new Graphics(gif.ActiveFrame);
+                        graphics.DrawString("Sample Text", font, brush, new PointF(10, 10));
                     }
-
-                    // Save the animated GIF
-                    gif.Save(outputPath, gifOptions);
                 }
+
+                GifOptions gifOptions = new GifOptions();
+                gif.Save(outputGifPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -118,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate an animated banner where each frame’s caption uses a brand‑specific font that isn’t installed on the server.
- * 2. When you want to overlay dynamic text on a series of PNG images and combine them into a single GIF for email marketing campaigns.
- * 3. When building a game scoreboard that displays scores in a custom typeface across animated GIF frames.
- * 4. When creating instructional tutorials that require consistent custom‑styled text on each step’s image before exporting as an animated GIF.
- * 5. When automating the production of social‑media memes that combine multiple PNG scenes with user‑provided fonts into a looping GIF.
+ * 1. When you need to add captions using a specific TrueType font to each frame of an existing GIF before creating an animated GIF.
+ * 2. When you want to ensure text appearance is consistent across all frames by loading custom font files from a folder.
+ * 3. When you are generating dynamic GIF banners where the text style must match corporate branding fonts not installed on the server.
+ * 4. When you have to process a source GIF, overlay localized language strings with custom fonts, and output a new animated GIF.
+ * 5. When you need to programmatically assemble an animated GIF from multiple frames while applying the same custom font to all text elements.
  */

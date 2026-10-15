@@ -1,34 +1,44 @@
-// HOW-TO: Apply Gaussian Blur Radius 5 to TIFF and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to TIFF and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.tif";
+            string outputPath = "output\\softened.png";
+
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
                 var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 5);
                 raster.Filter(raster.Bounds, blurOptions);
-                var pngOptions = new PngOptions();
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
                 raster.Save(outputPath, pngOptions);
             }
         }
@@ -41,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften high‑resolution scanned documents (TIFF) before embedding them in a web page as PNGs.
- * 2. When you want to reduce visual noise in medical imaging TIFF files by applying a Gaussian blur and then export them to PNG for reporting.
- * 3. When preparing product catalog images, you may blur the background of a TIFF photograph and save the result as a PNG thumbnail.
- * 4. When converting archival TIFF maps to PNG while applying a blur to hide sensitive details for public distribution.
- * 5. When automating a batch process that applies a radius‑5 Gaussian blur to TIFF graphics and stores the softened output as PNG files for mobile apps.
+ * 1. When you need to soften high‑resolution scanned documents (TIFF) before publishing them as web‑friendly PNGs.
+ * 2. When a medical imaging application must reduce noise in TIFF X‑ray images using a Gaussian blur before converting to PNG for reports.
+ * 3. When an e‑commerce platform wants to apply a uniform blur effect to product photos stored as TIFF and deliver them as PNG thumbnails.
+ * 4. When a batch‑processing script has to convert archival TIFF files to PNG while applying a radius‑5 Gaussian blur to improve visual aesthetics.
+ * 5. When a document management system requires programmatic image preprocessing—blur and format change—from TIFF to PNG using C# and Aspose.Imaging.
  */

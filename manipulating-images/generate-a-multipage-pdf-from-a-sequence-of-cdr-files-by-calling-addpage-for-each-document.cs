@@ -1,8 +1,19 @@
-// HOW-TO: Convert Multiple CorelDRAW CDR Files to Separate PDF Pages in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multipage PDF from Multiple CDR Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -11,63 +22,71 @@ class Program
     {
         try
         {
-            // Input CDR file paths (hardcoded)
+            // Hardcoded input CDR file paths
             string cdrPath1 = "Input/file1.cdr";
             string cdrPath2 = "Input/file2.cdr";
-            string cdrPath3 = "Input/file3.cdr";
 
             // Validate input files
-            if (!File.Exists(cdrPath1))
+            if (!File.Exists(cdrPath1)) { Console.Error.WriteLine($"File not found: {cdrPath1}"); return; }
+            if (!File.Exists(cdrPath2)) { Console.Error.WriteLine($"File not found: {cdrPath2}"); return; }
+
+            // Output PDF path
+            string outputPath = "Output/combined.pdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // List to hold rasterized pages
+            List<RasterImage> rasterPages = new List<RasterImage>();
+
+            // Process each CDR file
+            string[] cdrFiles = new string[] { cdrPath1, cdrPath2 };
+            foreach (string cdrFile in cdrFiles)
             {
-                Console.Error.WriteLine($"File not found: {cdrPath1}");
-                return;
-            }
-            if (!File.Exists(cdrPath2))
-            {
-                Console.Error.WriteLine($"File not found: {cdrPath2}");
-                return;
-            }
-            if (!File.Exists(cdrPath3))
-            {
-                Console.Error.WriteLine($"File not found: {cdrPath3}");
-                return;
+                using (CdrImage cdr = (CdrImage)Image.Load(cdrFile))
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        PngOptions pngOptions = new PngOptions();
+                        cdr.Save(ms, pngOptions);
+                        ms.Position = 0;
+                        RasterImage raster = (RasterImage)Image.Load(ms);
+                        rasterPages.Add(raster);
+                    }
+                }
             }
 
-            // Output PDF directory
-            string outputDir = Path.GetDirectoryName("Output/combined.pdf");
-            Directory.CreateDirectory(outputDir);
+            // Create multipage TIFF and add pages
+            using (TiffImage tiff = new TiffImage(new TiffFrame(rasterPages[0])))
+            {
+                for (int i = 1; i < rasterPages.Count; i++)
+                {
+                    tiff.AddPage(rasterPages[i]);
+                }
 
-            // Convert each CDR to a separate PDF page file
-            ConvertCdrToPdf(cdrPath1, "Output/page1.pdf");
-            ConvertCdrToPdf(cdrPath2, "Output/page2.pdf");
-            ConvertCdrToPdf(cdrPath3, "Output/page3.pdf");
+                // Save as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                tiff.Save(outputPath, pdfOptions);
+            }
+
+            // Dispose raster pages
+            foreach (var page in rasterPages)
+            {
+                page.Dispose();
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    static void ConvertCdrToPdf(string inputPath, string outputPath)
-    {
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image cdrImage = Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                cdrImage.Save(outputPath, pdfOptions);
-            }
-        }
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a set of CorelDRAW (.cdr) drawings into individual PDF pages for printing or archiving.
- * 2. When an automated workflow must validate the existence of each CDR file before creating PDF equivalents to avoid runtime errors.
- * 3. When you want to generate PDF files in a specific output folder structure, ensuring each source CDR has its own PDF page.
- * 4. When integrating Aspose.Imaging into a C# application to transform vector graphics into PDF format without manual user interaction.
- * 5. When preparing separate PDF pages that will later be merged into a multi‑page document using another tool or library.
+ * 1. When a designer needs to combine several CorelDRAW (CDR) drawings into a single PDF for client review using C# and Aspose.Imaging.
+ * 2. When an automated reporting tool must batch‑convert a collection of CDR assets into a multipage PDF for archival purposes.
+ * 3. When a web service receives uploaded CDR files and has to return a combined PDF document to the end user without manual intervention.
+ * 4. When a desktop application wants to merge multiple CDR diagrams into a printable PDF programmatically in a .NET environment.
+ * 5. When a migration script has to transform legacy CDR documents into PDF format for integration with a document management system.
  */
