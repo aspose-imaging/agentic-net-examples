@@ -1,45 +1,53 @@
-// HOW-TO: Rotate CorelDRAW File 90 Degrees Clockwise and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate CorelDRAW CDR File 90 Degrees And Save As PDF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace CorelDrawRotateToPdf
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output/output.pdf";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                string inputPath = "input.cdr";
+                string outputPath = "output/output.pdf";
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    image.Save(outputPath, new PdfOptions());
+                }
             }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically re‑orient scanned CorelDRAW drawings before generating printable PDFs in a batch workflow.
- * 2. When a web service must convert user‑uploaded CDR files to PDF while ensuring the artwork is displayed in landscape orientation.
- * 3. When generating PDF reports from legacy CorelDRAW assets that require a 90‑degree clockwise rotation to match corporate branding guidelines.
- * 4. When building a desktop utility that prepares CorelDRAW illustrations for mobile viewing by rotating them and exporting to PDF.
- * 5. When integrating Aspose.Imaging into a CI pipeline to rotate design files and produce PDF documentation without manual intervention.
+ * 1. When a developer needs to automatically re‑orient a CorelDRAW design before generating a printable PDF for a marketing brochure.
+ * 2. When a batch process must convert legacy .cdr artwork into PDF while ensuring the page is rotated to match portrait layout requirements.
+ * 3. When an application integrates with a document management system and must store rotated CorelDRAW drawings as searchable PDF files.
+ * 4. When a web service receives user‑uploaded CDR files and must rotate them clockwise to correct orientation before delivering PDF previews.
+ * 5. When a CI/CD pipeline validates design assets by rotating them and exporting to PDF to verify visual consistency across platforms.
  */
