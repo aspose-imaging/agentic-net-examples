@@ -1,4 +1,11 @@
 // HOW-TO: Convert SVG to BMP with Specific Width and Height in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -46,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a bitmap preview of an SVG logo at a fixed 800×600 size for a Windows desktop application.
- * 2. When you must embed an SVG diagram into a legacy system that only accepts BMP files and requires exact dimensions for layout consistency.
- * 3. When creating thumbnails of vector graphics for email attachments, converting the SVG to a BMP with predetermined width and height to meet size constraints.
- * 4. When preparing assets for a printing workflow that demands BMP format and specific pixel dimensions to match the printer’s resolution settings.
- * 5. When automating batch conversion of SVG icons to BMPs for a game engine that cannot render SVGs and needs each image at a uniform size.
+ * 1. When you need to generate a bitmap thumbnail of an SVG logo at a fixed 800×600 size for a Windows desktop application.
+ * 2. When you must convert scalable vector graphics to BMP format for legacy systems that only accept raster images with specific dimensions.
+ * 3. When you are creating printable assets and require the SVG to be rasterized to a BMP with exact width and height to match a layout template.
+ * 4. When you need to batch‑process SVG icons and save them as BMP files with uniform size for use in a game engine that does not support SVG.
+ * 5. When you want to embed a vector illustration into a document that only supports BMP, ensuring the image is rendered at the desired resolution using Aspose.Imaging in C#.
  */
