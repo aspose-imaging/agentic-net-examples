@@ -1,18 +1,26 @@
 // HOW-TO: Convert DjVu to PDF with Custom Author Metadata in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Djvu;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.djvu";
-            string outputPath = "output/output.pdf";
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -20,12 +28,23 @@ public class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            using (Aspose.Imaging.FileFormats.Djvu.DjvuImage image = (Aspose.Imaging.FileFormats.Djvu.DjvuImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                // Ensure the loaded image is a DjvuImage (optional cast)
+                DjvuImage djvu = image as DjvuImage;
+                if (djvu == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not a DjVu image.");
+                    return;
+                }
+
                 PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Author = "Example" };
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                pdfOptions.PdfDocumentInfo.Author = "Example";
+
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -39,8 +58,8 @@ public class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to archive scanned DjVu documents as searchable PDFs while embedding the author's name for proper attribution.
- * 2. When a digital library application must batch‑convert DjVu files to PDF and set consistent metadata before publishing.
- * 3. When generating PDF reports from DjVu source files and you want to programmatically assign the author field using C#.
- * 4. When integrating Aspose.Imaging into a document‑management system to transform DjVu images into PDFs with custom document information.
- * 5. When creating PDFs from DjVu e‑books and need to ensure the author metadata complies with PDF standards for downstream processing.
+ * 2. When a publishing workflow requires converting multi-page DjVu files to PDF and setting PDF metadata programmatically in a C# application.
+ * 3. When building a document management system that must preserve source author information during DjVu‑to‑PDF conversion using Aspose.Imaging.
+ * 4. When automating batch processing of DjVu manuals into PDF format and you want to add a consistent author tag to each output file.
+ * 5. When integrating file format conversion into a .NET service and you must ensure the resulting PDF contains custom metadata like the author field.
  */
