@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert TIFF Files to JPEG with 90% Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert TIFF Files To JPEG With 90% Quality In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -26,37 +33,29 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory);
+            foreach (string file in files)
             {
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                string ext = Path.GetExtension(file).ToLowerInvariant();
                 if (ext != ".tif" && ext != ".tiff")
-                {
                     continue;
-                }
 
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".jpg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(file))
                 {
-                    using (JpegOptions jpegOptions = new JpegOptions())
-                    {
-                        jpegOptions.Quality = 90;
-                        image.Save(outputPath, jpegOptions);
-                    }
+                    JpegOptions jpegOptions = new JpegOptions { Quality = 90 };
+                    image.Save(outputPath, jpegOptions);
                 }
 
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Converted {file} to {outputPath}");
             }
         }
         catch (Exception ex)
@@ -68,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically shrink a folder of high‑resolution TIFF scans into web‑friendly JPEGs for faster page loads.
- * 2. When a document‑management system must archive incoming TIFF images as compressed JPEGs while preserving filenames.
- * 3. When a photo‑processing pipeline has to convert multi‑page TIFFs to single‑page JPEGs with a specific quality setting for consistent output.
- * 4. When you want to generate JPEG previews of TIFF assets in a batch job and log each conversion for audit purposes.
- * 5. When a Windows service processes scanned invoices stored as TIFF and creates lower‑size JPEG copies for email attachment.
+ * 1. When you need to automatically transform a folder of scanned TIFF documents into smaller JPEG images for web publishing.
+ * 2. When you want to create a nightly job that compresses high‑resolution TIFF files to 90 % quality JPEGs to save storage space.
+ * 3. When you are building a migration tool that reads legacy TIFF assets and outputs JPEGs while keeping a log of each conversion.
+ * 4. When you must prepare a batch of medical or engineering TIFF images for a client application that only supports JPEG format.
+ * 5. When you require a simple C# script to process incoming TIFF uploads, convert them to JPEG with consistent quality, and store the results in a separate directory.
  */
