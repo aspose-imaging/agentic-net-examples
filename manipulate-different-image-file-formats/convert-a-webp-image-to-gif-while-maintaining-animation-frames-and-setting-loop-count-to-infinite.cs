@@ -1,8 +1,17 @@
-// HOW-TO: Convert Animated WebP to GIF with Infinite Loop in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated WebP To Infinite Loop GIF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.webp";
-            string outputPath = "output.gif";
+            string inputPath = "Input/input.webp";
+            string outputPath = "Output/output.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -19,15 +28,14 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
             using (Image image = Image.Load(inputPath))
             {
-                using (GifOptions gifOptions = new GifOptions())
-                {
-                    gifOptions.LoopsCount = 0;
-                    image.Save(outputPath, gifOptions);
-                }
+                GifOptions gifOptions = new GifOptions();
+                gifOptions.LoopsCount = 0; // infinite loop
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated WebP banner on platforms that only support GIF, you can convert it while preserving all frames and setting the animation to loop forever.
- * 2. When a mobile app requires an endlessly looping GIF for a loading spinner but the source assets are stored as animated WebP, this code transforms the source without losing animation.
- * 3. When migrating a website’s animated graphics from WebP to GIF for email newsletters that don’t recognize WebP, you can keep the animation intact and ensure continuous playback.
- * 4. When creating a slideshow where each slide is an animated WebP and the presentation tool only accepts GIFs, this snippet converts each file and forces an infinite loop.
- * 5. When automating a batch process that archives animated WebP files as GIFs for legacy systems, the code guarantees all frames are retained and the resulting GIF repeats indefinitely.
+ * 1. When you need to display an animated WebP advertisement on legacy browsers that only support GIF, you can convert it to an endlessly looping GIF using C# and Aspose.Imaging.
+ * 2. When creating a mobile app that shares animated stickers, you may convert user‑uploaded WebP stickers to GIFs with infinite looping for compatibility with messaging platforms.
+ * 3. When generating email newsletters that require animated images, you can transform animated WebP files into GIFs that loop forever to ensure the animation repeats for all recipients.
+ * 4. When building a content‑management system that archives animated assets, you can standardize storage by converting WebP animations to GIFs with an infinite loop count via C#.
+ * 5. When automating a batch process to prepare social‑media posts, you can use this code to turn animated WebP clips into GIFs that continuously play without manual editing.
  */
