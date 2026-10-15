@@ -3,7 +3,7 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -12,8 +12,8 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -21,57 +21,47 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-            foreach (string inputPath in files)
+
+            foreach (var file in files)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(file))
                 {
-                    SvgImage svgImage = image as SvgImage;
-                    if (svgImage == null)
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        Console.Error.WriteLine($"Failed to load SVG: {inputPath}");
-                        return;
-                    }
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
+                    };
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-                    using (MemoryStream ms = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
-                        PngOptions tempPngOptions = new PngOptions();
-                        svgImage.Save(ms, tempPngOptions);
+                        svgImage.Save(ms, pngOptions);
                         ms.Position = 0;
 
                         using (RasterImage raster = (RasterImage)Image.Load(ms))
                         {
-                            MotionWienerFilterOptions blurOptions = new MotionWienerFilterOptions(8, 60.0, 0.0);
-                            raster.Filter(raster.Bounds, blurOptions);
+                            double[,] kernel = ConvolutionFilter.GetBlurMotion(8, 60);
+                            var filterOptions = new ConvolutionFilterOptions(kernel);
+                            raster.Filter(raster.Bounds, filterOptions);
 
-                            PngOptions outOptions = new PngOptions();
-                            outOptions.Source = new FileCreateSource(outputPath, false);
-                            raster.Save(outputPath, outOptions);
+                            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            raster.Save(outputPath, new PngOptions());
                         }
                     }
                 }
@@ -86,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate blurred PNG thumbnails from a folder of SVG icons for a web gallery.
- * 2. When you want to preprocess vector graphics with a motion‑blur effect before embedding them in a slide presentation.
- * 3. When an automated build pipeline must convert design assets from SVG to PNG while applying a consistent blur for UI mockups.
- * 4. When a reporting tool requires PNG images with a specific blur angle to simulate motion in data visualizations.
- * 5. When you are creating a batch script to prepare SVG logos for print, adding a motion blur of size 8 and angle 60 before rasterizing to PNG.
+ * 1. When you need to generate a series of blurred PNG thumbnails from a collection of SVG icons for a web gallery.
+ * 2. When an e‑commerce platform wants to apply a consistent motion‑blur effect to product vector graphics before storing them as PNGs for faster loading.
+ * 3. When a game developer batch‑processes SVG assets to PNG sprites and adds a motion blur to simulate speed in the final artwork.
+ * 4. When a marketing team automates the creation of PNG banners from SVG templates, applying a specific blur size and angle to match a campaign’s visual style.
+ * 5. When a reporting tool converts SVG charts to PNG images and adds a motion‑blur filter to emphasize trend direction in printed PDFs.
  */
