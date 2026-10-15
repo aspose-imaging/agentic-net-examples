@@ -1,6 +1,14 @@
-// HOW-TO: Convert DjVu Pages 1‑3 To PNG And Merge Into Multipage TIFF C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 1‑3 to PNG and Combine into Multipage TIFF C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -8,87 +16,78 @@ using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputPath = "Input/document.djvu";
-            string pngOutputDir = "Output/PNGs";
-            string tiffOutputPath = "Output/merged.tif";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputDjvuPath = "input.djvu";
+                if (!File.Exists(inputDjvuPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputDjvuPath}");
+                    return;
+                }
 
-            Directory.CreateDirectory(pngOutputDir);
-            Directory.CreateDirectory(Path.GetDirectoryName(tiffOutputPath));
-
-            // Export pages 1-3 to PNG
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-            {
+                string[] pngPaths = new string[3];
                 for (int i = 0; i < 3; i++)
                 {
-                    string pngPath = Path.Combine(pngOutputDir, $"page{i + 1}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
-                    using (PngOptions pngOptions = new PngOptions())
+                    pngPaths[i] = $"page{i + 1}.png";
+                    string pngDir = Path.GetDirectoryName(pngPaths[i]) ?? ".";
+                    Directory.CreateDirectory(pngDir);
+
+                    using (DjvuImage djvu = (DjvuImage)Image.Load(inputDjvuPath))
                     {
+                        PngOptions pngOptions = new PngOptions();
                         pngOptions.MultiPageOptions = new DjvuMultiPageOptions(i);
-                        djvu.Save(pngPath, pngOptions);
+                        djvu.Save(pngPaths[i], pngOptions);
                     }
                 }
-            }
 
-            // Merge PNGs into a multipage TIFF
-            string firstPng = Path.Combine(pngOutputDir, "page1.png");
-            using (RasterImage firstImg = (RasterImage)Image.Load(firstPng))
-            {
-                int width = firstImg.Width;
-                int height = firstImg.Height;
-
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                using (RasterImage firstPng = (RasterImage)Image.Load(pngPaths[0]))
                 {
-                    using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
-                    {
-                        // Add frames for pages 2 and 3
-                        for (int i = 1; i < 3; i++)
-                        {
-                            tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-                        }
+                    int width = firstPng.Width;
+                    int height = firstPng.Height;
 
-                        // Copy pixels for each frame
-                        for (int i = 0; i < 3; i++)
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+                    {
+                        int[] pixels = firstPng.LoadArgb32Pixels(firstPng.Bounds);
+                        ((RasterImage)tiffImage).SaveArgb32Pixels(tiffImage.Bounds, pixels);
+
+                        for (int i = 1; i < pngPaths.Length; i++)
                         {
-                            string pngPath = Path.Combine(pngOutputDir, $"page{i + 1}.png");
-                            using (RasterImage src = (RasterImage)Image.Load(pngPath))
+                            using (RasterImage png = (RasterImage)Image.Load(pngPaths[i]))
                             {
-                                tiff.ActiveFrame = tiff.Frames[i];
-                                ((RasterImage)tiff.ActiveFrame).SaveArgb32Pixels(tiff.ActiveFrame.Bounds, src.LoadArgb32Pixels(src.Bounds));
+                                int[] framePixels = png.LoadArgb32Pixels(png.Bounds);
+                                tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
+                                tiffImage.ActiveFrame = tiffImage.Frames[tiffImage.Frames.Count() - 1];
+                                ((RasterImage)tiffImage).SaveArgb32Pixels(tiffImage.Bounds, framePixels);
                             }
                         }
 
-                        // Save TIFF
-                        Directory.CreateDirectory(Path.GetDirectoryName(tiffOutputPath));
-                        tiff.Save(tiffOutputPath, tiffOptions);
+                        string outputTiffPath = "output.tif";
+                        string outDir = Path.GetDirectoryName(outputTiffPath) ?? ".";
+                        Directory.CreateDirectory(outDir);
+                        tiffImage.Save(outputTiffPath);
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract specific pages from a DjVu document and save them as high‑quality PNG images for web preview.
- * 2. When you must combine several exported PNG pages into a single multipage TIFF for archival or printing workflows.
- * 3. When an application processes scanned books stored as DjVu and requires individual page images before creating a consolidated TIFF file.
- * 4. When a document management system needs to convert selected DjVu pages to PNG and then bundle them into a TIFF to support legacy TIFF‑only viewers.
- * 5. When automating batch conversion of DjVu chapters into PNG and merging them into a multipage TIFF for easy distribution to clients.
+ * 1. When you need to extract the first three pages of a DjVu document as high‑quality PNG images for web preview before creating a single multipage TIFF for archival storage.
+ * 2. When a scanning workflow requires converting selected DjVu pages to PNG to apply image processing, then merging them into a TIFF file for compatibility with legacy document management systems.
+ * 3. When generating printable PDFs from DjVu sources, you can first create PNGs of specific pages and then combine them into a TIFF that can be easily embedded into PDF generation tools.
+ * 4. When building a batch job that processes large DjVu files, extracting only the initial pages as PNGs reduces memory usage before consolidating them into a compact multipage TIFF for distribution.
+ * 5. When creating a digital catalog, you may convert key DjVu pages to PNG for thumbnail display and then merge those thumbnails into a single TIFF to simplify storage and retrieval.
  */
