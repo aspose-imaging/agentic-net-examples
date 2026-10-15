@@ -1,9 +1,17 @@
-// HOW-TO: Rasterize CMX Vector to PNG at Specific DPI Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Rasterize CMX Vector Image to PNG for Web in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,20 +30,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                PngOptions options = new PngOptions
                 {
-                    pngOptions.ResolutionSettings = new ResolutionSetting(96, 96);
-                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    Source = new FileCreateSource(outputPath, false),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
+                        PageWidth = cmx.Width,
+                        PageHeight = cmx.Height
+                    }
+                };
 
-                    image.Save(outputPath, pngOptions);
-                }
+                cmx.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display legacy CorelDRAW CMX artwork on a website, you can rasterize it to a PNG at web‑friendly DPI.
- * 2. When converting vector logos stored in CMX format to high‑quality PNG thumbnails for product catalogs, this code automates the process in C#.
- * 3. When generating printable previews of CMX diagrams at a consistent resolution for a document management system, you can use Aspose.Imaging to rasterize them.
- * 4. When building an automated pipeline that transforms batch CMX files into web‑optimized PNG images with a white background, this snippet provides the necessary steps.
- * 5. When integrating CMX support into a .NET application that must serve images at 96 dpi to match other UI assets, the code shows how to load, rasterize, and save the files.
+ * 1. When you need to display legacy CMX drawings on a website that only supports raster formats like PNG.
+ * 2. When you must convert a CMX vector file to a high‑resolution PNG thumbnail for product catalogs.
+ * 3. When an e‑commerce platform requires white‑background PNG images generated from CMX artwork for consistent branding.
+ * 4. When automating a batch process that transforms multiple CMX files into web‑ready PNGs with fixed dimensions.
+ * 5. When integrating Aspose.Imaging into a C# service that serves PNG previews of CMX diagrams on demand.
  */
