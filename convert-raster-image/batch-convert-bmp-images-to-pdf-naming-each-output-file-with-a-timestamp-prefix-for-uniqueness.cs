@@ -1,10 +1,17 @@
 // HOW-TO: Batch Convert BMP Files to PDF with Timestamped Filenames in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BmpToPdfBatch
+namespace BatchBmpToPdf
 {
     class Program
     {
@@ -12,37 +19,36 @@ namespace BmpToPdfBatch
         {
             try
             {
-                string inputDirectory = @"C:\BmpInput";
-                string outputDirectory = @"C:\PdfOutput";
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\InputImages";
+                string outputDirectory = @"C:\OutputPdfs";
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(outputDirectory);
-
-                string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+                // Get all BMP files in the input directory
+                string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
                 foreach (string inputPath in bmpFiles)
                 {
+                    // Verify the input file exists
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        continue;
                     }
 
+                    // Create a timestamp prefix for uniqueness
                     string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(inputPath)}.pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, $"{timestamp}_{fileNameWithoutExt}.pdf");
 
-                    // Ensure the output directory for this file exists
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                    // Load BMP and save as PDF
                     using (Image image = Image.Load(inputPath))
                     {
                         var pdfOptions = new PdfOptions();
                         image.Save(outputPath, pdfOptions);
                     }
-
-                    // Slight pause to help keep timestamps unique
-                    System.Threading.Thread.Sleep(1);
                 }
             }
             catch (Exception ex)
@@ -55,9 +61,9 @@ namespace BmpToPdfBatch
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive a collection of BMP scans as PDF documents while ensuring each PDF has a unique timestamped name to avoid overwriting.
- * 2. When an automated workflow must convert newly saved BMP screenshots into PDFs for email attachment, using a timestamp prefix to keep the order of creation.
- * 3. When a document management system requires batch conversion of BMP assets to PDF and needs unique filenames for version control.
- * 4. When generating PDF invoices from BMP graphics in a batch process and you want each file to include a precise creation timestamp for audit trails.
- * 5. When migrating legacy BMP image archives to PDF format on a server and you need to guarantee unique output names across multiple runs.
+ * 1. When you need to archive a collection of BMP screenshots as PDF documents while ensuring each file has a unique timestamped name.
+ * 2. When an automated workflow must convert scanned BMP images from a scanner into PDF reports without overwriting existing files.
+ * 3. When a server‑side application processes user‑uploaded BMP graphics and stores them as PDFs with a timestamp prefix for version control.
+ * 4. When you want to generate PDF portfolios from BMP assets in a folder, using C# to create uniquely named output files for later retrieval.
+ * 5. When a batch job must transform legacy BMP assets into PDF format for compliance, adding a precise timestamp to each filename to track processing time.
  */
