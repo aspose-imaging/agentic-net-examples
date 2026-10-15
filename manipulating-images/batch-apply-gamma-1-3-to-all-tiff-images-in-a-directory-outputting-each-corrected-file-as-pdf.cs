@@ -1,8 +1,16 @@
 // HOW-TO: Batch Apply Gamma 1.3 to TIFF Images and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -26,31 +34,31 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var file in files)
             {
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                string ext = Path.GetExtension(file).ToLowerInvariant();
                 if (ext != ".tif" && ext != ".tiff")
                     continue;
 
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(file))
                 {
                     RasterImage raster = (RasterImage)image;
                     raster.AdjustGamma(1.3f);
 
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
+                    string outputFileName = Path.GetFileNameWithoutExtension(file) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    raster.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -63,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the brightness of scanned TIFF documents before archiving them as searchable PDFs.
- * 2. When a medical imaging workflow requires batch gamma correction of radiology TIFF files and conversion to PDF for electronic health records.
- * 3. When a publishing system must normalize the contrast of high‑resolution TIFF artwork and output each file as a PDF for proofing.
- * 4. When an automated document processing pipeline has to apply a consistent gamma level to all TIFF images in a folder and generate PDF versions for downstream OCR.
- * 5. When a legacy archive contains TIFF scans that need batch gamma adjustment and conversion to PDF to reduce storage size and improve viewing compatibility.
+ * 1. When you need to correct the brightness of a large set of scanned TIFF documents before archiving them as searchable PDFs.
+ * 2. When an application must automatically adjust the gamma of medical imaging TIFF files and generate PDF reports for each patient.
+ * 3. When a batch job has to prepare product catalog TIFF images with consistent exposure and output them as PDF brochures.
+ * 4. When a document management system requires server‑side processing to apply gamma 1.3 to incoming TIFF files and store them as PDFs.
+ * 5. When a developer wants to streamline the workflow of converting legacy TIFF graphics to PDF while ensuring uniform visual quality across all files.
  */
