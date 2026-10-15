@@ -1,4 +1,11 @@
-// HOW-TO: Create a Spiral Drawing With Bezier Curves On BMP In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a Spiral Drawing with Bezier Curves on BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,81 +13,84 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string outputPath = "output/spiral.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            int width = 800;
+            int height = 800;
+            var bmpOptions = new BmpOptions
             {
-                string outputPath = "spiral.bmp";
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
+            {
+                var graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                Pen pen = new Pen(Color.Blue, 2);
+
+                float centerX = width / 2f;
+                float centerY = height / 2f;
+                float radiusStep = 20f;
+                int segments = 12;
+                float angle = 0f;
+                float radius = 0f;
+
+                for (int i = 0; i < segments; i++)
                 {
-                    Directory.CreateDirectory(outputDir);
+                    float startAngle = angle;
+                    float endAngle = angle + (float)Math.PI / 2f;
+                    float startRadius = radius;
+                    float endRadius = radius + radiusStep;
+
+                    PointF p0 = new PointF(
+                        centerX + startRadius * (float)Math.Cos(startAngle),
+                        centerY + startRadius * (float)Math.Sin(startAngle));
+
+                    PointF p3 = new PointF(
+                        centerX + endRadius * (float)Math.Cos(endAngle),
+                        centerY + endRadius * (float)Math.Sin(endAngle));
+
+                    float ctrlRadius = startRadius + radiusStep / 2f;
+                    float ctrlAngle1 = startAngle + (float)Math.PI / 4f;
+                    float ctrlAngle2 = endAngle - (float)Math.PI / 4f;
+
+                    PointF p1 = new PointF(
+                        centerX + ctrlRadius * (float)Math.Cos(ctrlAngle1),
+                        centerY + ctrlRadius * (float)Math.Sin(ctrlAngle1));
+
+                    PointF p2 = new PointF(
+                        centerX + ctrlRadius * (float)Math.Cos(ctrlAngle2),
+                        centerY + ctrlRadius * (float)Math.Sin(ctrlAngle2));
+
+                    graphics.DrawBezier(pen, p0, p1, p2, p3);
+
+                    angle = endAngle;
+                    radius = endRadius;
                 }
 
-                int width = 800;
-                int height = 800;
-
-                var bmpOptions = new BmpOptions();
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-                using (var image = (RasterImage)Image.Create(bmpOptions, width, height))
-                {
-                    var graphics = new Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-
-                    var pen = new Pen(Aspose.Imaging.Color.Blue, 2);
-
-                    double a = 0;
-                    double b = 5;
-                    double deltaTheta = Math.PI / 4;
-                    int segments = 20;
-
-                    for (int i = 0; i < segments; i++)
-                    {
-                        double theta0 = i * deltaTheta;
-                        double theta1 = (i + 1) * deltaTheta;
-
-                        double r0 = a + b * theta0;
-                        double r1 = a + b * theta1;
-
-                        double x0 = width / 2 + r0 * Math.Cos(theta0);
-                        double y0 = height / 2 + r0 * Math.Sin(theta0);
-                        double x3 = width / 2 + r1 * Math.Cos(theta1);
-                        double y3 = height / 2 + r1 * Math.Sin(theta1);
-
-                        double thetaC1 = theta0 + deltaTheta / 3;
-                        double rC1 = a + b * thetaC1;
-                        double x1 = width / 2 + rC1 * Math.Cos(thetaC1);
-                        double y1 = height / 2 + rC1 * Math.Sin(thetaC1);
-
-                        double thetaC2 = theta0 + 2 * deltaTheta / 3;
-                        double rC2 = a + b * thetaC2;
-                        double x2 = width / 2 + rC2 * Math.Cos(thetaC2);
-                        double y2 = height / 2 + rC2 * Math.Sin(thetaC2);
-
-                        graphics.DrawBezier(pen, (float)x0, (float)y0, (float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3);
-                    }
-
-                    image.Save();
-                }
+                image.Save();
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a procedural spiral pattern for a background image or texture in a Windows desktop application.
- * 2. When you want to create a BMP file that visualizes mathematical curves, such as an Archimedean spiral, for educational or scientific reports.
- * 3. When you need to programmatically draw smooth vector-like graphics using Bezier segments without relying on external design tools.
- * 4. When you are building a custom chart or logo that requires precise control over line thickness and color on a raster canvas.
- * 5. When you must export dynamically generated graphics to a BMP format for compatibility with legacy systems or hardware.
+ * 1. When you need to generate a decorative spiral pattern for a bitmap logo or background programmatically using C# and Aspose.Imaging.
+ * 2. When you want to create a series of smooth Bezier‑based arcs to illustrate mathematical spirals in scientific visualizations saved as BMP files.
+ * 3. When an application must produce printable spiral graphics for CNC or laser‑cutting templates without relying on external design tools.
+ * 4. When you are building a game or UI component that requires dynamically drawn spiral animations rendered to a raster image.
+ * 5. When you need to export a custom spiral illustration to a BMP file for legacy systems that only accept uncompressed bitmap formats.
  */
