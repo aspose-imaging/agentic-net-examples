@@ -1,4 +1,11 @@
-// HOW-TO: Batch Apply Custom Fonts to CDR and Export PDFs with Embedded Fonts in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to PDF with Embedded Custom Fonts in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -11,64 +18,56 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-            string fontsDirectory = Path.Combine(baseDir, "Fonts");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+            string fontsDirectory = "Fonts";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            if (!Directory.Exists(fontsDirectory))
-            {
-                Directory.CreateDirectory(fontsDirectory);
-            }
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(fontsDirectory);
 
             string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 var loadOptions = new LoadOptions();
-                loadOptions.AddCustomFontSource(
-                    (object[] args) =>
+                loadOptions.AddCustomFontSource((object[] args) =>
+                {
+                    string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                    var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                     {
-                        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
                         {
-                            foreach (var fontFile in Directory.GetFiles(fontsPath))
-                            {
-                                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-                            }
+                            byte[] fontBytes = File.ReadAllBytes(fontFile);
+                            string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                            result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
                         }
-                        return result.ToArray();
-                    },
-                    fontsDirectory);
+                    }
+                    return result.ToArray();
+                }, fontsDirectory);
 
                 using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                     using (var pdfOptions = new PdfOptions())
                     {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
+
                         image.Save(outputPath, pdfOptions);
                     }
                 }
@@ -83,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to convert a large collection of CorelDRAW (.cdr) designs into PDF documents while ensuring that all custom typography is preserved and embedded for reliable printing.
- * 2. When an automated publishing workflow must replace missing or outdated fonts in multiple CDR files before generating print‑ready PDFs for distribution.
- * 3. When a SaaS platform offers on‑the‑fly preview of user‑uploaded CDR artwork as PDFs and must embed the specific brand fonts to maintain visual consistency.
- * 4. When a legal or compliance system archives design files as PDFs and requires the original fonts to be embedded to prevent font substitution during later review.
- * 5. When a batch processing script needs to render CDR files to PDFs in a .NET application, loading custom font files from a separate folder to guarantee correct text rendering across different machines.
+ * 1. When you need to generate printable PDFs from a collection of CorelDRAW designs while ensuring the documents use company‑specific fonts that are not installed on the target system.
+ * 2. When an automated workflow must convert multiple .cdr files to PDF and embed the exact font files to guarantee consistent text appearance across different viewers.
+ * 3. When you are building a document‑generation service that receives CorelDRAW templates and must output PDFs with licensed fonts packaged inside the file.
+ * 4. When migrating legacy design assets to a PDF archive and you must preserve the original typography by loading custom font files from a directory.
+ * 5. When creating a batch conversion tool for a print shop that processes dozens of CDR files nightly, embedding the shop’s proprietary fonts into each resulting PDF.
  */
