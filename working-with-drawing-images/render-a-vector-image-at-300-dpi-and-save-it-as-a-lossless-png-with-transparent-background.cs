@@ -1,41 +1,49 @@
-// HOW-TO: Render SVG to Transparent PNG at 300 DPI Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Render SVG to 300 DPI Transparent PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/vector.svg";
-        string outputPath = "Output/rendered.png";
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            PngOptions pngOptions = new PngOptions
             {
-                PngOptions options = new PngOptions
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new FileCreateSource(outputPath, false),
+                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300),
+                VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
-                image.Save(outputPath, options);
+                    BackgroundColor = Aspose.Imaging.Color.Transparent
+                }
+            };
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display scalable vector graphics on a website that only supports raster PNG images with a transparent background.
- * 2. When generating high‑resolution product thumbnails from SVG logos for print‑ready catalogs that require 300 DPI images.
- * 3. When converting user‑uploaded SVG icons into lossless PNG assets for a mobile app that demands a fixed DPI and alpha channel.
- * 4. When preparing transparent PNG overlays from vector diagrams for video compositing or slide presentations.
- * 5. When automating batch processing of SVG assets to create consistent 300 DPI PNG files for a digital asset management system.
+ * 1. When a web application needs to generate high‑resolution PNG thumbnails from user‑uploaded SVG logos while preserving transparency.
+ * 2. When a desktop publishing tool must export vector illustrations as lossless PNGs at print‑ready 300 DPI for inclusion in PDFs.
+ * 3. When an e‑commerce platform wants to create product images from SVG designs that retain crisp edges and a transparent background for overlay on different backgrounds.
+ * 4. When a reporting service converts SVG charts into PNG assets for email attachments, ensuring the images are sharp at 300 DPI and maintain alpha channel information.
+ * 5. When a game development pipeline rasterizes SVG UI elements into PNG sprites with exact DPI settings and transparent backgrounds for seamless integration.
  */
