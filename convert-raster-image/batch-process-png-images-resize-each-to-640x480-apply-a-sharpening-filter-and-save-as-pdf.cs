@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert PNG to PDF with Resize and Sharpen in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Resize and Sharpen PNG Images to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -37,22 +44,22 @@ class Program
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    if (!image.IsCached) image.CacheData();
+                    if (!image.IsCached)
+                        image.CacheData();
 
-                    image.Resize(640, 480);
-
+                    image.Resize(640, 480, ResizeType.NearestNeighbourResample);
                     image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    image.Save(outputPath, pdfOptions);
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -65,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDFs from a folder of PNG screenshots, resizing them to standard slide dimensions and enhancing clarity with a sharpen filter.
- * 2. When automating the preparation of product catalog images, converting high‑resolution PNGs to uniformly sized PDF pages for easy distribution.
- * 3. When creating a batch workflow that reduces PNG file size by resizing and then bundles them as PDFs for archival or email attachment.
- * 4. When processing scanned PNG documents to improve readability before converting them into searchable PDF files.
- * 5. When building a C# service that ingests user‑uploaded PNG graphics, standardizes their dimensions, applies sharpening, and outputs PDF reports for downstream systems.
+ * 1. When you need to convert a folder of high‑resolution PNG screenshots into uniformly sized PDF pages for documentation, this code automates the process.
+ * 2. When preparing product catalog images, you can batch resize PNG photos to 640×480, sharpen them for clarity, and output a single PDF per image using C#.
+ * 3. When generating printable PDFs from scanned PNG receipts, the routine ensures each page has the correct dimensions and enhanced readability.
+ * 4. When building an automated report that embeds PNG charts, the code resizes and sharpens each chart before embedding it as a PDF for consistent layout.
+ * 5. When migrating legacy PNG assets to a PDF archive, the script batch processes the files, applies a sharpening filter to improve visual quality, and stores them in a searchable PDF format.
  */

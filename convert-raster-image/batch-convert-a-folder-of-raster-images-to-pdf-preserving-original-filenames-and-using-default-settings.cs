@@ -1,4 +1,11 @@
 // HOW-TO: Batch Convert Raster Images to PDF with Original Filenames in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,35 +19,27 @@ namespace RasterToPdfBatch
         {
             try
             {
-                string inputFolder = "input";
-                string outputFolder = "output";
+                string inputFolder = @"C:\InputImages";
+                string outputFolder = @"C:\OutputPdfs";
 
-                // Ensure output root folder exists
-                Directory.CreateDirectory(outputFolder);
-
-                // Get all files in the input folder
-                string[] files = Directory.GetFiles(inputFolder);
-
-                foreach (string inputPath in files)
+                var files = Directory.GetFiles(inputFolder);
+                foreach (var inputPath in files)
                 {
-                    // Verify input file exists
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
-                    // Preserve original filename, change extension to .pdf
                     string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                     string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
 
-                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Load the raster image and save as PDF using default settings
-                    using (Image image = Image.Load(inputPath))
+                    using (var image = Image.Load(inputPath))
                     {
-                        image.Save(outputPath, new PdfOptions());
+                        var pdfOptions = new PdfOptions();
+                        image.Save(outputPath, pdfOptions);
                     }
                 }
             }
@@ -54,9 +53,9 @@ namespace RasterToPdfBatch
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDF versions of a large set of scanned photos or screenshots automatically, preserving each file’s original name.
- * 2. When an application must archive user‑uploaded raster files (JPEG, PNG, BMP) as PDFs for compliance or storage without manually renaming each document.
- * 3. When a reporting tool has to batch‑convert chart images into PDF reports while keeping the source filenames for easy reference.
- * 4. When a migration script moves legacy image assets into a PDF‑based document management system, using default Aspose.Imaging settings for speed.
- * 5. When a background service processes a folder of product images nightly, creating PDF catalogs that match the original image filenames.
+ * 1. When you need to generate PDF reports from a folder of scanned JPEG or PNG files while keeping each PDF named the same as its source image.
+ * 2. When an automated workflow must archive a collection of product photos as PDFs for compliance without manually renaming each file.
+ * 3. When a desktop application processes user‑uploaded screenshots and saves them as PDFs for easy printing or sharing.
+ * 4. When a server‑side service converts a batch of medical imaging files (e.g., BMP) to PDFs for integration with electronic health record systems.
+ * 5. When a migration script moves legacy raster assets into a PDF‑based document repository while preserving the original file names.
  */

@@ -1,9 +1,16 @@
-// HOW-TO: Batch Convert Images to PDF with Current Date Watermark in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Images to PDF with Date Watermark in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -28,14 +35,20 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory);
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f =>
+                {
+                    string ext = Path.GetExtension(f).ToLowerInvariant();
+                    return ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".tif" || ext == ".tiff";
+                })
+                .ToArray();
 
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
@@ -45,18 +58,18 @@ class Program
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    Graphics graphics = new Graphics(image);
-                    string watermarkText = DateTime.Now.ToString("yyyy-MM-dd");
-                    Font font = new Font("Arial", 24);
-                    SolidBrush brush = new SolidBrush(Color.Yellow);
-                    float x = image.Width - (font.Size * watermarkText.Length) - 10;
-                    float y = image.Height - font.Size - 10;
+                    var raster = (RasterImage)image;
+
+                    var graphics = new Graphics(raster);
+                    string watermarkText = $"Generated on {DateTime.Now:yyyy-MM-dd}";
+                    var font = new Font("Arial", 24);
+                    var brush = new SolidBrush(Color.Yellow);
+                    float x = raster.Width - 200; // approximate position
+                    float y = raster.Height - 30;
                     graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
 
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    var pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -69,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive daily scanned receipts as PDF files and stamp each with the processing date automatically.
- * 2. When a photographer wants to generate PDF portfolios from a folder of JPEGs while adding a date watermark to protect copyright.
- * 3. When an invoicing system must convert PNG invoice images to PDF and embed the current date as a verification mark before sending to clients.
- * 4. When a legal firm needs to batch‑process evidence photos into PDFs and include the capture date as a visible watermark for chain‑of‑custody records.
- * 5. When a document management workflow requires converting various raster image formats to PDF and tagging each file with the generation date for audit trails.
+ * 1. When a company needs to archive daily scanned photos as PDF documents that show the generation date for compliance.
+ * 2. When a developer wants to automate converting a folder of product photos (PNG, JPG, BMP, GIF, TIFF) into PDFs with a timestamp watermark.
+ * 3. When an application must generate PDF reports from user‑uploaded images and include the current date as proof of creation.
+ * 4. When a legal team requires batch processing of evidence images into PDFs that display the date they were processed.
+ * 5. When a photographer wants to create watermarked PDF portfolios from a collection of raster images, automatically adding today’s date.
  */

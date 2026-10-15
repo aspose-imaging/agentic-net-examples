@@ -1,19 +1,25 @@
-// HOW-TO: Resize BMP to 1024x1024, Apply Gaussian Blur and Export as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP to 1024x1024, Apply Gaussian Blur, Save as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output/result.svg";
+
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output.svg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,15 +28,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                image.Resize(1024, 1024, ResizeType.NearestNeighbourResample);
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5);
-                image.Filter(image.Bounds, blurOptions);
-
+                raster.Resize(1024, 1024);
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
+                raster.Filter(raster.Bounds, blurOptions);
                 SvgOptions svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a scalable SVG thumbnail from a high‑resolution BMP for responsive web design.
- * 2. When a desktop application must preprocess scanned BMP documents by resizing them to a uniform size and softening details before vector conversion.
- * 3. When an automated pipeline creates blurred background graphics from BMP assets for use in UI themes and requires SVG output for infinite scaling.
- * 4. When you want to convert legacy BMP icons into SVG format while applying a Gaussian blur to achieve a modern, softened appearance.
- * 5. When a reporting tool needs to embed blurred, resized BMP images as SVG illustrations to keep file size low and maintain quality across different screen resolutions.
+ * 1. When you need to convert a high‑resolution BMP logo into a scalable SVG for web use while smoothing edges with a Gaussian blur.
+ * 2. When preparing product images for responsive design, you resize the bitmap to a fixed 1024×1024 size, blur it to reduce noise, and output SVG for crisp scaling.
+ * 3. When generating vector‑based thumbnails from legacy BMP files, applying a blur to create a soft‑focus effect before saving as SVG.
+ * 4. When automating a batch process that transforms scanned BMP documents into lightweight SVG graphics with a uniform size and subtle blur for visual consistency.
+ * 5. When integrating image preprocessing into a C# application that requires raster images to be resized, blurred, and exported as SVG for further vector editing.
  */

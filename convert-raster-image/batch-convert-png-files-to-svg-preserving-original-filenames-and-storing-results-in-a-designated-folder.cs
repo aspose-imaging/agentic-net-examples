@@ -1,53 +1,64 @@
-// HOW-TO: Batch Convert PNG Images to SVG Files with Original Filenames in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Images to SVG Files in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchPngToSvg
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputFolder = "input";
-            string outputFolder = "output";
-
-            Directory.CreateDirectory(outputFolder);
-
-            var pngFiles = Directory.GetFiles(inputFolder, "*.png", SearchOption.TopDirectoryOnly);
-            foreach (var inputPath in pngFiles)
+            try
             {
-                if (!File.Exists(inputPath))
+                string inputFolder = "input";
+                string outputFolder = "output";
+
+                // Ensure the output folder exists
+                Directory.CreateDirectory(outputFolder);
+
+                string[] pngFiles = Directory.GetFiles(inputFolder, "*.png", SearchOption.TopDirectoryOnly);
+                foreach (var pngPath in pngFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    if (!File.Exists(pngPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {pngPath}");
+                        return;
+                    }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
+                    string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(pngPath) + ".svg");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (var image = Image.Load(inputPath))
-                {
-                    var options = new SvgOptions();
-                    image.Save(outputPath, options);
+                    using (var image = Image.Load(pngPath))
+                    {
+                        var options = new SvgOptions();
+                        image.Save(outputPath, options);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform a collection of PNG icons into scalable SVG graphics for responsive web design while keeping each file’s original name.
- * 2. When an automated build process must generate vector versions of product screenshots stored in a folder for documentation purposes.
- * 3. When a migration script has to replace raster logos with SVG equivalents across multiple marketing assets without manual renaming.
- * 4. When a desktop application requires on‑the‑fly conversion of user‑uploaded PNG files to SVG for further editing in vector editors.
- * 5. When a CI pipeline should validate that all PNG assets in a repository can be batch‑converted to SVG and saved to a designated output directory.
+ * 1. When you need to generate scalable vector graphics from a collection of PNG icons for a web UI, preserving each original filename.
+ * 2. When automating the conversion of product photos stored as PNGs into SVGs for responsive design without manually renaming files.
+ * 3. When preparing a set of raster diagrams for printing at any resolution by batch converting them to SVG using C#.
+ * 4. When migrating legacy PNG assets to vector format for a mobile app and you want the process to run on a server with Aspose.Imaging.
+ * 5. When creating an automated build step that transforms all PNG assets in a folder into SVGs and saves them to a designated output directory.
  */

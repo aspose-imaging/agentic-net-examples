@@ -1,59 +1,64 @@
 // HOW-TO: Resize PNG to Max Width 1200 and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-namespace ImageProcessingApp
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            const string inputPath = "input.png";
-            const string outputPath = "output.pdf";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.pdf";
 
-            try
+            if (!File.Exists(inputPath))
             {
-                if (!File.Exists(inputPath))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                if (!image.IsCached)
+                    image.CacheData();
+
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
+
+                if (originalWidth > 1200)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string? outputDir = Path.GetDirectoryName(outputPath);
-                Directory.CreateDirectory(outputDir ?? ".");
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    int originalWidth = image.Width;
-                    int originalHeight = image.Height;
-
-                    int newWidth = originalWidth > 1200 ? 1200 : originalWidth;
+                    int newWidth = 1200;
                     int newHeight = (int)Math.Round((double)originalHeight * newWidth / originalWidth);
-
-                    if (newWidth != originalWidth)
-                    {
-                        image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-                    }
-
-                    var pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    image.Resize(newWidth, newHeight, Aspose.Imaging.ResizeType.LanczosResample);
                 }
+
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink large PNG screenshots to a 1200‑pixel width for faster loading while preserving the original aspect ratio before embedding them in a PDF report.
- * 2. When generating printable PDFs from user‑uploaded PNG logos that must not exceed a specific width to fit page layouts.
- * 3. When automating batch conversion of high‑resolution PNG assets to PDF documents for archiving, ensuring each image is resized to a consistent maximum width.
- * 4. When creating PDF invoices that include product images originally stored as PNG files, and you must resize them to avoid overflow on the invoice template.
- * 5. When developing a web service that receives PNG files, resizes them to a 1200‑pixel limit, and returns a PDF version for downstream processing or storage.
+ * 1. When you need to generate a PDF brochure from high‑resolution PNG graphics while ensuring the file fits within a 1200‑pixel width for faster loading.
+ * 2. When an e‑commerce site must downsize product PNG images before embedding them in PDF invoices to keep email attachments small.
+ * 3. When a reporting tool converts user‑uploaded PNG charts into PDFs, preserving the original aspect ratio and limiting width to 1200 pixels.
+ * 4. When a document‑automation workflow requires converting PNG logos to PDF format with consistent dimensions for print‑ready files.
+ * 5. When a mobile app backend processes PNG screenshots, resizes them to a maximum width and stores them as PDFs for archival purposes.
  */

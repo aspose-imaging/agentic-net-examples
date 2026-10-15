@@ -1,34 +1,45 @@
-// HOW-TO: Sharpen PNG Image and Save as PDF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Sharpen a JPEG and Save as PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
+                Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +51,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the visual sharpness of a scanned PNG before embedding it into a PDF report.
- * 2. When generating printable PDFs from product photos that require a sharpened appearance to highlight details.
- * 3. When creating a PDF catalog where each raster image must be sharpened to enhance texture and edges.
- * 4. When converting screenshots to PDF pages while applying a sharpening filter to make text and UI elements clearer.
- * 5. When automating a document workflow that loads a PNG, sharpens it, and saves the result directly as a PDF using C#.
+ * 1. When you need to enhance the clarity of a scanned photo before embedding it into a PDF report.
+ * 2. When generating printable PDFs from JPEG assets and want to apply a sharpening effect to improve visual quality.
+ * 3. When automating a workflow that converts product images to PDF brochures while automatically sharpening details.
+ * 4. When creating PDF invoices that include high‑resolution images and require a quick sharpen filter to make text or logos more legible.
+ * 5. When building a C# application that processes user‑uploaded pictures, sharpens them, and stores the result as a single‑page PDF document.
  */

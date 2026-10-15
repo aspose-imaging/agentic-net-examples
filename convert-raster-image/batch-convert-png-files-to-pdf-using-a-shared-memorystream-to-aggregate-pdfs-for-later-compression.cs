@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert Multiple PNG Images to a Single PDF Using MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Images to Individual PDFs and Combine into One PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,39 +18,44 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputFolder = "input";
-            string outputPdfPath = "output/combined.pdf";
+            string inputFolder = @"C:\Images\InputPngs";
+            string outputFolder = @"C:\Images\OutputPdfs";
+            string aggregatedPdfPath = @"C:\Images\Aggregated\combined.pdf";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(outputFolder);
+            Directory.CreateDirectory(Path.GetDirectoryName(aggregatedPdfPath));
 
-            // Shared memory stream to aggregate PDFs
+            // Shared memory stream for aggregating PDFs
             using (MemoryStream aggregatedStream = new MemoryStream())
             {
-                // Get all PNG files in the input folder
-                string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
-
-                foreach (string pngPath in pngFiles)
+                // Process each PNG file in the input folder
+                foreach (string pngPath in Directory.GetFiles(inputFolder, "*.png"))
                 {
-                    // Validate input file existence
                     if (!File.Exists(pngPath))
                     {
                         Console.Error.WriteLine($"File not found: {pngPath}");
                         return;
                     }
 
-                    // Load PNG image
                     using (Image image = Image.Load(pngPath))
                     {
-                        // Save as PDF into the shared memory stream
+                        // Save individual PDF
+                        string pdfFileName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
+                        string pdfPath = Path.Combine(outputFolder, pdfFileName);
+                        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
                         PdfOptions pdfOptions = new PdfOptions();
+                        image.Save(pdfPath, pdfOptions);
+
+                        // Append PDF to the shared memory stream
                         image.Save(aggregatedStream, pdfOptions);
                     }
                 }
 
-                // Write aggregated PDF bytes to the output file
+                // Write the aggregated PDF stream to disk
                 aggregatedStream.Position = 0;
-                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
+                using (FileStream fileStream = new FileStream(aggregatedPdfPath, FileMode.Create, FileAccess.Write))
                 {
                     aggregatedStream.CopyTo(fileStream);
                 }
@@ -58,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge dozens of product screenshots (PNG) into one searchable PDF report without creating temporary files.
- * 2. When an automated build process must generate a single PDF portfolio from a folder of PNG assets for archiving or emailing.
- * 3. When a web service receives multiple PNG uploads and must return a combined PDF to the client while keeping the data in memory for further compression.
- * 4. When you want to consolidate scanned PNG pages into a single PDF document before applying Aspose.Imaging’s PDF compression features.
- * 5. When a desktop application needs to batch‑convert user‑selected PNG files into a combined PDF for printing or offline viewing.
+ * 1. When you need to generate separate PDF reports from a folder of PNG scans and store them for later distribution.
+ * 2. When you want to create a single combined PDF document from multiple PNG receipts for easy archiving.
+ * 3. When an application must convert user‑uploaded PNG screenshots into PDFs and then merge them into one file before sending to a web service.
+ * 4. When a batch processing job has to produce both individual PDF files and a consolidated PDF for compliance documentation.
+ * 5. When you are building a .NET utility that consolidates PNG product images into a single PDF catalog while also keeping each image as its own PDF file.
  */

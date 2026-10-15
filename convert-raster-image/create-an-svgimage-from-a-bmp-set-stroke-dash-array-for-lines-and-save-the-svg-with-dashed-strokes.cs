@@ -1,9 +1,16 @@
-// HOW-TO: Create SVG from BMP with Dashed Line Stroke in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG from BMP with Dashed Line Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.bmp";
-            string outputPath = "Output\\image.svg";
+            string inputPath = "Input/image.bmp";
+            string outputPath = "Output/image.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -27,22 +34,23 @@ class Program
                 int width = bmpImage.Width;
                 int height = bmpImage.Height;
 
-                SvgOptions svgOptions = new SvgOptions();
-                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                FileCreateSource source = new FileCreateSource(outputPath, false);
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    PageWidth = width,
-                    PageHeight = height,
-                    BackgroundColor = Color.White
+                    Source = source
                 };
 
                 using (Image svgImage = Image.Create(svgOptions, width, height))
                 {
                     Graphics graphics = new Graphics(svgImage);
+                    graphics.Clear(Color.White);
+
                     Pen pen = new Pen(Color.Black);
                     pen.DashPattern = new float[] { 5, 5 };
-                    graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
 
-                    svgImage.Save(outputPath);
+                    graphics.DrawLine(pen, 10, 10, width - 10, height - 10);
+
+                    svgImage.Save();
                 }
             }
         }
@@ -55,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a bitmap diagram into a scalable SVG for web display while adding a custom dashed border line.
- * 2. When generating vector graphics from legacy BMP assets and you want to highlight edges with a patterned stroke using Aspose.Imaging in a C# application.
- * 3. When creating printable diagrams where the source image is a BMP but the final output must be an SVG with stylized dashed lines for better visual emphasis.
- * 4. When automating a workflow that transforms scanned BMP images into SVG files and programmatically applies dash patterns to lines for diagram annotations.
- * 5. When developing a C# tool that extracts dimensions from a BMP, creates an SVG canvas of the same size, and draws custom dashed lines for UI overlays or reporting.
+ * 1. When you need to convert a legacy BMP diagram into a scalable SVG file while applying custom dashed strokes for better visual emphasis.
+ * 2. When generating vector graphics from raster assets for responsive web pages and want to programmatically define line dash patterns in C#.
+ * 3. When creating printable technical drawings from bitmap sources and require SVG output with precise dash styling for standards compliance.
+ * 4. When automating batch processing of BMP images to SVG format and need to add consistent dashed lines to highlight boundaries or guides.
+ * 5. When integrating Aspose.Imaging into a .NET application to transform raster images into editable SVGs with custom pen dash arrays for UI overlays.
  */

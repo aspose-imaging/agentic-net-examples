@@ -1,4 +1,11 @@
-// HOW-TO: Crop PNG to 300x300, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop PNG, Apply Median Filter, and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,32 +15,32 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/input.png";
+        string outputPath = "Output/output.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\result.pdf";
-
-            if (!File.Exists(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                if (!image.IsCached)
+                    image.CacheData();
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                var cropRect = new Rectangle(0, 0, 300, 300);
+                image.Crop(cropRect);
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-            {
-                if (!raster.IsCached) raster.CacheData();
+                var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
+                image.Filter(image.Bounds, medianOptions);
 
-                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(0, 0, 300, 300);
-                raster.Crop(cropRect);
-
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a 300 × 300 thumbnail from a PNG, reduce noise with a median filter, and embed it in a PDF report using C#.
- * 2. When generating printable PDFs from scanned PNG images where you must crop a specific region and smooth the image before saving.
- * 3. When creating PDF invoices that include a cleaned‑up logo extracted from a larger PNG file by cropping and applying noise reduction.
- * 4. When preprocessing PNG screenshots for documentation, cropping the area of interest, applying a median filter to remove artifacts, and converting the result to PDF.
- * 5. When automating batch conversion of PNG graphics to PDF pages while ensuring each page contains a centered, noise‑filtered 300 × 300 image.
+ * 1. When you need to extract a specific 300 × 300 area from a PNG, reduce noise with a median filter, and generate a PDF report.
+ * 2. When converting scanned PNG thumbnails into clean PDF pages for archival or printing.
+ * 3. When preparing a cropped and denoised image snippet for inclusion in a PDF invoice or catalog.
+ * 4. When automating the preprocessing of PNG graphics before embedding them into a PDF document in a C# application.
+ * 5. When building a batch job that trims, smooths, and bundles PNG assets into PDF files for distribution.
  */

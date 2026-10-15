@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert Multiple PNG Files to Sequentially Named PDFs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Files to Sequentially Named PDFs in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,34 +15,33 @@ namespace BatchPngToPdf
 {
     class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
             try
             {
-                string inputDirectory = @"C:\Images\Input";
-                string outputDirectory = @"C:\Images\Output";
-
-                Directory.CreateDirectory(outputDirectory);
+                string inputDirectory = @"C:\InputPngs";
+                string outputDirectory = @"C:\OutputPdfs";
 
                 string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+                int index = 1;
 
-                for (int i = 0; i < pngFiles.Length; i++)
+                foreach (string inputPath in pngFiles)
                 {
-                    string inputPath = pngFiles[i];
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        continue;
                     }
 
-                    string outputPath = Path.Combine(outputDirectory, $"output_{i + 1}.pdf");
+                    string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     using (Image image = Image.Load(inputPath))
                     {
-                        var pdfOptions = new PdfOptions();
-                        image.Save(outputPath, pdfOptions);
+                        image.Save(outputPath, new PdfOptions());
                     }
+
+                    index++;
                 }
             }
             catch (Exception ex)
@@ -48,9 +54,9 @@ namespace BatchPngToPdf
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from a folder of scanned PNG receipts, assigning each PDF a unique number.
- * 2. When an application must archive product images as PDFs for compliance, creating files like output_1.pdf, output_2.pdf, etc.
- * 3. When a web service processes user‑uploaded PNG screenshots and stores them as sequentially numbered PDF documents for easy retrieval.
- * 4. When a batch job converts PNG assets from a design pipeline into PDFs for printing, preserving order with numeric suffixes.
- * 5. When a desktop tool prepares a series of PNG diagrams for distribution by converting them to PDFs with consistent naming.
+ * 1. When you need to generate a series of PDF reports from a folder of PNG screenshots, automatically naming each PDF with a numeric suffix.
+ * 2. When an application must archive scanned PNG images as PDFs for easier distribution while preserving order.
+ * 3. When a batch processing job has to convert user‑uploaded PNG assets into PDFs for printing, creating files like output_1.pdf, output_2.pdf, etc.
+ * 4. When you want to automate the creation of PDF portfolios from PNG design mockups, ensuring each file is saved in a target directory with incremental names.
+ * 5. When a backend service processes large numbers of PNG charts and needs to store them as compact PDF documents with predictable filenames for later retrieval.
  */

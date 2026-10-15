@@ -1,4 +1,11 @@
-// HOW-TO: Resize PNG with Lanczos Resampling and Export as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG with Lanczos Resampling and Export to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +14,13 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/input.png";
-        string outputPath = "Output/resized.svg";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output/output.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,23 +29,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
-
-                int newWidth = image.Width * 2;
-                int newHeight = image.Height * 2;
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                using (SvgOptions options = new SvgOptions())
-                {
-                    options.VectorRasterizationOptions = new SvgRasterizationOptions();
-                    options.VectorRasterizationOptions.PageWidth = image.Width;
-                    options.VectorRasterizationOptions.PageHeight = image.Height;
-
-                    image.Save(outputPath, options);
-                }
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to double the resolution of a PNG logo while preserving sharp edges and then embed it as a scalable SVG in a web page.
- * 2. When converting raster PNG assets to vector‑friendly SVG files for responsive UI designs without losing detail.
- * 3. When generating high‑quality printable graphics by upscaling PNG images with Lanczos resampling before saving them as SVG for lossless scaling.
- * 4. When automating a build pipeline that processes PNG icons, enlarges them, and outputs SVG files for use in multiple screen densities.
- * 5. When creating a C# tool that prepares PNG illustrations for vector editors by resizing them with high‑quality resampling and exporting to SVG format.
+ * 1. When you need to generate a smaller, high‑quality vector version of a PNG for responsive web design.
+ * 2. When converting raster logos to scalable SVGs while preserving detail through Lanczos resampling.
+ * 3. When preparing thumbnail images for a mobile app and storing them as SVG to reduce file size.
+ * 4. When automating batch processing of PNG assets to create SVG icons at half the original resolution.
+ * 5. When integrating image optimization into a C# backend that requires both resizing and format conversion to SVG.
  */

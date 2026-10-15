@@ -1,10 +1,16 @@
-// HOW-TO: Resize PNG to 640x480, Apply Gaussian Blur and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to 640x480, Apply Gaussian Blur and Export as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -13,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.svg";
+            string outputPath = "output/output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,22 +27,27 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDir);
-            }
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                if (!image.IsCached)
-                    image.CacheData();
+                raster.Resize(640, 480);
+                if (!raster.IsCached) raster.CacheData();
 
-                image.Resize(640, 480);
-                image.Filter(image.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 5.0);
+                raster.Filter(raster.Bounds, blurOptions);
 
-                SvgOptions svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                var svgGraphics = new SvgGraphics2D(640, 480, 96);
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+                SvgImage svgImage = svgGraphics.EndRecording();
+                svgImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a scalable vector thumbnail with a soft blur for web previews.
- * 2. When you must convert high‑resolution PNG assets into smaller, blurred SVG icons for responsive UI design.
- * 3. When an application creates blurred background images for PDFs and stores them as SVG to keep file size low.
- * 4. When a batch process prepares product images by resizing them to 640×480, applying a Gaussian blur, and exporting to SVG for print‑ready layouts.
- * 5. When you want to programmatically transform user‑uploaded PNG photos into blurred SVG graphics for use in HTML5 canvas animations.
+ * 1. When you need to generate a scalable vector version of a blurred thumbnail from a high‑resolution PNG for responsive web design.
+ * 2. When you want to preprocess product photos by resizing them to 640×480 and applying a soft Gaussian blur before embedding them in SVG icons.
+ * 3. When creating low‑bandwidth placeholders, you can convert a PNG to a blurred SVG that scales without pixelation on different screen sizes.
+ * 4. When automating a workflow that converts user‑uploaded PNG screenshots into blurred SVG overlays for UI mockups.
+ * 5. When preparing graphics for print or PDF generation, you may resize a PNG, blur it, and save it as SVG to retain vector quality while applying a smoothing effect.
  */

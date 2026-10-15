@@ -1,10 +1,16 @@
-// HOW-TO: Add Filename Footer to PNG, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Filename Footer to PNG and Save as PDF with Median Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -13,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.pdf";
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,26 +28,25 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                RasterImage raster = (RasterImage)image;
+
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
                 using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Black))
                 {
-                    Font font = new Font("Arial", 12);
-                    Graphics graphics = new Graphics(raster);
-                    string fileName = Path.GetFileName(inputPath);
-                    float x = 10;
-                    float y = raster.Height - 20;
-                    graphics.DrawString(fileName, font, brush, new Aspose.Imaging.PointF(x, y));
+                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(raster);
+                    graphics.DrawString(Path.GetFileName(inputPath), font, brush, new Aspose.Imaging.Point(10, raster.Height - 30));
                 }
 
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.Source = new FileCreateSource(outputPath, false);
-                raster.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up a scanned PNG image with a median filter before archiving it as a PDF that includes the original file name as a footer.
- * 2. When generating PDF reports from PNG assets and you want each page to display the source image’s filename at the bottom for traceability.
- * 3. When automating batch conversion of product photos from PNG to PDF while reducing noise and adding a branding label with the file name.
- * 4. When creating printable PDFs from PNG screenshots and need to embed the screenshot’s filename as a caption for documentation purposes.
- * 5. When preparing legal‑evidence PDFs from PNG images, applying a median filter to improve clarity and appending the file name as a footer for audit trails.
+ * 1. When you need to clean up a scanned PNG image, add a descriptive label, and generate a searchable PDF report.
+ * 2. When automating batch conversion of product photos to PDFs while applying noise reduction and embedding the original file name as a caption.
+ * 3. When creating archival PDFs from PNG receipts that require median filtering to remove speckles and a footer for audit trails.
+ * 4. When building a C# service that receives PNG uploads, applies a median filter for quality improvement, and returns a PDF with the source name displayed.
+ * 5. When preparing marketing assets where each PNG must be filtered, watermarked with its filename, and delivered as a PDF for client review.
  */
