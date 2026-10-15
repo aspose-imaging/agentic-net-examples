@@ -1,11 +1,17 @@
-// HOW-TO: Extract Embedded Images From SVG and Create PNG Thumbnails in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Embedded Images from SVG and Create PNG Thumbnails in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -19,7 +25,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
                 return;
             }
 
@@ -28,68 +34,49 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
-
-            foreach (string svgPath in svgFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            foreach (string filePath in files)
             {
-                if (!File.Exists(svgPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {svgPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
 
-                using (Image image = Image.Load(svgPath))
+                using (Image vector = Image.Load(filePath))
                 {
-                    VectorImage vectorImage = (VectorImage)image;
+                    var vectorImage = (VectorImage)vector;
                     var embeddedImages = vectorImage.GetEmbeddedImages();
                     int index = 0;
-                    foreach (var embedded in embeddedImages)
+                    foreach (EmbeddedImage embedded in embeddedImages)
                     {
                         using (embedded)
                         {
-                            using (Image embeddedImg = embedded.Image)
+                            string baseName = Path.GetFileNameWithoutExtension(filePath);
+                            string outputPath = Path.Combine(outputDirectory, $"{baseName}_thumb_{index}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            using (RasterImage raster = (RasterImage)embedded.Image)
                             {
-                                RasterImage raster = (RasterImage)embeddedImg;
+                                int maxSize = 150;
+                                int width = raster.Width;
+                                int height = raster.Height;
+                                double ratio = Math.Min((double)maxSize / width, (double)maxSize / height);
+                                int thumbWidth = (int)(width * ratio);
+                                int thumbHeight = (int)(height * ratio);
+                                if (thumbWidth <= 0) thumbWidth = 1;
+                                if (thumbHeight <= 0) thumbHeight = 1;
 
-                                int maxDim = 150;
-                                int newWidth = raster.Width;
-                                int newHeight = raster.Height;
+                                raster.Resize(thumbWidth, thumbHeight);
 
-                                if (raster.Width > raster.Height)
+                                using (var pngOptions = new PngOptions())
                                 {
-                                    if (raster.Width > maxDim)
-                                    {
-                                        newWidth = maxDim;
-                                        newHeight = (int)((float)raster.Height / raster.Width * maxDim);
-                                    }
-                                }
-                                else
-                                {
-                                    if (raster.Height > maxDim)
-                                    {
-                                        newHeight = maxDim;
-                                        newWidth = (int)((float)raster.Width / raster.Height * maxDim);
-                                    }
-                                }
-
-                                if (newWidth != raster.Width || newHeight != raster.Height)
-                                {
-                                    raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-                                }
-
-                                string baseName = Path.GetFileNameWithoutExtension(svgPath);
-                                string outFileName = $"{baseName}_thumb_{index}.png";
-                                string outPath = Path.Combine(outputDirectory, outFileName);
-                                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-
-                                using (PngOptions pngOptions = new PngOptions())
-                                {
-                                    pngOptions.Source = new FileCreateSource(outPath, false);
-                                    raster.Save(outPath, pngOptions);
+                                    raster.Save(outputPath, pngOptions);
                                 }
                             }
+
+                            index++;
                         }
-                        index++;
                     }
                 }
             }
@@ -103,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate small preview PNGs for all raster images embedded in a collection of SVG icons for a web gallery.
- * 2. When an application must automatically extract photos from SVG diagrams and store them as separate PNG files for further analysis.
- * 3. When a build pipeline has to convert embedded high‑resolution bitmaps inside SVG assets into uniform 150‑pixel thumbnails for mobile apps.
- * 4. When a reporting tool requires extracting and resizing raster graphics from SVG charts to embed them in PDF summaries.
- * 5. When a content‑management system must batch‑process uploaded SVG files, pulling out any embedded images and saving them as lightweight PNG thumbnails for faster loading.
+ * 1. When you need to generate preview thumbnails for all raster images embedded in a collection of SVG icons for a web catalog, this code batch‑processes the SVG files and saves PNG previews.
+ * 2. When a design pipeline requires extracting bitmap assets from SVG illustrations to reuse them in a mobile app, the script pulls each embedded image and converts it to a PNG of a fixed size.
+ * 3. When automating documentation generation, you can use this routine to pull embedded screenshots from SVG diagrams and create small PNG thumbnails for inclusion in PDF reports.
+ * 4. When migrating legacy SVG assets that contain embedded JPEGs into a new asset management system, the code extracts those JPEGs, rasterizes them, and stores them as PNG thumbnails for consistent format handling.
+ * 5. When building a content‑delivery service that serves low‑resolution previews of SVG‑based charts, this example quickly extracts the chart’s raster layers and outputs 150‑pixel PNG thumbnails for faster loading.
  */
