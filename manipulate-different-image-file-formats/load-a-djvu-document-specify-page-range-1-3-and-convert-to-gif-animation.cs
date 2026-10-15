@@ -1,9 +1,17 @@
-// HOW-TO: Convert DjVu Pages 1 To 3 Into Animated GIF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 1 to 3 Into Animated GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -11,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.djvu";
-            string outputPath = "output.gif";
+            string inputPath = "Input/document.djvu";
+            string outputPath = "Output/animation.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -25,7 +33,7 @@ class Program
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 GifOptions gifOptions = new GifOptions();
-                gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(1, 3));
+                gifOptions.MultiPageOptions = new MultiPageOptions(new IntRange(1, 3));
                 djvu.Save(outputPath, gifOptions);
             }
         }
@@ -38,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first three pages of a DjVu e‑book and create a lightweight animated GIF for preview on a website.
- * 2. When you want to generate a short looping animation from selected DjVu pages to embed in a mobile app tutorial.
- * 3. When you must convert a multi‑page DjVu technical manual into a GIF that can be displayed in email clients that only support GIF images.
- * 4. When you are building a document‑conversion service that offers users the ability to download the first few pages of a DjVu file as an animated GIF.
- * 5. When you need to automate batch processing of DjVu files to produce GIF animations of specific page ranges for archival or sharing purposes.
+ * 1. When you need to embed a short animation of selected DjVu pages in a web page.
+ * 2. When you want to create a preview GIF of the first few pages of a scanned book stored as DjVu.
+ * 3. When you have to generate an animated thumbnail for a document management system that only supports GIF.
+ * 4. When you need to extract a specific page range from a DjVu file and share it as a lightweight animation.
+ * 5. When you are building a C# application that converts multi‑page DjVu documents into GIF animations for email attachments.
  */
