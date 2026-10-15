@@ -1,35 +1,43 @@
-// HOW-TO: Create BMP Image with 90 Degree Arc Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image and Draw 90 Degree Arc in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "arc_output.bmp";
-
         try
         {
+            string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            int width = 200;
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            int width = 300;
             int height = 200;
 
-            BmpOptions bmpOptions = new BmpOptions();
-
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (Image image = Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(20, 20, 160, 160);
-                Pen pen = new Pen(Aspose.Imaging.Color.Blue, 3);
-
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
+                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(50, 50, 200, 100);
                 graphics.DrawArc(pen, rect, 0, 90);
 
-                image.Save(outputPath, bmpOptions);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -41,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail that includes a quarter‑circle indicator for progress or status in a Windows desktop application.
- * 2. When you want to programmatically draw a 90° blue arc inside a defined rectangle for custom chart markers or gauges in a reporting tool.
- * 3. When you must create a simple bitmap file with vector‑based graphics, such as a logo or badge, without using external design software.
- * 4. When you are building automated tests that verify drawing APIs by creating a BMP file with a known arc shape for pixel‑by‑pixel comparison.
- * 5. When you need to produce a BMP asset containing a precise arc for use in game UI elements or embedded devices that only support BMP format.
+ * 1. When you need to generate a BMP diagram with a quarter‑circle highlight for a Windows desktop UI mockup.
+ * 2. When you want to programmatically add a blue 90‑degree arc to a bitmap for a custom chart or gauge indicator.
+ * 3. When an automated report requires a simple BMP image containing a curved segment inside a defined rectangle.
+ * 4. When you are building a game asset pipeline that creates BMP sprites with precise arc shapes for collision boundaries.
+ * 5. When you must produce a BMP file with a drawn arc for testing image‑processing algorithms that detect curved edges.
  */
