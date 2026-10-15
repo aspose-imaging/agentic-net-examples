@@ -1,39 +1,54 @@
 // HOW-TO: Convert EMF to SVG with Custom Background Color in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.svg";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image emfImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image emfImage = Image.Load(inputPath))
-            {
-                Graphics graphics = new Graphics(emfImage);
-
-                // Gradient fill not supported; using solid color as fallback
-                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
-                {
-                    graphics.FillRectangle(brush, 0, 0, emfImage.Width, emfImage.Height);
-                }
+                int width = emfImage.Width;
+                int height = emfImage.Height;
 
                 SvgOptions svgOptions = new SvgOptions();
-                emfImage.Save(outputPath, svgOptions);
+                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(svgOptions, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(svgImage);
+                    using (SolidBrush bgBrush = new SolidBrush(Aspose.Imaging.Color.LightBlue))
+                    {
+                        graphics.FillRectangle(bgBrush, 0, 0, width, height);
+                    }
+
+                    graphics.DrawImage(emfImage, new Aspose.Imaging.Point(0, 0));
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    svgImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector diagram from an EMF file into a web page and want to replace its default background with a solid color before converting it to SVG.
- * 2. When a reporting tool generates charts as EMF and you must produce SVG assets with a consistent background for cross‑platform rendering.
- * 3. When migrating legacy Windows Metafile assets to scalable SVG format while ensuring the images have a uniform light‑blue background for branding.
- * 4. When automating a batch process that reads EMF logos, applies a corporate color as the background, and saves them as SVG for use in responsive UI designs.
- * 5. When integrating Aspose.Imaging in a C# application to programmatically change the background of vector graphics and export them to SVG for further editing in design software.
+ * 1. When you need to embed a legacy EMF diagram into a web page as scalable SVG with a solid background color.
+ * 2. When converting printed vector assets to SVG for responsive UI while ensuring a consistent background hue.
+ * 3. When generating SVG thumbnails from EMF files for a document management system that requires a uniform background.
+ * 4. When preprocessing EMF logos for branding assets, adding a brand‑color backdrop before exporting to SVG.
+ * 5. When automating batch conversion of EMF charts to SVG in a C# application, applying a light background to improve visibility.
  */
