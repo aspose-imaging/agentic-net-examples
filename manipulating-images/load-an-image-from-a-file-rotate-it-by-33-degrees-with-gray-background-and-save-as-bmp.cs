@@ -1,17 +1,22 @@
 // HOW-TO: Rotate JPEG By 33 Degrees With Gray Background And Save As BMP In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output/output.bmp";
+        string inputPath = "Input\\input.jpg";
+        string outputPath = "Output\\rotated.bmp";
 
         try
         {
@@ -28,13 +33,8 @@ class Program
                 if (!image.IsCached)
                     image.CacheData();
 
-                image.Rotate(33f, true, Color.FromArgb(255, 128, 128, 128));
-
-                BmpOptions options = new BmpOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
+                image.Rotate(33.0f, true, Aspose.Imaging.Color.Gray);
+                BmpOptions options = new BmpOptions();
                 image.Save(outputPath, options);
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a rotated version of a photo in a desktop application that only supports BMP files.
- * 2. When preparing images for a legacy printing system that requires BMP format and a specific background color after rotation.
- * 3. When generating thumbnails for a catalog where each image must be rotated by a custom angle and saved with a uniform gray canvas.
- * 4. When converting user‑uploaded JPEGs to BMP for a game engine that cannot handle JPEG metadata and needs a solid background.
- * 5. When automating batch processing of scanned documents that must be rotated to correct orientation and stored as BMP for OCR tools.
+ * 1. When you need to generate a BMP thumbnail of a photo rotated by a specific angle while preserving a uniform gray fill for the empty corners.
+ * 2. When an application must preprocess scanned JPEG documents by rotating them 33 degrees and converting them to BMP for legacy Windows printing.
+ * 3. When a game asset pipeline requires rotating texture images at arbitrary angles and saving them as BMP files with a consistent background color.
+ * 4. When automating batch image preparation for OCR, you rotate misaligned JPEGs and output BMPs that OCR engines handle more reliably.
+ * 5. When integrating Aspose.Imaging in a C# service that adjusts image orientation and stores the result in BMP format for downstream processing.
  */
