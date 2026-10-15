@@ -1,9 +1,15 @@
-// HOW-TO: Create a 200x200 BMP Image with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG Image With 800x600 Canvas Using Aspose Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,18 +18,15 @@ class Program
     {
         try
         {
-            string outputPath = "output\\output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             Source source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions()
-            {
-                Source = source
-            };
+            PngOptions options = new PngOptions() { Source = source };
 
-            using (BmpImage image = (BmpImage)Image.Create(options, 200, 200))
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 800, 600))
             {
-                image.Save();
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -35,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a blank BMP file of a specific size to use as a canvas for drawing vector graphics in a C# application.
- * 2. When an automated reporting tool must create a 200 × 200 pixel bitmap to embed as a placeholder image in PDF or Word documents.
- * 3. When a game engine requires a BMP texture of known dimensions for legacy hardware that only supports 24‑bit RGB images.
- * 4. When a batch process has to produce a series of uniformly sized BMP files for printing labels or receipts that demand exact pixel dimensions.
- * 5. When a unit test must verify that Aspose.Imaging can successfully create and save a new BMP image using FileCreateSource without loading an existing file.
+ * 1. When you need to generate a blank PNG file of a specific size for later drawing or overlay operations in a C# application.
+ * 2. When you want to programmatically create a raster canvas to render vector graphics or charts before saving them as a PNG.
+ * 3. When an automated report generator must produce a placeholder image file with exact dimensions for PDF or email attachments.
+ * 4. When a web service needs to return a newly created PNG image stream without reading an existing file from disk.
+ * 5. When you are testing image processing pipelines and require a known‑size PNG source to validate resizing or filtering algorithms.
  */
