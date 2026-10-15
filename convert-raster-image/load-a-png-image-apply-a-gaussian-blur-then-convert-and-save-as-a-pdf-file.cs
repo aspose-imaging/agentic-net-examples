@@ -1,19 +1,27 @@
 // HOW-TO: Apply Gaussian Blur to PNG and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input/input.png";
+        string outputPath = "output/output.pdf";
+
         try
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\image.pdf";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,9 +33,15 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f));
 
-                PdfOptions pdfOptions = new PdfOptions();
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                var pdfOptions = new PdfOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -40,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blurred preview PDF from a high‑resolution PNG for a web catalog.
- * 2. When you want to obscure sensitive details in a PNG before embedding it in a PDF report.
- * 3. When you must batch‑process product screenshots, applying a softening filter and packaging them as PDF documentation.
- * 4. When you are creating printable PDFs that require a subtle blur effect on PNG graphics to reduce visual noise.
- * 5. When you need to convert scanned PNG images into PDF files while automatically applying a Gaussian blur to improve compression artifacts.
+ * 1. When you need to create a blurred preview PDF of a high‑resolution PNG for faster web viewing.
+ * 2. When generating printable PDF documents from PNG assets while applying a softening effect to hide sensitive details.
+ * 3. When automating a workflow that converts scanned PNG images into PDF reports with a uniform Gaussian blur for aesthetic consistency.
+ * 4. When building a C# service that receives PNG logos, applies a subtle blur, and outputs them as PDF files for branding guidelines.
+ * 5. When preparing marketing materials that require PNG images to be blurred and bundled into a single PDF for client review.
  */
