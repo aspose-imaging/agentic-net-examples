@@ -1,9 +1,15 @@
-// HOW-TO: Batch Convert Multiple SVG Files to PNG with Shared Rasterization Options in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple SVG Files to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,48 +17,44 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "InputSvgs";
+            string outputDir = "OutputPngs";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            var rasterOptions = new SvgRasterizationOptions
             {
                 BackgroundColor = Aspose.Imaging.Color.White
             };
 
-            foreach (string inputPath in files)
+            using (var pngOptions = new PngOptions())
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                string[] files = Directory.GetFiles(inputDir, "*.svg");
+                foreach (var file in files)
                 {
-                    rasterOptions.PageWidth = image.Width;
-                    rasterOptions.PageHeight = image.Height;
-
-                    using (PngOptions pngOptions = new PngOptions())
+                    if (!File.Exists(file))
                     {
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                        Console.Error.WriteLine($"File not found: {file}");
+                        continue;
+                    }
 
-                        string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(file) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(file))
+                    {
                         image.Save(outputPath, pngOptions);
                     }
                 }
@@ -67,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PNG thumbnails for a large collection of SVG icons for a web UI.
- * 2. When an automated build process must convert design assets from SVG to PNG for inclusion in a mobile app.
- * 3. When a reporting tool requires raster images instead of vectors and you must batch‑process SVG charts into PNG files.
- * 4. When you want to preserve a consistent background color and size across many SVG‑to‑PNG conversions using Aspose.Imaging in C#.
- * 5. When a migration script has to replace SVG graphics with PNG equivalents while reusing rasterization settings to improve performance.
+ * 1. When you need to generate web‑ready PNG thumbnails from a folder of SVG icons using a single set of rasterization settings.
+ * 2. When an automated build process must convert a collection of vector logos to PNG for inclusion in PDF reports.
+ * 3. When a desktop application has to export user‑created SVG diagrams as high‑quality PNG images in bulk.
+ * 4. When a CI pipeline must rasterize SVG assets with a white background for consistent rendering on dark themes.
+ * 5. When migrating legacy SVG assets to PNG for compatibility with systems that only support raster image formats.
  */
