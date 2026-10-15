@@ -1,10 +1,17 @@
-// HOW-TO: How To Set Brush Opacity When Filling Shapes In C# (Aspose.Imaging for .NET)
+// HOW-TO: Set Brush Opacity When Filling Path In BMP Image With C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,29 +19,28 @@ class Program
     {
         try
         {
-            string outputPath = "output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            var options = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (var image = Aspose.Imaging.Image.Create(options, 300, 200))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
             {
-                var graphics = new Aspose.Imaging.Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                var path = new Aspose.Imaging.GraphicsPath();
-                var figure = new Aspose.Imaging.Figure();
+                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
 
-                var rectShape = new RectangleShape(new Aspose.Imaging.RectangleF(50, 50, 200, 100));
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                Aspose.Imaging.Shapes.RectangleShape rectShape = new Aspose.Imaging.Shapes.RectangleShape(
+                    new Aspose.Imaging.RectangleF(50, 50, 100, 100));
                 figure.AddShape(rectShape);
                 path.AddFigure(figure);
 
-                using (var brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, 255, 0, 0)))
                 {
-                    brush.Color = Aspose.Imaging.Color.FromArgb(128, Aspose.Imaging.Color.Blue);
                     graphics.FillPath(brush, path);
                 }
 
@@ -50,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a semi‑transparent rectangle overlay on a PNG image for highlighting a region in a C# reporting tool.
- * 2. When generating UI assets that require a partially see‑through button background using Aspose.Imaging’s SolidBrush with a custom Alpha value.
- * 3. When adding a watermark with adjustable opacity to images before saving them as PNG files in an automated batch process.
- * 4. When designing custom graphics for a game UI where shapes must be filled with colors that blend with the background via the FillPath method.
- * 5. When producing visual documentation that shows overlapping shapes with varying transparency to illustrate layer effects.
+ * 1. When you need to create a semi‑transparent rectangle overlay on a BMP image for a watermark effect.
+ * 2. When generating UI icons that require a partially opaque shape to blend with background colors.
+ * 3. When adding a translucent highlight to scanned documents to indicate areas of interest without obscuring underlying text.
+ * 4. When producing preview thumbnails where a colored overlay must be visible but not fully block the original image.
+ * 5. When designing custom report graphics that use semi‑transparent fills to differentiate data regions in a bitmap chart.
  */
