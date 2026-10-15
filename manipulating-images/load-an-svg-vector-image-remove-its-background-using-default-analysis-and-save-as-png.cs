@@ -1,31 +1,54 @@
-// HOW-TO: Remove Background from SVG and Save as PNG Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background from SVG and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
-            using (SvgImage image = (SvgImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                image.RemoveBackground();
-                image.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var vectorImage = image as VectorImage;
+                if (vectorImage != null)
+                {
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                }
+
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
+                };
+
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -37,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate transparent PNG icons from SVG artwork for web UI, you can load the SVG, strip its background, and export it as PNG with Aspose.Imaging in C#.
- * 2. When preparing product images for e‑commerce, you can automatically remove the solid background from vector logos and save them as PNG files for use on catalog pages.
- * 3. When creating assets for mobile apps, you can convert SVG illustrations to PNG with a transparent background to ensure they render correctly on different screen sizes.
- * 4. When automating a design pipeline, you can batch‑process SVG files to eliminate their backgrounds and output PNGs without manual editing, using C# and Aspose.Imaging.
- * 5. When integrating vector graphics into a reporting system, you can strip the SVG background and embed the resulting PNG with transparency into PDF or HTML reports.
+ * 1. When you need to convert company logo SVG files to PNG icons with a transparent background for use in web applications.
+ * 2. When you want to automatically strip the white background from user‑uploaded SVG illustrations before embedding them in PDF reports.
+ * 3. When you are generating thumbnails of vector graphics for a mobile app and require the thumbnails to have no background.
+ * 4. When you need to preprocess SVG assets for an e‑commerce catalog so they appear correctly over varied product page colors.
+ * 5. When you are building a batch script that cleans up SVG assets by removing backgrounds and saves them as PNGs for a design system.
  */
