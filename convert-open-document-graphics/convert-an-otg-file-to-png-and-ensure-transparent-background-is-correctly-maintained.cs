@@ -1,8 +1,15 @@
-// HOW-TO: Convert OTG to PNG with Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG Vector Image to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -21,18 +28,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                using (PngOptions options = new PngOptions())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    options.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Color.Transparent,
+                        BackgroundColor = Aspose.Imaging.Color.Transparent,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    }
-                };
-                image.Save(outputPath, pngOptions);
+                    };
+
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -44,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to display vector OTG graphics on a web page that only supports PNG images with alpha transparency.
- * 2. When an application must batch‑convert design assets from OTG to PNG while preserving the original transparent background for UI icons.
- * 3. When a reporting tool has to embed OTG diagrams into PDF or Word documents that require raster PNG files with no background color.
- * 4. When a mobile app imports OTG logos and needs to save them as PNGs so they render correctly over any background in the app.
- * 5. When a CI/CD pipeline uses Aspose.Imaging in C# to automate image conversion and must ensure that the resulting PNG retains transparency for downstream graphic workflows.
+ * 1. When you need to display an OTG logo on a website without a background, you can convert it to a PNG with transparency using Aspose.Imaging in C#.
+ * 2. When generating printable PDFs that require overlaying vector graphics, you may first convert OTG files to transparent PNGs for easy raster handling.
+ * 3. When building a desktop application that imports OTG icons and saves them as PNG assets for UI themes, preserving the transparent background is essential.
+ * 4. When automating a batch process that extracts OTG diagrams from a repository and converts them to PNGs for inclusion in documentation, maintaining transparency ensures the diagrams blend with various background colors.
+ * 5. When creating a game asset pipeline that needs vector artwork in OTG format converted to PNG sprites with an alpha channel intact, this code provides a reliable C# solution.
  */
