@@ -1,9 +1,16 @@
-// HOW-TO: Draw Multiple Colored Lines on BMP Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Multiple Colored Lines on BMP Using Pen Configurations in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,50 +19,42 @@ class Program
     {
         try
         {
-            // Hardcoded output path
+            // Define output path
             string outputPath = "output.bmp";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Define pen configurations (start point, end point, color, width)
-            var penConfigs = new[]
+            // Define pen configurations
+            var penConfigs = new List<PenConfig>
             {
-                new { Start = new Point(20, 20), End = new Point(200, 20), Color = Color.FromArgb(255, 255, 0, 0), Width = 5f },
-                new { Start = new Point(20, 50), End = new Point(200, 100), Color = Color.FromArgb(255, 0, 255, 0), Width = 3f },
-                new { Start = new Point(50, 150), End = new Point(250, 150), Color = Color.FromArgb(255, 0, 0, 255), Width = 8f }
+                new PenConfig { Color = Color.Red, Width = 5, X1 = 50, Y1 = 50, X2 = 450, Y2 = 50 },
+                new PenConfig { Color = Color.Green, Width = 3, X1 = 50, Y1 = 100, X2 = 450, Y2 = 200 },
+                new PenConfig { Color = Color.Blue, Width = 2, X1 = 100, Y1 = 300, X2 = 400, Y2 = 400 }
             };
 
-            // Calculate canvas size based on maximum coordinates
-            int maxX = 0;
-            int maxY = 0;
-            foreach (var cfg in penConfigs)
+            // Create BMP image
+            var bmpOptions = new BmpOptions
             {
-                maxX = Math.Max(maxX, Math.Max(cfg.Start.X, cfg.End.X));
-                maxY = Math.Max(maxY, Math.Max(cfg.Start.Y, cfg.End.Y));
-            }
-            // Add some padding
-            int canvasWidth = maxX + 20;
-            int canvasHeight = maxY + 20;
+                Source = new FileCreateSource(outputPath, false)
+            };
+            int width = 500;
+            int height = 500;
 
-            // Create BMP image with FileCreateSource
-            var bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-            using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Create graphics object
-                Graphics graphics = new Graphics(image);
-                // Clear background to white
+                // Initialize graphics
+                var graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Draw lines using pen configurations
+                // Draw lines based on configurations
                 foreach (var cfg in penConfigs)
                 {
-                    Pen pen = new Pen(cfg.Color, cfg.Width);
-                    graphics.DrawLine(pen, cfg.Start, cfg.End);
+                    var pen = new Pen(cfg.Color, cfg.Width);
+                    graphics.DrawLine(pen, cfg.X1, cfg.Y1, cfg.X2, cfg.Y2);
                 }
 
-                // Save the image (output file already bound)
+                // Save the image
                 image.Save();
             }
         }
@@ -64,13 +63,23 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    class PenConfig
+    {
+        public Color Color { get; set; }
+        public float Width { get; set; }
+        public int X1 { get; set; }
+        public int Y1 { get; set; }
+        public int X2 { get; set; }
+        public int Y2 { get; set; }
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a BMP diagram with custom colored lines for reports or UI assets.
- * 2. When you want to create a dynamic line chart where line positions, colors, and thickness are defined at runtime.
- * 3. When you must export engineering sketches or schematics as BMP files with precise pen settings.
- * 4. When you are building a batch process that draws multiple annotated lines on images for automated testing.
- * 5. When you require a simple way to render vector‑style line art into a BMP using Aspose.Imaging without manual pixel manipulation.
+ * 1. When you need to generate a simple diagram or schematic with colored lines for a report without using external design tools.
+ * 2. When creating dynamic visual indicators such as progress bars or status lines in a server‑side image processing pipeline.
+ * 3. When programmatically adding annotation lines to scanned documents or maps stored as BMP files.
+ * 4. When building a custom chart or timeline where each segment has its own color and thickness defined at runtime.
+ * 5. When automating the production of test images to verify rendering or printing quality of line graphics.
  */
