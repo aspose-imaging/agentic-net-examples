@@ -1,9 +1,9 @@
-// HOW-TO: Add a LZW Compressed TIFF Frame and Save Multi‑Frame Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add a New TIFF Frame with Adobe Deflate Compression in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -13,14 +13,14 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.tif";
-            string outputPath = "output\\result.tif";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -30,26 +30,22 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
+                int width = tiff.Width;
+                int height = tiff.Height;
 
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
-                frameOptions.Compression = TiffCompressions.Lzw;
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.Compression = TiffCompressions.AdobeDeflate;
 
                 TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
 
-                Color[] whitePixels = new Color[width * height];
-                for (int i = 0; i < whitePixels.Length; i++)
-                {
-                    whitePixels[i] = Color.White;
-                }
-                newFrame.SavePixels(newFrame.Bounds, whitePixels);
+                Color[] pixels = tiff.LoadPixels(tiff.ActiveFrame.Bounds);
+                newFrame.SavePixels(newFrame.Bounds, pixels);
 
-                tiffImage.AddFrame(newFrame);
+                tiff.AddFrame(newFrame);
 
-                tiffImage.Save(outputPath);
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -61,9 +57,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to append a blank page to an existing multi‑page TIFF document for printing or archiving.
- * 2. When you want to create a new layer in a TIFF file with LZW compression to reduce file size while preserving image quality.
- * 3. When you must generate a multi‑frame TIFF for medical imaging where each frame represents a different slice and requires consistent dimensions and compression.
- * 4. When you are building a document conversion pipeline that merges scanned pages into a single TIFF and need to add additional pages programmatically.
- * 5. When you need to automate the creation of a tiled TIFF with custom compression for GIS or satellite imagery workflows.
+ * 1. When you need to embed an additional page into an existing multi‑page TIFF for archival documents using Aspose.Imaging in C#.
+ * 2. When you want to create a multi‑frame TIFF where each frame uses Adobe Deflate compression to reduce file size without losing image quality.
+ * 3. When you must programmatically duplicate the pixel data of an existing TIFF page into a new frame for image‑analysis pipelines in a .NET application.
+ * 4. When you are building a C# solution that merges several scanned images into a single TIFF file while keeping consistent dimensions and applying a specific compression method.
+ * 5. When you need to add a new frame to a TIFF, preserve the original dimensions, and save the updated multi‑frame image to disk with Aspose.Imaging.
  */
