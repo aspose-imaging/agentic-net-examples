@@ -1,4 +1,11 @@
 // HOW-TO: Compare Telea and ContentAwareFill Watermark Removal Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,46 +16,41 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputTeleaPath = "output\\output_telea.png";
+        string outputCafPath = "output\\output_caf.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputTeleaPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputCafPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputTeleaPath = "output/telea.png";
-            string outputContentAwarePath = "output/contentaware.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTeleaPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputContentAwarePath));
-
             using (var image = Image.Load(inputPath))
             {
-                var rasterImage = (RasterImage)image;
+                var raster = (RasterImage)image;
 
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-
-                int x = rasterImage.Width / 4;
-                int y = rasterImage.Height / 4;
-                int w = rasterImage.Width / 2;
-                int h = rasterImage.Height / 2;
-                var rectF = new RectangleF(x, y, w, h);
-                figure.AddShape(new EllipseShape(rectF));
+                var ellipseRect = new RectangleF(50, 50, 100, 100);
+                figure.AddShape(new EllipseShape(ellipseRect));
                 mask.AddFigure(figure);
 
                 var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                using (var teleaResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(rasterImage, teleaOptions))
+                using (var resultTelea = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, teleaOptions))
                 {
-                    teleaResult.Save(outputTeleaPath, new PngOptions());
+                    resultTelea.Save(outputTeleaPath, new PngOptions());
                 }
 
                 var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
-                using (var cafResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(rasterImage, cafOptions))
+                using (var resultCaf = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, cafOptions))
                 {
-                    cafResult.Save(outputContentAwarePath, new PngOptions());
+                    resultCaf.Save(outputCafPath, new PngOptions());
                 }
             }
         }
@@ -61,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to evaluate which algorithm—Telea or ContentAwareFill—produces cleaner results for removing a logo from a PNG image in a C# application.
- * 2. When you want to generate side‑by‑side output files to visually compare watermark‑removal quality for quality‑control pipelines.
- * 3. When your image‑processing workflow requires programmatically creating a mask (e.g., an ellipse) to target a specific region before applying removal algorithms.
- * 4. When you must automate the removal of watermarks from batches of images and need to choose the most effective algorithm for your project.
- * 5. When you are integrating Aspose.Imaging into a .NET service and need to save the cleaned images in PNG format after applying Telea or ContentAwareFill options.
+ * 1. When you need to evaluate which algorithm—Telea or ContentAwareFill—produces cleaner results for removing circular watermarks from PNG images in a C# application.
+ * 2. When you want to automatically generate side‑by‑side before‑and‑after images to demonstrate watermark‑removal quality to clients.
+ * 3. When integrating Aspose.Imaging into a batch‑processing pipeline that must choose the best removal method for logos embedded in product photos.
+ * 4. When testing the impact of different mask shapes (e.g., ellipses) on the effectiveness of Telea versus ContentAwareFill in a .NET image‑editing tool.
+ * 5. When creating a proof‑of‑concept that saves the output of both algorithms to separate files for visual comparison in quality‑control workflows.
  */

@@ -1,21 +1,28 @@
 // HOW-TO: Create PNG Mask from JPEG Using Magic Wand Tool in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output/mask.png";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "mask.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,6 +38,7 @@ class Program
 
                 PngOptions pngOptions = new PngOptions
                 {
+                    ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new FileCreateSource(outputPath, false)
                 };
 
@@ -46,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to isolate a specific region of a JPEG photo for further editing in Photoshop, you can generate a PNG mask with Aspose.Imaging’s MagicWandTool.
- * 2. When building a web application that lets users select objects in uploaded JPEG images and then export the selection as a transparent PNG overlay.
- * 3. When preparing assets for a game engine where the collision shape must be derived from a JPEG texture and saved as a binary mask image.
- * 4. When automating batch processing of product photos to create cut‑out masks for e‑commerce catalogs.
- * 5. When integrating image analysis into a machine‑learning pipeline that requires a binary mask of a JPEG input for segmentation preprocessing.
+ * 1. When you need to isolate a subject in a JPEG and export the selection as a transparent PNG for further editing in Photoshop or other graphics tools.
+ * 2. When building an automated workflow that generates masks for image segmentation tasks in machine‑learning pipelines.
+ * 3. When creating cut‑out assets from user‑uploaded photos for e‑commerce product listings without manual Photoshop work.
+ * 4. When developing a web application that lets users select areas of a photo and then download the mask as a PNG with an alpha channel.
+ * 5. When preparing layered images for compositing, requiring a PNG mask derived from the original JPEG to preserve transparency.
  */

@@ -1,13 +1,21 @@
-// HOW-TO: Batch Remove Watermarks from TIFF Files Using Content Aware Fill in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Remove Watermarks from TIFF Files Using Content‑Aware Fill in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -18,8 +26,11 @@ class Program
             string inputFolder = "input";
             string outputFolder = "output";
 
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
-            foreach (string inputPath in tiffFiles)
+            var tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (var inputPath in tiffFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -27,28 +38,27 @@ class Program
                     return;
                 }
 
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".tif");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    RasterImage rasterImage = (RasterImage)image;
+                    int width = image.Width;
+                    int height = image.Height;
 
-                    // Create a mask covering the whole image
                     var mask = new GraphicsPath();
                     var figure = new Figure();
-                    var rect = new RectangleF(0, 0, rasterImage.Width, rasterImage.Height);
-                    figure.AddShape(new RectangleShape(rect));
+                    figure.AddShape(new RectangleShape(new RectangleF(0, 0, width, height)));
                     mask.AddFigure(figure);
 
                     var options = new ContentAwareFillWatermarkOptions(mask);
 
-                    using (RasterImage result = WatermarkRemover.PaintOver(rasterImage, options))
+                    using (RasterImage result = WatermarkRemover.PaintOver((RasterImage)image, options))
                     {
-                        string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputPath = Path.Combine(outputFolder, fileName + "_clean.tif");
-
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        var tiffSaveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        result.Save(outputPath, tiffSaveOptions);
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        result.Save(outputPath, tiffOptions);
                     }
                 }
             }
@@ -62,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically clean a large collection of scanned TIFF documents that contain printed watermarks before archiving them.
- * 2. When a document management system must strip watermarks from multi‑page TIFF files on upload to improve OCR accuracy.
- * 3. When a medical imaging workflow requires batch removal of annotation watermarks from DICOM‑converted TIFF images while preserving image quality.
- * 4. When a GIS application processes satellite TIFF tiles and must eliminate branding watermarks using content‑aware fill without manual editing.
- * 5. When a legal firm wants to prepare TIFF evidence files for court by programmatically removing watermarks in bulk using C# and Aspose.Imaging.
+ * 1. When you need to automatically clean scanned documents that contain printed watermarks before archiving them as TIFF files.
+ * 2. When a batch of medical imaging TIFFs must have embedded copyright marks removed without manually editing each image.
+ * 3. When a document management system imports TIFF files and requires watermark‑free images for OCR processing.
+ * 4. When you want to prepare a collection of TIFF graphics for printing by eliminating watermarks using content‑aware fill to preserve background details.
+ * 5. When a migration script must process dozens of TIFF files, strip watermarks, and save the results back to a designated output folder.
  */

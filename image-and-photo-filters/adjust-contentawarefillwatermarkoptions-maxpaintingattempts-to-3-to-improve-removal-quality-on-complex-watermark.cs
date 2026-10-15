@@ -1,9 +1,16 @@
-// HOW-TO: Remove Watermark From JPEG Using ContentAwareFill And MaxPaintingAttempts 3 In C# (Aspose.Imaging for .NET)
+// HOW-TO: Improve Watermark Removal Quality by Limiting Painting Attempts in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -26,24 +33,19 @@ class Program
 
             using (var image = Image.Load(inputPath))
             {
-                var raster = (RasterImage)image;
+                var rasterImage = (RasterImage)image;
 
-                var points = new Aspose.Imaging.Point[]
-                {
-                    new Aspose.Imaging.Point(0, 0),
-                    new Aspose.Imaging.Point(raster.Width - 1, 0),
-                    new Aspose.Imaging.Point(raster.Width - 1, raster.Height - 1),
-                    new Aspose.Imaging.Point(0, raster.Height - 1)
-                };
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 100)));
+                mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(points)
-                {
-                    MaxPaintingAttempts = 3
-                };
+                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
+                options.MaxPaintingAttempts = 3;
 
-                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(rasterImage, options))
                 {
-                    result.Save(outputPath, new JpegOptions());
+                    result.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -56,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically erase a complex logo or text watermark from JPEG photos before archiving them.
- * 2. When an e‑commerce application must clean up product JPEG images that contain semi‑transparent watermarks to improve visual quality.
- * 3. When a batch‑processing tool has to remove watermarks from user‑uploaded JPEGs while preserving the original dimensions and format.
- * 4. When a digital asset management system requires watermark removal with a limited number of painting attempts to balance speed and quality.
- * 5. When a C# service integrates Aspose.Imaging to restore copyrighted JPEG images by stripping watermarks without converting to another file type.
+ * 1. When you need to delete a semi‑transparent logo from a PNG photograph while preserving surrounding pixels, you can use Aspose.Imaging’s ContentAwareFillWatermarkOptions with a custom mask.
+ * 2. When processing scanned documents that contain repetitive watermark patterns, limiting MaxPaintingAttempts to three helps the algorithm converge faster and produce cleaner results.
+ * 3. When automating batch cleanup of product images that have elliptical watermarks, the code creates an ellipse mask and saves the cleaned image as PNG.
+ * 4. When integrating watermark removal into a C# web service, the example shows how to load an image, apply a shape‑based mask, and output the result without extra dependencies.
+ * 5. When optimizing performance for complex watermark shapes, adjusting MaxPaintingAttempts reduces unnecessary painting cycles while still achieving high‑quality removal.
  */

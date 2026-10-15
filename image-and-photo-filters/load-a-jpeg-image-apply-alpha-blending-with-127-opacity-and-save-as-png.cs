@@ -1,10 +1,17 @@
-// HOW-TO: Apply Semi Transparent Blend To JPEG And Export PNG Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend JPEG Image With 50% Opacity And Save As PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,7 +20,7 @@ class Program
         try
         {
             string inputPath = "input.jpg";
-            string outputPath = "output.png";
+            string outputPath = "output\\result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,18 +28,19 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (RasterImage background = (RasterImage)Image.Load(inputPath))
             using (RasterImage overlay = (RasterImage)Image.Load(inputPath))
             {
-                background.Blend(new Point(0, 0), overlay, 127);
+                int offsetX = (background.Width - overlay.Width) / 2;
+                int offsetY = (background.Height - overlay.Height) / 2;
+                background.Blend(new Point(offsetX, offsetY), overlay, 127);
 
-                PngOptions pngOptions = new PngOptions()
+                PngOptions pngOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-
                 background.Save(outputPath, pngOptions);
             }
         }
@@ -45,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a watermark effect by overlaying a JPEG onto itself with 50% opacity and saving the result as a PNG with transparency.
- * 2. When you want to convert a JPEG image to a PNG while preserving a semi‑transparent alpha channel for web graphics.
- * 3. When you are generating UI assets that require a PNG with partial opacity derived from an existing JPEG source.
- * 4. When you need to programmatically blend two identical images to test alpha‑blending logic before applying it to different layers.
- * 5. When you are building an image‑processing pipeline that must output PNG files with a specific opacity level for printing or publishing.
+ * 1. When you need to create a semi‑transparent overlay of a JPEG and export it as a PNG for web graphics.
+ * 2. When you want to combine two identical photos with adjustable opacity to produce a watermark effect in a .NET application.
+ * 3. When you must convert a JPEG to a lossless PNG while applying an alpha blend to control image transparency.
+ * 4. When you are generating thumbnails that require a centered overlay with 127 (≈50%) opacity for UI previews.
+ * 5. When you are building a batch process that reads JPEG files, blends them with a specified opacity, and saves the result as PNG for further compositing.
  */

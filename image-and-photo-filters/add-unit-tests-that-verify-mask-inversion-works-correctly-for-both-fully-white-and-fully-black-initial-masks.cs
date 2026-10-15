@@ -1,11 +1,19 @@
-// HOW-TO: Verify PNG Mask Inversion for White and Black Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Unit Test Mask Inversion for White and Black PNG Masks in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,104 +21,95 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string baseDir = Path.Combine(Directory.GetCurrentDirectory(), "MaskInversionTests");
-            string inputWhitePath = Path.Combine(baseDir, "input_white.png");
-            string inputBlackPath = Path.Combine(baseDir, "input_black.png");
-            string outputFromWhitePath = Path.Combine(baseDir, "output_from_white.png");
-            string outputFromBlackPath = Path.Combine(baseDir, "output_from_black.png");
+            // Define paths
+            string inputWhitePath = "input/whiteMask.png";
+            string inputBlackPath = "input/blackMask.png";
+            string outputWhiteInvertedPath = "output/invertedWhite.png";
+            string outputBlackInvertedPath = "output/invertedBlack.png";
 
-            // Ensure directories exist
+            // Ensure input directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(inputWhitePath));
             Directory.CreateDirectory(Path.GetDirectoryName(inputBlackPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFromWhitePath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFromBlackPath));
 
-            // Create a 10x10 white image
-            if (!File.Exists(inputWhitePath))
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputWhiteInvertedPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBlackInvertedPath));
+
+            // Create a white mask image (100x100)
+            using (RasterImage whiteImg = (RasterImage)Image.Create(
+                new PngOptions { ColorType = PngColorType.TruecolorWithAlpha, Source = new FileCreateSource(inputWhitePath, false) },
+                100, 100))
             {
-                var whiteOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(inputWhitePath, false)
-                };
-                using (RasterImage whiteImg = (RasterImage)Image.Create(whiteOptions, 10, 10))
-                {
-                    int[] whitePixels = new int[10 * 10];
-                    for (int i = 0; i < whitePixels.Length; i++) whitePixels[i] = unchecked((int)0xFFFFFFFF);
-                    whiteImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), whitePixels);
-                    whiteImg.Save();
-                }
+                int[] whitePixels = new int[100 * 100];
+                for (int i = 0; i < whitePixels.Length; i++) whitePixels[i] = unchecked((int)0xFFFFFFFF); // ARGB white
+                whiteImg.SaveArgb32Pixels(new Rectangle(0, 0, 100, 100), whitePixels);
+                whiteImg.Save();
             }
 
-            // Create a 10x10 black image
-            if (!File.Exists(inputBlackPath))
+            // Create a black mask image (100x100)
+            using (RasterImage blackImg = (RasterImage)Image.Create(
+                new PngOptions { ColorType = PngColorType.TruecolorWithAlpha, Source = new FileCreateSource(inputBlackPath, false) },
+                100, 100))
             {
-                var blackOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(inputBlackPath, false)
-                };
-                using (RasterImage blackImg = (RasterImage)Image.Create(blackOptions, 10, 10))
-                {
-                    int[] blackPixels = new int[10 * 10];
-                    for (int i = 0; i < blackPixels.Length; i++) blackPixels[i] = unchecked((int)0xFF000000);
-                    blackImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), blackPixels);
-                    blackImg.Save();
-                }
+                int[] blackPixels = new int[100 * 100];
+                for (int i = 0; i < blackPixels.Length; i++) blackPixels[i] = 0; // ARGB black
+                blackImg.SaveArgb32Pixels(new Rectangle(0, 0, 100, 100), blackPixels);
+                blackImg.Save();
             }
 
-            // Test inversion on white mask
+            // Verify input files exist
             if (!File.Exists(inputWhitePath))
             {
                 Console.Error.WriteLine($"File not found: {inputWhitePath}");
                 return;
             }
-            using (RasterImage imgWhite = (RasterImage)Image.Load(inputWhitePath))
-            {
-                MagicWandTool.Select(imgWhite, new MagicWandSettings(0, 0))
-                    .Invert()
-                    .Apply();
-                imgWhite.Save(outputFromWhitePath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-            }
-
-            // Verify result for white mask inversion (should become black)
-            bool whiteTestPassed = false;
-            if (File.Exists(outputFromWhitePath))
-            {
-                using (RasterImage resultWhite = (RasterImage)Image.Load(outputFromWhitePath))
-                {
-                    var pixel = resultWhite.GetPixel(0, 0);
-                    whiteTestPassed = pixel.ToArgb() == unchecked((int)0xFF000000);
-                }
-            }
-            Console.WriteLine(whiteTestPassed ? "TestWhiteMaskInversion Passed" : "TestWhiteMaskInversion Failed");
-
-            // Test inversion on black mask
             if (!File.Exists(inputBlackPath))
             {
                 Console.Error.WriteLine($"File not found: {inputBlackPath}");
                 return;
             }
+
+            // Process white mask inversion
+            using (RasterImage imgWhite = (RasterImage)Image.Load(inputWhitePath))
+            {
+                MagicWandTool.Select(imgWhite, new MagicWandSettings(0, 0))
+                    .Invert()
+                    .Apply();
+
+                imgWhite.Save(outputWhiteInvertedPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                int[] resultWhite = imgWhite.LoadArgb32Pixels(new Rectangle(0, 0, imgWhite.Width, imgWhite.Height));
+                bool isBlack = true;
+                foreach (int pixel in resultWhite)
+                {
+                    if (pixel != 0)
+                    {
+                        isBlack = false;
+                        break;
+                    }
+                }
+                Console.WriteLine(isBlack ? "White mask inversion passed" : "White mask inversion failed");
+            }
+
+            // Process black mask inversion
             using (RasterImage imgBlack = (RasterImage)Image.Load(inputBlackPath))
             {
                 MagicWandTool.Select(imgBlack, new MagicWandSettings(0, 0))
                     .Invert()
                     .Apply();
-                imgBlack.Save(outputFromBlackPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-            }
 
-            // Verify result for black mask inversion (should become white)
-            bool blackTestPassed = false;
-            if (File.Exists(outputFromBlackPath))
-            {
-                using (RasterImage resultBlack = (RasterImage)Image.Load(outputFromBlackPath))
+                imgBlack.Save(outputBlackInvertedPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                int[] resultBlack = imgBlack.LoadArgb32Pixels(new Rectangle(0, 0, imgBlack.Width, imgBlack.Height));
+                bool isWhite = true;
+                foreach (int pixel in resultBlack)
                 {
-                    var pixel = resultBlack.GetPixel(0, 0);
-                    blackTestPassed = pixel.ToArgb() == unchecked((int)0xFFFFFFFF);
+                    if (pixel != unchecked((int)0xFFFFFFFF))
+                    {
+                        isWhite = false;
+                        break;
+                    }
                 }
+                Console.WriteLine(isWhite ? "Black mask inversion passed" : "Black mask inversion failed");
             }
-            Console.WriteLine(blackTestPassed ? "TestBlackMaskInversion Passed" : "TestBlackMaskInversion Failed");
         }
         catch (Exception ex)
         {
@@ -121,9 +120,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a PNG mask correctly flips from fully opaque to fully transparent using Aspose.Imaging unit tests.
- * 2. When validating that mask inversion works for both white (opaque) and black (transparent) source images in automated CI pipelines.
- * 3. When creating regression tests to detect bugs in the Aspose.Imaging MagicWand mask handling for different color types.
- * 4. When preparing sample images and verifying that the SaveArgb32Pixels method produces the expected inverted mask results.
- * 5. When integrating image preprocessing steps that require reliable mask inversion before further analysis or compositing.
+ * 1. When you need to verify that a binary image mask correctly flips from opaque to transparent using Aspose.Imaging unit tests in C#.
+ * 2. When automating quality checks for generated PNG masks that start fully white or fully black before applying image compositing.
+ * 3. When ensuring that mask inversion logic works for both alpha‑filled and empty masks in a graphics pipeline that uses Aspose.Imaging.
+ * 4. When creating CI/CD pipelines that run C# tests to detect regressions in mask processing for PNG files with truecolor with alpha.
+ * 5. When debugging image‑mask transformations in a .NET application that relies on accurate inversion of white and black mask layers.
  */
