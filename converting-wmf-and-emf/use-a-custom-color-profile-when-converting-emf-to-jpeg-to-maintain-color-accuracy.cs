@@ -1,10 +1,17 @@
 // HOW-TO: Convert EMF to JPEG with Custom ICC Color Profile in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,31 +21,29 @@ class Program
         {
             string inputPath = "Input/sample.emf";
             string outputPath = "Output/sample.jpg";
-            string iccProfilePath = "Input/custom.icc";
+            string iccPath = "Input/custom.icc";
 
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-
-            if (!File.Exists(iccProfilePath))
+            if (!File.Exists(iccPath))
             {
-                Console.Error.WriteLine($"File not found: {iccProfilePath}");
+                Console.Error.WriteLine($"File not found: {iccPath}");
                 return;
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Stream iccStream = File.OpenRead(iccPath))
+            using (JpegOptions jpegOptions = new JpegOptions())
             {
-                using (FileStream iccStream = File.OpenRead(iccProfilePath))
+                jpegOptions.RgbColorProfile = new StreamSource(iccStream);
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    using (JpegOptions jpegOptions = new JpegOptions())
-                    {
-                        jpegOptions.RgbColorProfile = new StreamSource(iccStream);
-                        image.Save(outputPath, jpegOptions);
-                    }
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -51,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve the exact colors of a vector EMF logo while delivering it as a JPEG for web pages, you can apply a custom ICC profile during conversion.
- * 2. When generating printable JPEG thumbnails from EMF drawings in a desktop application, using a specific color profile ensures the thumbnails match the brand’s color standards.
- * 3. When migrating legacy EMF assets to a JPEG‑based digital asset management system, applying the original ICC profile prevents color shifts caused by default sRGB conversion.
- * 4. When an automated report generator creates JPEG charts from EMF diagrams and must comply with a client‑specified color space, the code embeds the required ICC profile.
- * 5. When building a C# service that converts user‑uploaded EMF files to JPEG for email attachments, using a custom ICC profile guarantees consistent color reproduction across different email clients.
+ * 1. When you need to preserve brand‑specific colors while converting vector EMF graphics to JPEG for web publishing.
+ * 2. When a printing workflow requires embedding a custom ICC profile during EMF‑to‑JPEG conversion to match the target printer’s color space.
+ * 3. When generating thumbnails of EMF diagrams for a catalog and must maintain accurate colors across different devices.
+ * 4. When automating batch conversion of legacy EMF assets to JPEG in a C# application and need to apply a corporate color profile.
+ * 5. When integrating Aspose.Imaging into a document management system to ensure color‑consistent JPEG output from uploaded EMF files.
  */

@@ -1,45 +1,55 @@
 // HOW-TO: Convert WMF to PNG with 50% Scaling in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input/input.wmf";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.wmf";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             using (Image image = Image.Load(inputPath))
             {
+                // Get original dimensions
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
-                double scale = 0.5;
-                int newWidth = (int)(originalWidth * scale);
-                int newHeight = (int)(originalHeight * scale);
 
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                // Apply scaling factor of 0.5
+                int scaledWidth = (int)(originalWidth * 0.5);
+                int scaledHeight = (int)(originalHeight * 0.5);
+
+                var rasterizationOptions = new WmfRasterizationOptions
                 {
-                    PageWidth = newWidth,
-                    PageHeight = newHeight,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageWidth = scaledWidth,
+                    PageHeight = scaledHeight,
+                    BackgroundColor = Color.White
                 };
 
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 image.Save(outputPath, pngOptions);
@@ -54,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate smaller thumbnail PNGs from legacy WMF vector drawings for web previews.
- * 2. When an application must batch‑process WMF icons and reduce their size by half before embedding them into a mobile app.
- * 3. When a reporting tool converts WMF charts to PNG images while applying a custom scale to fit a fixed‑size PDF page.
- * 4. When a document conversion service rasterizes WMF logos at 50 % of their original dimensions to save storage space.
- * 5. When a C# program creates PNG assets from WMF files with a white background and specific pixel dimensions for UI design.
+ * 1. When you need to embed a vector WMF logo into a web page as a smaller PNG thumbnail.
+ * 2. When generating printable reports that require WMF diagrams resized to half their original size for PDF inclusion.
+ * 3. When creating email attachments that must be PNG images with reduced dimensions to meet size limits.
+ * 4. When migrating legacy WMF assets to a modern image format while automatically scaling them for mobile app displays.
+ * 5. When processing batch conversions of WMF icons to PNG sprites with a consistent 0.5 scaling factor for UI design.
  */

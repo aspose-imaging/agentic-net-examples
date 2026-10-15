@@ -1,4 +1,11 @@
 // HOW-TO: Convert WMF to PNG with Metadata Preservation in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.wmf";
-            string outputPath = "Output/sample.png";
+            string inputPath = "Input\\sample.wmf";
+            string outputPath = "Output\\sample.png";
 
             if (!File.Exists(inputPath))
             {
@@ -37,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy WMF vector graphics to PNG for web display while keeping the original author and creation date information.
- * 2. When an application must batch‑process engineering diagrams stored as WMF files and output PNG thumbnails that retain embedded metadata for audit trails.
- * 3. When a reporting tool generates charts in WMF format and the final PDF requires PNG images with preserved metadata for compliance documentation.
- * 4. When migrating a digital asset library from Windows Metafile to a cross‑platform PNG format without losing attribution data such as author name.
- * 5. When automating the import of WMF icons into a C# desktop application and the PNG assets must carry the original creation timestamps for version control.
+ * 1. When you need to convert legacy WMF vector drawings to web‑friendly PNG files while keeping the original author and creation date information.
+ * 2. When a document management system must display embedded WMF graphics as PNG thumbnails without losing their metadata.
+ * 3. When automating a migration of design assets from Windows Metafile format to PNG for use in modern C# applications that rely on image metadata.
+ * 4. When generating PNG reports from WMF charts in a C# service and you want the resulting images to retain source metadata for audit trails.
+ * 5. When building a batch conversion tool in .NET that processes multiple WMF files into PNG while preserving their embedded metadata for downstream processing.
  */

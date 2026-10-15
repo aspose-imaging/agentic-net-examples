@@ -1,46 +1,56 @@
-// HOW-TO: Convert EMF to GIF with 256‑Color Palette in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to GIF With 256‑Color Palette In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputPath = Path.Combine("Input", "input.emf");
-            string outputPath = Path.Combine("Output", "output.gif");
+            string inputPath = Path.Combine("Input", "sample.emf");
+            string outputPath = Path.Combine("Output", "sample.gif");
 
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (GifOptions gifOptions = new GifOptions())
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(outputPath, gifOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (GifOptions gifOptions = new GifOptions())
+                    {
+                        image.Save(outputPath, gifOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector EMF logo into a web page that only supports GIF images.
- * 2. When you must reduce the file size of an EMF diagram for email attachments by converting it to a 256‑color GIF.
- * 3. When a legacy reporting system requires charts in GIF format but your source graphics are stored as EMF.
- * 4. When you want to generate web‑friendly frames from an EMF illustration for use in a GIF slideshow.
- * 5. When you are building a batch conversion tool that transforms multiple EMF files into GIFs with a limited color palette.
+ * 1. When you need to embed vector graphics from a Windows Metafile into a web page that only supports GIF images with a 256‑color limit.
+ * 2. When generating email newsletters that require animated or static GIFs derived from EMF logos while ensuring the file size stays small.
+ * 3. When automating a batch process that converts legacy EMF icons to GIFs for use in mobile applications that cannot handle more than 256 colors.
+ * 4. When creating printable reports where charts are exported as EMF and must be converted to GIF for compatibility with older PDF generators.
+ * 5. When developing a C# utility that transforms EMF diagrams into GIFs for inclusion in documentation systems that only accept GIF format.
  */
