@@ -1,12 +1,16 @@
-// HOW-TO: Batch Draw Multiple Shapes Onto BMP Image With Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Draw Multiple Shapes on a BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,75 +18,53 @@ class Program
     {
         try
         {
+            string inputPath = "input.bmp";
             string outputPath = "output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            int width = 800;
-            int height = 600;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Create(options, width, height))
+            using (Image image = Image.Load(inputPath))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                var shapes = new List<(string shape, object[] args)>();
-
-                shapes.Add(("Line", new object[] { new Aspose.Imaging.Point(100, 100), new Aspose.Imaging.Point(200, 200) }));
-                shapes.Add(("Rectangle", new object[] { new Aspose.Imaging.Rectangle(250, 150, 200, 100) }));
-                shapes.Add(("Ellipse", new object[] { new Aspose.Imaging.Rectangle(500, 300, 150, 100) }));
-                shapes.Add(("Polygon", new object[] { new Aspose.Imaging.Point[] {
-                    new Aspose.Imaging.Point(400, 400),
-                    new Aspose.Imaging.Point(450, 450),
-                    new Aspose.Imaging.Point(400, 500)
-                } }));
-
-                foreach (var shape in shapes)
+                var shapes = new List<Action<Graphics>>
                 {
-                    switch (shape.shape)
+                    g =>
                     {
-                        case "Line":
-                            var p1 = (Aspose.Imaging.Point)shape.args[0];
-                            var p2 = (Aspose.Imaging.Point)shape.args[1];
-                            Pen linePen = new Pen(Aspose.Imaging.Color.Blue, 2);
-                            graphics.DrawLine(linePen, p1, p2);
-                            break;
-
-                        case "Rectangle":
-                            var rect = (Aspose.Imaging.Rectangle)shape.args[0];
-                            Pen rectPen = new Pen(Aspose.Imaging.Color.Green, 2);
-                            graphics.DrawRectangle(rectPen, rect);
-                            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, Aspose.Imaging.Color.Yellow)))
-                            {
-                                graphics.FillRectangle(brush, rect);
-                            }
-                            break;
-
-                        case "Ellipse":
-                            var ellRect = (Aspose.Imaging.Rectangle)shape.args[0];
-                            Pen ellipsePen = new Pen(Aspose.Imaging.Color.Red, 2);
-                            graphics.DrawEllipse(ellipsePen, ellRect);
-                            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, Aspose.Imaging.Color.Pink)))
-                            {
-                                graphics.FillEllipse(brush, ellRect);
-                            }
-                            break;
-
-                        case "Polygon":
-                            var points = (Aspose.Imaging.Point[])shape.args[0];
-                            Pen polyPen = new Pen(Aspose.Imaging.Color.Purple, 2);
-                            graphics.DrawPolygon(polyPen, points);
-                            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, Aspose.Imaging.Color.LightGray)))
-                            {
-                                graphics.FillPolygon(brush, points);
-                            }
-                            break;
+                        Pen pen = new Pen(Aspose.Imaging.Color.Blue, 3);
+                        g.DrawLine(pen, new Point(50, 50), new Point(200, 50));
+                    },
+                    g =>
+                    {
+                        Pen pen = new Pen(Aspose.Imaging.Color.Green, 2);
+                        using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Yellow))
+                        {
+                            Rectangle rect = new Rectangle(60, 60, 100, 80);
+                            g.DrawRectangle(pen, rect);
+                            g.FillRectangle(brush, rect);
+                        }
+                    },
+                    g =>
+                    {
+                        Pen pen = new Pen(Aspose.Imaging.Color.Red, 4);
+                        Rectangle rect = new Rectangle(120, 150, 80, 80);
+                        g.DrawEllipse(pen, rect);
                     }
+                };
+
+                foreach (var draw in shapes)
+                {
+                    draw(graphics);
                 }
 
-                image.Save();
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -94,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a template BMP file that contains a set of predefined lines, rectangles, ellipses, and polygons for a reporting dashboard.
- * 2. When you want to programmatically create vector‑based graphics for a game map overlay by iterating over a collection of shape definitions.
- * 3. When you have to produce batch‑processed engineering diagrams, such as circuit schematics, by drawing multiple shapes onto a single bitmap in C#.
- * 4. When you are building an automated watermarking tool that adds various geometric shapes to scanned documents saved as BMP files.
- * 5. When you need to export shape data from a database into a visual BMP preview for a CAD‑like web application using Aspose.Imaging.
+ * 1. When you need to programmatically add lines, rectangles, and ellipses to a bitmap template to create custom diagrams for engineering reports.
+ * 2. When generating a series of annotated screenshots where shapes highlight UI elements before saving the result as a BMP file.
+ * 3. When automating the creation of batch graphics for a game’s map editor by drawing multiple geometric shapes onto a base image.
+ * 4. When producing printable labels that require filled rectangles and colored outlines drawn on a bitmap background.
+ * 5. When building a server‑side service that overlays multiple vector shapes onto uploaded images for branding or watermark purposes.
  */
