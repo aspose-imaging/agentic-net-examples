@@ -1,9 +1,16 @@
-// HOW-TO: Create SVG With Dashed Rectangle From PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG from JPEG with Dashed Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "source.png");
-            string outputPath = Path.Combine("Output", "result.svg");
+            string inputPath = "Input\\source.jpg";
+            string outputPath = "Output\\result.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,29 +29,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int width;
-            int height;
-
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Image raster = Image.Load(inputPath))
             {
-                width = rasterImage.Width;
-                height = rasterImage.Height;
-            }
+                int width = raster.Width;
+                int height = raster.Height;
 
-            SvgOptions svgOptions = new SvgOptions();
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-            using (Image svgImage = Image.Create(svgOptions, width, height))
-            {
-                Graphics graphics = new Graphics(svgImage);
-                graphics.Clear(Color.White);
+                using (Image svgImage = Image.Create(svgOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(svgImage);
+                    graphics.Clear(Color.White);
 
-                Pen pen = new Pen(Color.Black);
-                pen.Width = 2;
-                pen.DashPattern = new float[] { 5, 5 };
+                    Pen pen = new Pen(Color.Black);
+                    pen.Width = 2;
+                    pen.DashStyle = DashStyle.Custom;
+                    pen.DashPattern = new float[] { 5, 5 };
 
-                graphics.DrawRectangle(pen, new Rectangle(10, 10, width - 20, height - 20));
+                    graphics.DrawRectangle(pen, new Rectangle(10, 10, width - 20, height - 20));
 
-                svgImage.Save(outputPath);
+                    svgImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a scalable vector graphic that outlines a raster image with a dashed border for printing or web display.
- * 2. When you want to convert a PNG logo into an SVG file while preserving a custom stroke pattern for consistent styling across devices.
- * 3. When you are building a reporting tool that overlays dashed frames on images and exports them as SVG for resolution‑independent rendering.
- * 4. When you need to programmatically add decorative dashed outlines to thumbnails before embedding them in an HTML5 canvas.
- * 5. When you are automating the creation of SVG assets with specific dash patterns for use in vector‑based UI components or diagrams.
+ * 1. When you need to convert a JPEG photograph into an SVG file and add a custom dashed border for scalable web graphics.
+ * 2. When generating vector diagrams from raster images for print layouts that require precise dash patterns on shapes.
+ * 3. When creating dynamic SVG assets in a C# application where the stroke style must be programmatically defined.
+ * 4. When automating the production of SVG icons from existing bitmap assets with consistent dashed outlines.
+ * 5. When building a reporting tool that overlays dashed rectangles on raster screenshots and exports the result as editable SVG.
  */
