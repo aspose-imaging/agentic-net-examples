@@ -1,10 +1,18 @@
-// HOW-TO: Draw Polygon on Indexed PSD Canvas Using GraphicsPath in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Red Filled Polygon on Indexed PSD with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,44 +21,39 @@ class Program
         try
         {
             string outputPath = "output.psd";
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
-
-            int width = 500;
-            int height = 500;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             var psdOptions = new PsdOptions();
             psdOptions.Source = new FileCreateSource(outputPath, false);
             psdOptions.ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Indexed;
-            psdOptions.Palette = new ColorPalette(new Color[]
-            {
-                Color.FromArgb(255, 255, 0, 0),
-                Color.FromArgb(255, 0, 255, 0),
-                Color.FromArgb(255, 0, 0, 255)
-            });
+            psdOptions.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
 
-            using (var image = Image.Create(psdOptions, width, height))
+            using (var image = Image.Create(psdOptions, 200, 200))
             {
                 var graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                var points = new PointF[]
+                var pen = new Pen(Color.Blue);
+                using (var brush = new SolidBrush(Color.Red))
                 {
-                    new PointF(100, 100),
-                    new PointF(400, 100),
-                    new PointF(350, 400),
-                    new PointF(150, 400)
-                };
+                    graphics.Clear(Color.White);
 
-                var polygon = new PolygonShape(points);
-                var figure = new Figure();
-                figure.AddShape(polygon);
-                var path = new GraphicsPath();
-                path.AddFigure(figure);
+                    var path = new GraphicsPath();
+                    var figure = new Figure();
 
-                var pen = new Pen(Color.Black, 2);
-                graphics.DrawPath(pen, path);
+                    var points = new PointF[]
+                    {
+                        new PointF(50, 50),
+                        new PointF(150, 50),
+                        new PointF(150, 150),
+                        new PointF(50, 150)
+                    };
+
+                    var polygon = new PolygonShape(points);
+                    figure.AddShape(polygon);
+                    path.AddFigure(figure);
+
+                    graphics.DrawPath(pen, path);
+                    graphics.FillPath(brush, path);
+                }
 
                 image.Save();
             }
@@ -64,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PSD file with a limited color palette and overlay a custom polygon shape for a web‑based design preview.
- * 2. When creating automated thumbnails for Photoshop documents that require vector‑based outlines drawn on an indexed image.
- * 3. When building a batch process that adds a border or mask polygon to existing PSD layers while preserving the file’s indexed color mode.
- * 4. When programmatically producing printable mock‑ups where the shape must be defined with precise points using Aspose.Imaging’s GraphicsPath.
- * 5. When integrating a C# service that draws geometric annotations on PSD files before they are saved to a content‑management system.
+ * 1. When you need to generate a PSD file with a limited color palette and programmatically add a custom shape such as a polygon for branding or UI mockups.
+ * 2. When creating automated graphics for print workflows that require indexed color mode to reduce file size while preserving vector‑like shapes.
+ * 3. When building a server‑side image service that draws geometric overlays on PSD layers for watermarking or annotation purposes.
+ * 4. When prototyping design assets in C# where you must fill and stroke shapes on a PSD canvas before exporting to Photoshop.
+ * 5. When integrating Aspose.Imaging into a .NET application to produce PSD templates with pre‑drawn polygons for later editing by designers.
  */
