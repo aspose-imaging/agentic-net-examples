@@ -1,9 +1,15 @@
-// HOW-TO: Add 5‑Pixel Border to Horizontally Merged JPEG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge multiple JPEGs horizontally with 5 pixel border in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -14,24 +20,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input image paths
             string[] inputPaths = new string[]
             {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
+                "Input/image1.jpg",
+                "Input/image2.jpg",
+                "Input/image3.jpg"
             };
-            string outputPath = "output/merged.jpg";
 
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
+
+            // Hardcoded output path
+            string outputPath = "Output/merged_with_border.jpg";
 
             // Ensure output directory exists
             string outputDir = Path.GetDirectoryName(outputPath);
@@ -40,44 +48,39 @@ class Program
                 Directory.CreateDirectory(outputDir);
             }
 
-            // Collect sizes of input images
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            // Collect sizes of all images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas size with border (5 pixels each side)
-            int totalWidth = sizes.Sum(s => s.Width) + 10; // 5 left + 5 right
-            int maxHeight = sizes.Max(s => s.Height) + 10; // 5 top + 5 bottom
+            // Calculate canvas size for horizontal merge
+            int mergedWidth = sizes.Sum(s => s.Width);
+            int mergedHeight = sizes.Max(s => s.Height);
+
+            // Add border of 5 pixels on each side
+            int border = 5;
+            int canvasWidth = mergedWidth + border * 2;
+            int canvasHeight = mergedHeight + border * 2;
 
             // Create output source and options
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = source,
-                Quality = 100
-            };
+            var source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
 
-            // Create canvas bound to output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            // Create canvas
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
-                // Fill background with white
-                int[] whitePixels = Enumerable.Repeat(Color.White.ToArgb(), totalWidth * maxHeight).ToArray();
-                canvas.SaveArgb32Pixels(new Rectangle(0, 0, totalWidth, maxHeight), whitePixels);
-
-                // Merge images horizontally with 5-pixel border offset
-                int offsetX = 5;
-                int offsetY = 5;
-                foreach (string inputPath in inputPaths)
+                int offsetX = border;
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
-                        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                        canvas.SaveArgb32Pixels(new Rectangle(offsetX, offsetY, img.Width, img.Height), pixels);
+                        Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(offsetX, border, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
@@ -95,9 +98,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several product photos side‑by‑side and add a uniform margin for a clean presentation in a web gallery.
- * 2. When generating a single JPEG banner from multiple ads and you want a consistent 5‑pixel frame around the combined image.
- * 3. When creating printable marketing material that stitches together screenshots and requires a thin border to separate them visually.
- * 4. When automating the preparation of image assets for a mobile app that expects a fixed‑size canvas with a small padding around merged pictures.
- * 5. When processing scanned documents that are merged horizontally and you need a subtle border to prevent content from touching the edge of the final JPEG file.
+ * 1. When you need to create a single panoramic view from several JPEG photos and want a consistent 5‑pixel frame around the combined image.
+ * 2. When generating product catalogs where each product image is placed side‑by‑side and a uniform border is required for visual separation.
+ * 3. When preparing social‑media graphics that stitch multiple screenshots together and need a thin border to match branding guidelines.
+ * 4. When automating the creation of printable banners that combine several JPEG panels and must include a margin for trimming.
+ * 5. When building a web service that receives multiple JPEG uploads, merges them horizontally, and returns the result with a fixed border for consistent UI layout.
  */

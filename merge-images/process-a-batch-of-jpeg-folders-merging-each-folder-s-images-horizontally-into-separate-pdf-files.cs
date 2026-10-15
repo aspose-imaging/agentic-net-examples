@@ -1,66 +1,95 @@
-// HOW-TO: Merge JPEG Images in Each Folder Horizontally into PDF using C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge JPEG Images Horizontally Into PDFs For Each Folder In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output root directories
-        string inputRoot = @"C:\InputImages";
-        string outputRoot = @"C:\OutputPdfs";
-
         try
         {
-            // Process each subfolder in the input root
-            foreach (string folderPath in Directory.GetDirectories(inputRoot))
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                // Get all JPEG files in the current folder
-                string[] jpegFiles = Directory.GetFiles(folderPath, "*.jpg");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                if (jpegFiles.Length == 0)
-                    continue; // Skip folders without JPEGs
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Load each JPEG image
-                List<Image> loadedImages = new List<Image>();
-                foreach (string jpegPath in jpegFiles)
+            string[] folders = Directory.GetDirectories(inputDirectory);
+            foreach (string folder in folders)
+            {
+                string[] jpgFiles = Directory.GetFiles(folder, "*.jpg");
+                string[] jpegFiles = Directory.GetFiles(folder, "*.jpeg");
+                string[] imageFiles = jpgFiles.Concat(jpegFiles).ToArray();
+
+                if (imageFiles.Length == 0)
                 {
-                    if (!File.Exists(jpegPath))
+                    continue;
+                }
+
+                List<(int Width, int Height)> sizes = new List<(int, int)>();
+                foreach (string imgPath in imageFiles)
+                {
+                    if (!File.Exists(imgPath))
                     {
-                        Console.Error.WriteLine($"File not found: {jpegPath}");
-                        continue;
+                        Console.Error.WriteLine($"File not found: {imgPath}");
+                        return;
+                    }
+                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                    {
+                        sizes.Add((img.Width, img.Height));
+                    }
+                }
+
+                int totalWidth = sizes.Sum(s => s.Width);
+                int maxHeight = sizes.Max(s => s.Height);
+
+                JpegOptions canvasOptions = new JpegOptions();
+                using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, totalWidth, maxHeight))
+                {
+                    int offsetX = 0;
+                    foreach (string imgPath in imageFiles)
+                    {
+                        if (!File.Exists(imgPath))
+                        {
+                            Console.Error.WriteLine($"File not found: {imgPath}");
+                            return;
+                        }
+                        using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                        {
+                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                            offsetX += img.Width;
+                        }
                     }
 
-                    Image img = Image.Load(jpegPath);
-                    loadedImages.Add(img);
-                }
-
-                if (loadedImages.Count == 0)
-                    continue; // No images successfully loaded
-
-                // Create a single PDF containing all images (each image on its own page)
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Ensure the output directory exists
-                string folderName = new DirectoryInfo(folderPath).Name;
-                string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Merge images horizontally into a single PDF page
-                // (Aspose.Imaging merges the images side‑by‑side when using Image.Create with an array)
-                using (Image merged = Image.Create(loadedImages.ToArray()))
-                {
-                    merged.Save(outputPath, pdfOptions);
-                }
-
-                // Dispose loaded images
-                foreach (Image img in loadedImages)
-                {
-                    img.Dispose();
+                    string folderName = Path.GetFileName(folder);
+                    string outputPath = Path.Combine(outputDirectory, folderName + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    PdfOptions pdfOptions = new PdfOptions();
+                    canvas.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -73,9 +102,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically combine all photos from multiple product‑shoot folders into single landscape‑style PDFs for easy client review.
- * 2. When a digital archiving system must generate a PDF per event folder, placing each JPEG side‑by‑side on one page to preserve the original layout.
- * 3. When a reporting tool has to batch‑process scanned receipts stored in separate directories and output a consolidated PDF per day without manual intervention.
- * 4. When a marketing team wants to create printable catalogs by merging promotional JPEGs from each campaign folder into a single PDF page per campaign.
- * 5. When a document management workflow requires converting groups of JPEG screenshots into PDFs, keeping each group’s images aligned horizontally for consistent presentation.
+ * 1. When you need to create a single PDF page that shows all photos from a product shoot side‑by‑side for quick review.
+ * 2. When an e‑commerce platform must generate printable catalogs by stitching together all JPEGs in each category folder into one PDF per category.
+ * 3. When a legal firm wants to combine scanned JPEG evidence files from separate case folders into horizontal PDFs for easier courtroom presentation.
+ * 4. When a marketing team automates the creation of banner‑style PDFs from daily photo batches stored in different project directories.
+ * 5. When a photo‑archiving script must batch‑process multiple event folders, merging their images into a single PDF per event for archival storage.
  */

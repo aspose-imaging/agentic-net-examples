@@ -1,11 +1,18 @@
-// HOW-TO: Merge Multiple JPEG Images Horizontally Into a PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load JPEG Images With Memory Limit And Merge Horizontally In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,10 +21,12 @@ class Program
     {
         try
         {
-            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-            string outputPath = "merged.png";
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "output.jpg";
 
-            foreach (var path in inputPaths)
+            // Validate input files
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -26,34 +35,52 @@ class Program
                 }
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (var path in inputPaths)
+            // Load options with memory limit
+            LoadOptions loadOptions = new LoadOptions
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                BufferSizeHint = 1024 * 1024 // 1 MB buffer
+            };
+
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
+            {
+                using (JpegImage img = (JpegImage)Image.Load(path, loadOptions))
                 {
-                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                    sizes.Add(new Size(img.Width, img.Height));
                 }
             }
 
+            // Calculate canvas dimensions for horizontal merge
             int totalWidth = sizes.Sum(s => s.Width);
             int maxHeight = sizes.Max(s => s.Height);
 
-            Source outSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = outSource };
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
+            // Create output source and options
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = outputSource,
+                Quality = 90
+            };
+
+            // Create canvas
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (JpegImage img = (JpegImage)Image.Load(path, loadOptions))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
+
+                // Save the merged image (canvas is bound to output source)
                 canvas.Save();
             }
         }
@@ -66,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several high‑resolution JPEG photos into a single panoramic PNG for web galleries without loading the entire images into memory.
- * 2. When an e‑commerce platform must create a side‑by‑side product comparison image from multiple JPEG thumbnails and output a PNG for consistent background.
- * 3. When a reporting tool generates a composite image of chart screenshots stored as JPEGs and saves the merged result as a lossless PNG for PDF embedding.
- * 4. When a mobile app server stitches user‑uploaded JPEG screenshots into a single banner PNG while controlling memory consumption using Aspose.Imaging.
- * 5. When an automated batch process creates a horizontal strip of JPEG frames for video sprite sheets and exports it as a PNG for CSS sprite usage.
+ * 1. When processing a large batch of high‑resolution JPEG photos on a server with limited RAM, you can load each image with a 1 MB buffer to avoid out‑of‑memory errors before stitching them side‑by‑side.
+ * 2. When creating a panoramic view from several landscape JPEGs in a desktop application, the code lets you calculate the combined canvas size while keeping memory consumption low.
+ * 3. When generating product‑catalog thumbnails that require merging multiple JPEGs into a single image, you can control the load options to ensure the operation runs efficiently on low‑end machines.
+ * 4. When building an automated image‑processing pipeline that concatenates advertisement banners, the memory‑limited loading prevents crashes during batch processing.
+ * 5. When developing a cloud‑based service that assembles user‑uploaded JPEGs into a single horizontal collage, the code helps stay within the memory quotas of the hosting environment.
  */

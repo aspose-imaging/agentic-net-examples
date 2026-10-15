@@ -1,4 +1,11 @@
 // HOW-TO: Crop JPEG Images to Central Square and Merge Vertically into PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Linq;
@@ -7,6 +14,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -31,19 +39,18 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            List<string> jpegFiles = files.Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)).ToList();
 
-            var jpegFiles = files.Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            if (jpegFiles.Length == 0)
+            if (jpegFiles.Count == 0)
             {
                 Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
+            List<int[]> croppedPixels = new List<int[]>();
             List<int> squareSizes = new List<int>();
 
-            foreach (var filePath in jpegFiles)
+            foreach (string filePath in jpegFiles)
             {
                 if (!File.Exists(filePath))
                 {
@@ -53,56 +60,42 @@ class Program
 
                 using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
-                    int side = Math.Min(img.Width, img.Height);
-                    squareSizes.Add(side);
+                    if (!img.IsCached) img.CacheData();
+
+                    int squareSize = Math.Min(img.Width, img.Height);
+                    int offsetX = (img.Width - squareSize) / 2;
+                    int offsetY = (img.Height - squareSize) / 2;
+                    Rectangle cropRect = new Rectangle(offsetX, offsetY, squareSize, squareSize);
+                    img.Crop(cropRect);
+
+                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                    croppedPixels.Add(pixels);
+                    squareSizes.Add(squareSize);
                 }
             }
 
             int canvasWidth = squareSizes.Max();
             int canvasHeight = squareSizes.Sum();
 
-            string outputPath = Path.Combine(outputDirectory, "Merged.pdf");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (JpegOptions jpegOptions = new JpegOptions())
+            using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), canvasWidth, canvasHeight))
             {
-                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+                // Fill background with white
+                int totalPixels = canvasWidth * canvasHeight;
+                int[] whitePixels = Enumerable.Repeat(Color.White.ToArgb(), totalPixels).ToArray();
+                canvas.SaveArgb32Pixels(new Rectangle(0, 0, canvasWidth, canvasHeight), whitePixels);
+
+                int offsetY = 0;
+                for (int i = 0; i < croppedPixels.Count; i++)
                 {
-                    // Fill background with white
-                    int totalPixels = canvasWidth * canvasHeight;
-                    int[] whitePixels = new int[totalPixels];
-                    int whiteArgb = Aspose.Imaging.Color.White.ToArgb();
-                    for (int i = 0; i < totalPixels; i++)
-                        whitePixels[i] = whiteArgb;
-                    canvas.SaveArgb32Pixels(new Rectangle(0, 0, canvasWidth, canvasHeight), whitePixels);
-
-                    int offsetY = 0;
-                    foreach (var filePath in jpegFiles)
-                    {
-                        if (!File.Exists(filePath))
-                        {
-                            Console.Error.WriteLine($"File not found: {filePath}");
-                            return;
-                        }
-
-                        using (RasterImage img = (RasterImage)Image.Load(filePath))
-                        {
-                            int side = Math.Min(img.Width, img.Height);
-                            int offsetX = (img.Width - side) / 2;
-                            int offsetYImg = (img.Height - side) / 2;
-                            img.Crop(new Rectangle(offsetX, offsetYImg, side, side));
-
-                            int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                            canvas.SaveArgb32Pixels(new Rectangle(0, offsetY, side, side), pixels);
-                            offsetY += side;
-                        }
-                    }
-
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        canvas.Save(outputPath, pdfOptions);
-                    }
+                    int size = squareSizes[i];
+                    Rectangle destRect = new Rectangle(0, offsetY, size, size);
+                    canvas.SaveArgb32Pixels(destRect, croppedPixels[i]);
+                    offsetY += size;
                 }
+
+                string outputPath = Path.Combine(outputDirectory, "Merged.pdf");
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -114,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a printable PDF portfolio from a set of portrait‑oriented JPEG photos by cropping each to a centered square and stacking them vertically.
- * 2. When an e‑commerce site must generate a single PDF catalog page that shows product images uniformly cropped to square thumbnails arranged one below another.
- * 3. When a mobile app backend has to convert user‑uploaded JPEG selfies into a vertically merged PDF for easy sharing or archiving.
- * 4. When a reporting tool requires combining multiple scanned JPEG receipts into a single PDF document with each receipt displayed as a square image.
- * 5. When a document automation workflow needs to standardize varied‑size JPEG images, crop them to a central square, and merge them into a PDF for compliance documentation.
+ * 1. When you need to create a printable PDF portfolio that shows a series of portrait‑style JPEG photos stacked vertically, each centered and cropped to a square.
+ * 2. When an e‑commerce site must generate a single PDF catalog page from product photos that are originally rectangular JPEGs, ensuring uniform square thumbnails.
+ * 3. When a mobile app wants to combine user‑uploaded JPEG selfies into a vertical PDF collage without distortion by cropping to the central square region first.
+ * 4. When a reporting tool requires merging scanned JPEG receipts into a single PDF document while standardizing each receipt to a square layout for consistent appearance.
+ * 5. When an automated workflow must batch‑process JPEG images, crop them to a central square, and archive them as a vertically merged PDF for easy sharing or printing.
  */

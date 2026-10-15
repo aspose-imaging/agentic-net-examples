@@ -1,7 +1,15 @@
-// HOW-TO: Add Author Metadata to Merged Horizontal JPEG PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Author Metadata to PDF Created from Horizontal JPEG Merge in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,69 +22,61 @@ class Program
     {
         try
         {
-            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg" };
-            string outputPath = "merged.pdf";
+            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string path in inputPaths)
+            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (imageFiles.Length == 0)
             {
-                if (!File.Exists(path))
+                Console.Error.WriteLine("No JPEG files found in input directory.");
+                return;
+            }
+
+            var dimensions = new List<(int Width, int Height)>();
+            foreach (string file in imageFiles)
+            {
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
-            }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(file))
                 {
-                    sizes.Add(img.Size);
+                    dimensions.Add((img.Width, img.Height));
                 }
             }
 
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            int totalWidth = dimensions.Sum(d => d.Width);
+            int maxHeight = dimensions.Max(d => d.Height);
 
-            string tempCanvasPath = Path.Combine(Path.GetTempPath(), "temp_canvas.jpg");
-            string tempDir = Path.GetDirectoryName(tempCanvasPath);
-            if (!string.IsNullOrEmpty(tempDir))
-            {
-                Directory.CreateDirectory(tempDir);
-            }
-
+            string tempCanvasPath = Path.Combine(outputDirectory, "temp_canvas.jpg");
             Source tempSource = new FileCreateSource(tempCanvasPath, true);
-            JpegOptions canvasOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                for (int i = 0; i < imageFiles.Length; i++)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    string file = imageFiles[i];
+                    using (RasterImage img = (RasterImage)Image.Load(file))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
+                string outputPdfPath = Path.Combine(outputDirectory, "merged.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
                 PdfOptions pdfOptions = new PdfOptions();
                 pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
                 pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                canvas.Save(outputPath, pdfOptions);
+                canvas.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -88,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple landscape-oriented JPEG photos into a single PDF report and embed the author's name for document tracking.
- * 2. When an automated invoice system must stitch product images side-by-side and produce a PDF with author metadata for compliance auditing.
- * 3. When a digital archive workflow requires creating a PDF from horizontally merged scanned pages while preserving author information for searchability.
- * 4. When a web application generates a portfolio PDF from user-uploaded JPEGs and wants to set the author field to credit the creator.
- * 5. When a batch processing script merges marketing banner images into one PDF and adds custom author metadata to satisfy branding guidelines.
+ * 1. When you need to combine several scanned JPEG pages into a single PDF and embed the author's name for document tracking.
+ * 2. When generating a PDF report from a series of product photos and want the author field to show the photographer's name.
+ * 3. When automating the creation of e‑books from image chapters and must include author metadata for compliance with publishing standards.
+ * 4. When building a document management system that merges uploaded JPEG invoices into a PDF and records the user who uploaded them.
+ * 5. When creating archival PDFs from horizontal image strips and need to embed author information for future search and retrieval.
  */

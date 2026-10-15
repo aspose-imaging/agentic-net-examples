@@ -1,8 +1,16 @@
-// HOW-TO: Merge Multiple JPEG Images Horizontally into One JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Files Horizontally Into One Image Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -16,21 +24,21 @@ class Program
             string inputDirectory = "Input";
             string outputPath = "Output/merged.jpg";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            if (!Directory.Exists(inputDirectory))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                return;
+            }
 
-            var imageFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
-
-            if (imageFiles.Length == 0)
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (files.Length == 0)
             {
                 Console.Error.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            var sizes = new List<Aspose.Imaging.Size>();
-
-            foreach (var filePath in imageFiles)
+            List<Size> sizes = new List<Size>();
+            foreach (string filePath in files)
             {
                 if (!File.Exists(filePath))
                 {
@@ -38,26 +46,34 @@ class Program
                     return;
                 }
 
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(filePath))
+                using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
-                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                    sizes.Add(img.Size);
                 }
             }
 
             int totalWidth = sizes.Sum(s => s.Width);
             int maxHeight = sizes.Max(s => s.Height);
 
-            var source = new FileCreateSource(outputPath, false);
-            var options = new JpegOptions() { Source = source, Quality = 100 };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, totalWidth, maxHeight))
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (var filePath in imageFiles)
+                foreach (string filePath in files)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(filePath))
+                    if (!File.Exists(filePath))
                     {
-                        var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        return;
+                    }
+
+                    using (RasterImage img = (RasterImage)Image.Load(filePath))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
@@ -75,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a side‑by‑side photo collage from a set of JPEG pictures for a marketing email.
- * 2. When generating a single wide banner by stitching product photos stored in a folder for an e‑commerce site.
- * 3. When automating the preparation of before‑and‑after comparison images by placing two JPEGs next to each other.
- * 4. When consolidating scanned document pages saved as JPEGs into one continuous image for archival or printing.
- * 5. When building a thumbnail strip of multiple JPEG thumbnails to display in a gallery view within a desktop application.
+ * 1. When you need to create a panoramic view from a series of product JPEG photos for an online catalog.
+ * 2. When generating a single banner image by stitching separate advertisement JPEGs together for a website.
+ * 3. When combining scanned JPEG pages of a document into one wide image for printing or archiving.
+ * 4. When preparing a side‑by‑side before‑and‑after comparison of JPEG images for a technical report.
+ * 5. When assembling a sequence of camera snapshot JPEGs into a single image to use as a slideshow thumbnail.
  */

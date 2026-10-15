@@ -1,9 +1,15 @@
-// HOW-TO: Merge Multiple JPEGs and Add Bottom Right Logo PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEGs Horizontally and Add Bottom Right Logo in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -13,27 +19,17 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
+            // Hardcoded paths
+            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg" };
             string logoPath = "logo.png";
-            string outputPath = "Output/merged.png";
+            string outputPath = "output/merged.png";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            string[] jpegFiles2 = Directory.GetFiles(inputDirectory, "*.jpeg");
-            var allFiles = jpegFiles.Concat(jpegFiles2).ToArray();
-
-            if (allFiles.Length == 0)
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                Console.WriteLine("No JPEG files found.");
-                return;
-            }
-
-            foreach (var file in allFiles)
-            {
-                if (!File.Exists(file))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
@@ -44,42 +40,52 @@ class Program
                 return;
             }
 
-            List<Size> sizes = new List<Size>();
-            foreach (var file in allFiles)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect sizes of input images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(file))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
                 }
             }
 
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            // Calculate canvas dimensions for horizontal merge
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
 
-            Source outputSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = outputSource };
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            // Create PNG canvas
+            var src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = src };
+            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, totalWidth, maxHeight))
             {
+                // Merge input images horizontally
                 int offsetX = 0;
-                foreach (var file in allFiles)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(file))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                using (RasterImage logo = (RasterImage)Image.Load(logoPath))
+                // Load logo image
+                using (Aspose.Imaging.RasterImage logo = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(logoPath))
                 {
                     int posX = canvas.Width - logo.Width;
                     int posY = canvas.Height - logo.Height;
-                    Rectangle logoBounds = new Rectangle(posX, posY, logo.Width, logo.Height);
+                    if (posX < 0) posX = 0;
+                    if (posY < 0) posY = 0;
+                    Aspose.Imaging.Rectangle logoBounds = new Aspose.Imaging.Rectangle(posX, posY, logo.Width, logo.Height);
                     canvas.SaveArgb32Pixels(logoBounds, logo.LoadArgb32Pixels(logo.Bounds));
                 }
 
+                // Save the final image
                 canvas.Save();
             }
         }
@@ -92,9 +98,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several product JPEG photos into a single banner and brand it with a bottom‑right PNG logo using C#.
- * 2. When creating a printable catalog page that stitches high‑resolution JPEG images together and adds a transparent PNG watermark logo at the corner.
- * 3. When generating a composite image for a web slideshow where all source JPEGs are merged and a PNG logo is overlaid for copyright protection.
- * 4. When automating the preparation of marketing assets that require merging client‑provided JPEGs and adding a partner PNG logo before publishing as a PNG file.
- * 5. When building a batch process that consolidates scanned JPEG documents into one image and stamps a PNG logo for document tracking.
+ * 1. When you need to combine several product photos into a single banner and brand it with a company logo at the corner.
+ * 2. When generating a composite image for an email newsletter that merges customer‑uploaded JPEGs and adds a trademark watermark before converting to PNG.
+ * 3. When creating a printable catalog page where multiple high‑resolution JPEGs are stitched side‑by‑side and a logo is overlaid to protect intellectual property.
+ * 4. When automating the preparation of social‑media graphics that require merging screenshots and appending a logo in the bottom‑right corner for consistent branding.
+ * 5. When developing a web service that receives multiple JPEG uploads, merges them into one image and returns a PNG with a logo overlay for downstream processing.
  */

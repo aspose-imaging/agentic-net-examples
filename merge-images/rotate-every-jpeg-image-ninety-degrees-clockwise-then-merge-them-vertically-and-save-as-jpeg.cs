@@ -1,8 +1,15 @@
 // HOW-TO: Rotate JPEG Images 90 Degrees Clockwise and Merge Vertically in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,65 +21,64 @@ class Program
     {
         try
         {
-            string inputDirectory = "input";
-            string outputPath = "output/merged.jpg";
-
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            string inputDirectory = "Input";
+            string outputPath = "Output/merged.jpg";
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+            var files = Directory.GetFiles(inputDirectory)
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            if (jpegFiles.Length == 0)
+            if (files.Length == 0)
             {
-                Console.WriteLine("No JPEG files found in the input directory.");
+                Console.WriteLine("No JPEG files found.");
                 return;
             }
 
-            var imagesData = new List<(int[] Pixels, int Width, int Height)>();
+            List<Size> sizes = new List<Size>();
 
-            foreach (string filePath in jpegFiles)
+            foreach (var file in files)
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                using (RasterImage img = (RasterImage)Image.Load(filePath))
+                using (Image img = Image.Load(file))
                 {
                     img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                    int width = img.Width;
-                    int height = img.Height;
-                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                    imagesData.Add((pixels, width, height));
+                    RasterImage rImg = (RasterImage)img;
+                    sizes.Add(new Size(rImg.Width, rImg.Height));
                 }
             }
 
-            int maxWidth = imagesData.Max(i => i.Width);
-            int totalHeight = imagesData.Sum(i => i.Height);
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
-            };
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (var data in imagesData)
+                foreach (var file in files)
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, data.Width, data.Height);
-                    canvas.SaveArgb32Pixels(bounds, data.Pixels);
-                    offsetY += data.Height;
+                    if (!File.Exists(file))
+                    {
+                        Console.Error.WriteLine($"File not found: {file}");
+                        return;
+                    }
+
+                    using (Image img = Image.Load(file))
+                    {
+                        img.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                        RasterImage rImg = (RasterImage)img;
+                        Rectangle bounds = new Rectangle(0, offsetY, rImg.Width, rImg.Height);
+                        canvas.SaveArgb32Pixels(bounds, rImg.LoadArgb32Pixels(rImg.Bounds));
+                        offsetY += rImg.Height;
+                    }
                 }
                 canvas.Save();
             }
@@ -86,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the orientation of a batch of scanned JPEG photos and combine them into a single portrait‑style image for printing.
- * 2. When creating a vertical photo strip from multiple camera snapshots to use in social media stories or product catalogs.
- * 3. When preprocessing images for a PDF generator that requires all pages to be portrait and merged into one JPEG file.
- * 4. When automating the preparation of receipt or invoice scans that were captured sideways, rotating them and stacking them for archival storage.
- * 5. When building a slideshow thumbnail that displays several JPEG frames stacked vertically after aligning their orientation.
+ * 1. When you need to correct the orientation of a batch of portrait photos taken sideways and combine them into a single scrolling image for a web gallery.
+ * 2. When you want to create a tall composite JPEG from multiple scanned receipts that were scanned in landscape mode.
+ * 3. When an e‑commerce site must display a series of product photos as one continuous vertical banner after rotating them to match the site layout.
+ * 4. When a reporting tool has to generate a single JPEG report by stacking rotated screenshots taken from a mobile device.
+ * 5. When a digital signage system requires a vertical strip of rotated advertisement images merged into one high‑quality JPEG file.
  */
