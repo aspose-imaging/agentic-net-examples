@@ -1,11 +1,17 @@
-// HOW-TO: Validate SVG Generated from ODG Conversion Using C# and Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Validate SVG Generated From ODG Conversion Against XSD In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Net;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using System.Xml;
 using System.Xml.Schema;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -14,7 +20,8 @@ class Program
         try
         {
             string inputPath = "input.odg";
-            string svgPath = "output.svg";
+            string outputPath = "output.svg";
+            string schemaPath = "svg.xsd";
 
             if (!File.Exists(inputPath))
             {
@@ -22,41 +29,45 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(svgPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
                 var options = new SvgOptions();
-                image.Save(svgPath, options);
+                image.Save(outputPath, options);
             }
 
-            bool isValid = true;
+            if (!File.Exists(schemaPath))
+            {
+                Console.Error.WriteLine($"File not found: {schemaPath}");
+                return;
+            }
+
+            bool hasErrors = false;
             var settings = new XmlReaderSettings
             {
                 ValidationType = ValidationType.Schema
             };
+            settings.Schemas.Add(null, schemaPath);
             settings.ValidationEventHandler += (sender, e) =>
             {
-                isValid = false;
-                Console.Error.WriteLine($"Validation error: {e.Message}");
+                hasErrors = true;
+                Console.Error.WriteLine($"Validation {e.Severity}: {e.Message}");
             };
 
-            using (WebClient client = new WebClient())
-            {
-                string xsdContent = client.DownloadString("https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.xsd");
-                using (StringReader sr = new StringReader(xsdContent))
-                using (XmlReader xr = XmlReader.Create(sr))
-                {
-                    settings.Schemas.Add(null, xr);
-                }
-            }
-
-            using (XmlReader reader = XmlReader.Create(svgPath, settings))
+            using (var reader = XmlReader.Create(outputPath, settings))
             {
                 while (reader.Read()) { }
             }
 
-            Console.WriteLine(isValid ? "SVG is valid." : "SVG is invalid.");
+            if (!hasErrors)
+            {
+                Console.WriteLine("SVG validation succeeded.");
+            }
+            else
+            {
+                Console.Error.WriteLine("SVG validation failed.");
+            }
         }
         catch (Exception ex)
         {
@@ -67,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design workflow requires converting OpenDocument graphics (ODG) to scalable SVG files and ensuring they meet the official SVG 1.1 schema before publishing on the web.
- * 2. When an automated build pipeline must verify that SVG assets produced from ODG sources are syntactically correct to prevent rendering errors in browsers.
- * 3. When a SaaS platform generates user‑uploaded ODG diagrams as SVG thumbnails and needs to validate the output against the SVG XSD to guarantee compatibility with downstream image processing tools.
- * 4. When a compliance audit demands that all exported SVG files conform to the W3C SVG schema, and developers use C# with Aspose.Imaging to perform the conversion and validation in a single step.
- * 5. When a desktop application processes batch ODG files, converts them to SVG, and programmatically checks each file’s validity to avoid corrupt files causing crashes in the UI.
+ * 1. When you need to ensure that an SVG created from an OpenDocument graphic complies with the official SVG schema before publishing it.
+ * 2. When a web application must convert user‑uploaded ODG files to SVG and guarantee the output is standards‑compatible for browsers.
+ * 3. When an automated build pipeline generates SVG assets from ODG sources and wants to catch schema violations early.
+ * 4. When integrating Aspose.Imaging into a document‑processing service that requires validated SVG for downstream vector editing tools.
+ * 5. When performing quality‑assurance testing of batch ODG‑to‑SVG conversions to verify that each SVG file passes XML schema validation.
  */
