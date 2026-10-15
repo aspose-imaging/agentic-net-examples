@@ -1,41 +1,61 @@
-// HOW-TO: Extract Embedded TIFF Thumbnail and Save as WebP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Embedded Thumbnail From TIFF And Save As WebP In C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.tif";
-        string outputPath = "thumbnail.webp";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "thumbnail.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
             {
-                using (RasterImage raster = (RasterImage)tiff.ActiveFrame)
+                // Cast to TiffImage if needed (not strictly required for ExifData)
+                TiffImage tiff = image as TiffImage;
+                if (tiff == null)
                 {
+                    Console.Error.WriteLine("The provided file is not a TIFF image.");
+                    return;
+                }
+
+                // Access EXIF data
+                ExifData exif = tiff.ExifData;
+                if (exif == null || exif.Thumbnail == null)
+                {
+                    Console.Error.WriteLine("No embedded thumbnail found in the TIFF image.");
+                    return;
+                }
+
+                // Get the thumbnail image
+                using (Image thumbnail = exif.Thumbnail)
+                {
+                    // Save thumbnail as WebP
                     WebPOptions options = new WebPOptions();
-                    raster.Save(outputPath, options);
+                    thumbnail.Save(outputPath, options);
                 }
             }
         }
@@ -48,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate lightweight preview images from high‑resolution TIFF files for web galleries, you can extract the embedded thumbnail and convert it to WebP using C#.
- * 2. When a document management system stores scanned TIFFs with embedded thumbnails and you want to display those thumbnails quickly on mobile devices, this code extracts and saves them as WebP.
- * 3. When optimizing storage for a digital asset pipeline, you can pull the small TIFF thumbnail and re‑encode it to WebP to reduce file size while preserving visual fidelity.
- * 4. When building a PDF generation service that requires a small preview of each page scanned as TIFF, you can retrieve the thumbnail and convert it to WebP for inclusion in the PDF.
- * 5. When creating a thumbnail cache for a desktop application that browses large TIFF archives, this snippet lets you extract the built‑in thumbnail and store it as a WebP file for fast loading.
+ * 1. When you need to generate a small preview image for a large TIFF document without loading the full image.
+ * 2. When you want to display a quick thumbnail of a scanned photograph on a web page and prefer the WebP format for better compression.
+ * 3. When you are building a digital asset management system that extracts and stores embedded thumbnails from TIFF files for faster catalog browsing.
+ * 4. When you need to convert legacy TIFF metadata thumbnails to a modern web‑friendly format to improve loading times on mobile devices.
+ * 5. When you are processing a batch of TIFF files and must extract their internal thumbnails to create a gallery of low‑resolution previews.
  */
