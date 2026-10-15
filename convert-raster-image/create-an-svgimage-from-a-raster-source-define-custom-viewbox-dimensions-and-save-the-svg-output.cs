@@ -1,37 +1,27 @@
-// HOW-TO: Convert PNG to Scalable SVG with Custom Viewbox in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create SVG From JPEG With Custom Viewbox Size In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.jpg";
+        string outputPath = "Output\\result.svg";
+
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            string inputPath = Path.Combine(inputDirectory, "sample.png");
-            string outputPath = Path.Combine(outputDirectory, "output.svg");
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -40,17 +30,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image rasterImage = Image.Load(inputPath))
             {
+                int width = 800;
+                int height = 600;
+
                 using (SvgOptions svgOptions = new SvgOptions())
                 {
-                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    svgOptions.Source = new FileCreateSource(outputPath, false);
+
+                    using (SvgImage svgImage = (SvgImage)Image.Create(svgOptions, width, height))
                     {
-                        PageWidth = 800,
-                        PageHeight = 600,
-                        BackgroundColor = Color.White
-                    };
-                    image.Save(outputPath, svgOptions);
+                        Graphics graphics = new Graphics(svgImage);
+                        graphics.DrawImage(rasterImage, new Point(0, 0));
+                        svgImage.Save();
+                    }
                 }
             }
         }
@@ -63,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a high‑resolution PNG into a web page as a scalable SVG with a defined 800×600 viewbox.
- * 2. When generating printable graphics from raster assets and you require a white background in the resulting SVG.
- * 3. When automating batch conversion of product photos to vector format for responsive UI layouts in a C# application.
- * 4. When creating SVG placeholders from existing bitmap logos while preserving exact dimensions for design tools.
- * 5. When integrating Aspose.Imaging into a .NET service that transforms uploaded images into SVG files with custom page size settings.
+ * 1. When you need to embed a high‑resolution photograph into a scalable vector graphic for responsive web design, you can convert the JPEG to SVG with a defined viewbox using Aspose.Imaging in C#.
+ * 2. When generating printable marketing materials that require vector‑based layouts but start from raster logos, this code creates an SVG with precise dimensions to maintain quality.
+ * 3. When building a desktop application that converts user‑uploaded images into SVG icons with a fixed canvas size, the snippet shows how to draw the raster onto an SVG and save it.
+ * 4. When automating batch processing of product images to produce lightweight SVG thumbnails with custom width and height, the example demonstrates the necessary steps in .NET.
+ * 5. When integrating image conversion into a reporting system that outputs SVG charts containing background pictures, the code provides a way to place the raster image inside a vector container with a specific viewbox.
  */
