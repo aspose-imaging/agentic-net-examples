@@ -1,18 +1,25 @@
 // HOW-TO: Convert OTG to PNG with Maximum Lossless Compression in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.otg");
-            string outputPath = Path.Combine("Output", "sample.png");
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,11 +31,11 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
+                using (PngOptions options = new PngOptions())
                 {
-                    PngCompressionLevel = PngCompressionLevel.ZipLevel9
-                };
-                image.Save(outputPath, options);
+                    options.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink OTG vector graphics for web delivery without losing quality, you can convert them to PNG with maximum lossless compression.
- * 2. When integrating legacy OTG assets into a .NET application that only supports raster images, you can programmatically transform them to PNG.
- * 3. When preparing print‑ready OTG files for inclusion in a PDF, converting to PNG ensures consistent rendering across platforms.
- * 4. When automating a batch process that archives design files, converting OTG to highly compressed PNG reduces storage space.
- * 5. When building an image‑processing pipeline that receives OTG uploads, converting to PNG with ZipLevel9 allows downstream components to handle a standard format efficiently.
+ * 1. When you need to shrink vector‑based OTG graphics for web pages while keeping them losslessly encoded as PNG.
+ * 2. When a batch conversion tool must read OTG files and output PNGs with the smallest possible file size for mobile apps.
+ * 3. When integrating Aspose.Imaging into a C# service that archives design assets by converting them to PNG with maximum zip compression.
+ * 4. When preparing print‑ready artwork stored as OTG for distribution as PNG files without quality loss and with optimal compression.
+ * 5. When automating a workflow that validates the existence of OTG files, creates output folders, and saves the images as highly compressed PNGs using .NET.
  */

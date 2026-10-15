@@ -1,10 +1,18 @@
-// HOW-TO: Batch Convert ODG and OTG Files to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert ODG and OTG Files to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BatchConvert
+namespace BatchConvertOpenDocumentGraphics
 {
     class Program
     {
@@ -16,37 +24,31 @@ namespace BatchConvert
                 string inputDirectory = @"C:\Input";
                 string outputDirectory = @"C:\Output";
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(outputDirectory);
+                // Get all .odg and .otg files in the input directory
+                var files = Directory.GetFiles(inputDirectory)
+                    .Where(f => f.EndsWith(".odg", StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".otg", StringComparison.OrdinalIgnoreCase));
 
-                // Get all ODG and OTG files in the input directory
-                string[] odgFiles = Directory.GetFiles(inputDirectory, "*.odg", SearchOption.TopDirectoryOnly);
-                string[] otgFiles = Directory.GetFiles(inputDirectory, "*.otg", SearchOption.TopDirectoryOnly);
-
-                string[] allFiles = new string[odgFiles.Length + otgFiles.Length];
-                odgFiles.CopyTo(allFiles, 0);
-                otgFiles.CopyTo(allFiles, odgFiles.Length);
-
-                foreach (string inputPath in allFiles)
+                foreach (var inputPath in files)
                 {
-                    // Verify input file exists
+                    // Verify the input file exists
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        continue;
                     }
 
                     // Determine output path with .svg extension
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+                    string outputPath = Path.Combine(outputDirectory,
+                        Path.GetFileNameWithoutExtension(inputPath) + ".svg");
 
                     // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Load the image and save as SVG
+                    // Load the ODG/OTG image and save as SVG
                     using (Image image = Image.Load(inputPath))
                     {
-                        SvgOptions options = new SvgOptions();
+                        var options = new SvgOptions();
                         image.Save(outputPath, options);
                     }
 
@@ -63,9 +65,9 @@ namespace BatchConvert
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a library of OpenDocument graphics (ODG) and OpenType glyph (OTG) files to scalable SVG for web display.
- * 2. When an automated build or CI pipeline must generate SVG assets from design files stored in a shared folder.
- * 3. When a reporting or documentation tool requires vector images in SVG format but the source assets are provided as ODG or OTG.
- * 4. When you want to preserve vector quality while converting multiple OpenDocument drawings to a format supported by modern browsers.
- * 5. When a desktop application needs to batch process user‑uploaded ODG/OTG files and store the results as SVG for further editing.
+ * 1. When you need to migrate a library of OpenDocument graphics (ODG/OTG) to scalable SVG files for web display without losing vector quality.
+ * 2. When an automated build process must convert newly added ODG or OTG assets into SVG format for inclusion in a responsive UI.
+ * 3. When a document management system requires batch exporting of mixed ODG/OTG diagrams to SVG so they can be indexed by search engines.
+ * 4. When a designer wants to generate SVG previews of multiple OpenDocument drawings in a single C# script using Aspose.Imaging.
+ * 5. When a server‑side application must ensure an output folder contains SVG versions of all ODG/OTG files for downstream processing.
  */

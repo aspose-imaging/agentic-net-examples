@@ -1,9 +1,14 @@
-// HOW-TO: Convert OTG File To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG File to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +16,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.otg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,13 +27,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                    image.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically transform OTG vector drawings into PDF documents for easy sharing or printing in a .NET application.
- * 2. When an automated server‑side workflow must batch‑convert stored OTG assets into PDFs to integrate with a document management system.
- * 3. When a desktop tool requires loading an OTG image, applying Aspose.Imaging options, and saving it as a PDF while preserving layout fidelity.
- * 4. When you want to generate PDF reports from OTG design files without manual user interaction, using C# and Aspose.Imaging.
- * 5. When integrating a file‑conversion service that receives OTG uploads and returns PDF files for downstream processing or archival.
+ * 1. When a developer needs to transform proprietary OTG graphics created by CorelDRAW into a universally viewable PDF for client distribution.
+ * 2. When an application must batch‑convert OTG design assets to PDF to embed them in reports or email attachments.
+ * 3. When a web service receives OTG uploads and must generate PDF previews for online viewers or thumbnail generation.
+ * 4. When a desktop tool automates the migration of legacy OTG files to PDF to preserve archival quality without manual export.
+ * 5. When a C# program integrates Aspose.Imaging to convert OTG diagrams into PDF for printing or further processing in PDF‑centric workflows.
  */

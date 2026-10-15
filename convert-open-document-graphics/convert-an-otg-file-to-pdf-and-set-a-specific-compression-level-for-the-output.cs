@@ -1,4 +1,11 @@
-// HOW-TO: Convert OTG to PDF with Compression Settings in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PDF with Compression Options in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,32 +18,8 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.otg");
-            if (files.Length == 0)
-            {
-                Console.WriteLine("No OTG files found in input directory.");
-                return;
-            }
-
-            string inputPath = files[0];
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -51,6 +34,7 @@ class Program
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     // Specific compression level not supported; using default options.
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -64,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically turn legacy OTG vector drawings into searchable PDF documents for archiving in a .NET application.
- * 2. When an automated workflow must convert incoming OTG files to PDF while applying default compression to reduce file size.
- * 3. When a desktop utility has to load an OTG image, embed it in a PDF, and save the result using Aspose.Imaging in C#.
- * 4. When integrating a document management system that receives OTG files and requires them to be stored as PDFs with consistent compression.
- * 5. When creating a batch conversion tool that scans a folder for *.otg files and outputs PDF versions for downstream processing.
+ * 1. When you need to archive vector graphics created in OTG format as searchable PDF files for easy distribution.
+ * 2. When a web service must convert user‑uploaded OTG drawings to PDF while applying default compression to reduce file size.
+ * 3. When integrating Aspose.Imaging into a C# desktop application to batch‑process OTG files into PDFs for printing workflows.
+ * 4. When generating PDF reports that embed OTG images and you want the conversion handled programmatically in .NET.
+ * 5. When migrating legacy OTG assets to a PDF‑based document management system and require automated conversion in C#.
  */

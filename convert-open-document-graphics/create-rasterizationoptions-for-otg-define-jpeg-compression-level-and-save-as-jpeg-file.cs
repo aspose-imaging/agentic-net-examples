@@ -1,9 +1,15 @@
 // HOW-TO: Convert OTG Vector Image to JPEG with Quality Setting in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.jpg";
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,7 +30,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 80,
                     VectorRasterizationOptions = new VectorRasterizationOptions
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an OTG vector diagram on a web page that only supports JPEG images.
- * 2. When you want to generate thumbnail previews of OTG files with a specific compression quality for faster loading.
- * 3. When you are building a batch conversion tool that rasterizes vector graphics to JPEG while preserving background color.
- * 4. When you must integrate OTG to JPEG conversion into a C# reporting system that embeds images in PDF documents.
- * 5. When you require consistent page dimensions and a white background for OTG files before saving them as JPEG for archival.
+ * 1. When you need to embed an OTG vector graphic into a web page that only supports JPEG images, you can rasterize it with a white background and save it at a specific compression quality using C#.
+ * 2. When generating thumbnails of OTG drawings for a mobile app, you can convert each file to a JPEG of the original dimensions while controlling file size through the Quality property.
+ * 3. When automating a batch process that converts legacy OTG design files to JPEG for archival in a document management system, this code ensures consistent background color and compression across all images.
+ * 4. When integrating Aspose.Imaging into a reporting service that must output vector diagrams as JPEGs for email attachments, you can set the rasterization options to match the source size and specify the desired JPEG quality.
+ * 5. When creating a print preview that requires a raster image of an OTG vector at screen resolution, the code lets you render the vector to a JPEG with a white canvas and adjustable compression to balance clarity and bandwidth.
  */

@@ -1,40 +1,45 @@
 // HOW-TO: Convert OTG to BMP with Fixed Threshold Binarization in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = "input\\input.otg";
-        string outputPath = "output\\output.bmp";
+        string inputPath = "input.otg";
+        string outputPath = "output.bmp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
-
-                // Apply fixed threshold binarization (threshold value 128)
+                RasterImage raster = (RasterImage)image;
+                // Apply fixed threshold binarization (example threshold: 128)
                 raster.BinarizeFixed(128);
 
-                // Save as BMP
-                BmpOptions bmpOptions = new BmpOptions();
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 1
+                };
+
                 raster.Save(outputPath, bmpOptions);
             }
         }
@@ -47,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare scanned engineering drawings in OTG format for legacy systems that only accept BMP, applying a binary threshold to simplify the image.
- * 2. When converting OTG files from a medical imaging device into BMP for a Windows application that requires monochrome images.
- * 3. When automating a batch process that extracts high‑contrast outlines from OTG maps by binarizing them before OCR or pattern recognition.
- * 4. When integrating Aspose.Imaging into a document workflow that transforms proprietary OTG graphics into BMP thumbnails with a fixed threshold for consistent visual quality.
- * 5. When developing a C# utility that reduces OTG file size by converting to BMP and applying a 128‑level threshold to create a binary image for faster network transmission.
+ * 1. When you need to transform legacy OTG graphics into 1‑bit BMP files for embedding in low‑color‑depth UI components.
+ * 2. When you must preprocess scanned OTG drawings by applying a fixed threshold to produce a binary image for OCR or pattern recognition.
+ * 3. When a printing workflow requires converting OTG artwork to monochrome BMP to meet printer firmware that only accepts 1‑bpp images.
+ * 4. When you are building a batch conversion tool that reads OTG files, binarizes them at a specific intensity, and saves them as BMP for archival storage.
+ * 5. When integrating Aspose.Imaging in a C# application to generate black‑and‑white BMP masks from OTG source files for use in computer‑vision segmentation.
  */

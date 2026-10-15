@@ -1,4 +1,11 @@
-// HOW-TO: Rotate ODG Image 90 Degrees Clockwise and Save as JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate ODG Image 90 Degrees And Save As JPEG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -40,9 +47,9 @@ namespace OdgRotateExample
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an ODG diagram to a JPEG thumbnail for quick web preview, you can load the ODG, rotate it, and save it as JPEG using C#.
- * 2. When a scanned ODG drawing is oriented incorrectly, you can programmatically rotate it ninety degrees clockwise before publishing it as a JPEG image.
- * 3. When building a batch processor that generates JPEG previews of multiple ODG files, you can rotate each image to the correct orientation during the conversion.
- * 4. When an email client only accepts JPEG attachments, you can rotate the ODG artwork and save it as a JPEG to ensure proper display in the message.
- * 5. When integrating ODG support into a .NET application that displays user‑uploaded drawings, you can rotate the image and convert it to JPEG for consistent rendering across browsers.
+ * 1. When you need to display an OpenDocument Graphics (ODG) diagram in a web gallery that only supports JPEG, you can rotate it to the correct orientation and convert it to JPEG using C#.
+ * 2. When generating printable reports that require landscape‑oriented ODG charts, you can programmatically rotate the chart 90° clockwise and save it as a JPEG for inclusion in PDF documents.
+ * 3. When automating batch processing of scanned ODG sketches that were saved upside‑down, you can use Aspose.Imaging to rotate each image and output JPEG files for archival storage.
+ * 4. When integrating ODG assets into a mobile app that only handles JPEG images, you can rotate the graphics to match the device’s portrait mode and convert them on the fly with C#.
+ * 5. When creating thumbnails of ODG illustrations for a content management system, you can rotate the original image and save a JPEG version to ensure consistent orientation across the site.
  */

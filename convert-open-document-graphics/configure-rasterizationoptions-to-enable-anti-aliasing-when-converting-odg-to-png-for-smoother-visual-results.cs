@@ -1,6 +1,14 @@
 // HOW-TO: Convert ODG to PNG with Anti‑Aliasing Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
@@ -21,16 +29,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                var pngOptions = new PngOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.AntiAlias
+                    }
                 };
+
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -43,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑quality PNG thumbnails from OpenDocument graphics (ODG) for web previews, ensuring smooth edges with anti‑aliasing.
- * 2. When converting ODG diagrams to PNG for inclusion in PDF reports, and you want the rasterized output to retain visual fidelity.
- * 3. When automating batch processing of ODG files in a C# application and require consistent background color and anti‑aliased rendering.
- * 4. When integrating Aspose.Imaging into a document management system to display ODG content as PNG images without jagged lines.
- * 5. When preparing ODG artwork for mobile apps where PNG assets must be anti‑aliased to look crisp on high‑resolution screens.
+ * 1. When you need to generate high‑quality PNG previews of ODG drawings for web display while keeping edges smooth.
+ * 2. When exporting OpenDocument graphics to PNG for reports and want text and vector lines rendered without jagged edges.
+ * 3. When automating batch conversion of ODG files to PNG in a C# application and require a consistent white background and anti‑aliased rendering.
+ * 4. When integrating Aspose.Imaging into a document‑management system to create crisp thumbnail images of ODG files for high‑DPI screens.
+ * 5. When converting ODG diagrams to PNG for printing or PDF embedding and need smooth visual results without manual post‑processing.
  */

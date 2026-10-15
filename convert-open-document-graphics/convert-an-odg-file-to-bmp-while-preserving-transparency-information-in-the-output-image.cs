@@ -1,4 +1,11 @@
-// HOW-TO: Convert ODG to 32‑Bit BMP With Alpha Channel In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to BMP with Alpha Channel Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +18,7 @@ class Program
         try
         {
             string inputPath = "input.odg";
-            string outputPath = "output.bmp";
+            string outputPath = "output\\output.bmp";
 
             if (!File.Exists(inputPath))
             {
@@ -19,20 +26,17 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-                outputDir = ".";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
             {
                 using (RasterImage raster = (RasterImage)image)
                 {
-                    var bmpOptions = new BmpOptions
+                    BmpOptions options = new BmpOptions
                     {
-                        BitsPerPixel = 32 // Preserve alpha channel
+                        BitsPerPixel = 32 // Preserve transparency (alpha channel)
                     };
-                    raster.Save(outputPath, bmpOptions);
+                    raster.Save(outputPath, options);
                 }
             }
         }
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display OpenDocument graphics in a Windows application that only supports BMP files while keeping the original transparent areas.
- * 2. When exporting vector drawings from LibreOffice to a 32‑bit BMP for use in legacy reporting tools that require raster images with alpha channels.
- * 3. When automating batch conversion of ODG assets to BMP thumbnails for a game engine that reads BMP textures and respects transparency.
- * 4. When integrating Aspose.Imaging into a C# service that converts user‑uploaded ODG diagrams to BMP for email attachments without losing the overlay transparency.
- * 5. When preparing printable previews of ODG illustrations in a .NET workflow that saves them as BMP files while preserving semi‑transparent layers for accurate visual fidelity.
+ * 1. When you need to display OpenDocument graphics in a Windows application that only supports BMP files while keeping the original transparent background.
+ * 2. When a batch process must convert legacy ODG illustrations to 32‑bit BMP images for printing pipelines that require alpha channel information.
+ * 3. When integrating Aspose.Imaging into a C# service that generates thumbnails from ODG files and saves them as BMP with preserved transparency.
+ * 4. When migrating assets from an OpenDocument design suite to a game engine that loads BMP textures and expects per‑pixel alpha.
+ * 5. When automating document conversion in a .NET workflow and you must ensure the resulting BMP retains the original image’s opacity data for further editing.
  */

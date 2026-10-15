@@ -1,4 +1,11 @@
 // HOW-TO: Convert ODG to SVG and Strip Group Tags in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -12,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.odg";
-            string outputPath = "output.svg";
+            string outputPath = "output/output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -29,8 +36,9 @@ class Program
             }
 
             string svgContent = File.ReadAllText(outputPath);
-            string simplified = Regex.Replace(svgContent, @"</?g[^>]*>", "", RegexOptions.Singleline);
-            File.WriteAllText(outputPath, simplified);
+            svgContent = Regex.Replace(svgContent, @"<g[^>]*>", "", RegexOptions.IgnoreCase);
+            svgContent = Regex.Replace(svgContent, @"</g>", "", RegexOptions.IgnoreCase);
+            File.WriteAllText(outputPath, svgContent);
         }
         catch (Exception ex)
         {
@@ -41,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed an OpenDocument Graphic (ODG) into a web page, you can convert it to SVG and remove unnecessary <g> elements to keep the markup lightweight.
- * 2. When automating a batch process that prepares vector assets for mobile apps, this code converts ODG files to SVG and simplifies the SVG by stripping group tags, reducing file size.
- * 3. When integrating Aspose.Imaging in a C# service that receives user‑uploaded ODG drawings, you can output clean SVG without extra grouping for downstream editing tools.
- * 4. When optimizing SVGs for faster rendering in browsers, the code transforms ODG to SVG and eliminates redundant group elements using a regular expression.
- * 5. When creating a CI pipeline that validates and normalizes vector graphics, this snippet converts ODG to SVG and cleans the markup, ensuring consistent SVG structure across builds.
+ * 1. When you need to embed an OpenDocument graphic into a web page, you can convert the .odg file to lightweight SVG and remove unnecessary <g> containers for faster rendering.
+ * 2. When preparing vector assets for responsive design, you may convert ODG drawings to SVG and clean up group tags to reduce file size and simplify DOM manipulation.
+ * 3. When integrating legacy ODG diagrams into a C# application that generates reports, you can use Aspose.Imaging to transform them into SVG and strip grouping elements for easier styling with CSS.
+ * 4. When automating batch processing of design files, this code lets you programmatically convert multiple .odg files to clean SVG files without manual editing.
+ * 5. When optimizing SVG output for mobile devices, removing group elements after conversion from ODG helps improve performance and reduces parsing overhead in browsers.
  */

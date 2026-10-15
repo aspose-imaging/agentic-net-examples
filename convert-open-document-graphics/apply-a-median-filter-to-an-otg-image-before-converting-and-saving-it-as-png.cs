@@ -1,17 +1,23 @@
 // HOW-TO: Apply Median Filter to OTG Image and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.otg";
-        string outputPath = "output/output.png";
+        string outputPath = "output.png";
 
         try
         {
@@ -25,45 +31,33 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                if (image is RasterImage raster)
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
-                    raster.Filter(raster.Bounds, medianOptions);
-
-                    var saveOptions = new PngOptions
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                    PngOptions saveOptions = new PngOptions
                     {
                         Source = new FileCreateSource(outputPath, false)
                     };
                     raster.Save(outputPath, saveOptions);
                 }
-                else if (image is VectorImage vector)
-                {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        var tempOptions = new PngOptions
-                        {
-                            Source = new StreamSource(ms)
-                        };
-                        vector.Save(ms, tempOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage raster2 = (RasterImage)Image.Load(ms))
-                        {
-                            var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
-                            raster2.Filter(raster2.Bounds, medianOptions);
-
-                            var saveOptions = new PngOptions
-                            {
-                                Source = new FileCreateSource(outputPath, false)
-                            };
-                            raster2.Save(outputPath, saveOptions);
-                        }
-                    }
-                }
                 else
                 {
-                    Console.Error.WriteLine("Unsupported image type.");
-                    return;
+                    int width = image.Width;
+                    int height = image.Height;
+
+                    PngOptions createOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    using (RasterImage canvas = (RasterImage)Image.Create(createOptions, width, height))
+                    {
+                        Graphics graphics = new Graphics(canvas);
+                        graphics.DrawImage(image, 0, 0, width, height);
+                        canvas.Filter(canvas.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                        canvas.Save();
+                    }
                 }
             }
         }
@@ -76,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in an OTG graphic before exporting it as a high‑quality PNG for web display.
- * 2. When converting vector‑based OTG files to raster PNGs while preserving image clarity by applying a median filter.
- * 3. When processing scanned OTG diagrams that contain speckles and you want a cleaner PNG output for documentation.
- * 4. When automating a batch job that reads OTG assets, denoises them, and stores the results as PNG files for a mobile app.
- * 5. When integrating Aspose.Imaging into a C# service that receives OTG uploads, applies noise reduction, and returns PNG thumbnails.
+ * 1. When you need to reduce noise in an OTG graphic before converting it to a PNG for web display.
+ * 2. When a batch process must apply a median filter to scanned OTG files and store the cleaned results as PNGs in a .NET application.
+ * 3. When you have an OTG image that may be vector or raster and you must ensure it is rasterized, filtered, and saved as PNG without losing dimensions.
+ * 4. When preparing OTG assets for a mobile app, you want to smooth the image using a 3‑pixel median filter and output a PNG with Aspose.Imaging in C#.
+ * 5. When automating image pipelines, you need to detect the image type, apply a median filter, and convert the OTG file to PNG while handling missing files gracefully.
  */

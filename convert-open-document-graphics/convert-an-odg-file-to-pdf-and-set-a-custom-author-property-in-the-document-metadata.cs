@@ -1,4 +1,11 @@
-// HOW-TO: Convert ODG to PDF and Set Custom Author in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF and Set Custom Author Metadata in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -42,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from an OpenDocument graphics file while embedding the creator’s name for document tracking.
- * 2. When an application must batch‑convert ODG illustrations to PDF for distribution and ensure the author field is set for compliance.
- * 3. When a web service receives user‑uploaded ODG diagrams and must return PDF versions with custom metadata for archival purposes.
- * 4. When automating document workflows that require preserving source author information while converting vector graphics to a portable PDF format.
- * 5. When integrating Aspose.Imaging into a C# project to programmatically add or update PDF metadata during format conversion.
+ * 1. When you need to generate PDF reports from ODG drawings while embedding the creator's name for document tracking.
+ * 2. When an application must batch‑process OpenDocument graphics and produce searchable PDFs with author information for compliance.
+ * 3. When a web service receives ODG files from users and returns PDFs that include custom metadata for digital asset management.
+ * 4. When automating archival of design assets, converting ODG files to PDF and setting the author field to simplify cataloging.
+ * 5. When integrating Aspose.Imaging into a C# workflow to preserve author attribution while converting vector graphics to PDF for printing.
  */
