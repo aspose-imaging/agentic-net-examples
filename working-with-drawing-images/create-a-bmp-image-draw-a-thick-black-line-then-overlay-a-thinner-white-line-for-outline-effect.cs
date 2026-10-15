@@ -1,9 +1,15 @@
-// HOW-TO: Create BMP with Black Line and White Outline in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Outlined Diagonal Line Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,26 +18,25 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
-            string dir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
             int width = 200;
             int height = 200;
 
-            using (Image image = Image.Create(options, width, height))
+            using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                Pen blackPen = new Pen(Color.Black, 10);
-                graphics.DrawLine(blackPen, 20, 20, 180, 180);
+                Pen blackPen = new Pen(Aspose.Imaging.Color.Black, 10);
+                graphics.DrawLine(blackPen, new Aspose.Imaging.Point(20, 20), new Aspose.Imaging.Point(180, 180));
 
-                Pen whitePen = new Pen(Color.White, 4);
-                graphics.DrawLine(whitePen, 20, 20, 180, 180);
+                Pen whitePen = new Pen(Aspose.Imaging.Color.White, 4);
+                graphics.DrawLine(whitePen, new Aspose.Imaging.Point(20, 20), new Aspose.Imaging.Point(180, 180));
 
                 image.Save();
             }
@@ -45,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP diagram that highlights a path with a thick black line and a contrasting white border for better visibility.
- * 2. When creating simple vector‑style graphics for reports, such as a highlighted diagonal line on a white background using Aspose.Imaging in C#.
- * 3. When producing placeholder images for UI testing where a distinct black line with a white outline indicates alignment or spacing.
- * 4. When automating the creation of custom icons that require a bold line and a thin outline to stand out on different backgrounds.
- * 5. When exporting engineering sketches to BMP format and you want the main line emphasized with a contrasting outline for print quality.
+ * 1. When you need to generate a BMP file with a highlighted diagonal line for a simple diagram or placeholder image in a .NET application.
+ * 2. When you want to programmatically add an outlined line to a bitmap to emphasize edges in a UI component or report.
+ * 3. When creating test images that require a thick black stroke with a contrasting white border to verify rendering pipelines.
+ * 4. When automating the production of icons or markers that need a clear outline for visibility against varying backgrounds.
+ * 5. When building a graphics utility that draws custom shapes on raster images and saves them directly as BMP without using external editors.
  */
