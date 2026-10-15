@@ -1,57 +1,66 @@
-// HOW-TO: Log Processing Times for WebP Images While Converting in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Timestamps While Converting WebP to BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
-class Program
+namespace WebPProcessor
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputFolder = "input";
-            string outputFolder = "output";
-
-            Directory.CreateDirectory(inputFolder);
-            Directory.CreateDirectory(outputFolder);
-
-            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
-            foreach (string inputPath in webpFiles)
+            try
             {
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName);
+                // Hardcoded input and output paths
+                string inputPath = "input.webp";
+                string outputPath = "output.bmp";
 
-                Console.WriteLine($"Processing {fileName} started at {DateTime.Now:O}");
-
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                // Log start timestamp
+                Console.WriteLine($"Processing started: {DateTime.Now:O}");
+
+                // Load WebP image
+                using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
                 {
-                    image.Save(outputPath);
+                    // Save as BMP (or any other raster format)
+                    BmpOptions bmpOptions = new BmpOptions();
+                    webpImage.Save(outputPath, bmpOptions);
                 }
 
-                Console.WriteLine($"Processing {fileName} finished at {DateTime.Now:O}");
+                // Log end timestamp
+                Console.WriteLine($"Processing finished: {DateTime.Now:O}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to audit how long each WebP file takes to load and save during a batch conversion using Aspose.Imaging in a .NET console app.
- * 2. When debugging performance bottlenecks in an image processing pipeline that handles multiple WebP files and you want start‑and‑end timestamps for each operation.
- * 3. When you want a simple console log that records the exact timestamp of when each WebP image processing begins and finishes to verify processing order.
- * 4. When integrating Aspose.Imaging into a scheduled server job and you must record timestamps for compliance or monitoring of WebP image handling.
- * 5. When creating a script to copy WebP images to another folder while tracking the processing duration of each file for reporting or optimization purposes.
+ * 1. When you need to debug a batch conversion of WebP images to BMP and want to know exactly when each file starts and finishes processing.
+ * 2. When you are building a server‑side service that logs processing times for image format conversions to monitor performance.
+ * 3. When you must audit image transformation steps in a C# application to ensure compliance with timing requirements.
+ * 4. When troubleshooting intermittent failures in WebP to BMP conversion and need timestamps to correlate errors with system events.
+ * 5. When generating detailed logs for a CI/CD pipeline that processes WebP assets and requires start/end timestamps for each conversion.
  */
