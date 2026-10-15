@@ -1,45 +1,52 @@
-// HOW-TO: Copy JPEG and Preserve JFIF and EXIF Segments Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Thumbnail to JFIF and EXIF Segments of JPEG in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                if (!image.IsCached)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (JpegImage jpegImage = (JpegImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    image.CacheData();
+                    var thumbOptions = new JpegOptions();
+                    jpegImage.Save(ms, thumbOptions);
+                    ms.Position = 0;
+                    using (JpegImage thumbImage = (JpegImage)Aspose.Imaging.Image.Load(ms))
+                    {
+                        thumbImage.Resize(100, 100, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                        jpegImage.Jfif.Thumbnail = thumbImage;
+                        if (jpegImage.ExifData != null)
+                        {
+                            jpegImage.ExifData.Thumbnail = thumbImage;
+                        }
+                    }
                 }
 
-                JpegOptions options = new JpegOptions();
-                options.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, options);
+                jpegImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -51,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a duplicate of an existing JPEG without losing its embedded JFIF and EXIF metadata, such as camera settings or GPS information.
- * 2. When an application must re‑encode a JPEG after processing (e.g., applying filters) while keeping the original thumbnail and other metadata intact.
- * 3. When a server‑side service stores user‑uploaded photos and wants to rewrite the file to a new location or format without stripping the EXIF orientation data.
- * 4. When a batch‑processing tool generates new JPEG files from templates and must retain the original JFIF application markers for compatibility with legacy software.
- * 5. When a digital asset management system updates image files and requires that existing EXIF tags (author, copyright, etc.) remain unchanged after saving.
+ * 1. When you need to embed a small preview image in both the JFIF and EXIF metadata of a JPEG so that photo viewers can display thumbnails without loading the full image.
+ * 2. When generating image galleries for web or mobile apps and want each JPEG to contain a built‑in thumbnail for faster loading on devices that read EXIF or JFIF data.
+ * 3. When creating digital asset pipelines that require consistent thumbnail information across different JPEG standards for compatibility with legacy photo management software.
+ * 4. When processing user‑uploaded photos in a C# backend and must add a 100×100 pixel thumbnail to satisfy third‑party APIs that read either the JFIF or EXIF thumbnail fields.
+ * 5. When updating existing JPEG files with a new thumbnail after resizing, ensuring both JFIF and EXIF sections are synchronized to avoid mismatched previews.
  */
