@@ -1,19 +1,26 @@
-// HOW-TO: Increase TGA Image DPI to 300 and Convert to TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase TGA DPI to 300 and Convert to TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string inputPath = Path.Combine("Input", "input.tga");
+        string outputPath = Path.Combine("Output", "output.tiff");
+
         try
         {
-            string inputPath = "input.tga";
-            string outputPath = "output/output.tiff";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,13 +29,18 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                image.HorizontalResolution = 300;
-                image.VerticalResolution = 300;
+                if (image is RasterImage raster)
+                {
+                    raster.HorizontalResolution = 300;
+                    raster.VerticalResolution = 300;
+                }
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    image.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +52,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a low‑resolution TGA asset for high‑quality printing by raising its DPI to 300 and saving it as a TIFF file.
- * 2. When a game development pipeline requires converting legacy TGA textures to TIFF while standardizing the resolution for texture atlases.
- * 3. When a medical imaging application must import TGA scans, adjust their pixel density, and store them in a lossless TIFF format for archival.
- * 4. When an automated batch process must ensure all TGA graphics meet a 300 DPI specification before being used in a publishing workflow.
- * 5. When a desktop utility needs to read a TGA file, modify its horizontal and vertical resolution, and output a TIFF compatible with Photoshop.
+ * 1. When preparing game textures for high‑resolution printing, you need to raise a 72 DPI TGA file to 300 DPI and save it as a TIFF for lossless output.
+ * 2. When migrating legacy assets from a graphics pipeline, you may need to convert low‑resolution TGA images to high‑resolution TIFFs to meet publishing standards.
+ * 3. When creating archival copies of technical drawings stored as TGA, increasing the DPI and converting to TIFF ensures the files retain detail for future reference.
+ * 4. When integrating TGA sprites into a CAD workflow, you must adjust the image resolution to 300 DPI and export to TIFF so the CAD software interprets the scale correctly.
+ * 5. When generating printable marketing material from game assets, you convert the TGA to TIFF and set the DPI to 300 to match printer requirements.
  */
