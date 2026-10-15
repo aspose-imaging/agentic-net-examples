@@ -1,6 +1,14 @@
-// HOW-TO: Merge JPEG Images Horizontally into a 300 DPI PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge JPEG Images Horizontally Into PDF With 300 DPI C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -14,89 +22,70 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "Input";
+            string outputPdfPath = "Output/merged.pdf";
+            string tempJpegPath = "Output/temp.jpg";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            string outputDir = Path.GetDirectoryName(outputPdfPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            string[] allFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
-            List<string> jpegFiles = new List<string>();
-            foreach (var f in allFiles)
+            string[] jpegFiles = Directory.GetFiles(inputDir, "*.jpg");
+            if (jpegFiles.Length == 0)
             {
-                string ext = Path.GetExtension(f).ToLowerInvariant();
-                if (ext == ".jpg" || ext == ".jpeg")
-                {
-                    jpegFiles.Add(f);
-                }
-            }
-
-            if (jpegFiles.Count == 0)
-            {
-                Console.WriteLine("No JPEG files found.");
+                Console.WriteLine("No JPEG files found in input directory.");
                 return;
             }
 
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (var path in jpegFiles)
+            var imagesInfo = new List<(string path, int width, int height)>();
+            foreach (var file in jpegFiles)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
-
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (JpegImage img = (JpegImage)Image.Load(file))
                 {
-                    sizes.Add(img.Size);
+                    imagesInfo.Add((file, img.Width, img.Height));
                 }
             }
 
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (var sz in sizes)
+            int canvasWidth = imagesInfo.Sum(i => i.width);
+            int canvasHeight = imagesInfo.Max(i => i.height);
+
+            Source tempSource = new FileCreateSource(tempJpegPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
-                totalWidth += sz.Width;
-                if (sz.Height > maxHeight)
-                    maxHeight = sz.Height;
-            }
-
-            string tempCanvasPath = Path.Combine(outputDirectory, "temp_canvas.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-
-            Source source = new FileCreateSource(tempCanvasPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
-            {
-                canvas.HorizontalResolution = 300;
-                canvas.VerticalResolution = 300;
-
                 int offsetX = 0;
-                foreach (var path in jpegFiles)
+                foreach (var info in imagesInfo)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (JpegImage img = (JpegImage)Image.Load(info.path))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                string outputPdfPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
                 PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
                 canvas.Save(outputPdfPath, pdfOptions);
+            }
+
+            if (File.Exists(tempJpegPath))
+            {
+                File.Delete(tempJpegPath);
             }
         }
         catch (Exception ex)
@@ -108,9 +97,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine multiple scanned photos side‑by‑side into a single high‑resolution PDF for printing or archiving.
- * 2. When generating a printable product catalog page by stitching product JPEG images horizontally and exporting to a 300 DPI PDF.
- * 3. When creating a side‑by‑side comparison document of before‑and‑after JPEG images for a client report in PDF format.
- * 4. When automating the preparation of large‑format advertisement layouts by merging banner JPEGs into a PDF with print‑ready DPI.
- * 5. When building a batch process that consolidates daily camera JPEG captures into a single PDF for easy distribution to stakeholders.
+ * 1. When you need to combine multiple scanned JPEG pages into a single high‑resolution PDF for printing or archiving.
+ * 2. When generating a printable catalog by stitching product photos side‑by‑side and exporting them as a 300‑DPI PDF.
+ * 3. When creating a PDF report that includes horizontally aligned screenshots saved as JPEGs with consistent DPI.
+ * 4. When automating the preparation of legal documents that require JPEG evidence images merged into a single PDF at print‑quality resolution.
+ * 5. When developing a batch process that converts a folder of JPEG receipts into a single PDF with 300 DPI for accounting audits.
  */
