@@ -1,18 +1,27 @@
-// HOW-TO: Resize SVG to JPEG with Aspect Ratio and 90% Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize SVG While Maintaining Aspect Ratio and Export to JPEG 90 Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.jpg";
+            string inputPath = "Input\\drawing.svg";
+            string outputPath = "Output\\drawing_resized.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,15 +33,23 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
+                SvgImage svgImage = (SvgImage)image;
+                int originalWidth = svgImage.Width;
+                int originalHeight = svgImage.Height;
+
                 int targetWidth = 800;
-                double aspectRatio = (double)image.Height / image.Width;
-                int targetHeight = (int)(targetWidth * aspectRatio);
+                int targetHeight = (int)Math.Round((double)originalHeight * targetWidth / originalWidth);
 
-                image.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
-
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 90
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = targetWidth,
+                        PageHeight = targetHeight
+                    }
                 };
 
                 image.Save(outputPath, jpegOptions);
@@ -47,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnails for SVG logos to display on a website, you need to resize the vector and save it as a high‑quality JPEG.
- * 2. When converting user‑uploaded SVG diagrams into JPEGs for email attachments, maintaining the original aspect ratio prevents distortion.
- * 3. When preparing print‑ready images from scalable graphics, resizing to a specific width and exporting with 90 % JPEG quality ensures sharpness while keeping file size reasonable.
- * 4. When building a batch‑processing tool that standardizes image dimensions for a mobile app, you can load each SVG, resize proportionally, and save as JPEG.
- * 5. When integrating vector assets into a legacy system that only supports JPEG, you must preserve the aspect ratio and control compression quality during conversion.
+ * 1. When you need to generate thumbnail previews of SVG logos for a web gallery without distorting their proportions.
+ * 2. When an e‑commerce platform must convert scalable product illustrations to JPEGs for email newsletters while keeping visual fidelity.
+ * 3. When a reporting tool has to embed vector diagrams into PDF reports that only accept raster images, requiring a fixed width and high‑quality JPEG output.
+ * 4. When a mobile app downloads SVG assets and must resize them on the server to a specific pixel width before sending them to devices with limited bandwidth.
+ * 5. When a content management system automates batch processing of SVG icons, resizing each to a uniform size and storing them as JPEGs with 90 % quality for faster rendering.
  */
