@@ -1,8 +1,14 @@
-// HOW-TO: Create SVG Diagram with Lines and Filled Rectangle in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Vector Diagram with Shapes and Connectors and Save as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -11,24 +17,23 @@ class Program
     {
         try
         {
-            string outputPath = "output/diagram.svg";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "diagram.svg";
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(new SvgOptions(), 400, 300))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            SvgOptions svgOptions = new SvgOptions();
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(svgOptions, 800, 600))
             {
-                var graphics = new Aspose.Imaging.Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(350, 50));
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(350, 50), new Aspose.Imaging.Point(350, 250));
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(350, 250), new Aspose.Imaging.Point(50, 250));
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(50, 250), new Aspose.Imaging.Point(50, 50));
+                Aspose.Imaging.Pen blackPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
 
-                using (var brush = new SolidBrush(Aspose.Imaging.Color.LightBlue))
-                {
-                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(100, 100, 200, 100));
-                }
+                graphics.DrawRectangle(blackPen, new Aspose.Imaging.Rectangle(100, 100, 200, 150));
+                graphics.DrawEllipse(blackPen, new Aspose.Imaging.Rectangle(100, 100, 200, 150));
+                graphics.DrawLine(blackPen, new Aspose.Imaging.Point(300, 175), new Aspose.Imaging.Point(500, 300));
+                graphics.DrawRectangle(blackPen, new Aspose.Imaging.Rectangle(500, 250, 150, 100));
 
                 image.Save(outputPath);
             }
@@ -42,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a scalable vector diagram on the fly for a web dashboard using C#.
- * 2. When you want to programmatically draw connector lines and shapes for flowcharts or network maps without using external design tools.
- * 3. When you must create an SVG file that can be embedded in HTML emails or web pages with precise dimensions and colors.
- * 4. When you require automated generation of printable schematics or UI mockups directly from server‑side code.
- * 5. When you need to produce lightweight vector graphics for responsive designs, ensuring they scale without loss of quality across devices.
+ * 1. When you need to generate a scalable flow‑chart or network diagram on the fly in a web application and embed it as an SVG without using external design tools.
+ * 2. When an automated reporting system must create vector‑based illustrations such as rectangles, ellipses, and connector lines for PDF or HTML reports using C#.
+ * 3. When a SaaS platform wants to provide users with downloadable SVG schematics of custom layouts created programmatically with Aspose.Imaging.
+ * 4. When you are building a diagramming component that requires high‑quality, resolution‑independent graphics for responsive web pages.
+ * 5. When you need to batch‑process multiple diagram files, drawing shapes and lines dynamically and saving each as an SVG for later editing in vector editors.
  */
