@@ -1,13 +1,19 @@
-// HOW-TO: Batch Sharpen PNG Images with 5x5 Filter Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Sharpen PNG Images With 5x5 Filter In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
@@ -29,22 +35,23 @@ public class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string filePath in files)
+            foreach (string inputPath in files)
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                using (RasterImage raster = (RasterImage)Image.Load(filePath))
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Sharpen5x5));
-
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileName(filePath));
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                    var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen5x5;
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, filterOptions);
                     PngOptions options = new PngOptions
                     {
                         Source = new FileCreateSource(outputPath, false)
@@ -62,9 +69,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the sharpness of a large set of PNG photos automatically before publishing them on a website.
- * 2. When you want to apply a 5x5 sharpening convolution to every PNG in a folder while keeping the original filenames for downstream processing.
- * 3. When you are building a preprocessing pipeline that improves the detail of scanned PNG graphics before they are archived.
- * 4. When you must batch‑process product‑catalog PNG assets to make edges clearer without manually editing each file.
- * 5. When you need to integrate a C# routine that reads PNG files, sharpens them, and saves the results to a separate output directory for further analysis.
+ * 1. When you need to automatically enhance the sharpness of a large set of product photos stored as PNGs before uploading them to an e‑commerce site.
+ * 2. When a desktop application must process user‑provided PNG screenshots and apply a 5x5 sharpening filter to improve visual clarity without changing file names.
+ * 3. When a batch job has to prepare PNG assets for print by applying a convolution sharpen filter while preserving the original naming scheme for downstream workflows.
+ * 4. When you want to integrate Aspose.Imaging into a C# service that periodically sharpens PNG icons in a resource folder to keep UI elements crisp.
+ * 5. When a migration script must improve the detail of archived PNG diagrams by applying a 5x5 sharpen filter across an entire directory in one run.
  */
