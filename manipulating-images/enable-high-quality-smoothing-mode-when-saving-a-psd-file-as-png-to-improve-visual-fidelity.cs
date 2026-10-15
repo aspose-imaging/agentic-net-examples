@@ -1,19 +1,26 @@
 // HOW-TO: Save PSD as PNG with High Quality Smoothing in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.psd";
-            string outputPath = "output.png";
+            string outputPath = "output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,20 +28,15 @@ class Program
                 return;
             }
 
-            var outputDir = Path.GetDirectoryName(outputPath);
-            if (outputDir != null)
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        SmoothingMode = SmoothingMode.HighQuality,
-                        TextRenderingHint = TextRenderingHint.AntiAliasGridFit
+                        SmoothingMode = SmoothingMode.HighQuality
                     }
                 };
 
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a Photoshop PSD file to a PNG for web display while preserving smooth edges and text clarity.
- * 2. When generating thumbnails from layered PSD artwork and want high-quality anti-aliasing rendering in C#.
- * 3. When exporting design assets from PSD to PNG for print-ready PDFs and require vector rasterization with high smoothing.
- * 4. When building an automated pipeline that processes PSD files and saves them as PNGs with consistent visual fidelity across different devices.
- * 5. When creating a desktop application that loads PSD files and saves them as PNGs with high-quality smoothing to improve the appearance of UI icons.
+ * 1. When converting layered Photoshop files to PNG for web display and you need smoother edges and anti‑aliased graphics.
+ * 2. When generating thumbnails from PSD assets for a gallery and want high‑quality rasterization to preserve visual fidelity.
+ * 3. When exporting PSD designs to PNG for printing proofs and require precise smoothing to avoid jagged lines.
+ * 4. When automating batch conversion of PSD files to PNG in a C# application and need consistent high‑quality output across all images.
+ * 5. When integrating Aspose.Imaging into a workflow that transforms PSD logos into PNG icons and you want the best possible smoothing mode.
  */
