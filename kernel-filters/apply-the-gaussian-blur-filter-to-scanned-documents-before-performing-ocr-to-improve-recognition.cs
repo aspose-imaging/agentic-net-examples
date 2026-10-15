@@ -1,14 +1,22 @@
-// HOW-TO: Apply Gaussian Blur to Scanned JPEG Before OCR in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to JPEG Image in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\scanned.jpg";
-        string outputPath = "output\\blurred.jpg";
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
         try
         {
@@ -18,20 +26,14 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                    return;
-                }
-
                 var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                raster.Filter(raster.Bounds, blurOptions);
-                raster.Save(outputPath);
+                image.Filter(image.Bounds, blurOptions);
+                var saveOptions = new JpegOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in scanned JPEG receipts before feeding them to an OCR engine, you can use this code to apply a Gaussian blur filter with Aspose.Imaging in C#.
- * 2. When processing batches of scanned TIFF or PNG forms, applying a Gaussian blur smooths uneven lighting and improves text recognition accuracy.
- * 3. When preparing historical handwritten documents for digitization, a Gaussian blur helps soften paper grain, making OCR results more reliable.
- * 4. When building a document‑processing pipeline that extracts data from photographed invoices, this code pre‑processes the images to enhance OCR performance.
- * 5. When developing a mobile app that captures and uploads scanned images for text extraction, you can blur the images server‑side to improve OCR consistency.
+ * 1. When you need to reduce noise in scanned JPEG documents before running OCR in a C# application.
+ * 2. When you want to preprocess photographed receipts to improve text extraction accuracy using a Gaussian blur filter.
+ * 3. When you are building a batch image pipeline that automatically blurs low‑resolution scans to smooth edges before converting them to JPEG.
+ * 4. When you must enhance readability of handwritten notes captured as images by applying a mild blur prior to machine‑learning analysis.
+ * 5. When you are integrating Aspose.Imaging into a .NET service that prepares images for downstream document‑processing workflows.
  */
