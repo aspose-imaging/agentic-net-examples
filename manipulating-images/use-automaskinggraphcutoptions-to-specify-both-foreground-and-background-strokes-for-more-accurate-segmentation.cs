@@ -1,14 +1,24 @@
-// HOW-TO: Segment Complex Image with Graph Cut Using AutoMasking in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply GraphCut AutoMasking with Custom Strokes for Precise Image Segmentation in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -23,43 +33,43 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            string tempExportPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempExportPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                var maskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = false,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                    Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
+                    FeatheringRadius = 3,
+                    Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
+                        Source = new FileCreateSource(tempExportPath, false)
                     },
-                    BackgroundReplacementColor = Aspose.Imaging.Color.Transparent,
-                    Args = new Aspose.Imaging.Masking.Options.AutoMaskingArgs
+                    BackgroundReplacementColor = Color.Transparent,
+                    Args = new AutoMaskingArgs
                     {
-                        ObjectsPoints = new Aspose.Imaging.Point[][]
+                        ObjectsPoints = new Point[][]
                         {
-                            new Aspose.Imaging.Point[]
-                            {
-                                new Aspose.Imaging.Point(50, 50),
-                                new Aspose.Imaging.Point(60, 60),
-                                new Aspose.Imaging.Point(70, 70)
-                            }
+                            new Point[] { new Point(100, 100), new Point(150, 100), new Point(150, 150), new Point(100, 150) }
                         }
                     }
                 };
 
-                using (Aspose.Imaging.Masking.Result.MaskingResult results = new Aspose.Imaging.Masking.ImageMasking(image).Decompose(maskingOptions))
+                ImageMasking masking = new ImageMasking(sourceImage);
+                using (MaskingResult results = masking.Decompose(maskingOptions))
                 using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    foreground.Save(outputPath, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(outputPath, false)
-                    });
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
+            }
+
+            if (File.Exists(tempExportPath))
+            {
+                File.Delete(tempExportPath);
             }
         }
         catch (Exception ex)
@@ -71,9 +81,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a foreground object from a photo with irregular edges and save it as a transparent PNG in a .NET application.
- * 2. When you want to improve segmentation accuracy on a cluttered scene by providing custom foreground strokes to the graph‑cut algorithm.
- * 3. When you are building an image‑editing tool that replaces the background of JPEG images with transparency without manual masking.
- * 4. When you need to programmatically generate masks for product photos to isolate items for e‑commerce catalogs.
- * 5. When you are automating batch processing of complex images where default stroke detection is insufficient and you must define explicit points for object segmentation.
+ * 1. When you need to extract a specific object from a complex photograph by defining foreground points and generate a transparent PNG.
+ * 2. When you want to replace the background of a product image with transparency for e‑commerce catalogs using C#.
+ * 3. When you must create a mask for a photo‑editing workflow that requires precise edge feathering and custom stroke input.
+ * 4. When you are building an automated pipeline that separates foreground subjects from cluttered scenes for machine‑learning training data.
+ * 5. When you need to export a segmented image with an alpha channel to PNG while preserving original colors and applying graph‑cut segmentation.
  */
