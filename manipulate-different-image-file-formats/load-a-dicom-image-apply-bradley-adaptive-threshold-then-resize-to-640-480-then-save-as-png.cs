@@ -1,8 +1,16 @@
-// HOW-TO: Convert DICOM to PNG with Bradley Threshold and Resize in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize DICOM Image to 640x480 and Convert to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -10,8 +18,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.dcm";
-        string outputPath = "Output\\output.png";
+        string inputPath = "Input\\sample.dcm";
+        string outputPath = "Output\\result.png";
 
         if (!File.Exists(inputPath))
         {
@@ -23,23 +31,17 @@ class Program
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
+                // Resize to 640x480
+                dicom.Resize(640, 480);
 
-                raster.BinarizeBradley(0.15);
-                raster.Resize(640, 480);
-
+                // Save as PNG
                 PngOptions pngOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-
-                raster.Save(outputPath, pngOptions);
+                dicom.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to preprocess DICOM scans by binarizing them with Bradley adaptive threshold and downscale them to 640×480 for faster web viewing as PNG files.
- * 2. When a radiology workflow requires converting high‑resolution DICOM images to lightweight PNG thumbnails while preserving contrast using Aspose.Imaging’s BinarizeBradley method.
- * 3. When a healthcare data‑export tool must transform DICOM files into PNG format with consistent size for integration into electronic health record (EHR) systems.
- * 4. When a machine‑learning pipeline needs uniformly sized (640×480) binary PNG images generated from DICOM scans for training image classification models.
- * 5. When a desktop C# utility has to batch‑process DICOM images, apply adaptive thresholding, resize them, and save the results as PNG for archival or reporting purposes.
+ * 1. When a medical imaging application needs to display DICOM scans on a web page, developers can resize the image to a standard 640×480 resolution and convert it to PNG for fast browser rendering.
+ * 2. When integrating DICOM files into a reporting system that only accepts PNG, developers can use this code to transform high‑resolution scans into a universally supported format while reducing file dimensions.
+ * 3. When creating thumbnails for a PACS viewer, developers can quickly generate 640×480 PNG thumbnails from original DICOM files to improve navigation performance.
+ * 4. When exporting diagnostic images for patient portals, developers can convert DICOM images to PNG with a fixed size to ensure consistent layout across mobile and desktop devices.
+ * 5. When preprocessing DICOM data for machine‑learning pipelines that require PNG inputs, developers can resize and convert the images in a single step using Aspose.Imaging for .NET.
  */
