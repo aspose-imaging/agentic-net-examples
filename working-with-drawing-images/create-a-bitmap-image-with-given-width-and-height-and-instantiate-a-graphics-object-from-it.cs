@@ -1,8 +1,16 @@
 // HOW-TO: Create a Yellow BMP Image of Specific Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,16 +21,17 @@ class Program
         {
             string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             int width = 200;
-            int height = 200;
+            int height = 100;
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(options, width, height))
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Yellow);
+                graphics.Clear(Aspose.Imaging.Color.Yellow);
                 image.Save();
             }
         }
@@ -35,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a solid‑color BMP placeholder image of a custom width and height for a reporting or UI mockup.
- * 2. When an automated process must create a bitmap file on the fly to serve as a background for dynamically rendered charts.
- * 3. When a server‑side application has to produce a simple colored image for email attachments without using external image editors.
- * 4. When you want to programmatically create a thumbnail canvas in BMP format before drawing additional graphics or text.
- * 5. When testing image‑processing pipelines that require a known‑size, single‑color bitmap as input data.
+ * 1. When you need to generate a solid‑color BMP file of exact dimensions for a report thumbnail or placeholder image in a .NET application.
+ * 2. When a server‑side service must create a custom‑sized bitmap to embed in a PDF or Word document without using external image editors.
+ * 3. When an automated testing framework requires a known‑size image with a specific background color to validate image‑processing algorithms.
+ * 4. When you want to programmatically produce a background canvas for drawing additional graphics, such as charts or watermarks, using Aspose.Imaging.
+ * 5. When a desktop utility must create a temporary BMP file to feed into legacy software that only accepts bitmap input.
  */
