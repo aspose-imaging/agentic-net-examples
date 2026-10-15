@@ -1,20 +1,28 @@
 // HOW-TO: Deskew CorelDRAW CDR and Save as TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.cdr";
+        string outputPath = "output.tiff";
+
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.tiff";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,7 +35,7 @@ class Program
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var rasterOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = new CdrRasterizationOptions
                         {
@@ -35,14 +43,13 @@ class Program
                             PageHeight = cdr.Height
                         }
                     };
-                    cdr.Save(ms, rasterOptions);
+                    cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        raster.NormalizeAngle(false, Color.LightGray);
-                        var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        raster.Save(outputPath, saveOptions);
+                        raster.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
+                        raster.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
                     }
                 }
             }
@@ -56,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow receives scanned CorelDRAW (CDR) files that are slightly rotated, a developer can deskew them and convert to TIFF for reliable high‑resolution printing.
- * 2. When archiving design assets, you may need to normalize the orientation of CDR pages and store them as lossless TIFF images for long‑term preservation.
- * 3. When integrating CorelDRAW drawings into a document management system that only supports TIFF, this code automatically corrects skew and performs the format conversion in C#.
- * 4. When preparing CDR artwork for OCR or image analysis, deskewing the vector file and exporting it as a raster TIFF improves recognition accuracy.
- * 5. When building a batch‑processing tool that standardizes page size and orientation of multiple CDR files before sending them to a downstream imaging pipeline, this snippet handles the rasterization, deskew, and TIFF output.
+ * 1. When you need to automatically correct the rotation of scanned CorelDRAW CDR pages before archiving them as high‑quality TIFF files in a .NET application.
+ * 2. When a document‑management system must convert vector CDR drawings to raster TIFF images while removing skew for consistent printing.
+ * 3. When batch processing of CDR artwork requires deskewing and saving to TIFF for compatibility with legacy imaging workflows.
+ * 4. When integrating Aspose.Imaging into a C# service that prepares CDR files for OCR by normalizing their angle and exporting them as TIFF.
+ * 5. When generating searchable TIFF archives from misaligned CorelDRAW files in an automated pipeline using C# and Aspose.Imaging.
  */
