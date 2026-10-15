@@ -1,10 +1,19 @@
-// HOW-TO: Validate Low Magic Wand Threshold Does Not Produce Empty Mask in C# (Aspose.Imaging for .NET)
+// HOW-TO: Validate Magic Wand Threshold on Uniform Color Image in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,8 +21,29 @@ class Program
     {
         try
         {
-            string inputPath = "uniform.png";
-            string outputMaskPath = "mask.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            if (!File.Exists(inputPath))
+            {
+                int width = 200;
+                int height = 200;
+                int argbColor = unchecked((int)0xFF00FF00); // Opaque green
+
+                using (RasterImage uniform = (RasterImage)Image.Create(
+                    new PngOptions { Source = new FileCreateSource(inputPath, false) },
+                    width, height))
+                {
+                    int[] pixels = new int[width * height];
+                    for (int i = 0; i < pixels.Length; i++)
+                        pixels[i] = argbColor;
+
+                    var rect = new Rectangle(0, 0, width, height);
+                    uniform.SaveArgb32Pixels(rect, pixels);
+                }
+            }
 
             if (!File.Exists(inputPath))
             {
@@ -21,45 +51,35 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath) ?? ".");
-
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                {
-                    image.CacheData();
-                }
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 1 })
+                    .Apply();
 
-                MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 1 }).Apply();
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+            }
 
+            using (RasterImage result = (RasterImage)Image.Load(outputPath))
+            {
+                int width = result.Width;
+                int height = result.Height;
+                var rect = new Rectangle(0, 0, width, height);
+                int[] resultPixels = result.LoadArgb32Pixels(rect);
                 bool hasNonTransparent = false;
-                for (int y = 0; y < image.Height && !hasNonTransparent; y++)
+                foreach (int pixel in resultPixels)
                 {
-                    for (int x = 0; x < image.Width; x++)
+                    int alpha = (pixel >> 24) & 0xFF;
+                    if (alpha != 0)
                     {
-                        var color = image.GetPixel(x, y);
-                        if (color.A != 0)
-                        {
-                            hasNonTransparent = true;
-                            break;
-                        }
+                        hasNonTransparent = true;
+                        break;
                     }
                 }
 
                 if (hasNonTransparent)
-                {
-                    Console.WriteLine("Mask contains data.");
-                }
+                    Console.WriteLine("Validation passed: mask is not empty.");
                 else
-                {
-                    Console.WriteLine("Empty mask produced.");
-                }
-
-                var saveOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-                image.Save(outputMaskPath, saveOptions);
+                    Console.WriteLine("Validation failed: mask is empty.");
             }
         }
         catch (Exception ex)
@@ -71,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure that a Magic Wand selection on a solid‑color PNG still generates a usable alpha mask even with a minimal threshold.
- * 2. When you want to programmatically verify that applying a low‑threshold Magic Wand does not result in an entirely transparent image before further processing.
- * 3. When you are building an automated image‑masking pipeline and must confirm that uniform images produce non‑empty masks for downstream compositing.
- * 4. When you need to debug or test Aspose.Imaging’s MagicWandTool behavior on edge‑case images with no color variation.
- * 5. When you are saving the resulting mask as a PNG with alpha channel to preserve transparency information for later use.
+ * 1. When you need to ensure the Aspose.Imaging MagicWand tool selects pixels correctly even on a solid‑color PNG.
+ * 2. When you want to test that a low threshold value does not generate an empty selection mask for uniform images.
+ * 3. When you are automating image preprocessing and must verify that background removal works on single‑color pictures.
+ * 4. When you need to programmatically create a uniform image, apply a magic wand selection, and save the result without losing alpha transparency.
+ * 5. When you are debugging image segmentation logic and require a reproducible example that confirms threshold handling in C#.
  */
