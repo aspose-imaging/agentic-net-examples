@@ -1,21 +1,25 @@
-// HOW-TO: Shift a GraphicsPath and Draw Rectangle on PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Shift And Draw A Rectangle On An Image Using TranslateTransform In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input/input.jpg";
+        string outputPath = "output/output.jpg";
+
         try
         {
-            string inputPath = "input/input.png";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,38 +28,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int width = inputImage.Width;
-                int height = inputImage.Height;
+                GraphicsPath path = new GraphicsPath();
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
+                Figure figure = new Figure();
+                RectangleF rect = new RectangleF(0, 0, 100, 100);
+                RectangleShape rectShape = new RectangleShape(rect);
+                figure.AddShape(rectShape);
+                path.AddFigure(figure);
 
-                using (Image outputImage = Image.Create(pngOptions, width, height))
-                {
-                    RasterImage outputRaster = (RasterImage)outputImage;
+                Graphics graphics = new Graphics(image);
+                graphics.TranslateTransform(50, 30);
 
-                    int[] pixels = inputImage.LoadArgb32Pixels(new Rectangle(0, 0, inputImage.Width, inputImage.Height));
-                    outputRaster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+                Pen pen = new Pen(Color.Blue, 3);
+                graphics.DrawPath(pen, path);
 
-                    Graphics graphics = new Graphics(outputImage);
-
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    RectangleShape rectShape = new RectangleShape(new RectangleF(0, 0, 100, 50));
-                    figure.AddShape(rectShape);
-                    path.AddFigure(figure);
-
-                    int offsetX = 50;
-                    int offsetY = 30;
-                    graphics.TranslateTransform(offsetX, offsetY);
-
-                    Pen pen = new Pen(Color.Blue, 3);
-                    graphics.DrawPath(pen, path);
-
-                    outputImage.Save();
-                }
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -67,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay a blue rectangle at a precise X/Y offset on an existing PNG image for watermarking or highlighting using Aspose.Imaging in C#.
- * 2. When you want to reposition vector shapes before rendering them onto a raster canvas to create dynamic layouts or UI elements in a PNG file.
- * 3. When you must copy the pixel data of a source PNG and then draw a translated shape on top without changing the original image size or resolution.
- * 4. When you are generating thumbnails that include a shifted annotation or border drawn with a custom pen and saved as PNG.
- * 5. When you require programmatic control of shape placement in automated report graphics, such as adding offset rectangles to charts exported as PNG files.
+ * 1. When you need to add a blue rectangle annotation offset by specific X and Y coordinates to a JPEG photo for visual emphasis.
+ * 2. When you want to programmatically shift a GraphicsPath before rendering to align custom shapes with existing content in an image.
+ * 3. When creating a simple overlay such as a border or highlight on an image and need to control its position using TranslateTransform.
+ * 4. When generating dynamic reports that require drawing shapes at precise locations on scanned documents loaded with Aspose.Imaging.
+ * 5. When building a C# application that adds watermarks or markers to images and must adjust their placement without modifying the original shape definitions.
  */
