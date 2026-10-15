@@ -1,19 +1,16 @@
-// HOW-TO: Combine Multiple TIFF Files Preserving Original Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple TIFF Files While Keeping Original Compression in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -21,12 +18,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath1 = "input1.tif";
             string inputPath2 = "input2.tif";
-            string outputPath = "output.tif";
+            string outputPath = "output\\merged.tif";
 
-            // Validate input files
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -38,51 +33,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (TiffImage dest = (TiffImage)Image.Load(inputPath1))
             {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // List of input TIFF files
-            List<string> inputFiles = new List<string> { inputPath1, inputPath2 };
-
-            TiffImage destinationImage = null;
-
-            foreach (string inputFile in inputFiles)
-            {
-                using (TiffImage sourceImage = (TiffImage)Image.Load(inputFile))
+                using (TiffImage src = (TiffImage)Image.Load(inputPath2))
                 {
-                    // Initialize destination image on first iteration
-                    if (destinationImage == null)
+                    foreach (TiffFrame frame in src.Frames)
                     {
-                        // Use dimensions of the first frame of the first source image
-                        TiffFrame firstFrame = sourceImage.Frames[0];
-                        int width = firstFrame.Width;
-                        int height = firstFrame.Height;
-
-                        Source fileSource = new FileCreateSource(outputPath, false);
-                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = fileSource };
-
-                        destinationImage = (TiffImage)Image.Create(tiffOptions, width, height);
-                        // Remove the initially created empty frame
-                        destinationImage.RemoveFrame(0);
-                    }
-
-                    // Copy all frames from source to destination, preserving compression
-                    foreach (TiffFrame frame in sourceImage.Frames)
-                    {
-                        destinationImage.AddFrame(TiffFrame.CopyFrame(frame));
+                        dest.AddFrame(TiffFrame.CopyFrame(frame));
                     }
                 }
-            }
 
-            // Save the concatenated TIFF
-            if (destinationImage != null)
-            {
-                destinationImage.Save();
-                destinationImage.Dispose();
+                dest.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -94,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive scanned documents from different sources into a single multi‑page TIFF while keeping each page’s original LZW or CCITT compression.
- * 2. When a medical imaging system must merge patient X‑ray TIFF files into one file without re‑encoding to maintain diagnostic quality.
- * 3. When a legal firm wants to concatenate case‑related TIFF evidence files into a single archive while preserving the original compression for court admissibility.
- * 4. When a batch processing tool combines satellite imagery TIFF tiles into a composite file without losing the original compression to reduce storage size.
- * 5. When a digital preservation workflow consolidates historic TIFF photographs into one archive file while ensuring each frame’s compression remains unchanged.
+ * 1. When you need to combine scanned documents stored as separate multi‑page TIFF files into a single archival TIFF without re‑encoding the original LZW or CCITT compression.
+ * 2. When a medical imaging system must merge patient X‑ray TIFF series while preserving the lossless compression for regulatory compliance.
+ * 3. When a GIS application has multiple tiled TIFF raster layers that must be concatenated into one file while keeping each layer’s original compression intact.
+ * 4. When a digital preservation workflow requires appending newly scanned TIFF pages to an existing archive without degrading image quality.
+ * 5. When a batch process creates a combined TIFF report from several source TIFFs and you want to retain each frame’s original compression to minimize file size.
  */
