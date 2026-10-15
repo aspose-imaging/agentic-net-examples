@@ -1,9 +1,16 @@
-// HOW-TO: Convert ODG to BMP and Binarize Image with Threshold in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to BMP and Apply Threshold Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,9 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample_binary.bmp";
-            string tempPath = "Output\\temp.bmp";
+            string inputPath = "input.odg";
+            string outputPath = "output\\output.bmp";
 
             if (!File.Exists(inputPath))
             {
@@ -22,31 +28,50 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                BmpOptions bmpOptions = new BmpOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    vectorImage.Save(ms, new BmpOptions());
+                    ms.Position = 0;
+
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = vectorImage.Width,
-                        PageHeight = vectorImage.Height
-                    }
-                };
-                vectorImage.Save(tempPath, bmpOptions);
-            }
+                        int width = raster.Width;
+                        int height = raster.Height;
+                        int[] pixels = new int[width * height];
 
-            using (Image bmpImage = Image.Load(tempPath))
-            {
-                RasterCachedImage raster = (RasterCachedImage)bmpImage;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
+                        raster.SaveArgb32Pixels(raster.Bounds, pixels);
+
+                        const int threshold = 128;
+                        for (int i = 0; i < pixels.Length; i++)
+                        {
+                            int a = (pixels[i] >> 24) & 0xFF;
+                            int r = (pixels[i] >> 16) & 0xFF;
+                            int g = (pixels[i] >> 8) & 0xFF;
+                            int b = pixels[i] & 0xFF;
+                            int intensity = (r + g + b) / 3;
+                            int bw = intensity >= threshold ? 255 : 0;
+                            pixels[i] = (a << 24) | (bw << 16) | (bw << 8) | bw;
+                        }
+
+                        for (int i = 0; i < pixels.Length; i++)
+                        {
+                            int x = i % width;
+                            int y = i / width;
+                            int argb = pixels[i];
+                            Aspose.Imaging.Color color = Aspose.Imaging.Color.FromArgb(
+                                (argb >> 24) & 0xFF,
+                                (argb >> 16) & 0xFF,
+                                (argb >> 8) & 0xFF,
+                                argb & 0xFF);
+                            raster.SetPixel(x, y, color);
+                        }
+
+                        raster.Save(outputPath, new BmpOptions());
+                    }
                 }
-                raster.BinarizeFixed(128);
-                raster.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -58,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an ODG vector file to a BMP raster and then binarize it with a fixed threshold for OCR preprocessing using Aspose.Imaging for .NET.
- * 2. When a document‑processing workflow requires a high‑contrast binary BMP generated from ODG drawings to improve rendering speed on low‑color devices.
- * 3. When a machine‑vision application only accepts black‑and‑white bitmaps, you can rasterize the ODG and apply a 128‑level threshold to produce the required binary image.
- * 4. When preparing artwork for laser engraving, you may rasterize the ODG to BMP and use a threshold filter to create a printable black‑and‑white bitmap.
- * 5. When building a batch conversion utility that archives ODG diagrams as binary BMP files for space‑efficient storage, this code automates the rasterization and binarization steps.
+ * 1. When you need to render an OpenDocument Graphics (ODG) diagram as a black‑and‑white BMP for legacy Windows applications that only accept bitmap input.
+ * 2. When preparing vector drawings for OCR, converting ODG to BMP and applying a threshold creates a high‑contrast binary image that improves text recognition accuracy.
+ * 3. When generating printable line art from ODG files, converting to BMP and binarizing ensures consistent ink coverage on monochrome printers.
+ * 4. When building a document‑conversion pipeline that extracts vector graphics from ODG and stores them as compact BMP files with a simple binary mask for storage or transmission.
+ * 5. When creating thumbnails for a web gallery that require fast loading, converting ODG to a small BMP and applying a threshold reduces file size and simplifies client‑side rendering.
  */
