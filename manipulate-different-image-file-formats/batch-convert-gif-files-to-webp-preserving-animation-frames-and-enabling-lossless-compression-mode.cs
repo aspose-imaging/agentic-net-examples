@@ -3,13 +3,15 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
@@ -34,9 +36,9 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory, "*.gif");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -44,21 +46,31 @@ class Program
                     continue;
                 }
 
-                if (!inputPath.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileName + ".webp");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image gifImage = Image.Load(inputPath))
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrWhiteSpace(outputDir))
                 {
-                    WebPOptions options = new WebPOptions
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                using (GifImage gif = (GifImage)Image.Load(inputPath))
+                {
+                    if (gif.PageCount == 0)
                     {
-                        Lossless = true
-                    };
-                    gifImage.Save(outputPath, options);
+                        Console.Error.WriteLine($"No frames found in GIF: {inputPath}");
+                        continue;
+                    }
+
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+                    using (RasterImage frame = (RasterImage)gif.ActiveFrame)
+                    {
+                        WebPOptions options = new WebPOptions
+                        {
+                            Lossless = true
+                        };
+                        frame.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -71,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the size of animated GIF assets for a web app while keeping the animation intact and using lossless WebP compression.
- * 2. When you want to automate the conversion of a folder of GIF stickers into WebP format for faster loading on mobile devices.
- * 3. When you are preparing a batch of product demo animations for an e‑commerce site and require lossless quality to avoid visual artifacts.
- * 4. When you need to integrate GIF‑to‑WebP conversion into a CI/CD pipeline to ensure all uploaded animations meet a standardized format.
- * 5. When you are migrating legacy GIF banners to a modern image format and must preserve each frame’s timing without sacrificing image fidelity.
+ * 1. When you need to reduce website load time by converting animated GIF banners into smaller lossless WebP files using C#.
+ * 2. When you want to process a folder of user‑uploaded GIF stickers and store them as WebP to preserve animation while saving storage space.
+ * 3. When an e‑commerce platform requires batch conversion of product GIF demos to WebP for better compatibility with modern browsers.
+ * 4. When a mobile app backend must automatically transform GIF assets into lossless WebP to improve rendering performance on Android and iOS.
+ * 5. When a digital marketing tool needs to generate WebP versions of animated GIF ads while keeping all frames intact for analytics tracking.
  */
