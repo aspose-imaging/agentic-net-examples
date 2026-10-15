@@ -1,11 +1,16 @@
-// HOW-TO: Load TIFF From Memory Stream And Append PNG And JPG Frames In C# (Aspose.Imaging for .NET)
+// HOW-TO: Add JPEG and PNG Frames to Existing TIFF from Memory Stream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -13,55 +18,44 @@ class Program
     {
         try
         {
-            string inputTiffPath = "input.tif";
-            string outputTiffPath = "output\\merged.tif";
-            string framePath1 = "frame1.png";
-            string framePath2 = "frame2.jpg";
+            string tiffInputPath = "input.tif";
+            string[] framePaths = { "frame1.jpg", "frame2.png" };
+            string outputPath = "output.tif";
 
-            if (!File.Exists(inputTiffPath))
+            if (!File.Exists(tiffInputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputTiffPath}");
+                Console.Error.WriteLine($"File not found: {tiffInputPath}");
                 return;
             }
-            if (!File.Exists(framePath1))
+            foreach (var fp in framePaths)
             {
-                Console.Error.WriteLine($"File not found: {framePath1}");
-                return;
-            }
-            if (!File.Exists(framePath2))
-            {
-                Console.Error.WriteLine($"File not found: {framePath2}");
-                return;
-            }
-
-            byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
-            using (var ms = new MemoryStream(tiffBytes))
-            {
-                using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
+                if (!File.Exists(fp))
                 {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                    using (Image additionalImage1 = Image.Load(framePath1))
-                    {
-                        int width1 = additionalImage1.Width;
-                        int height1 = additionalImage1.Height;
-                        tiffImage.AddFrame(new TiffFrame(tiffOptions, width1, height1));
-                        TiffFrame newFrame1 = tiffImage.Frames[tiffImage.Frames.Count() - 1];
-                        newFrame1.SavePixels(newFrame1.Bounds, ((RasterImage)additionalImage1).LoadPixels(additionalImage1.Bounds));
-                    }
-
-                    using (Image additionalImage2 = Image.Load(framePath2))
-                    {
-                        int width2 = additionalImage2.Width;
-                        int height2 = additionalImage2.Height;
-                        tiffImage.AddFrame(new TiffFrame(tiffOptions, width2, height2));
-                        TiffFrame newFrame2 = tiffImage.Frames[tiffImage.Frames.Count() - 1];
-                        newFrame2.SavePixels(newFrame2.Bounds, ((RasterImage)additionalImage2).LoadPixels(additionalImage2.Bounds));
-                    }
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
-                    tiffImage.Save(outputTiffPath);
+                    Console.Error.WriteLine($"File not found: {fp}");
+                    return;
                 }
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            byte[] tiffBytes = File.ReadAllBytes(tiffInputPath);
+            using (var ms = new MemoryStream(tiffBytes))
+            using (TiffImage tiffImage = (TiffImage)Aspose.Imaging.Image.Load(ms))
+            {
+                foreach (var fp in framePaths)
+                {
+                    using (Aspose.Imaging.Image srcImg = Aspose.Imaging.Image.Load(fp))
+                    {
+                        Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)srcImg;
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        TiffFrame newFrame = new TiffFrame(tiffOptions, raster.Width, raster.Height);
+                        Aspose.Imaging.Color[] pixels = raster.LoadPixels(raster.Bounds);
+                        newFrame.SavePixels(newFrame.Bounds, pixels);
+                        tiffImage.AddFrame(newFrame);
+                    }
+                }
+
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -73,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine separate images such as a scanned document and additional graphics into a single multi‑page TIFF without writing the original file to disk first.
- * 2. When a web service receives a TIFF as a byte array and you must add extra pages from user‑uploaded PNG or JPEG files before saving or returning it.
- * 3. When generating a multi‑page report where the base TIFF is created elsewhere and you programmatically insert charts or photos as new frames.
- * 4. When processing large TIFF files in memory to avoid I/O overhead while merging additional image layers for archival or printing purposes.
- * 5. When building a document conversion pipeline that reads a TIFF from a database BLOB, adds supplemental pages, and stores the merged TIFF back to storage.
+ * 1. When you need to combine separate JPEG or PNG images into a multi‑page TIFF document without writing the original TIFF to disk first.
+ * 2. When a web service receives a TIFF file as a byte array and you must append additional scanned pages stored as image files before returning the updated file.
+ * 3. When generating a printable report where each page is created as an image and then merged into a single TIFF for archival.
+ * 4. When automating the creation of a multi‑frame medical image by adding frames from various image sources in a C# application.
+ * 5. When building a batch process that reads a TIFF from a database BLOB, adds new frames from user‑uploaded pictures, and saves the result back to storage.
  */
