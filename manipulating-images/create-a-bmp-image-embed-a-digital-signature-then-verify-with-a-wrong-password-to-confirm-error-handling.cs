@@ -1,55 +1,64 @@
-// HOW-TO: Create BMP Image with Digital Signature and Verify Password in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image, Add Digital Signature, Verify with Wrong Password in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string outputPath = "signed_image.bmp";
+            // Hardcoded paths
+            string inputPath = "original.bmp";
+            string signedPath = "signed.bmp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(inputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(signedPath) ?? ".");
 
-            // Create a blank BMP image
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 200, 200))
+            // Create a simple BMP image
+            using (RasterImage bmp = (RasterImage)Image.Create(new BmpOptions { BitsPerPixel = 24 }, 256, 256))
             {
-                // Fill with white color
-                int[] whitePixels = Enumerable.Repeat(unchecked((int)0xFFFFFFFF), 200 * 200).ToArray();
-                canvas.SaveArgb32Pixels(new Rectangle(0, 0, 200, 200), whitePixels);
-
-                // Embed digital signature
-                string correctPassword = "Secret123";
-                canvas.EmbedDigitalSignature(correctPassword);
-
-                // Save the image (bound to file)
-                canvas.Save();
+                // Optionally fill with a solid color (default is black)
+                bmp.Save(inputPath);
             }
 
-            // Verify with correct password
-            if (!File.Exists(outputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (RasterImage signedImage = (RasterImage)Image.Load(outputPath))
+            // Embed digital signature with correct password
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                bool isSignedCorrect = signedImage.IsDigitalSigned("Secret123");
-                Console.WriteLine($"Verification with correct password: {isSignedCorrect}");
+                image.EmbedDigitalSignature("CorrectPassword");
+                image.Save(signedPath);
+            }
 
-                // Verify with wrong password
-                bool isSignedWrong = signedImage.IsDigitalSigned("WrongPass");
-                Console.WriteLine($"Verification with wrong password: {isSignedWrong}");
+            // Verify signed image exists
+            if (!File.Exists(signedPath))
+            {
+                Console.Error.WriteLine($"File not found: {signedPath}");
+                return;
+            }
+
+            // Attempt verification with wrong password
+            using (RasterImage signedImage = (RasterImage)Image.Load(signedPath))
+            {
+                bool isSigned = signedImage.IsDigitalSigned("WrongPassword");
+                Console.WriteLine($"Verification with wrong password: {(isSigned ? "Signed" : "Not signed")}");
             }
         }
         catch (Exception ex)
@@ -61,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blank BMP file and embed a digital signature to protect confidential graphics in a C# application.
- * 2. When you want to ensure that only users with the correct password can verify the authenticity of an image, such as in secure document workflows.
- * 3. When you are implementing compliance checks that require proof that an image has not been tampered with by validating the signature with both correct and incorrect passwords.
- * 4. When you are testing error handling in image security features by deliberately using a wrong password to confirm the verification fails.
- * 5. When you need to programmatically create and sign BMP images for automated reporting systems that store signed visual assets.
+ * 1. When you need to programmatically generate a BMP file and protect it with a password‑protected digital signature.
+ * 2. When you want to embed a digital signature into an image to guarantee its authenticity in a .NET application.
+ * 3. When you must confirm that signature verification fails with an incorrect password to handle security errors gracefully.
+ * 4. When you are building a workflow that creates, signs, and validates bitmap assets for compliance or audit purposes.
+ * 5. When you need to demonstrate error handling for digital signature verification in image‑processing tutorials or unit tests.
  */
