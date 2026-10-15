@@ -1,8 +1,14 @@
-// HOW-TO: Flip PNG Vertically Using MemoryStream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Flip a PNG Vertically Using MemoryStream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -19,26 +25,23 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (var fileStream = File.OpenRead(inputPath))
-            using (var memoryStream = new MemoryStream())
+            byte[] inputBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream())
             {
-                fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0;
+                ms.Write(inputBytes, 0, inputBytes.Length);
+                ms.Position = 0;
 
-                using (Image image = Image.Load(memoryStream))
+                using (Image image = Image.Load(ms))
                 {
                     image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                    memoryStream.SetLength(0);
-                    image.Save(memoryStream, new PngOptions());
+                    ms.SetLength(0);
+                    ms.Position = 0;
+                    image.Save(ms);
                 }
 
-                memoryStream.Position = 0;
-                using (var outFile = File.Create(outputPath))
-                {
-                    memoryStream.CopyTo(outFile);
-                }
+                File.WriteAllBytes(outputPath, ms.ToArray());
             }
         }
         catch (Exception ex)
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to vertically mirror a PNG image stored in memory before saving it to disk in a C# application.
- * 2. When processing uploaded PNG files in a web service and you must flip them without creating temporary files.
- * 3. When generating thumbnails that require a top‑to‑bottom inversion of PNG graphics in a background job.
- * 4. When converting images received from a camera sensor that provides upside‑down PNG data and you need to correct orientation in .NET.
- * 5. When implementing an image editor that applies a vertical flip to a PNG loaded from a stream and returns the modified stream to the caller.
+ * 1. When you need to mirror a PNG image for a UI element without creating a temporary file, you can load it into a MemoryStream, flip it vertically, and save it back.
+ * 2. When processing uploaded PNGs in a web API, you can use Aspose.Imaging to vertically flip the image in memory before returning it to the client.
+ * 3. When generating thumbnails that require a top‑down orientation, you can read the source PNG from a byte array, apply a vertical flip, and write the result to the same stream.
+ * 4. When integrating image transformations into a background service that works with streams for performance, you can vertically flip PNGs using RotateFlip on an Image loaded from a MemoryStream.
+ * 5. When you need to correct upside‑down screenshots captured from a device, you can load the PNG into a MemoryStream, flip it along the Y‑axis, and overwrite the original byte array.
  */
