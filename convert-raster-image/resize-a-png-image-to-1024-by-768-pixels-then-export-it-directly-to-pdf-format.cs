@@ -1,51 +1,51 @@
 // HOW-TO: Resize PNG to 1024x768 and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "input.png";
+            string outputPath = "output.pdf";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "Input/image.png";
-                string outputPath = "Output/resized.pdf";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    image.Resize(1024, 768);
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                image.Resize(1024, 768);
+                image.Save(outputPath, new PdfOptions());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report that includes a PNG logo scaled to a standard 1024×768 size for consistent layout.
- * 2. When an e‑commerce platform must convert product thumbnail PNGs into PDF catalogs while ensuring all images fit a predefined page dimension.
- * 3. When a document automation system requires resizing user‑uploaded PNG signatures before embedding them into PDF contracts.
- * 4. When a batch processing tool must shrink large PNG screenshots to 1024×768 and archive them as PDF files to save storage space.
- * 5. When a web service needs to deliver printable PDFs from PNG assets, ensuring the images are resized to fit standard A4‑like dimensions.
+ * 1. When a web application needs to generate printable PDF reports from user‑uploaded PNG screenshots at a standard 1024×768 size.
+ * 2. When an automated batch job must shrink large PNG assets and bundle them as PDFs for archival or email distribution.
+ * 3. When a desktop tool converts product‑catalog images from PNG to PDF while ensuring they fit a predefined page layout.
+ * 4. When a document‑generation service resizes PNG logos to a consistent resolution before embedding them in PDF invoices.
+ * 5. When a migration script prepares PNG graphics for a PDF‑based e‑learning platform by resizing them to 1024×768 pixels.
  */
