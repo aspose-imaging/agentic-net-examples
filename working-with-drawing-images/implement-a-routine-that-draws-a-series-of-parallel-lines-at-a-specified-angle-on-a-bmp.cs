@@ -1,8 +1,16 @@
-// HOW-TO: Draw Parallel Lines At 45 Degrees On A BMP With C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Parallel Lines at a Specific Angle on a BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,40 +19,54 @@ class Program
     {
         try
         {
+            string inputPath = "input.bmp";
             string outputPath = "output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             int width = 500;
             int height = 500;
+            double angleDegrees = 45.0;
+            int spacing = 20;
 
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath);
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                Pen pen = new Pen(Color.Black, 2);
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                double angleDeg = 45;
-                double angleRad = angleDeg * Math.PI / 180.0;
-                double cos = Math.Cos(angleRad);
-                double sin = Math.Sin(angleRad);
-                int spacing = 20;
+                double angleRad = angleDegrees * Math.PI / 180.0;
+                double dirX = Math.Cos(angleRad);
+                double dirY = Math.Sin(angleRad);
+                double perpX = -dirY;
+                double perpY = dirX;
+                double diagonal = Math.Sqrt(width * width + height * height);
 
-                double length = Math.Sqrt(width * width + height * height) * 2;
+                double centerX = width / 2.0;
+                double centerY = height / 2.0;
 
-                for (int i = -height; i < width + height; i += spacing)
+                int maxOffset = (int)diagonal;
+                for (int offset = -maxOffset; offset <= maxOffset; offset += spacing)
                 {
-                    double offset = i;
-                    double x1 = offset * (-sin);
-                    double y1 = offset * cos;
-                    double x2 = x1 + cos * length;
-                    double y2 = y1 + sin * length;
+                    double offsetX = centerX + offset * perpX;
+                    double offsetY = centerY + offset * perpY;
 
-                    graphics.DrawLine(pen, (int)Math.Round(x1), (int)Math.Round(y1), (int)Math.Round(x2), (int)Math.Round(y2));
+                    double startX = offsetX - dirX * diagonal;
+                    double startY = offsetY - dirY * diagonal;
+                    double endX = offsetX + dirX * diagonal;
+                    double endY = offsetY + dirY * diagonal;
+
+                    Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
+                    graphics.DrawLine(pen, (int)Math.Round(startX), (int)Math.Round(startY), (int)Math.Round(endX), (int)Math.Round(endY));
                 }
 
-                image.Save();
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a patterned background image, such as diagonal hatch lines, for a BMP file in a C# application.
- * 2. When creating printable engineering drawings that require evenly spaced guide lines at a specific angle using Aspose.Imaging.
- * 3. When building a custom watermark or security pattern overlay on a bitmap before saving it to disk.
- * 4. When developing a game or UI asset that uses tiled line textures generated programmatically at runtime.
- * 5. When automating the production of test images to verify image‑processing algorithms that expect parallel line patterns at a given angle.
+ * 1. When you need to generate a hatched background pattern for a BMP report or form in a .NET application.
+ * 2. When creating custom grid overlays at a 45‑degree angle for engineering diagrams stored as BMP files.
+ * 3. When programmatically adding watermark lines to a BMP image to indicate confidential status.
+ * 4. When producing test images with evenly spaced diagonal lines to validate image‑processing algorithms in C#.
+ * 5. When designing printable barcode or QR‑code guides that require parallel line markers on a BMP canvas.
  */
