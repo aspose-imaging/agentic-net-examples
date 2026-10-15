@@ -1,40 +1,49 @@
 // HOW-TO: Resize TIFF with Lanczos and Add Password Protected Digital Signature in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output/output.tif";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                RasterImage raster = tiffImage.ActiveFrame;
 
-                string password = "securePass";
-                image.EmbedDigitalSignature(password);
+                int newWidth = raster.Width / 2;
+                int newHeight = raster.Height / 2;
+                if (newWidth <= 0) newWidth = raster.Width;
+                if (newHeight <= 0) newHeight = raster.Height;
 
-                TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, options);
+                raster.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                raster.EmbedDigitalSignature("StrongPassword123");
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of a high‑resolution TIFF for faster web delivery while preserving image quality using Lanczos resampling.
- * 2. When you must protect a TIFF document by embedding a digital signature that requires a password longer than four characters for compliance or authenticity verification.
- * 3. When an automated workflow processes scanned TIFF files, resizes them to half their dimensions, and secures them before storing them in an archive.
- * 4. When a medical imaging system needs to downscale large TIFF scans and embed a password‑protected signature to ensure data integrity during transmission.
- * 5. When a desktop application generates TIFF reports, resizes them for printing, and adds a digital signature to prevent tampering.
+ * 1. When you need to shrink large TIFF scans for faster transmission while preserving quality with Lanczos resampling and ensure the file is tamper‑evident by embedding a password‑protected digital signature.
+ * 2. When archiving scanned legal documents you want to reduce file size, keep high‑quality details, and embed a signature so only users who know the strong password can verify authenticity.
+ * 3. When preparing medical imaging (e.g., radiology TIFFs) for integration into a PACS system, you may resize the images to fit storage constraints and add a digital signature to meet compliance and audit requirements.
+ * 4. When creating a digital asset pipeline for a publishing house, you can downscale high‑resolution TIFF artwork and embed a password‑protected signature to protect copyright before distribution.
+ * 5. When automating batch processing of engineering drawings, you can resize each TIFF to a standard dimension and embed a digital signature to guarantee that the drawings have not been altered after export.
  */
