@@ -1,4 +1,11 @@
 // HOW-TO: Create a Blank 800x600 WebP Image and Save in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,12 +18,10 @@ class Program
     {
         try
         {
-            string outputPath = "output.webp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
+            string outputPath = "output/output.webp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             Source source = new FileCreateSource(outputPath, false);
             WebPOptions options = new WebPOptions() { Source = source };
-
             using (RasterImage canvas = (RasterImage)Image.Create(options, 800, 600))
             {
                 canvas.Save();
@@ -31,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a placeholder WebP image of a specific size for a web page without loading an existing file.
- * 2. When you want to create a blank canvas to draw graphics programmatically before adding custom drawings or text.
- * 3. When an automated report generator must produce a WebP thumbnail of a fixed dimension as part of its output.
- * 4. When a server‑side service creates empty WebP files to reserve space for later image processing in a pipeline.
- * 5. When testing image‑processing code you require a known‑size WebP file without relying on external assets.
+ * 1. When you need to generate a placeholder WebP file of a specific size for testing image pipelines in a C# application.
+ * 2. When an automated report generator must create a blank WebP canvas to overlay dynamic graphics before saving.
+ * 3. When a web service creates thumbnails on the fly and requires an empty 800×600 WebP base to compose custom images.
+ * 4. When a CI/CD build script validates that the Aspose.Imaging library can produce WebP files with default settings.
+ * 5. When a desktop utility needs to initialize a new WebP image file to store user‑drawn sketches programmatically.
  */
