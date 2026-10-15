@@ -1,4 +1,11 @@
-// HOW-TO: Crop Center 400x400 From PNG and Save As SVG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Central 400x400 Region From PNG and Convert to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,37 +15,45 @@ class Program
 {
     static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.svg";
-
         try
         {
+            // Hardcoded paths
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            string outDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outDir))
+            {
+                Directory.CreateDirectory(outDir);
+            }
 
+            // Load PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                // Cast to RasterImage for cropping
+                var raster = (RasterImage)image;
 
-                int targetSize = 400;
-                int left = (raster.Width - targetSize) / 2;
-                int right = left;
-                int top = (raster.Height - targetSize) / 2;
-                int bottom = top;
+                // Determine central 400x400 region
+                int targetWidth = 400;
+                int targetHeight = 400;
+                int leftShift = (raster.Width - targetWidth) / 2;
+                int rightShift = raster.Width - leftShift - targetWidth;
+                int topShift = (raster.Height - targetHeight) / 2;
+                int bottomShift = raster.Height - topShift - targetHeight;
 
-                raster.Crop(left, right, top, bottom);
+                // Crop the image
+                raster.Crop(leftShift, rightShift, topShift, bottomShift);
 
-                SvgOptions svgOptions = new SvgOptions();
+                // Save as SVG
+                var svgOptions = new SvgOptions();
                 raster.Save(outputPath, svgOptions);
             }
         }
@@ -51,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a fixed‑size thumbnail from a large PNG and deliver it as a scalable SVG for responsive web graphics.
- * 2. When converting raster logos stored as PNG into vector SVGs after cropping the central area to fit branding guidelines.
- * 3. When generating cut‑out icons from user‑uploaded PNG files for use in high‑resolution UI designs that require SVG format.
- * 4. When preprocessing PNG assets by cropping a 400‑pixel square before converting them to SVG for inclusion in printable PDFs.
- * 5. When automating a batch process that trims the center of PNG screenshots and saves them as SVGs for lightweight documentation.
+ * 1. When you need to extract a fixed‑size central thumbnail from a PNG and embed it as scalable vector graphics in a web page.
+ * 2. When generating SVG icons from high‑resolution PNG assets for responsive UI designs.
+ * 3. When preparing a cropped portion of a screenshot for inclusion in documentation that requires lossless scaling.
+ * 4. When converting a specific area of a product image to SVG for printing or laser cutting where vector format is required.
+ * 5. When automating batch processing to trim and vectorize PNG logos for branding assets.
  */
