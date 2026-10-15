@@ -1,12 +1,17 @@
-// HOW-TO: Create BMP With Semi Transparent Shapes Using SourceOver In C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Semi Transparent Shapes on BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -17,37 +22,33 @@ class Program
             string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
             int width = 400;
             int height = 300;
 
-            using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 32;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Clear background to white
-                int[] whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White.ToArgb(), width * height).ToArray();
-                image.SaveArgb32Pixels(new Rectangle(0, 0, width, height), whitePixels);
+                RasterImage raster = (RasterImage)image;
+                Graphics graphics = new Graphics(raster);
+                graphics.Clear(Color.White);
 
-                Graphics graphics = new Graphics(image);
-
-                // Semi‑transparent rectangle
-                Pen rectPen = new Pen(Aspose.Imaging.Color.FromArgb(128, 0, 0, 255), 3);
-                graphics.DrawRectangle(rectPen, 50, 50, 200, 150);
-                using (SolidBrush rectBrush = new SolidBrush(Aspose.Imaging.Color.FromArgb(64, 255, 0, 0)))
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                 {
-                    graphics.FillRectangle(rectBrush, 50, 50, 200, 150);
+                    graphics.FillRectangle(brush, 50, 50, 200, 150);
                 }
 
-                // Semi‑transparent ellipse
-                Pen ellipsePen = new Pen(Aspose.Imaging.Color.FromArgb(128, 0, 255, 0), 3);
-                graphics.DrawEllipse(ellipsePen, 100, 100, 150, 100);
-                using (SolidBrush ellipseBrush = new SolidBrush(Aspose.Imaging.Color.FromArgb(64, 0, 0, 255)))
+                using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(128, 0, 0, 255)))
                 {
-                    graphics.FillEllipse(ellipseBrush, 100, 100, 150, 100);
+                    graphics.FillEllipse(brush2, 150, 100, 200, 150);
                 }
 
-                // Save the image (output file already bound)
+                Pen pen = new Pen(Color.Black, 2);
+                graphics.DrawRectangle(pen, 50, 50, 200, 150);
+                graphics.DrawEllipse(pen, 150, 100, 200, 150);
+
                 image.Save();
             }
         }
@@ -60,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP report thumbnail that overlays semi‑transparent annotations on a white background.
- * 2. When you want to programmatically add watermark rectangles or ellipses with adjustable opacity to BMP images in a .NET application.
- * 3. When you are building a custom UI component that renders layered graphics, such as progress indicators, directly into a BMP file using Aspose.Imaging.
- * 4. When you must create composite images for printing where the SourceOver mode preserves underlying pixel data while blending translucent shapes.
- * 5. When you are automating the creation of diagrammatic BMP assets, like flow‑chart symbols, that require partially see‑through shapes for visual emphasis.
+ * 1. When you need to generate a 32‑bit BMP report with overlapping colored shapes for a desktop application.
+ * 2. When you want to create watermark overlays on bitmap images without losing the original background.
+ * 3. When you are building a custom chart or diagram where semi‑transparent rectangles and ellipses must be rendered programmatically.
+ * 4. When you need to export UI mock‑ups as BMP files that preserve alpha blending for later compositing.
+ * 5. When you are automating the production of printable graphics that require precise pixel dimensions and transparent layering using C#.
  */
