@@ -1,9 +1,15 @@
-// HOW-TO: Draw a Smooth S-Shaped Bezier Curve on a BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw an S‑Shaped Bezier Curve on a BMP with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,31 +17,23 @@ class Program
     static void Main(string[] args)
     {
         string outputPath = "output.bmp";
-
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            int width = 250;
-            int height = 200;
-
+            int width = 400;
+            int height = 300;
             using (Image image = Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
-
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
-
-                Aspose.Imaging.PointF p1 = new Aspose.Imaging.PointF(10, 100);
-                Aspose.Imaging.PointF p2 = new Aspose.Imaging.PointF(50, 10);
-                Aspose.Imaging.PointF p3 = new Aspose.Imaging.PointF(150, 190);
-                Aspose.Imaging.PointF p4 = new Aspose.Imaging.PointF(200, 100);
-
-                graphics.DrawBezier(pen, p1, p2, p3, p4);
-
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
+                PointF p0 = new PointF(50, 250);
+                PointF p1 = new PointF(150, 50);
+                PointF p2 = new PointF(250, 250);
+                PointF p3 = new PointF(350, 50);
+                graphics.DrawBezier(pen, p0, p1, p2, p3);
                 image.Save();
             }
         }
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a BMP file that contains a smooth S‑shaped curve for custom UI graphics or diagram annotations in a .NET application.
- * 2. When you want to create vector‑like drawing primitives such as Bezier curves on raster images for generating test patterns or sample images in automated image‑processing pipelines.
- * 3. When you must render a scalable smooth curve onto a BMP to embed in reports, PDFs, or email attachments without relying on external graphic editors.
- * 4. When you are building a signature or handwriting simulation that requires precise control points using PointF and need to output the result as a BMP for legacy systems.
- * 5. When you need to demonstrate or benchmark Aspose.Imaging’s Graphics.DrawBezier method by drawing a curved path on a bitmap and saving it with specific pen color and thickness.
+ * 1. When you need to generate a BMP file with a custom S‑shaped line for diagrams or UI mock‑ups programmatically in C#.
+ * 2. When you want to create smooth vector‑based curves in raster images for scientific plots or engineering schematics using Aspose.Imaging.
+ * 3. When an application must render decorative separators or wave patterns on bitmap assets without relying on external design tools.
+ * 4. When you are automating the production of test images that contain precise Bezier paths to validate image‑processing algorithms.
+ * 5. When you need to embed dynamically generated curved graphics into reports or PDFs that later reference the BMP as a source image.
  */
