@@ -1,4 +1,11 @@
-// HOW-TO: Increase TIFF Brightness and Apply Gaussian Blur Then Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust TIFF Brightness and Apply Gaussian Blur Then Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,26 +18,37 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "image.tif");
-            string outputPath = Path.Combine("Output", "result.pdf");
-
+            string inputPath = "Input/sample.tif";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputPath = "Output/result.pdf";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.AdjustBrightness(50);
+                RasterImage rasterImage = (RasterImage)image;
+                if (!rasterImage.IsCached)
+                {
+                    rasterImage.CacheData();
+                }
 
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                raster.Filter(raster.Bounds, blurOptions);
+                // Adjust brightness (example value: 50)
+                rasterImage.AdjustBrightness(50);
 
-                PdfOptions pdfOptions = new PdfOptions();
+                // Apply Gaussian blur
+                var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions
+                {
+                    Radius = 5,
+                    Sigma = 1.5
+                };
+                rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
+
+                // Save as PDF
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -43,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance a scanned TIFF document’s visibility by brightening it, blur background noise, and deliver the result as a searchable PDF for archiving.
- * 2. When converting legacy TIFF maps or blueprints to PDF while adjusting exposure and smoothing details to improve readability on digital devices.
- * 3. When preparing medical imaging TIFF files for patient reports, increasing contrast, reducing speckle with Gaussian blur, and exporting to PDF for secure sharing.
- * 4. When automating a batch workflow that normalizes lighting of product photos stored as TIFF, applies a subtle blur for aesthetic effect, and generates PDF catalogs.
- * 5. When integrating Aspose.Imaging into a C# application to preprocess scanned receipts (brightening, noise reduction) before saving them as PDF invoices.
+ * 1. When you need to enhance the visual quality of scanned TIFF documents by brightening them before converting to a searchable PDF.
+ * 2. When you want to reduce noise and smooth edges of a TIFF image using Gaussian blur before archiving it as a PDF.
+ * 3. When a batch process must standardize the brightness of multi‑page TIFF files and output them as PDFs for printing.
+ * 4. When you are building a C# application that prepares medical imaging TIFFs for PDF reports with consistent illumination and softening effects.
+ * 5. When you need to programmatically convert legacy TIFF graphics to PDF while applying image adjustments to meet publishing guidelines.
  */
