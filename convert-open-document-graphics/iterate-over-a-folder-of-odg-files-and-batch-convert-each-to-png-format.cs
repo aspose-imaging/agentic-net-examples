@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert ODG Files to PNG in C# with Aspose Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert ODG Files to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,37 +19,28 @@ namespace OdgBatchConverter
         {
             try
             {
-                // Hardcoded input and output folder paths
-                string inputFolder = @"C:\OdgInput";
-                string outputFolder = @"C:\PngOutput";
+                string inputFolder = "InputOdgs";
+                string outputFolder = "OutputPngs";
 
-                // Ensure the output folder exists
-                Directory.CreateDirectory(outputFolder);
-
-                // Get all ODG files in the input folder
-                string[] odgFiles = Directory.GetFiles(inputFolder, "*.odg");
+                string[] odgFiles = Directory.GetFiles(inputFolder, "*.odg", SearchOption.TopDirectoryOnly);
 
                 foreach (string inputPath in odgFiles)
                 {
-                    // Verify the input file exists
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
-                    // Determine the output PNG path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Load the ODG image and save as PNG
                     using (Image image = Image.Load(inputPath))
                     {
-                        var pngOptions = new PngOptions();
-                        image.Save(outputPath, pngOptions);
+                        PngOptions options = new PngOptions();
+                        image.Save(outputPath, options);
                     }
 
                     Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
@@ -58,9 +56,9 @@ namespace OdgBatchConverter
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a collection of OpenDocument graphics (ODG) drawings into web‑friendly PNG images for a website or documentation portal.
- * 2. When you want to migrate legacy ODG assets stored in a shared folder to PNG format for use in mobile apps that only support raster images.
- * 3. When a batch processing job must generate PNG thumbnails from ODG files before uploading them to a cloud storage service.
- * 4. When an integration script has to convert user‑submitted ODG diagrams to PNG on the server side for preview in a .NET web application.
- * 5. When you are building a migration tool that consolidates design files by converting all ODG files in a directory to PNG for archival purposes.
+ * 1. When you need to automatically transform a collection of OpenDocument graphics (ODG) drawings into web‑ready PNG images for a website gallery.
+ * 2. When a document management system must export user‑uploaded ODG diagrams to PNG format for preview thumbnails.
+ * 3. When a migration script has to convert legacy ODG assets stored in a directory to PNG to integrate with a new .NET application.
+ * 4. When an automated build process should generate PNG versions of ODG files for inclusion in PDF reports or presentations.
+ * 5. When a desktop utility must process dozens of ODG files in a folder and save each as a lossless PNG without manual intervention.
  */
