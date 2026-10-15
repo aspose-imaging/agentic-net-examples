@@ -1,7 +1,14 @@
-// HOW-TO: Apply Multiple Gaussian Blur Levels to JPEG in C# with Aspose Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Apply Multiple Gaussian Blur Filters with Different Sigma Values in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -17,20 +24,21 @@ class Program
             }
 
             string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
 
             double[] sigmas = new double[] { 0.5, 1.5, 2.5 };
             foreach (double sigma in sigmas)
             {
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                string fileName = $"output_sigma_{sigma.ToString().Replace('.', '_')}.jpg";
+                string outputPath = Path.Combine(outputDir, fileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    if (!image.IsCached) image.CacheData();
-
-                    var options = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, sigma);
-                    image.Filter(image.Bounds, options);
-
-                    string outputPath = Path.Combine(outputDir, $"blur_sigma_{sigma}.jpg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    image.Save(outputPath);
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(3, sigma);
+                    image.Filter(image.Bounds, filterOptions);
+                    var jpegOptions = new JpegOptions();
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -43,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create preview thumbnails with varying blur strengths for a photo gallery.
- * 2. When you want to compare the visual effect of different Gaussian sigma values on a JPEG before choosing the optimal blur for a UI background.
- * 3. When you are building an automated pipeline that generates multiple blurred versions of an image for machine‑learning data augmentation.
- * 4. When you must apply consistent kernel size while experimenting with sigma to fine‑tune the softness of product images for an e‑commerce site.
- * 5. When you need to batch‑process a single source image and save each blurred result to a separate file for quality‑control testing.
+ * 1. When you need to generate preview images with varying levels of softness for a photo gallery, you can apply Gaussian blur with sigma 0.5, 1.5, and 2.5 and save each result as a JPEG.
+ * 2. When testing the visual impact of different blur intensities on a product image before choosing a final effect, this code lets you compare three sigma values side by side.
+ * 3. When creating a set of blurred background layers for a UI design, you can automatically produce multiple JPEG files with different blur strengths using Aspose.Imaging in C#.
+ * 4. When evaluating performance of the GaussianBlurFilterOptions in Aspose.Imaging, the loop over several sigma values provides a quick benchmark across small, medium, and strong blur.
+ * 5. When preparing images for a machine‑learning dataset that requires varied blur levels to augment training data, the script generates the required JPEG samples with three sigma settings.
  */
