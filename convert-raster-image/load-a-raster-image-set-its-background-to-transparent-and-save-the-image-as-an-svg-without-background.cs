@@ -1,8 +1,17 @@
-// HOW-TO: Convert PNG to Transparent SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to Transparent SVG with No Background in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -10,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.svg";
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/result.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,7 +33,16 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 image.BackgroundColor = Color.Transparent;
-                image.Save(outputPath, new SvgOptions());
+
+                var svgOptions = new SvgOptions();
+                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    BackgroundColor = Color.Transparent,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -36,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a PNG logo into a web page as a scalable SVG without any background color.
- * 2. When you are generating vector assets from user‑uploaded raster images for responsive design and require a transparent background.
- * 3. When an e‑commerce platform must convert product photos to SVG format for high‑resolution printing while preserving transparency.
- * 4. When a desktop application creates diagram exports and must replace bitmap icons with transparent SVG equivalents for better scaling.
- * 5. When an automated build pipeline processes assets and needs to batch‑convert PNG files to SVG with no background using C# and Aspose.Imaging.
+ * 1. When you need to embed a logo from a PNG file into a web page as an SVG without any background color.
+ * 2. When you want to prepare UI icons for high‑resolution displays by converting raster images to scalable SVGs with transparent backgrounds.
+ * 3. When generating printable graphics from scanned PNG assets and require the output SVG to retain transparency for overlaying on other designs.
+ * 4. When automating a batch process that converts product photos to SVG format for use in vector‑based marketing materials while removing the original background.
+ * 5. When integrating Aspose.Imaging in a C# application to create SVG assets from screenshots, ensuring the resulting vector file has no opaque background.
  */
