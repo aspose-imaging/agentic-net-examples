@@ -1,10 +1,19 @@
-// HOW-TO: Flip JPEG Images Horizontally and Merge into a Single PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Flip JPEGs Horizontally And Merge Into A PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,7 +23,7 @@ class Program
         try
         {
             string inputDirectory = "Input";
-            string outputPath = "Output/merged.png";
+            string outputPath = "output.png";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -23,18 +32,25 @@ class Program
                 return;
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-            if (files.Length == 0)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
+
+            if (jpgFiles.Length == 0)
             {
                 Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            List<string> imagePaths = new List<string>();
-            List<int> widths = new List<int>();
-            List<int> heights = new List<int>();
+            var imagesInfo = new List<(string Path, int Width, int Height)>();
 
-            foreach (string file in files)
+            foreach (string file in jpgFiles)
             {
                 if (!File.Exists(file))
                 {
@@ -42,31 +58,25 @@ class Program
                     return;
                 }
 
-                imagePaths.Add(file);
-                using (RasterImage img = (RasterImage)Image.Load(file))
+                using (JpegImage img = (JpegImage)Image.Load(file))
                 {
                     img.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    widths.Add(img.Width);
-                    heights.Add(img.Height);
+                    imagesInfo.Add((file, img.Width, img.Height));
                 }
             }
 
-            int totalWidth = widths.Sum();
-            int maxHeight = heights.Max();
+            int totalWidth = imagesInfo.Sum(i => i.Width);
+            int maxHeight = imagesInfo.Max(i => i.Height);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = outputSource };
 
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                for (int i = 0; i < imagePaths.Count; i++)
+                foreach (var info in imagesInfo)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(imagePaths[i]))
+                    using (JpegImage img = (JpegImage)Image.Load(info.Path))
                     {
                         img.RotateFlip(RotateFlipType.RotateNoneFlipX);
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
@@ -86,9 +96,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a panoramic view from a set of portrait‑oriented JPEG photos that must be mirrored before stitching, this code flips each image and joins them side‑by‑side into a PNG.
- * 2. When generating product catalogs where each product photo must be displayed as a mirrored thumbnail next to the original, the routine flips the JPEGs and composes them horizontally for a single PNG sprite sheet.
- * 3. When preparing assets for a web carousel that requires all images to face the opposite direction and be combined into one lightweight PNG file, this solution automates the flip and merge process in C#.
- * 4. When building a reporting tool that visualizes before‑and‑after comparisons by mirroring source JPEGs and aligning them in a single row, the code produces the combined PNG output ready for embedding.
- * 5. When creating printable banners that need a series of horizontally flipped JPEG graphics arranged in a continuous strip, this example flips each image and merges them into a high‑resolution PNG canvas.
+ * 1. When you need to create a mirrored photo strip from a set of JPEG selfies for a web gallery.
+ * 2. When generating a single panoramic PNG by flipping and stitching product photos taken from opposite angles.
+ * 3. When preparing printable marketing material that requires all JPEG logos to be mirrored and combined into one PNG banner.
+ * 4. When automating batch processing of user‑uploaded JPEG images to produce a horizontally mirrored collage for a mobile app.
+ * 5. When converting a collection of scanned JPEG documents into a single PNG file with each page mirrored for right‑to‑left reading.
  */
