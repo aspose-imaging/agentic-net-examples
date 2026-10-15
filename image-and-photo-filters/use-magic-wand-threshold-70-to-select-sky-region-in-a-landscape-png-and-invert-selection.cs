@@ -1,4 +1,11 @@
 // HOW-TO: Select Sky Region in PNG with Magic Wand and Invert Selection in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,7 +20,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,11 +28,11 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(100, 50) { Threshold = 70 })
+                MagicWandTool.Select(image, new MagicWandSettings(10, 10) { Threshold = 70 })
                     .Invert()
                     .Apply();
 
@@ -41,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to isolate the sky in a landscape PNG to replace it with a different background using Aspose.Imaging in C#.
- * 2. When you want to create a mask of the sky area for applying color grading or lighting effects without affecting the rest of the image.
- * 3. When you are preparing images for a composite where the sky must be removed and later blended with another sky layer programmatically.
- * 4. When you need to generate a sky selection mask to feed into machine‑learning models that require separate sky and ground annotations.
- * 5. When you want to invert the sky selection to edit everything except the sky, such as adding foreground elements while preserving the original sky.
+ * 1. When you need to automatically isolate and edit the sky area of a landscape PNG for color correction or replacement.
+ * 2. When building a photo‑editing tool that lets users remove or mask the sky by selecting it with a tolerance threshold.
+ * 3. When generating thumbnails that require the sky to be excluded from the visible region to focus on foreground details.
+ * 4. When preparing images for compositing and you must invert the sky selection to keep only the ground and objects.
+ * 5. When automating batch processing of outdoor photos to apply effects only to non‑sky parts by selecting the sky first and then inverting the mask.
  */
