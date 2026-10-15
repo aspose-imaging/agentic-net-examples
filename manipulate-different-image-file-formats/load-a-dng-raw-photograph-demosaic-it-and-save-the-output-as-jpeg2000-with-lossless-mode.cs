@@ -3,7 +3,7 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -18,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/photo.dng";
-            string outputPath = "Output/photo.jp2";
+            string inputPath = Path.Combine("Input", "photo.dng");
+            string outputPath = Path.Combine("Output", "photo.jp2");
 
             if (!File.Exists(inputPath))
             {
@@ -31,10 +31,8 @@ class Program
 
             using (DngImage dng = (DngImage)Image.Load(inputPath))
             {
-                using (Jpeg2000Options options = new Jpeg2000Options())
-                {
-                    dng.Save(outputPath, options);
-                }
+                Jpeg2000Options options = new Jpeg2000Options();
+                dng.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to archive raw DNG files as lossless JPEG2000 for long‑term storage while preserving full color detail.
- * 2. When a web service must deliver high‑quality preview images from DNG uploads without introducing compression artifacts.
- * 3. When a scientific imaging pipeline requires converting raw sensor data to a standardized lossless format for downstream analysis.
- * 4. When a digital asset management system needs to batch‑process DNG assets into JPEG2000 to reduce file size while keeping lossless fidelity.
- * 5. When a developer integrates Aspose.Imaging to demosaic raw camera files and export them as JPEG2000 for compatibility with legacy viewers.
+ * 1. When you need to archive raw camera files by converting DNG images to a smaller, lossless JPEG2000 format for long‑term storage.
+ * 2. When a web service must deliver high‑quality pictures to clients that only support JPEG2000, requiring on‑the‑fly DNG to JPEG2000 conversion in C#.
+ * 3. When a photo‑editing application wants to preview raw DNG files after demosaicing without relying on proprietary SDKs, using Aspose.Imaging to save them as lossless JPEG2000.
+ * 4. When you are building a batch conversion tool that prepares raw photographs for medical imaging systems that require lossless JPEG2000 input.
+ * 5. When you need to integrate raw image processing into a .NET workflow that later compresses images losslessly for archival or transmission purposes.
  */
