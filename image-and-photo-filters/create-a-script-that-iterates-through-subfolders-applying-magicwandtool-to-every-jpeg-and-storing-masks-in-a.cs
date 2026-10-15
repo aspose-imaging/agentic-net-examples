@@ -1,12 +1,18 @@
-// HOW-TO: Generate Grayscale Mask PNGs from JPEGs in Subfolders Using MagicWand in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Magic Wand Selection to JPEGs and Save PNG Masks in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -14,38 +20,42 @@ class Program
     {
         try
         {
-            string inputRoot = "InputImages";
-            string outputRoot = "Masks";
+            string inputRoot = "Input";
+            string outputRoot = "Output";
 
             Directory.CreateDirectory(outputRoot);
 
-            var jpegFiles = Directory.GetFiles(inputRoot, "*.*", SearchOption.AllDirectories)
-                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var inputPath in jpegFiles)
+            string[] files = Directory.GetFiles(inputRoot, "*.*", SearchOption.AllDirectories);
+            foreach (string inputPath in files)
             {
+                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                if (ext != ".jpg" && ext != ".jpeg")
+                {
+                    continue;
+                }
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string relativePath = Path.GetRelativePath(inputRoot, inputPath);
                 string outputPath = Path.Combine(outputRoot, Path.ChangeExtension(relativePath, ".png"));
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
-                {
-                    Directory.CreateDirectory(outputDir);
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    MagicWandTool.Select(image, new MagicWandSettings(0, 0)).Apply();
+                    int pointX = image.Width / 2;
+                    int pointY = image.Height / 2;
+
+                    MagicWandTool.Select(image, new MagicWandSettings(pointX, pointY))
+                        .Apply();
 
                     PngOptions pngOptions = new PngOptions
                     {
-                        ColorType = PngColorType.Grayscale
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
                     image.Save(outputPath, pngOptions);
@@ -61,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically create selection masks for a large collection of JPEG photos stored in nested folders, such as preparing assets for background removal.
- * 2. When you want to batch‑process product images to extract their foreground objects and save the masks as grayscale PNG files for later compositing.
- * 3. When a machine‑learning pipeline requires binary masks for training data and the source images are organized in multiple subdirectories.
- * 4. When you are building a web service that receives JPEG uploads and must generate corresponding mask images for image‑editing tools.
- * 5. When you have to archive image masks separately from the original pictures while preserving the original folder hierarchy for easy reference.
+ * 1. When you need to automatically generate transparent PNG masks for every JPEG photo in a nested folder structure for later compositing or analysis.
+ * 2. When a batch image‑processing pipeline must isolate the central region of each JPEG using Aspose.Imaging’s MagicWandTool before exporting the selection as an alpha‑channel PNG.
+ * 3. When you want to create a searchable archive of mask images that mirrors the original directory hierarchy, preserving relative paths while converting formats.
+ * 4. When a desktop application must process user‑uploaded photo collections, apply a magic‑wand selection to each file, and store the results without overwriting the source images.
+ * 5. When you are building a preprocessing step for machine‑learning models that requires PNG masks with true‑color and alpha channels derived from JPEG inputs across multiple subfolders.
  */
