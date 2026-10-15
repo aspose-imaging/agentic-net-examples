@@ -1,71 +1,82 @@
-// HOW-TO: Batch Compress GIF Files and Log Size Reduction in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Compress GIF Images and Log Original and Compressed Sizes in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
-class Program
+namespace BatchGifCompressor
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                // Hardcoded input and output directories
+                string inputDirectory = "input_gifs";
+                string outputDirectory = "output_gifs";
 
-            if (!Directory.Exists(outputDirectory))
-            {
+                // Ensure the output directory exists
                 Directory.CreateDirectory(outputDirectory);
-            }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+                // Get all GIF files in the input directory
+                string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
 
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in gifFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    using (GifOptions options = new GifOptions())
+                    // Verify the input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        image.Save(outputPath, options);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
-                }
 
-                long originalSize = new FileInfo(inputPath).Length;
-                long compressedSize = new FileInfo(outputPath).Length;
-                Console.WriteLine($"File: {fileName}, Original: {originalSize} bytes, Compressed: {compressedSize} bytes");
+                    // Record original file size
+                    long originalSize = new FileInfo(inputPath).Length;
+
+                    // Load the GIF image
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        // Determine output path
+                        string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Set GIF save options (default compression)
+                        var saveOptions = new GifOptions();
+
+                        // Save the image with the specified options
+                        image.Save(outputPath, saveOptions);
+                    }
+
+                    // Record compressed file size
+                    long compressedSize = new FileInfo(Path.Combine(outputDirectory, Path.GetFileName(inputPath))).Length;
+
+                    // Log the sizes
+                    Console.WriteLine($"{inputPath}: {originalSize} bytes -> {compressedSize} bytes");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the storage footprint of a large collection of GIF animations before uploading them to a web server.
- * 2. When you want to generate a report of original versus compressed file sizes to evaluate the effectiveness of GIF optimization.
- * 3. When you are building an automated pipeline that processes user‑uploaded GIFs and saves the optimized versions to a separate output folder.
- * 4. When you need to compare different compression settings by repeatedly saving GIFs with Aspose.Imaging and tracking size changes.
- * 5. When you are creating a desktop utility that scans a directory, compresses all GIFs, and logs the results for performance monitoring.
+ * 1. When you need to reduce the storage footprint of many GIF animations before uploading them to a web server.
+ * 2. When you want to generate a report comparing original and compressed GIF sizes to evaluate compression efficiency.
+ * 3. When an automated build pipeline must process all GIF assets in a folder and output optimized versions.
+ * 4. When you are creating a desktop tool that optimizes user‑selected GIF files while showing size savings in the UI.
+ * 5. When you need to ensure consistent GIF compression settings across a large media library using Aspose.Imaging in C#.
  */
