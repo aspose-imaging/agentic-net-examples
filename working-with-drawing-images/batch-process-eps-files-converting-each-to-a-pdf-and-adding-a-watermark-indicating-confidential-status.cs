@@ -1,33 +1,42 @@
-// HOW-TO: Convert Multiple EPS Files To PDF In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EPS to PDF with Confidential Watermark in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputDir = "input_eps";
-            string outputDir = "output_pdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add EPS files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
-            foreach (string epsPath in epsFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.eps");
+
+            foreach (var epsPath in files)
             {
                 if (!File.Exists(epsPath))
                 {
@@ -36,12 +45,19 @@ class Program
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(epsPath);
-                string pdfPath = Path.Combine(outputDir, fileName + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (EpsImage epsImage = (EpsImage)Aspose.Imaging.Image.Load(epsPath))
+                using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(epsPath))
                 {
-                    epsImage.Save(pdfPath, new PdfOptions());
+                    var graphics = new Aspose.Imaging.Graphics(epsImage);
+                    var font = new Aspose.Imaging.Font("Arial", 48);
+                    var brush = new SolidBrush(Aspose.Imaging.Color.Red);
+                    var point = new Aspose.Imaging.PointF(10, epsImage.Height - 60);
+                    graphics.DrawString("Confidential", font, brush, point);
+
+                    var pdfOptions = new PdfOptions();
+                    epsImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -54,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of vector EPS artwork into PDF documents for client delivery or archival using C#.
- * 2. When a publishing workflow requires batch processing of EPS files into PDF format before sending them to a print service.
- * 3. When you want to integrate EPS‑to‑PDF conversion into a .NET backend that generates reports containing embedded vector graphics.
- * 4. When you must create a script that scans an input directory, converts each EPS file to PDF, and saves the results to a separate output folder for further processing.
- * 5. When you are building a document management system that needs to standardize incoming EPS files as searchable PDFs without manual intervention.
+ * 1. When a design team needs to archive multiple Adobe EPS artwork files as PDF documents while automatically marking them as confidential.
+ * 2. When a legal department must distribute a set of vector drawings in PDF format with a red "Confidential" stamp to prevent unauthorized sharing.
+ * 3. When an automated build pipeline has to convert generated EPS charts into PDFs and embed a watermark for internal review.
+ * 4. When a printing service wants to prepare client EPS submissions for preview by converting them to PDFs and adding a confidentiality label.
+ * 5. When a document management system requires bulk transformation of EPS files to searchable PDFs with a visible security watermark.
  */
