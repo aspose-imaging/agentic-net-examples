@@ -1,4 +1,11 @@
-// HOW-TO: Convert PNG to SVG with 16‑Color Palette in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to SVG with 16‑Color Palette Reduction in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,9 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string tempPath = "temp/temp_palette.png";
-            string outputPath = "output/output.svg";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,24 +28,33 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
+                var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 16);
+
+                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_reduced.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
                 PngOptions pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = ColorPaletteHelper.GetCloseTransparentImagePalette(raster, 16),
+                    Palette = palette,
                     PngCompressionLevel = PngCompressionLevel.ZipLevel6
                 };
-                raster.Save(tempPath, pngOptions);
-            }
+                raster.Save(tempPngPath, pngOptions);
 
-            using (Image img = Image.Load(tempPath))
-            {
-                SvgOptions svgOptions = new SvgOptions();
-                img.Save(outputPath, svgOptions);
+                using (Image reduced = Image.Load(tempPngPath))
+                {
+                    SvgOptions svgOptions = new SvgOptions();
+                    reduced.Save(outputPath, svgOptions);
+                }
+
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a PNG graphic in a web page as a lightweight SVG with a limited 16‑color palette to reduce file size.
- * 2. When preparing icons for mobile or embedded devices that only support a small number of colors and require vector scalability.
- * 3. When converting legacy PNG assets to SVG for printing on low‑resolution printers while preserving exact color mapping.
- * 4. When generating SVG assets for a game UI where a fixed palette ensures consistent appearance across different platforms.
- * 5. When automating a batch process that transforms user‑uploaded PNG images into SVG files with a reduced palette for faster rendering in browsers.
+ * 1. When you need to shrink a high‑resolution PNG for faster web loading while keeping it scalable as an SVG with only 16 colors.
+ * 2. When creating icon sets that must be vector‑based for UI design but must adhere to a limited color palette for brand consistency.
+ * 3. When preparing graphics for low‑bandwidth mobile applications where a reduced palette and vector format minimize data usage.
+ * 4. When converting raster logos to SVG for print or signage while ensuring the file size stays small by limiting colors to 16.
+ * 5. When generating SVG assets from PNG screenshots for documentation, and you want to preserve visual fidelity with a compact indexed‑color palette.
  */
