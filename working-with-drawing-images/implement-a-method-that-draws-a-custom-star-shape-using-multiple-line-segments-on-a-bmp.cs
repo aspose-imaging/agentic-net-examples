@@ -1,10 +1,16 @@
-// HOW-TO: Draw a Five‑Pointed Star on a BMP Image with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Custom Five‑Point Star on BMP with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,50 +19,44 @@ class Program
     {
         try
         {
-            string outputPath = "output_star.bmp";
+            string outputPath = "output/star.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
 
             int width = 500;
             int height = 500;
-            int centerX = width / 2;
-            int centerY = height / 2;
-            int outerRadius = 200;
-            int innerRadius = 80;
-            int pointsCount = 5;
 
-            // Prepare star points (outer and inner alternating)
-            Point[] starPoints = new Point[pointsCount * 2];
-            double angleStep = Math.PI / pointsCount;
-            for (int i = 0; i < pointsCount * 2; i++)
+            using (Image image = Image.Create(options, width, height))
             {
-                double radius = (i % 2 == 0) ? outerRadius : innerRadius;
-                double angle = i * angleStep - Math.PI / 2; // start at top
-                int x = centerX + (int)(radius * Math.Cos(angle));
-                int y = centerY + (int)(radius * Math.Sin(angle));
-                starPoints[i] = new Point(x, y);
-            }
-
-            BmpOptions createOptions = new BmpOptions();
-            createOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(createOptions, width, height))
-            {
-                // Clear background to white
-                RasterImage raster = (RasterImage)image;
-                int[] whitePixels = Enumerable.Repeat(Color.White.ToArgb(), width * height).ToArray();
-                raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), whitePixels);
-
                 Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(Color.Black, 3);
+                graphics.Clear(Color.White);
 
-                for (int i = 0; i < starPoints.Length; i++)
+                int centerX = width / 2;
+                int centerY = height / 2;
+                double outerRadius = 200;
+                double innerRadius = 80;
+                int pointsCount = 5;
+                List<Point> points = new List<Point>();
+
+                for (int i = 0; i < pointsCount * 2; i++)
                 {
-                    Point start = starPoints[i];
-                    Point end = starPoints[(i + 1) % starPoints.Length];
-                    graphics.DrawLine(pen, start.X, start.Y, end.X, end.Y);
+                    double angle = Math.PI / pointsCount * i - Math.PI / 2;
+                    double radius = (i % 2 == 0) ? outerRadius : innerRadius;
+                    int x = centerX + (int)(radius * Math.Cos(angle));
+                    int y = centerY + (int)(radius * Math.Sin(angle));
+                    points.Add(new Point(x, y));
                 }
 
-                // Save the image (output path already bound)
+                Pen pen = new Pen(Color.Yellow, 3);
+                for (int i = 0; i < points.Count; i++)
+                {
+                    Point p1 = points[i];
+                    Point p2 = points[(i + 1) % points.Count];
+                    graphics.DrawLine(pen, p1.X, p1.Y, p2.X, p2.Y);
+                }
+
                 image.Save();
             }
         }
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a custom star logo or badge and save it as a BMP file using Aspose.Imaging in C#.
- * 2. When creating printable game boards, puzzles, or educational worksheets that require a precisely positioned star shape drawn with line segments on a bitmap.
- * 3. When automating the production of Windows desktop icons or splash screens that must be stored in BMP format and include a stylized star graphic.
- * 4. When generating test images containing geometric shapes to validate image‑processing or computer‑vision algorithms in a .NET application.
- * 5. When adding a decorative star watermark to bitmap charts, diagrams, or reports as part of an automated reporting pipeline.
+ * 1. When you need to generate a decorative star logo directly in a BMP file for a Windows desktop application.
+ * 2. When you want to create dynamic badge icons with a star shape that can be customized by changing radius or point count at runtime.
+ * 3. When you are building a game asset pipeline that requires programmatically drawing polygonal stars onto bitmap textures using C#.
+ * 4. When you need to export a star‑shaped diagram to a BMP for printing or embedding in reports without using external design tools.
+ * 5. When you are testing the Aspose.Imaging drawing API by rendering geometric shapes such as a multi‑segment star on a blank canvas.
  */
