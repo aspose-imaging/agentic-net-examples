@@ -1,25 +1,24 @@
-// HOW-TO: Convert PNG to JPEG2000 With Buffer Size Hint in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create lossless JPEG2000 from PNG with memory buffer limit in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\source.png";
-        string outputPath = "Output\\result.jp2";
-
         try
         {
+            string inputPath = "Input\\source.png";
+            string outputPath = "Output\\result.jp2";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,12 +27,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new Aspose.Imaging.LoadOptions { BufferSizeHint = 10 };
+            using (Aspose.Imaging.Image srcImage = Aspose.Imaging.Image.Load(inputPath, loadOptions))
             {
-                using (Jpeg2000Options options = new Jpeg2000Options())
+                int width = srcImage.Width;
+                int height = srcImage.Height;
+
+                using (Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image jp2Image = new Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image(width, height))
                 {
-                    options.BufferSizeHint = 10; // Buffer size in MB
-                    image.Save(outputPath, options);
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(jp2Image);
+                    graphics.DrawImage(srcImage, 0, 0, width, height);
+
+                    var options = new Jpeg2000Options();
+                    jp2Image.Save(outputPath, options);
                 }
             }
         }
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution PNG graphics as lossless JPEG2000 files while controlling memory usage in a C# application.
- * 2. When a server‑side image‑processing service must convert user‑uploaded PNGs to JPEG2000 for efficient storage without sacrificing quality.
- * 3. When a desktop utility processes large PNG maps and must limit RAM consumption by setting a buffer size hint during conversion to JPEG2000.
- * 4. When integrating Aspose.Imaging into a .NET workflow that requires converting PNG assets to JPEG2000 for compatibility with legacy imaging systems.
- * 5. When building a batch conversion tool that transforms PNG screenshots into JPEG2000 format with predictable memory footprints in C#.
+ * 1. When you need to convert high‑resolution PNG assets to JPEG2000 for archival while keeping the image lossless and controlling memory usage in a C# application.
+ * 2. When a server‑side service must generate JPEG2000 files from user‑uploaded PNGs without exceeding a predefined buffer size to avoid out‑of‑memory errors.
+ * 3. When a desktop tool processes PNG graphics and saves them as JPEG2000 for efficient storage in a medical imaging workflow that requires lossless compression.
+ * 4. When an automated batch job creates JPEG2000 thumbnails from PNG source files while ensuring the conversion runs within limited RAM on a Windows service.
+ * 5. When integrating Aspose.Imaging into a .NET microservice that receives PNG streams and returns JPEG2000 responses, and you must enforce a buffer hint to keep the service responsive.
  */
