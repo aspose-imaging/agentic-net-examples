@@ -3,36 +3,42 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.webp";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output/output.webp";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            string outDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outDir))
             {
-                WebPOptions options = new WebPOptions
+                Directory.CreateDirectory(outDir);
+            }
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                var options = new WebPOptions
                 {
-                    Quality = 75
+                    Quality = 75,
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
                 image.Save(outputPath, options);
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce page load time by converting high‑resolution JPEG photos to smaller WebP files with a controlled quality level.
- * 2. When preparing image assets for a mobile app that requires WebP format with lossless alpha support while keeping visual fidelity at 75 % quality.
- * 3. When migrating a legacy photo gallery to modern web standards and want to automate JPEG‑to‑WebP conversion in a C# backend.
- * 4. When generating thumbnails for an e‑commerce site and need consistent compression settings to balance size and quality.
- * 5. When integrating Aspose.Imaging into a CI pipeline to batch‑process uploaded JPEGs into WebP for CDN distribution.
+ * 1. When you need to reduce the file size of JPEG photos for faster web page loading while preserving acceptable visual quality.
+ * 2. When you want to generate WebP thumbnails from existing JPEG assets in a .NET batch‑processing pipeline.
+ * 3. When you are building an image‑upload service that stores user pictures as WebP to save storage costs.
+ * 4. When you need to convert legacy JPEG product images to WebP for progressive loading in modern browsers.
+ * 5. When you are preparing assets for a mobile app that requires WebP format with a specific compression level.
  */
