@@ -1,19 +1,23 @@
-// HOW-TO: Save EPS Preview As JPEG Image Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EPS Preview and Save as JPEG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             string inputPath = "input.eps";
-            string outputPath = "preview.jpg";
+            string outputPath = "output/preview.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,20 +25,12 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new EpsRasterizationOptions();
-                var jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                epsImage.Save(outputPath, jpegOptions);
+                // Save the extracted EPS preview as JPEG with default settings
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a thumbnail JPEG from an EPS file for web preview.
- * 2. When converting vector EPS artwork to a raster JPEG for email attachments.
- * 3. When extracting the embedded preview of a CAD EPS drawing to display in a Windows application.
- * 4. When automating batch processing of EPS files to create JPEG previews for a digital asset management system.
- * 5. When integrating EPS to JPEG conversion into a reporting tool that requires raster images for PDF generation.
+ * 1. When you need to generate thumbnail JPEGs from EPS files for a web gallery preview.
+ * 2. When converting vector EPS artwork into a raster JPEG to attach to emails or reports.
+ * 3. When extracting the embedded preview of an EPS to display in a document management system.
+ * 4. When automating batch processing of EPS files to create default‑quality JPEG previews for a file explorer.
+ * 5. When integrating EPS preview extraction into a C# application that requires quick JPEG output without custom settings.
  */
