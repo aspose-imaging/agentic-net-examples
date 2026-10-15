@@ -1,61 +1,72 @@
-// HOW-TO: Batch Convert EMF Files to SVG with Embedded Base64 Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF to SVG with Embedded Base64 Images in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Text;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
-namespace EmfToSvgBatch
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\EmfInput";
+            string outputDirectory = @"C:\SvgOutput";
+
+            // Get all EMF files in the input directory
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf", SearchOption.AllDirectories);
+
+            foreach (string inputPath in emfFiles)
             {
-                string inputDirectory = @"C:\InputEmf";
-                string outputDirectory = @"C:\OutputSvg";
+                // Check if the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Determine output path with .svg extension
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
 
                 // Ensure the output directory exists
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf", SearchOption.TopDirectoryOnly);
-                foreach (string emfPath in emfFiles)
+                // Load the EMF image
+                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    if (!File.Exists(emfPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {emfPath}");
-                        return;
-                    }
+                    // Set SVG options (default behavior embeds raster images as Base64)
+                    SvgOptions svgOptions = new SvgOptions();
 
-                    byte[] emfBytes = File.ReadAllBytes(emfPath);
-                    string base64 = Convert.ToBase64String(emfBytes);
-
-                    string svgContent = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                                        $"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n" +
-                                        $"  <image href=\"data:image/emf;base64,{base64}\" />\n" +
-                                        $"</svg>";
-
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(emfPath);
-                    string svgPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(svgPath));
-
-                    File.WriteAllText(svgPath, svgContent, Encoding.UTF8);
+                    // Save as SVG
+                    emfImage.Save(outputPath, svgOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed legacy EMF diagrams into web pages without storing separate image files, you can batch convert them to SVG with Base64 data URIs using C#.
- * 2. When generating documentation that requires scalable vector graphics, converting a folder of EMF assets to SVG with embedded Base64 ensures the graphics render correctly across browsers.
- * 3. When automating a migration from Windows Metafile resources to a modern SVG workflow, this code lets you process all EMF files in one step and embed them directly in the SVG output.
- * 4. When creating a portable SVG package for email newsletters or offline reports, converting EMF to SVG with Base64 eliminates external image dependencies.
- * 5. When integrating legacy engineering drawings into a .NET application that consumes SVG, batch converting EMF files to Base64‑encoded SVG simplifies loading and rendering the images at runtime.
+ * 1. When you need to migrate a library of Windows Metafile (EMF) graphics to scalable SVG files for web display while preserving embedded raster content.
+ * 2. When an application must generate SVG assets from EMF diagrams in bulk and ensure the raster parts are self‑contained using Base64 encoding.
+ * 3. When a reporting tool exports charts as EMF and you want to convert them to SVG for inclusion in HTML emails without external image files.
+ * 4. When a CI/CD pipeline processes design assets, converting all EMF files in a folder to SVG to streamline vector asset management.
+ * 5. When a legacy CAD system outputs EMF drawings and you need an automated C# script to produce SVG files that embed images for cross‑platform viewing.
  */
