@@ -1,10 +1,17 @@
-// HOW-TO: Batch Convert Raster Images To SVG In C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert JPG PNG BMP Images to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace BatchRasterToSvg
+namespace ImageBatchConverter
 {
     class Program
     {
@@ -15,38 +22,34 @@ namespace BatchRasterToSvg
                 string inputFolder = @"C:\Images\Input";
                 string outputFolder = @"C:\Images\Output";
 
-                // Ensure the base output directory exists
                 Directory.CreateDirectory(outputFolder);
 
-                string[] files = Directory.GetFiles(inputFolder);
-                foreach (string inputPath in files)
+                string[] extensions = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".gif" };
+                var files = Directory.GetFiles(inputFolder);
+                foreach (var file in files)
                 {
-                    // Verify input file exists
-                    if (!File.Exists(inputPath))
+                    string ext = Path.GetExtension(file).ToLowerInvariant();
+                    if (Array.IndexOf(extensions, ext) < 0)
+                        continue;
+
+                    if (!File.Exists(file))
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        Console.Error.WriteLine($"File not found: {file}");
                         return;
                     }
 
-                    // Process only common raster image extensions
-                    string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-                    if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".bmp" && ext != ".tif" && ext != ".tiff" && ext != ".gif")
-                    {
-                        continue;
-                    }
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
 
-                    string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-
-                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (Image image = Image.Load(inputPath))
+                    using (Image image = Image.Load(file))
                     {
-                        SvgOptions options = new SvgOptions();
+                        var options = new SvgOptions();
                         image.Save(outputPath, options);
                     }
 
-                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                    Console.WriteLine($"Converted: {file} -> {outputPath}");
                 }
             }
             catch (Exception ex)
@@ -59,9 +62,9 @@ namespace BatchRasterToSvg
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of PNG, JPEG, BMP, or GIF files into scalable SVG graphics while keeping the original file names.
- * 2. When a web application must generate vector versions of user‑uploaded raster images for responsive design without manual processing.
- * 3. When a reporting system requires batch transformation of scanned TIFF documents into SVG for lightweight embedding in PDFs.
- * 4. When a migration script has to replace legacy raster assets with SVG equivalents across a large media library using C#.
- * 5. When an automated build pipeline should include image optimization by converting all raster assets to SVG to improve scalability and reduce size.
+ * 1. When you need to generate scalable SVG versions of a large set of raster photos for responsive web design.
+ * 2. When an automated build process must preserve original filenames while converting JPEG, PNG, BMP, GIF, or TIFF files to vector format.
+ * 3. When a desktop application has to export user‑uploaded images to SVG for further editing in vector graphics tools.
+ * 4. When migrating a legacy image library to a format that scales without loss for high‑resolution printing.
+ * 5. When creating an asset pipeline that converts multiple image types to SVG to reduce file size and improve rendering performance.
  */
