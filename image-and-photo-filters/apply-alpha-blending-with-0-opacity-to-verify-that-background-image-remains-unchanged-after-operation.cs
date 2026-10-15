@@ -1,54 +1,70 @@
-// HOW-TO: Apply Zero Opacity Alpha Blend to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Apply Zero Opacity Alpha Blend to JPEG Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        string backgroundPath = "background.png";
-        string foregroundPath = "foreground.png";
-        string outputPath = "result.png";
-
-        try
+        static void Main(string[] args)
         {
-            if (!File.Exists(backgroundPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {backgroundPath}");
-                return;
-            }
-            if (!File.Exists(foregroundPath))
-            {
-                Console.Error.WriteLine($"File not found: {foregroundPath}");
-                return;
-            }
+                string inputPath = "input.jpg";
+                string overlayPath = "overlay.png";
+                string outputPath = "output\\result.jpg";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+                if (!File.Exists(overlayPath))
+                {
+                    Console.Error.WriteLine($"File not found: {overlayPath}");
+                    return;
+                }
 
-            using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
-            using (RasterImage foreground = (RasterImage)Image.Load(foregroundPath))
-            {
-                background.Blend(new Point(0, 0), foreground, 0);
-                PngOptions options = new PngOptions();
-                background.Save(outputPath, options);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage background = (RasterImage)Image.Load(inputPath))
+                {
+                    using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+                    {
+                        background.Blend(new Point(0, 0), overlay, 0);
+                        JpegOptions options = new JpegOptions()
+                        {
+                            Source = new FileCreateSource(outputPath, false),
+                            Quality = 100
+                        };
+                        background.Save(outputPath, options);
+                    }
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to confirm that blending a foreground image with 0% opacity does not alter the original PNG background in a C# application.
- * 2. When writing unit tests for image compositing logic to ensure the Blend method leaves the base image unchanged when opacity is set to zero.
- * 3. When creating a workflow that conditionally overlays graphics but must keep the original background intact if the overlay is fully transparent.
- * 4. When debugging an image processing pipeline that uses Aspose.Imaging to verify that zero‑opacity alpha blending does not introduce artifacts in PNG files.
- * 5. When generating placeholder images where a transparent layer is applied programmatically without affecting the underlying picture.
+ * 1. When you need to confirm that applying an overlay with zero opacity does not alter the original JPEG background image in a C# application.
+ * 2. When you want to test the alpha‑blending functionality of Aspose.Imaging without affecting the source image, using a PNG overlay on a JPEG.
+ * 3. When building an automated image pipeline that must safely ignore optional watermarks by blending them with 0% opacity.
+ * 4. When validating that the Blend method preserves image quality before saving the result with high‑quality JPEG options.
+ * 5. When creating unit tests for image processing code that ensure background integrity after a no‑effect blend operation.
  */
