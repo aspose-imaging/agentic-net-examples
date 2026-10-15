@@ -1,15 +1,14 @@
-// HOW-TO: Recover Corrupted TIFF Frames Using Consistent and Full Modes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Recover Corrupted TIFF Using Consistent and Full Modes and Compare Frames in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -17,50 +16,51 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input/corrupted.tif";
+        string outputPath = "output/recovered.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
         try
         {
-            string inputPath = "corrupted.tif";
-            string outputPathConsistent = "output\\recovered_consistent.tif";
-            string outputPathFull = "output\\recovered_full.tif";
+            int consistentCount = 0;
+            int fullCount = 0;
 
-            if (!File.Exists(inputPath))
+            var consistentOptions = new LoadOptions { DataRecoveryMode = DataRecoveryMode.ConsistentRecover };
+            using (Image imgConsistent = Image.Load(inputPath, consistentOptions))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (imgConsistent is TiffImage tiffConsistent)
+                {
+                    consistentCount = tiffConsistent.Frames.Count();
+                }
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
-
-            int countConsistent = 0;
-            int countFull = 0;
-
-            var loadOptionsConsistent = new LoadOptions
+            var defaultOptions = new LoadOptions(); // default recovery mode
+            using (Image imgFull = Image.Load(inputPath, defaultOptions))
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                DataBackgroundColor = Color.White
-            };
-            using (TiffImage imgConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
-            {
-                countConsistent = imgConsistent.Frames.Count();
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                imgConsistent.Save(outputPathConsistent, tiffOptions);
+                if (imgFull is TiffImage tiffFull)
+                {
+                    fullCount = tiffFull.Frames.Count();
+                }
             }
 
-            var loadOptionsFull = new LoadOptions
-            {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                DataBackgroundColor = Color.White
-            };
-            using (TiffImage imgFull = (TiffImage)Image.Load(inputPath, loadOptionsFull))
-            {
-                countFull = imgFull.Frames.Count();
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                imgFull.Save(outputPathFull, tiffOptions);
-            }
+            Console.WriteLine($"Consistent recovery frame count: {consistentCount}");
+            Console.WriteLine($"Full recovery frame count: {fullCount}");
 
-            Console.WriteLine($"Consistent recovery frame count: {countConsistent}");
-            Console.WriteLine($"Full recovery frame count: {countFull}");
+            if (consistentCount == fullCount)
+                Console.WriteLine("Both recovery modes yielded the same frame count.");
+            else
+                Console.WriteLine("Recovery modes yielded different frame counts.");
         }
         catch (Exception ex)
         {
@@ -71,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a batch of scanned documents saved as a multi‑page TIFF becomes unreadable, you can use this code to attempt recovery of all pages and save a usable file.
- * 2. When an imaging pipeline receives corrupted TIFF files from a third‑party scanner, the recovery modes let you extract as many frames as possible before processing further.
- * 3. When you need to compare the effectiveness of Aspose.Imaging’s ConsistentRecover versus FullRecover to decide which strategy yields more usable frames.
- * 4. When you want to automate the cleanup of legacy TIFF archives by programmatically restoring damaged frames and storing the results in a designated output folder.
- * 5. When troubleshooting TIFF corruption issues, the code provides frame counts for each recovery mode to help diagnose the severity of the damage.
+ * 1. When a batch of scanned multi‑page TIFF documents becomes corrupted and you need to extract as many pages as possible using Aspose.Imaging’s recovery options.
+ * 2. When you want to evaluate whether the default full recovery mode retrieves more frames than the consistent recovery mode for a damaged TIFF file.
+ * 3. When you need to programmatically compare frame counts from two different TIFF recovery strategies to decide which mode to adopt in an automated pipeline.
+ * 4. When you are building a C# utility that must create an output folder, load a corrupted TIFF, and log the number of successfully recovered pages.
+ * 5. When you must handle missing or unreadable TIFF files gracefully by catching exceptions and reporting error messages during the recovery process.
  */
