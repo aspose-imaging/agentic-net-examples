@@ -1,6 +1,14 @@
 // HOW-TO: Extract GIF Frames to PNG and Log Transparency Status in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
@@ -12,8 +20,8 @@ class Program
     {
         try
         {
-            string inputGifPath = "input.gif";
-            string outputDir = "output";
+            string inputGifPath = "Input/animation.gif";
+            string outputDirectory = "Output";
 
             if (!File.Exists(inputGifPath))
             {
@@ -21,22 +29,22 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
-            using (GifImage gif = (GifImage)Aspose.Imaging.Image.Load(inputGifPath))
+            using (GifImage gif = (GifImage)Image.Load(inputGifPath))
             {
-                int frameCount = gif.PageCount;
-                for (int i = 0; i < frameCount; i++)
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
+                    GifFrameBlock frame = (GifFrameBlock)gif.Pages[i];
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    var pngOptions = new PngOptions();
-                    gif.Save(outputPath, pngOptions);
+                    using (PngOptions pngOptions = new PngOptions())
+                    {
+                        frame.Save(outputPath, pngOptions);
+                    }
 
-                    using (Aspose.Imaging.RasterImage png = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(outputPath))
+                    using (RasterImage png = (RasterImage)Image.Load(outputPath))
                     {
                         bool hasTransparency = png.HasTransparentColor;
                         Console.WriteLine($"Frame {i}: Transparent = {hasTransparency}");
@@ -53,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify that each frame extracted from an animated GIF retains its transparency after conversion to PNG for quality‑assurance testing.
- * 2. When a QA pipeline must automatically generate PNG assets from GIF animations and record whether each image contains a transparent color.
- * 3. When you are building a content‑management workflow that extracts individual frames from GIFs, saves them as PNGs, and logs transparency to ensure correct rendering on web pages.
- * 4. When a developer wants to programmatically inspect the alpha channel of every frame in a GIF to detect loss of transparency during batch conversion.
- * 5. When creating automated reports that list the transparency status of PNG files produced from GIF frames for compliance with design guidelines.
+ * 1. When you need to verify that each frame extracted from an animated GIF retains its alpha channel before using the PNGs in a web carousel.
+ * 2. When performing quality assurance on converted assets to ensure transparent regions are preserved for UI overlays.
+ * 3. When generating individual PNG frames from a GIF for a sprite sheet and you must log which frames contain transparency.
+ * 4. When automating a pipeline that converts animated GIFs to PNG sequences and requires a transparency report for compliance with design guidelines.
+ * 5. When debugging image processing workflows and need to confirm that the HasTransparentColor property correctly reflects the presence of transparent pixels in each exported frame.
  */
