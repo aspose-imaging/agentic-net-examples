@@ -1,9 +1,14 @@
 // HOW-TO: Crop a Region from OTG Image and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,8 +16,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/cropped.png";
+            string inputPath = "input/input.otg";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,12 +27,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 if (!image.IsCached)
                     image.CacheData();
 
-                var cropRect = new Rectangle(50, 50, 200, 200);
+                var cropRect = new Aspose.Imaging.Rectangle(50, 50, 200, 200);
                 image.Crop(cropRect);
 
                 var pngOptions = new PngOptions();
@@ -43,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific part of an OTG diagram for a report and deliver it as a lightweight PNG file.
- * 2. When an application processes scanned engineering drawings in OTG format and must generate cropped thumbnails for a web gallery.
- * 3. When a batch job converts selected sections of OTG maps into PNG assets for use in mobile apps.
- * 4. When a document management system isolates a region of an OTG image to create a preview image without exposing the full original file.
- * 5. When a developer integrates Aspose.Imaging to programmatically cut out a logo area from an OTG file and save it as a PNG for branding purposes.
+ * 1. When you need to extract a specific part of an OTG map and deliver it as a lightweight PNG for web display.
+ * 2. When converting legacy OTG graphics from a design tool into PNG thumbnails for a mobile app.
+ * 3. When preprocessing scanned OTG documents by cropping out margins before archiving them as PNG files.
+ * 4. When generating region‑specific PNG assets from a large OTG sprite sheet for a game engine.
+ * 5. When automating a batch job that reads OTG files, crops a fixed area, and saves the result in PNG format for further analysis.
  */
