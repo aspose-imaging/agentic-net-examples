@@ -1,18 +1,26 @@
-// HOW-TO: Load DICOM Image Apply Fixed Threshold Binarization Save As TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM Image to Binary TIFF with Fixed Threshold in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            string inputPath = "input.dcm";
-            string outputPath = "output\\result.tiff";
+            string inputPath = Path.Combine("Input", "sample.dcm");
+            string outputPath = Path.Combine("Output", "output.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -22,30 +30,31 @@ namespace ImagingNet
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            try
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                using (var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+                RasterCachedImage rci = (RasterCachedImage)dicomImage;
+                if (!rci.IsCached)
                 {
-                    var raster = (RasterImage)dicomImage;
-                    if (!raster.IsCached) raster.CacheData();
-                    raster.BinarizeFixed(128);
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    raster.Save(outputPath, tiffOptions);
+                    rci.CacheData();
                 }
+                rci.BinarizeFixed(128);
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dicomImage.Save(outputPath, tiffOptions);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans into high‑contrast black‑and‑white TIFF files for easier viewing on standard picture viewers.
- * 2. When a radiology workflow requires batch processing of DICOM files to produce printable TIFF reports with a fixed threshold of 128 for consistent binary output.
- * 3. When a research project wants to archive DICOM images as lossless TIFFs after applying a fixed binarization step to simplify image analysis algorithms.
- * 4. When a healthcare integration service must extract pixel data from DICOM, apply a 128‑level threshold, and store the result in a TIFF format compatible with legacy PACS systems.
- * 5. When a developer needs to programmatically load a DICOM file in C#, perform fixed‑threshold binarization, and save the result as a TIFF for downstream processing in non‑medical software.
+ * 1. When a medical imaging application needs to create a high‑contrast black‑and‑white TIFF for archival or analysis from a DICOM scan.
+ * 2. When a radiology workflow requires converting DICOM files to a TIFF format that legacy viewers can display without loss of diagnostic detail.
+ * 3. When preprocessing DICOM images for OCR or pattern‑recognition algorithms that perform better on binary images with a fixed threshold.
+ * 4. When generating printable reports that embed binary TIFFs derived from DICOM scans to reduce file size and improve visual clarity.
+ * 5. When integrating DICOM data into a document management system that stores images as TIFF and requires a fixed‑threshold binarization step.
  */
