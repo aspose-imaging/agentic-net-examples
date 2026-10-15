@@ -1,31 +1,41 @@
-// HOW-TO: Convert OTG to PDF with 300 DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PDF with Custom DPI in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.otg";
-        string outputPath = "Output\\sample.pdf";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "result.pdf");
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (PdfOptions options = new PdfOptions())
                 {
-                    pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
-                    image.Save(outputPath, pdfOptions);
+                    options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
+                    options.PdfDocumentInfo = new PdfDocumentInfo();
+
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -38,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution printable PDFs from OTG vector graphics in a .NET application.
- * 2. When an automated document pipeline must convert archived OTG files to PDF while preserving 300 dpi quality for compliance.
- * 3. When a reporting tool requires embedding OTG diagrams into PDF reports with consistent DPI settings.
- * 4. When a web service receives OTG uploads and must return PDF versions optimized for screen and print rendering.
- * 5. When migrating legacy design assets stored as OTG into PDF format for integration with modern document management systems.
+ * 1. When a developer needs to generate high‑resolution printable PDFs from OTG vector graphics for marketing brochures.
+ * 2. When an application must batch‑convert OTG design files to PDF while preserving 300 dpi for accurate scaling in CAD workflows.
+ * 3. When a document management system requires OTG drawings to be stored as PDF with consistent resolution for archival compliance.
+ * 4. When a web service needs to render OTG images as PDF thumbnails at a specific DPI for preview generation.
+ * 5. When integrating Aspose.Imaging into a C# project to transform OTG files into PDF format for cross‑platform distribution with controlled image quality.
  */
