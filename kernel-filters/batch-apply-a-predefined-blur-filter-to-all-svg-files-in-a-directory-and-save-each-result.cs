@@ -1,4 +1,11 @@
-// HOW-TO: Batch Apply Gaussian Blur to All SVG Files in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Gaussian Blur to SVG Files and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -18,52 +25,44 @@ class Program
             Directory.CreateDirectory(outputDirectory);
 
             string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
-            foreach (string inputPath in svgFiles)
+
+            foreach (string svgPath in svgFiles)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(svgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {svgPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string tempPngPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_temp.png");
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_blur.png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image svgImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(svgPath))
                 {
-                    var rasterOptions = new SvgRasterizationOptions
+                    string tempPngPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(svgPath) + "_temp.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height
-                    };
+                        pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = svgImage.Width,
+                            PageHeight = svgImage.Height
+                        };
+                        svgImage.Save(tempPngPath, pngOptions);
+                    }
 
-                    var pngOptions = new PngOptions
+                    using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
                     {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                        var blurOptions = new GaussianBlurFilterOptions(5, 1.0);
+                        raster.Filter(raster.Bounds, blurOptions);
 
-                    svgImage.Save(tempPngPath, pngOptions);
-                }
+                        string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(svgPath) + "_blur.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        raster.Save(outputPath);
+                    }
 
-                using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-                {
-                    var blurOptions = new GaussianBlurFilterOptions
+                    if (File.Exists(tempPngPath))
                     {
-                        Radius = 5,
-                        Sigma = 2.0
-                    };
-
-                    raster.Filter(raster.Bounds, blurOptions);
-                    raster.Save(outputPath);
-                }
-
-                // Optionally delete the temporary PNG
-                if (File.Exists(tempPngPath))
-                {
-                    File.Delete(tempPngPath);
+                        File.Delete(tempPngPath);
+                    }
                 }
             }
         }
@@ -76,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically soften vector graphics before publishing them on a website, you can batch blur all SVG assets with this code.
- * 2. When a design pipeline requires converting SVG icons to raster PNGs, applying a Gaussian blur, and saving the results for use in mobile apps, this script handles the whole process.
- * 3. When you want to create a consistent blurred background effect for a set of SVG illustrations in a marketing campaign, the code processes every file in a folder without manual editing.
- * 4. When generating preview thumbnails of SVG diagrams with a subtle blur to protect proprietary details, the program rasterizes, blurs, and stores the images automatically.
- * 5. When integrating image preprocessing into a CI/CD workflow to ensure all SVG assets meet a blur standard before deployment, this batch routine can be invoked as part of the build script.
+ * 1. When you need to automatically add a soft blur effect to a large collection of SVG icons before publishing them as PNG assets.
+ * 2. When you want to generate blurred preview thumbnails from vector graphics for a web gallery using C#.
+ * 3. When a design pipeline requires converting SVG logos to raster PNGs with a consistent blur radius for UI consistency.
+ * 4. When you must process all SVG files in a folder to create blurred watermarks for PDF reports without manual editing.
+ * 5. When an automated build script has to apply a Gaussian blur filter to SVG diagrams and output PNGs for documentation screenshots.
  */
