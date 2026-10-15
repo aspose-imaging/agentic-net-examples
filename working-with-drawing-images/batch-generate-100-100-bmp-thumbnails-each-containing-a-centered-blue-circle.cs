@@ -1,11 +1,16 @@
-// HOW-TO: Create 100x100 BMP Thumbnails with Blue Circle in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 100x100 BMP Thumbnails With Blue Circle Overlay In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,45 +18,47 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDir);
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + "_thumb.bmp");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
-                using (BmpImage canvas = (BmpImage)Image.Create(options, 100, 100))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
-                    SolidBrush brush = new SolidBrush(Color.Blue);
-                    Rectangle circleRect = new Rectangle(10, 10, 80, 80);
-                    graphics.FillEllipse(brush, circleRect);
-                    canvas.Save();
+                    image.Resize(100, 100, ResizeType.NearestNeighbourResample);
+
+                    Graphics graphics = new Graphics(image);
+                    Pen bluePen = new Pen(Color.Blue);
+                    graphics.DrawEllipse(bluePen, new Rectangle(0, 0, 100, 100));
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (BmpOptions bmpOptions = new BmpOptions() { Source = new FileCreateSource(outputPath, false) })
+                    {
+                        image.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -64,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate small BMP preview images for a collection of files to display in a Windows desktop application.
- * 2. When you want to automatically create 100 × 100 icons with a blue circular logo for a product catalog stored as BMP files.
- * 3. When a batch process must add a consistent visual marker (blue circle) to each image before uploading to a legacy system that only accepts BMP format.
- * 4. When you are building a game asset pipeline that requires uniform 100 px BMP sprites with a centered circle for collision testing.
- * 5. When you need to convert a folder of source images into BMP thumbnails for printing proofs while preserving a simple vector‑style graphic.
+ * 1. When you need to generate small BMP preview images for a gallery of user‑uploaded photos, adding a blue circle watermark to each thumbnail.
+ * 2. When a desktop application must create uniform 100 × 100 icons from various source formats and mark them with a centered blue circle for visual identification.
+ * 3. When an automated pipeline processes a folder of images and outputs BMP thumbnails that include a simple graphic element for testing rendering pipelines.
+ * 4. When you want to batch‑convert a collection of pictures into BMP files of exact size while drawing a blue ellipse to verify drawing APIs in Aspose.Imaging.
+ * 5. When a reporting tool requires fixed‑size BMP thumbnails with a blue circle overlay to represent status symbols across multiple input images.
  */
