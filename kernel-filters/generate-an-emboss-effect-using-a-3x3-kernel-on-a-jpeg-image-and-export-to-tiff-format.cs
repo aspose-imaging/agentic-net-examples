@@ -1,9 +1,15 @@
 // HOW-TO: Apply Emboss Filter to JPEG and Save as TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\embossed.tiff";
+            string inputPath = "input.jpg";
+            string outputPath = "output.tiff";
 
             if (!File.Exists(inputPath))
             {
@@ -21,16 +27,11 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
                 double[,] embossKernel = new double[,]
                 {
@@ -39,7 +40,7 @@ class Program
                     { 0, 1, 2 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+                var filterOptions = new ConvolutionFilterOptions(embossKernel);
                 raster.Filter(raster.Bounds, filterOptions);
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to give a JPEG photograph a raised‑relief look and store the result as a lossless TIFF for archival purposes.
- * 2. When a web service must generate embossed thumbnails from user‑uploaded JPEGs before saving them in a TIFF‑based document repository.
- * 3. When an automated batch job applies a 3×3 convolution kernel to convert color images into embossed versions for printing on high‑resolution TIFF media.
- * 4. When a desktop application requires applying a custom emboss filter to an image and then exporting it to TIFF to maintain compatibility with legacy imaging systems.
- * 5. When you want to preprocess scanned JPEG images with an emboss effect to enhance edge detection before further analysis in a TIFF workflow.
+ * 1. When you need to add a stylized emboss effect to user‑uploaded JPEG photos before archiving them as lossless TIFF files.
+ * 2. When a document‑management system must convert scanned JPEG images into TIFF while enhancing edges for better OCR readability.
+ * 3. When a web service generates printable TIFF assets from JPEG product images and wants a quick 3×3 convolution to highlight texture.
+ * 4. When a batch‑processing tool applies a custom kernel to JPEG graphics to create a raised‑look preview and stores the result in TIFF for downstream workflows.
+ * 5. When a desktop application needs to demonstrate Aspose.Imaging’s convolution filter by embossing a JPEG and exporting the result to a TIFF for archival quality.
  */
