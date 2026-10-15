@@ -1,8 +1,16 @@
-// HOW-TO: Extract EPS Preview Image to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract EPS Preview Image and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 namespace EpsPreviewExtractor
 {
@@ -13,7 +21,7 @@ namespace EpsPreviewExtractor
             try
             {
                 string inputPath = "input.eps";
-                string outputPath = "preview.png";
+                string outputPath = "output/preview.png";
 
                 if (!File.Exists(inputPath))
                 {
@@ -21,13 +29,14 @@ namespace EpsPreviewExtractor
                     return;
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
                 {
                     using (Image preview = epsImage.GetPreviewImage())
                     {
-                        preview.Save(outputPath);
+                        var pngOptions = new PngOptions();
+                        preview.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -41,9 +50,9 @@ namespace EpsPreviewExtractor
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a thumbnail PNG of an EPS file for a web gallery or product catalog.
- * 2. When you want to display a low‑resolution preview of a vector logo in a desktop application without rendering the full EPS.
- * 3. When you must batch‑process EPS files to extract their embedded previews before converting them to other raster formats.
- * 4. When you are building a document management system that shows a quick PNG preview of uploaded EPS artwork.
- * 5. When you need to verify that an EPS file contains a preview image by saving it as PNG for further analysis.
+ * 1. When you need to generate thumbnail previews of EPS files for a web gallery.
+ * 2. When you want to convert EPS artwork into a raster PNG for printing or PDF embedding.
+ * 3. When an application must display EPS content on devices that only support PNG images.
+ * 4. When you need to extract the embedded preview from an EPS to compare versions in a version‑control system.
+ * 5. When automating batch processing of EPS files to create preview images for a digital asset management system.
  */

@@ -3,14 +3,13 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -21,7 +20,8 @@ class Program
         try
         {
             string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.tiff";
+            string outputPath = "Output/output.tiff";
+            string iccPath = "profile.icc";
 
             if (!File.Exists(inputPath))
             {
@@ -31,30 +31,25 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            byte[] iccData = null;
+            if (File.Exists(iccPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
+                iccData = File.ReadAllBytes(iccPath);
+            }
+
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            {
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height,
                     BackgroundColor = Color.White
                 };
-
-                using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                if (iccData != null)
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300)
-                })
-                {
-                    string iccPath = "profile.icc";
-                    if (File.Exists(iccPath))
-                    {
-                        byte[] iccData = File.ReadAllBytes(iccPath);
-                        tiffOptions.IccProfile = new MemoryStream(iccData);
-                    }
-
-                    epsImage.Save(outputPath, tiffOptions);
+                    tiffOptions.IccProfile = new MemoryStream(iccData);
                 }
+
+                epsImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a print‑ready EPS artwork into a high‑resolution 300 DPI TIFF for pre‑press workflows while preserving color accuracy with an embedded ICC profile.
- * 2. When a desktop application must display or archive vector graphics as raster images that match the original size and background, using C# and Aspose.Imaging.
- * 3. When generating thumbnails or PDFs from EPS files for a digital asset management system that requires TIFF output at a specific resolution and embedded color profile.
- * 4. When automating batch processing of EPS logos to create print‑ready TIFF files for a publishing pipeline that demands consistent DPI and color management.
- * 5. When integrating a C# service that receives EPS files and needs to deliver them as TIFFs suitable for high‑quality printing, ensuring the correct resolution and ICC profile are applied.
+ * 1. When a print shop needs to convert client‑provided EPS artwork into high‑resolution 300 DPI TIFF files with an embedded ICC profile to ensure accurate colors before printing.
+ * 2. When a desktop publishing application must generate preview images of vector EPS logos as TIFFs for inclusion in PDFs while preserving color management.
+ * 3. When an automated build pipeline processes EPS assets and creates color‑calibrated TIFFs for a digital asset management system.
+ * 4. When a web service receives EPS files and returns 300 DPI TIFF thumbnails that match the original color space using an embedded ICC profile.
+ * 5. When a scientific reporting tool rasterizes EPS diagrams into TIFF format for high‑quality print reports and needs to embed the lab’s ICC profile for consistent color reproduction.
  */

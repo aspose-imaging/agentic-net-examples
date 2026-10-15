@@ -1,40 +1,54 @@
-// HOW-TO: Save EMF With Custom Vector Rasterization Options In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF to JPEG with Custom Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input/input.emf";
-            string outputPath = "output/output.emf";
+            // Hardcoded input and output paths
+            string inputPath = "input.emf";
+            string outputPath = "output\\output.jpg";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load EMF image
+            using (var emfImage = Image.Load(inputPath) as EmfImage)
             {
-                EmfOptions options = new EmfOptions();
+                if (emfImage == null)
+                {
+                    Console.Error.WriteLine("Failed to load EMF image.");
+                    return;
+                }
 
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions();
-                vectorOptions.BackgroundColor = Color.White;
-                vectorOptions.PageWidth = image.Width;
-                vectorOptions.PageHeight = image.Height;
-                vectorOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                vectorOptions.SmoothingMode = SmoothingMode.None;
+                // Configure JPEG options to control output quality
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90 // Adjust quality as needed (0-100)
+                };
 
-                options.VectorRasterizationOptions = vectorOptions;
-
-                image.Save(outputPath, options);
+                // Save EMF as JPEG with the specified options
+                emfImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to re‑save an existing EMF file with a white background and no smoothing to ensure consistent printing results.
- * 2. When you want to render text in an EMF as single‑bit per pixel to reduce file size in a C# reporting tool.
- * 3. When you must preserve the original dimensions of an EMF while applying specific rasterization settings before embedding it in a PDF document.
- * 4. When you are generating EMF graphics programmatically and need to control page width, height, and rendering hints using Aspose.Imaging in .NET.
- * 5. When you need to apply custom vector rasterization options to an EMF to meet corporate branding guidelines for color and smoothing.
+ * 1. When you need to generate high‑resolution JPEG thumbnails from vector EMF graphics for web preview.
+ * 2. When exporting reports that contain EMF charts to JPEG files to embed in email attachments.
+ * 3. When converting legacy EMF logos to JPEG format while controlling compression to meet size constraints.
+ * 4. When processing batch EMF drawings on a server and saving them as JPEGs with a specific quality setting.
+ * 5. When integrating Aspose.Imaging into a C# application to transform vector drawings into raster images for printing workflows.
  */

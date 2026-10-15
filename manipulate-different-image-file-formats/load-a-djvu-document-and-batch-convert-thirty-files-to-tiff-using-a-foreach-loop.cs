@@ -1,6 +1,14 @@
-// HOW-TO: Batch Convert Up To 30 DjVu Files To TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Up to 30 DjVu Files to TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -16,6 +24,8 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            Directory.CreateDirectory(outputDirectory);
+
             string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
             int processed = 0;
 
@@ -30,15 +40,16 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tiff");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                 {
-                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                    {
-                        djvu.Save(outputPath, tiffOptions);
-                    }
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
+                    djvu.Save(outputPath, tiffOptions);
                 }
 
                 processed++;
@@ -53,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automate conversion of a large set of scanned DjVu documents into multi‑page TIFF files for archival or OCR processing.
- * 2. When an application must limit the conversion to the first thirty DjVu files in a folder to avoid excessive memory usage.
- * 3. When a batch job has to create TIFF versions of DjVu files to ensure compatibility with legacy systems that only accept TIFF.
- * 4. When a C# service processes incoming DjVu uploads and stores them as TIFF images for downstream image analysis pipelines.
- * 5. When a developer wants to use a foreach loop to iterate through files, load each DjVu image, and save it with default TIFF options in a specified output directory.
+ * 1. When you need to automate conversion of a large set of scanned DjVu documents into multi‑page TIFF files for archival or OCR processing.
+ * 2. When a document management system requires TIFF images but the source files are provided as DjVu, and you want to process up to thirty files at a time.
+ * 3. When you are building a batch‑processing tool that reads DjVu files from a folder and saves them as TIFFs for compatibility with legacy Windows applications.
+ * 4. When you must limit the conversion to the first thirty DjVu files to avoid overloading resources while still generating TIFF output for each.
+ * 5. When you need to programmatically create TIFF files with multi‑page support from DjVu sources using Aspose.Imaging in a C# console application.
  */

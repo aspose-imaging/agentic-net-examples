@@ -1,16 +1,23 @@
 // HOW-TO: Resize WebP Image to Half Size with High Quality in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.webp";
-        string outputPath = "output\\resized.webp";
+        string outputPath = "output.webp";
 
         try
         {
@@ -20,22 +27,34 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (WebPImage image = (WebPImage)Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
             {
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
+                outputDir = ".";
+            }
+            Directory.CreateDirectory(outputDir);
 
-                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+            using (Image image = Image.Load(inputPath))
+            {
+                WebPImage webp = image as WebPImage;
+                if (webp == null)
+                {
+                    Console.Error.WriteLine("Input file is not a WebP image.");
+                    return;
+                }
+
+                int newWidth = webp.Width / 2;
+                int newHeight = webp.Height / 2;
+
+                webp.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
 
                 WebPOptions options = new WebPOptions
                 {
-                    Lossless = false,
-                    Quality = 100
+                    Quality = 90,
+                    Lossless = false
                 };
 
-                image.Save(outputPath, options);
+                webp.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a smaller, high‑quality version of an existing WebP photo for responsive web design.
- * 2. When a mobile app must downscale user‑uploaded WebP images to reduce bandwidth while preserving visual fidelity.
- * 3. When an e‑commerce platform wants to create half‑size product thumbnails from original WebP assets without losing quality.
- * 4. When a content management system automatically resizes WebP graphics before storing them to save disk space yet keep sharpness.
- * 5. When a batch‑processing script must update legacy WebP files to a standardized size for consistent display across browsers.
+ * 1. When you need to generate smaller thumbnail versions of WebP photos for faster web page loading while preserving visual fidelity.
+ * 2. When an e‑commerce platform must reduce the dimensions of product images stored as WebP to meet a maximum file size limit without sacrificing quality.
+ * 3. When a mobile app needs to downscale user‑uploaded WebP pictures before uploading them to conserve bandwidth.
+ * 4. When a content management system automatically creates optimized WebP previews for galleries by resizing originals to half their size.
+ * 5. When a batch‑processing script updates existing WebP assets to a consistent resolution and quality setting for SEO‑friendly image delivery.
  */

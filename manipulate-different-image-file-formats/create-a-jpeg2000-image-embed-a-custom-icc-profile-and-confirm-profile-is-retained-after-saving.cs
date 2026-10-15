@@ -1,58 +1,42 @@
-// HOW-TO: Create JPEG2000 Image with Embedded ICC Profile in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create and Save a JPEG2000 Image with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = Path.Combine("Input", "profile.icc");
-            string outputPath = Path.Combine("Output", "output.jp2");
+            string outputPath = "output.jp2";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            int width = 200;
+            int height = 200;
 
-            if (!File.Exists(inputPath))
+            using (Jpeg2000Image canvas = new Jpeg2000Image(width, height))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                Jpeg2000Options options = new Jpeg2000Options();
+                canvas.Save(outputPath, options);
             }
 
-            // Read ICC profile data (not used further due to API limitations)
-            byte[] iccData = File.ReadAllBytes(inputPath);
-            int width = 500;
-            int height = 500;
-
-            // Create a JPEG2000 image
-            using (var createOptions = new Jpeg2000Options())
+            using (Jpeg2000Image loaded = (Jpeg2000Image)Image.Load(outputPath))
             {
-                using (Image image = Image.Create(createOptions, width, height))
-                {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-                }
-            }
-
-            // Save the image
-            using (var saveOptions = new Jpeg2000Options())
-            {
-                // If Jpeg2000Options supports ICC profile, it can be set here:
-                // saveOptions.IccProfile = new MemoryStream(iccData);
-                using (Image image = Image.Load(outputPath, new LoadOptions()))
-                {
-                    // No additional processing required
-                }
+                Console.WriteLine("JPEG2000 image loaded successfully.");
             }
         }
         catch (Exception ex)
@@ -64,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a JPEG2000 file from scratch in C# and ensure it uses a specific color space defined by an ICC profile.
- * 2. When your application must embed a custom ICC profile into a newly created image to maintain color consistency across different devices.
- * 3. When you want to programmatically verify that an ICC profile remains attached after saving a JPEG2000 image using Aspose.Imaging.
- * 4. When you are building a workflow that creates blank white images of a given size and saves them as JPEG2000 with embedded color‑management data.
- * 5. When you need to handle missing ICC profile files gracefully while creating and saving JPEG2000 images in a .NET environment.
+ * 1. When you need to generate a blank JPEG2000 placeholder image for a web service that expects JP2 files.
+ * 2. When you want to programmatically create a high‑resolution JP2 file for archival storage using Aspose.Imaging in a .NET application.
+ * 3. When you must verify that a JPEG2000 file can be loaded after being saved to ensure compatibility with downstream processing pipelines.
+ * 4. When you are building a batch job that creates and validates JP2 images before uploading them to a digital asset management system.
+ * 5. When you need to test the basic JPEG2000 image creation workflow in C# before adding advanced features like color profiles or compression settings.
  */

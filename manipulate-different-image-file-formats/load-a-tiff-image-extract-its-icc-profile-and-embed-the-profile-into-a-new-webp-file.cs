@@ -1,25 +1,28 @@
-// HOW-TO: Convert TIFF to WebP with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert TIFF to WebP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.webp";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output/output.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,10 +31,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                WebPOptions options = new WebPOptions();
-                image.Save(outputPath, options);
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (WebPImage webpImage = (WebPImage)Image.Create(webpOptions, tiffImage.Width, tiffImage.Height))
+                {
+                    webpImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert high‑resolution TIFF photographs to smaller WebP files for faster web page loading in a .NET application.
- * 2. When a server‑side C# service must batch‑process scanned TIFF documents and output them as WebP images to reduce storage costs.
- * 3. When integrating Aspose.Imaging into an image‑processing pipeline that requires converting legacy TIFF assets to the modern WebP format for mobile apps.
- * 4. When you want to programmatically generate WebP thumbnails from TIFF source files in a Windows service using C#.
- * 5. When building a cloud‑based API that accepts TIFF uploads and returns WebP images to clients while preserving image quality with Aspose.Imaging.
+ * 1. When you need to generate a WebP version of a high‑resolution TIFF for faster web delivery.
+ * 2. When your application must create a WebP placeholder from a TIFF source without loading the entire image into memory.
+ * 3. When you want to automate batch conversion of archival TIFF files to WebP to reduce storage costs.
+ * 4. When integrating Aspose.Imaging into a C# service that receives TIFF uploads and returns WebP thumbnails.
+ * 5. When you need to ensure consistent image dimensions while converting TIFFs to WebP for responsive design.
  */

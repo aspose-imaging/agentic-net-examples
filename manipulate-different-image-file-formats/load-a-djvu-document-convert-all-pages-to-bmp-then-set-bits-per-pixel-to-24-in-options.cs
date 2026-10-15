@@ -1,62 +1,55 @@
-// HOW-TO: Convert DjVu Pages to 24‑Bit BMP Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Document to 24‑Bit BMP Images in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "input.djvu";
+            string outputPath = "output/output.bmp";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.djvu";
-                string outputFolder = "output";
-                string outputPathPattern = Path.Combine(outputFolder, "page_{0}.bmp");
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(outputFolder);
-
-                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-                {
-                    int pageCount = djvu.Pages.Length;
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        string outPath = string.Format(outputPathPattern, i + 1);
-                        BmpOptions options = new BmpOptions();
-                        djvu.Pages[i].Save(outPath, options);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.MultiPageOptions = new DjvuMultiPageOptions();
+
+                image.Save(outputPath, bmpOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page DjVu file and save them as high‑quality 24‑bit BMP images for further processing in Windows applications.
- * 2. When a document archiving system requires conversion of scanned DjVu documents into BMP format to preserve lossless pixel data for OCR engines.
- * 3. When a legacy graphics pipeline only accepts BMP images, you can programmatically transform DjVu pages to 24‑bit BMPs using Aspose.Imaging in C#.
- * 4. When preparing DjVu‑based e‑books for printing, converting each page to BMP ensures compatibility with printers that require bitmap input.
- * 5. When building a batch conversion tool that processes a folder of DjVu files and outputs separate BMP files per page for use in image analysis or machine‑learning models.
+ * 1. When you need to extract high‑quality bitmap pages from a multi‑page DjVu file for printing or further image analysis in a .NET application.
+ * 2. When a legacy system only accepts 24‑bit BMP files and you must convert incoming DjVu documents without losing page information.
+ * 3. When preparing DjVu‑based e‑books for Windows desktop viewers that require BMP format with a specific bits‑per‑pixel setting.
+ * 4. When automating a batch process that converts scanned DjVu archives into BMP images for OCR engines that work best with 24‑bit color depth.
+ * 5. When integrating Aspose.Imaging into a C# service that receives DjVu uploads and needs to store each page as a BMP file for downstream graphics pipelines.
  */

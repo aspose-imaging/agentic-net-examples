@@ -1,9 +1,9 @@
-// HOW-TO: Add Custom Sized CCITT Group 4 TIFF Frame With 300 DPI In C# (Aspose.Imaging for .NET)
+// HOW-TO: Add a TIFF Frame with Custom Size and CCITT Group 4 Compression in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -17,11 +17,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output\\output.tif";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output\\output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,19 +32,17 @@ class Program
 
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
+                int width = 800;
+                int height = 600;
+
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
                 frameOptions.Compression = TiffCompressions.CcittFax4;
+                frameOptions.Xresolution = new TiffRational(300, 1);
+                frameOptions.Yresolution = new TiffRational(300, 1);
+                frameOptions.ResolutionUnit = TiffResolutionUnits.Inch;
 
-                int frameWidth = 800;
-                int frameHeight = 600;
-
-                using (TiffFrame newFrame = new TiffFrame(frameOptions, frameWidth, frameHeight))
-                {
-                    newFrame.HorizontalResolution = 300;
-                    newFrame.VerticalResolution = 300;
-                    tiffImage.AddFrame(newFrame);
-                }
-
+                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+                tiffImage.AddFrame(newFrame);
                 tiffImage.Save(outputPath);
             }
         }
@@ -57,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a high‑resolution, fax‑compatible TIFF page for archival scanning systems.
- * 2. When adding a new page to an existing multi‑page TIFF document with specific width, height, and 300 DPI resolution for printing.
- * 3. When generating a compressed TIFF frame using CCITT Group 4 to reduce file size while preserving black‑and‑white scan quality.
- * 4. When integrating scanned documents into a workflow that requires each page to have exact dimensions and DPI metadata for downstream OCR processing.
- * 5. When building a document management solution that must append additional TIFF frames with uniform compression and resolution settings to maintain consistency across all pages.
+ * 1. When you need to append a high‑compression scanned page to an existing multi‑page TIFF for archival storage.
+ * 2. When generating a fax‑ready TIFF document with precise 300 dpi resolution for legal or medical records.
+ * 3. When creating a multi‑resolution TIFF where each frame has its own dimensions and CCITT Group 4 compression to reduce file size.
+ * 4. When converting scanned images into a single TIFF file that meets printer or scanner DPI specifications.
+ * 5. When programmatically adding a new page to a TIFF file in a C# application while controlling compression and resolution settings.
  */

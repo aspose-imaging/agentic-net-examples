@@ -1,71 +1,70 @@
-// HOW-TO: Export SVG to HTML5 Canvas and Embed in React Component using C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to HTML5 Canvas and Generate React Component in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Text;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-namespace VectorExport
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "input.svg";
+            string htmlOutputPath = "output.html";
+            string reactComponentPath = "CanvasComponent.jsx";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "vector.svg";
-                string outputPath = "CanvasComponent.jsx";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                string svgContent = File.ReadAllText(inputPath);
-                string svgBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(svgContent));
-                string dataUrl = $"data:image/svg+xml;base64,{svgBase64}";
-
-                var sb = new StringBuilder();
-                sb.AppendLine("import React, { useRef, useEffect } from 'react';");
-                sb.AppendLine();
-                sb.AppendLine("const CanvasComponent = () => {");
-                sb.AppendLine("  const canvasRef = useRef(null);");
-                sb.AppendLine();
-                sb.AppendLine("  useEffect(() => {");
-                sb.AppendLine("    const canvas = canvasRef.current;");
-                sb.AppendLine("    if (!canvas) return;");
-                sb.AppendLine("    const ctx = canvas.getContext('2d');");
-                sb.AppendLine("    const img = new Image();");
-                sb.AppendLine($"    img.src = \"{dataUrl}\";");
-                sb.AppendLine("    img.onload = () => {");
-                sb.AppendLine("      ctx.clearRect(0, 0, canvas.width, canvas.height);");
-                sb.AppendLine("      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);");
-                sb.AppendLine("    };");
-                sb.AppendLine("  }, []);");
-                sb.AppendLine();
-                sb.AppendLine("  return (");
-                sb.AppendLine("    <canvas ref={canvasRef} width={500} height={500} />");
-                sb.AppendLine("  );");
-                sb.AppendLine("};");
-                sb.AppendLine();
-                sb.AppendLine("export default CanvasComponent;");
-
-                File.WriteAllText(outputPath, sb.ToString());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            string htmlDir = Path.GetDirectoryName(htmlOutputPath) ?? ".";
+            Directory.CreateDirectory(htmlDir);
+
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                Html5CanvasOptions options = new Html5CanvasOptions();
+                image.Save(htmlOutputPath, options);
             }
+
+            string htmlContent = File.ReadAllText(htmlOutputPath);
+            string escapedHtml = htmlContent
+                .Replace("\\", "\\\\")
+                .Replace("`", "\\`")
+                .Replace("{", "{{")
+                .Replace("}", "}}");
+
+            string componentCode = "import React from 'react';\n\n" +
+                                   "const CanvasComponent = () => (\n" +
+                                   "  <div dangerouslySetInnerHTML={{ __html: `" + escapedHtml + "` }} />\n" +
+                                   ");\n\n" +
+                                   "export default CanvasComponent;";
+
+            string componentDir = Path.GetDirectoryName(reactComponentPath) ?? ".";
+            Directory.CreateDirectory(componentDir);
+            File.WriteAllText(reactComponentPath, componentCode);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a server‑side SVG file inside a React web app without loading external assets, you can convert it to a Base64 data URL and draw it on an HTML5 canvas using C#.
- * 2. When building a dynamic dashboard that renders vector icons on a canvas for high‑resolution scaling, this code lets you generate a ready‑to‑use React component from an SVG at build time.
- * 3. When you want to embed vector graphics in a single‑page application while keeping the bundle size low, you can pre‑process the SVG in .NET and output a self‑contained React canvas component.
- * 4. When integrating legacy design assets stored as SVG into a modern React front‑end, this approach automates the conversion to a canvas element that works across browsers.
- * 5. When creating a reusable UI library that supplies vector illustrations as React components, you can use this C# script to produce JSX files that render the SVG on an HTML5 canvas.
+ * 1. When you need to display a scalable vector graphic on a web page using an HTML5 canvas inside a React application, this code converts the SVG to canvas markup and creates a ready‑to‑use React component.
+ * 2. When a design team provides logos or icons in SVG format and the front‑end team works with React, you can automate the conversion to canvas and embed it without manually rewriting the markup.
+ * 3. When building a cross‑platform .NET service that prepares interactive graphics for a React front‑end, the code lets you generate the HTML5 canvas HTML and package it as a JSX component in one step.
+ * 4. When you want to avoid loading external SVG files at runtime for performance or security reasons, you can pre‑render the SVG to a canvas string and embed it directly in the React component’s dangerouslySetInnerHTML.
+ * 5. When integrating Aspose.Imaging into a CI/CD pipeline to produce static React components from vector assets, this script automates the export, escaping, and file creation process.
  */

@@ -1,55 +1,71 @@
-// HOW-TO: Extract Each Frame From Animated GIF and Save As PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract Each Frame from Animated GIF and Save as PNG Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
-class Program
+namespace GifFrameExtractor
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "Input/animated.gif";
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.gif";
+                string outputFolder = "output_frames";
 
-            string outputDirectory = "Output";
-            Directory.CreateDirectory(outputDirectory);
-
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
-            {
-                int frameCount = gif.PageCount;
-                for (int i = 0; i < frameCount; i++)
+                if (!File.Exists(inputPath))
                 {
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    using (var pngOptions = new PngOptions())
+                Directory.CreateDirectory(outputFolder);
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    if (image is IMultipageImage multipage)
                     {
-                        gif.Save(outputPath, pngOptions);
+                        int index = 0;
+                        foreach (var page in multipage.Pages)
+                        {
+                            string outputPath = Path.Combine(outputFolder, $"frame_{index:D4}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            var pngOptions = new PngOptions();
+                            page.Save(outputPath, pngOptions);
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        string outputPath = Path.Combine(outputFolder, "frame_0000.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var pngOptions = new PngOptions();
+                        image.Save(outputPath, pngOptions);
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to break down an animated GIF into individual PNG images for further editing or analysis.
- * 2. When you want to generate thumbnail previews for each frame of a GIF to display in a gallery.
- * 3. When you are converting GIF animation frames to PNG to preserve transparency for use in UI components.
- * 4. When you need to extract frames from a GIF to create a sprite sheet or video sequence in a game.
- * 5. When you are processing GIF frames server‑side to store them as separate files for archival or compliance purposes.
+ * 1. When you need to break down an animated GIF into individual PNG frames for creating a sprite sheet or video editing.
+ * 2. When you want to generate high-quality PNG thumbnails for each animation step to display in a web gallery.
+ * 3. When you are preprocessing GIF animations for machine-learning models that require separate image inputs.
+ * 4. When you must archive every frame of a GIF as lossless PNG files for compliance or documentation purposes.
+ * 5. When you are building a custom slideshow that loads each GIF frame as a separate PNG to apply per-frame effects in a C# application.
  */

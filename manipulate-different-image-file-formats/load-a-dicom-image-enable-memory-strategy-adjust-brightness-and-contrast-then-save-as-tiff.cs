@@ -1,9 +1,16 @@
-// HOW-TO: Load DICOM, Adjust Brightness and Contrast, Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load DICOM Image, Adjust Brightness and Contrast, Save As TIFF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -23,15 +30,14 @@ class Program
 
         try
         {
-            var loadOptions = new LoadOptions { BufferSizeHint = 50 };
-            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath, loadOptions))
+            var loadOptions = new LoadOptions { BufferSizeHint = 64 * 1024 * 1024 };
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath, loadOptions))
             {
-                var raster = (RasterImage)dicomImage;
-                raster.AdjustBrightness(50);
-                raster.AdjustContrast(0.2f);
+                dicom.AdjustBrightness(50);
+                dicom.AdjustContrast(0.2f);
 
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
+                dicom.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert raw DICOM scans to TIFF for archival while enhancing visibility by brightening and increasing contrast.
- * 2. When a radiology workflow requires processing large DICOM files with limited memory, using a buffer hint to avoid out‑of‑memory errors.
- * 3. When a developer wants to prepare DICOM images for downstream analysis tools that only accept TIFF format.
- * 4. When an imaging system must programmatically improve the visual quality of DICOM images before displaying them in a .NET UI.
- * 5. When integrating Aspose.Imaging into a C# service that automatically transforms incoming DICOM uploads into high‑contrast TIFF files for reporting.
+ * 1. When a radiology software needs to convert raw DICOM scans to high‑resolution TIFF files while enhancing visibility by increasing brightness and contrast.
+ * 2. When a healthcare application must process large DICOM files on limited memory by using a custom buffer size before exporting them to TIFF for archival.
+ * 3. When a developer wants to integrate Aspose.Imaging to adjust image quality of medical images programmatically and store the results in a widely supported TIFF format.
+ * 4. When a PACS system requires automated preprocessing of DICOM images to improve diagnostic clarity before sending them to external viewers that only support TIFF.
+ * 5. When a C# batch‑processing tool needs to read DICOM files, apply consistent brightness/contrast corrections, and save the output as TIFF for further analysis or printing.
  */

@@ -1,25 +1,34 @@
-// HOW-TO: Load CMX Vector File and Get Dimensions in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Load a CMX Vector File and Get Its Dimensions in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cmx";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmx = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Image.Load(inputPath))
+            string inputPath = "input.cmx";
+
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine($"CMX loaded. Width: {cmx.Width}, Height: {cmx.Height}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
+                Console.WriteLine($"CMX image loaded. Width: {cmx.Width}, Height: {cmx.Height}");
+                Console.WriteLine($"Page count: {cmx.PageCount}");
             }
         }
         catch (Exception ex)
@@ -31,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to verify that a CMX vector file is accessible and retrieve its width and height before converting it to another image format.
- * 2. When building a batch processor that scans a directory of CMX files to collect their dimensions for a reporting dashboard.
- * 3. When integrating legacy CorelDRAW CMX assets into a .NET application and you must confirm the image metadata such as canvas size.
- * 4. When creating a quality‑check tool that flags CMX files with unexpected width or height values during import.
- * 5. When troubleshooting import errors by loading a CMX file and printing its basic properties to the console.
+ * 1. When you need to read a CorelDRAW CMX file in a .NET application to extract its width, height, and page count for layout calculations.
+ * 2. When you want to verify that a CMX vector image exists and retrieve its page count before converting it to another format.
+ * 3. When building a batch‑processing tool that logs the dimensions of multiple CMX files for quality‑control reporting.
+ * 4. When integrating legacy CMX assets into a modern imaging pipeline and need to programmatically confirm image size and page information.
+ * 5. When creating a reporting feature that displays basic metadata of CMX drawings to end‑users in a Windows application.
  */

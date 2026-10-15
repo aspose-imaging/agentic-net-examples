@@ -1,73 +1,67 @@
-// HOW-TO: Batch Convert EMF Files to SVG with Vector Fidelity in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+namespace EmfToSvgBatch
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "InputEmf";
+            string outputDirectory = "OutputSvg";
 
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                if (!Directory.Exists(inputDirectory))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"Directory not found: {inputDirectory}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+                foreach (string inputPath in emfFiles)
                 {
-                    using (SvgOptions options = new SvgOptions())
+                    if (!File.Exists(inputPath))
                     {
-                        var rasterOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
-                        options.VectorRasterizationOptions = rasterOptions;
-                        image.Save(outputPath, options);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (EmfImage image = (EmfImage)Image.Load(inputPath))
+                    {
+                        image.Save(outputPath, new SvgOptions());
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a library of legacy EMF diagrams to web‑compatible SVG files while keeping the original vector quality.
- * 2. When you want to automate the conversion of all EMF icons in a folder to scalable SVG assets for a responsive UI.
- * 3. When you are preparing print‑ready graphics and must preserve exact dimensions by converting EMF to SVG in a batch process.
- * 4. When a CI/CD pipeline must generate SVG versions of EMF charts for documentation generation without manual intervention.
- * 5. When you are building a cross‑platform application that requires vector images in SVG format and you have existing EMF resources to convert programmatically.
+ * 1. When you need to migrate a library of legacy EMF icons to scalable SVG format for modern web applications.
+ * 2. When generating vector graphics for PDF reports and want to ensure the images remain resolution‑independent by converting EMF to SVG in bulk.
+ * 3. When automating the preparation of design assets for a responsive UI, converting multiple EMF drawings to SVG without losing vector fidelity.
+ * 4. When integrating a CI/CD pipeline that must transform EMF diagrams into SVG for documentation sites automatically.
+ * 5. When creating a batch conversion tool to process user‑uploaded EMF files and store them as SVG for cross‑platform viewing.
  */

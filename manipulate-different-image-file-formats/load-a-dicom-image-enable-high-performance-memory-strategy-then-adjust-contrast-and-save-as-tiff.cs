@@ -1,36 +1,40 @@
-// HOW-TO: Load DICOM, Adjust Contrast, and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load DICOM Image, Adjust Contrast, and Save as TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.dcm";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "Input\\image.dcm";
+        string outputPath = "Output\\image.tiff";
 
         try
         {
-            var loadOptions = new LoadOptions { BufferSizeHint = 1024 };
-            using (var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath, loadOptions))
-            {
-                var raster = (RasterImage)dicomImage;
-                raster.AdjustContrast(50f);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            var loadOptions = new Aspose.Imaging.LoadOptions { BufferSizeHint = 100 };
+            using (DicomImage dicom = (DicomImage)Aspose.Imaging.Image.Load(inputPath, loadOptions))
+            {
+                dicom.AdjustContrast(50);
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
+                dicom.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to convert DICOM scans to TIFF for archival while enhancing image contrast for better visual inspection.
- * 2. When a medical imaging workflow requires fast, low‑memory loading of large DICOM files before exporting them to a format compatible with standard picture viewers.
- * 3. When a developer builds a C# service that processes DICOM images, adjusts contrast to highlight details, and stores the result as TIFF for downstream analysis.
- * 4. When integrating Aspose.Imaging into a PACS system to batch‑convert DICOM studies to high‑resolution TIFFs with optimized memory usage.
- * 5. When creating a diagnostic reporting tool that reads DICOM, applies a contrast boost, and saves the output as TIFF for inclusion in PDF reports.
+ * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while improving visibility by increasing contrast.
+ * 2. When a radiology workflow requires fast loading of large DICOM files using a memory buffer hint before exporting them to a widely supported TIFF format.
+ * 3. When diagnostic software must preprocess DICOM images by adjusting contrast to enhance details and then save them as TIFF for downstream analysis tools.
+ * 4. When a healthcare system wants to batch‑process DICOM images with Aspose.Imaging in C# and store the results as TIFF files with optimized memory usage.
+ * 5. When a developer needs to programmatically read a DICOM file, apply a contrast boost, and output a TIFF for integration with non‑DICOM viewers.
  */

@@ -1,12 +1,17 @@
 // HOW-TO: Create Indexed PSD With 64‑Color Palette From PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\source.png";
-            string outputPath = "Output\\result.psd";
+            string inputPath = "input.png";
+            string outputPath = "output.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -25,40 +30,39 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image srcImage = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster;
-                if (srcImage is RasterCachedImage rci)
+                int width = raster.Width;
+                int height = raster.Height;
+
+                int[] argbPixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
+
+                HashSet<int> uniqueColors = new HashSet<int>();
+                foreach (int argb in argbPixels)
                 {
-                    if (!rci.IsCached) rci.CacheData();
-                    raster = rci;
+                    uniqueColors.Add(argb);
+                    if (uniqueColors.Count >= 64)
+                        break;
                 }
-                else
+
+                Color[] paletteColors = new Color[64];
+                int index = 0;
+                foreach (int argb in uniqueColors)
                 {
-                    raster = srcImage as RasterImage;
+                    paletteColors[index++] = Color.FromArgb(argb);
                 }
-
-                Rectangle rect = new Rectangle(0, 0, raster.Width, raster.Height);
-                int[] argbPixels = new int[raster.Width * raster.Height];
-                raster.SaveArgb32Pixels(rect, argbPixels);
-
-                var distinctColors = new HashSet<int>(argbPixels);
-                var paletteColors = distinctColors.Take(64).Select(c => Color.FromArgb(c)).ToArray();
-                ColorPalette palette = new ColorPalette(paletteColors);
-
-                using (PsdOptions psdOptions = new PsdOptions())
+                while (index < 64)
                 {
-                    psdOptions.Source = new FileCreateSource(outputPath, false);
-                    psdOptions.ColorMode = ColorModes.Indexed;
-                    psdOptions.Palette = palette;
-
-                    using (Image psdImage = Image.Create(psdOptions, raster.Width, raster.Height))
-                    {
-                        Graphics graphics = new Graphics(psdImage);
-                        graphics.DrawImage(raster, 0, 0);
-                        psdImage.Save();
-                    }
+                    paletteColors[index++] = Color.Black;
                 }
+
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    ColorMode = ColorModes.Indexed,
+                    Palette = new ColorPalette(paletteColors)
+                };
+
+                raster.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink a Photoshop file by converting a full‑color PNG into an indexed PSD limited to 64 colors to reduce storage size.
- * 2. When exporting graphics for legacy game engines that only accept indexed PSD files with a maximum palette of 64 colors.
- * 3. When preparing images for a printing workflow that requires indexed color mode to guarantee consistent color output across devices.
- * 4. When generating thumbnails or preview images where a fixed 64‑color palette minimizes memory usage while retaining the original visual appearance.
- * 5. When automating a batch process that converts PNG assets to indexed PSDs to meet a design pipeline’s strict palette‑size specifications.
+ * 1. When you need to shrink a full‑color PNG into a smaller Photoshop file by converting it to an indexed PSD limited to 64 colors for faster web loading.
+ * 2. When preparing graphics for a legacy game engine that only accepts indexed PSD files with a maximum palette of 64 colors.
+ * 3. When generating design‑team preview thumbnails that must be PSD format but require a reduced color set to speed up rendering.
+ * 4. When converting high‑resolution screenshots into compact PSD files to keep repository sizes low in version‑control systems.
+ * 5. When building a batch process that enforces a consistent 64‑color palette across all user‑uploaded images by saving them as indexed PSDs.
  */

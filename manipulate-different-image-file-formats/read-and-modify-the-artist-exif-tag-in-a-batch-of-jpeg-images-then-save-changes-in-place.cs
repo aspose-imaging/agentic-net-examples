@@ -1,4 +1,11 @@
-// HOW-TO: Update Artist EXIF Tag in Multiple JPEG Images Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Update Artist EXIF Tag In Multiple JPEG Files Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,10 +15,10 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputDirectory = "InputImages";
+
         try
         {
-            string inputDirectory = "InputImages";
-
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -19,38 +26,48 @@ class Program
                 return;
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*", SearchOption.AllDirectories);
-            foreach (string inputPath in files)
-            {
-                string extension = Path.GetExtension(inputPath);
-                if (!string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase) &&
-                    !string.Equals(extension, ".jpeg", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
+            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
 
+            foreach (string inputPath in jpgFiles)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string outputPath = inputPath;
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
-                {
-                    Directory.CreateDirectory(outputDir);
+                    return;
                 }
 
                 using (JpegImage image = (JpegImage)Image.Load(inputPath))
                 {
-                    var exif = image.ExifData;
-                    if (exif != null)
+                    if (image.ExifData != null)
                     {
-                        exif.Artist = "New Artist";
+                        image.ExifData.Artist = "New Artist";
                     }
 
-                    image.Save(outputPath);
+                    string outputDir = Path.GetDirectoryName(inputPath);
+                    Directory.CreateDirectory(outputDir);
+                    image.Save(inputPath);
+                }
+            }
+
+            foreach (string inputPath in jpegFiles)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                {
+                    if (image.ExifData != null)
+                    {
+                        image.ExifData.Artist = "New Artist";
+                    }
+
+                    string outputDir = Path.GetDirectoryName(inputPath);
+                    Directory.CreateDirectory(outputDir);
+                    image.Save(inputPath);
                 }
             }
         }
@@ -63,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to add or replace the artist name across a whole collection of JPEG photos before uploading to a portfolio site.
- * 2. When a digital asset management system requires a consistent Artist EXIF field for all images to enable proper search and categorization.
- * 3. When a batch of legacy JPEG files lacks proper attribution and needs the correct photographer name embedded automatically.
- * 4. When preparing images for a stock‑photo marketplace that mandates the Artist tag to match the contributor’s registered name.
- * 5. When a software tool must programmatically correct metadata after renaming or moving JPEG files to ensure compliance with copyright metadata standards.
+ * 1. When you need to assign or correct the photographer’s name across a large collection of JPEG photos before publishing them online.
+ * 2. When a digital asset management system requires consistent Artist metadata in JPEG images for proper attribution and search indexing.
+ * 3. When preparing a batch of product photos for an e‑commerce site and you must embed the brand’s artist information into each file’s EXIF data.
+ * 4. When migrating legacy images to a new workflow and you need to update the EXIF Artist tag in place without creating duplicate files.
+ * 5. When automating compliance with copyright standards by programmatically setting the Artist field in all JPEG files using C# and Aspose.Imaging.
  */

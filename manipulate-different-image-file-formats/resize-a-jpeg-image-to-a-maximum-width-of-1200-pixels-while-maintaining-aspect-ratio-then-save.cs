@@ -1,13 +1,18 @@
-// HOW-TO: Resize JPEG to Max Width 1200 Pixels While Keeping Aspect Ratio in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize JPEG to Maximum Width 1200 Pixels While Keeping Aspect Ratio in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -20,26 +25,24 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int newWidth = image.Width;
-                int newHeight = image.Height;
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
-                if (image.Width > 1200)
+                int maxWidth = 1200;
+                int newWidth = originalWidth;
+                int newHeight = originalHeight;
+
+                if (originalWidth > maxWidth)
                 {
-                    double ratio = 1200.0 / image.Width;
-                    newWidth = 1200;
-                    newHeight = (int)Math.Round(image.Height * ratio);
+                    newWidth = maxWidth;
+                    newHeight = (int)Math.Round((double)originalHeight * maxWidth / originalWidth);
                 }
 
-                if (newWidth != image.Width || newHeight != image.Height)
-                {
-                    image.Resize(newWidth, newHeight);
-                }
-
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
                 image.Save(outputPath);
             }
         }
@@ -52,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate web‑optimized JPEGs that never exceed 1200 px wide to improve page load speed.
- * 2. When processing user‑uploaded photos for a gallery and you must enforce a maximum width while preserving the original proportions.
- * 3. When creating thumbnails for email newsletters where the image width must be limited to 1200 px without distortion.
- * 4. When preparing product images for an e‑commerce site that requires a consistent maximum dimension for all JPEG files.
- * 5. When automating batch conversion of high‑resolution photos to a size suitable for mobile devices while keeping aspect ratio.
+ * 1. When you need to generate web‑optimized JPEG thumbnails that never exceed 1200 px wide.
+ * 2. When preparing product photos for an e‑commerce site to ensure consistent display across devices.
+ * 3. When reducing the file size of high‑resolution camera images before uploading to a cloud storage service.
+ * 4. When creating a batch process that resizes user‑uploaded profile pictures to fit a maximum width constraint.
+ * 5. When converting large JPEGs into a standard size for inclusion in PDF reports or email newsletters.
  */

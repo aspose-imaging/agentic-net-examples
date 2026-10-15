@@ -1,75 +1,67 @@
-// HOW-TO: Batch Convert DICOM Images to GIF with Contrast Adjustment in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Adjust Contrast of DICOM Images and Convert to GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace DicomBatchProcessor
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDirectory = @"C:\InputDicom";
+                string outputDirectory = @"C:\OutputGif";
 
-            if (!Directory.Exists(outputDirectory))
-            {
                 Directory.CreateDirectory(outputDirectory);
+
+                string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+
+                foreach (string inputPath in dicomFiles)
+                {
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                    {
+                        dicomImage.AdjustContrast(1.3f);
+
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".gif");
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        GifOptions gifOptions = new GifOptions();
+                        dicomImage.Save(outputPath, gifOptions);
+                    }
+                }
             }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
+            catch (Exception ex)
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
-                {
-                    RasterImage raster = (RasterImage)dicom;
-                    if (!raster.IsCached)
-                    {
-                        raster.CacheData();
-                    }
-                    raster.AdjustContrast(1.3f);
-
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".gif");
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    using (GifOptions gifOptions = new GifOptions())
-                    {
-                        dicom.Save(outputPath, gifOptions);
-                    }
-                }
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital needs to quickly generate animated previews of a series of DICOM scans with enhanced contrast for web‑based review.
- * 2. When a research lab wants to export a folder of MRI images to lightweight GIF files after applying a uniform contrast boost for presentation slides.
- * 3. When a medical imaging software vendor must automate the conversion of incoming DICOM files to GIF format for integration with a legacy reporting system.
- * 4. When a developer builds a batch processing tool that normalizes the visual quality of radiology images before archiving them as GIFs for mobile viewing.
- * 5. When a telemedicine platform requires server‑side code to adjust contrast of DICOM images and deliver them as GIFs to browsers without installing specialized viewers.
+ * 1. When a radiology software needs to enhance the visibility of multiple DICOM scans and provide lightweight GIF previews for web viewers.
+ * 2. When a medical research team wants to automatically process a folder of DICOM files, increase their contrast by a factor of 1.3, and store the results as GIFs for inclusion in reports.
+ * 3. When a healthcare IT system must generate static GIF thumbnails from a batch of DICOM images after applying contrast correction for faster loading in patient portals.
+ * 4. When a developer is building a bulk conversion tool that reads DICOM files from a directory, adjusts image contrast, and saves them as GIFs using Aspose.Imaging in a .NET application.
+ * 5. When an imaging workflow requires converting high‑resolution DICOM images to smaller GIF files with enhanced contrast to reduce bandwidth for remote diagnostics.
  */

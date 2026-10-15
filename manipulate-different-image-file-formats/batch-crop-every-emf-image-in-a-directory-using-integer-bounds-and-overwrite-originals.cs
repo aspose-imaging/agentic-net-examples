@@ -1,61 +1,63 @@
-// HOW-TO: Batch Crop Multiple EMF Files with Fixed Bounds in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Crop EMF Images In Folder By Fixed Pixels Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDirectory = "Input";
+            // Hardcoded input directory containing EMF files
+            string inputDirectory = @"C:\Images\Input";
 
-            // Ensure the input directory exists
+            // Ensure the directory exists
             if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EMF files and rerun.");
+                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
                 return;
             }
 
-            // Hardcoded crop bounds
-            int cropX = 10;
-            int cropY = 10;
-            int cropWidth = 200;
-            int cropHeight = 200;
+            // Get all EMF files in the directory
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
 
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf", SearchOption.TopDirectoryOnly);
             foreach (string inputPath in emfFiles)
             {
+                // Verify the file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Ensure the directory for the output (same as input) exists
-                Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
-                using (Image image = Image.Load(inputPath))
+                // Load the EMF image
+                using (EmfImage image = (EmfImage)Image.Load(inputPath))
                 {
-                    // Perform cropping
-                    Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                    image.Crop(cropRect);
-
-                    // Prepare EMF save options
-                    EmfOptions exportOptions = new EmfOptions();
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = cropWidth,
-                        PageHeight = cropHeight
-                    };
-                    exportOptions.VectorRasterizationOptions = vectorOptions;
+                    // Crop by shifts: remove 10 pixels from each side
+                    int left = 10;
+                    int right = 10;
+                    int top = 10;
+                    int bottom = 10;
+                    image.Crop(left, right, top, bottom);
 
                     // Overwrite the original file
-                    image.Save(inputPath, exportOptions);
+                    string outputPath = inputPath;
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the cropped image
+                    image.Save(outputPath);
                 }
             }
         }
@@ -68,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove unwanted margins from a set of EMF vector logos before publishing them.
- * 2. When an automated build process must standardize the size of EMF diagrams for a documentation pipeline.
- * 3. When a desktop application must quickly trim all EMF icons in a folder to a specific thumbnail dimension.
- * 4. When migrating legacy EMF assets and you want to overwrite the originals with a cropped version to save storage.
- * 5. When generating printable reports and you must ensure each EMF chart fits within a predefined page area.
+ * 1. When you need to remove a uniform border from a large set of EMF vector graphics before publishing them.
+ * 2. When an automated build process must trim whitespace from all EMF files in a resource directory without creating new files.
+ * 3. When a desktop application has to prepare EMF icons by cropping 10‑pixel margins in bulk to fit UI guidelines.
+ * 4. When a migration script must standardize the canvas size of existing EMF diagrams by cropping identical amounts on each side.
+ * 5. When a reporting tool generates EMF charts and you must programmatically eliminate extra padding from every chart file in a folder.
  */

@@ -1,40 +1,37 @@
-// HOW-TO: Create 200x200 JPEG Thumbnail From Large Image Using Memory‑Efficient Loading In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 200x200 JPEG Thumbnail from Large Image Using Memory Buffer in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output/thumbnail.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input\\large.jpg";
-            string outputPath = "Output\\thumbnail.jpg";
-
-            if (!File.Exists(inputPath))
+            var loadOptions = new Aspose.Imaging.LoadOptions { BufferSizeHint = 10 * 1024 * 1024 };
+            using (JpegImage image = (JpegImage)Aspose.Imaging.Image.Load(inputPath, loadOptions))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 1024 * 1024 }))
-            {
-                if (!image.IsCached) image.CacheData();
-
-                image.Resize(200, 200, ResizeType.NearestNeighbourResample);
-
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90,
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                image.Save(outputPath, jpegOptions);
+                image.Resize(200, 200, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate small preview images for a web gallery without loading the entire high‑resolution JPEG into memory.
- * 2. When processing user‑uploaded photos on a server and want to create low‑size thumbnails while controlling memory usage.
- * 3. When building a desktop application that displays image thumbnails and must handle very large JPEG files efficiently.
- * 4. When creating product catalog thumbnails from high‑resolution product photos while preserving JPEG quality.
- * 5. When automating batch image processing to produce consistent 200×200 thumbnails for mobile app assets.
+ * 1. When you need to generate small preview images for a photo gallery from high‑resolution JPEG files without loading the entire image into memory.
+ * 2. When a web application must create thumbnails on the fly for user‑uploaded large JPEG photos while controlling memory usage with a buffer hint.
+ * 3. When an e‑commerce site wants to display product image thumbnails sized to 200×200 pixels and store them as separate JPEG files for faster page loads.
+ * 4. When a digital asset management system processes massive JPEG scans and requires a quick, low‑memory way to produce standardized thumbnail versions.
+ * 5. When a desktop utility converts large JPEG pictures into smaller thumbnail files for email attachments, using Aspose.Imaging’s Resize and Save methods in C#.
  */

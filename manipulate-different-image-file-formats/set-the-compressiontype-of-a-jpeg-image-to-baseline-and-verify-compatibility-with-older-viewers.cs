@@ -1,4 +1,11 @@
-// HOW-TO: Set JPEG Compression to Baseline Mode in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Set JPEG Compression to Baseline and Verify Compatibility in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +14,13 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\sample.jpg";
-        string outputPath = "Output\\sample_baseline.jpg";
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,10 +31,24 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (JpegOptions options = new JpegOptions())
+                var jpegOptions = new JpegOptions
                 {
-                    options.CompressionType = JpegCompressionMode.Baseline;
-                    image.Save(outputPath, options);
+                    CompressionType = JpegCompressionMode.Baseline
+                };
+                image.Save(outputPath, jpegOptions);
+            }
+
+            // Verify that the saved image uses Baseline compression
+            using (Image savedImage = Image.Load(outputPath))
+            {
+                var jpegImage = savedImage as JpegImage;
+                if (jpegImage != null && jpegImage.JpegOptions != null && jpegImage.JpegOptions.CompressionType == JpegCompressionMode.Baseline)
+                {
+                    Console.WriteLine("Compression type set to Baseline. Compatible with older viewers.");
+                }
+                else
+                {
+                    Console.WriteLine("Compression type verification failed.");
                 }
             }
         }
@@ -40,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure a JPEG file can be opened by older browsers or legacy image viewers that only support baseline JPEG compression.
- * 2. When you are preparing images for email attachments where some clients reject progressive JPEGs, so you convert them to baseline.
- * 3. When you are archiving photos for long‑term storage and want maximum compatibility across different operating systems and devices.
- * 4. When you are generating thumbnails for a web gallery and must guarantee that all users, regardless of their viewer version, can view the images.
- * 5. When you are batch‑processing a collection of photos from a camera that saved them as progressive JPEGs and need to standardize them to baseline for a printing workflow.
+ * 1. When you need to guarantee that JPEG images open correctly in legacy browsers or older image viewers, you set the compression mode to Baseline.
+ * 2. When preparing product photos for email newsletters that must display on all email clients, you convert JPEGs to Baseline compression.
+ * 3. When archiving scanned documents as JPEG files for long‑term storage, you use Baseline compression to ensure future compatibility.
+ * 4. When generating thumbnails for a mobile app that must work on devices with limited JPEG decoder support, you enforce Baseline compression.
+ * 5. When validating a batch of images before uploading to a content management system that rejects progressive JPEGs, you programmatically set and verify Baseline compression.
  */

@@ -1,19 +1,18 @@
-// HOW-TO: Combine Multiple TIFF Files While Keeping Original EXIF Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple TIFF Files Into One While Keeping EXIF Metadata In C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -21,12 +20,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath1 = "input1.tif";
             string inputPath2 = "input2.tif";
             string outputPath = "output.tif";
 
-            // Validate input files
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -38,69 +35,36 @@ class Program
                 return;
             }
 
-            // Prepare list of inputs
-            List<string> inputPaths = new List<string> { inputPath1, inputPath2 };
-
-            // TIFF options for the destination image
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            TiffImage destImage = null;
-            bool firstFrameCreated = false;
-
-            foreach (string inputPath in inputPaths)
-            {
-                using (TiffImage srcImage = (TiffImage)Image.Load(inputPath))
-                {
-                    foreach (TiffFrame srcFrame in srcImage.Frames)
-                    {
-                        // Load pixel data from source frame
-                        Aspose.Imaging.Color[] pixels = srcImage.LoadPixels(srcFrame.Bounds);
-
-                        int width = srcFrame.Width;
-                        int height = srcFrame.Height;
-
-                        if (!firstFrameCreated)
-                        {
-                            // Create destination image with size of the first frame
-                            destImage = (TiffImage)Image.Create(tiffOptions, width, height);
-                            // Save pixels to the first frame
-                            destImage.SavePixels(destImage.Bounds, pixels);
-                            // Preserve EXIF metadata from the source image
-                            if (srcImage.ExifData != null)
-                            {
-                                destImage.ExifData = srcImage.ExifData;
-                            }
-                            firstFrameCreated = true;
-                        }
-                        else
-                        {
-                            // Add a new frame to the destination image
-                            destImage.AddFrame(new TiffFrame(tiffOptions, width, height));
-                            int newIndex = destImage.Frames.Count() - 1;
-                            // Save pixels to the newly added frame
-                            destImage.Frames[newIndex].SavePixels(destImage.Frames[newIndex].Bounds, pixels);
-                        }
-                    }
-                }
-            }
-
-            if (destImage == null)
-            {
-                Console.Error.WriteLine("No frames were processed. Destination image not created.");
-                return;
-            }
-
-            // Ensure output directory exists
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrWhiteSpace(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
-            // Save the concatenated TIFF
-            using (destImage)
+            using (TiffImage first = (TiffImage)Image.Load(inputPath1))
             {
-                destImage.Save(outputPath, tiffOptions);
+                Source outSource = new FileCreateSource(outputPath, false);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = outSource };
+
+                using (TiffImage output = (TiffImage)Image.Create(tiffOptions, first.Width, first.Height))
+                {
+                    foreach (TiffFrame frame in first.Frames)
+                    {
+                        TiffFrame copied = TiffFrame.CopyFrame(frame);
+                        output.AddFrame(copied);
+                    }
+
+                    using (TiffImage second = (TiffImage)Image.Load(inputPath2))
+                    {
+                        foreach (TiffFrame frame in second.Frames)
+                        {
+                            TiffFrame copied = TiffFrame.CopyFrame(frame);
+                            output.AddFrame(copied);
+                        }
+                    }
+
+                    output.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -112,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge scanned document pages stored as separate TIFF files into a single multi‑page TIFF for easier distribution while retaining each page’s camera or scanner EXIF data.
- * 2. When archiving medical imaging studies that consist of several TIFF frames and you must preserve the original metadata for regulatory compliance.
- * 3. When creating a digital archive of historic photographs that are stored as individual TIFFs and you want a single file that keeps each photo’s capture information intact.
- * 4. When building a batch processing tool that consolidates TIFF images generated by a scanner into one file without losing orientation, resolution, or date‑taken metadata.
- * 5. When developing a document management system that stores multi‑page TIFFs and requires the original EXIF tags from each source page for searchable metadata.
+ * 1. When a digital archivist needs to merge scanned pages from separate TIFF files into a single multi‑page document without losing the original EXIF tags.
+ * 2. When a medical imaging system must concatenate patient scan series stored as individual TIFF frames while preserving metadata for regulatory compliance.
+ * 3. When a photographer wants to combine separate TIFF exposures into one file for batch printing, keeping camera settings embedded.
+ * 4. When a document management application needs to create a unified TIFF archive from multiple source files while retaining each page’s metadata for search indexing.
+ * 5. When a GIS developer must merge tiled TIFF map images into a single file and keep geolocation EXIF data intact for later analysis.
  */

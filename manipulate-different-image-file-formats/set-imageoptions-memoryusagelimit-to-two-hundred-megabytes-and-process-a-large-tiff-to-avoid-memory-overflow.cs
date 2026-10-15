@@ -1,9 +1,9 @@
-// HOW-TO: Process Large TIFF Image With Limited Memory Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Load and Save Large TIFF Image in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -20,19 +20,20 @@ class Program
         string inputPath = "input.tif";
         string outputPath = "output.tif";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
             using (Image image = Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -45,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must open and re‑save a multi‑page TIFF that exceeds the default memory budget, this code demonstrates how to load the file and write it back safely with Aspose.Imaging.
- * 2. When converting high‑resolution scanned documents to a new TIFF file without running out of RAM, developers can use this pattern to manage large image files in .NET.
- * 3. When building a server‑side service that processes satellite or aerial imagery stored as TIFFs, the example shows how to read and write the images while keeping memory usage under control.
- * 4. When integrating medical imaging workflows that handle large DICOM‑derived TIFF files, the snippet provides a reliable way to load and re‑export the images in C#.
- * 5. When archiving legacy TIFF archives in a batch job, this code helps ensure each file is loaded and saved without causing an out‑of‑memory exception.
+ * 1. When you need to open a multi‑page TIFF file and save it unchanged to a new location in a .NET application.
+ * 2. When processing high‑resolution scanned images that are several hundred megabytes, you can load the TIFF with Aspose.Imaging and re‑save it while controlling memory consumption.
+ * 3. When automating a batch job that moves raw TIFF files from a scanner into a standardized folder structure using C#.
+ * 4. When integrating TIFF handling into a web service that must verify the source file exists before performing the save operation.
+ * 5. When you want to catch and log any exceptions that occur while loading or saving large TIFF images to ensure reliable image processing.
  */

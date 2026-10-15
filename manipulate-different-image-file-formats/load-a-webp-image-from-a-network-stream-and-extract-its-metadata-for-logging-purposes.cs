@@ -1,9 +1,9 @@
-// HOW-TO: Read WebP Image Metadata and Properties in C# With Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Read WebP Image Metadata and Save to Text File in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -17,7 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "image.webp";
+            string inputPath = "sample.webp";
+            string outputPath = "output\\metadata.txt";
 
             if (!File.Exists(inputPath))
             {
@@ -25,24 +26,20 @@ class Program
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                Console.WriteLine($"Format: {image.FileFormat}");
-                Console.WriteLine($"Width: {image.Width}");
-                Console.WriteLine($"Height: {image.Height}");
-                Console.WriteLine($"BitsPerPixel: {image.BitsPerPixel}");
+                bool isWebP = image is WebPImage;
+                string metadata = "=== WebP Image Metadata ===\n";
+                metadata += $"Width: {image.Width}\n";
+                metadata += $"Height: {image.Height}\n";
+                metadata += $"Bits Per Pixel: {image.BitsPerPixel}\n";
+                metadata += $"Is WebP Image: {(isWebP ? "Yes" : "No")}\n";
+                metadata += $"File Format: {image.FileFormat}\n";
 
-                var metadata = image.Metadata;
-                if (metadata != null)
-                {
-                    Console.WriteLine($"Metadata: {metadata}");
-                }
-
-                WebPImage webp = image as WebPImage;
-                if (webp != null)
-                {
-                    Console.WriteLine("WebPImage loaded successfully.");
-                }
+                Console.WriteLine(metadata);
+                File.WriteAllText(outputPath, metadata);
             }
         }
         catch (Exception ex)
@@ -54,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to log basic information such as format, dimensions, and color depth of a WebP file before processing it further.
- * 2. When you want to verify that a downloaded WebP image can be successfully parsed by Aspose.Imaging in a C# application.
- * 3. When you need to extract and store the embedded metadata of a WebP image for auditing or analytics.
- * 4. When you are building a server‑side service that validates incoming WebP uploads by checking their properties and metadata.
- * 5. When you need to confirm the image type at runtime (e.g., cast to WebPImage) to apply WebP‑specific operations in .NET.
+ * 1. When you need to log the dimensions and format of WebP images received from a web service for audit trails.
+ * 2. When you want to verify that a file is a valid WebP image before processing it in an image conversion pipeline.
+ * 3. When you are building a diagnostic tool that extracts pixel depth and other properties from user‑uploaded WebP files.
+ * 4. When you need to generate a simple text report of WebP image characteristics to include in automated test results.
+ * 5. When you are troubleshooting image rendering issues and require a quick way to dump WebP metadata to a log file.
  */

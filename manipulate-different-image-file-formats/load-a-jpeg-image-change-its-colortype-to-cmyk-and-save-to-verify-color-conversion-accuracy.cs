@@ -1,51 +1,53 @@
-// HOW-TO: Convert JPEG to CMYK Color Space in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to CMYK Color Space and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "Input\\sample.jpg";
+            string outputPath = "Output\\sample_cmyk.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "Input\\sample.jpg";
-                string outputPath = "Output\\sample_cmyk.jpg";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    using (JpegOptions options = new JpegOptions())
-                    {
-                        options.ColorType = JpegCompressionColorMode.Cmyk;
-                        image.Save(outputPath, options);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                JpegOptions options = new JpegOptions();
+                options.ColorType = JpegCompressionColorMode.Cmyk;
+                image.Save(outputPath, options);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When preparing images for professional printing, you may need to convert RGB JPEG files to CMYK to ensure accurate color reproduction.
- * 2. When integrating a C# web service that generates print‑ready assets, you can use this code to change the JPEG color mode to CMYK before delivering the file.
- * 3. When migrating a legacy catalog of JPEG photos to a workflow that requires CMYK color profiles, the snippet automates the batch conversion.
- * 4. When validating that a JPEG image meets a printer’s CMYK specifications, you can load the file, set the color type, and save it to verify the conversion.
- * 5. When building a desktop application that lets users export their photos for offset printing, this example shows how to switch the JPEG’s color space using Aspose.Imaging in .NET.
+ * 1. When preparing print‑ready artwork, you need to convert RGB JPEGs to CMYK to match the press color profile.
+ * 2. When integrating a web service that receives JPEGs and must store them in CMYK for downstream publishing pipelines.
+ * 3. When validating color conversion accuracy by saving a JPEG with the CMYK color mode and comparing it to the original.
+ * 4. When migrating a legacy image library to Aspose.Imaging and need to ensure JPEGs are saved in CMYK for compliance with branding guidelines.
+ * 5. When building a batch processing tool that converts user‑uploaded JPEG photos to CMYK before archiving them in a digital asset management system.
  */

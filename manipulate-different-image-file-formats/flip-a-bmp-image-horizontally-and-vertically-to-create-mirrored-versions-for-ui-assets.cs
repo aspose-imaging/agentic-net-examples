@@ -1,55 +1,62 @@
 // HOW-TO: Flip BMP Image Horizontally and Vertically Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
-class Program
+namespace ImageProcessing
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.bmp";
-            string outputPathHorizontal = "output_horizontal.bmp";
-            string outputPathVertical = "output_vertical.bmp";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.bmp";
+                string outputPathHorizontal = "output\\horizontal.bmp";
+                string outputPathVertical = "output\\vertical.bmp";
 
-            // Horizontal flip
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal) ?? ".");
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPathHorizontal, bmpOptions);
-            }
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-            // Vertical flip
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical) ?? ".");
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPathVertical, bmpOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    image.Save(outputPathHorizontal);
+                }
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                    image.Save(outputPathVertical);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need mirrored button icons for a Windows desktop UI, you can flip a BMP file horizontally with Aspose.Imaging in C#.
- * 2. When creating a vertically reflected background image for a game level, the code generates a flipped BMP version programmatically.
- * 3. When preparing opposite‑direction sprite sheets for a 2‑D animation, you can use this routine to produce a vertically flipped BMP copy.
- * 4. When an application requires both left‑to‑right and top‑to‑bottom mirrored versions of a bitmap logo for responsive layouts, the example automates the process.
- * 5. When automating asset pipelines that store graphics as BMP, this snippet quickly creates horizontal and vertical mirrors without manual editing.
+ * 1. When creating mirrored UI icons for left‑to‑right and right‑to‑left layouts, you can flip a BMP file to generate the required assets automatically.
+ * 2. When a game needs a sprite’s opposite orientation for character movement, this code produces horizontal and vertical BMP copies without manual editing.
+ * 3. When preparing print‑ready graphics that must be reversed for embossing or stamping, the RotateFlip operation quickly generates the flipped versions.
+ * 4. When a legacy system stores textures as BMP and you must provide both normal and flipped versions for a responsive design, the example shows how to do it in C#.
+ * 5. When automating batch processing of UI assets, you can use this snippet to create mirrored BMP files for theme variations or accessibility support.
  */

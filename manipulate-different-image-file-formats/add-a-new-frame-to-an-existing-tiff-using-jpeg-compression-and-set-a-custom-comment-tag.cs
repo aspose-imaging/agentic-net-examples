@@ -3,13 +3,12 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -18,11 +17,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output/output.tif";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output\\output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,16 +30,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 int width = tiff.Width;
                 int height = tiff.Height;
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
-                TiffFrame newFrame = new TiffFrame(tiffOptions, width, height);
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
+                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
 
-                Color[] whitePixels = Enumerable.Repeat(Color.White, width * height).ToArray();
-                newFrame.SavePixels(newFrame.Bounds, whitePixels);
+                Aspose.Imaging.Color[] whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White, width * height).ToArray();
+                newFrame.SavePixels(new Aspose.Imaging.Rectangle(0, 0, width, height), whitePixels);
 
                 tiff.AddFrame(newFrame);
                 tiff.Save(outputPath);
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to append a new JPEG‑compressed page to a multi‑page TIFF archive generated from scanned documents.
- * 2. When you want to create a blank white page in a TIFF file for later annotation or stamping in a C# imaging workflow.
- * 3. When a medical imaging system must add an additional image layer to a DICOM‑derived TIFF while preserving JPEG compression for size efficiency.
- * 4. When a digital archiving solution requires inserting a placeholder frame into an existing TIFF before merging it with other image assets.
- * 5. When a GIS application programmatically expands a geospatial TIFF stack with a new raster layer using Aspose.Imaging for .NET.
+ * 1. When you need to create a multi‑page TIFF by appending a blank JPEG‑compressed page to an existing document in a C# application.
+ * 2. When you want to reduce the file size of a new TIFF page by using JPEG compression while preserving the original image dimensions.
+ * 3. When a workflow requires programmatically adding a white background frame to a scanned TIFF and then saving the updated file on the server.
+ * 4. When you must generate a TIFF file that contains both original pages and additional generated pages for archival or reporting purposes using Aspose.Imaging for .NET.
+ * 5. When you need to automate the insertion of a new frame with custom metadata (e.g., comment tag) into a TIFF stack as part of a document‑processing pipeline.
  */

@@ -1,65 +1,74 @@
-// HOW-TO: Copy Large JPEG2000 Files in Parallel with Buffered Streams in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG2000 Files to JPEG in Parallel with Memory Optimization in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
-namespace Jp2Processor
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            if (!Directory.Exists(inputDirectory))
             {
-                string inputDirectory = "C:\\Data\\Jp2Input";
-                string outputDirectory = "C:\\Data\\Jp2Output";
-
-                var inputFiles = Directory.GetFiles(inputDirectory, "*.jp2", SearchOption.AllDirectories);
-
-                ParallelOptions parallelOptions = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
-                };
-
-                Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
-                {
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
-
-                    string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
-                    string outputPath = Path.Combine(outputDirectory, relativePath);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    const int bufferSize = 81920;
-                    using (FileStream sourceStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: false))
-                    using (FileStream destinationStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: false))
-                    {
-                        byte[] buffer = new byte[bufferSize];
-                        int bytesRead;
-                        while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            destinationStream.Write(buffer, 0, bytesRead);
-                        }
-                    }
-                });
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
-            catch (Exception ex)
+
+            if (!Directory.Exists(outputDirectory))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                Directory.CreateDirectory(outputDirectory);
             }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.jp2");
+
+            files.AsParallel().ForAll(inputPath =>
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                var loadOptions = new LoadOptions { BufferSizeHint = 100 };
+
+                using (Jpeg2000Image image = (Jpeg2000Image)Image.Load(inputPath, loadOptions))
+                {
+                    var jpegOptions = new JpegOptions();
+                    image.Save(outputPath, jpegOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to duplicate a massive archive of JPEG2000 images to another folder while preserving the original directory hierarchy and minimizing memory usage.
- * 2. When you want to speed up batch conversion or migration of JPEG2000 files by leveraging all CPU cores with Parallel.ForEach.
- * 3. When processing high‑resolution satellite or medical images stored as JP2 and you must read and write them efficiently without loading entire files into memory.
- * 4. When building an automated pipeline that copies JP2 assets from a source repository to a deployment location on a server with limited RAM.
- * 5. When you require a reliable way to copy large JP2 files in a .NET application while handling missing files gracefully and ensuring thread‑safe directory creation.
+ * 1. When you need to batch‑convert a large set of JP2 satellite images to standard JPEGs while keeping RAM usage low.
+ * 2. When you want to speed up image conversion by processing multiple JPEG2000 files simultaneously on a multi‑core server.
+ * 3. When you must ensure each JP2 file is loaded with a custom buffer size to avoid out‑of‑memory errors during bulk processing.
+ * 4. When you are building an automated pipeline that reads JP2 files from a folder, converts them to JPEG, and stores the results in another directory.
+ * 5. When you need a simple C# solution that creates missing input or output folders, handles missing files gracefully, and logs errors during parallel image conversion.
  */

@@ -1,36 +1,51 @@
-// HOW-TO: Batch Convert Up to 20 DjVu Files to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple DjVu Files To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            string[] inputFiles = new string[]
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                "input1.djvu",
+                "input2.djvu",
+                "input3.djvu",
+                "input4.djvu",
+                "input5.djvu",
+                "input6.djvu",
+                "input7.djvu",
+                "input8.djvu",
+                "input9.djvu",
+                "input10.djvu",
+                "input11.djvu",
+                "input12.djvu",
+                "input13.djvu",
+                "input14.djvu",
+                "input15.djvu",
+                "input16.djvu",
+                "input17.djvu",
+                "input18.djvu",
+                "input19.djvu",
+                "input20.djvu"
+            };
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (var inputPath in files.Take(20))
+            foreach (var inputPath in inputFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -38,15 +53,15 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
                 {
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        djvu.Save(outputPath, pdfOptions);
-                    }
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    PdfOptions pdfOptions = new PdfOptions();
+                    djvuImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -59,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically transform a collection of scanned DjVu documents into PDF files for archiving or sharing.
- * 2. When a migration script must process the first twenty DjVu images in a folder and output PDFs using default settings.
- * 3. When integrating Aspose.Imaging into a C# backend to generate PDF versions of DjVu manuals for distribution to users.
- * 4. When building a batch conversion tool that creates PDF equivalents of DjVu files for compatibility with standard PDF viewers.
- * 5. When automating a document workflow that requires converting multiple DjVu pages to PDF before applying further processing such as OCR.
+ * 1. When you need to automate the conversion of a large collection of scanned DjVu documents into PDF files for archival or distribution.
+ * 2. When a document management system must ingest DjVu files and store them as PDFs without manual intervention, using C# and Aspose.Imaging.
+ * 3. When preparing e‑books or reports originally saved as DjVu, you want to programmatically generate PDF versions for compatibility with standard readers.
+ * 4. When migrating legacy DjVu assets to a PDF‑based workflow, you require a batch process that creates PDFs with default settings to preserve the original layout.
+ * 5. When building a server‑side service that receives DjVu uploads and returns PDF outputs, you need code that loads each file, converts it, and saves the result efficiently.
  */

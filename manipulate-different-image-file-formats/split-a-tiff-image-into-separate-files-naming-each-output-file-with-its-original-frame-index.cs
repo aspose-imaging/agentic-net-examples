@@ -1,16 +1,16 @@
-// HOW-TO: Split Multi‑Page TIFF Into Individual Files Named By Frame Index In C# (Aspose.Imaging for .NET)
+// HOW-TO: Split Multi‑Page TIFF into Individual Files with Frame Index Names in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -20,7 +20,7 @@ class Program
         try
         {
             string inputPath = "input.tif";
-            string outputDirectory = "output";
+            string outputDir = "output";
 
             if (!File.Exists(inputPath))
             {
@@ -28,22 +28,18 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
-
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                int frameCount = tiffImage.Frames.Count();
+                int frameCount = tiff.Frames.Count();
                 for (int i = 0; i < frameCount; i++)
                 {
-                    TiffFrame frame = tiffImage.Frames[i];
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    using (TiffImage outImage = (TiffImage)Image.Create(tiffOptions, frame.Width, frame.Height))
+                    TiffFrame frame = tiff.Frames[i];
+                    TiffFrame newFrame = TiffFrame.CopyFrame(frame);
+                    using (TiffImage single = new TiffImage(newFrame))
                     {
-                        outImage.SavePixels(outImage.Bounds, ((RasterImage)frame).LoadPixels(frame.Bounds));
-                        outImage.Save(outputPath, tiffOptions);
+                        string outputPath = Path.Combine(outputDir, $"frame_{i}.tif");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        single.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
                     }
                 }
             }
@@ -57,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract each page of a multi‑page TIFF scan into separate files for downstream OCR processing.
- * 2. When a web service must deliver individual TIFF frames as separate assets for a digital archive.
- * 3. When a printing workflow requires separating a multi‑frame TIFF into single‑page TIFFs to feed a printer that only accepts one page per file.
- * 4. When you want to generate thumbnail previews for each frame by first saving each frame as its own TIFF file.
- * 5. When a medical imaging application must isolate each slice of a multi‑frame TIFF (e.g., DICOM‑converted) for analysis or storage.
+ * 1. When you need to extract each page of a multi‑page TIFF for separate processing or archival, this code creates individual TIFF files named by their original frame index.
+ * 2. When a document‑management system requires uploading each TIFF frame as a distinct image, the snippet splits the source file and saves the frames with sequential filenames.
+ * 3. When generating thumbnails or applying per‑page transformations, you first separate the TIFF into single‑frame files using this approach.
+ * 4. When integrating with a workflow that consumes one image per step, the code isolates each frame of a multi‑page TIFF into its own file for downstream tasks.
+ * 5. When debugging or inspecting specific pages of a large TIFF, the routine extracts and saves each frame so you can open them individually in any viewer.
  */

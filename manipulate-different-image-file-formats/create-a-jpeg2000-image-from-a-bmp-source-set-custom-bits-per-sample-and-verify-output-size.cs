@@ -1,4 +1,11 @@
 // HOW-TO: Convert BMP to JPEG2000 and Get Output File Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -21,16 +28,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image bmp = Image.Load(inputPath))
             {
-                using (Jpeg2000Options options = new Jpeg2000Options())
-                {
-                    image.Save(outputPath, options);
-                }
+                var jp2Options = new Jpeg2000Options();
+                bmp.Save(outputPath, jp2Options);
             }
 
-            FileInfo info = new FileInfo(outputPath);
-            Console.WriteLine($"Output file size: {info.Length} bytes");
+            long fileSize = new FileInfo(outputPath).Length;
+            Console.WriteLine($"Output file size: {fileSize} bytes");
         }
         catch (Exception ex)
         {
@@ -41,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP assets to the high‑compression JPEG2000 format for web or archival storage while using Aspose.Imaging in a C# application.
- * 2. When you must programmatically generate JPEG2000 files from BMP sources to meet industry standards for medical imaging or satellite data processing.
- * 3. When you want to automate a batch job that converts BMP scans to JPEG2000 and logs the resulting file size to monitor compression efficiency.
- * 4. When you are building a .NET service that receives BMP uploads, converts them to JPEG2000, and validates the output size before saving to a database.
- * 5. When you need to verify that a JPEG2000 conversion produces the expected byte size for quality‑control or compliance reporting in an imaging workflow.
+ * 1. When you need to compress a high‑resolution BMP into a smaller JPEG2000 file for web delivery while preserving image quality.
+ * 2. When integrating Aspose.Imaging into a batch conversion tool that transforms legacy BMP assets to JPEG2000 for archival storage.
+ * 3. When developing a C# application that must report the exact size of the generated JPEG2000 image to enforce size limits or quotas.
+ * 4. When creating a workflow that converts scanned BMP documents to JPEG2000 to take advantage of lossless compression before further processing.
+ * 5. When troubleshooting image conversion pipelines and need a simple code snippet to load a BMP, save as JPEG2000, and log the resulting file size for diagnostics.
  */

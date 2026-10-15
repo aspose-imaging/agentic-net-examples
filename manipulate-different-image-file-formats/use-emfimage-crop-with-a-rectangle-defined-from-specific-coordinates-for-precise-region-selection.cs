@@ -1,34 +1,39 @@
-// HOW-TO: Crop a Specific Region from an EMF File in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Specific Region From EMF File Using C# Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        const string inputPath = "input.emf";
+        const string outputPath = "output.emf";
+
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.emf";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EmfImage emf = (EmfImage)Image.Load(inputPath))
+            using (EmfImage image = (EmfImage)Image.Load(inputPath))
             {
-                Rectangle cropRect = new Rectangle(10, 20, 200, 150);
-                emf.Crop(cropRect);
-
-                EmfOptions options = new EmfOptions();
-                emf.Save(outputPath, options);
+                // Define the rectangle region to crop: X, Y, Width, Height
+                var cropRect = new Rectangle(50, 50, 300, 200);
+                image.Crop(cropRect);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -40,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract only a portion of a vector‑based EMF diagram for reuse in a report.
- * 2. When generating thumbnails of a selected area from a large EMF drawing to improve loading speed.
- * 3. When removing unwanted margins from an EMF logo before embedding it in a web page.
- * 4. When isolating a specific chart region from an EMF file to feed into another graphics workflow.
- * 5. When programmatically preparing a cropped EMF segment for printing on a custom‑size label.
+ * 1. When you need to extract a logo or diagram from a larger EMF drawing to reuse it in a report.
+ * 2. When generating thumbnails of a specific area of an EMF vector graphic for a web preview.
+ * 3. When removing unwanted margins from a CAD‑generated EMF file before embedding it into a PDF.
+ * 4. When isolating a particular chart region in an EMF file to apply separate styling or annotations.
+ * 5. When preparing a precise cutout of a vector illustration for inclusion in a slide deck or marketing material.
  */

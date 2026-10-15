@@ -1,9 +1,9 @@
-// HOW-TO: Batch Convert DjVu Pages to PNG Regions Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert DjVu Pages to PNG Using Rectangle Crop in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -11,6 +11,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -19,8 +20,8 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputDjvu";
-            string outputDirectory = "OutputPng";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -34,40 +35,33 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            var rectangles = new[]
-            {
-                new Rectangle(0, 0, 500, 500),
-                new Rectangle(100, 100, 300, 300)
-            };
-
             string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
 
-            foreach (string filePath in files)
+            foreach (string inputPath in files)
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                using (DjvuImage djvu = (DjvuImage)Image.Load(filePath))
+                Rectangle rect = new Rectangle(0, 0, 200, 200);
+                int pageIndex = 0;
+
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{pageIndex}.png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                 {
-                    for (int i = 0; i < rectangles.Length; i++)
+                    PngOptions pngOptions = new PngOptions
                     {
-                        Rectangle area = rectangles[i];
-                        string outputFileName = Path.GetFileNameWithoutExtension(filePath) + $"_region{i + 1}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        Source = new FileCreateSource(outputPath, false),
+                        MultiPageOptions = new DjvuMultiPageOptions(pageIndex, rect)
+                    };
 
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        PngOptions pngOptions = new PngOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false),
-                            MultiPageOptions = new DjvuMultiPageOptions(0, area)
-                        };
-
-                        djvu.Save(outputPath, pngOptions);
-                    }
+                    djvu.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -80,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract specific page sections from a collection of DjVu documents and save them as separate PNG files for web preview.
- * 2. When an archival system must generate thumbnail images of defined areas within scanned DjVu files for quick visual indexing.
- * 3. When a publishing workflow requires batch conversion of selected regions of DjVu illustrations into high‑resolution PNG assets for inclusion in e‑books.
- * 4. When a document‑analysis tool has to process multiple DjVu files and isolate particular rectangles for OCR or pattern‑recognition preprocessing.
- * 5. When a digital signage application must automatically crop and convert recurring logo or banner sections from DjVu source files into PNG sprites for display.
+ * 1. When you need to extract a thumbnail region from each page of multiple DjVu documents for a web preview gallery.
+ * 2. When you want to automate the conversion of selected areas of scanned DjVu files into PNG images for OCR preprocessing.
+ * 3. When a publishing workflow requires batch exporting of specific page sections from DjVu manuals into high‑resolution PNG assets.
+ * 4. When you are building a document‑management system that must generate preview images of the first 200×200 pixels of each DjVu file.
+ * 5. When you need to programmatically create PNG snapshots of defined rectangles from a collection of DjVu files for archival or reporting purposes.
  */

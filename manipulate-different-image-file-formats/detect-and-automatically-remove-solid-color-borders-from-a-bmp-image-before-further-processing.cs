@@ -1,9 +1,14 @@
-// HOW-TO: Automatically Detect and Remove Solid Color Borders from BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Automatically Remove Solid Color Borders from BMP Image in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,113 +16,95 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output\\output.bmp";
 
         try
         {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 Aspose.Imaging.Color borderColor = image.GetPixel(0, 0);
 
-                int top = 0;
-                int bottom = image.Height - 1;
                 int left = 0;
                 int right = image.Width - 1;
+                int top = 0;
+                int bottom = image.Height - 1;
 
-                // Find top boundary
-                for (int y = 0; y < image.Height; y++)
+                while (left <= right)
                 {
-                    bool rowHasDifferent = false;
-                    for (int x = 0; x < image.Width; x++)
-                    {
-                        if (image.GetPixel(x, y) != borderColor)
-                        {
-                            rowHasDifferent = true;
-                            break;
-                        }
-                    }
-                    if (rowHasDifferent)
-                    {
-                        top = y;
-                        break;
-                    }
-                }
-
-                // Find bottom boundary
-                for (int y = image.Height - 1; y >= 0; y--)
-                {
-                    bool rowHasDifferent = false;
-                    for (int x = 0; x < image.Width; x++)
-                    {
-                        if (image.GetPixel(x, y) != borderColor)
-                        {
-                            rowHasDifferent = true;
-                            break;
-                        }
-                    }
-                    if (rowHasDifferent)
-                    {
-                        bottom = y;
-                        break;
-                    }
-                }
-
-                // Find left boundary
-                for (int x = 0; x < image.Width; x++)
-                {
-                    bool colHasDifferent = false;
+                    bool columnSame = true;
                     for (int y = 0; y < image.Height; y++)
                     {
-                        if (image.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(left, y) != borderColor)
                         {
-                            colHasDifferent = true;
+                            columnSame = false;
                             break;
                         }
                     }
-                    if (colHasDifferent)
-                    {
-                        left = x;
-                        break;
-                    }
+                    if (columnSame) left++;
+                    else break;
                 }
 
-                // Find right boundary
-                for (int x = image.Width - 1; x >= 0; x--)
+                while (right >= left)
                 {
-                    bool colHasDifferent = false;
+                    bool columnSame = true;
                     for (int y = 0; y < image.Height; y++)
                     {
-                        if (image.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(right, y) != borderColor)
                         {
-                            colHasDifferent = true;
+                            columnSame = false;
                             break;
                         }
                     }
-                    if (colHasDifferent)
-                    {
-                        right = x;
-                        break;
-                    }
+                    if (columnSame) right--;
+                    else break;
                 }
 
-                int newWidth = right - left + 1;
-                int newHeight = bottom - top + 1;
-
-                if (newWidth <= 0 || newHeight <= 0)
+                while (top <= bottom)
                 {
-                    Console.Error.WriteLine("Unable to detect content area; image may be uniform.");
-                    return;
+                    bool rowSame = true;
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        if (image.GetPixel(x, top) != borderColor)
+                        {
+                            rowSame = false;
+                            break;
+                        }
+                    }
+                    if (rowSame) top++;
+                    else break;
                 }
 
-                image.Crop(new Rectangle(left, top, newWidth, newHeight));
+                while (bottom >= top)
+                {
+                    bool rowSame = true;
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        if (image.GetPixel(x, bottom) != borderColor)
+                        {
+                            rowSame = false;
+                            break;
+                        }
+                    }
+                    if (rowSame) bottom--;
+                    else break;
+                }
+
+                int cropWidth = right - left + 1;
+                int cropHeight = bottom - top + 1;
+
+                if (cropWidth > 0 && cropHeight > 0 && (left > 0 || top > 0 || cropWidth != image.Width || cropHeight != image.Height))
+                {
+                    Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight);
+                    image.Crop(rect);
+                }
 
                 var saveOptions = new BmpOptions
                 {
@@ -135,9 +122,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing scanned documents saved as BMP files, you may need to strip uniform color margins before OCR processing.
- * 2. When generating thumbnails from BMP screenshots, removing solid color frames ensures the thumbnail focuses on the actual content.
- * 3. When converting legacy BMP assets to modern formats, eliminating border padding reduces file size and prevents unwanted whitespace.
- * 4. When performing computer-vision analysis on BMP images, discarding constant-color borders improves feature detection accuracy.
- * 5. When batch-processing BMP sprites for a game, automatically cropping identical edge colors simplifies sprite sheet alignment.
+ * 1. When preparing scanned documents for OCR, you may need to strip uniform color margins from BMP files before text extraction.
+ * 2. When generating thumbnails for a photo gallery, removing solid borders from BMP images ensures consistent sizing without extra padding.
+ * 3. When converting legacy BMP assets to modern formats, eliminating unwanted frame colors prevents artifacts in the final PNG or JPEG.
+ * 4. When performing batch image analysis, cleaning solid color edges from BMP files improves accuracy of shape detection algorithms.
+ * 5. When integrating BMP images into a UI layout, automatically cropping uniform borders simplifies alignment and reduces layout calculations.
  */

@@ -1,11 +1,17 @@
-// HOW-TO: Convert DjVu Pages 3 to 7 to GIF with Memory Optimization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 3 to 7 to Animated GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,7 +19,7 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\document.djvu";
+            string inputPath = "Input\\sample.djvu";
             string outputPath = "Output\\range3to7.gif";
 
             if (!File.Exists(inputPath))
@@ -24,13 +30,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var loadOptions = new LoadOptions { BufferSizeHint = 1048576 };
-
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, loadOptions))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 1048576 }))
             {
-                var gifOptions = new GifOptions();
-                gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(3, 7));
-
+                GifOptions gifOptions = new GifOptions();
+                gifOptions.MultiPageOptions = new MultiPageOptions(new IntRange(3, 7));
                 djvu.Save(outputPath, gifOptions);
             }
         }
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific range of pages from a large DjVu document and create a lightweight animated GIF for web preview, this code handles the conversion efficiently.
- * 2. When processing high‑resolution DjVu files on a server with limited RAM, the BufferSizeHint setting reduces memory usage while converting selected pages to GIF.
- * 3. When building a document‑to‑image pipeline that only requires pages 3 through 7 of a multi‑page DjVu, this example shows how to isolate and save those pages as a single GIF file.
- * 4. When integrating Aspose.Imaging into a C# application to generate GIF thumbnails from a subset of DjVu pages for email attachments, the code demonstrates the necessary steps.
- * 5. When automating batch conversion of DjVu archives and you want to limit the output to a specific page range to save storage space, this snippet provides a ready‑to‑use solution.
+ * 1. When you need to extract a specific range of pages from a large DjVu document and create a single GIF for web preview.
+ * 2. When you want to reduce memory consumption while loading a high‑resolution DjVu file before converting selected pages to GIF.
+ * 3. When an application must generate an animated GIF from pages 3‑7 of a scanned book stored as DjVu for inclusion in a mobile app.
+ * 4. When automating batch processing of DjVu archives and only the middle pages are required as GIFs for documentation thumbnails.
+ * 5. When integrating Aspose.Imaging in a C# service to serve GIF previews of particular DjVu pages without loading the entire document into memory.
  */

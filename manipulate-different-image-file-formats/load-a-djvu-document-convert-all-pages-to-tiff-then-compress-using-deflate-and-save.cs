@@ -1,4 +1,11 @@
-// HOW-TO: Convert DjVu Document Pages To Deflate Compressed TIFF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multi-Page DjVu To Deflate-Compressed TIFF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,29 +19,22 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\document.djvu";
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\result.tiff";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDirectory = "Output";
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                for (int i = 0; i < djvu.Pages.Length; i++)
-                {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tiff");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb))
-                    {
-                        tiffOptions.Compression = TiffCompressions.Deflate;
-                        djvu.Pages[i].Save(outputPath, tiffOptions);
-                    }
-                }
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb);
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive scanned DjVu files as separate TIFF images with Deflate compression to reduce storage size while preserving image quality.
- * 2. When a legacy document workflow requires each page of a DjVu document to be saved as an individual TIFF for compatibility with older systems.
- * 3. When preparing DjVu pages for an OCR engine that only accepts TIFF input, using Deflate compression to speed up processing and lower memory usage.
- * 4. When generating printable TIFF files from DjVu source material while keeping color information and minimizing file size for faster web delivery.
- * 5. When converting multi‑page DjVu manuals into individual TIFF pages for integration into a .NET reporting tool that consumes TIFF images.
+ * 1. When you need to archive scanned documents originally in DjVu format as lossless, multi-page TIFF files with Deflate compression for long-term storage.
+ * 2. When a document management system requires all pages of a DjVu file to be delivered as a single TIFF bundle that can be opened by standard image viewers.
+ * 3. When you are building a C# batch-processing tool that converts a library of DjVu manuals into compressed TIFFs to reduce file size while preserving image quality.
+ * 4. When integrating Aspose.Imaging into a workflow that extracts each page of a DjVu e-book and saves it as a Deflate-compressed TIFF for printing or OCR preprocessing.
+ * 5. When migrating legacy DjVu archives to a format supported by Windows printers, converting them to multi-page TIFF with Deflate compression using .NET.
  */

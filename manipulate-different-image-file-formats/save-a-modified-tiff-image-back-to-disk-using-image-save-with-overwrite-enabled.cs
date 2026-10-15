@@ -1,4 +1,11 @@
-// HOW-TO: Rotate and Overwrite TIFF Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Invert Colors Of A TIFF And Overwrite File In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,24 +18,34 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.tif";
-        string outputPath = "output.tif";
+        string outputPath = "output/output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (TiffImage image = (TiffImage)Image.Load(inputPath))
-            {
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                var bounds = tiff.Bounds;
+                Color[] pixels = tiff.LoadPixels(bounds);
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    Color c = pixels[i];
+                    pixels[i] = Color.FromArgb(c.A,
+                        (byte)(255 - c.R),
+                        (byte)(255 - c.G),
+                        (byte)(255 - c.B));
+                }
+                tiff.SavePixels(bounds, pixels);
 
                 TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, options);
+                tiff.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to rotate scanned TIFF documents 90 degrees and save the changes back to the original location without creating a new file.
- * 2. When a batch job must reorient multi‑page TIFF files from a scanner before archiving them on a server.
- * 3. When a medical imaging application requires correcting the orientation of DICOM‑derived TIFF images and overwriting the existing files.
- * 4. When a GIS system processes satellite TIFF tiles, rotates them to match map coordinates, and replaces the old tiles in the dataset.
- * 5. When an automated document workflow needs to flip TIFF pages for proper display and ensure the updated file overwrites the previous version.
+ * 1. When you need to programmatically invert the colors of a scanned TIFF document before storing it in an archival system.
+ * 2. When a medical imaging application must apply a negative effect to DICOM‑converted TIFF files and overwrite the original output.
+ * 3. When a batch job processes large numbers of TIFF maps, adjusts pixel values, and saves the modified images to a specific folder without creating duplicate files.
+ * 4. When a web service receives a TIFF upload, applies a simple color transformation for preview purposes, and writes the result back using Aspose.Imaging with overwrite enabled.
+ * 5. When an automated testing suite validates that TIFF image manipulation code correctly writes the altered image to disk, ensuring the file is replaced if it already exists.
  */

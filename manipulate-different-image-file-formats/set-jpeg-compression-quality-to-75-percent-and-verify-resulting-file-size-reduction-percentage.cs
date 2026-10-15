@@ -1,18 +1,24 @@
-// HOW-TO: Compress JPEG to 75% Quality and Calculate Size Reduction in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Reduce JPEG File Size by Setting Quality to 75% in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\sample_compressed.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -26,17 +32,18 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (JpegOptions options = new JpegOptions())
+                var jpegOptions = new JpegOptions
                 {
-                    options.Quality = 75;
-                    image.Save(outputPath, options);
-                }
+                    Quality = 75
+                };
+                image.Save(outputPath, jpegOptions);
             }
 
             long newSize = new FileInfo(outputPath).Length;
             double reduction = (originalSize - newSize) * 100.0 / originalSize;
+
             Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {newSize} bytes");
+            Console.WriteLine($"New size: {newSize} bytes");
             Console.WriteLine($"Size reduction: {reduction:F2}%");
         }
         catch (Exception ex)
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the storage footprint of high‑resolution JPEG photos before archiving them on a server.
- * 2. When preparing images for faster web page loading by compressing JPEGs to a specific quality level and verifying the size savings.
- * 3. When generating thumbnails for a mobile app and want to ensure the compressed JPEG meets a target file‑size reduction.
- * 4. When automating batch processing of user‑uploaded pictures to enforce a maximum quality setting and report compression metrics.
- * 5. When optimizing images for email attachments and need to calculate the percentage decrease to stay within size limits.
+ * 1. When you need to shrink large JPEG photos for web upload while controlling quality in a C# application.
+ * 2. When you want to generate optimized thumbnails with a specific compression level to meet bandwidth constraints.
+ * 3. When you must compare original and compressed image sizes to verify that a chosen quality setting meets storage targets.
+ * 4. When you are building an automated batch processor that reduces JPEG file sizes before archiving them.
+ * 5. When you need to report the percentage of size reduction after applying a 75% quality setting for logging or analytics.
  */

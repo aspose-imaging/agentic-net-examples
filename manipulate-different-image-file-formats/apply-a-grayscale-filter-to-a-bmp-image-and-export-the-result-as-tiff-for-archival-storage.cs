@@ -1,4 +1,11 @@
-// HOW-TO: Convert BMP to Grayscale TIFF for Archival Storage in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to Grayscale TIFF for Archival in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.bmp");
-            string outputPath = Path.Combine("Output", "sample.tiff");
+            string inputPath = Path.Combine("Input", "image.bmp");
+            string outputPath = Path.Combine("Output", "image.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -25,16 +32,9 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
+                if (!raster.IsCached) raster.CacheData();
                 raster.Grayscale();
-
-                using (TiffOptions options = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    raster.Save(outputPath, options);
-                }
+                raster.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
             }
         }
         catch (Exception ex)
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive legacy BMP scans as lossless grayscale TIFF files to reduce file size while preserving image quality.
- * 2. When a document management system requires all incoming bitmap images to be converted to a standard grayscale TIFF format for consistent indexing.
- * 3. When preparing medical or engineering drawings for long‑term storage, converting them from BMP to grayscale TIFF ensures compatibility with archival standards.
- * 4. When automating a batch process that reads BMP files, applies a grayscale filter, and saves them as TIFF using Aspose.Imaging in a .NET application.
- * 5. When you must ensure the BMP image data is cached before manipulation to avoid memory issues during grayscale conversion and TIFF export.
+ * 1. When you need to archive legacy BMP scans as lossless grayscale TIFF files to reduce file size while preserving detail.
+ * 2. When a document management system requires all incoming images to be stored in a single‑channel TIFF format for compliance.
+ * 3. When converting color BMP screenshots to grayscale TIFF for inclusion in legal evidence packages.
+ * 4. When preparing medical imaging data by stripping color from BMP files and saving them as TIFF for long‑term storage.
+ * 5. When automating a batch process that normalizes BMP assets to grayscale TIFF before uploading to a cloud archive.
  */

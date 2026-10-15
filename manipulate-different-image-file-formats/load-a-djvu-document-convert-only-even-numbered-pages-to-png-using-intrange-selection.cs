@@ -1,11 +1,17 @@
-// HOW-TO: Convert Even Pages of DjVu to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert Even Pages of a DjVu Document to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -27,20 +33,20 @@ class Program
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 int pageCount = djvu.Pages.Length;
-
                 for (int i = 0; i < pageCount; i++)
                 {
                     // Convert only even-numbered pages (1-based indexing)
-                    if ((i + 1) % 2 != 0)
-                        continue;
-
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    using (PngOptions pngOptions = new PngOptions())
+                    if ((i + 1) % 2 == 0)
                     {
-                        IntRange range = new IntRange(i, i);
-                        pngOptions.MultiPageOptions = new DjvuMultiPageOptions(range);
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+                        string outDir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrWhiteSpace(outDir))
+                        {
+                            Directory.CreateDirectory(outDir);
+                        }
+
+                        var pngOptions = new PngOptions();
+                        pngOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(i, i));
                         djvu.Save(outputPath, pngOptions);
                     }
                 }
@@ -55,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract only the even-numbered pages from a multi‑page DjVu file and save them as high‑quality PNG images for web publishing.
- * 2. When automating a workflow that processes scanned books in DjVu format but only the even pages contain the content you want to archive as PNG.
- * 3. When generating thumbnails for every second page of a DjVu document to reduce storage while preserving visual fidelity.
- * 4. When creating a batch conversion tool that skips odd pages to speed up processing of large DjVu archives and outputs PNG files for downstream image analysis.
- * 5. When integrating Aspose.Imaging into a C# application to selectively export specific pages (e.g., even pages) from DjVu to PNG for printing or OCR pipelines.
+ * 1. When you need to extract only the even-numbered pages from a multi‑page DjVu file and save them as separate PNG images for web preview.
+ * 2. When generating thumbnails for every second page of a scanned book stored in DjVu format to reduce processing time.
+ * 3. When creating a printable subset of a DjVu archive by converting only the even pages to high‑quality PNG files.
+ * 4. When developing a document‑conversion service that must skip odd pages and output PNGs for downstream image analysis.
+ * 5. When automating batch processing of DjVu files to extract specific page ranges (e.g., even pages) for archival or OCR pipelines.
  */

@@ -1,11 +1,15 @@
-// HOW-TO: Split a BigTIFF image into four PNG quadrants using C# (Aspose.Imaging for .NET)
+// HOW-TO: Split A BigTIFF Image Into Four PNG Quadrants Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.BigTiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -16,10 +20,6 @@ class Program
         {
             string inputPath = "input.tif";
             string outputDir = "Output";
-            string outputPath1 = Path.Combine(outputDir, "quadrant1.png");
-            string outputPath2 = Path.Combine(outputDir, "quadrant2.png");
-            string outputPath3 = Path.Combine(outputDir, "quadrant3.png");
-            string outputPath4 = Path.Combine(outputDir, "quadrant4.png");
 
             if (!File.Exists(inputPath))
             {
@@ -27,37 +27,35 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4));
+            Directory.CreateDirectory(outputDir);
 
-            using (BigTiffImage bigTiff = (BigTiffImage)Image.Load(inputPath))
+            using (BigTiffImage bigTiff = (BigTiffImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                int width = bigTiff.Width;
-                int height = bigTiff.Height;
-                int halfWidth = width / 2;
-                int halfHeight = height / 2;
+                Aspose.Imaging.RasterImage source = bigTiff;
 
-                var quadrants = new[]
+                int width = source.Width;
+                int height = source.Height;
+                int halfW = width / 2;
+                int halfH = height / 2;
+
+                for (int i = 0; i < 4; i++)
                 {
-                    new { Rect = new Rectangle(0, 0, halfWidth, halfHeight), Output = outputPath1 },
-                    new { Rect = new Rectangle(halfWidth, 0, width - halfWidth, halfHeight), Output = outputPath2 },
-                    new { Rect = new Rectangle(0, halfHeight, halfWidth, height - halfHeight), Output = outputPath3 },
-                    new { Rect = new Rectangle(halfWidth, halfHeight, width - halfWidth, height - halfHeight), Output = outputPath4 }
-                };
+                    int x = (i % 2) * halfW;
+                    int y = (i / 2) * halfH;
 
-                foreach (var q in quadrants)
-                {
-                    int[] pixels = bigTiff.LoadArgb32Pixels(q.Rect);
+                    int[] pixels = source.LoadArgb32Pixels(new Aspose.Imaging.Rectangle(x, y, halfW, halfH));
 
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.Source = new FileCreateSource(q.Output, false);
+                    string outputPath = Path.Combine(outputDir, $"quadrant{i + 1}.png");
 
-                    using (Image pngImage = Image.Create(pngOptions, q.Rect.Width, q.Rect.Height))
+                    var pngOptions = new PngOptions
                     {
-                        ((RasterImage)pngImage).SaveArgb32Pixels(new Rectangle(0, 0, q.Rect.Width, q.Rect.Height), pixels);
-                        pngImage.Save();
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    using (Aspose.Imaging.RasterImage quad = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, halfW, halfH))
+                    {
+                        quad.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, halfW, halfH), pixels);
+                        quad.Save();
                     }
                 }
             }
@@ -71,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing massive satellite or aerial BigTIFF files you need to break them into smaller PNG tiles for faster web map rendering.
- * 2. When converting high‑resolution medical scans stored as BigTIFF into manageable PNG sections for analysis or display on limited‑memory devices.
- * 3. When generating preview thumbnails of each quadrant of a large engineering drawing saved as BigTIFF for quick visual inspection.
- * 4. When preparing separate image assets from a giant scanned map to feed into a GIS application that only accepts PNG inputs.
- * 5. When creating four equal‑sized PNG segments from a BigTIFF to parallelize image processing tasks across multiple threads or services.
+ * 1. When you need to break a massive satellite BigTIFF file into four smaller PNG tiles for faster web rendering.
+ * 2. When a medical imaging workflow stores scans as BigTIFF and you must extract each quadrant as separate PNGs for detailed analysis.
+ * 3. When generating preview thumbnails of different sections of a high‑resolution map saved in BigTIFF format.
+ * 4. When preparing image data for a machine‑learning model that requires smaller PNG inputs derived from a large source file.
+ * 5. When creating printable sections of a large engineering drawing stored as BigTIFF, saving each quadrant as an individual PNG for separate printing.
  */

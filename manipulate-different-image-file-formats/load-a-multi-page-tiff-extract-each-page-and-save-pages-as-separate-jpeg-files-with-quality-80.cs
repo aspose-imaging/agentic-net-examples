@@ -1,10 +1,16 @@
-// HOW-TO: Extract Multi‑Page TIFF Frames To Separate JPEGs With Quality 80 In C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract TIFF Pages to JPEG Files with Quality 80 in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\multpage.tif";
-            string outputDirectory = "Output";
+            string inputPath = "input.tif";
+            string outputDirectory = "output";
 
             if (!File.Exists(inputPath))
             {
@@ -21,26 +27,20 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
-
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
                 int pageIndex = 0;
                 foreach (TiffFrame frame in tiff.Frames)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex + 1}.jpg");
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.jpg");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (JpegOptions jpegOptions = new JpegOptions
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        Quality = 80,
-                        Source = new FileCreateSource(outputPath, false)
-                    })
-                    {
-                        tiff.ActiveFrame = frame;
-                        tiff.Save(outputPath, jpegOptions);
-                    }
+                        Quality = 80
+                    };
 
+                    frame.Save(outputPath, jpegOptions);
                     pageIndex++;
                 }
             }
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a scanned multi‑page TIFF document into individual JPEG images for quick web preview.
- * 2. When a medical imaging system stores patient scans as a multi‑page TIFF and you must extract each slice as a JPEG for integration with a viewer.
- * 3. When an archival workflow requires separating each page of a TIFF manuscript into high‑quality JPEG files before running OCR.
- * 4. When a printing service receives multi‑page TIFF proofs and must deliver each page as a JPEG with controlled compression.
- * 5. When a mobile app needs to display individual pages of a TIFF comic book as JPEG thumbnails with a specific quality setting.
+ * 1. When you need to convert scanned multi‑page documents (TIFF) into separate high‑quality JPEG images for web preview.
+ * 2. When a medical imaging system stores patient scans as multi‑page TIFFs and you must export each slice as an 80‑quality JPEG for integration with other software.
+ * 3. When an archival workflow requires extracting each page of a TIFF manuscript and saving them as JPEGs to reduce file size while preserving visual fidelity.
+ * 4. When a printing service receives multi‑page TIFF proofs and needs to generate individual JPEG files for proofing on devices that only support JPEG.
+ * 5. When a batch processing script must automate the conversion of TIFF pages to JPEGs with a specific compression quality using C# and Aspose.Imaging.
  */

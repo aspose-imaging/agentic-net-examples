@@ -1,18 +1,25 @@
-// HOW-TO: Convert DICOM Image To PDF With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DICOM Image to PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input\\image.dcm";
-            string outputPath = "Output\\result.pdf";
+            string inputPath = Path.Combine("Input", "sample.dcm");
+            string outputPath = Path.Combine("Output", "result.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -22,11 +29,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    dicom.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -39,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application must generate a printable PDF report from a DICOM scan for clinicians to review.
- * 2. When a hospital information system needs to archive radiology images as PDF files to comply with document management policies.
- * 3. When a telemedicine platform wants to embed DICOM images into patient records that are stored as PDFs for easy sharing.
- * 4. When a medical research tool requires batch conversion of DICOM files to PDFs for inclusion in study publications.
- * 5. When a diagnostic software needs to convert a single DICOM image to PDF on the fly for integration with non‑medical document workflows.
+ * 1. When a healthcare application must generate a printable PDF report from a DICOM scan for doctors to review.
+ * 2. When a medical imaging workflow needs to archive DICOM files as PDF documents to integrate with a document management system.
+ * 3. When a radiology web service wants to provide patients with a downloadable PDF version of their imaging study.
+ * 4. When a hospital’s billing software requires converting DICOM images to PDF to attach them to invoices.
+ * 5. When a research tool needs to batch‑process DICOM images and save them as PDFs for inclusion in scientific publications.
  */
