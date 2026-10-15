@@ -1,48 +1,54 @@
-// HOW-TO: Convert TIFF to JPEG with 95% Quality Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to JPEG with 95% Quality Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace ImageConversion
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\result.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.tif";
-                string outputPath = "output\\final.jpg";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                if (!File.Exists(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    JpegOptions jpegOptions = new JpegOptions();
                     jpegOptions.Quality = 95;
                     image.Save(outputPath, jpegOptions);
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready JPEG previews from high‑resolution TIFF scans while preserving most visual detail.
- * 2. When an application must automatically convert uploaded TIFF documents to compressed JPEG files for email attachment size limits.
- * 3. When a batch‑processing service creates thumbnail JPEGs from TIFF images and requires a specific 95 percent quality setting.
- * 4. When a digital‑archive system stores original TIFF files but serves JPEG copies to browsers with controlled compression.
- * 5. When a C# program integrates Aspose.Imaging to replace legacy command‑line tools for TIFF‑to‑JPEG conversion with precise quality control.
+ * 1. When you need to reduce the file size of a PNG logo for faster web page loading by converting it to a high‑quality JPEG.
+ * 2. When an e‑commerce platform requires product images in JPEG format with a specific quality setting for consistent display across browsers.
+ * 3. When a batch processing tool must transform scanned PNG documents into JPEGs while preserving visual fidelity at 95 percent quality.
+ * 4. When a mobile app generates screenshots in PNG and you must export them as JPEGs to meet upload size limits without noticeable loss.
+ * 5. When integrating Aspose.Imaging into a C# service that prepares user‑uploaded PNG avatars for storage as JPEGs with controlled compression.
  */
