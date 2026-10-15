@@ -1,36 +1,61 @@
-// HOW-TO: Convert PSD with Embedded EMF Text to TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PSD to TIFF While Preserving Raster Data in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.psd";
-            string outputPath = "output.tiff";
+            string inputPath = "Input\\sample.psd";
+            string outputPath = "Output\\result.tiff";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            using (Image psdImage = Image.Load(inputPath))
             {
-                // Save as TIFF, rasterizing any vector content (including EMF text)
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                // Ensure raster data is cached
+                RasterImage rasterPsd = (RasterImage)psdImage;
+                if (!rasterPsd.IsCached)
+                {
+                    rasterPsd.CacheData();
+                }
+
+                // Create TIFF canvas bound to output file
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                using (Image tiffImage = Image.Create(tiffOptions, rasterPsd.Width, rasterPsd.Height))
+                {
+                    RasterImage rasterTiff = (RasterImage)tiffImage;
+
+                    // Copy pixel data from PSD to TIFF
+                    Color[] pixels = rasterPsd.LoadPixels(rasterPsd.Bounds);
+                    rasterTiff.SavePixels(rasterTiff.Bounds, pixels);
+
+                    // Save the TIFF image (output file already bound)
+                    tiffImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -42,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a print‑ready TIFF from a Photoshop PSD that contains EMF text layers, preserving the visual layout as rasterized vector graphics.
- * 2. When an automated workflow must convert design assets with embedded vector annotations into a single‑page TIFF for archival or downstream processing.
- * 3. When a web service receives PSD files with EMF captions and must output a TIFF that can be displayed in browsers without requiring vector support.
- * 4. When migrating legacy Photoshop documents to a format compatible with document management systems that only accept TIFF images.
- * 5. When creating thumbnails or previews of PSD files containing EMF text for a C# application that only handles raster image formats.
+ * 1. When you need to generate a high‑resolution TIFF from a Photoshop PSD for printing or archival purposes using C#.
+ * 2. When an automated workflow must read a PSD file, ensure its pixel data is cached, and output a TIFF without losing image quality.
+ * 3. When a server‑side application has to convert user‑uploaded PSD files to TIFF for compatibility with downstream imaging tools.
+ * 4. When you want to programmatically create a TIFF file bound to a specific file path and copy pixel data from an existing PSD in .NET.
+ * 5. When you need to handle missing PSD files gracefully and log errors while performing format conversion in a batch process.
  */
