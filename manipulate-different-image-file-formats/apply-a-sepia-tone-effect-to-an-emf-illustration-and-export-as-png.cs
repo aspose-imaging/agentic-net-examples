@@ -1,69 +1,68 @@
-// HOW-TO: Apply Sepia Tone to EMF and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Sepia Tone to EMF Illustration and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input\\illustration.emf";
+        string outputPath = "output\\sepia.png";
+
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image emfImage = Image.Load(inputPath))
+            using (Image emf = Image.Load(inputPath))
             {
-                int width = emfImage.Width;
-                int height = emfImage.Height;
+                int width = emf.Width;
+                int height = emf.Height;
 
-                PngOptions pngOptions = new PngOptions
+                using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), width, height))
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
-                {
-                    // Draw EMF onto raster canvas
                     Graphics graphics = new Graphics(canvas);
-                    graphics.DrawImage(emfImage, new Rectangle(0, 0, width, height));
+                    graphics.DrawImage(emf, new Rectangle(0, 0, width, height));
 
-                    // Apply sepia tone
-                    Rectangle bounds = new Rectangle(0, 0, width, height);
-                    int[] pixels = canvas.LoadArgb32Pixels(bounds);
+                    int[] pixels = canvas.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
                     for (int i = 0; i < pixels.Length; i++)
                     {
-                        int pixel = pixels[i];
-                        int a = (pixel >> 24) & 0xFF;
-                        int r = (pixel >> 16) & 0xFF;
-                        int g = (pixel >> 8) & 0xFF;
-                        int b = pixel & 0xFF;
+                        int argb = pixels[i];
+                        int a = (argb >> 24) & 0xFF;
+                        int r = (argb >> 16) & 0xFF;
+                        int g = (argb >> 8) & 0xFF;
+                        int b = argb & 0xFF;
 
                         int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
                         int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
                         int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
 
-                        tr = tr > 255 ? 255 : tr;
-                        tg = tg > 255 ? 255 : tg;
-                        tb = tb > 255 ? 255 : tb;
+                        if (tr > 255) tr = 255;
+                        if (tg > 255) tg = 255;
+                        if (tb > 255) tb = 255;
 
                         pixels[i] = (a << 24) | (tr << 16) | (tg << 8) | tb;
                     }
-                    canvas.SaveArgb32Pixels(bounds, pixels);
 
-                    // Save the final PNG
-                    canvas.Save();
+                    canvas.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+
+                    PngOptions pngOptions = new PngOptions();
+                    canvas.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -76,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy vector EMF illustrations to web‑friendly PNGs with a nostalgic sepia effect for a marketing website.
- * 2. When generating thumbnail previews of EMF diagrams for a desktop application and want the thumbnails to have a consistent sepia style.
- * 3. When preparing printed reports that embed EMF charts but require the images to be saved as PNG with a sepia tone to match a vintage theme.
- * 4. When automating batch processing of EMF assets in a CI pipeline and need to apply a sepia filter before publishing them as PNG files.
- * 5. When creating an e‑learning module that displays EMF graphics with a sepia look, and you must programmatically render them to PNG for cross‑platform compatibility.
+ * 1. When you need to convert vector EMF graphics to raster PNG with a vintage sepia look for web publishing.
+ * 2. When generating thumbnails of legacy EMF diagrams for a mobile app and want a consistent sepia color scheme.
+ * 3. When preparing print‑ready assets from EMF files and require a sepia filter to match a brand’s retro aesthetic.
+ * 4. When automating batch processing of engineering drawings stored as EMF and need to output them as PNG with sepia tone for documentation.
+ * 5. When integrating image processing into a C# service that receives EMF uploads and must return a sepia‑styled PNG for preview.
  */
