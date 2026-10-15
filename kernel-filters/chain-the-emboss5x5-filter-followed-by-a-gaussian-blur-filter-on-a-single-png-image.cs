@@ -1,9 +1,16 @@
-// HOW-TO: Apply Emboss and Gaussian Blur Filters to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss and Gaussian Blur Filters Sequentially to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -20,24 +27,17 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Apply Emboss5x5 filter
-                raster.Filter(
-                    raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.GetGaussian(5, 1.0)));
 
-                // Apply Gaussian blur filter
-                raster.Filter(
-                    raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(3, 1.0)));
-
-                // Save the result as PNG
-                raster.Save(outputPath, new PngOptions());
+                using (PngOptions options = new PngOptions())
+                {
+                    raster.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add an embossed 3‑D effect and then smooth a PNG image using Aspose.Imaging in C#.
- * 2. When creating UI icons that require a raised look with softened edges by applying Emboss5x5 and Gaussian blur filters.
- * 3. When preprocessing scanned PNG documents to emphasize texture and reduce noise before OCR in a .NET application.
- * 4. When generating stylized thumbnails for a web gallery where an emboss filter followed by a blur improves visual appeal.
- * 5. When building an automated .NET image pipeline that applies artistic emboss and blur effects to PNG assets before deployment.
+ * 1. When you need to give a PNG photo a raised‑edge effect followed by a softening blur for a stylized thumbnail in a C# web application.
+ * 2. When preparing product images for an e‑commerce site and want to highlight texture with an emboss filter before applying a Gaussian blur to reduce noise using Aspose.Imaging.
+ * 3. When creating artistic filters for a desktop photo editor written in C# that first emphasizes edges with a 5×5 emboss kernel and then smooths the result with a Gaussian blur.
+ * 4. When automating batch processing of scanned documents to make text stand out with embossing and then soften background artifacts with a blur in a .NET service.
+ * 5. When generating game asset sprites where a raised‑relief look is required first, then a subtle blur is added to blend the sprite into the background using Aspose.Imaging for .NET.
  */
