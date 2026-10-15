@@ -1,4 +1,11 @@
 // HOW-TO: Convert ODG to PDF with Custom Page Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -24,16 +31,17 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = 800,
-                        PageHeight = 600
-                    };
-                    image.Save(outputPath, pdfOptions);
-                }
+                        PageWidth = 595,   // custom width in points
+                        PageHeight = 842,  // custom height in points
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF report from an ODG diagram and ensure the output fits a specific 800 × 600 pixel layout.
- * 2. When a web application must convert user‑uploaded ODG files to PDF while preserving a predefined page size for consistent printing.
- * 3. When automating batch processing of OpenDocument graphics to PDFs with a uniform page dimension for archival purposes.
- * 4. When integrating Aspose.Imaging into a C# service that creates PDFs from ODG files with a white background and custom page width and height.
- * 5. When developing a desktop tool that transforms ODG drawings into PDFs that match the exact size required by a downstream layout engine.
+ * 1. When a developer needs to generate printable PDF reports from OpenDocument graphics (ODG) files with a specific A4 page layout.
+ * 2. When integrating a document conversion service that must preserve vector quality while fitting the output to a predefined page dimension.
+ * 3. When automating batch processing of ODG diagrams into PDFs for archiving, requiring a uniform page size across all documents.
+ * 4. When creating PDFs for mobile or web preview where the page width and height must match a custom design specification.
+ * 5. When building a C# application that converts user‑uploaded ODG files to PDFs and needs to set a white background and exact page dimensions for consistent rendering.
  */
