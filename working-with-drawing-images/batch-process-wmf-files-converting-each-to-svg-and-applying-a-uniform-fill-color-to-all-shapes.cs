@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert WMF to SVG with Uniform Fill Color in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WMF to SVG with Red Fill Color in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -28,12 +35,12 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
@@ -43,17 +50,15 @@ class Program
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var svgOptions = new SvgOptions
+                    using (SvgOptions svgOptions = new SvgOptions())
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.Blue,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        }
-                    };
-
-                    image.Save(outputPath, svgOptions);
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                        rasterOptions.BackgroundColor = Color.Red;
+                        rasterOptions.PageWidth = image.Width;
+                        rasterOptions.PageHeight = image.Height;
+                        svgOptions.VectorRasterizationOptions = rasterOptions;
+                        image.Save(outputPath, svgOptions);
+                    }
                 }
             }
         }
@@ -66,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform a collection of legacy WMF drawings into scalable SVG files while applying the same fill color to all shapes for consistent branding.
- * 2. When an automated build process must generate web‑ready vector graphics from WMF assets and ensure every graphic uses a predefined background color.
- * 3. When a reporting tool requires converting multiple WMF icons to SVG format and wants a uniform color theme without manually editing each file.
- * 4. When migrating a desktop application’s UI assets from WMF to SVG for responsive design and you need to apply a single fill color across all converted images.
- * 5. When creating a batch script that prepares WMF illustrations for print‑to‑screen conversion, saving them as SVG with a consistent color to match corporate style guidelines.
+ * 1. When you need to automatically transform a collection of legacy WMF diagrams into scalable SVG files for web display while applying a consistent background color.
+ * 2. When a reporting system must generate SVG charts from WMF assets and ensure all shapes share the same fill color for brand consistency.
+ * 3. When a batch image‑processing pipeline has to convert multiple WMF icons to SVG format and apply a uniform color to simplify downstream styling.
+ * 4. When migrating a desktop application’s vector assets from WMF to SVG and you want to enforce a single background hue across all converted files.
+ * 5. When preparing WMF‑based technical drawings for inclusion in documentation and you need them in SVG with a predefined fill color without manual editing.
  */

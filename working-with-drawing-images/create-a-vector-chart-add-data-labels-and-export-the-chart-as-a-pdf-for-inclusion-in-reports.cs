@@ -1,9 +1,17 @@
-// HOW-TO: Generate Bar Chart with Labels and Export to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate Bar Chart with Data Labels and Export to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -12,64 +20,55 @@ class Program
     {
         try
         {
-            string outputPath = Path.Combine("Output", "Chart.pdf");
+            string outputPath = "Output/Chart.pdf";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(new PngOptions(), 800, 600))
+            int width = 800;
+            int height = 600;
+
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            PdfOptions options = new PdfOptions();
+            options.Source = source;
+
+            using (Image canvas = Image.Create(options, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-                int chartX = 100;
-                int chartY = 100;
-                int chartWidth = 600;
-                int chartHeight = 400;
+                Pen axisPen = new Pen(Color.Black, 2);
+                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(width - 50, height - 50));
+                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(50, 50));
 
-                Aspose.Imaging.Pen axisPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawLine(axisPen, chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
-                graphics.DrawLine(axisPen, chartX, chartY, chartX, chartY + chartHeight);
-
-                int[] values = { 120, 80, 150, 60, 200 };
+                int[] data = { 120, 80, 150, 60, 200 };
                 string[] labels = { "A", "B", "C", "D", "E" };
-                int barCount = values.Length;
-                int maxVal = values.Max();
-
+                int barCount = data.Length;
+                int maxData = data.Max();
+                int chartWidth = width - 100;
+                int chartHeight = height - 100;
                 int barWidth = chartWidth / (barCount * 2);
-                int space = barWidth;
+                int spacing = barWidth;
 
-                for (int i = 0; i < barCount; i++)
+                Font labelFont = new Font("Arial", 12);
+                using (SolidBrush textBrush = new SolidBrush(Color.Black))
                 {
-                    int barHeight = (int)((double)values[i] / maxVal * chartHeight);
-                    int x = chartX + space / 2 + i * (barWidth + space);
-                    int y = chartY + chartHeight - barHeight;
-
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                    for (int i = 0; i < barCount; i++)
                     {
-                        graphics.FillRectangle(brush, x, y, barWidth, barHeight);
-                    }
+                        int barHeight = (int)((double)data[i] / maxData * chartHeight);
+                        int x = 50 + spacing / 2 + i * (barWidth + spacing);
+                        int y = height - 50 - barHeight;
 
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1);
-                    graphics.DrawRectangle(pen, x, y, barWidth, barHeight);
+                        using (SolidBrush barBrush = new SolidBrush(Color.Blue))
+                        {
+                            graphics.FillRectangle(barBrush, new Rectangle(x, y, barWidth, barHeight));
+                        }
 
-                    Aspose.Imaging.Font valueFont = new Aspose.Imaging.Font("Arial", 12);
-                    string valueStr = values[i].ToString();
-                    int labelX = x + barWidth / 2 - (valueStr.Length * 3);
-                    int labelY = y - 20;
-                    using (SolidBrush textBrush = new SolidBrush(Aspose.Imaging.Color.Black))
-                    {
-                        graphics.DrawString(valueStr, valueFont, textBrush, labelX, labelY);
-                    }
-
-                    Aspose.Imaging.Font labelFont = new Aspose.Imaging.Font("Arial", 12);
-                    int labelX2 = x + barWidth / 2 - (labels[i].Length * 3);
-                    int labelY2 = chartY + chartHeight + 5;
-                    using (SolidBrush textBrush2 = new SolidBrush(Aspose.Imaging.Color.Black))
-                    {
-                        graphics.DrawString(labels[i], labelFont, textBrush2, labelX2, labelY2);
+                        string valueLabel = data[i].ToString();
+                        graphics.DrawString(valueLabel, labelFont, textBrush, new Point(x + barWidth / 2, y - 20));
+                        graphics.DrawString(labels[i], labelFont, textBrush, new Point(x + barWidth / 2, height - 40));
                     }
                 }
 
-                image.Save(outputPath, new PdfOptions());
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -81,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically create a bar chart image with data labels and embed it in a PDF report using Aspose.Imaging for .NET.
- * 2. When you want to visualize sales figures or survey results as a vector chart in C# and include the chart in generated PDF documents.
- * 3. When an automated reporting system must generate PDF files that contain custom charts without relying on external design tools.
- * 4. When you are building a desktop application that exports statistical data as high‑resolution PDFs for printing or archiving.
- * 5. When you require a pure .NET solution to draw charts, add annotations, and save them directly to PDF format for compliance documentation.
+ * 1. When you need to embed a dynamically generated bar chart with labeled values into a PDF report for business analytics.
+ * 2. When an automated reporting system must create high‑resolution vector graphics of sales figures without rasterizing the image.
+ * 3. When a desktop application has to produce printable PDFs containing charts that scale cleanly on any device.
+ * 4. When you want to programmatically generate charts from an array of data and save them directly as PDF files using Aspose.Imaging in C#.
+ * 5. When a financial dashboard requires exporting chart visuals with precise data labels for regulatory documentation.
  */

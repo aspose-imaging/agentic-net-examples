@@ -1,8 +1,14 @@
-// HOW-TO: Fill Combined Rectangle and Ellipse Path on Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Fill Combined Rectangle and Ellipse Path on PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -12,7 +18,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
+            string inputPath = "input.png";
             string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
@@ -23,29 +29,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(image);
+                Graphics graphics = new Graphics(rasterImage);
 
                 GraphicsPath path = new GraphicsPath();
 
-                Figure figure = new Figure();
+                // First figure: rectangle
+                Figure rectFigure = new Figure();
+                RectangleShape rectShape = new RectangleShape(new RectangleF(50f, 50f, 200f, 150f));
+                rectFigure.AddShape(rectShape);
+                path.AddFigure(rectFigure);
 
-                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 200, 150));
-                figure.AddShape(rectShape);
+                // Second figure: ellipse
+                Figure ellipseFigure = new Figure();
+                EllipseShape ellipseShape = new EllipseShape(new RectangleF(300f, 100f, 180f, 120f));
+                ellipseFigure.AddShape(ellipseShape);
+                path.AddFigure(ellipseFigure);
 
-                EllipseShape ellipseShape = new EllipseShape(new RectangleF(300, 100, 150, 100));
-                figure.AddShape(ellipseShape);
-
-                path.AddFigure(figure);
-
-                using (SolidBrush solidBrush = new SolidBrush(Color.Blue))
+                using (SolidBrush solidBrush = new SolidBrush(Aspose.Imaging.Color.Blue))
                 {
                     graphics.FillPath(solidBrush, path);
                 }
 
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -57,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to overlay solid colored shapes such as a rectangle and an ellipse onto a JPEG and save the result as a PNG for web graphics.
- * 2. When generating custom watermarks or badges by programmatically drawing combined geometric paths on product photos using C#.
- * 3. When creating composite graphics for reports, like highlighting regions of interest with filled shapes on scanned images.
- * 4. When building a batch image processing tool that adds colored annotations to images before archiving them in loss‑less PNG format.
- * 5. When developing a C# application that requires drawing multiple shapes as a single GraphicsPath to ensure consistent fill rendering across different image formats.
+ * 1. When you need to programmatically overlay a solid‑colored rectangle and ellipse onto an existing PNG for a custom watermark or UI element.
+ * 2. When generating dynamic graphics such as badges or icons that require multiple shapes filled with the same color in a single raster image.
+ * 3. When creating a composite shape for a game sprite sheet where both rectangular and elliptical regions must be painted uniformly.
+ * 4. When automating batch processing of images to add blue‑filled geometric highlights for data‑visualization overlays.
+ * 5. When building a reporting tool that draws combined shapes on scanned documents to indicate areas of interest before saving as PNG.
  */

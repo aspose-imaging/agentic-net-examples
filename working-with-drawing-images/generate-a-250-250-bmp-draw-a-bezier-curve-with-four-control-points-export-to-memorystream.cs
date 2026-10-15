@@ -1,9 +1,16 @@
-// HOW-TO: Create 250x250 BMP With Bezier Curve And Save To MemoryStream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 250x250 BMP With Bezier Curve and Save to MemoryStream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,22 +18,24 @@ class Program
     {
         try
         {
-            using (MemoryStream ms = new MemoryStream())
+            BmpOptions bmpOptions = new BmpOptions();
+            using (Image image = Image.Create(bmpOptions, 250, 250))
             {
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(ms);
-                using (Image image = Image.Create(bmpOptions, 250, 250))
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                Pen pen = new Pen(Color.Black, 2);
+                Point p1 = new Point(20, 200);
+                Point p2 = new Point(80, 20);
+                Point p3 = new Point(170, 230);
+                Point p4 = new Point(230, 30);
+
+                graphics.DrawBezier(pen, p1, p2, p3, p4);
+
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-                    Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
-                    Point p0 = new Point(20, 200);
-                    Point p1 = new Point(70, 20);
-                    Point p2 = new Point(180, 20);
-                    Point p3 = new Point(230, 200);
-                    graphics.DrawBezier(pen, p0, p1, p2, p3);
-                    image.Save();
-                    Console.WriteLine($"BMP size in bytes: {ms.Length}");
+                    image.Save(ms, new BmpOptions());
+                    Console.WriteLine($"MemoryStream length: {ms.Length}");
                 }
             }
         }
@@ -39,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a bitmap thumbnail that contains a custom Bezier‑shaped logo entirely in memory for a web API response.
- * 2. When you want to programmatically create a 250 × 250 BMP background and draw a smooth curve for a diagram or UI element without writing intermediate files to disk.
- * 3. When you are building a reporting tool that embeds vector‑style curves into BMP images and streams them directly to a client application.
- * 4. When you need to test image‑processing pipelines by producing a known BMP image with a specific Bezier pattern for automated validation.
- * 5. When you are converting drawing commands into a BMP stream for use in email attachments or database storage where only a byte array is required.
+ * 1. When you need to generate a thumbnail BMP image that contains a custom Bezier‑shaped watermark before sending it over a network.
+ * 2. When you want to create a printable 250 × 250 BMP diagram with a smooth curve for inclusion in a PDF report generated in a .NET service.
+ * 3. When you have to draw vector‑based graphics on a bitmap in memory for a game UI element without writing temporary files to disk.
+ * 4. When you are building an API that returns dynamically drawn BMP images, such as signature or signature‑like curves, directly from a MemoryStream.
+ * 5. When you need to test image‑processing pipelines by programmatically creating BMP files with known geometric shapes like a Bezier curve.
  */

@@ -1,44 +1,56 @@
-// HOW-TO: Create BMP with Overlapping Semi-Transparent Circles in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image with Overlapping Transparent Circles in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string outputPath = "output/circles.bmp";
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-                outputDir = ".";
-            Directory.CreateDirectory(outputDir);
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            int width = 400;
-            int height = 400;
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            var bmpOptions = new BmpOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            int width = 500;
+            int height = 500;
 
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                var graphics = new Graphics(image);
-                graphics.Clear(Color.Yellow);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                var brush1 = new SolidBrush(Color.FromArgb(128, 255, 0, 0));
-                graphics.FillEllipse(brush1, new Rectangle(50, 50, 200, 200));
+                // Circle 1: semi-transparent red
+                using (SolidBrush brush1 = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                {
+                    graphics.FillEllipse(brush1, 150 - 100, 150 - 100, 200, 200);
+                }
 
-                var brush2 = new SolidBrush(Color.FromArgb(128, 0, 255, 0));
-                graphics.FillEllipse(brush2, new Rectangle(150, 100, 200, 200));
+                // Circle 2: more transparent green
+                using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(96, 0, 255, 0)))
+                {
+                    graphics.FillEllipse(brush2, 250 - 120, 200 - 120, 240, 240);
+                }
 
-                var brush3 = new SolidBrush(Color.FromArgb(128, 0, 0, 255));
-                graphics.FillEllipse(brush3, new Rectangle(100, 150, 200, 200));
+                // Circle 3: less transparent blue
+                using (SolidBrush brush3 = new SolidBrush(Color.FromArgb(160, 0, 0, 255)))
+                {
+                    graphics.FillEllipse(brush3, 200 - 80, 300 - 80, 160, 160);
+                }
 
                 image.Save();
             }
@@ -52,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP file that visualizes layered data using semi‑transparent circles for a dashboard or report.
- * 2. When you want to programmatically create a background image with colored overlapping shapes for a game UI or splash screen.
- * 3. When you need to produce a test image that demonstrates alpha blending and opacity handling in Aspose.Imaging for unit testing.
- * 4. When you are building a custom chart that represents intersecting data sets with colored circles in a BMP format.
- * 5. When you want to automate the creation of decorative graphics, such as logos or icons, that require overlapping translucent circles.
+ * 1. When you need to generate a BMP thumbnail that visualizes layered data by drawing semi‑transparent circles to indicate depth.
+ * 2. When you want to programmatically create a simple diagram for a report, using overlapping colored circles with different opacity levels to highlight relationships.
+ * 3. When you are building a game UI and require a background texture composed of blended circles rendered directly to a BMP file.
+ * 4. When you need to export a custom legend or icon set where each element is drawn with varying transparency to convey hierarchy.
+ * 5. When you are testing image‑processing pipelines and need a reproducible BMP file containing overlapping shapes with alpha blending for validation.
  */

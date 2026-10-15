@@ -1,8 +1,16 @@
 // HOW-TO: Draw Rectangle and Ellipse Outlines on BMP with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -11,33 +19,49 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Hardcoded output path
+            string outputPath = "output/output.bmp";
 
-            int width = 400;
-            int height = 300;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Create(new BmpOptions(), width, height))
+            // Define canvas size
+            int width = 500;
+            int height = 400;
+
+            // Create BMP options with file source
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+
+            // Create image canvas
+            using (Image image = Image.Create(options, width, height))
             {
+                // Create graphics object
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
+                // Create a graphics path
                 GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
 
-                RectangleShape rectShape = new RectangleShape(new RectangleF(50, 50, 200, 100));
-                figure.AddShape(rectShape);
+                // First figure: rectangle
+                Figure rectFigure = new Figure();
+                RectangleShape rectShape = new RectangleShape(new Aspose.Imaging.RectangleF(50, 50, 200, 150));
+                rectFigure.AddShape(rectShape);
+                path.AddFigure(rectFigure);
 
-                EllipseShape ellipseShape = new EllipseShape(new RectangleF(100, 150, 150, 100));
-                figure.AddShape(ellipseShape);
+                // Second figure: ellipse
+                Figure ellipseFigure = new Figure();
+                EllipseShape ellipseShape = new EllipseShape(new Aspose.Imaging.RectangleF(300, 100, 150, 150));
+                ellipseFigure.AddShape(ellipseShape);
+                path.AddFigure(ellipseFigure);
 
-                path.AddFigure(figure);
+                // Create black pen with width 2
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
 
-                Pen pen = new Pen(Color.Black, 2);
+                // Draw the path outlines
                 graphics.DrawPath(pen, path);
 
-                BmpOptions saveOptions = new BmpOptions();
-                image.Save(outputPath, saveOptions);
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -49,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail that highlights specific regions with black outlines for a reporting dashboard.
- * 2. When you want to programmatically add rectangle and ellipse borders to an image for a CAD preview in a .NET application.
- * 3. When creating printable forms where shape outlines must be drawn on a white background using Aspose.Imaging.
- * 4. When building a batch process that adds simple vector outlines to existing images before archiving them as BMP files.
- * 5. When developing a custom UI component that visualizes geometric shapes by rendering their outlines with a 2‑pixel black pen.
+ * 1. When you need to generate a BMP file that highlights geometric shapes such as rectangles and ellipses with a thick black outline for reports or UI thumbnails.
+ * 2. When creating a server‑side image rendering service that draws vector outlines on a bitmap without filling the shapes, using Aspose.Imaging in a C# web application.
+ * 3. When automating the production of diagram assets where only the borders of shapes are required, for example for technical documentation or schematics.
+ * 4. When you want to programmatically add a 2‑pixel black border around multiple shapes on a fixed‑size canvas before embedding the image into a PDF or email.
+ * 5. When building a testing tool that verifies the correct placement and size of drawn paths by rendering them to a BMP and comparing the pixel output.
  */

@@ -1,11 +1,17 @@
 // HOW-TO: Create a BMP Logo with Rectangles and Ellipses in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -16,38 +22,30 @@ class Program
             string outputPath = "output/logo.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
             int width = 200;
             int height = 200;
 
-            using (Image image = Image.Create(options, width, height))
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.Clear(Color.White);
 
-                // Fill background rectangle
-                using (SolidBrush backgroundBrush = new SolidBrush(Aspose.Imaging.Color.LightGray))
+                Pen rectPen = new Pen(Color.Red, 5);
+                Rectangle rect = new Rectangle(20, 20, 160, 160);
+                graphics.DrawRectangle(rectPen, rect);
+
+                Pen ellipsePen = new Pen(Color.Blue, 5);
+                Rectangle ellipseRect = new Rectangle(50, 50, 100, 100);
+                graphics.DrawEllipse(ellipsePen, ellipseRect);
+
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 0, 255, 0)))
                 {
-                    graphics.FillRectangle(backgroundBrush, new Rectangle(20, 20, 160, 160));
+                    graphics.FillEllipse(brush, ellipseRect);
                 }
 
-                // Outline rectangle
-                Pen rectPen = new Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawRectangle(rectPen, new Rectangle(20, 20, 160, 160));
-
-                // Fill ellipse
-                using (SolidBrush ellipseBrush = new SolidBrush(Aspose.Imaging.Color.Yellow))
-                {
-                    graphics.FillEllipse(ellipseBrush, new Rectangle(50, 50, 100, 100));
-                }
-
-                // Outline ellipse
-                Pen ellipsePen = new Pen(Aspose.Imaging.Color.Red, 2);
-                graphics.DrawEllipse(ellipsePen, new Rectangle(50, 50, 100, 100));
-
-                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -60,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple company badge or icon as a BMP file by programmatically drawing shapes with Aspose.Imaging in C#.
- * 2. When you want to create placeholder graphics for UI prototypes that require rectangles and ellipses without using external design tools.
- * 3. When an automated report generator must embed a custom logo into a BMP image using .NET drawing APIs.
- * 4. When a batch process has to produce multiple stamped images with consistent geometric branding elements for a Windows application.
- * 5. When you are testing image processing pipelines and require a known BMP file containing specific colored shapes for validation.
+ * 1. When you need to generate a simple company badge or logo on the fly as a BMP file using C# and Aspose.Imaging.
+ * 2. When an application must create placeholder graphics with basic geometric shapes for testing UI layouts.
+ * 3. When you want to programmatically add a colored ellipse overlay to a rectangular frame for custom watermarking.
+ * 4. When a reporting tool requires embedding a dynamically drawn BMP icon that combines red borders and semi‑transparent green fills.
+ * 5. When you are building a batch process that produces multiple BMP assets with consistent shape‑based designs for game sprites or icons.
  */

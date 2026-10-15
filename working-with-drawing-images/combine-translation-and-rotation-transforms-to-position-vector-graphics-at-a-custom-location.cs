@@ -1,63 +1,47 @@
-// HOW-TO: How to Translate and Rotate an SVG When Converting to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Translate and Rotate an SVG When Converting to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputVectorPath = "input.svg";
-            string outputPath = "output.png";
-            string tempRasterPath = "temp_raster.png";
-
-            if (!File.Exists(inputVectorPath))
+            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputVectorPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
-
-            // Rasterize SVG to PNG
-            using (Image vectorImage = Image.Load(inputVectorPath))
-            {
-                PngOptions rasterOptions = new PngOptions
+                var source = new FileCreateSource(outputPath, false);
+                JpegOptions options = new JpegOptions() { Source = source, Quality = 90 };
+                using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, vectorImage.Width, vectorImage.Height))
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
-                };
-                vectorImage.Save(tempRasterPath, rasterOptions);
-            }
-
-            // Load rasterized image
-            using (RasterImage rasterImage = (RasterImage)Image.Load(tempRasterPath))
-            {
-                // Create canvas
-                Source canvasSource = new FileCreateSource(outputPath, false);
-                PngOptions canvasOptions = new PngOptions { Source = canvasSource };
-                int canvasWidth = 800;
-                int canvasHeight = 600;
-
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.TranslateTransform(200, 150);
-                    graphics.RotateTransform(45);
-                    graphics.DrawImage(rasterImage, 0, 0);
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.TranslateTransform(100f, 50f);
+                    graphics.RotateTransform(45f);
+                    graphics.DrawImage(vectorImage, 0, 0);
                     canvas.Save();
                 }
-            }
-
-            // Clean up temporary raster file
-            if (File.Exists(tempRasterPath))
-            {
-                try { File.Delete(tempRasterPath); } catch { }
             }
         }
         catch (Exception ex)
@@ -69,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to place a logo SVG at a specific position and angle on a larger PNG report canvas.
- * 2. When generating thumbnails that require rotating and offsetting vector artwork before embedding into a fixed‑size image.
- * 3. When creating custom‑oriented watermarks from SVG files on background images in a .NET application.
- * 4. When preparing marketing banners where an SVG illustration must be shifted and tilted on a preset PNG layout.
- * 5. When automating batch conversion of SVG icons that must be aligned and rotated consistently on a standard‑size PNG sprite sheet.
+ * 1. When you need to place an SVG logo at a specific offset and angle on a JPEG report header generated in a C# application.
+ * 2. When creating product catalog thumbnails that require rotating and shifting vector illustrations before rasterizing them to JPEG for web display.
+ * 3. When overlaying a scaled SVG watermark at a custom position and orientation on high‑resolution JPEG photographs in an automated .NET workflow.
+ * 4. When generating printable marketing flyers where vector icons must be rotated and translated onto a JPEG background using Aspose.Imaging in C#.
+ * 5. When building a batch converter that aligns and angles SVG diagrams consistently before saving them as JPEG files for legacy systems.
  */

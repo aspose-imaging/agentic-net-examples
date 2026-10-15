@@ -1,44 +1,51 @@
-// HOW-TO: Draw Ten Evenly Spaced Vertical Lines on BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP with Ten Evenly Spaced Vertical Lines in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             string outputPath = "output.bmp";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Set up BMP options
-            var bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24
-            };
 
             int width = 200;
             int height = 200;
             int lineCount = 10;
+            int spacing = width / (lineCount + 1);
 
-            using (Image image = Image.Create(bmpOptions, width, height))
+            BmpOptions options = new BmpOptions
             {
-                var graphics = new Graphics(image);
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (Image image = Image.Create(options, width, height))
+            {
+                Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                var pen = new Pen(Color.Black, 1);
+                Pen pen = new Pen(Color.Black, 1);
 
                 for (int i = 1; i <= lineCount; i++)
                 {
-                    float x = (float)i * width / (lineCount + 1);
+                    int x = i * spacing;
                     graphics.DrawLine(pen, x, 0, x, height);
                 }
 
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple grid or ruler overlay on a BMP image for a reporting UI.
- * 2. When creating test patterns to verify image rendering or printer alignment using Aspose.Imaging in C#.
- * 3. When programmatically adding guide lines to a bitmap before exporting it for CAD or design documentation.
- * 4. When producing a background with evenly spaced vertical separators for a chart or dashboard generated on the server.
- * 5. When automating the creation of placeholder graphics with consistent line spacing for unit tests or mockups.
+ * 1. When you need to generate a simple grid overlay on a BMP for a UI mockup.
+ * 2. When you want to programmatically add ruler marks to a bitmap for a printing preview.
+ * 3. When creating test images with known line patterns to validate image analysis algorithms.
+ * 4. When producing a barcode‑like background by drawing evenly spaced vertical lines on a BMP file.
+ * 5. When automating the creation of placeholder graphics for documentation or reports using Aspose.Imaging in C#.
  */

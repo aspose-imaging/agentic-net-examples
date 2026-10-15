@@ -1,7 +1,13 @@
-// HOW-TO: Get GraphicsPath Bounds And Align Shapes Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Get Bounding Rectangle of GraphicsPath and Center an Ellipse in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
 
@@ -11,63 +17,47 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
             string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            if (!File.Exists(inputPath))
+            using (var image = Aspose.Imaging.Image.Create(new PngOptions(), 500, 500))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
-            {
-                // Create a GraphicsPath with a rectangle shape
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                RectangleF rect = new RectangleF(50, 50, 200, 100);
-                RectangleShape rectShape = new RectangleShape(rect);
-                figure.AddShape(rectShape);
-                path.AddFigure(figure);
+                // Create a rectangle shape inside a figure and add to a GraphicsPath
+                var rectFigure = new Aspose.Imaging.Figure();
+                var rectShape = new RectangleShape(new Aspose.Imaging.RectangleF(100, 100, 200, 150));
+                rectFigure.AddShape(rectShape);
 
-                // Retrieve bounds of the path
-                RectangleF bounds = path.GetBounds(new Matrix());
+                var path = new Aspose.Imaging.GraphicsPath();
+                path.AddFigure(rectFigure);
 
-                // Determine canvas size with margin
-                int margin = 20;
-                int canvasWidth = (int)Math.Ceiling(bounds.Right) + margin;
-                int canvasHeight = (int)Math.Ceiling(bounds.Bottom) + margin;
+                // Retrieve bounding rectangle of the path
+                Aspose.Imaging.RectangleF bounds = path.GetBounds(new Aspose.Imaging.Matrix());
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                // Draw the rectangle path
+                var penRect = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                graphics.DrawPath(penRect, path);
 
-                // Create output image
-                PngOptions pngOptions = new PngOptions();
-                using (RasterImage outputImage = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
-                {
-                    Graphics graphics = new Graphics(outputImage);
-                    graphics.Clear(Color.White);
+                // Align an ellipse to the center of the bounding rectangle
+                float centerX = bounds.X + bounds.Width / 2;
+                float centerY = bounds.Y + bounds.Height / 2;
+                float radius = Math.Min(bounds.Width, bounds.Height) / 4;
+                var ellipseRect = new Aspose.Imaging.RectangleF(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
-                    // Draw the original path
-                    Pen bluePen = new Pen(Color.Blue);
-                    graphics.DrawPath(bluePen, path);
+                var ellipseFigure = new Aspose.Imaging.Figure();
+                var ellipseShape = new EllipseShape(ellipseRect);
+                ellipseFigure.AddShape(ellipseShape);
 
-                    // Align additional element: draw a circle at the center of the bounds
-                    float centerX = bounds.X + bounds.Width / 2;
-                    float centerY = bounds.Y + bounds.Height / 2;
-                    float radius = Math.Min(bounds.Width, bounds.Height) / 4;
-                    RectangleF circleRect = new RectangleF(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                    EllipseShape ellipse = new EllipseShape(circleRect);
-                    Figure circleFigure = new Figure();
-                    circleFigure.AddShape(ellipse);
-                    GraphicsPath circlePath = new GraphicsPath();
-                    circlePath.AddFigure(circleFigure);
-                    Pen redPen = new Pen(Color.Red);
-                    graphics.DrawPath(redPen, circlePath);
+                var ellipsePath = new Aspose.Imaging.GraphicsPath();
+                ellipsePath.AddFigure(ellipseFigure);
 
-                    // Save the image
-                    outputImage.Save(outputPath, pngOptions);
-                }
+                var penEllipse = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2);
+                graphics.DrawPath(penEllipse, ellipsePath);
+
+                // Save the image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -79,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to calculate the exact size of a drawn rectangle so you can create a PNG canvas that fits the shape with a margin.
- * 2. When you want to position additional graphics, such as circles or text, relative to an existing GraphicsPath without manual coordinate calculations.
- * 3. When generating dynamic images where the dimensions depend on vector shapes defined by Aspose.Imaging’s GraphicsPath.
- * 4. When aligning overlay elements to the bounding box of a shape for consistent layout across different image resolutions.
- * 5. When automating image processing pipelines that require extracting shape bounds to place watermarks or annotations precisely.
+ * 1. When you need to calculate the exact area occupied by a complex shape in a PNG image to position other graphics precisely.
+ * 2. When you want to automatically place a logo or watermark at the center of a drawn rectangle without hard‑coding coordinates.
+ * 3. When generating dynamic diagrams where an annotation (ellipse) must be aligned to the middle of a user‑defined bounding box.
+ * 4. When creating printable reports that require centering decorative elements inside variable‑size containers using Aspose.Imaging for .NET.
+ * 5. When developing a UI thumbnail generator that must overlay a highlight circle exactly within the bounds of a detected shape.
  */

@@ -1,44 +1,37 @@
-// HOW-TO: Draw a Floating Point Rectangle on BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw a Floating Point Rectangle on BMP with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             string outputPath = "output.bmp";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create a new BMP image with 32 bits per pixel
-            var options = new BmpOptions
+            BmpOptions options = new BmpOptions();
+            options.BitsPerPixel = 24;
+            options.Source = new FileCreateSource(outputPath, false);
+            using (Image image = Image.Create(options, 300, 200))
             {
-                BitsPerPixel = 32
-            };
-            using (var image = Image.Create(options, 200, 200))
-            {
-                // Initialize graphics object
-                var graphics = new Graphics(image);
-
-                // Set background color to Yellow
-                graphics.Clear(Color.Yellow);
-
-                // Define a blue pen
-                var pen = new Pen(Color.Blue);
-
-                // Define a floating-point rectangle
-                var rect = new RectangleF(20.5f, 30.5f, 100.0f, 50.0f);
-
-                // Draw the rectangle
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                RectangleF rect = new RectangleF(10.5f, 20.5f, 150.75f, 80.25f);
+                Pen pen = new Pen(Color.Blue, 3);
                 graphics.DrawRectangle(pen, rect);
-
-                // Save the image
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail with a precisely positioned blue outline around a specific area.
- * 2. When you want to create a custom diagram where rectangle dimensions are defined with sub‑pixel accuracy for high‑resolution printing.
- * 3. When you are building a reporting tool that overlays floating‑point rectangles on a solid‑color background to highlight data regions.
- * 4. When you need to programmatically add a semi‑transparent rectangular border to an image before saving it as a 32‑bit BMP.
- * 5. When you are automating the creation of UI mockups that require exact pixel‑fraction placement of shapes using Aspose.Imaging in C#.
+ * 1. When you need to generate a BMP diagram that highlights a specific area with a precisely positioned rectangle using floating‑point coordinates.
+ * 2. When creating programmatic image annotations for engineering schematics where the rectangle dimensions must be defined with sub‑pixel accuracy.
+ * 3. When building a C# application that overlays a blue border on a white background BMP to mark selection zones in a custom UI.
+ * 4. When exporting chart or map screenshots to BMP format and require exact rectangle overlays for data‑range visualization.
+ * 5. When automating the production of printable assets that need a high‑resolution rectangle drawn at non‑integer positions for alignment testing.
  */

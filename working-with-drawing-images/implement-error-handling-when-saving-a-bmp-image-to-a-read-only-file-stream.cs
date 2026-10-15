@@ -1,52 +1,63 @@
-// HOW-TO: How To Save JPEG As BMP To A Read‑Only Stream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Handle Error When Saving BMP With Aspose.Imaging To Read‑Only Stream In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace AsposeImagingExample
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.bmp";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded input and output paths
+                string inputPath = "input.jpg";
+                string outputPath = "output/output.bmp";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            if (!File.Exists(outputPath))
-            {
-                File.WriteAllBytes(outputPath, new byte[0]);
-            }
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (FileStream readOnlyStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    BmpOptions options = new BmpOptions();
-                    image.Save(readOnlyStream, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the source image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Open a read‑only file stream for the output path
+                    using (FileStream readOnlyStream = new FileStream(outputPath, FileMode.OpenOrCreate, FileAccess.Read))
+                    {
+                        // Attempt to save as BMP to the read‑only stream
+                        BmpOptions bmpOptions = new BmpOptions();
+                        image.Save(readOnlyStream, bmpOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert user‑uploaded JPEG photos to BMP format while writing to a file that is opened as read‑only for security compliance.
- * 2. When an application must generate BMP thumbnails from JPEG images but the destination file is locked for writing by another process.
- * 3. When you are processing images in a sandboxed environment where the output stream can only be opened with read access.
- * 4. When you want to gracefully handle permission errors while saving converted images to a network share that enforces read‑only access.
- * 5. When you need to log or display conversion failures without crashing the program by catching exceptions during the save operation.
+ * 1. When a developer needs to convert a JPEG image to BMP using Aspose.Imaging but must write the result to a file that may be opened with read‑only permissions.
+ * 2. When an application processes user‑uploaded photos and saves them as BMP files on a network share where the file system enforces read‑only access.
+ * 3. When a background service generates thumbnail BMPs and must gracefully handle cases where the destination stream cannot be written.
+ * 4. When integrating Aspose.Imaging into a legacy system that opens output files with FileAccess.Read for compatibility, requiring proper exception handling.
+ * 5. When debugging image conversion pipelines and you want to capture and log errors caused by insufficient write permissions on the output stream.
  */

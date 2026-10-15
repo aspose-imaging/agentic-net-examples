@@ -1,4 +1,11 @@
-// HOW-TO: Create Multiple BMP Images with Colored Diagonal Lines in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multiple BMP Images With Colored Diagonal Lines In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,34 +19,40 @@ class Program
     {
         try
         {
-            string outputDirectory = "output";
+            string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
+
             int width = 200;
             int height = 200;
-            Color[] colors = new Color[]
+
+            var colors = new (Color color, string name)[]
             {
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.Yellow,
-                Color.Magenta,
-                Color.Cyan,
-                Color.Black,
-                Color.White
+                (Color.Red, "Red"),
+                (Color.Green, "Green"),
+                (Color.Blue, "Blue"),
+                (Color.Yellow, "Yellow"),
+                (Color.Magenta, "Magenta"),
+                (Color.Cyan, "Cyan"),
+                (Color.Black, "Black")
             };
 
-            for (int i = 0; i < colors.Length; i++)
+            foreach (var (color, name) in colors)
             {
-                string outputPath = Path.Combine(outputDirectory, $"DiagonalLine_{i + 1}.bmp");
+                string outputPath = Path.Combine(outputDir, $"diag_{name}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                BmpOptions bmpOptions = new BmpOptions();
-
-                using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
+                var bmpOptions = new BmpOptions
                 {
-                    Graphics graphics = new Graphics(image);
-                    Pen pen = new Pen(colors[i], 5);
-                    graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-                    image.Save(outputPath, bmpOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                using (var image = Image.Create(bmpOptions, width, height))
+                {
+                    var graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+                    var pen = new Pen(color, 5);
+                    graphics.DrawLine(pen, 0, 0, width - 1, height - 1);
+                    image.Save();
                 }
             }
         }
@@ -52,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need a set of BMP test files each showing a different colored diagonal line to verify rendering pipelines or display hardware.
- * 2. When generating sample assets for UI components that require diagonal line graphics in various colors for documentation or demos.
- * 3. When creating placeholder images for automated visual regression tests that compare colored line patterns across builds.
- * 4. When producing a batch of simple bitmap images for teaching graphics programming concepts such as drawing primitives and color handling in C#.
- * 5. When preparing colored diagonal line sprites for game development tools that only accept BMP format and need quick batch generation.
+ * 1. When you need a set of BMP test files with distinct colored diagonal lines to verify image rendering pipelines in a C# application.
+ * 2. When generating sample assets for UI components that display diagonal patterns, such as loading screens or placeholders, using Aspose.Imaging.
+ * 3. When creating reference images for automated visual regression tests that compare color accuracy across different BMP outputs.
+ * 4. When preparing demonstration graphics for documentation or tutorials that show how to draw lines with various pens in .NET.
+ * 5. When batch‑producing simple diagnostic images to check file‑system permissions and BMP file creation on different environments.
  */

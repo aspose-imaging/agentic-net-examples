@@ -1,36 +1,52 @@
-// HOW-TO: Shift Drawing Origin With TranslateTransform And Draw Shapes On BMP In C# (Aspose.Imaging for .NET)
+// HOW-TO: Shift Drawing Origin with TranslateTransform and Draw Shapes on BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string outputPath = "output.bmp";
-
         try
         {
+            string outputPath = "output.bmp";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 200;
-            int height = 200;
+            int width = 400;
+            int height = 300;
 
-            using (Image canvas = Image.Create(options, width, height))
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                Graphics graphics = new Graphics(canvas);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
                 graphics.TranslateTransform(50, 30);
 
                 Pen pen = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(pen, 0, 0, 100, 50);
+                graphics.DrawRectangle(pen, 0, 0, 200, 100);
+                graphics.DrawEllipse(pen, 0, 0, 200, 100);
 
-                canvas.Save();
+                using (SolidBrush brush = new SolidBrush(Color.LightGreen))
+                {
+                    graphics.FillRectangle(brush, 0, 0, 200, 100);
+                }
+
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -42,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to offset graphics on a bitmap so that all drawn elements start from a custom origin, such as placing a logo 50 pixels right and 30 pixels down.
- * 2. When generating programmatic reports that require precise positioning of rectangles or other shapes on a BMP image for layout consistency.
- * 3. When creating a simple UI mock‑up where controls are drawn on a canvas and you want to shift the whole coordinate system instead of adjusting each shape individually.
- * 4. When preprocessing images for printing and you must move the drawing area to accommodate printer margins on a BMP file.
- * 5. When building a game map tile where the tile graphics need to be drawn relative to an offset origin to align with a larger world grid.
+ * 1. When you need to create a BMP report thumbnail and offset all graphics by a margin without manually adjusting each shape’s coordinates.
+ * 2. When generating a printable form where the logo and decorative elements must start at a specific offset from the page edge using Aspose.Imaging.
+ * 3. When building a game asset pipeline that requires drawing multiple sprites on a bitmap canvas with a common origin shift for consistent alignment.
+ * 4. When creating a custom watermark that should appear 50 pixels right and 30 pixels down from the top‑left corner of a BMP image.
+ * 5. When programmatically producing diagrammatic illustrations (rectangles, ellipses, filled areas) on a bitmap and you want to simplify positioning by translating the coordinate system once.
  */

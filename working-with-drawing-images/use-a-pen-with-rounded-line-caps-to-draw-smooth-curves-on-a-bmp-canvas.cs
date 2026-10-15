@@ -1,4 +1,11 @@
 // HOW-TO: Draw Smooth Bezier Curve on BMP with Rounded Caps in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,29 +19,30 @@ class Program
     {
         try
         {
-            string outputPath = "output/curves.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.bmp";
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-            int width = 200;
-            int height = 200;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Create(options, width, height))
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            int width = 400;
+            int height = 300;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
-                pen.StartCap = Aspose.Imaging.LineCap.Round;
-                pen.EndCap = Aspose.Imaging.LineCap.Round;
+                Pen pen = new Pen(Aspose.Imaging.Color.Blue, 5);
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
 
-                graphics.DrawBezier(
-                    pen,
-                    new Aspose.Imaging.PointF(10, 150),
-                    new Aspose.Imaging.PointF(50, 10),
-                    new Aspose.Imaging.PointF(150, 10),
-                    new Aspose.Imaging.PointF(190, 150));
+                PointF p1 = new PointF(50, 250);
+                PointF p2 = new PointF(150, 50);
+                PointF p3 = new PointF(250, 450);
+                PointF p4 = new PointF(350, 150);
+
+                graphics.DrawBezier(pen, p1, p2, p3, p4);
 
                 image.Save();
             }
@@ -48,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP signature or logo with anti‑aliased curved lines for a desktop application.
- * 2. When creating custom chart markers or decorative elements that require smooth Bezier curves with rounded ends in a reporting tool.
- * 3. When programmatically producing game assets such as curved paths or UI elements and saving them as BMP files for legacy compatibility.
- * 4. When exporting hand‑drawn style diagrams from a C# service where the pen’s rounded caps ensure visually pleasing line terminations.
- * 5. When automating the creation of printable templates that include smooth curves, and you must control line thickness and cap style using Aspose.Imaging.
+ * 1. When you need to generate a BMP diagram with smooth curved lines for a technical report.
+ * 2. When creating custom icons or UI assets that require anti‑aliased Bezier strokes with rounded ends.
+ * 3. When programmatically adding decorative curves to scanned documents before saving them as BMP files.
+ * 4. When building a server‑side service that produces thumbnail previews with stylized curves for a web application.
+ * 5. When automating the production of printable graphics, such as signage or labels, that need precise BMP output with consistent line caps.
  */

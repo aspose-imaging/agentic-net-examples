@@ -1,35 +1,44 @@
-// HOW-TO: Draw Arrow Line on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Draw Arrow Lines on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "arrow.bmp";
+        string outputPath = "output\\arrow.bmp";
 
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions createOptions = new BmpOptions();
-            createOptions.Source = new FileCreateSource(outputPath, false);
-
-            int width = 300;
+            BmpOptions options = new BmpOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            int width = 400;
             int height = 300;
 
-            using (Image image = Image.Create(createOptions, width, height))
+            using (Image image = Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
                 Pen pen = new Pen(Color.Black, 5);
-                pen.EndCap = LineCap.ArrowAnchor;
+                pen.EndCap = LineCap.Triangle;
 
-                graphics.DrawLine(pen, new Point(50, 50), new Point(250, 250));
+                graphics.DrawLine(pen, 50, 50, 350, 50);
+                graphics.DrawLine(pen, 50, 100, 350, 200);
+                graphics.DrawLine(pen, 50, 250, 350, 250);
 
                 image.Save();
             }
@@ -43,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP diagram that shows directional flow, such as a simple flowchart arrow, you can use this code to draw a line with an arrowhead.
- * 2. When creating technical documentation that includes annotated screenshots, the code lets you programmatically add arrow markers to BMP files to highlight features.
- * 3. When building a Windows desktop application that visualizes vector paths, you can render arrows on BMP canvases to indicate start‑to‑end directions.
- * 4. When automating the production of printable schematics in BMP format, the Pen with an ArrowAnchor end cap provides a quick way to illustrate connections between components.
- * 5. When developing a game or simulation that requires overlaying directional cues on bitmap backgrounds, this snippet draws clear arrow lines without needing external graphics editors.
+ * 1. When you need to generate a BMP diagram with directional arrows for a technical report using C# and Aspose.Imaging.
+ * 2. When you want to programmatically add arrow‑head lines to a bitmap for a custom UI overlay in a Windows application.
+ * 3. When you are creating printable schematics that require precise line thickness and triangle end caps on a BMP file.
+ * 4. When you need to automate the production of flow‑chart style images where each connector ends with an arrow in a .NET service.
+ * 5. When you are building a batch process that draws multiple annotated lines on BMP images for GIS or mapping visualizations.
  */

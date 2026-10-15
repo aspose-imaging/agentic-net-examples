@@ -1,8 +1,16 @@
-// HOW-TO: Batch Convert EMF Files to PDF with Date Header in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EMF Files to PDF with Date Header in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -11,39 +19,47 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputFolder = "input_emf";
+            string outputFolder = "output_pdf";
 
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputFolder);
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (string inputPath in files)
+            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+            foreach (string emfPath in emfFiles)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(emfPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {emfPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image emfImage = Aspose.Imaging.Image.Load(emfPath))
                 {
-                    Graphics graphics = new Graphics(image);
-                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
-                    using (SolidBrush brush = new SolidBrush(Color.Black))
-                    {
-                        string header = $"Converted on {DateTime.Now:yyyy-MM-dd}";
-                        graphics.DrawString(header, font, brush, new Point(10, 10));
-                    }
+                    int width = emfImage.Width;
+                    int height = emfImage.Height;
+                    int headerHeight = 50;
+                    int totalHeight = height + headerHeight;
+
+                    string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(emfPath) + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    pdfOptions.Source = new FileCreateSource(outputPath, false);
+
+                    using (Aspose.Imaging.Image pdfImage = Aspose.Imaging.Image.Create(pdfOptions, width, totalHeight))
+                    {
+                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(pdfImage);
+
+                        using (SolidBrush textBrush = new SolidBrush(Aspose.Imaging.Color.Black))
+                        {
+                            Aspose.Imaging.Font headerFont = new Aspose.Imaging.Font("Arial", 24);
+                            graphics.DrawString(DateTime.Now.ToString("yyyy-MM-dd"), headerFont, textBrush, new Aspose.Imaging.Point(10, 10));
+                        }
+
+                        graphics.DrawImage(emfImage, new Aspose.Imaging.Rectangle(0, headerHeight, width, height));
+
+                        pdfImage.Save();
+                    }
                 }
             }
         }
@@ -56,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDF reports from a collection of EMF vector graphics and include the conversion date on each page.
- * 2. When an automated workflow must archive legacy EMF diagrams as PDFs while adding a timestamp for audit compliance.
- * 3. When a desktop application has to batch‑process user‑uploaded EMF files and produce PDF versions with a consistent header for branding.
- * 4. When a server‑side service converts EMF assets to PDF for downstream systems and requires a date stamp to track processing time.
- * 5. When you want to create a searchable PDF catalog of EMF illustrations and need the conversion date displayed on every page for version control.
+ * 1. When a developer needs to batch‑convert legacy EMF vector drawings into PDF reports that automatically include the conversion date on each page.
+ * 2. When an application must generate printable PDFs from EMF logos while adding a timestamp header for audit purposes.
+ * 3. When a document‑management system requires converting user‑uploaded EMF diagrams to PDF and tagging each page with the current date for version control.
+ * 4. When a reporting tool has to embed EMF charts into PDF invoices and display the generation date at the top of every page.
+ * 5. When a migration script must transform a folder of EMF assets into PDF files and prepend a date header for compliance documentation.
  */

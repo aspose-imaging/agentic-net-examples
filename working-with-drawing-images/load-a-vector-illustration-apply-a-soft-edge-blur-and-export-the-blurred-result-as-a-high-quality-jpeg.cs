@@ -1,9 +1,16 @@
-// HOW-TO: Convert SVG to High Quality JPEG in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur to SVG and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,9 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output/output.jpg";
-            string tempPath = "temp/temp.png";
+            string inputPath = "Input/vector.svg";
+            string outputPath = "Output/blurred.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,27 +28,24 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
             using (Image vectorImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                vectorImage.Save(tempPath, pngOptions);
-            }
-
-            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-            {
-                var jpegOptions = new JpegOptions
+                using (var memoryStream = new MemoryStream())
                 {
-                    Quality = 100,
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, jpegOptions);
-            }
+                    var pngOptions = new PngOptions();
+                    vectorImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                    {
+                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0);
+                        raster.Filter(raster.Bounds, blurOptions);
+
+                        var jpegOptions = new JpegOptions { Quality = 95 };
+                        raster.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a high‑resolution JPEG thumbnail from an SVG logo for web pages without losing vector detail.
- * 2. When a reporting system must embed vector diagrams as JPEG images in PDF reports that only accept raster formats.
- * 3. When an e‑commerce platform converts product SVG icons into JPEGs for email newsletters that require JPEG attachments.
- * 4. When a desktop application creates printable JPEG assets from user‑uploaded SVG artwork while preserving maximum quality.
- * 5. When a batch process migrates a library of SVG assets to JPEG files for legacy systems that cannot render SVG.
+ * 1. When you need to soften the edges of a vector logo before embedding it in a web page as a JPEG.
+ * 2. When converting an SVG illustration to a raster format with a blur effect for print‑ready marketing materials.
+ * 3. When generating blurred thumbnails of SVG icons for UI placeholders in a C# desktop application.
+ * 4. When preparing a blurred background image from a vector asset for use in a slide deck or presentation.
+ * 5. When automating the creation of stylized JPEG previews of SVG diagrams with controlled quality for email attachments.
  */
