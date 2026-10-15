@@ -1,9 +1,15 @@
-// HOW-TO: Extract Each Page From Multi‑Page EMF And Save As 300 DPI PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Split Multi-Page EMF Into High-Resolution PNG Pages In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -22,50 +28,36 @@ class Program
 
             Directory.CreateDirectory(outputDirectory);
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                if (image is IMultipageImage multipageImage)
+                if (image is IMultipageImage multipage)
                 {
-                    int pageCount = multipageImage.PageCount;
+                    int pageCount = multipage.PageCount;
                     for (int i = 0; i < pageCount; i++)
                     {
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        var vectorOptions = new VectorRasterizationOptions
+                        using (var page = multipage.Pages[i])
                         {
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            BackgroundColor = Color.White
-                        };
+                            var options = new PngOptions
+                            {
+                                ResolutionSettings = new ResolutionSetting(300, 300)
+                            };
 
-                        var pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = vectorOptions,
-                            MultiPageOptions = new MultiPageOptions(new IntRange(i, i))
-                        };
-
-                        image.Save(outputPath, pngOptions);
+                            string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            page.Save(outputPath, options);
+                        }
                     }
                 }
                 else
                 {
+                    var options = new PngOptions
+                    {
+                        ResolutionSettings = new ResolutionSetting(300, 300)
+                    };
+
                     string outputPath = Path.Combine(outputDirectory, "page_1.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        BackgroundColor = Color.White
-                    };
-
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions
-                    };
-
-                    image.Save(outputPath, pngOptions);
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -78,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a multi‑page vector EMF report into separate high‑resolution PNG images for web preview.
- * 2. When generating thumbnail previews of each page of a multi‑page EMF diagram for a document management system.
- * 3. When preparing printable PNG assets from each page of an EMF file at 300 DPI for inclusion in marketing materials.
- * 4. When extracting individual pages from a multi‑page EMF to feed into a machine‑learning pipeline that requires raster images.
- * 5. When automating the batch conversion of EMF drawings into PNGs for archival storage while preserving page separation.
+ * 1. When you need to convert each page of a vector‑based EMF report into separate high‑resolution PNG images for web preview.
+ * 2. When a printing workflow requires extracting individual pages from a multi‑page EMF file and saving them as 300 DPI PNGs for accurate print scaling.
+ * 3. When generating thumbnails for each page of a multi‑page EMF diagram to display in a document management system.
+ * 4. When migrating legacy EMF assets to raster PNG format while preserving page separation and DPI for archival purposes.
+ * 5. When automating batch processing of EMF files to create page‑by‑page PNG assets for use in mobile applications.
  */
