@@ -1,4 +1,11 @@
-// HOW-TO: Adjust Magic Wand Feather Radius Interactively and Save PNG Previews in C# (Aspose.Imaging for .NET)
+// HOW-TO: Interactively Adjust Feather Radius and Preview Mask with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -15,6 +22,7 @@ class Program
         {
             string inputPath = "input.jpg";
             string outputDirectory = "output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,21 +31,16 @@ class Program
 
             Directory.CreateDirectory(outputDirectory);
 
-            // Initial point for MagicWand selection (hardcoded)
-            int startX = 100;
-            int startY = 100;
-
-            int previewIndex = 1;
             while (true)
             {
-                Console.Write("Enter feather radius (or press Enter to exit): ");
+                Console.Write("Enter feather radius (or 'exit' to quit): ");
                 string line = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(line))
+                if (string.IsNullOrWhiteSpace(line) || line.Equals("exit", StringComparison.OrdinalIgnoreCase))
                 {
                     break;
                 }
 
-                if (!int.TryParse(line, out int featherRadius) || featherRadius < 0)
+                if (!int.TryParse(line, out int radius) || radius < 0)
                 {
                     Console.WriteLine("Invalid radius. Please enter a non‑negative integer.");
                     continue;
@@ -45,17 +48,14 @@ class Program
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    MagicWandTool.Select(image, new MagicWandSettings(startX, startY))
-                        .GetFeathered(new FeatheringSettings() { Size = featherRadius })
+                    MagicWandTool.Select(image, new MagicWandSettings(0, 0))
+                        .GetFeathered(new FeatheringSettings() { Size = radius })
                         .Apply();
 
-                    string outputPath = Path.Combine(outputDirectory, $"preview_{previewIndex}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    image.Save(outputPath, new PngOptions());
-                    Console.WriteLine($"Preview saved to: {outputPath}");
+                    string previewPath = Path.Combine(outputDirectory, $"preview_{radius}.png");
+                    image.Save(previewPath, new PngOptions());
+                    Console.WriteLine($"Preview saved to: {previewPath}");
                 }
-
-                previewIndex++;
             }
         }
         catch (Exception ex)
@@ -67,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑editing app needs users to fine‑tune a selection’s softness and instantly view the result as a PNG preview.
- * 2. When an automated workflow must generate multiple mask variations with different feather radii for testing image segmentation quality.
- * 3. When a desktop utility offers real‑time adjustment of Magic Wand selection edges before exporting the refined mask.
- * 4. When a developer builds a UI that lets designers experiment with feather settings to achieve smooth transitions in cut‑out images.
- * 5. When creating sample images for documentation or tutorials that demonstrate how changing feather radius affects the mask appearance.
+ * 1. When you need to let users fine‑tune the softness of a selection edge and see the result instantly for photo editing tools.
+ * 2. When building a desktop application that creates masks for background removal and requires real‑time preview of different feather sizes.
+ * 3. When automating batch processing but want to test the optimal feather radius on a sample image before applying it to the whole set.
+ * 4. When integrating Aspose.Imaging into a UI that lets designers experiment with mask feathering without writing separate scripts.
+ * 5. When developing a command‑line utility for graphic designers to quickly generate PNG previews of feathered selections at various radii.
  */
