@@ -1,12 +1,19 @@
-// HOW-TO: Create Multiple BMP Images with Centered Squares from Size List in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Multiple BMP Images with Centered Colored Square in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -14,47 +21,44 @@ class Program
     {
         try
         {
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
-
-            var specs = new List<(int width, int height)>
+            // Define size specifications (width, height)
+            List<(int width, int height)> sizes = new List<(int, int)>
             {
-                (200, 200),
-                (300, 150),
-                (400, 400)
+                (200, 300),
+                (400, 400),
+                (500, 250)
             };
 
-            int index = 1;
-            foreach (var spec in specs)
+            for (int i = 0; i < sizes.Count; i++)
             {
-                int width = spec.width;
-                int height = spec.height;
+                int width = sizes[i].width;
+                int height = sizes[i].height;
 
-                string fileName = $"image_{index}.bmp";
-                string outputPath = Path.Combine(outputDir, fileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string outputPath = $"output_{i}.bmp";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
                 Source source = new FileCreateSource(outputPath, false);
-                BmpOptions bmpOptions = new BmpOptions { Source = source };
+                BmpOptions options = new BmpOptions() { Source = source };
 
-                using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
+                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
                 {
+                    // Create graphics object
                     Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
 
-                    int squareSize = Math.Min(width, height) / 2;
+                    // Determine centered square dimensions
+                    int squareSize = Math.Min(width, height);
                     int offsetX = (width - squareSize) / 2;
                     int offsetY = (height - squareSize) / 2;
 
-                    using (SolidBrush brush = new SolidBrush(Color.Black))
+                    // Fill centered square with a solid color
+                    using (SolidBrush brush = new SolidBrush(Color.Blue))
                     {
                         graphics.FillRectangle(brush, new Rectangle(offsetX, offsetY, squareSize, squareSize));
                     }
 
+                    // Save the bound image
                     canvas.Save();
                 }
-
-                index++;
             }
         }
         catch (Exception ex)
@@ -66,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate placeholder BMP files of various dimensions for testing UI layouts.
- * 2. When you want to programmatically create a set of icons with a centered square logo for a game asset pipeline.
- * 3. When you must produce batch BMP thumbnails with a consistent centered shape for legacy printing systems.
- * 4. When you are preparing sample images for documentation that require different canvas sizes but a uniform centered element.
- * 5. When you automate the creation of BMP masks of varying sizes for image processing experiments using Aspose.Imaging in C#.
+ * 1. When you need to generate a set of BMP thumbnails of varying dimensions with a consistent centered logo or color block for UI placeholders.
+ * 2. When automating the creation of test images for a graphics pipeline that requires different canvas sizes but a fixed central element.
+ * 3. When producing batch assets for a game where each level uses a different resolution background but the same centered icon.
+ * 4. When preparing sample BMP files for documentation or tutorials that demonstrate drawing shapes with Aspose.Imaging in C#.
+ * 5. When building a server‑side service that creates custom‑sized BMP badges with a centered colored square for user profiles.
  */
