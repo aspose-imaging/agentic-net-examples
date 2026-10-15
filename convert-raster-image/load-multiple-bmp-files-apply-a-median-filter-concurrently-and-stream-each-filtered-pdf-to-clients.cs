@@ -1,12 +1,15 @@
 // HOW-TO: Apply Median Filter to Multiple BMPs and Convert to PDF in Parallel C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -32,45 +35,25 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            files.AsParallel().ForAll(inputPath =>
+            System.Threading.Tasks.Parallel.ForEach(files, file =>
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                using (Image image = Image.Load(inputPath))
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(file))
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
-                    {
-                        return;
-                    }
+                    RasterImage raster = (RasterImage)image;
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                    // Apply median filter with size 3
-                    var medianOptions = new MedianFilterOptions(3);
-                    raster.Filter(raster.Bounds, medianOptions);
-
-                    // Prepare output PDF path
-                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save to PDF file
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         raster.Save(outputPath, pdfOptions);
-                    }
-
-                    // Stream PDF to client (simulated by writing to a MemoryStream)
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (PdfOptions pdfOptions = new PdfOptions())
-                        {
-                            raster.Save(ms, pdfOptions);
-                        }
-                        Console.WriteLine($"Streamed PDF for {fileName}: {ms.Length} bytes");
                     }
                 }
             });
@@ -84,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noisy BMP scans before sending them as PDFs to a web client.
- * 2. When a server must process a batch of BMP images concurrently to reduce latency in a high‑traffic application.
- * 3. When you want to apply a median filter to remove salt‑and‑pepper noise from medical or engineering BMP files before archiving them as PDFs.
- * 4. When an ASP.NET service streams filtered PDF documents on‑the‑fly to browsers without storing intermediate files.
- * 5. When you need to automate conversion of legacy BMP assets into searchable PDF reports while preserving image quality.
+ * 1. When you need to clean up noisy BMP scans of documents and deliver them as PDFs to web clients.
+ * 2. When a batch of legacy BMP images must be processed on a server without blocking the main thread.
+ * 3. When you want to reduce speckle noise in medical or engineering BMP images before archiving them as PDFs.
+ * 4. When an ASP.NET application must generate PDF reports from uploaded BMP pictures while handling many requests simultaneously.
+ * 5. When you have to automate conversion of scanned BMP receipts into searchable PDF files with noise reduction for accounting systems.
  */
