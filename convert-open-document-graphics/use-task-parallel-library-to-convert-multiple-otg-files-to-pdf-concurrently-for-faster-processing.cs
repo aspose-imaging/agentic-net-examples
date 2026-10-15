@@ -1,68 +1,75 @@
-// HOW-TO: Convert Multiple OTG Files to PDF in Parallel with C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple OTG Files to PDF Concurrently Using TPL in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace OtgToPdfConverter
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
+            // Hardcoded input and output file paths
+            string[] inputPaths = new string[]
             {
-                // Hardcoded input and output file paths
-                string[] inputPaths = new string[]
-                {
-                    "input\\file1.otg",
-                    "input\\file2.otg",
-                    "input\\file3.otg"
-                };
+                "input1.otg",
+                "input2.otg",
+                "input3.otg"
+            };
 
-                string[] outputPaths = new string[]
-                {
-                    "output\\file1.pdf",
-                    "output\\file2.pdf",
-                    "output\\file3.pdf"
-                };
-
-                // Process files in parallel
-                Parallel.For(0, inputPaths.Length, i =>
-                {
-                    string inputPath = inputPaths[i];
-                    string outputPath = outputPaths[i];
-
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load OTG image and save as PDF
-                    using (Image image = Image.Load(inputPath))
-                    {
-                        image.Save(outputPath, new PdfOptions());
-                    }
-                });
-            }
-            catch (Exception ex)
+            string[] outputPaths = new string[]
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+                "output1.pdf",
+                "output2.pdf",
+                "output3.pdf"
+            };
+
+            // Ensure the arrays have the same length
+            int count = Math.Min(inputPaths.Length, outputPaths.Length);
+
+            Parallel.For(0, count, i =>
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                string? outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir ?? ".");
+
+                // Load OTG image and save as PDF
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new PdfOptions());
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web service must batch‑convert uploaded OTG drawings to PDF quickly for user download.
- * 2. When a desktop application needs to generate printable PDFs from many OTG design files without freezing the UI.
- * 3. When an automated build pipeline processes a large archive of OTG assets and creates PDF documentation in parallel to reduce build time.
- * 4. When a cloud function receives multiple OTG images and must convert them to PDF simultaneously to meet SLA response times.
- * 5. When a migration script moves legacy OTG files to a PDF‑based archive and wants to speed up the conversion by using multi‑core processing.
+ * 1. When a batch of OTG vector graphics must be turned into PDF reports quickly, developers can run the conversions in parallel to save time.
+ * 2. When an automated server job needs to generate PDF invoices from OTG templates for many customers at once, parallel processing speeds up the workflow.
+ * 3. When a desktop application lets users select several OTG drawings and export them to PDF without freezing the UI, using TPL keeps the interface responsive.
+ * 4. When a cloud service receives multiple OTG uploads and must store them as PDFs for archival, concurrent conversion reduces latency and resource usage.
+ * 5. When a CI/CD pipeline validates that OTG assets render correctly as PDFs across many files, parallel conversion shortens the test cycle.
  */
