@@ -1,8 +1,15 @@
-// HOW-TO: Log Progress While Vertically Merging JPEG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Progress While Vertically Merging Multiple JPEG Images in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -19,50 +26,56 @@ class Program
 
             if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
                 return;
             }
 
-            var imagePaths = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToList();
+            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
+            var imagePaths = jpgFiles.Concat(jpegFiles).ToArray();
 
-            if (imagePaths.Count == 0)
+            if (imagePaths.Length == 0)
             {
-                Console.Error.WriteLine("No JPEG images found in the input directory.");
+                Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in imagePaths)
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+
+            foreach (var path in imagePaths)
             {
                 if (!File.Exists(path))
                 {
                     Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
+
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
+            int canvasWidth = widths.Max();
+            int canvasHeight = heights.Sum();
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
+            };
 
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                int processed = 0;
-                int total = imagePaths.Count;
-
-                foreach (string path in imagePaths)
+                for (int i = 0; i < imagePaths.Length; i++)
                 {
+                    string path = imagePaths[i];
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
@@ -70,9 +83,8 @@ class Program
                         offsetY += img.Height;
                     }
 
-                    processed++;
-                    int percent = (int)((processed * 100.0) / total);
-                    Console.WriteLine($"Progress: {percent}% ({processed}/{total})");
+                    int percent = (i + 1) * 100 / imagePaths.Length;
+                    Console.WriteLine($"Progress: {percent}% ({i + 1}/{imagePaths.Length})");
                 }
 
                 canvas.Save();
@@ -87,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple scanned JPEG pages into a single long image and show a percentage indicator to users during processing.
- * 2. When building a photo‑gallery export tool that stacks user‑selected JPEG photos vertically and wants to log progress for debugging or UI feedback.
- * 3. When creating a printable PDF‑like strip from a set of JPEG receipts and needs to track how many images have been merged.
- * 4. When automating a server‑side batch job that merges product‑shot JPEGs into a catalog banner while reporting completion status to logs.
- * 5. When developing a mobile‑app backend that assembles JPEG screenshots into a single image and requires progress percentages for monitoring.
+ * 1. When you need to combine a series of JPEG photos into a single tall image for a catalog or report and want to display the merge percentage in the console using Aspose.Imaging for .NET.
+ * 2. When building an automated tool that creates a vertical banner from multiple JPEG advertisements and requires progress logging to monitor each image addition.
+ * 3. When generating a vertical sprite sheet from game asset JPEG files and need to track how far the merging process has progressed.
+ * 4. When stitching together sequential security‑camera JPEG snapshots into one timeline image and want real‑time feedback on the merging status.
+ * 5. When developing a batch image processor that assembles scanned JPEG pages into a single document‑style image and needs to report the percentage completed after each page is added.
  */
