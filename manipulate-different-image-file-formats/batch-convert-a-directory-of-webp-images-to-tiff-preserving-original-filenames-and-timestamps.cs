@@ -3,7 +3,7 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -12,14 +12,15 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -50,16 +51,16 @@ public class Program
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (TiffOptions options = new TiffOptions(TiffExpectedFormat.Default))
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                     {
-                        image.Save(outputPath, options);
+                        image.Save(outputPath, tiffOptions);
                     }
                 }
 
-                DateTime creationTime = File.GetCreationTime(inputPath);
-                DateTime lastWriteTime = File.GetLastWriteTime(inputPath);
-                File.SetCreationTime(outputPath, creationTime);
-                File.SetLastWriteTime(outputPath, lastWriteTime);
+                DateTime creationTime = File.GetCreationTimeUtc(inputPath);
+                DateTime lastWriteTime = File.GetLastWriteTimeUtc(inputPath);
+                File.SetCreationTimeUtc(outputPath, creationTime);
+                File.SetLastWriteTimeUtc(outputPath, lastWriteTime);
             }
         }
         catch (Exception ex)
@@ -71,9 +72,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a collection of WebP assets to TIFF for archival or printing while keeping the original file names intact.
- * 2. When an application must process a folder of WebP photos and output TIFF files for compatibility with legacy systems that only read TIFF.
- * 3. When you want to preserve the original creation and modification dates of images after converting them from WebP to TIFF for audit trails.
- * 4. When automating a nightly job that converts newly added WebP screenshots into high‑resolution TIFFs for further analysis.
- * 5. When integrating Aspose.Imaging into a C# service that batch‑converts user‑uploaded WebP images to TIFF without losing metadata.
+ * 1. When a developer needs to archive a collection of WebP photos as lossless TIFF files for long‑term storage while keeping the original creation and modification dates.
+ * 2. When an image‑processing pipeline must convert user‑uploaded WebP assets to TIFF before feeding them into a legacy system that only accepts TIFF format.
+ * 3. When a batch script is required to rename and convert WebP screenshots to TIFF for inclusion in a PDF report, ensuring the file timestamps match the source images.
+ * 4. When migrating a website’s media library from WebP to TIFF to comply with a regulatory requirement that mandates preserving original file metadata.
+ * 5. When automating the preparation of WebP textures for a printing workflow that requires TIFF files with exact original timestamps for version control.
  */
