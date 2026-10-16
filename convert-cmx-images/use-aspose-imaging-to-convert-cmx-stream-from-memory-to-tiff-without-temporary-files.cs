@@ -1,37 +1,45 @@
-// HOW-TO: Convert CMX Image Stream to TIFF in C# Without Temp Files (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX Stream to TIFF in Memory Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.cmx";
-        string outputPath = "output.tiff";
-
         try
         {
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "output.tiff");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (FileStream fileStream = File.OpenRead(inputPath))
-            using (MemoryStream memoryStream = new MemoryStream())
+            byte[] data = File.ReadAllBytes(inputPath);
+            using (var ms = new MemoryStream(data))
             {
-                fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0;
-
-                using (Image image = Image.Load(memoryStream))
+                using (Image image = Image.Load(ms))
                 {
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    image.Save(outputPath, tiffOptions);
+                    using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                    {
+                        image.Save(outputPath, tiffOptions);
+                    }
                 }
             }
         }
@@ -44,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application receives a CMX drawing from a network service and must generate a TIFF preview without writing intermediate files to disk.
- * 2. When an automated document processing pipeline needs to transform legacy CorelDRAW CMX files into TIFF for archival while keeping the conversion entirely in memory.
- * 3. When a cloud‑based image conversion microservice must handle CMX uploads and return TIFF responses without consuming temporary storage.
- * 4. When a batch job processes large numbers of CMX files and wants to reduce I/O overhead by loading each file into a MemoryStream before saving as TIFF.
- * 5. When a mobile or embedded C# application must convert CMX graphics to TIFF for printing, using only in‑memory operations to preserve limited storage.
+ * 1. When a CAD application needs to render CMX drawings as high‑resolution TIFF images directly from a byte array without creating intermediate files.
+ * 2. When a web service receives CMX data over an API and must return a TIFF preview to the client while keeping the conversion entirely in memory.
+ * 3. When a batch job processes archived CMX files stored in a database BLOB column and saves the results as TIFF for archival or printing purposes.
+ * 4. When an automated document workflow converts CMX design files to TIFF for OCR or indexing without consuming disk space for temporary images.
+ * 5. When a desktop utility converts user‑selected CMX files to TIFF on the fly, using Aspose.Imaging to avoid file‑system permissions issues.
  */

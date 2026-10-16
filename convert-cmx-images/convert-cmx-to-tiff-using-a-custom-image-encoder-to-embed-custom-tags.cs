@@ -1,16 +1,15 @@
-// HOW-TO: Convert CMX to TIFF with Custom Rasterization Options in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX File to TIFF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-28
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -20,8 +19,9 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.cmx";
-            string outputPath = "Output\\result.tiff";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "sample.cmx");
+            string outputPath = Path.Combine(baseDir, "Output", "result.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -31,17 +31,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            using (Image cmxImage = Image.Load(inputPath))
             {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmx.Width,
-                    PageHeight = cmx.Height
-                };
-
-                cmx.Save(outputPath, tiffOptions);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                cmxImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display CorelDRAW CMX vector drawings in a TIFF viewer or document, you can convert them using Aspose.Imaging in C#.
- * 2. When a batch processing job must archive CMX files as lossless TIFF images for long‑term storage while preserving page dimensions.
- * 3. When integrating a .NET application with a printing workflow that only accepts TIFF, you can rasterize CMX artwork to TIFF on the fly.
- * 4. When generating thumbnails or previews for CMX designs, converting them to TIFF with a white background ensures consistent rendering across platforms.
- * 5. When a document management system requires TIFF files with specific page size metadata, you can use the vector rasterization options to match the original CMX dimensions.
+ * 1. When a developer needs to convert legacy CorelDRAW CMX drawings to TIFF for archival or printing workflows in a .NET application.
+ * 2. When integrating an automated pipeline that ingests CMX files and outputs high‑resolution TIFF images for downstream image analysis.
+ * 3. When building a document management system that must store vector drawings as lossless TIFFs to ensure compatibility with third‑party viewers.
+ * 4. When creating a batch conversion tool that processes multiple CMX files from a folder and saves them as TIFFs on a server.
+ * 5. When a C# service must convert CMX artwork to TIFF before applying further processing such as OCR or watermarking.
  */

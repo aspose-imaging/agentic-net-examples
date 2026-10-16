@@ -1,8 +1,17 @@
-// HOW-TO: Convert CMX to JPEG With White Background in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CMX Files to JPEG with White Background in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,28 +19,55 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.cmx");
-            string outputPath = Path.Combine("Output", "sample.jpg");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                using (JpegOptions jpegOptions = new JpegOptions())
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.cmx");
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+                {
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
+                        PageWidth = cmxImage.Width,
+                        PageHeight = cmxImage.Height
                     };
-                    image.Save(outputPath, jpegOptions);
+
+                    using (JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        VectorRasterizationOptions = vectorOptions,
+                        Quality = 90
+                    })
+                    {
+                        cmxImage.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -44,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display CorelDRAW CMX vector drawings on web pages that only support JPEG, you can convert them to JPEG with a solid white background to hide transparency.
- * 2. When generating thumbnails of CMX files for a document management system, you can rasterize the vectors to JPEG while ensuring transparent areas are filled to avoid visual artifacts.
- * 3. When automating batch processing of legacy CMX assets for a mobile app, you can use C# and Aspose.Imaging to convert each file to JPEG with a custom background color.
- * 4. When preparing print‑ready previews of CMX designs in a .NET application, you can render the vector image to JPEG and set the background to match the paper color.
- * 5. When integrating CMX support into an image‑upload workflow, you can convert incoming CMX files to JPEG on the server, applying a white background to maintain consistent appearance across browsers.
+ * 1. When you need to generate JPEG previews of CorelDRAW CMX drawings for web thumbnails, ensuring transparent areas appear white.
+ * 2. When batch‑processing a folder of CMX files to create JPEG assets for email newsletters without unwanted background artifacts.
+ * 3. When integrating a .NET service that converts legacy CMX vector graphics to JPEG for storage in a database that only supports raster images.
+ * 4. When preparing CMX artwork for printing workflows that require JPEG input and a solid background to avoid color shifts.
+ * 5. When automating the migration of old CMX design files to JPEG format in a CI pipeline, setting a consistent background color to maintain visual fidelity.
  */
