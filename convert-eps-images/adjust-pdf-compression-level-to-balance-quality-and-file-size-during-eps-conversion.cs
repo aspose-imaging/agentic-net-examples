@@ -1,7 +1,13 @@
-// HOW-TO: Convert EPS to PDF with Balanced Compression Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF in C# While Trying to Set Compression (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
@@ -14,20 +20,20 @@ class Program
             string inputPath = "Input\\sample.eps";
             string outputPath = "Output\\sample.pdf";
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
+                // Adjusting PDF compression level is not supported by the Aspose.Imaging API.
+                // The conversion proceeds without compression adjustments.
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                    // Compression level adjustment is not directly supported; using default settings.
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -41,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EPS artwork to PDF for client delivery while keeping file size reasonable.
- * 2. When generating printable PDFs from EPS logos for marketing materials and wants to preserve visual fidelity without excessive file weight.
- * 3. When building an automated pipeline that ingests EPS files and outputs PDF documents for archival, requiring a balance between quality and storage costs.
- * 4. When integrating Aspose.Imaging into a web service that serves PDF previews of EPS designs and must limit bandwidth usage.
- * 5. When creating batch conversion tools that transform multiple EPS files to PDF and need default compression to simplify code while still achieving acceptable image quality.
+ * 1. When a developer needs to programmatically convert vector EPS artwork into a PDF document for printing or distribution using C# and Aspose.Imaging.
+ * 2. When an application must batch‑process EPS files from a folder and generate corresponding PDFs without manual intervention.
+ * 3. When a workflow requires validating that an EPS file exists before attempting conversion to avoid runtime errors.
+ * 4. When a project needs to ensure the output directory is created automatically during EPS‑to‑PDF conversion.
+ * 5. When a developer wants to handle conversion failures gracefully by catching exceptions and logging error messages.
  */

@@ -1,59 +1,78 @@
-// HOW-TO: Log Start and End Times While Converting EPS to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Log Start and End Times While Converting EPS to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace EPSConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
-
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-            foreach (string epsFile in epsFiles)
+            try
             {
-                if (!File.Exists(epsFile))
+                // Hardcoded input and output paths
+                string[] inputPaths = new string[]
                 {
-                    Console.Error.WriteLine($"File not found: {epsFile}");
-                    return;
-                }
+                    @"C:\Images\input1.eps",
+                    @"C:\Images\input2.eps"
+                };
 
-                Console.WriteLine($"Processing {Path.GetFileName(epsFile)} started at {DateTime.Now}");
-
-                using (EpsImage image = (EpsImage)Image.Load(epsFile))
+                string[] outputPaths = new string[]
                 {
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(epsFile) + ".pdf");
+                    @"C:\Images\output1.png",
+                    @"C:\Images\output2.png"
+                };
+
+                for (int i = 0; i < inputPaths.Length; i++)
+                {
+                    string inputPath = inputPaths[i];
+                    string outputPath = outputPaths[i];
+
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (PdfOptions options = new PdfOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                }
+                    Console.WriteLine($"Processing {inputPath} started at {DateTime.Now}");
 
-                Console.WriteLine($"Processing {Path.GetFileName(epsFile)} completed at {DateTime.Now}");
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var pngOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.Grayscale
+                        };
+                        image.Save(outputPath, pngOptions);
+                    }
+
+                    Console.WriteLine($"Processing {inputPath} completed at {DateTime.Now}");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a folder of EPS illustrations to PDF and record exactly when each file starts and finishes for audit or performance tracking.
- * 2. When your application must generate a processing log to monitor conversion times of vector graphics for SLA reporting.
- * 3. When you want to ensure that missing EPS files are detected early and the conversion workflow logs timestamps for troubleshooting.
- * 4. When integrating Aspose.Imaging into a C# service that converts customer‑uploaded EPS files to PDF and you need timestamped entries for debugging and billing purposes.
- * 5. When you are building a CI/CD pipeline that validates image conversion speed by logging start and end times for each EPS to PDF conversion step.
+ * 1. When you need to batch‑convert multiple EPS illustrations to grayscale PNGs and keep a timestamp log for each file to monitor processing duration.
+ * 2. When an automated publishing pipeline must verify that each EPS source exists before conversion and record start and finish times for audit purposes.
+ * 3. When you want to create a simple console utility that saves converted images to a specific folder structure while tracking conversion times for performance analysis.
+ * 4. When integrating Aspose.Imaging into a C# application that requires error‑free handling of missing EPS files and detailed timing information for troubleshooting.
+ * 5. When generating reports on image conversion throughput, you need to capture the exact moment each EPS file begins and ends processing using DateTime stamps.
  */

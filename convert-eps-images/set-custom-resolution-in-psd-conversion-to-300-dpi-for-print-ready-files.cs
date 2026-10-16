@@ -1,16 +1,26 @@
-// HOW-TO: Convert JPEG to PSD with 300 DPI Resolution in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set PSD Resolution to 300 DPI When Converting JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.jpg";
-            string outputPath = "output.psd";
+            string outputPath = "output/output.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -20,11 +30,12 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var options = new PsdOptions();
-                options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300.0, 300.0);
-                image.Save(outputPath, options);
+                var psdOptions = new PsdOptions();
+                psdOptions.Source = new FileCreateSource(outputPath, false);
+                psdOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -36,9 +47,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate print‑ready PSD files from JPEG images with a specific 300 DPI resolution for high‑quality printing.
- * 2. When an e‑commerce platform must export product photos as layered PSDs while ensuring the output meets the printer’s DPI requirements.
- * 3. When a desktop publishing workflow requires converting source images to PSD format and setting the resolution to match magazine layout specifications.
- * 4. When an automated batch process creates PSD assets from user‑uploaded photos and must enforce a consistent 300 DPI setting for downstream design tools.
- * 5. When a graphic‑design integration needs to preserve image dimensions and embed a 300 DPI resolution flag during JPEG‑to‑PSD conversion in a C# application.
+ * 1. When a designer needs to export a JPEG asset as a print‑ready PSD file with 300 DPI resolution for high‑quality offset printing.
+ * 2. When an e‑commerce platform generates product mockups and must ensure the PSD files meet the printer’s 300 DPI specification automatically.
+ * 3. When a batch‑processing tool converts user‑uploaded photos to PSD format and must set the resolution to 300 DPI to preserve detail for large‑format prints.
+ * 4. When a publishing workflow requires converting web‑optimized JPEGs to PSDs with exact DPI settings so that layout software interprets the image size correctly.
+ * 5. When a digital asset management system needs to store images as PSDs with a predefined 300 DPI resolution to maintain consistency across all print‑ready assets.
  */
