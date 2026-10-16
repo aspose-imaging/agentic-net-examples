@@ -1,9 +1,17 @@
-// HOW-TO: Combine Multiple CDR Documents Into One PDF Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Multiple CDR Files Into a Single PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,28 +19,56 @@ class Program
     {
         try
         {
-            string inputPath1 = "input1.cdr";
-            string inputPath2 = "input2.cdr";
-            string inputPath3 = "input3.cdr";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!File.Exists(inputPath1)) { Console.Error.WriteLine($"File not found: {inputPath1}"); return; }
-            if (!File.Exists(inputPath2)) { Console.Error.WriteLine($"File not found: {inputPath2}"); return; }
-            if (!File.Exists(inputPath3)) { Console.Error.WriteLine($"File not found: {inputPath3}"); return; }
-
-            using (Image img1 = Image.Load(inputPath1))
-            using (Image img2 = Image.Load(inputPath2))
-            using (Image img3 = Image.Load(inputPath3))
+            if (!Directory.Exists(inputDirectory))
             {
-                Image[] images = new Image[] { img1, img2, img3 };
-                PdfOptions pdfOptions = new PdfOptions();
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                string outputPath = "output/combined.pdf";
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                using (Image pdf = Image.Create(images, true))
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+            if (files.Length == 0)
+            {
+                Console.WriteLine("No CDR files found in the input directory.");
+                return;
+            }
+
+            List<Image> images = new List<Image>();
+            foreach (string filePath in files)
+            {
+                if (!File.Exists(filePath))
                 {
-                    pdf.Save(outputPath, pdfOptions);
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
+
+                Image img = Image.Load(filePath);
+                images.Add(img);
+            }
+
+            string outputPath = Path.Combine(outputDirectory, "Combined.pdf");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image result = Image.Create(images.ToArray(), true))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    result.Save(outputPath, pdfOptions);
+                }
+            }
+
+            foreach (Image img in images)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -44,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to merge several CorelDRAW (.cdr) drawings into a single PDF portfolio while preserving the original page sequence.
- * 2. When an automated build process must convert multiple CDR assets into a consolidated PDF report for client delivery.
- * 3. When a web service receives separate CDR files and must generate one downloadable PDF document for end‑users.
- * 4. When a desktop application needs to batch‑process CDR illustrations and produce a combined PDF for printing or archiving.
- * 5. When a document management system requires programmatic merging of CDR files into a PDF to maintain consistent ordering before indexing.
+ * 1. When a design studio needs to merge several CorelDRAW (.cdr) drawings into one PDF portfolio while keeping the original page sequence.
+ * 2. When an automated build pipeline must convert a batch of CDR assets into a single PDF report for distribution to clients.
+ * 3. When a document management system requires consolidating multiple CDR diagrams into a searchable PDF document using C#.
+ * 4. When a Windows service processes incoming CDR files and creates a combined PDF invoice without manual intervention.
+ * 5. When a desktop application lets users select multiple CDR files and export them as a single PDF booklet preserving layout order.
  */

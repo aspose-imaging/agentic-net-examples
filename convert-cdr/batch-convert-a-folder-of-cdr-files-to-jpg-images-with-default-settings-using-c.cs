@@ -1,51 +1,63 @@
-// HOW-TO: Batch Convert CDR Files to JPG Images in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to JPG Images in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchCdrToJpg
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputFolder = @"C:\InputCdr";
-            string outputFolder = @"C:\OutputJpg";
-
-            string[] cdrFiles = Directory.GetFiles(inputFolder, "*.cdr");
-
-            foreach (string inputPath in cdrFiles)
+            try
             {
-                if (!File.Exists(inputPath))
+                string inputFolder = "C:\\InputCdr";
+                string outputFolder = "C:\\OutputJpg";
+
+                Directory.CreateDirectory(outputFolder);
+
+                string[] cdrFiles = Directory.GetFiles(inputFolder, "*.cdr", SearchOption.TopDirectoryOnly);
+                foreach (string inputPath in cdrFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".jpg");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
-                {
-                    JpegOptions options = new JpegOptions();
-                    image.Save(outputPath, options);
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        JpegOptions options = new JpegOptions();
+                        image.Save(outputPath, options);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically generate web‑ready JPEG previews of a large collection of CorelDRAW (CDR) designs stored in a folder.
- * 2. When a migration project requires converting legacy CDR artwork to JPEG format for use in a .NET application without manual intervention.
- * 3. When an e‑commerce platform must batch‑process product illustrations originally saved as CDR files into JPEG thumbnails for faster page loads.
- * 4. When a digital asset management system needs to archive CDR drawings as JPEGs to ensure compatibility with standard image viewers.
- * 5. When a Windows service has to nightly convert newly added CDR files in a directory to JPEGs for downstream reporting or printing workflows.
+ * 1. When a graphic design studio needs to automatically turn a collection of CorelDRAW (.cdr) assets into web‑ready JPEGs for publishing.
+ * 2. When a migration script must process dozens of legacy CDR files stored in a directory and output JPEG thumbnails for a content management system.
+ * 3. When an e‑commerce platform wants to generate product preview images from CDR source files without manual intervention.
+ * 4. When a Windows service has to batch convert newly uploaded CDR drawings to JPG format for email attachments or reporting.
+ * 5. When a developer integrates Aspose.Imaging into a .NET tool to streamline bulk image conversion from vector CDR files to raster JPEGs with default quality settings.
  */
