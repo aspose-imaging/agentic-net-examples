@@ -1,10 +1,16 @@
-// HOW-TO: Batch Convert WebP Images to APNG with Fixed Frame Delay in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert WebP Images to APNG with Uniform Frame Delay in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -40,19 +46,24 @@ class Program
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (WebPImage webp = (WebPImage)Image.Load(inputPath))
                 {
-                    ApngOptions createOptions = new ApngOptions
+                    int width = webp.Width;
+                    int height = webp.Height;
+
+                    ApngOptions options = new ApngOptions
                     {
                         Source = new FileCreateSource(outputPath, false),
-                        DefaultFrameTime = 100u, // uniform frame delay in milliseconds
+                        DefaultFrameTime = 100u,
                         ColorType = PngColorType.TruecolorWithAlpha
                     };
 
-                    using (ApngImage apng = (ApngImage)Image.Create(createOptions, webp.Width, webp.Height))
+                    using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Create(options, width, height))
                     {
                         apng.RemoveAllFrames();
                         apng.AddFrame(webp);
@@ -70,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a collection of animated WebP files into APNGs for browsers that support PNG animation while keeping a consistent frame speed.
- * 2. When automating the preparation of game assets, turning WebP sprite animations into APNGs with a uniform delay for use in Unity.
- * 3. When migrating a legacy web gallery, batch converting WebP animations to APNG to ensure compatibility with older image viewers.
- * 4. When generating email‑friendly animated images, converting WebP to APNG with a fixed frame time to meet email client constraints.
- * 5. When creating a CI pipeline that processes uploaded WebP animations into APNGs with a standard delay for consistent playback across platforms.
+ * 1. When you need to automatically transform a collection of WebP animation files into APNG format for web deployment while ensuring each frame displays for the same duration, this code provides a ready‑to‑use solution.
+ * 2. If your application must generate animated PNGs from user‑uploaded WebP stickers or emojis and you want a consistent frame timing across all output files, the sample shows how to achieve it in bulk.
+ * 3. For a CI/CD pipeline that prepares assets for a mobile game, you can use this script to convert dozens of WebP spritesheets into APNGs with a fixed delay, simplifying asset management.
+ * 4. When migrating a legacy image library that stores animated WebP files to a format supported by older browsers, the code lets you batch‑process the folder and produce APNGs with a uniform frame rate.
+ * 5. If you are building a server‑side service that receives WebP animations and must return APNGs with a standardized playback speed, this example demonstrates the necessary Aspose.Imaging calls in C#.
  */

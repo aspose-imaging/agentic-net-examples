@@ -1,15 +1,22 @@
-// HOW-TO: Convert APNG Animation To Animated GIF In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert APNG Animation to Animated GIF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ApngToGifConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
             string inputPath = "input.apng";
             string outputPath = "output.gif";
@@ -20,26 +27,29 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            try
             {
-                GifOptions options = new GifOptions();
-                apng.Save(outputPath, options);
+                using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+                {
+                    GifOptions options = new GifOptions();
+                    apng.Save(outputPath, options);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a web‑based APNG animation on platforms that only support animated GIFs, you can use this code to convert the file while keeping the original frame sequence.
- * 2. When a mobile app requires GIF assets for compatibility with older iOS or Android versions, the snippet lets you transform existing APNG assets into GIFs without losing animation timing.
- * 3. When automating a batch process that archives user‑uploaded APNG stickers as GIFs for email newsletters, this example shows how to load each APNG and save it as an animated GIF in C#.
- * 4. When integrating Aspose.Imaging into a server‑side service that generates preview thumbnails, you can first convert the APNG to GIF to simplify further processing or playback.
- * 5. When migrating a legacy graphics pipeline that only understands GIF animation, the code provides a straightforward way to preserve the original frame order while converting APNG files to GIF format.
+ * 1. When you need to display an animated PNG on platforms that only support GIF, you can convert the APNG to an animated GIF while preserving the original frame sequence using C# and Aspose.Imaging.
+ * 2. When a web application must generate lightweight GIF previews from user‑uploaded APNG files, this code provides a simple way to perform the conversion on the server side.
+ * 3. When a game developer wants to reuse existing APNG sprite animations in a legacy engine that only reads GIF frames, the sample shows how to keep the animation timing intact.
+ * 4. When an email marketing system requires animated content in GIF format but receives assets as APNG, the snippet converts them automatically in a .NET workflow.
+ * 5. When a desktop utility needs to batch‑process APNG files into GIFs for archival or sharing purposes, this example demonstrates the core conversion logic you can loop over multiple files.
  */

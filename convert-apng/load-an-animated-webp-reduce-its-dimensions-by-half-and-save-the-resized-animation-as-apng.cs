@@ -1,4 +1,11 @@
-// HOW-TO: Resize Animated WebP to Half Size and Save as APNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize Animated WebP to Half Size and Convert to APNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +14,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.webp";
-            string outputPath = "output.apng";
+            string inputPath = "Input/animated.webp";
+            string outputPath = "Output/resized.apng";
 
             if (!File.Exists(inputPath))
             {
@@ -20,16 +27,18 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
+                WebPImage webp = (WebPImage)img;
                 int newWidth = webp.Width / 2;
                 int newHeight = webp.Height / 2;
-                webp.Resize(newWidth, newHeight);
 
-                ApngOptions options = new ApngOptions();
-                webp.Save(outputPath, options);
+                webp.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+
+                ApngOptions apngOptions = new ApngOptions();
+                webp.Save(outputPath, apngOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a smaller version of an animated WebP on a mobile website, you can resize it and convert it to APNG for broader browser compatibility.
- * 2. When an e‑learning platform requires animated illustrations in APNG format but only has source assets as animated WebP, this code halves the dimensions and performs the conversion.
- * 3. When optimizing email newsletters that support APNG but not WebP, you can shrink the animation to reduce file size and save it as APNG using C#.
- * 4. When a game UI needs low‑resolution animated icons, you can programmatically resize the original WebP animation and export it as APNG for use in the engine.
- * 5. When a content‑management system automatically processes uploaded animated WebP files, this snippet can generate a half‑size APNG thumbnail for preview purposes.
+ * 1. When you need to display a smaller animated image on a mobile app, you can resize an animated WebP and convert it to APNG for better compatibility.
+ * 2. When optimizing web page load times, developers can shrink animated WebP assets and output them as APNG to serve browsers that prefer PNG animation.
+ * 3. When creating animated stickers for messaging platforms that only accept APNG, you can take an existing animated WebP, halve its dimensions, and save it as APNG.
+ * 4. When preparing assets for an email newsletter that does not support WebP, you can resize the animation and convert it to APNG to ensure it displays correctly.
+ * 5. When building a game UI that requires low‑resolution animated icons, you can programmatically reduce the size of a WebP animation and export it as APNG for use in the engine.
  */

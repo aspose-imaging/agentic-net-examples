@@ -1,7 +1,16 @@
 // HOW-TO: Create Rotating SVG Animation and Export as APNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
@@ -12,7 +21,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.apng";
+            string outputPath = "output\\animation.apng";
 
             if (!File.Exists(inputPath))
             {
@@ -22,44 +31,56 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
+            int width, height;
+            using (Image svg = Image.Load(inputPath))
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
+                width = svg.Width;
+                height = svg.Height;
+            }
 
-                ApngOptions apngOptions = new ApngOptions
+            int frameCount = 36;
+            double angleStep = 360.0 / frameCount;
+
+            ApngOptions apngOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = 100
+            };
+
+            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+            {
+                apng.RemoveAllFrames();
+
+                for (int i = 0; i < frameCount; i++)
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100
-                };
+                    double angle = i * angleStep;
 
-                using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(apngOptions, width, height))
-                {
-                    int frameCount = 36;
-                    double angleStep = 360.0 / frameCount;
-
-                    for (int i = 0; i < frameCount; i++)
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        double angle = i * angleStep;
-
-                        BmpOptions bmpOptions = new BmpOptions();
-                        using (Aspose.Imaging.Image frameCanvas = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+                        using (Image tempSvg = Image.Load(inputPath))
                         {
-                            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(frameCanvas);
-                            graphics.Clear(Aspose.Imaging.Color.Transparent);
+                            tempSvg.Save(ms, new PngOptions
+                            {
+                                VectorRasterizationOptions = new SvgRasterizationOptions
+                                {
+                                    PageWidth = width,
+                                    PageHeight = height,
+                                    BackgroundColor = Color.White
+                                }
+                            });
+                        }
 
-                            graphics.TranslateTransform(width / 2, height / 2);
-                            graphics.RotateTransform((float)angle);
-                            graphics.TranslateTransform(-width / 2, -height / 2);
+                        ms.Position = 0;
 
-                            graphics.DrawImage(vectorImage, new Aspose.Imaging.Point(0, 0));
-
-                            apngImage.AddFrame((Aspose.Imaging.RasterImage)frameCanvas);
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            raster.Rotate((float)angle, true, Color.White);
+                            apng.AddFrame(raster);
                         }
                     }
-
-                    apngImage.Save();
                 }
+
+                apng.Save();
             }
         }
         catch (Exception ex)
@@ -71,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a rotating logo for a website banner and deliver it as a lightweight animated PNG using C#.
- * 2. When you want to programmatically convert a vector icon into a frame‑by‑frame spin animation for mobile app splash screens.
- * 3. When an e‑learning platform requires a looping rotation of a diagram and you must produce the animation without rasterizing the SVG beforehand.
- * 4. When you are building a desktop tool that visualizes mechanical parts turning and need to save the result as an APNG for easy sharing.
- * 5. When you need to automate the creation of animated product previews from SVG assets for marketing emails using Aspose.Imaging for .NET.
+ * 1. When you need to turn a static SVG logo into a continuously rotating animated PNG for use in a website header.
+ * 2. When you want to generate a series of frames that show a vector illustration spinning, then combine them into an APNG for inclusion in mobile app splash screens.
+ * 3. When you have to automate the creation of rotating product previews from SVG files to embed in email newsletters without relying on JavaScript.
+ * 4. When you are building a game and require a lightweight, loss‑less animated sprite created from a vector asset, using C# and Aspose.Imaging.
+ * 5. When you must batch‑process multiple SVG icons into looping APNG animations for a UI component library, ensuring consistent size and background color.
  */
