@@ -1,4 +1,11 @@
-// HOW-TO: Resize BMP Image to Half Size and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP Image to Half Size and Convert to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.bmp");
-            string outputPath = Path.Combine("Output", "sample_resized.svg");
+            string inputPath = "Input\\image.bmp";
+            string outputPath = "Output\\image.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,22 +31,28 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-
-                image.Resize(newWidth, newHeight);
-
-                using (SvgOptions svgOptions = new SvgOptions())
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
                 {
-                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    raster.CacheData();
+                }
+
+                int newWidth = raster.Width / 2;
+                int newHeight = raster.Height / 2;
+
+                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = newWidth,
                         PageHeight = newHeight
-                    };
+                    }
+                };
 
-                    image.Save(outputPath, svgOptions);
-                }
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a lightweight vector version of a legacy BMP logo for responsive web pages, you can resize it and export it as SVG using C# and Aspose.Imaging.
- * 2. When a desktop application must downscale high‑resolution BMP scans before embedding them into a PDF as scalable graphics, this code provides the resizing and SVG conversion.
- * 3. When an automated build pipeline processes BMP assets and requires half‑size SVG files for mobile UI assets, the snippet automates the transformation in .NET.
- * 4. When converting BMP screenshots into scalable diagrams for documentation, resizing them to half their dimensions reduces file size while preserving quality in the resulting SVG.
- * 5. When a game development tool needs to import BMP textures, shrink them for performance, and store them as SVG for vector‑based rendering, this approach handles the conversion in C#.
+ * 1. When you need to generate scalable vector graphics from a large BMP thumbnail for web display.
+ * 2. When you want to reduce the file size of a bitmap by halving its dimensions before embedding it in an SVG document.
+ * 3. When creating responsive UI icons that must scale without loss, converting resized BMPs to SVG ensures crisp rendering on any screen.
+ * 4. When automating a batch process that prepares legacy BMP assets for modern vector‑based reporting tools.
+ * 5. When integrating image processing into a C# application that must output SVG files for further editing in design software.
  */

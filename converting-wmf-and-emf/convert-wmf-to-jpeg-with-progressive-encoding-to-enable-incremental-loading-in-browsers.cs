@@ -1,4 +1,11 @@
-// HOW-TO: Convert WMF to Progressive JPEG for Incremental Browser Loading in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WMF to Progressive JPEG with Quality 90 in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,11 +16,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/input.wmf";
-        string outputPath = "Output/output.jpg";
-
         try
         {
+            string inputPath = Path.Combine("Input", "input.wmf");
+            string outputPath = Path.Combine("Output", "output.jpg");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,6 +34,7 @@ class Program
                 using (JpegOptions jpegOptions = new JpegOptions())
                 {
                     jpegOptions.CompressionType = JpegCompressionMode.Progressive;
+                    jpegOptions.Quality = 90;
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -40,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display vector WMF graphics on a web page and want faster perceived load times by using progressive JPEGs that render gradually in the browser.
- * 2. When a legacy application generates reports as WMF files and you must convert them to web‑friendly JPEG images with progressive encoding for seamless integration into HTML emails.
- * 3. When optimizing a content management system that stores WMF assets and you require automated C# code to produce progressive JPEG thumbnails that load incrementally on mobile devices.
- * 4. When migrating a digital archive from Windows Metafile format to JPEG while preserving bandwidth by enabling progressive compression through Aspose.Imaging in a .NET service.
- * 5. When building an image processing pipeline that converts WMF logos to progressive JPEGs so browsers can display a low‑quality preview before the full image finishes downloading.
+ * 1. When you need to display vector WMF graphics on a website and want faster incremental loading, you convert them to progressive JPEGs using C#.
+ * 2. When migrating legacy WMF assets to a modern image pipeline, you can batch‑convert them to high‑quality progressive JPEGs for better browser compatibility.
+ * 3. When generating thumbnails for email newsletters, converting WMF logos to progressive JPEG reduces download size while preserving visual fidelity.
+ * 4. When building a server‑side image service that serves images over slow connections, using progressive JPEG encoding lets browsers render the image progressively.
+ * 5. When integrating Aspose.Imaging into a .NET application to automate image format conversion with specific compression settings, this code demonstrates loading a WMF and saving it as a progressive JPEG.
  */

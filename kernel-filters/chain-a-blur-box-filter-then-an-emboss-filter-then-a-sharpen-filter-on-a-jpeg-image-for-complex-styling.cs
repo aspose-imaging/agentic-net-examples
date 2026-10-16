@@ -1,53 +1,48 @@
-// HOW-TO: Apply Blur, Emboss, and Sharpen Filters to JPEG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Blur Box, Emboss, and Sharpen Filters to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output\\styled.jpg";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                double[,] blurKernel = new double[,]
-                {
-                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                    { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                    { 0.04, 0.04, 0.04, 0.04, 0.04 }
-                };
+                double[,] blurKernel = ConvolutionFilter.GetBlurBox(5);
                 image.Filter(image.Bounds, new ConvolutionFilterOptions(blurKernel));
 
-                double[,] embossKernel = new double[,]
-                {
-                    { -2, -1, 0 },
-                    { -1, 1, 1 },
-                    { 0, 1, 2 }
-                };
+                double[,] embossKernel = ConvolutionFilter.Emboss3x3;
                 image.Filter(image.Bounds, new ConvolutionFilterOptions(embossKernel));
 
                 image.Filter(image.Bounds, new SharpenFilterOptions());
 
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    Quality = 90,
                     Source = new FileCreateSource(outputPath, false)
                 };
                 image.Save(outputPath, jpegOptions);
@@ -62,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to soften an image, add a textured emboss effect, and then enhance edges before saving as a high‑quality JPEG for web galleries.
- * 2. When preparing product photos for an e‑commerce site and want a subtle blur to reduce noise, an emboss to highlight details, and sharpening to make the final image crisp.
- * 3. When creating stylized thumbnails for a mobile app where a combination of blur, emboss, and sharpen gives a distinctive visual signature.
- * 4. When processing scanned documents to smooth background, emphasize text edges with emboss, and sharpen for better OCR accuracy before exporting to JPEG.
- * 5. When building an automated image pipeline that applies multiple convolution filters sequentially to achieve a custom artistic look on JPEG assets.
+ * 1. When you need to soften a photo, add a textured emboss effect, and then enhance edges before saving as a JPEG for web galleries.
+ * 2. When creating stylized product thumbnails that require a subtle blur, a 3‑D emboss look, and sharpened details to attract customers.
+ * 3. When preprocessing scanned documents to reduce noise, give a raised‑text appearance, and improve readability in a compressed JPEG.
+ * 4. When generating artistic filters for a mobile app that combines smoothing, embossing, and sharpening in a single processing step.
+ * 5. When automating batch image processing to apply multiple convolution filters sequentially for consistent visual branding across marketing assets.
  */

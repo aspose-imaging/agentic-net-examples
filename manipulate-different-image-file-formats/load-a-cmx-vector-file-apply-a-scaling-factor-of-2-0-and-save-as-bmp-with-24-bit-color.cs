@@ -1,4 +1,11 @@
-// HOW-TO: Scale CMX Vector by 2x and Save as 24‑Bit BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Scale CMX Vector Image by 2x and Save as 24‑Bit BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -25,19 +32,16 @@ class Program
 
             using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                int newWidth = (int)(cmx.Width * 2.0);
-                int newHeight = (int)(cmx.Height * 2.0);
+                int newWidth = cmx.Width * 2;
+                int newHeight = cmx.Height * 2;
+                cmx.Resize(newWidth, newHeight);
 
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 24;
-
-                using (Image raster = Image.Create(bmpOptions, newWidth, newHeight))
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    Graphics graphics = new Graphics(raster);
-                    graphics.DrawImage(cmx, new Rectangle(0, 0, newWidth, newHeight));
+                    BitsPerPixel = 24
+                };
 
-                    raster.Save(outputPath, bmpOptions);
-                }
+                cmx.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy CorelDRAW CMX drawings into high‑resolution BMP files for printing or archival purposes.
- * 2. When a Windows desktop application must display a CMX illustration at double size on a bitmap canvas.
- * 3. When generating thumbnails for CMX assets by scaling them and saving as 24‑bit BMP for compatibility with older image viewers.
- * 4. When preparing CMX graphics for inclusion in a .NET reporting tool that only accepts BMP images.
- * 5. When automating batch processing of CMX files to produce larger, lossless BMP copies for machine‑vision analysis.
+ * 1. When you need to double the size of a CorelDRAW CMX drawing for high‑resolution printing and output it as a standard 24‑bit BMP file.
+ * 2. When a legacy Windows application only accepts BMP images, you can convert CMX vectors to BMP while scaling them to match the required pixel dimensions.
+ * 3. When preparing assets for a game engine that requires raster BMP textures, you can upscale CMX artwork to avoid pixelation and preserve color depth.
+ * 4. When automating a batch process that ingests CMX files and generates larger BMP previews for a web gallery, this code handles the resize and format conversion.
+ * 5. When integrating Aspose.Imaging into a C# service that receives CMX diagrams and must deliver 24‑bit BMP files at double resolution for downstream OCR analysis.
  */

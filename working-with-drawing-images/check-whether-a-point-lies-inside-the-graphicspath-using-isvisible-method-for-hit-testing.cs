@@ -1,47 +1,53 @@
-// HOW-TO: How To Test If A Point Is Inside A GraphicsPath In C# (Aspose.Imaging for .NET)
+// HOW-TO: How to Test If a Point Is Inside a GraphicsPath in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
+
         try
         {
-            string outputPath = "output.png";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-            int width = 200;
-            int height = 200;
-
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (Image image = Image.Create(new BmpOptions(), 200, 200))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                RectangleF rect = new RectangleF(30, 30, 140, 140);
-                RectangleShape rectangleShape = new RectangleShape(rect);
-
-                Figure figure = new Figure();
-                figure.AddShape(rectangleShape);
-
                 GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                RectangleF rect = new RectangleF(50, 50, 100, 100);
+                RectangleShape rectShape = new RectangleShape(rect);
+                figure.AddShape(rectShape);
                 path.AddFigure(figure);
 
-                Pen pen = new Pen(Color.Blue, 2);
-                graphics.DrawPath(pen, path);
+                Point testPoint = new Point(75, 75);
+                bool isInside = path.IsVisible(testPoint);
+                Console.WriteLine($"Point ({testPoint.X}, {testPoint.Y}) inside path: {isInside}");
 
-                Point testPoint = new Point(50, 50);
-                bool isVisible = path.IsVisible(testPoint);
-                Console.WriteLine($"Point ({testPoint.X}, {testPoint.Y}) is inside the path: {isVisible}");
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                graphics.DrawPath(new Pen(Color.Blue, 2), path);
 
-                image.Save();
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Use this code to perform hit‑testing on drawn shapes when building a custom image annotation tool that needs to know if a mouse click falls inside a rectangle.
- * 2. Apply the technique to validate user selections in a graphics editor that saves the canvas as a PNG file.
- * 3. Implement point‑inside‑shape detection for interactive game maps rendered with Aspose.Imaging, ensuring clicks trigger actions only within defined zones.
- * 4. Use the IsVisible check to create server‑side image processing that verifies whether a given coordinate lies within a generated diagram before adding labels.
- * 5. Employ this approach in a document‑generation workflow to confirm that dynamically placed elements do not overlap restricted areas on a PDF‑converted PNG page.
+ * 1. Use this code to determine whether a mouse click falls within a drawn rectangle for interactive image annotations in a BMP file.
+ * 2. Apply the IsVisible hit‑testing method to enable custom shape selection in a C# graphics editor built with Aspose.Imaging.
+ * 3. Validate user‑defined points against complex paths when implementing collision detection for game sprites rendered as BMP images.
+ * 4. Perform server‑side verification that uploaded coordinates lie inside a predefined region before processing image transformations.
+ * 5. Generate visual debugging output that highlights the tested area and logs whether a point is inside the GraphicsPath for quality‑assurance testing.
  */

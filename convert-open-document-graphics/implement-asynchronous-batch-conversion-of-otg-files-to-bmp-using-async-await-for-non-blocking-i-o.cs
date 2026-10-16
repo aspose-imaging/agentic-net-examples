@@ -1,8 +1,15 @@
-// HOW-TO: Asynchronously Convert Multiple OTG Files to BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Asynchronously Convert Multiple OTG Files To BMP In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -12,27 +19,32 @@ class Program
     {
         try
         {
-            string inputFolder = "input";
-            string outputFolder = "output";
+            // Hardcoded input and output directories
+            string inputDirectory = "input";
+            string outputDirectory = "output";
 
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.otg");
-            var tasks = new List<Task>();
+            // Get all OTG files recursively
+            var otgFiles = Directory.GetFiles(inputDirectory, "*.otg", SearchOption.AllDirectories);
 
-            foreach (string inputPath in inputFiles)
+            // Process each file asynchronously
+            var tasks = otgFiles.Select(async filePath =>
             {
-                if (!File.Exists(inputPath))
+                // Verify input file exists
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".bmp");
+                // Determine relative path and corresponding output path with .bmp extension
+                string relativePath = Path.GetRelativePath(inputDirectory, filePath);
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(relativePath, ".bmp"));
 
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                tasks.Add(ProcessFileAsync(inputPath, outputPath));
-            }
+                await ConvertOtgToBmpAsync(filePath, outputPath);
+            });
 
             await Task.WhenAll(tasks);
         }
@@ -42,14 +54,16 @@ class Program
         }
     }
 
-    private static async Task ProcessFileAsync(string inputPath, string outputPath)
+    private static async Task ConvertOtgToBmpAsync(string inputPath, string outputPath)
     {
         await Task.Run(() =>
         {
+            // Load OTG image
             using (Image image = Image.Load(inputPath))
             {
-                var options = new BmpOptions();
-                image.Save(outputPath, options);
+                // Save as BMP using default BmpOptions
+                var bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
         });
     }
@@ -57,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application must quickly convert a large batch of OTG vector graphics into BMP bitmaps without freezing the UI.
- * 2. When a server‑side service processes uploaded OTG files and needs to generate BMP thumbnails asynchronously to improve throughput.
- * 3. When an automated build pipeline includes image assets in OTG format and requires non‑blocking conversion to BMP for legacy tools.
- * 4. When a cloud function receives OTG files from a queue and must save them as BMP images while keeping the function responsive.
- * 5. When a background worker in a Windows service converts OTG diagrams to BMP for later printing or archival without blocking other tasks.
+ * 1. When you need to convert a large collection of OTG drawings to BMP format on a server without blocking the thread pool.
+ * 2. When you want to process OTG images stored in nested folders and save the results in a mirrored directory structure using asynchronous I/O.
+ * 3. When you are building a .NET application that must keep the UI responsive while converting many OTG files to BMP in the background.
+ * 4. When you require a scalable solution that leverages Aspose.Imaging to batch‑convert OTG files to BMP with minimal memory overhead.
+ * 5. When you need to integrate non‑blocking image conversion into a cloud‑based workflow that handles OTG to BMP transformations on demand.
  */

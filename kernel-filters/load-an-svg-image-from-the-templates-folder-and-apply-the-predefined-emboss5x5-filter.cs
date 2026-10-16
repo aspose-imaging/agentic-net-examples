@@ -1,11 +1,15 @@
-// HOW-TO: Apply Emboss5x5 Filter to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss 5x5 Filter to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -13,43 +17,43 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "templates/input.svg";
-        string outputPath = "output/embossed.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image svgImg = Image.Load(inputPath))
+            string inputPath = "templates/input.svg";
+            string outputPath = "output/embossed.png";
+            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
+
+            if (!File.Exists(inputPath))
             {
-                SvgImage svgImage = (SvgImage)svgImg;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
+            // Load SVG and rasterize to PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
                 var pngOptions = new PngOptions();
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height
-                };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                svgImage.Save(tempPath, pngOptions);
+            // Load rasterized image
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                // Apply Emboss5x5 filter
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
 
-                using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-                {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-                    raster.Save(outputPath, new PngOptions());
-                }
+                // Save the filtered image
+                var outOptions = new PngOptions();
+                raster.Save(outputPath, outOptions);
+            }
 
-                File.Delete(tempPath);
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -61,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert an SVG logo to a PNG thumbnail with an embossed effect for a web UI.
- * 2. When generating product catalog images from vector assets and want a subtle 3‑D look without manual editing.
- * 3. When automating batch processing of SVG icons to create embossed PNGs for mobile app assets.
- * 4. When preparing printable graphics from SVG files and require a raised‑edge appearance for visual emphasis.
- * 5. When integrating image processing into a C# service that transforms vector diagrams into stylized raster images for reports.
+ * 1. When you need to convert a vector SVG logo into a raster PNG with an embossed 3‑D effect for web thumbnails.
+ * 2. When generating product catalog images where the original SVG artwork must be stylized with a depth‑enhancing filter before publishing.
+ * 3. When creating printable marketing assets that require a PNG version of an SVG diagram with a subtle emboss to improve visual contrast.
+ * 4. When building an automated pipeline that processes SVG icons, applies a convolution emboss filter, and stores the results as PNG files for mobile apps.
+ * 5. When developing a C# utility that rasterizes SVG illustrations and adds a predefined Emboss5x5 filter to match a brand’s textured graphic style.
  */

@@ -1,9 +1,15 @@
 // HOW-TO: Batch Resize PNG Images to 640x480 and Convert to BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -36,12 +42,19 @@ class Program
                     return;
                 }
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
+                    if (image is RasterImage raster && !raster.IsCached)
+                    {
+                        raster.CacheData();
+                    }
+
                     image.Resize(640, 480);
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                     BmpOptions options = new BmpOptions();
                     image.Save(outputPath, options);
                 }
@@ -56,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically shrink a collection of PNG screenshots to a standard 640x480 size and store them as BMP files for a legacy Windows application.
- * 2. When a photo‑gallery website requires all uploaded PNG pictures to be resized and saved in BMP format for faster thumbnail generation on a .NET server.
- * 3. When migrating assets from a design folder to a format compatible with a printing system that only accepts BMP, while ensuring each image fits a 640x480 layout.
- * 4. When creating a batch script that processes user‑provided PNG icons, resizes them to a uniform resolution, and converts them to BMP for use in a game engine that reads BMP textures.
- * 5. When implementing an automated build step that converts a set of PNG UI mockups into 640x480 BMP files to be bundled with a desktop application built with C#.
+ * 1. When you need to automatically shrink a collection of PNG screenshots to a standard 640x480 resolution and store them as BMP files for legacy Windows applications.
+ * 2. When a photo‑processing service must convert user‑uploaded PNG assets into BMP format with uniform dimensions before archiving them.
+ * 3. When a game development pipeline requires batch resizing of texture PNGs to 640x480 and saving them as BMPs for compatibility with an older engine.
+ * 4. When an automated reporting tool generates charts as PNGs and you must batch convert them to BMPs at a fixed size for inclusion in a PDF that only supports BMP images.
+ * 5. When a desktop utility needs to process all PNG files in a folder, resize each to 640x480, and output BMPs for use in a printing system that expects BMP format.
  */

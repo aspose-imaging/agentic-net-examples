@@ -1,9 +1,16 @@
-// HOW-TO: Create Multiple BMP Images with Different Shapes Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate Multiple BMP Images with Different Shapes Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,55 +19,66 @@ class Program
     {
         try
         {
-            string outputDir = "output";
-            string[] shapes = { "Line", "Rectangle", "Ellipse", "Polygon", "Bezier" };
+            string outputDir = "output_shapes";
+            Directory.CreateDirectory(outputDir);
+
             int width = 200;
             int height = 200;
 
-            foreach (var shape in shapes)
+            List<string> shapes = new List<string> { "Line", "Rectangle", "Ellipse", "Polygon", "Bezier", "Arc", "Pie" };
+
+            foreach (string shape in shapes)
             {
                 string outputPath = Path.Combine(outputDir, shape + ".bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-                using (Image image = Image.Create(bmpOptions, width, height))
+                using (BmpOptions options = new BmpOptions())
                 {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
-
-                    Pen pen = new Pen(Color.Black);
-                    switch (shape)
+                    options.Source = new FileCreateSource(outputPath, false);
+                    using (RasterImage image = (RasterImage)Image.Create(options, width, height))
                     {
-                        case "Line":
-                            graphics.DrawLine(pen, 10, 10, 190, 190);
-                            break;
-                        case "Rectangle":
-                            graphics.DrawRectangle(pen, 20, 20, 160, 120);
-                            break;
-                        case "Ellipse":
-                            graphics.DrawEllipse(pen, 20, 20, 160, 120);
-                            break;
-                        case "Polygon":
-                            PointF[] polygonPoints = new PointF[]
-                            {
-                                new PointF(100, 10),
-                                new PointF(190, 190),
-                                new PointF(10, 190)
-                            };
-                            graphics.DrawPolygon(pen, polygonPoints);
-                            break;
-                        case "Bezier":
-                            graphics.DrawBezier(pen,
-                                new PointF(10, 190),
-                                new PointF(50, 10),
-                                new PointF(150, 10),
-                                new PointF(190, 190));
-                            break;
-                    }
+                        Graphics graphics = new Graphics(image);
+                        graphics.Clear(Color.White);
+                        Pen pen = new Pen(Color.Black);
 
-                    image.Save();
+                        switch (shape)
+                        {
+                            case "Line":
+                                graphics.DrawLine(pen, 10, 10, width - 10, height - 10);
+                                break;
+                            case "Rectangle":
+                                graphics.DrawRectangle(pen, 20, 20, width - 40, height - 40);
+                                break;
+                            case "Ellipse":
+                                graphics.DrawEllipse(pen, 20, 20, width - 40, height - 40);
+                                break;
+                            case "Polygon":
+                                Point[] polyPoints = new Point[]
+                                {
+                                    new Point(50, 10),
+                                    new Point(width - 10, 50),
+                                    new Point(width - 50, height - 10),
+                                    new Point(10, height - 50)
+                                };
+                                graphics.DrawPolygon(pen, polyPoints);
+                                break;
+                            case "Bezier":
+                                Point p1 = new Point(10, height - 10);
+                                Point p2 = new Point(10, 10);
+                                Point p3 = new Point(width - 10, 10);
+                                Point p4 = new Point(width - 10, height - 10);
+                                graphics.DrawBezier(pen, p1, p2, p3, p4);
+                                break;
+                            case "Arc":
+                                graphics.DrawArc(pen, 20, 20, width - 40, height - 40, 0, 180);
+                                break;
+                            case "Pie":
+                                graphics.DrawPie(pen, 20, 20, width - 40, height - 40, 0, 90);
+                                break;
+                        }
+
+                        image.Save();
+                    }
                 }
             }
         }
@@ -73,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a set of BMP icons that each display a distinct geometric shape for a UI library or testing suite.
- * 2. When creating sample image assets for documentation or tutorials that require separate shape illustrations in BMP format using C#.
- * 3. When automating the production of placeholder graphics for a game level editor, where each BMP file represents a different collision shape.
- * 4. When building a batch process that outputs BMP files for a hardware device that only accepts monochrome shape patterns.
- * 5. When validating image‑processing pipelines by supplying known BMP files containing lines, rectangles, ellipses, polygons, and Bezier curves.
+ * 1. When you need to create a set of sample BMP files showing basic geometric primitives for testing image processing algorithms.
+ * 2. When you want to automatically generate icons or placeholders that contain a line, rectangle, ellipse, polygon, bezier curve, arc, or pie for UI mock‑ups.
+ * 3. When you are building a teaching tool that demonstrates drawing operations in C# by producing separate BMP files for each shape.
+ * 4. When you must prepare a batch of shape‑based assets for a game or simulation that requires individual BMP textures for different objects.
+ * 5. When you need to export vector‑style drawings as raster BMP files in a predefined folder structure for documentation or reporting purposes.
  */

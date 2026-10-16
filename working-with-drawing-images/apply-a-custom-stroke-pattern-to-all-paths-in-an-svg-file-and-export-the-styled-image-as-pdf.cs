@@ -1,10 +1,15 @@
-// HOW-TO: Apply Custom Stroke Dash Pattern to SVG Paths and Export as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Dashed Stroke to SVG Paths and Export as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,8 +17,10 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.svg";
-            string outputPath = "Output\\styled.pdf";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputPath = Path.Combine(baseDir, "Input", "input.svg");
+            string outputPath = Path.Combine(baseDir, "Output", "styled.pdf");
+            string tempSvgPath = Path.Combine(baseDir, "Output", "temp.svg");
 
             if (!File.Exists(inputPath))
             {
@@ -22,26 +29,17 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
 
             string svgContent = File.ReadAllText(inputPath);
-            string modifiedContent = svgContent.Replace("<path ", "<path stroke-dasharray=\"5,2\" ");
+            string modified = svgContent.Replace("<path ", "<path style=\"stroke-dasharray:5,2;\" ");
 
-            string tempSvgPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_modified.svg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
-            File.WriteAllText(tempSvgPath, modifiedContent);
+            File.WriteAllText(tempSvgPath, modified);
 
-            using (Image svgImage = Image.Load(tempSvgPath))
+            using (Image image = Image.Load(tempSvgPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height
-                    };
-                    svgImage.Save(outputPath, pdfOptions);
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically add a dashed outline to every shape in an SVG before generating a printable PDF report.
- * 2. When a web application must convert user‑uploaded SVG icons into PDFs with consistent stroke styling for branding guidelines.
- * 3. When automating the creation of PDF catalogs that require all vector graphics to share the same custom stroke pattern without manually editing each SVG.
- * 4. When integrating Aspose.Imaging into a C# workflow to ensure SVG diagrams retain a specific dash style when rendered as high‑resolution PDFs for documentation.
- * 5. When batch‑processing multiple SVG files to apply a uniform stroke‑dasharray and export them as PDFs for archival or distribution.
+ * 1. When you need to add a consistent dashed outline to all vector shapes in an SVG before generating a printable PDF report.
+ * 2. When you want to programmatically style SVG icons with a custom stroke pattern and embed them in a PDF brochure using C#.
+ * 3. When you must convert SVG diagrams with highlighted borders into PDF for documentation that requires a specific dash style.
+ * 4. When you are automating the preparation of SVG floor plans with uniform stroke dash arrays for PDF distribution to clients.
+ * 5. When you need to preprocess SVG assets to include a stroke-dasharray attribute and then batch‑export them as PDFs in a .NET application.
  */

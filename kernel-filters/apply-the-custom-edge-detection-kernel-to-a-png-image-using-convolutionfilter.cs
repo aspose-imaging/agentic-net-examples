@@ -1,10 +1,16 @@
-// HOW-TO: How to Load and Save a PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Edge Detection Kernel to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -13,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output\\result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,13 +29,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            double[,] customKernel = new double[,]
+            {
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
+
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, options);
+                var filterOptions = new ConvolutionFilterOptions(customKernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically open a PNG file, modify it, and write the result back without changing its format using Aspose.Imaging in a .NET application.
- * 2. When an automated batch job must verify that a PNG image exists and create a copy in a specific output directory with Aspose.Imaging handling the file I/O.
- * 3. When you want to ensure consistent PNG encoding options while saving images from a C# service that processes user‑uploaded graphics.
- * 4. When a server‑side C# API must read a PNG, perform raster‑level operations, and return the processed image to clients without relying on GDI+.
- * 5. When you are building a migration tool that reads legacy PNG assets and rewrites them using Aspose.Imaging to guarantee compatibility with newer .NET platforms.
+ * 1. When you need to highlight object boundaries in a PNG before performing OCR.
+ * 2. When you want to preprocess screenshots to emphasize edges for visual analysis in a C# application.
+ * 3. When creating a custom thumbnail generator that applies edge detection to improve visual contrast of PNG assets.
+ * 4. When integrating an automated quality‑check pipeline that flags blurred regions by applying a convolution kernel to product images.
+ * 5. When building a scientific imaging tool that extracts structural details from PNG microscopy images using a custom filter.
  */

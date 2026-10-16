@@ -1,10 +1,17 @@
 // HOW-TO: Batch Apply Blur Filter to PNG Images and Save as JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -29,15 +36,6 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            double[,] blurKernel = new double[,]
-            {
-                { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                { 0.04, 0.04, 0.04, 0.04, 0.04 },
-                { 0.04, 0.04, 0.04, 0.04, 0.04 }
-            };
-
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -53,9 +51,22 @@ class Program
 
                 using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(blurKernel));
+                    double[,] blurKernel = new double[,]
+                    {
+                        { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                        { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                        { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                        { 0.04, 0.04, 0.04, 0.04, 0.04 },
+                        { 0.04, 0.04, 0.04, 0.04, 0.04 }
+                    };
 
-                    JpegOptions jpegOptions = new JpegOptions();
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(blurKernel);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    var jpegOptions = new JpegOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
                     raster.Save(outputPath, jpegOptions);
                 }
             }
@@ -69,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically blur a collection of PNG assets before publishing them as compressed JPEGs for a web gallery.
- * 2. When you want to preprocess scanned PNG documents with a uniform box blur to reduce noise before converting them to JPEG for archival storage.
- * 3. When a photo‑editing tool must apply the same convolution filter to every PNG in a folder and output JPEGs for faster loading on mobile devices.
- * 4. When an e‑commerce platform requires batch conversion of product PNG images with a subtle blur effect to meet branding guidelines while delivering JPEG thumbnails.
- * 5. When a CI/CD pipeline should validate image quality by applying a predefined blur kernel to PNG test assets and generate JPEG results for visual regression testing.
+ * 1. When you need to automatically blur confidential details in a collection of PNG screenshots before archiving them as smaller JPEG files.
+ * 2. When you want to preprocess product photos by applying a uniform blur and converting them to JPEG for faster web page loading.
+ * 3. When you must generate preview thumbnails with a soft focus effect from high‑resolution PNG assets and store them as JPEGs for email attachments.
+ * 4. When you are building a batch image pipeline that removes sharp edges from PNG diagrams and saves the results in JPEG format for legacy systems.
+ * 5. When you need to apply the same convolution blur to every PNG in a folder and output compressed JPEGs for batch reporting or documentation.
  */

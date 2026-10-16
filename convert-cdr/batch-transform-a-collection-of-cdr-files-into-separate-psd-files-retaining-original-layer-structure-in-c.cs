@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert CDR to PSD with Separate Layers in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert CDR Files to PSD with Layer Preservation in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -37,19 +44,21 @@ class Program
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".psd";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".psd");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (var options = new PsdOptions())
                 {
-                    var vectorOptions = new PsdVectorizationOptions
+                    using (PsdOptions options = new PsdOptions())
                     {
-                        VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                    };
-                    options.VectorizationOptions = vectorOptions;
-                    image.Save(outputPath, options);
+                        options.VectorizationOptions = new PsdVectorizationOptions
+                        {
+                            VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
+                        };
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -62,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to migrate a library of CorelDRAW drawings into Photoshop files while keeping each vector element on its own layer for further editing.
- * 2. When an automated build process must generate PSD assets from incoming CDR designs to feed a web‑based preview system.
- * 3. When a design studio wants to archive client CDR projects as editable Photoshop files without manually opening each file.
- * 4. When a SaaS platform receives bulk CDR uploads and must transform them into layered PSDs for downstream compositing workflows.
- * 5. When a CI pipeline has to validate that converted PSDs preserve the original layer hierarchy for quality assurance.
+ * 1. When a design studio needs to migrate multiple CorelDRAW (.cdr) illustrations into Photoshop (.psd) files while keeping each vector layer separate for further editing.
+ * 2. When an automated build pipeline must generate PSD assets from a folder of CDR source files for use in a web‑based graphics editor.
+ * 3. When a print‑production workflow requires converting a batch of client‑provided CDR logos into layered PSDs to apply spot‑color separations in Photoshop.
+ * 4. When a digital asset management system needs to index vector graphics and store them as PSDs with original layers for easy preview and version control.
+ * 5. When a SaaS application offers users the ability to upload CDR files and receive downloadable PSD files that retain the original layer hierarchy for collaborative design work.
  */

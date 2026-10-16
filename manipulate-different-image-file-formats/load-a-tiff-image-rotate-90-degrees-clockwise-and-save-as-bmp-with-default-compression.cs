@@ -1,50 +1,50 @@
-// HOW-TO: Rotate TIFF Image 90 Degrees Clockwise and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate A TIFF Image 90 Degrees And Save As BMP In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "input/input.tif";
+            string outputPath = "output/output.bmp";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "Input\\image.tif";
-                string outputPath = "Output\\rotated.bmp";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
+            using (Image image = Image.Load(inputPath))
+            {
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                    using (BmpOptions bmpOptions = new BmpOptions())
-                    {
-                        image.Save(outputPath, bmpOptions);
-                    }
-                }
+                image.Save(outputPath, new BmpOptions());
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives scanned TIFF files that need to be re‑oriented for display in a Windows application that only supports BMP format.
- * 2. When a batch job must convert legacy TIFF maps into BMP thumbnails after rotating them to match the north‑up orientation.
- * 3. When a document workflow requires rotating incoming TIFF invoices 90° clockwise before archiving them as BMP for compatibility with older reporting tools.
- * 4. When a game asset pipeline needs to take high‑resolution TIFF textures, rotate them, and store them as BMP for fast loading in the engine.
- * 5. When an automated script processes scanned forms, rotates each page, and saves the result as BMP to be consumed by a third‑party OCR service that only accepts BMP input.
+ * 1. When you need to rotate a scanned TIFF page 90° clockwise and store it as a BMP file for a legacy Windows application that only supports BMP format.
+ * 2. When processing batch TIFF images from a scanner, you must reorient each image and convert it to BMP before feeding them into a third‑party OCR engine that requires BMP input.
+ * 3. When preparing graphics for a game that uses BMP sprites, you may rotate the original TIFF artwork and save it as BMP using Aspose.Imaging in C#.
+ * 4. When integrating with an older reporting system that expects BMP images, you can rotate incoming TIFF charts and convert them to BMP on the fly.
+ * 5. When automating document archiving, you might need to correct the orientation of TIFF files and convert them to BMP for compatibility with a storage service that only accepts BMP files.
  */

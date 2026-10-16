@@ -1,9 +1,15 @@
-// HOW-TO: Sharpen BMP Image and Save as PDF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Sharpen BMP Image and Save as PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,7 +17,7 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "image.bmp");
+            string inputPath = Path.Combine("Input", "sample.bmp");
             string outputPath = Path.Combine("Output", "filtered.pdf");
 
             if (!File.Exists(inputPath))
@@ -24,19 +30,11 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterCachedImage raster = image as RasterCachedImage;
-                if (raster != null)
-                {
-                    if (!raster.IsCached)
-                        raster.CacheData();
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
-                }
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    image.Save(outputPath, pdfOptions);
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance a scanned BMP diagram with a sharpen filter before embedding it in a PDF report.
- * 2. When an application must programmatically convert legacy BMP assets to searchable PDF documents while improving visual clarity.
- * 3. When a batch process has to apply a custom image filter to BMP files and generate PDF invoices for distribution.
- * 4. When a web service receives BMP uploads, applies sharpening to improve readability, and returns the result as a PDF file.
- * 5. When automating the preparation of print‑ready PDFs from BMP graphics, ensuring the images are sharpened for crisp output.
+ * 1. When you need to enhance the clarity of a scanned BMP diagram and deliver it as a searchable PDF report.
+ * 2. When a legacy application stores screenshots in BMP format and you must apply a sharpening filter before archiving them as PDFs.
+ * 3. When generating printable PDFs from raw BMP assets for marketing materials, and you want to improve edge definition automatically.
+ * 4. When converting BMP images from a medical imaging device into PDF files while applying a filter to highlight fine details.
+ * 5. When building a batch processing tool that reads BMP files, sharpens them, and saves the results as PDFs for document management systems.
  */

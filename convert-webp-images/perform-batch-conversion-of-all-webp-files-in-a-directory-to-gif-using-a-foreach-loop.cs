@@ -1,47 +1,71 @@
 // HOW-TO: Batch Convert WebP Images to GIF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace WebpToGifBatch
 {
-    static void Main()
+    class Program
     {
-        string inputDirectory = @"C:\InputWebP";
-        string outputDirectory = @"C:\OutputGif";
-
-        try
+        static void Main()
         {
-            foreach (var inputPath in Directory.GetFiles(inputDirectory, "*.webp"))
+            try
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\Images\Input";
+                string outputDirectory = @"C:\Images\Output";
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Get all WebP files in the input directory
+                string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp", SearchOption.TopDirectoryOnly);
 
-                using (var image = new WebPImage(inputPath))
+                foreach (string inputPath in webpFiles)
                 {
-                    image.Save(outputPath, new GifOptions());
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    // Determine output path with .gif extension
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".gif");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load WebP image and save as GIF
+                    using (WebPImage webpImage = new WebPImage(inputPath))
+                    {
+                        GifOptions gifOptions = new GifOptions();
+                        webpImage.Save(outputPath, gifOptions);
+                    }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate animated or static GIF previews for a large set of WebP assets stored on a server.
- * 2. When migrating a web application's image library from WebP to GIF to support browsers that do not handle WebP.
- * 3. When creating GIF versions of user‑uploaded WebP files for email newsletters that require GIF format.
- * 4. When automating a nightly job that converts newly added WebP graphics into GIFs for a digital signage system.
- * 5. When building a tool that processes a folder of WebP icons and outputs GIFs for use in legacy Windows applications.
+ * 1. When you need to process a folder of WebP graphics and generate GIF versions for web animation compatibility.
+ * 2. When an automated build script must convert user‑uploaded WebP assets to GIFs before publishing to a legacy CMS.
+ * 3. When a desktop utility has to batch convert images from WebP to GIF for email newsletters that only support GIF.
+ * 4. When migrating a photo archive from modern WebP format to GIF for use in older Windows applications that cannot read WebP.
+ * 5. When creating a server‑side service that scans a directory, converts each WebP file to GIF, and stores the results for downstream processing.
  */

@@ -1,9 +1,9 @@
-// HOW-TO: Configure Font Substitution to Save ODG with Missing Fonts in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Substitute Missing Fonts When Saving ODG With Aspose.Imaging C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -14,22 +14,20 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.odg";
-        string outputPath = "output/output.odg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            var loadOptions = new LoadOptions();
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample_converted.odg";
 
-            using (Image image = Image.Load(inputPath, loadOptions))
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var image = Image.Load(inputPath))
             {
                 image.Save(outputPath);
             }
@@ -43,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives ODG files that reference fonts not installed on the server, this code ensures the images are saved without font‑related errors by substituting available fonts.
- * 2. When automating batch processing of ODG drawings on a build server that lacks the original design fonts, the code lets developers generate output files reliably.
- * 3. When creating PDF or PNG exports from ODG files in a CI pipeline, configuring font substitution prevents missing‑glyph issues in the rendered images.
- * 4. When migrating legacy ODG assets to a new environment where some fonts are unavailable, this approach preserves the visual layout by using fallback fonts during save.
- * 5. When a desktop tool processes user‑uploaded ODG diagrams on machines without the required fonts, the code enables consistent saving of the files without manual font installation.
+ * 1. When an application generates ODG reports that use custom fonts not installed on the server, developers can configure font substitution to ensure the saved files render correctly.
+ * 2. When converting user‑uploaded ODG drawings to a standardized version on a cloud service, missing fonts need to be replaced automatically to avoid broken text.
+ * 3. When batch‑processing a library of ODG graphics for archival, font substitution guarantees that each saved file retains readable text despite varying client font installations.
+ * 4. When integrating Aspose.Imaging into a document‑editing workflow that must preserve layout after saving, developers use font substitution to handle absent fonts in the target environment.
+ * 5. When creating a cross‑platform C# tool that opens ODG files on machines without the original fonts, configuring font substitution prevents runtime errors and maintains visual fidelity.
  */

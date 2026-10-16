@@ -3,38 +3,42 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.dng";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (DngImage dng = (DngImage)Image.Load(inputPath))
+            string inputPath = "Input/sample.dng";
+            string outputPath = "Output/output.png";
+
+            if (!File.Exists(inputPath))
             {
-                dng.AdjustGamma(2.2f);
-                PngOptions pngOptions = new PngOptions();
-                dng.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                raster.AdjustGamma(2.2f);
+                using (var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                })
+                {
+                    raster.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the brightness of a raw DNG photo for web display by applying a standard 2.2 gamma curve before converting it to PNG.
- * 2. When building an automated pipeline that ingests raw camera files and outputs gamma‑corrected PNGs for downstream image analysis.
- * 3. When a mobile app requires low‑size PNG assets derived from DNG files with consistent gamma for accurate color rendering.
- * 4. When integrating a digital asset management system that must normalize raw images to a common gamma before archiving them as PNG thumbnails.
- * 5. When performing batch processing of scientific images captured in DNG format and needing to apply gamma correction to meet publication standards before exporting to PNG.
+ * 1. When a photographer needs to correct the brightness of a raw DNG file for web display by applying a 2.2 gamma curve and converting it to PNG using C#.
+ * 2. When a digital asset management system must batch‑process raw camera files, adjust their gamma for consistent viewing, and store the results as lossless PNGs with Aspose.Imaging.
+ * 3. When a mobile app backend receives DNG uploads, needs to perform gamma correction to match sRGB standards, and returns PNG thumbnails to the client.
+ * 4. When a scientific imaging pipeline requires normalizing raw sensor data by applying a gamma of 2.2 before exporting the images as PNG for analysis or reporting.
+ * 5. When an e‑commerce platform wants to ensure product photos captured in DNG format appear with correct contrast on browsers by adjusting gamma and converting them to PNG on the server.
  */

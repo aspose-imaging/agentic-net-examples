@@ -1,51 +1,62 @@
-// HOW-TO: Convert CorelDRAW CDR to PDF with ClearType Text Rendering in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CDR to PDF with ClearType Text Rendering in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Drawing.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace CdrToPdfConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output/output.pdf";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.cdr";
+                string outputPath = "output/output.pdf";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var pdfOptions = new PdfOptions();
-                var vectorOptions = new VectorRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    TextRenderingHint = TextRenderingHint.ClearTypeGridFit
-                };
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, pdfOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            TextRenderingHint = TextRenderingHint.ClearTypeGridFit
+                        }
+                    };
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PDF reports from CorelDRAW designs and want crisp, screen‑optimized text.
- * 2. When converting legacy CDR artwork to PDF for web preview while preserving ClearType text clarity.
- * 3. When automating batch processing of CDR files to PDFs in a C# application and require high‑quality text rendering.
- * 4. When integrating CorelDRAW assets into a document workflow that demands PDF output with sharp, readable fonts.
- * 5. When creating printable PDFs from vector graphics and want the text to appear smoother on Windows displays.
+ * 1. When you need to generate a PDF from a CorelDRAW (CDR) file and want the embedded text to appear crisp on Windows screens by using ClearType rendering.
+ * 2. When automating batch conversion of design assets where preserving text clarity in the resulting PDFs is critical for print‑ready or on‑screen viewing.
+ * 3. When integrating Aspose.Imaging into a C# application to convert vector drawings to PDF while controlling rasterization options for sharper typography.
+ * 4. When creating a server‑side service that receives CDR files and returns PDFs with optimized text rendering for better readability in PDF viewers.
+ * 5. When troubleshooting PDF output quality and need to explicitly set the TextRenderingHint to ClearTypeGridFit to improve anti‑aliasing of text in the converted document.
  */

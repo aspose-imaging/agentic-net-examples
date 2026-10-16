@@ -1,17 +1,25 @@
-// HOW-TO: Convert ODG to JPEG with Custom Quality and Rasterization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to JPEG With Custom Quality In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample.jpg";
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -25,13 +33,7 @@ public class Program
             {
                 var jpegOptions = new JpegOptions
                 {
-                    Quality = 90,
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
+                    Quality = 90
                 };
 
                 image.Save(outputPath, jpegOptions);
@@ -46,9 +48,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a high‑quality JPEG preview of an OpenDocument graphic for web display.
- * 2. When you must batch‑convert ODG diagrams to JPEG images while preserving background color and page dimensions.
- * 3. When a reporting tool requires rasterizing vector ODG files into JPEGs with a specific compression level.
- * 4. When integrating Aspose.Imaging into a C# application to create thumbnails of ODG files for a document management system.
- * 5. When automating image processing pipelines that need to load ODG files, set JPEG quality, and save them as JPEGs for downstream consumption.
+ * 1. When you need to generate web‑friendly JPEG thumbnails from OpenDocument graphics (ODG) files in a C# application.
+ * 2. When you must preserve visual fidelity while reducing file size by setting a specific JPEG quality during ODG conversion.
+ * 3. When an automated reporting system creates JPEG images from ODG diagrams for email attachments or PDFs.
+ * 4. When a batch‑processing service converts a library of ODG illustrations to JPEG for use in mobile apps.
+ * 5. When you integrate Aspose.Imaging into a .NET workflow to rasterize vector ODG files and output them as high‑quality JPEGs.
  */

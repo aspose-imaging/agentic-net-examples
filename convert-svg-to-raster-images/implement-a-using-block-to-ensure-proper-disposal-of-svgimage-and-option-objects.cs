@@ -1,50 +1,52 @@
-// HOW-TO: Convert SVG to PNG with Proper Disposal in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to PNG with Aspose.Imaging Using Block in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
-namespace SvgToPngConverter
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string inputPath = "Input\\image.svg";
+            string outputPath = "Output\\image.png";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.svg";
-                string outputPath = "output.png";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
-                {
-                    using (PngOptions pngOptions = new PngOptions())
-                    {
-                        svgImage.Save(outputPath, pngOptions);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            using (PngOptions pngOptions = new PngOptions())
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                svgImage.Save(outputPath, pngOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded SVG graphics to PNG thumbnails in a .NET web application while ensuring memory is released promptly.
- * 2. When an automated build pipeline must generate PNG assets from SVG design files using Aspose.Imaging without leaking resources.
- * 3. When a desktop utility processes a folder of SVG icons and saves them as PNGs for use in Windows applications, requiring deterministic disposal of image objects.
- * 4. When a cloud function transforms SVG diagrams into PNG images for PDF reports and must clean up objects to stay within execution time limits.
- * 5. When a legacy system migrates vector assets to raster format and wants to use C# using blocks to guarantee proper cleanup of Aspose.Imaging objects.
+ * 1. When you need to generate PNG thumbnails from user‑uploaded SVG graphics in a .NET web application.
+ * 2. When a desktop utility must batch‑convert a folder of SVG icons to PNG for inclusion in a Windows UI.
+ * 3. When an automated build script creates PNG assets from SVG design files for mobile app resources.
+ * 4. When a reporting service renders vector charts stored as SVG into raster PNG images for PDF export.
+ * 5. When a cloud function processes SVG logos and saves them as PNG files while ensuring memory is released promptly.
  */

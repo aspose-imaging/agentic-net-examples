@@ -1,4 +1,11 @@
 // HOW-TO: Convert ODG to PDF and Set Document Title in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -23,10 +30,11 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
-            using (PdfOptions pdfOptions = new PdfOptions())
             {
+                PdfOptions pdfOptions = new PdfOptions();
                 pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                pdfOptions.PdfDocumentInfo.Title = "Document Title";
+                pdfOptions.PdfDocumentInfo.Title = "Converted ODG Document";
+
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -39,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a searchable PDF from an OpenDocument Graphics (ODG) file while embedding a custom title for document management systems.
- * 2. When automating batch conversion of ODG diagrams to PDF for archiving and you want each PDF to carry a specific title in its metadata.
- * 3. When integrating Aspose.Imaging into a C# application to export ODG drawings as PDFs and ensure the PDF’s Title property is set for better accessibility.
- * 4. When creating reports that include ODG illustrations and you must provide a PDF version with a predefined title for compliance or branding purposes.
- * 5. When developing a workflow that converts user‑uploaded ODG files to PDF and you need to programmatically assign the document title for downstream indexing.
+ * 1. When you need to programmatically convert LibreOffice Draw (ODG) drawings to PDF files for distribution while embedding a custom title in the PDF metadata.
+ * 2. When automating a batch process that generates PDF reports from ODG templates and requires the document title to be searchable in PDF viewers.
+ * 3. When integrating Aspose.Imaging into a C# application to preserve document information by setting the PDF title after converting vector graphics.
+ * 4. When creating a workflow that validates the existence of source ODG files, converts them to PDF, and ensures the output folder structure is created automatically.
+ * 5. When handling exceptions during ODG‑to‑PDF conversion in .NET to log errors and prevent application crashes.
  */

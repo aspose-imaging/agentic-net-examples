@@ -1,11 +1,17 @@
 // HOW-TO: Apply Median Filter to OTG Image and Save as JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.otg";
-            string outputPath = "output.jpg";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.jpg");
 
             if (!File.Exists(inputPath))
             {
@@ -22,26 +28,27 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(ms, new PngOptions());
+                    using (PngOptions pngOptions = new PngOptions())
+                    {
+                        vectorImage.Save(ms, pngOptions);
+                    }
+
                     ms.Position = 0;
 
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
-                        raster.Filter(raster.Bounds, medianOptions);
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                        var jpegOptions = new JpegOptions();
-                        raster.Save(outputPath, jpegOptions);
+                        using (JpegOptions jpegOptions = new JpegOptions())
+                        {
+                            raster.Save(outputPath, jpegOptions);
+                        }
                     }
                 }
             }
@@ -55,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce salt‑and‑pepper noise in an OTG graphic before delivering a compressed JPEG for web display.
- * 2. When a legacy workflow requires converting proprietary OTG files to a widely supported JPEG format while applying a median filter to improve visual quality.
- * 3. When you are building a C# batch‑processing tool that cleans up scanned OTG images and outputs them as JPEGs for archival storage.
- * 4. When an automated pipeline must read an OTG image, apply a 3×3 median filter, and save the result as a JPEG using Aspose.Imaging without intermediate files on disk.
- * 5. When you want to ensure consistent JPEG output from OTG sources by first converting to PNG in memory, filtering, and then saving with Aspose.Imaging in a .NET application.
+ * 1. When you need to reduce noise in a vector OTG graphic before converting it to a JPEG for web display.
+ * 2. When you must rasterize an OTG file, apply a median filter, and save the result as a compressed JPEG for email attachments.
+ * 3. When preparing OTG drawings for a mobile app, you can use this code to clean the image and output a JPEG that balances quality and file size.
+ * 4. When automating a batch process that converts legacy OTG assets to JPEG thumbnails with built‑in noise reduction using Aspose.Imaging in C#.
+ * 5. When integrating image preprocessing into a document workflow, this snippet lets you filter and convert OTG diagrams to JPEGs ready for PDF embedding.
  */

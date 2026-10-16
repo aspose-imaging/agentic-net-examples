@@ -1,8 +1,15 @@
-// HOW-TO: Create Fixed Size BMP Thumbnails for Gallery Display in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create 150x150 BMP Thumbnail for Gallery Display in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,48 +17,26 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = "input.bmp";
+            string outputPath = "output\\thumbnail.bmp";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (BmpImage image = (BmpImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
+                if (!image.IsCached)
+                    image.CacheData();
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+                image.Resize(150, 150, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
-            foreach (var inputPath in files)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.bmp");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    int thumbWidth = 150;
-                    int thumbHeight = 150;
-                    image.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
-
-                    using (BmpOptions options = new BmpOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                }
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -63,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building an online photo gallery that needs fast‑loading preview images from high‑resolution BMP files.
- * 2. When generating thumbnail previews for a desktop application that displays BMP assets in a searchable catalog.
- * 3. When preparing BMP images for an e‑commerce product list where each item must show a uniform 150×150 pixel preview.
- * 4. When creating a batch‑processing script to resize BMP scans for a digital archive’s web interface.
- * 5. When automating thumbnail creation for a content‑management system that stores original BMP files but serves smaller previews to users.
+ * 1. When building a photo‑gallery web application that shows quick previews of BMP files, you can generate fixed‑size thumbnails to improve load times.
+ * 2. When migrating legacy desktop software that stores images as BMP, you may need to create small preview icons for file explorers or UI lists.
+ * 3. When implementing an e‑commerce platform that accepts BMP uploads, generating 150 × 150 thumbnails ensures consistent product image thumbnails across the site.
+ * 4. When developing a digital asset management system that caches image data, resizing BMP images to a standard thumbnail size helps reduce storage and bandwidth usage.
+ * 5. When creating a Windows Forms application that displays a scrollable image list, using Aspose.Imaging to resize BMPs provides fast, high‑quality thumbnails without external tools.
  */

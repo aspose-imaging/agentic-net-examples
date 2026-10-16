@@ -1,86 +1,71 @@
 // HOW-TO: Batch Convert SVG Files to APNG Animations in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Sources;
 
-class Program
+namespace SvgToApngBatch
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                // Hardcoded input and output directories
+                string inputDirectory = "input_svgs";
+                string outputDirectory = "output_apngs";
 
-            if (!Directory.Exists(outputDirectory))
-            {
+                // Ensure output directory exists
                 Directory.CreateDirectory(outputDirectory);
-            }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+                // Get all SVG files in the input directory
+                string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in svgFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image svgImage = Image.Load(inputPath))
-                {
-                    using (MemoryStream ms = new MemoryStream())
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        svgImage.Save(ms, new PngOptions());
-                        ms.Position = 0;
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            ApngOptions apngOptions = new ApngOptions
-                            {
-                                Source = new FileCreateSource(outputPath, false)
-                            };
+                    // Prepare output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".apng";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
-                            {
-                                apng.RemoveAllFrames();
-                                apng.AddFrame(raster);
-                                apng.Save();
-                            }
-                        }
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load SVG and save as APNG with default options
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var apngOptions = new ApngOptions();
+                        image.Save(outputPath, apngOptions);
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate animated PNGs from a collection of vector icons for a web UI, you can batch‑process the SVG assets into APNG files using C# and Aspose.Imaging.
- * 2. When an application must export user‑drawn SVG diagrams as lightweight animations for email newsletters, this code converts each SVG to an APNG with a default frame delay automatically.
- * 3. When a game development pipeline requires converting SVG sprites into APNG sequences for in‑game animations, the script processes all files in a folder without manual intervention.
- * 4. When a CI/CD build step has to transform design‑team SVG assets into APNG assets for mobile apps, the batch conversion ensures consistent frame timing across all images.
- * 5. When a reporting tool needs to embed animated graphics generated from SVG charts, this code creates individual APNG files from the source SVGs in one go.
+ * 1. When you need to generate animated PNGs from a collection of vector SVG icons for a web UI without manually converting each file.
+ * 2. When an automated build pipeline must transform design assets stored as SVGs into APNGs for use in mobile app splash screens.
+ * 3. When a reporting tool requires batch conversion of SVG charts into animated PNGs to embed in PDF reports.
+ * 4. When a game developer wants to create sprite animations by converting multiple SVG frames into APNG files with default timing.
+ * 5. When a content management system needs to process uploaded SVG illustrations and store them as APNGs for faster client-side rendering.
  */

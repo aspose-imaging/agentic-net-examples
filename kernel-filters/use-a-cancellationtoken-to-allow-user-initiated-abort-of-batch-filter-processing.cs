@@ -1,95 +1,92 @@
-// HOW-TO: Cancel Batch Text File Processing With CancellationToken In C# (Aspose.Imaging for .NET)
+// HOW-TO: Cancel Batch Median Filter Processing with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-namespace BatchFilterApp
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
-            {
-                // Hardcoded paths
-                string inputPath = "data\\input.txt";
-                string outputPath = "data\\output.txt";
+            // Hardcoded paths
+            string inputFolder = "InputImages";
+            string outputFolder = "OutputImages";
 
-                // Validate input file existence
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Cancellation token source
+            var cts = new System.Threading.CancellationTokenSource();
+
+            // Start a background thread to listen for a key press to cancel
+            var cancelThread = new System.Threading.Thread(() =>
+            {
+                Console.WriteLine("Press any key to abort processing...");
+                Console.ReadKey(true);
+                cts.Cancel();
+            });
+            cancelThread.IsBackground = true;
+            cancelThread.Start();
+
+            // Get all files in the input folder
+            string[] files = Directory.GetFiles(inputFolder);
+            foreach (string inputPath in files)
+            {
+                if (cts.Token.IsCancellationRequested)
+                {
+                    Console.WriteLine("Processing aborted by user.");
+                    break;
+                }
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set up cancellation
-                var cts = new CancellationTokenSource();
-                CancellationToken token = cts.Token;
-
-                // Start a task to listen for user abort (press 'c')
-                Task.Run(() =>
+                using (Image image = Image.Load(inputPath))
                 {
-                    Console.WriteLine("Press 'c' to cancel processing...");
-                    while (true)
+                    if (image is RasterImage raster)
                     {
-                        var keyInfo = Console.ReadKey(true);
-                        if (keyInfo.KeyChar == 'c' || keyInfo.KeyChar == 'C')
-                        {
-                            cts.Cancel();
-                            break;
-                        }
+                        // Apply median filter with size 3
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+
+                        // Save as PNG
+                        raster.Save(outputPath, new PngOptions());
                     }
-                });
-
-                // Begin batch processing
-                using (var reader = new StreamReader(inputPath))
-                using (var writer = new StreamWriter(outputPath, false))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    else
                     {
-                        // Check for cancellation request
-                        if (token.IsCancellationRequested)
-                        {
-                            Console.WriteLine("Processing cancelled by user.");
-                            break;
-                        }
-
-                        // Simulate filter processing (e.g., convert to upper case)
-                        string processedLine = ApplyFilter(line);
-
-                        writer.WriteLine(processedLine);
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
                     }
                 }
 
-                if (!token.IsCancellationRequested)
-                {
-                    Console.WriteLine("Batch processing completed successfully.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
-
-        static string ApplyFilter(string input)
+        catch (Exception ex)
         {
-            // Placeholder for actual filter logic
-            return input.ToUpperInvariant();
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to process a large list of image files in a console app and wants the user to be able to abort the batch operation by pressing a key.
- * 2. When building a bulk image conversion tool that applies Aspose.Imaging filters to many files and requires a responsive cancel option during long‑running processing.
- * 3. When importing thousands of records from a CSV or text file into a database and the operation must be stoppable without terminating the whole application.
- * 4. When creating a script that reads image paths from a text file, performs downloads or transformations, and should stop immediately if the operator requests cancellation.
- * 5. When designing a scheduled service that runs nightly image processing jobs and you need to expose a cancellation token so an administrator can cancel the current run from the command line.
+ * 1. When you need to apply a noise‑reducing median filter to a large set of images and allow the user to stop the operation midway.
+ * 2. When processing scanned documents in bulk and you want to let a technician abort the job if a faulty file is encountered.
+ * 3. When building a desktop utility that converts images from one folder to another while applying a filter, and you need responsive cancellation via a key press.
+ * 4. When integrating Aspose.Imaging into a server‑side service that processes image batches and must respect cancellation tokens from a client request.
+ * 5. When creating an automated photo‑enhancement pipeline that must handle unexpected interruptions without leaving partially processed files.
  */

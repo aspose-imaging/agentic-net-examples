@@ -1,17 +1,18 @@
-// HOW-TO: Batch Convert Animated GIFs to WebP While Preserving Frame Order in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Animated GIF to WebP While Preserving Frame Order in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using System.Linq;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -19,44 +20,45 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = "Input\\sample.gif";
+            string outputPath = "Output\\sample.webp";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
+            using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(inputPath))
             {
-                if (!File.Exists(inputPath))
+                GifImage gif = (GifImage)img;
+                GifFrameBlock firstBlock = gif.Blocks.OfType<GifFrameBlock>().FirstOrDefault();
+                if (firstBlock == null)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine("No frames found in GIF.");
                     return;
                 }
 
-                if (!inputPath.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
+                gif.ActiveFrame = firstBlock;
+                Aspose.Imaging.RasterImage firstRaster = (Aspose.Imaging.RasterImage)gif.ActiveFrame;
+                int width = firstRaster.Width;
+                int height = firstRaster.Height;
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image gif = Image.Load(inputPath))
+                WebPOptions createOptions = new WebPOptions();
+                using (WebPImage webp = (WebPImage)Aspose.Imaging.Image.Create(createOptions, width, height))
                 {
-                    var options = new WebPOptions();
-                    gif.Save(outputPath, options);
+                    foreach (GifFrameBlock frameBlock in gif.Blocks.OfType<GifFrameBlock>())
+                    {
+                        gif.ActiveFrame = frameBlock;
+                        Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)gif.ActiveFrame;
+                        WebPFrameBlock webpBlock = new WebPFrameBlock(raster);
+                        webp.AddBlock(webpBlock);
+                    }
+
+                    WebPOptions saveOptions = new WebPOptions();
+                    webp.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -69,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the size of animated GIFs for faster web page loading without losing the animation sequence, you can batch convert them to WebP using C#.
- * 2. When preparing a mobile app’s asset pipeline and want to serve animated images in the more efficient WebP format while keeping the original frame order, this code automates the conversion.
- * 3. When migrating an existing image library from GIF to WebP to improve compression and support modern browsers, you can process all files in a folder with this script.
- * 4. When building a server‑side image processing service that receives GIF uploads and must store them as WebP while preserving animation, the example shows how to handle it in .NET.
- * 5. When creating a CI/CD step that optimizes animated graphics before deployment, you can use this batch conversion to ensure every GIF is turned into a WebP with the correct frame sequence.
+ * 1. When you need to reduce the file size of animated GIFs for web delivery while keeping the original animation sequence intact.
+ * 2. When migrating legacy GIF assets to the modern WebP format in a .NET application to achieve faster page loads.
+ * 3. When building an image‑processing pipeline that automatically converts user‑uploaded GIFs to WebP for storage efficiency.
+ * 4. When creating a batch script to convert a library of GIF animations to WebP without losing frame order for mobile apps.
+ * 5. When optimizing email newsletters by replacing animated GIFs with WebP equivalents while preserving the original animation timing.
  */

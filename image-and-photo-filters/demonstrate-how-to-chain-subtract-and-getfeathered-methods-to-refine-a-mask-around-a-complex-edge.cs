@@ -1,8 +1,16 @@
-// HOW-TO: How To Refine A Mask With Subtract And Feather In C# (Aspose.Imaging for .NET)
+// HOW-TO: Refine Image Mask With Subtract And Feathering Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -12,7 +20,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
+            string inputPath = "input.jpg";
             string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
@@ -25,13 +33,12 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(100, 100))
-                    .Subtract(new MagicWandSettings(120, 120) { Threshold = 10 })
-                    .Subtract(new RectangleMask(150, 150, 30, 30))
+                MagicWandTool.Select(image, new MagicWandSettings(50, 50))
+                    .Subtract(new RectangleMask(10, 10, 30, 30))
                     .GetFeathered(new FeatheringSettings() { Size = 5 })
                     .Apply();
 
-                image.Save(outputPath, new PngOptions());
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
         catch (Exception ex)
@@ -43,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to remove unwanted background regions from a PNG photo while preserving fine details by subtracting multiple selections and feathering the edge.
- * 2. When you want to create a precise cut‑out of an object with complex contours by combining magic wand selections and a rectangular mask before applying a soft feather.
- * 3. When you must generate a clean mask for compositing two images in a .NET application, using successive Subtract calls to eliminate noise and then feather the boundary.
- * 4. When you are building an automated batch process that cleans up scanned documents, removing stray marks with Subtract and smoothing the mask edges for better OCR results.
- * 5. When you are developing a photo‑editing tool that lets users fine‑tune selections, allowing them to subtract overlapping areas and apply a feathered transition to achieve a natural blend.
+ * 1. When you need to remove a rectangular portion from a Magic Wand selection around a detailed object in a JPEG before exporting it as a transparent PNG.
+ * 2. When you want to smooth the edges of a refined mask after cutting out unwanted areas to create a natural feathered border in C# image processing.
+ * 3. When you are building a photo‑editing tool that lets users fine‑tune selections by subtracting shapes and applying feathering to achieve professional‑grade cut‑outs.
+ * 4. When you must prepare product‑shot images by eliminating background sections and adding a soft edge transition for e‑commerce listings.
+ * 5. When you are automating batch processing of scanned documents to isolate text regions, subtract noise rectangles, and save the result with alpha transparency.
  */

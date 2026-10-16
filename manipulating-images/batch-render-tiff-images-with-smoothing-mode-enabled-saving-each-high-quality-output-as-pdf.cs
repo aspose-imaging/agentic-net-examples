@@ -1,10 +1,17 @@
-// HOW-TO: Batch Convert TIFF to PDF with Anti-Aliasing in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert TIFF to PDF with High Quality Smoothing in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -12,13 +19,26 @@ class Program
     {
         try
         {
-            var inputFiles = new List<string>
-            {
-                "Input/image1.tif",
-                "Input/image2.tif"
-            };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            foreach (var inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -26,23 +46,25 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
                 {
-                    var pdfOptions = new PdfOptions
+                    PdfOptions pdfOptions = new PdfOptions
                     {
                         VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            SmoothingMode = SmoothingMode.AntiAlias
+                            PageWidth = tiff.Width,
+                            PageHeight = tiff.Height,
+                            SmoothingMode = SmoothingMode.HighQuality
                         }
                     };
 
-                    image.Save(outputPath, pdfOptions);
+                    tiff.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -55,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PDFs from a collection of high‑resolution TIFF scans while preserving image quality with anti‑alias smoothing.
- * 2. When an application must automatically convert scanned documents stored as TIFF files into PDF for archiving or sharing without manual intervention.
- * 3. When a reporting tool requires each page of a multi‑page TIFF to be rendered as a separate PDF page with exact dimensions and a white background.
- * 4. When you want to ensure that vector‑rasterized PDFs retain smooth edges and reduced jaggedness for graphics‑intensive TIFF images in a .NET service.
- * 5. When a batch job processes incoming TIFF files from a folder, creates corresponding PDF files, and saves them to a designated output directory using Aspose.Imaging.
+ * 1. When you need to automatically convert a folder of scanned TIFF documents into PDF files while preserving image clarity with high‑quality smoothing.
+ * 2. When generating printable PDFs from multi‑page TIFF maps or blueprints and you require the page dimensions to match the original image size.
+ * 3. When creating a batch job that processes incoming TIFF assets from a scanner or imaging device and outputs PDF reports with a white background and consistent page layout.
+ * 4. When integrating Aspose.Imaging into a C# backend service that must deliver high‑resolution PDF previews of uploaded TIFF images for web viewers.
+ * 5. When automating archival of legacy TIFF files into PDF format while ensuring the conversion uses the HighQua smoothing mode to minimize visual artifacts.
  */

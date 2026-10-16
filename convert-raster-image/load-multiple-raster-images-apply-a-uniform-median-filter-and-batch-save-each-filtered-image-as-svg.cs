@@ -1,54 +1,59 @@
-// HOW-TO: Batch Apply Median Filter to Images and Save as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Apply Median Filter to Raster Images and Save as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputFolder = "input";
+        string outputFolder = "output";
+
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputFolder))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputFolder))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputFolder);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
+            var files = Directory.GetFiles(inputFolder);
+            foreach (var file in files)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(file) + ".svg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(file))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, new MedianFilterOptions(3));
-
-                    using (var svgOptions = new SvgOptions())
+                    var raster = image as Aspose.Imaging.RasterImage;
+                    if (raster == null)
                     {
-                        image.Save(outputPath, svgOptions);
+                        Console.Error.WriteLine($"Not a raster image: {file}");
+                        continue;
                     }
+
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                    raster.Save(outputPath, new SvgOptions());
                 }
             }
         }
@@ -61,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noise in a folder of scanned photos before converting them to scalable SVG graphics for web display.
- * 2. When an automated pipeline must process dozens of bitmap files, apply a uniform median blur, and generate vector‑compatible SVG files for further editing.
- * 3. When a desktop application has to import various image formats, denoise them with a 3×3 median filter, and export each result as an SVG for printing at any resolution.
- * 4. When a data‑visualization tool requires pre‑filtered raster images to be transformed into SVGs so they can be styled with CSS.
- * 5. When a batch job must read images from a directory, apply the same image filter to all of them, and store the filtered output in a separate folder as SVG files for archival.
+ * 1. When you need to clean up noise in a collection of photos before converting them to scalable vector graphics for web display.
+ * 2. When you want to automate processing of scanned documents, applying a median filter to improve readability and then export each page as an SVG file.
+ * 3. When you are preparing a batch of raster icons for inclusion in a UI library and require a uniform smoothing filter before vectorizing them.
+ * 4. When you must integrate image preprocessing into a C# pipeline that reads images from a folder, applies noise reduction, and outputs SVGs for further editing in design tools.
+ * 5. When you are building a server‑side service that receives raster uploads, denoises them with a median filter, and returns lightweight SVG representations for responsive applications.
  */

@@ -1,4 +1,11 @@
-// HOW-TO: Convert PNG to JPEG and Ensure Output Size Under 5 MB in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PNG to JPEG and Verify Output Size Under 5 MB in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,12 +17,12 @@ namespace ImageConversion
     {
         static void Main()
         {
-            const string inputPath = "input.png";
-            const string outputPath = "output.jpg";
-            const long maxOutputSizeBytes = 5 * 1024 * 1024; // 5 MB
-
             try
             {
+                string inputPath = "input.png";
+                string outputPath = "output.jpg";
+                long maxOutputSizeBytes = 5 * 1024 * 1024; // 5 MB
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,8 +33,8 @@ namespace ImageConversion
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var options = new JpegOptions();
-                    image.Save(outputPath, options);
+                    var jpegOptions = new JpegOptions();
+                    image.Save(outputPath, jpegOptions);
                 }
 
                 FileInfo outInfo = new FileInfo(outputPath);
@@ -50,9 +57,9 @@ namespace ImageConversion
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert user‑uploaded PNG avatars to JPEG thumbnails while guaranteeing the files stay below a 5 MB email attachment limit.
- * 2. When an automated batch process must shrink high‑resolution PNG graphics to JPEG for faster web page loading and must verify the resulting size does not exceed a predefined budget.
- * 3. When a desktop application creates JPEG previews of PNG drawings and must alert the user if the preview file would be too large for storage on a limited‑capacity device.
- * 4. When a cloud service transforms PNG product images to JPEG for CDN delivery and needs to enforce a maximum file size to meet bandwidth constraints.
- * 5. When a reporting tool exports charts as PNG, then converts them to JPEG for inclusion in PDFs, ensuring each image complies with the PDF’s size restrictions.
+ * 1. When you need to generate JPEG thumbnails from PNG assets while ensuring each file stays below a specific size limit for email attachments.
+ * 2. When an e‑commerce platform must convert product PNG images to JPEG and guarantee they do not exceed the 5 MB upload restriction.
+ * 3. When a mobile app prepares user‑uploaded PNG pictures for storage by converting them to JPEG and checking the file‑size constraint.
+ * 4. When a batch‑processing script has to validate that converted images fit within a CDN‑imposed maximum file size.
+ * 5. When a reporting tool converts high‑resolution PNG charts to JPEG and needs to confirm the output remains under a defined byte limit.
  */

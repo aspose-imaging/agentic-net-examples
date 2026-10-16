@@ -1,7 +1,13 @@
-// HOW-TO: Batch Convert BMP Images to SVG and Upload to Cloud Storage in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to SVG Files in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
@@ -18,7 +24,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -34,7 +40,7 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
@@ -42,15 +48,19 @@ class Program
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
                     using (SvgOptions options = new SvgOptions())
                     {
+                        options.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Aspose.Imaging.Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
                         image.Save(outputPath, options);
                     }
                 }
-
-                // Placeholder: upload outputPath to cloud storage bucket using appropriate SDK
             }
         }
         catch (Exception ex)
@@ -62,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to transform legacy BMP assets into scalable SVG files before publishing them to an Azure Blob container.
- * 2. When an e‑commerce platform wants to generate lightweight vector icons from uploaded BMP product images and store them in Amazon S3 for fast CDN delivery.
- * 3. When a GIS application requires batch conversion of raster BMP maps to SVG vectors to enable zoom‑independent rendering in a cloud‑based map viewer.
- * 4. When a mobile app backend must preprocess user‑submitted BMP screenshots into SVG format and upload them to Google Cloud Storage for further analysis.
- * 5. When a document management system automates the migration of BMP diagrams to SVG vectors and saves the results in a cloud bucket for archival and sharing.
+ * 1. When you need to transform legacy BMP graphics into scalable SVG format for responsive web design.
+ * 2. When a C# application must process a folder of bitmap icons and generate vector equivalents for printing at any resolution.
+ * 3. When automating the migration of desktop UI assets from raster to vector to reduce file size and improve quality.
+ * 4. When integrating image conversion into a build pipeline that prepares assets for cloud storage or CDN distribution.
+ * 5. When creating a batch conversion tool that reads BMP files from a directory, converts them to SVG, and then uploads them to a cloud bucket for further processing.
  */

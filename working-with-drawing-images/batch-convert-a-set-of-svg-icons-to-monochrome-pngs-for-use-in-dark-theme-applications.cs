@@ -1,14 +1,22 @@
-// HOW-TO: Batch Convert SVG Icons To Monochrome PNGs In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert SVG Icons to Monochrome PNGs in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -30,36 +38,43 @@ public class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (string file in files)
+            foreach (string inputPath in files)
             {
-                string inputPath = file;
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        var pngOptions = new PngOptions();
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
+                    int width = svgImage.Width;
+                    int height = svgImage.Height;
 
-                        using (RasterCachedImage raster = (RasterCachedImage)Image.Load(ms))
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            if (!raster.IsCached) raster.CacheData();
-                            raster.Grayscale();
-                            raster.BinarizeFixed(128);
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            var outPngOptions = new PngOptions();
-                            raster.Save(outputPath, outPngOptions);
+                            BackgroundColor = Color.White,
+                            PageWidth = width,
+                            PageHeight = height
                         }
-                    }
+                    };
+
+                    svgImage.Save(outputPath, pngOptions);
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image pngImage = Image.Load(outputPath))
+                {
+                    RasterCachedImage raster = (RasterCachedImage)pngImage;
+                    if (!raster.IsCached) raster.CacheData();
+
+                    raster.Grayscale();
+                    raster.BinarizeFixed(128);
+
+                    raster.Save(outputPath);
                 }
             }
         }
@@ -72,9 +87,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate dark‑theme ready icons by turning a collection of SVG vector graphics into black‑and‑white PNG files for a Windows desktop application.
- * 2. When you want to automate the preprocessing of SVG assets for a mobile app, converting them to grayscale PNGs and then binarizing them to reduce file size and improve contrast on OLED screens.
- * 3. When a CI/CD pipeline must batch‑process design assets, converting SVG logos into monochrome PNGs for inclusion in PDF reports generated with .NET.
- * 4. When you are building a web dashboard that requires high‑contrast icons, using Aspose.Imaging in C# to rasterize SVGs and produce binary PNGs that render consistently across browsers.
- * 5. When you need to prepare a set of SVG symbols for a printing workflow, converting them to grayscale PNGs and applying a fixed threshold to ensure crisp black‑and‑white output for laser printers.
+ * 1. When you need to generate white‑on‑black icons for a dark‑mode UI by converting a folder of SVG assets to PNG files automatically.
+ * 2. When a build pipeline must rasterize vector graphics into fixed‑size PNGs for platforms that only support bitmap images.
+ * 3. When you want to create a set of monochrome PNG resources from designer‑provided SVG icons without manually editing each file.
+ * 4. When an application requires pre‑processed PNG icons with a white background for consistent rendering across different browsers.
+ * 5. When you are preparing assets for a mobile app that uses PNG icons and you need to batch convert them from SVG using Aspose.Imaging in C#.
  */

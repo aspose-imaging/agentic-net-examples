@@ -1,8 +1,16 @@
-// HOW-TO: Resize BMP Image with Nearest Neighbor and Export as SVG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize BMP Image With Nearest Neighbor And Export To SVG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -23,10 +31,10 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var raster = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                int newWidth = 200;   // desired width
-                int newHeight = 200;  // desired height
+                int newWidth = raster.Width * 2;
+                int newHeight = raster.Height * 2;
 
                 raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
@@ -43,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a scalable vector version of a low‑resolution BMP thumbnail for responsive web design.
- * 2. When you must quickly downscale a large bitmap to a fixed size using nearest‑neighbor to preserve hard edges before converting it to SVG for printing.
- * 3. When an application processes legacy BMP assets and requires them in SVG format for modern UI components without losing pixel‑art style.
- * 4. When a batch job converts BMP icons to SVG icons with exact dimensions for use in mobile apps, ensuring fast processing with nearest‑neighbor interpolation.
- * 5. When a developer wants to programmatically resize a BMP logo to 200 × 200 pixels and output it as an SVG file for inclusion in vector‑based reports.
+ * 1. When a developer needs to double the size of a legacy BMP graphic for a web‑friendly SVG icon without smoothing artifacts.
+ * 2. When an application must convert raster BMP assets into scalable SVG files while preserving pixel‑perfect edges for UI design.
+ * 3. When a batch‑processing tool has to upscale bitmap textures for high‑resolution displays and output them as vector SVGs for further editing.
+ * 4. When a game‑engine pipeline requires converting old BMP sprites to SVG format using nearest‑neighbor scaling to keep the retro pixel art style.
+ * 5. When a reporting system generates SVG charts from BMP logos, needing a quick resize and format change directly in C#.
  */

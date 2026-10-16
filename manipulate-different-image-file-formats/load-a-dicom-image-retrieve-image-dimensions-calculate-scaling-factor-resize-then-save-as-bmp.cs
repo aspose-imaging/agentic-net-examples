@@ -1,41 +1,46 @@
-// HOW-TO: Resize DICOM Image to Half Size and Save as BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize DICOM Image to BMP with Scaling Factor in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        string inputPath = "input.dcm";
+        string outputPath = "output\\resized.bmp";
+
         try
         {
-            string inputPath = "input.dcm";
-            string outputPath = "output\\output.bmp";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                int originalWidth = dicomImage.Width;
-                int originalHeight = dicomImage.Height;
+                int width = image.Width;
+                int height = image.Height;
 
+                // Example scaling factor: reduce size by 50%
                 double scale = 0.5;
-                int newWidth = (int)(originalWidth * scale);
-                int newHeight = (int)(originalHeight * scale);
+                int newWidth = (int)(width * scale);
+                int newHeight = (int)(height * scale);
 
-                dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                image.Resize(newWidth, newHeight);
 
-                using (BmpOptions bmpOptions = new BmpOptions())
-                {
-                    dicomImage.Save(outputPath, bmpOptions);
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a medical DICOM scan into a smaller BMP file for quick preview in a Windows application.
- * 2. When you must read the dimensions of a DICOM image and generate a scaled‑down version for embedding in a clinical report.
- * 3. When a healthcare system requires batch processing of DICOM files to create thumbnail BMP images for a PACS web portal.
- * 4. When integrating legacy imaging software that only accepts BMP files, you can resize and convert DICOM images on the fly.
- * 5. When performing performance testing, you may need to reduce DICOM image size before saving to BMP to evaluate rendering speed.
+ * 1. When a medical imaging application needs to convert high‑resolution DICOM scans to smaller BMP files for faster display on a web portal.
+ * 2. When a radiology workflow requires extracting the dimensions of a DICOM image to calculate a custom scaling factor before archiving.
+ * 3. When a C# service must batch‑process DICOM files, resize them by a percentage, and store the results as BMP for compatibility with legacy Windows software.
+ * 4. When a developer wants to create thumbnail previews of DICOM studies by reducing the image size and saving them in a widely supported bitmap format.
+ * 5. When integrating Aspose.Imaging into a diagnostic tool that needs to read DICOM metadata, resize the image, and output a BMP for further image‑analysis algorithms.
  */

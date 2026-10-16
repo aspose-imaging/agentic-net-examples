@@ -1,4 +1,11 @@
-// HOW-TO: Resize EPS to 2000px Width and Export as PDF/A-1b in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize EPS to 2000px Width and Save as PDF/A-1b in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -20,25 +27,25 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                double scale = 2000.0 / epsImage.Width;
-                int newHeight = (int)(epsImage.Height * scale);
-
-                var rasterOptions = new EpsRasterizationOptions
-                {
-                    PageWidth = 2000,
-                    PageHeight = newHeight
-                };
+                double scale = 2000.0 / image.Width;
+                int newHeight = (int)(image.Height * scale);
 
                 var pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    PdfCoreOptions = new PdfCoreOptions { PdfCompliance = PdfComplianceVersion.PdfA1b },
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = 2000,
+                        PageHeight = newHeight,
+                        BackgroundColor = Color.White
+                    }
                 };
 
-                epsImage.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a high‑resolution EPS artwork to a PDF/A‑1b compliant document while limiting the width to 2000 pixels for web preview.
- * 2. When a printing workflow requires rasterizing vector EPS files to a fixed pixel width before archiving them as PDF/A‑1b for long‑term preservation.
- * 3. When an application must generate PDF reports from EPS logos that fit within a specific layout width without exceeding 2000 pixels.
- * 4. When you need to batch‑process EPS diagrams to PDF/A‑1b for compliance‑checked submissions, ensuring each output matches a 2000‑pixel width constraint.
- * 5. When a document management system imports EPS graphics and must store them as PDF/A‑1b files with a standardized width for consistent rendering across devices.
+ * 1. When you need to convert a high‑resolution EPS illustration to a PDF/A‑1b document that fits a fixed 2000‑pixel width for archival or printing purposes.
+ * 2. When a publishing workflow requires rasterizing vector EPS artwork to a specific pixel width before embedding it in a PDF/A‑compliant PDF file.
+ * 3. When generating PDF/A‑1b reports from EPS logos and ensuring the output meets ISO‑19005‑1 standards while controlling image dimensions.
+ * 4. When automating batch processing of EPS files to create size‑restricted, PDF/A‑1b compliant PDFs for electronic document management systems.
+ * 5. When a C# application must resize EPS graphics to a consistent width and export them as PDF/A‑1b to guarantee long‑term preservation and color fidelity.
  */

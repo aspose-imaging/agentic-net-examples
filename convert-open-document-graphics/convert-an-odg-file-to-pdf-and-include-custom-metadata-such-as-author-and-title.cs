@@ -1,4 +1,11 @@
-// HOW-TO: Convert ODG to PDF with Custom Author and Title Metadata in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF with Custom Metadata in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -44,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate PDF reports from ODG drawings while embedding the document’s author and title for proper cataloging in a document management system.
- * 2. When an application must batch‑process OpenDocument graphics and produce searchable PDFs that include custom metadata for compliance auditing.
- * 3. When a CAD‑to‑PDF export feature requires preserving source information such as creator name and project title within the PDF’s document properties.
- * 4. When integrating Aspose.Imaging into a workflow that converts user‑uploaded ODG files to PDFs and adds branding metadata before storing them in a cloud repository.
- * 5. When building a C# service that converts design files to PDF and programmatically sets PDF metadata to improve SEO and enable easy retrieval in content‑management platforms.
+ * 1. When you need to generate PDF reports from LibreOffice Draw (ODG) drawings while embedding author and title information for document management systems.
+ * 2. When an application must batch‑convert user‑uploaded ODG files to searchable PDFs and preserve custom metadata for compliance auditing.
+ * 3. When a web service creates printable PDFs from ODG diagrams and wants to set the PDF’s author and title fields for proper indexing in content repositories.
+ * 4. When integrating Aspose.Imaging in a C# workflow to transform ODG assets into PDFs with embedded metadata for digital asset management.
+ * 5. When automating the archival of ODG design files as PDFs with consistent metadata to ensure consistent cataloging in enterprise archives.
  */

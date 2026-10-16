@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert DICOM Files to PDF with Memory Optimization in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert DICOM Images to PDF with Memory Optimization in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -28,28 +35,32 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
+                if (!inputPath.EndsWith(".dcm", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 var loadOptions = new LoadOptions { BufferSizeHint = 1024 * 1024 };
-
-                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
+                using (DicomImage dicom = (DicomImage)Image.Load(inputPath, loadOptions))
                 {
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                    string outDir = Path.GetDirectoryName(outputPath);
+                    Directory.CreateDirectory(outDir);
+
+                    using (var pdfOptions = new PdfOptions())
                     {
-                        pdfOptions.BufferSizeHint = 1024 * 1024;
-                        dicomImage.Save(outputPath, pdfOptions);
+                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                        dicom.Save(outputPath, pdfOptions);
                     }
                 }
             }
@@ -63,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to generate printable PDF reports from thousands of DICOM scans while keeping RAM usage low.
- * 2. When a research lab wants to automate the conversion of a folder of MRI DICOM images into PDFs for easy sharing with collaborators.
- * 3. When a medical imaging software vendor must batch process patient studies into PDF archives without loading entire images into memory.
- * 4. When a radiology PACS integration requires on‑the‑fly conversion of incoming DICOM files to PDF documents for electronic health records.
- * 5. When a cloud service processes uploaded DICOM files in bulk and needs to output PDF files while optimizing server memory consumption.
+ * 1. When a hospital needs to archive a folder of DICOM scans as PDF reports while keeping server memory usage low.
+ * 2. When medical imaging software must process large batches of radiology DICOM files and generate PDF files for patient records.
+ * 3. When a research lab wants to convert thousands of DICOM images to PDF for easy sharing without exhausting RAM.
+ * 4. When a cloud service automates the transformation of incoming DICOM uploads into PDF documents for downstream workflow.
+ * 5. When a developer builds a desktop utility that reads DICOM files from a directory, optimizes loading, and saves each as a PDF for printing.
  */

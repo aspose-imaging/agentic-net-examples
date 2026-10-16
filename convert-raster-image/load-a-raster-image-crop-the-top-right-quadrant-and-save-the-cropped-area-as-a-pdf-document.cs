@@ -1,7 +1,13 @@
-// HOW-TO: Crop Top Right Quadrant of PNG and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Top Right Quadrant of Image and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
@@ -9,11 +15,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/image.png";
+        string outputPath = "Output/cropped.pdf";
+
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\cropped.pdf";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,25 +28,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                {
-                    image.CacheData();
-                }
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
 
-                int halfWidth = image.Width / 2;
-                int halfHeight = image.Height / 2;
-                int x = halfWidth;
-                int y = 0;
-                int width = halfWidth;
-                int height = halfHeight;
-
-                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(x, y, width, height);
-                image.Crop(cropRect);
-
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                int halfWidth = raster.Width / 2;
+                int halfHeight = raster.Height / 2;
+                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(halfWidth, 0, halfWidth, halfHeight);
+                raster.Crop(rect);
+                raster.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the upper‑right quarter of a scanned PNG and embed it in a PDF report.
- * 2. When generating printable PDFs that contain only a specific region of a large raster image, such as a logo corner.
- * 3. When creating thumbnails or preview pages by cropping a portion of an image and converting it to PDF for documentation.
- * 4. When automating the conversion of selected image sections into PDF for archival or compliance purposes.
- * 5. When building a web service that receives PNG uploads, isolates the top‑right area, and returns a PDF file to the client.
+ * 1. When you need to extract the upper-right portion of a PNG chart and embed it in a PDF report.
+ * 2. When generating printable PDFs that contain only a specific quadrant of a scanned document.
+ * 3. When creating thumbnails of the top-right area of a large raster image for a web preview.
+ * 4. When automating the conversion of a portion of a bitmap into a PDF for archival purposes.
+ * 5. When processing batch images to crop a defined rectangle and store the result as PDF files using C#.
  */

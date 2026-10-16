@@ -1,9 +1,16 @@
-// HOW-TO: Apply Gamma Correction to TIFF and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gamma Correction and Gaussian Blur to TIFF and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,7 +18,7 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.tif";
+            string inputPath = "Input\\sample.tif";
             string outputPath = "Output\\result.pdf";
 
             if (!File.Exists(inputPath))
@@ -22,12 +29,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)tiff;
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
                 raster.AdjustGamma(1.2f);
-                PdfOptions pdfOptions = new PdfOptions();
-                tiff.Save(outputPath, pdfOptions);
+
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -39,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to brighten a scanned TIFF document before distributing it as a searchable PDF.
- * 2. When a medical imaging system must adjust the gamma of high‑resolution TIFF X‑ray images and archive them as PDFs.
- * 3. When an e‑commerce platform wants to enhance product TIFF photos and deliver them to customers in PDF catalogs.
- * 4. When a legal firm requires consistent visual quality across TIFF evidence files by applying gamma correction and converting them to PDF for courtroom presentation.
- * 5. When an automated workflow processes batches of TIFF maps, applies gamma correction to improve readability, and saves the results as PDFs for archival storage.
+ * 1. When you need to improve the brightness and reduce noise of scanned TIFF documents before archiving them as searchable PDFs.
+ * 2. When preparing high‑resolution TIFF images for printing, applying gamma correction and a subtle blur to achieve consistent visual quality in the final PDF.
+ * 3. When converting medical imaging TIFF files to PDF while adjusting gamma to enhance contrast and applying Gaussian blur to smooth artifacts.
+ * 4. When automating a workflow that processes batch TIFF photos, corrects exposure, adds a softening effect, and outputs them as PDF reports.
+ * 5. When integrating Aspose.Imaging in a C# application to transform legacy TIFF assets with gamma and blur filters before delivering them to end‑users in PDF format.
  */

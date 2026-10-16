@@ -1,4 +1,11 @@
-// HOW-TO: Extract a Rectangle from DjVu and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Extract a Rectangular Portion From DjVu and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,7 +20,7 @@ class Program
         try
         {
             string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\result.pdf";
+            string outputPath = "Output\\portion.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -27,8 +34,10 @@ class Program
             {
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    Rectangle area = new Rectangle(20, 20, 250, 250);
-                    pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(0, area);
+                    var rect = new Rectangle(20, 20, 250, 250);
+                    var multiPageOptions = new DjvuMultiPageOptions(0, rect);
+                    pdfOptions.MultiPageOptions = multiPageOptions;
+
                     djvu.Save(outputPath, pdfOptions);
                 }
             }
@@ -42,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF preview of a specific area of a large DjVu scan, such as a signature block, without converting the entire document.
- * 2. When you want to extract a portion of a multi‑page DjVu file (e.g., the first page) and embed it as a PDF page for reporting or documentation purposes.
- * 3. When an application must provide users with a downloadable PDF of a selected region from a DjVu technical drawing, preserving exact dimensions.
- * 4. When automating batch processing to crop consistent rectangular sections from DjVu files and save them as separate PDF files for archival.
- * 5. When integrating Aspose.Imaging in a C# service that converts a defined rectangle of a DjVu image into a PDF for downstream OCR or text extraction pipelines.
+ * 1. When you need to embed only a specific area of a DjVu document into a PDF report.
+ * 2. When you want to generate a PDF preview of a selected region of a DjVu page for faster loading.
+ * 3. When you must extract a diagram or figure from a large DjVu file and share it as a PDF.
+ * 4. When you are building a document‑conversion service that converts user‑chosen portions of DjVu files to PDF.
+ * 5. When you need to programmatically crop a DjVu image and archive the cropped content in PDF format.
  */

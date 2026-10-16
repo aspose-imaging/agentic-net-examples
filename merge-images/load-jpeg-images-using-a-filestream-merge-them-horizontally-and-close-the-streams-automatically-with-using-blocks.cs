@@ -1,8 +1,14 @@
-// HOW-TO: Merge Multiple JPEG Images Horizontally Using FileStream In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Horizontally Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,9 +20,16 @@ class Program
     {
         try
         {
-            string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
+            {
+                "image1.jpg",
+                "image2.jpg",
+                "image3.jpg"
+            };
             string outputPath = "merged.jpg";
 
+            // Validate input files
             foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
@@ -26,46 +39,55 @@ class Program
                 }
             }
 
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
-            {
-                using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(fs))
-                    {
-                        sizes.Add(new Size(img.Width, img.Height));
-                    }
-                }
-            }
-
-            int totalWidth = sizes.Sum(s => s.Width);
-            int maxHeight = sizes.Max(s => s.Height);
-
+            // Ensure output directory exists
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
+            // Load images, collect sizes
+            List<JpegImage> images = new List<JpegImage>();
+            int totalWidth = 0;
+            int maxHeight = 0;
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            foreach (string inputPath in inputPaths)
+            {
+                using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                {
+                    JpegImage img = (JpegImage)Image.Load(fs);
+                    images.Add(img);
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight)
+                        maxHeight = img.Height;
+                }
+            }
+
+            // Create output canvas
+            JpegOptions options = new JpegOptions()
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
+            };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(options, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (JpegImage img in images)
                 {
-                    using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-                    {
-                        using (RasterImage img = (RasterImage)Image.Load(fs))
-                        {
-                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                            offsetX += img.Width;
-                        }
-                    }
+                    var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
                 }
+
+                // Save the merged image
                 canvas.Save();
+            }
+
+            // Dispose loaded images
+            foreach (JpegImage img in images)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -77,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a single panoramic JPEG from several individual photos in a .NET batch job.
- * 2. When an e‑commerce platform must combine product thumbnail images side‑by‑side for a catalog preview.
- * 3. When a reporting tool generates a combined image of multiple charts saved as JPEGs for a PDF export.
- * 4. When a digital signage system stitches advertisement banners horizontally before displaying them on a screen.
- * 5. When a migration script consolidates scanned document pages stored as separate JPEG files into one wide image for archival.
+ * 1. When you need to create a single panoramic JPEG by stitching multiple product photos side‑by‑side using Aspose.Imaging in C#.
+ * 2. When you want to combine several scanned receipt JPEGs into one horizontal image for easier archival or email attachment.
+ * 3. When generating a side‑by‑side comparison of before‑and‑after JPEG images in a medical imaging workflow with automatic stream handling.
+ * 4. When assembling multiple screenshot JPEGs into one composite image for a bug report or documentation without manual editing.
+ * 5. When preparing a wide‑format printable banner by merging several JPEG sections horizontally in a .NET application.
  */

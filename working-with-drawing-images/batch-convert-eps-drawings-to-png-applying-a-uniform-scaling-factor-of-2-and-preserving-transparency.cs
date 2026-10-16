@@ -1,74 +1,82 @@
-// HOW-TO: Batch Convert EPS to PNG with Double Size and Transparency in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EPS Files to PNG with Double Size and Transparency in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace EpsBatchConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                // Hardcoded input and output directories
+                string inputDirectory = "input";
+                string outputDirectory = "output";
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+                // Get all EPS files in the input directory
+                string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.eps");
-
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in epsFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Aspose.Imaging.Image epsImage = Aspose.Imaging.Image.Load(inputPath))
-                {
-                    int newWidth = epsImage.Width * 2;
-                    int newHeight = epsImage.Height * 2;
-
-                    var pngOptions = new PngOptions
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageWidth = newWidth,
-                            PageHeight = newHeight,
-                            BackgroundColor = Aspose.Imaging.Color.Transparent
-                        }
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                    epsImage.Save(outputPath, pngOptions);
+                    // Determine output path
+                    string outputPath = Path.Combine(
+                        outputDirectory,
+                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load EPS image
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        // Prepare PNG options with scaling factor of 2
+                        var pngOptions = new PngOptions
+                        {
+                            // Preserve transparency by default; no extra settings needed
+                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            {
+                                PageWidth = image.Width * 2,
+                                PageHeight = image.Height * 2,
+                                // Preserve background as transparent
+                                BackgroundColor = Color.Transparent
+                            }
+                        };
+
+                        // Save as PNG
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution PNG thumbnails from a folder of vector EPS logos while keeping their transparent background.
- * 2. When an e‑commerce platform must convert supplier EPS artwork to double‑sized PNG images for product listings without losing transparency.
- * 3. When a publishing workflow requires automated batch conversion of EPS illustrations to PNG files at twice the original dimensions for print‑ready PDFs.
- * 4. When a mobile app backend has to preprocess EPS icons into larger PNG assets to match device screen densities while preserving alpha channels.
- * 5. When a GIS system needs to rasterize multiple EPS map layers into transparent PNG tiles at double resolution for web mapping.
+ * 1. When you need to generate high‑resolution PNG thumbnails from a collection of EPS logos for a web catalog while keeping the transparent background.
+ * 2. When automating the preparation of print‑ready artwork by scaling vector EPS drawings to twice their original size and exporting them as PNGs for preview in a .NET application.
+ * 3. When migrating legacy EPS assets to PNG format for use in mobile apps, and you must preserve the alpha channel during batch processing in C#.
+ * 4. When creating a batch pipeline that resizes vector illustrations for a digital signage system, requiring each EPS to be rasterized at double resolution with a transparent background.
+ * 5. When integrating Aspose.Imaging into a CI/CD workflow to convert design files from EPS to PNG at build time, ensuring consistent scaling and transparency across all generated images.
  */

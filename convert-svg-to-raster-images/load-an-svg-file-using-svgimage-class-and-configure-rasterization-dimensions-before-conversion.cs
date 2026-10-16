@@ -1,4 +1,11 @@
 // HOW-TO: Convert SVG to PNG with Custom Width and Height in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,31 +17,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "example.svg");
-        string outputPath = Path.Combine("Output", "example.png");
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = Path.Combine("Input", "sample.svg");
+            string outputPath = Path.Combine("Output", "sample.png");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
                     PageWidth = 800,
                     PageHeight = 600,
                     BackgroundColor = Color.White
                 };
 
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
@@ -51,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate thumbnail PNG images from scalable SVG logos at a fixed 800×600 size for a web gallery.
- * 2. When you must embed SVG icons into a PDF report that only supports raster images, requiring conversion to PNG with a white background.
- * 3. When an e‑commerce platform stores product illustrations as SVG and you need to create high‑resolution PNG previews for email newsletters.
- * 4. When a mobile app consumes PNG assets and you need to pre‑render SVG artwork at specific dimensions during the build process.
- * 5. When automating batch processing of SVG diagrams to PNG files with consistent sizing for documentation or training materials.
+ * 1. When you need to generate a raster PNG thumbnail of an SVG logo at a specific size for a web page.
+ * 2. When you must embed an SVG diagram into a PDF that only supports bitmap images, requiring a defined pixel resolution.
+ * 3. When you are creating responsive email templates and need to convert scalable SVG icons to fixed‑size PNGs to ensure consistent rendering across email clients.
+ * 4. When you want to pre‑process user‑uploaded SVG files on a server and store them as PNGs with a white background for later thumbnail previews.
+ * 5. When you are building a batch conversion tool that standardizes all SVG assets to 800×600 PNG files for a legacy graphics pipeline.
  */

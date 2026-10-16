@@ -1,8 +1,16 @@
 // HOW-TO: Batch Resize BMP Images to 1024x768 and Convert to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -17,7 +25,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
                 return;
             }
 
@@ -26,8 +34,7 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -36,20 +43,30 @@ class Program
                     return;
                 }
 
-                if (!string.Equals(Path.GetExtension(inputPath), ".bmp", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Resize(1024, 768);
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                    {
+                        raster.CacheData();
+                    }
+
+                    raster.Resize(1024, 768);
+
                     using (SvgOptions options = new SvgOptions())
                     {
-                        image.Save(outputPath, options);
+                        options.VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = raster.Width,
+                            PageHeight = raster.Height,
+                            BackgroundColor = Color.White
+                        };
+
+                        raster.Save(outputPath, options);
                     }
                 }
             }
@@ -63,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically shrink a collection of legacy BMP graphics to a standard web‑friendly resolution before converting them to scalable SVG files for responsive design.
- * 2. When a desktop application must process user‑uploaded BMP screenshots, resize them to 1024×768, and store them as SVGs to reduce file size and enable infinite scaling.
- * 3. When migrating an old asset library of BMP icons to vector format, you can batch resize each icon and save it as SVG for use in modern UI frameworks.
- * 4. When generating printable PDFs from BMP drawings, you first resize the images to a consistent size and convert them to SVG to preserve quality at any zoom level.
- * 5. When building an automated build pipeline that prepares BMP assets for a web game, the code resizes each image to the required resolution and outputs SVGs for fast rendering in browsers.
+ * 1. When you need to automatically shrink a collection of BMP photos to a standard 1024x768 size before publishing them as scalable SVG graphics.
+ * 2. When a legacy system stores screenshots as BMP files and you must batch‑convert them to lightweight SVGs for web display.
+ * 3. When preparing assets for a responsive UI, you may resize high‑resolution BMPs and transform them into vector‑compatible SVGs in a single C# routine.
+ * 4. When migrating a design library, you can use this code to resize all BMP icons and output them as SVG files for modern browsers.
+ * 5. When generating printable diagrams from BMP sources, resizing them to a consistent resolution and converting to SVG ensures crisp scaling without quality loss.
  */

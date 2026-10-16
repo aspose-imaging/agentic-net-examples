@@ -1,20 +1,25 @@
-// HOW-TO: How To Dither A TIFF, Apply Gaussian Blur And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Dither TIFF, Apply Gaussian Blur, and Save As PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input\\image.tif";
+        string outputPath = "output\\result.png";
+
         try
         {
-            string inputPath = Path.Combine("Input", "input.tif");
-            string outputPath = Path.Combine("Output", "output.png");
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,19 +32,12 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Dither the image
-                raster.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8);
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
 
-                // Apply Gaussian blur
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0f);
                 raster.Filter(raster.Bounds, blurOptions);
 
-                // Save as PNG
-                var pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, pngOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a high‑resolution TIFF scan into a web‑friendly PNG while preserving visual detail through Floyd‑Steinberg dithering and a soft Gaussian blur.
- * 2. When you want to prepare printed artwork for digital preview by reducing color depth, adding a blur effect, and exporting it as a PNG using Aspose.Imaging in a .NET application.
- * 3. When an automated image‑processing pipeline must batch‑process TIFF files, apply dithering to simulate limited palettes, smooth edges with Gaussian blur, and store the results as PNGs for downstream consumption.
- * 4. When you are building a C# utility that enhances legacy medical images (TIFF) with dithering for better contrast and a blur filter to reduce noise before saving them as PNG for web display.
- * 5. When you need to integrate image‑filtering steps—dithering and Gaussian blur—into a C# service that receives TIFF uploads and returns optimized PNG thumbnails.
+ * 1. When you need to convert a high‑contrast TIFF scan into a web‑friendly PNG with dithering to reduce file size while preserving visual detail.
+ * 2. When you want to soften the edges of a dithered TIFF image using a Gaussian blur before publishing it online.
+ * 3. When you are preparing legacy TIFF graphics for a mobile app and require both dithering and blur effects in a single C# workflow.
+ * 4. When you must automate batch processing of TIFF files to produce PNG thumbnails with consistent blur and dithering for a digital archive.
+ * 5. When you need to integrate Aspose.Imaging into a .NET service that receives TIFF uploads, applies visual enhancements, and returns PNG responses.
  */

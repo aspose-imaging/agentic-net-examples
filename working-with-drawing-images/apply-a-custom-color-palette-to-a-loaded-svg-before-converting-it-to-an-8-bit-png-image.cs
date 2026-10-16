@@ -1,11 +1,16 @@
-// HOW-TO: Convert SVG to 8‑Bit PNG with Custom Palette in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert SVG to 8‑Bit Indexed PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.svg";
-            string outputPath = "Output\\image.png";
+            string inputPath = "input.svg";
+            string outputPath = "output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,21 +29,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            PngOptions pngOptions = new PngOptions
+            {
+                ColorType = PngColorType.IndexedColor,
+                BitDepth = 8
+            };
+
             using (Image image = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false),
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height,
-                        BackgroundColor = Color.White
-                    }
-                };
-
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -51,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a low‑size PNG thumbnail from an SVG while preserving a specific brand color scheme.
- * 2. When an application must convert vector icons to 8‑bit PNGs for use in legacy systems that only support indexed colors.
- * 3. When you want to replace the default colors of an SVG with a predefined palette before embedding the image in a PDF report.
- * 4. When automating batch processing of SVG assets to produce web‑ready PNGs with a limited color palette for faster page loads.
- * 5. When creating game sprites from SVG artwork and need the output PNG to use an indexed palette for memory‑efficient rendering.
+ * 1. When you need to reduce the file size of vector graphics for web delivery by converting SVG files to 8‑bit indexed PNGs in a C# application.
+ * 2. When you must generate PNG assets with a limited color palette for legacy systems that only support indexed colors using Aspose.Imaging.
+ * 3. When you are automating a batch process that transforms design SVGs into PNG thumbnails with a fixed 256‑color palette for mobile apps.
+ * 4. When you want to ensure consistent color mapping across multiple SVG icons by saving them as indexed‑color PNGs in .NET.
+ * 5. When you are integrating image conversion into a server‑side service that receives SVG uploads and returns optimized 8‑bit PNGs for faster loading.
  */

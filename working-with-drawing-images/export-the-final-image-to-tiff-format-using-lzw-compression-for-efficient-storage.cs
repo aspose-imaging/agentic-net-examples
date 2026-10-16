@@ -1,7 +1,13 @@
-// HOW-TO: Convert JPEG to TIFF with LZW Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG to LZW Compressed TIFF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -12,22 +18,22 @@ class Program
         try
         {
             string inputPath = "Input\\sample.jpg";
+            string outputPath = "Output\\result.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = "Output\\result.tif";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    image.Save(outputPath, tiffOptions);
-                }
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Lzw;
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution photographs in a lossless TIFF file while keeping file size low by using LZW compression.
- * 2. When a document‑management system requires images in TIFF format for compatibility and you must convert incoming JPEG scans efficiently.
- * 3. When preparing images for printing workflows that only accept TIFF files with LZW compression to preserve quality and reduce storage.
- * 4. When migrating a legacy medical‑imaging database that stores images as JPEGs to a TIFF‑based PACS that mandates LZW‑compressed files.
- * 5. When implementing a C# service that receives user‑uploaded JPEGs and stores them as compressed TIFFs for long‑term cloud storage.
+ * 1. When you need to archive high‑resolution photos in a lossless, space‑efficient format for long‑term storage.
+ * 2. When a document management system requires TIFF files with LZW compression for compatibility and reduced bandwidth.
+ * 3. When preparing images for printing workflows that only accept TIFF with RGB photometric data.
+ * 4. When converting user‑uploaded JPEGs to TIFF to meet regulatory standards that mandate non‑lossy formats.
+ * 5. When optimizing image assets for GIS or medical imaging applications that rely on TIFF’s LZW compression to balance quality and file size.
  */

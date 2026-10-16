@@ -1,4 +1,11 @@
 // HOW-TO: Verify WebP to GIF Conversion Keeps Original Image Dimensions in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,44 +19,40 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputWebPPath = "input.webp";
-            string outputGifPath = "output.gif";
+            string inputPath = "input.webp";
+            string outputPath = "output.gif";
 
-            // Input file existence check
-            if (!File.Exists(inputWebPPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputWebPPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load WebP image
-            using (WebPImage webpImage = (WebPImage)Image.Load(inputWebPPath))
+            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
             {
-                int originalWidth = webpImage.Width;
-                int originalHeight = webpImage.Height;
+                int webpWidth = webpImage.Width;
+                int webpHeight = webpImage.Height;
 
                 // Save as GIF
                 GifOptions gifOptions = new GifOptions();
-                webpImage.Save(outputGifPath, gifOptions);
+                webpImage.Save(outputPath, gifOptions);
 
                 // Load resulting GIF
-                using (GifImage gifImage = (GifImage)Image.Load(outputGifPath))
+                using (GifImage gifImage = (GifImage)Image.Load(outputPath))
                 {
                     int gifWidth = gifImage.Width;
                     int gifHeight = gifImage.Height;
 
-                    // Compare dimensions
-                    if (originalWidth == gifWidth && originalHeight == gifHeight)
+                    if (webpWidth == gifWidth && webpHeight == gifHeight)
                     {
-                        Console.WriteLine("Success: GIF dimensions match the original WebP dimensions.");
+                        Console.WriteLine($"Dimensions match: Width={webpWidth}, Height={webpHeight}");
                     }
                     else
                     {
-                        Console.WriteLine($"Mismatch: Original WebP ({originalWidth}x{originalHeight}) vs GIF ({gifWidth}x{gifHeight}).");
+                        Console.WriteLine($"Dimensions differ: WebP (Width={webpWidth}, Height={webpHeight}) vs GIF (Width={gifWidth}, Height={gifHeight})");
                     }
                 }
             }
@@ -63,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert WebP assets to GIF while guaranteeing that the output files retain the exact width and height of the source images.
- * 2. When validating that a third‑party service’s WebP‑to‑GIF conversion does not alter image dimensions before displaying them in a responsive UI.
- * 3. When performing automated tests to ensure that Aspose.Imaging’s GIF export preserves the original pixel size of WebP graphics.
- * 4. When generating GIF previews of WebP pictures for email newsletters and must keep the original dimensions to avoid layout shifts.
- * 5. When troubleshooting mismatched image sizes after conversion and need a quick C# script to compare WebP and GIF dimensions.
+ * 1. When a web application needs to convert user‑uploaded WebP avatars to GIFs while preserving the exact width and height for consistent UI layout.
+ * 2. When a batch image processing script must ensure that animated GIFs generated from WebP assets retain the original dimensions to avoid cropping or scaling issues.
+ * 3. When validating image assets for an e‑learning platform, developers can compare WebP source sizes with the resulting GIFs to guarantee size consistency across devices.
+ * 4. When creating thumbnails from WebP files for email newsletters, the code can confirm that the GIF thumbnails match the source dimensions before embedding.
+ * 5. When performing automated quality checks in a CI pipeline, the dimension comparison helps detect unintended resizing during WebP‑to‑GIF conversion.
  */

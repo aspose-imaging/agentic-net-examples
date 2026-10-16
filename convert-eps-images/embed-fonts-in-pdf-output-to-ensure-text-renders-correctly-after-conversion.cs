@@ -1,6 +1,14 @@
-// HOW-TO: Embed Fonts When Converting EMF to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Embed Custom Fonts When Converting EMF to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -22,18 +30,29 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string fontsFolder = "Fonts";
-            if (!Directory.Exists(fontsFolder))
+            var loadOptions = new LoadOptions();
+            string fontsFolder = Path.Combine("Fonts");
+            loadOptions.AddCustomFontSource(args =>
             {
-                Directory.CreateDirectory(fontsFolder);
-            }
-
-            FontSettings.SetFontsFolders(new string[] { fontsFolder }, true);
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return result.ToArray();
+            }, fontsFolder);
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                using (var pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -47,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate PDF reports from EMF vector diagrams in a C# application and want the text to render correctly on any viewer by embedding the required fonts.
- * 2. When converting legacy Windows Metafile (EMF) files to PDF for long‑term archival and must ensure custom fonts are included in the PDF.
- * 3. When building an automated batch process that transforms multiple EMF assets into self‑contained PDFs on a server, embedding fonts to avoid missing‑font errors.
- * 4. When creating printable PDFs from EMF logos or branding assets in .NET and require the fonts to be embedded so the output looks identical on all platforms.
- * 5. When developing a document generation service that receives EMF input and outputs PDF files, and you need to guarantee consistent text appearance by embedding the source fonts.
+ * 1. When you need to convert vector EMF drawings to PDF while ensuring all text uses specific corporate fonts that are not installed on the target machine.
+ * 2. When generating PDF reports from EMF charts in a C# application and you must embed the exact fonts to preserve layout across different viewers.
+ * 3. When automating batch conversion of EMF files to PDF in a server environment that lacks the required fonts, requiring you to supply a custom font folder.
+ * 4. When creating printable PDFs from EMF logos and want the text to appear correctly on any device without relying on system font availability.
+ * 5. When developing a document workflow that transforms EMF assets into PDF documents and must guarantee font consistency for legal or branding compliance.
  */

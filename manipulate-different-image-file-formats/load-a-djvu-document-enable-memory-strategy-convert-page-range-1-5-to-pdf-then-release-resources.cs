@@ -1,4 +1,11 @@
-// HOW-TO: Convert DjVu Pages 1 To 5 To PDF With Memory Buffer In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert DjVu Pages 1 to 5 to PDF with Memory Buffer in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\document.djvu";
-            string outputPath = "Output\\output.pdf";
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\range1to5.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,13 +30,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 1024 * 1024 }))
-            {
-                IntRange range = new IntRange(1, 5);
-                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(range);
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.MultiPageOptions = multiPageOptions;
+            var loadOptions = new LoadOptions { BufferSizeHint = 1048576 };
 
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath, loadOptions))
+            {
+                var pdfOptions = new PdfOptions();
+                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(1, 5));
                 djvu.Save(outputPath, pdfOptions);
             }
         }
@@ -42,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first five pages of a large DjVu document and save them as a PDF while controlling memory usage in a C# application.
- * 2. When an archival system must batch‑convert specific page ranges from DjVu scans to searchable PDFs without loading the entire file into memory.
- * 3. When a desktop tool processes user‑uploaded DjVu files and offers a preview PDF of selected pages, using Aspose.Imaging’s buffer‑size hint to improve performance.
- * 4. When a server‑side service generates PDF excerpts from multi‑page DjVu manuals for on‑demand printing, ensuring efficient resource handling in .NET.
- * 5. When a document‑management workflow needs to programmatically convert a subset of DjVu pages to PDF and automatically clean up resources after saving.
+ * 1. When you need to extract only the first five pages of a DjVu document and save them as a searchable PDF in a .NET application.
+ * 2. When you want to limit memory usage while loading large DjVu files by setting a buffer size hint before conversion.
+ * 3. When you are automating batch processing of DjVu archives and must generate separate PDF files for specific page ranges.
+ * 4. When you require proper disposal of image resources after conversion to avoid memory leaks in a C# service.
+ * 5. When you need to programmatically create PDF reports from DjVu source files without loading the entire document into memory.
  */

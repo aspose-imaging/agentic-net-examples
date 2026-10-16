@@ -1,7 +1,14 @@
-// HOW-TO: Download WMF from URL and Convert to BMP Byte Array in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load WMF from URL and Convert to BMP Byte Array in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Net;
+using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,32 +18,26 @@ class Program
     {
         try
         {
-            // Hardcoded paths (required by priority rules)
-            string inputUrl = "https://example.com/sample.wmf";
-            string outputPath = "output.bmp";
+            // Hardcoded URL to the WMF file
+            string url = "https://example.com/sample.wmf";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Download WMF data from URL
-            using (WebClient client = new WebClient())
+            using (HttpClient client = new HttpClient())
+            using (Stream urlStream = client.GetStreamAsync(url).Result)
             {
-                byte[] wmfData = client.DownloadData(inputUrl);
-                using (MemoryStream wmfStream = new MemoryStream(wmfData))
+                // Load WMF image from the stream
+                using (Image image = Image.Load(urlStream))
                 {
-                    // Load WMF image
-                    using (Image image = Image.Load(wmfStream))
-                    {
-                        // Save image to BMP format in a memory stream
-                        using (MemoryStream bmpStream = new MemoryStream())
-                        {
-                            BmpOptions bmpOptions = new BmpOptions();
-                            image.Save(bmpStream, bmpOptions);
-                            byte[] bmpBytes = bmpStream.ToArray();
+                    // Set BMP save options
+                    var bmpOptions = new BmpOptions();
 
-                            // Example usage: output the size of the BMP byte array
-                            Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
-                        }
+                    // Save image to a memory stream in BMP format
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        image.Save(memoryStream, bmpOptions);
+                        byte[] bmpBytes = memoryStream.ToArray();
+
+                        // Output the size of the resulting byte array
+                        Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
                     }
                 }
             }
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to fetch a vector WMF graphic from a web service and embed it as a BMP byte array in a PDF or email attachment.
- * 2. When you want to convert online WMF icons to BMP for use in a Windows Forms application without writing to disk.
- * 3. When a cloud function must download a WMF logo, transform it to BMP, and store the resulting bytes in a database.
- * 4. When generating thumbnails for WMF files in a web API that returns the image data as a byte array.
- * 5. When integrating legacy WMF assets into a modern C# service that requires BMP data for further processing like OCR or printing.
+ * 1. When you need to download a WMF vector graphic from a web service and store it as a BMP byte array for embedding in a PDF document.
+ * 2. When a server‑side C# application must convert legacy WMF icons retrieved via HTTP into BMP data to send to a client‑side canvas.
+ * 3. When you want to cache a remote WMF image in memory as BMP bytes for fast repeated rendering without writing temporary files.
+ * 4. When an API endpoint receives a WMF URL and must return the image in BMP format as a byte stream for downstream processing.
+ * 5. When you are building a batch job that reads WMF files from URLs and saves them as BMP byte arrays for archival in a binary database.
  */

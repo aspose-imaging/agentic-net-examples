@@ -1,43 +1,57 @@
-// HOW-TO: Save JPEG to New File Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add Custom GPS EXIF Tags to JPEG Image in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "Input\\sample.jpg";
+            string outputPath = "Output\\sample_geotagged.jpg";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                var jpegOptions = new JpegOptions
+                var exif = image.ExifData;
+                if (exif != null)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    exif.GPSLatitude = new TiffRational[]
+                    {
+                        new TiffRational(37, 1),
+                        new TiffRational(48, 1),
+                        new TiffRational(30, 1)
+                    };
+                    exif.GPSLatitudeRef = "N";
 
-                image.Save(outputPath, jpegOptions);
+                    exif.GPSLongitude = new TiffRational[]
+                    {
+                        new TiffRational(122, 1),
+                        new TiffRational(24, 1),
+                        new TiffRational(15, 1)
+                    };
+                    exif.GPSLongitudeRef = "W";
+                }
+
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a duplicate JPEG file while ensuring it is saved with Aspose.Imaging’s JPEG options for consistent quality.
- * 2. When you want to programmatically copy an existing JPEG to a different folder in a .NET application.
- * 3. When you must re‑encode a JPEG image to a new file to apply future metadata or compression settings.
- * 4. When an automated workflow requires loading a JPEG, performing validation, and saving it to a target path without altering pixel data.
- * 5. When you are preparing a JPEG for further processing such as adding EXIF GPS tags, and you first need a clean copy saved with Aspose.Imaging.
+ * 1. When a developer needs to geotag photos taken offline by embedding latitude and longitude into the JPEG EXIF metadata using C#.
+ * 2. When building a photo‑management app that must add or correct GPS coordinates in existing images without re‑encoding them.
+ * 3. When preparing images for mapping services that require precise GPS EXIF tags to display locations on a map.
+ * 4. When integrating location data from a GPS device into a batch of JPEG files during an automated upload workflow.
+ * 5. When creating a custom image‑processing pipeline that updates EXIF GPS fields before sharing images on social media platforms.
  */

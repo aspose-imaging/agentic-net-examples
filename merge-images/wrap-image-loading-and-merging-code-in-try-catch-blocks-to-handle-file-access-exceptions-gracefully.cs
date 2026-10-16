@@ -1,8 +1,13 @@
-// HOW-TO: Merge Multiple JPEG Images Horizontally with Error Handling in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple Images Horizontally Into a JPEG With Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -12,11 +17,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string[] inputPaths = { "input1.jpg", "input2.png", "input3.bmp" };
+        string outputPath = "output/merged.jpg";
+
         try
         {
-            string[] inputPaths = new string[] { "input/image1.jpg", "input/image2.jpg", "input/image3.jpg" };
-            string outputPath = "output/merged.jpg";
-
             foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -28,22 +33,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            int totalWidth = 0;
+            int maxHeight = 0;
+
             foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight)
+                        maxHeight = img.Height;
                 }
             }
 
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = src, Quality = 90 };
 
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(options, totalWidth, maxHeight))
             {
                 int offsetX = 0;
                 foreach (var path in inputPaths)
@@ -67,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several product photos into a single JPEG banner for a website while ensuring missing or locked files do not crash the application.
- * 2. When you want to create a side‑by‑side panoramic view by stitching multiple JPEG screenshots from a monitoring system and handle file‑access errors gracefully.
- * 3. When an automated report generator must merge chart images into one composite JPEG before emailing the report, with robust handling of unavailable image files.
- * 4. When a desktop application assembles user‑uploaded pictures into a single JPEG collage for printing, protecting against file‑not‑found or permission exceptions.
- * 5. When a batch process concatenates image assets into a wider JPEG image and needs to continue safely even if some source files are missing or locked.
+ * 1. When you need to combine several photos of different formats into a single side‑by‑side JPEG for a web gallery.
+ * 2. When an application must generate a composite image from user‑uploaded pictures while ensuring the output folder exists.
+ * 3. When you want to create a high‑quality JPEG collage from PNG and BMP files and handle missing files gracefully.
+ * 4. When a batch process has to stitch product images together for a catalog and must catch file‑access errors.
+ * 5. When you are building a reporting tool that merges chart images into one JPEG and needs robust exception handling.
  */

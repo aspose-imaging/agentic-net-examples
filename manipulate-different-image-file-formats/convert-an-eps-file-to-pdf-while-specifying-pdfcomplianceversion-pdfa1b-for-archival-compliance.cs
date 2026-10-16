@@ -1,8 +1,16 @@
-// HOW-TO: Convert Eps To Pdf With Pdfa1b Compliance In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF/A-1b for Archival Compliance in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -11,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/input.eps";
-            string outputPath = "Output/output.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,13 +30,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions { PdfCompliance = PdfComplianceVersion.PdfA1b };
-                    epsImage.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                pdfOptions.PdfCoreOptions = new PdfCoreOptions { PdfCompliance = PdfComplianceVersion.PdfA1b };
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive vector artwork from EPS files in a PDF/A‑1b compliant PDF for long‑term preservation.
- * 2. When a publishing workflow requires converting designer‑generated EPS logos to PDF while ensuring the output meets PDF/A‑1b standards for legal documents.
- * 3. When an automated batch process must transform EPS illustrations into PDF files that pass PDF/A‑1b validation for government submissions.
- * 4. When integrating Aspose.Imaging into a C# application to generate PDF reports that include EPS diagrams and must comply with archival PDF/A‑1b specifications.
- * 5. When migrating legacy EPS assets to PDF format and you need to enforce PDF/A‑1b compliance to guarantee compatibility with document management systems.
+ * 1. When you need to archive vector graphics from EPS files in a PDF/A-1b compliant format for long‑term preservation.
+ * 2. When a publishing workflow requires converting designer‑provided EPS artwork into PDF for inclusion in PDF/A‑1b compliant documents.
+ * 3. When a regulatory system mandates that all exported PDFs meet PDF/A‑1b standards, and you must automate the conversion from EPS.
+ * 4. When you are building a .NET service that transforms incoming EPS logos into PDF/A‑1b PDFs for use in legal contracts.
+ * 5. When you need to ensure that EPS diagrams are saved as searchable, standards‑compliant PDFs for electronic document management systems.
  */

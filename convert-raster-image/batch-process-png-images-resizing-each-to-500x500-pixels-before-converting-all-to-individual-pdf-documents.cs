@@ -1,4 +1,11 @@
 // HOW-TO: Batch Resize PNG Images to 500x500 and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -28,8 +35,7 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -37,15 +43,12 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    if (!image.IsCached) image.CacheData();
-                    image.Resize(500, 500, ResizeType.NearestNeighbourResample);
+                    image.Resize(500, 500);
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         image.Save(outputPath, pdfOptions);
@@ -62,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate standardized 500×500 PDF thumbnails from a folder of PNG assets for a web catalog.
- * 2. When you must automate conversion of multiple PNG logos into PDF files while ensuring each image fits a fixed square dimension for printing.
- * 3. When a document management system requires all uploaded PNG diagrams to be resized and stored as PDF for consistent archival.
- * 4. When creating batch reports that embed PNG screenshots as PDF pages, and each screenshot must be uniformly sized.
- * 5. When preparing a set of product images for a mobile app, resizing them to 500×500 and converting to PDF to meet the app’s asset pipeline.
+ * 1. When you need to generate standardized 500 × 500 thumbnails of many PNG files and save each as a separate PDF for reporting or archival purposes.
+ * 2. When an application must automatically process a folder of product images, resize them for uniform layout, and deliver them as PDF documents to clients.
+ * 3. When a batch conversion tool is required to shrink large PNG graphics to a fixed size before embedding them into PDF invoices or catalogs.
+ * 4. When you want to automate the preparation of PNG screenshots for legal evidence, ensuring each image is resized and stored as an individual PDF file.
+ * 5. When a server‑side service must read PNG files from a directory, resize them to a specific dimension, and output PDF versions for downstream document workflows.
  */

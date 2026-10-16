@@ -1,59 +1,50 @@
-// HOW-TO: Crop EMF File to PNG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop an EMF Image to Specific Area and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image emfImage = Image.Load(inputPath))
-            {
-                int width = emfImage.Width;
-                int height = emfImage.Height;
+            string inputPath = "Input\\sample.emf";
+            string outputPath = "Output\\cropped.png";
 
-                PngOptions pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (EmfImage emf = (EmfImage)Image.Load(inputPath))
+            {
+                int left = 10;
+                int top = 10;
+                int width = 200;
+                int height = 200;
+                var cropRect = new Rectangle(left, top, width, height);
+                emf.Crop(cropRect);
+
+                var pngOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.DrawImage(emfImage, new Rectangle(0, 0, width, height));
-
-                    // Define crop bounds (example: inset by 10 pixels)
-                    int cropX = 10;
-                    int cropY = 10;
-                    int cropWidth = width - 20;
-                    int cropHeight = height - 20;
-
-                    if (cropWidth > 0 && cropHeight > 0)
-                    {
-                        Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                        canvas.Crop(cropRect);
-                    }
-
-                    canvas.Save();
-                }
+                emf.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EMF graphics to raster PNG for web display while removing unwanted borders.
- * 2. When you must generate thumbnail images from EMF drawings by cropping a fixed margin before saving.
- * 3. When an automated report generator creates EMF charts that must be trimmed and stored as PNG files for email attachments.
- * 4. When a batch processing tool has to standardize the size of EMF assets by cropping and converting them to PNG for a mobile app.
- * 5. When a legacy Windows application exports diagrams as EMF and you need to programmatically extract a centered portion and save it as PNG for documentation.
+ * 1. When you need to extract a portion of a vector‑based EMF diagram for inclusion in a web page as a lightweight PNG thumbnail.
+ * 2. When generating report assets that require converting and trimming EMF charts to fixed‑size PNG images for email attachments.
+ * 3. When preprocessing legacy EMF icons to create uniformly sized PNG sprites for a desktop application UI.
+ * 4. When automating batch conversion of scanned EMF drawings, cropping out margins before saving them as PNG files for archival.
+ * 5. When building a document conversion service that must isolate a specific region of an EMF file and deliver it as a PNG to downstream systems.
  */

@@ -1,8 +1,17 @@
-// HOW-TO: Create Animated GIF From Multiple PNG Frames In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Floyd Steinberg Dithering to Each Frame of an Animated GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
@@ -10,50 +19,28 @@ class Program
     {
         try
         {
-            // Hardcoded input frame paths
-            string frame1 = "frame1.png";
-            string frame2 = "frame2.png";
-            string frame3 = "frame3.png";
+            string inputPath = "input.gif";
+            string outputPath = "output\\output.gif";
 
-            // Verify input files exist
-            if (!File.Exists(frame1))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {frame1}");
-                return;
-            }
-            if (!File.Exists(frame2))
-            {
-                Console.Error.WriteLine($"File not found: {frame2}");
-                return;
-            }
-            if (!File.Exists(frame3))
-            {
-                Console.Error.WriteLine($"File not found: {frame3}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output path
-            string outputPath = "output/animated.gif";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load frames and create animated GIF
-            using (RasterImage img1 = (RasterImage)Image.Load(frame1))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                using (RasterImage img2 = (RasterImage)Image.Load(frame2))
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    using (RasterImage img3 = (RasterImage)Image.Load(frame3))
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    if (gif.ActiveFrame is RasterImage raster)
                     {
-                        RasterImage[] frames = new RasterImage[] { img1, img2, img3 };
-                        using (Image result = Image.Create(frames, true))
-                        {
-                            GifOptions gifOptions = new GifOptions();
-                            gifOptions.LoopsCount = 0; // infinite loop
-                            result.Save(outputPath, gifOptions);
-                        }
+                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
                     }
                 }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                gif.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -65,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several PNG images into a single looping animated GIF for a web banner using C# and Aspose.Imaging.
- * 2. When you want to programmatically generate an infinite‑loop GIF slideshow from product photos stored as PNG files in a .NET application.
- * 3. When you must automate the creation of an animated GIF from frame assets during a build process without manual image editors.
- * 4. When you are building a desktop tool that assembles user‑selected PNG screenshots into a GIF preview for UI testing.
- * 5. When you require server‑side code that reads PNG frames, assembles them into an animated GIF, and saves it to a specific output folder in an ASP.NET service.
+ * 1. When you need to reduce banding and add texture to every frame of a low‑color animated GIF before publishing it on the web using Aspose.Imaging for .NET.
+ * 2. When converting a high‑resolution video clip to an animated GIF and want each frame to retain visual detail despite the limited 256‑color palette by applying Floyd‑Steinberg dithering in C#.
+ * 3. When creating retro‑style pixel‑art animations where Floyd‑Steinberg dithering improves gradient smoothness across all GIF frames with Aspose.Imaging.
+ * 4. When processing user‑uploaded GIFs to ensure consistent visual quality across browsers that only support 256 colors by dithering each frame in C#.
+ * 5. When building an image‑processing pipeline that automatically enhances the visual fidelity of animated GIFs generated from screenshots or screen recordings using Aspose.Imaging’s Dither method.
  */

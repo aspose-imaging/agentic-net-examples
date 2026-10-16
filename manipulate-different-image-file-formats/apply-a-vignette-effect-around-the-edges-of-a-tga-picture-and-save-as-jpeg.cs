@@ -1,43 +1,62 @@
 // HOW-TO: Add Vignette Effect to TGA Image and Save as JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.tga";
-        string outputPath = "output\\result.jpg";
+        string inputPath = "Input\\sample.tga";
+        string outputPath = "Output\\result.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                int width = image.Width;
-                int height = image.Height;
-
-                Graphics graphics = new Graphics(image);
-                SolidBrush brush = new SolidBrush(Color.FromArgb(128, 0, 0, 0));
-                graphics.FillEllipse(brush, new Rectangle(0, 0, width, height));
-
-                JpegOptions jpegOptions = new JpegOptions
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    Quality = 90,
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                int centerX = raster.Width / 2;
+                int centerY = raster.Height / 2;
+                int radius = (int)(Math.Min(raster.Width, raster.Height) * 0.4);
+
+                var mask = MagicWandTool.Select(raster, new MagicWandSettings(centerX, centerY))
+                    .Union(new CircleMask(centerX, centerY, radius))
+                    .Invert()
+                    .GetFeathered(new FeatheringSettings { Size = 30 });
+
+                mask.Apply();
+
+                var jpegOptions = new JpegOptions
+                {
                     Source = new FileCreateSource(outputPath, false)
                 };
-                image.Save(outputPath, jpegOptions);
+
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply a darkened border (vignette) to a game asset stored as a TGA file before converting it to a web‑friendly JPEG for online galleries.
- * 2. When you want to batch‑process high‑resolution TGA screenshots, add a subtle vignette for visual emphasis, and output compressed JPEGs for faster loading.
- * 3. When a photo‑editing application requires converting legacy TGA textures with a vignette overlay into JPEG thumbnails for preview panels.
- * 4. When an e‑commerce platform must transform product renderings in TGA format, add a professional vignette effect, and store them as JPEGs for product listings.
- * 5. When a reporting tool generates charts as TGA images, needs to enhance them with a vignette for aesthetic appeal, and then saves the final images as JPEGs for inclusion in PDF reports.
+ * 1. When you need to create a photo‑style vignette around a TGA texture before publishing it as a JPEG for web galleries.
+ * 2. When converting legacy TGA assets from a game project into compressed JPEGs while adding a soft border to focus viewer attention.
+ * 3. When generating thumbnails with a darkened edge effect for an e‑commerce catalog that stores product images originally in TGA format.
+ * 4. When preparing print‑ready images by applying a feathered mask to the edges of a TGA file and exporting it as a high‑quality JPEG.
+ * 5. When automating batch processing of TGA screenshots to add a professional vignette and store the results in JPEG for email distribution.
  */

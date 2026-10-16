@@ -1,59 +1,65 @@
-// HOW-TO: Batch Convert CDR To PDF Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple CDR Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace CdrToPdfBatch
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded input file paths
-            string[] inputPaths = new string[]
+            try
             {
-                @"C:\Input\file1.cdr",
-                @"C:\Input\file2.cdr",
-                @"C:\Input\file3.cdr"
-            };
-
-            foreach (string inputPath in inputPaths)
-            {
-                if (!File.Exists(inputPath))
+                // Hardcoded input CDR file paths
+                string[] inputPaths = new string[]
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    @"C:\Images\file1.cdr",
+                    @"C:\Images\file2.cdr",
+                    @"C:\Images\file3.cdr"
+                };
 
-                // Determine output path (same folder, .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load CDR and save as PDF with default settings
-                using (Image image = Image.Load(inputPath))
+                foreach (string inputPath in inputPaths)
                 {
-                    PdfOptions options = new PdfOptions();
-                    image.Save(outputPath, options);
-                }
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                    string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath, new PdfOptions());
+                    }
+
+                    Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automate the conversion of several CorelDRAW (.cdr) drawings into PDF documents for archiving or sharing without manually opening each file.
- * 2. When a desktop application must generate PDFs from a list of CDR files supplied by the user, ensuring the output files are saved in the same folder.
- * 3. When a server‑side service processes uploaded CDR assets in bulk and creates PDF versions for preview in a web portal.
- * 4. When you want to integrate Aspose.Imaging into a build script that converts design files to PDF as part of a continuous‑integration pipeline.
- * 5. When an internal tool has to verify that each CDR file exists before converting it to PDF, creating the necessary output directories automatically.
+ * 1. When you need to automate the conversion of a collection of CorelDRAW (CDR) drawings into PDF documents for archiving or distribution.
+ * 2. When a desktop or server application must process several CDR files in a single run without manual intervention.
+ * 3. When you want to generate PDF versions of design assets on the fly before sending them to a printing service.
+ * 4. When you are building a migration tool that moves legacy CDR artwork into a PDF‑based workflow.
+ * 5. When you need to validate that each CDR file exists, create output folders, and convert them reliably using default Aspose.Imaging settings.
  */

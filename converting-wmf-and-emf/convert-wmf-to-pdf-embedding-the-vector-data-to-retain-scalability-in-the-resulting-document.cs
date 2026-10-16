@@ -1,4 +1,11 @@
-// HOW-TO: Convert WMF to PDF with Vector Preservation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WMF to Scalable PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,7 +20,7 @@ namespace WmfToPdfConverter
             try
             {
                 string inputPath = "input.wmf";
-                string outputPath = "output.pdf";
+                string outputPath = "output/output.pdf";
 
                 if (!File.Exists(inputPath))
                 {
@@ -21,12 +28,12 @@ namespace WmfToPdfConverter
                     return;
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    PdfOptions options = new PdfOptions();
+                    image.Save(outputPath, options);
                 }
             }
             catch (Exception ex)
@@ -39,9 +46,9 @@ namespace WmfToPdfConverter
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed scalable WMF graphics into a PDF report generated from a .NET application.
- * 2. When an automated batch process must convert legacy Windows Metafile diagrams to PDF for archival without losing vector quality.
- * 3. When a web service creates printable PDFs from user‑uploaded WMF logos while keeping them resolution‑independent.
- * 4. When a desktop tool exports engineering schematics stored as WMF files into PDF documents for client distribution.
- * 5. When a document management system migrates WMF assets to PDF format to ensure consistent rendering across platforms.
+ * 1. When a developer needs to embed Windows Metafile graphics into a PDF report while preserving vector quality for zoom‑in without pixelation.
+ * 2. When an application must batch‑convert legacy WMF icons into searchable PDF documents for archival or compliance purposes.
+ * 3. When a CAD or diagramming tool exports drawings as WMF and the downstream system requires PDF output that remains resolution‑independent.
+ * 4. When a web service receives WMF files from users and must generate printable PDFs that keep the original vector shapes intact.
+ * 5. When automating document generation in C# and the workflow includes converting vector‑based WMF logos into PDF brochures without losing scalability.
  */

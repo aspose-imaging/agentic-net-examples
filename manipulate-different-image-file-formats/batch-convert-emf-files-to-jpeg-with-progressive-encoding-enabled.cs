@@ -1,9 +1,15 @@
-// HOW-TO: Batch Convert EMF Files to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to Progressive JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -27,10 +33,13 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             foreach (string inputPath in files)
             {
+                if (!Path.GetExtension(inputPath).Equals(".emf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -40,17 +49,12 @@ class Program
                 string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg"));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    using (JpegOptions jpegOptions = new JpegOptions())
+                    using (JpegOptions options = new JpegOptions())
                     {
-                        jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
-                        image.Save(outputPath, jpegOptions);
+                        options.CompressionType = JpegCompressionMode.Progressive;
+                        image.Save(outputPath, options);
                     }
                 }
             }
@@ -64,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically convert a folder of Windows Metafile (EMF) graphics into web‑ready JPEG images for a reporting system.
- * 2. When a desktop application must rasterize vector EMF drawings at their original size and save them as JPEGs for email attachments.
- * 3. When a batch job processes design assets, converting EMF logos to JPEG thumbnails to display in a product catalog.
- * 4. When migrating legacy EMF files to a format supported by browsers, using Aspose.Imaging to preserve dimensions and apply a white background.
- * 5. When generating JPEG previews of EMF diagrams in a C# service that creates PDF reports, ensuring consistent image quality across pages.
+ * 1. When you need to generate web‑optimized JPEG previews from a collection of EMF vector drawings for faster page loads.
+ * 2. When a reporting system stores charts as EMF and you must export them as progressive JPEGs for email attachments.
+ * 3. When migrating legacy design assets stored in EMF to a photo‑gallery that only accepts JPEG with progressive compression.
+ * 4. When automating a build pipeline that converts EMF icons into progressive JPEG thumbnails for mobile apps.
+ * 5. When creating a batch script that processes user‑uploaded EMF files and saves them as progressive JPEGs to reduce bandwidth usage.
  */

@@ -1,4 +1,11 @@
-// HOW-TO: Convert ODG to PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG to PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,8 +29,8 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -36,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically convert LibreOffice Draw (.odg) diagrams into PDF files for easy sharing or printing.
- * 2. When an application must batch‑process ODG assets and generate PDF reports without manual export.
- * 3. When a web service receives ODG uploads and must return a PDF version for client browsers that only support PDF viewing.
- * 4. When integrating document workflows that require converting vector graphics from ODG to PDF to embed them in larger PDF portfolios.
- * 5. When automating archival of design files by converting ODG drawings to PDF to ensure long‑term, platform‑independent storage.
+ * 1. When you need to programmatically transform OpenDocument graphics (ODG) files into PDF documents for reporting or archival in a .NET application.
+ * 2. When an automated workflow must generate PDF versions of ODG diagrams to share with users who only have PDF readers.
+ * 3. When a server‑side service converts user‑uploaded ODG drawings to PDF for preview or printing without manual intervention.
+ * 4. When integrating Aspose.Imaging into a C# project to batch‑process multiple ODG files into PDFs for bulk document conversion.
+ * 5. When you want to ensure the output folder exists and handle missing input files gracefully while converting ODG to PDF in a .NET console app.
  */

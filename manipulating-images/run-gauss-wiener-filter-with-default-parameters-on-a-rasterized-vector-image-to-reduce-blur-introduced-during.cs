@@ -1,42 +1,52 @@
-// HOW-TO: Apply Gauss Wiener Filter to Rasterized SVG and Save as PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gauss Wiener Filter to Rasterized SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string tempRasterPath = "temp/temp.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "Input\\vector.svg";
-            string outputPath = "Output\\filtered.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image vectorImage = Image.Load(inputPath))
             {
-                using (var memoryStream = new MemoryStream())
+                PngOptions pngOptions = new PngOptions
                 {
-                    var pngOptions = new PngOptions();
-                    vectorImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
+                };
+                vectorImage.Save(tempRasterPath, pngOptions);
+            }
 
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
-                    {
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions();
-                        raster.Filter(raster.Bounds, filterOptions);
-                        var outOptions = new PngOptions();
-                        raster.Save(outputPath, outOptions);
-                    }
-                }
+            using (RasterImage rasterImage = (RasterImage)Image.Load(tempRasterPath))
+            {
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions());
+
+                PngOptions outOptions = new PngOptions();
+                rasterImage.Save(outputPath, outOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting SVG logos to PNG thumbnails for a web app, you can use this code to rasterize the vector and automatically reduce conversion blur with a Gauss‑Wiener filter.
- * 2. When preparing print‑ready assets from vector illustrations, the filter helps sharpen the rasterized image before saving it as high‑quality PNG.
- * 3. When building an automated pipeline that ingests SVG icons and outputs optimized PNGs for mobile devices, applying the Gauss‑Wiener filter improves visual clarity without manual editing.
- * 4. When generating chart images from SVG sources for PDF reports, the code ensures the rasterized PNG has reduced blur, making the graphics look crisp in the final document.
- * 5. When creating a batch process to convert legacy SVG files to PNG for a content management system, the built‑in filter cleans up artifacts caused by rasterization, delivering cleaner images for end users.
+ * 1. When you need to convert an SVG logo to a high‑quality PNG for web use and want to remove conversion blur with a Gauss‑Wiener filter in C#.
+ * 2. When you generate raster thumbnails from vector graphics and require automatic de‑blurring to keep sharp edges using Aspose.Imaging.
+ * 3. When a desktop application processes user‑uploaded SVG files and must output clean PNGs for printing, applying a default Gauss‑Wiener filter to improve clarity.
+ * 4. When you batch‑process vector illustrations into PNG assets for a mobile app and need a simple C# solution that rasterizes and denoises the images in one workflow.
+ * 5. When you integrate image preprocessing into a C# pipeline that reads SVG diagrams, rasterizes them, and applies a Gauss‑Wiener filter to reduce artifacts before further analysis.
  */

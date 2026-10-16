@@ -1,9 +1,16 @@
 // HOW-TO: Compare EPS and PDF File Sizes After Conversion in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +18,10 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.eps";
-            string outputPath = "Output\\converted.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             if (!File.Exists(inputPath))
             {
@@ -20,14 +29,9 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    epsImage.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, new PdfOptions());
             }
 
             long epsSize = new FileInfo(inputPath).Length;
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to evaluate storage savings by converting legacy EPS graphics to PDF in a .NET application.
- * 2. When you want to verify that a batch conversion process does not increase file size beyond acceptable limits.
- * 3. When you are migrating design assets to a PDF‑based workflow and must compare original EPS dimensions for compliance.
- * 4. When you need to log or display the size difference between EPS and PDF for reporting or auditing purposes.
- * 5. When you are building an automated tool that chooses the smaller format for archiving documents in C#.
+ * 1. When you need to evaluate whether converting legacy EPS artwork to PDF reduces storage requirements before archiving.
+ * 2. When you want to programmatically verify the size difference between original vector EPS files and their PDF equivalents in a .NET batch process.
+ * 3. When you are building a migration tool that assesses disk space savings by comparing EPS and PDF file sizes after conversion.
+ * 4. When you must generate a report of EPS versus PDF file sizes to decide which format to store in a cloud repository.
+ * 5. When you are testing Aspose.Imaging’s EPS‑to‑PDF conversion performance and need to log the resulting file size for quality control.
  */

@@ -1,7 +1,13 @@
 // HOW-TO: Benchmark Median Filter Speed on 4K vs 1080p PNG After Background Removal in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -33,18 +39,13 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1080p));
-
             // Process 4K image
-            Stopwatch sw4K = new Stopwatch();
-            sw4K.Start();
-            using (RasterImage image = (RasterImage)Image.Load(inputPath4K))
+            using (RasterImage raster4K = (RasterImage)Image.Load(inputPath4K))
             {
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                var maskingOptions4K = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    FeatheringRadius = (Math.Max(raster4K.Width, raster4K.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     ExportOptions = new PngOptions
@@ -55,31 +56,29 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                var masking4K = new ImageMasking(raster4K);
+                using (MaskingResult result4K = masking4K.Decompose(maskingOptions4K))
+                using (RasterImage foreground4K = (RasterImage)result4K[1].GetImage())
                 {
-                    foreground.Filter(foreground.Bounds, new MedianFilterOptions(3));
-                    var saveOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(outputPath4K, false)
-                    };
-                    foreground.Save(outputPath4K, saveOptions);
+                    var medianOptions = new MedianFilterOptions(3);
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    foreground4K.Filter(foreground4K.Bounds, medianOptions);
+                    sw.Stop();
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
+                    foreground4K.Save(outputPath4K, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+
+                    Console.WriteLine($"Median filter on 4K image took {sw.ElapsedMilliseconds} ms");
                 }
             }
-            sw4K.Stop();
-            long medianTime4K = sw4K.ElapsedMilliseconds;
 
             // Process 1080p image
-            Stopwatch sw1080p = new Stopwatch();
-            sw1080p.Start();
-            using (RasterImage image = (RasterImage)Image.Load(inputPath1080p))
+            using (RasterImage raster1080p = (RasterImage)Image.Load(inputPath1080p))
             {
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                var maskingOptions1080p = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    FeatheringRadius = (Math.Max(raster1080p.Width, raster1080p.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     ExportOptions = new PngOptions
@@ -90,24 +89,21 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                var masking1080p = new ImageMasking(raster1080p);
+                using (MaskingResult result1080p = masking1080p.Decompose(maskingOptions1080p))
+                using (RasterImage foreground1080p = (RasterImage)result1080p[1].GetImage())
                 {
-                    foreground.Filter(foreground.Bounds, new MedianFilterOptions(3));
-                    var saveOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(outputPath1080p, false)
-                    };
-                    foreground.Save(outputPath1080p, saveOptions);
+                    var medianOptions = new MedianFilterOptions(3);
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    foreground1080p.Filter(foreground1080p.Bounds, medianOptions);
+                    sw.Stop();
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath1080p));
+                    foreground1080p.Save(outputPath1080p, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+
+                    Console.WriteLine($"Median filter on 1080p image took {sw.ElapsedMilliseconds} ms");
                 }
             }
-            sw1080p.Stop();
-            long medianTime1080p = sw1080p.ElapsedMilliseconds;
-
-            Console.WriteLine($"Median filter time (4K): {medianTime4K} ms");
-            Console.WriteLine($"Median filter time (1080p): {medianTime1080p} ms");
         }
         catch (Exception ex)
         {
@@ -118,9 +114,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When optimizing an image‑processing pipeline, a developer can measure how long a median filter takes on high‑resolution (4K) versus HD (1080p) PNGs after removing the background.
- * 2. When deciding whether to apply background removal before filtering, a developer can compare execution times to choose the most efficient order for large PNG assets.
- * 3. When scaling a photo‑editing application, a developer can use this benchmark to ensure that processing 4K PNGs with Aspose.Imaging stays within acceptable performance limits.
- * 4. When evaluating hardware or server configurations, a developer can run the code to see how median‑filter performance varies with image size after auto‑masking.
- * 5. When documenting performance best practices, a developer can illustrate the impact of image resolution on filter speed by benchmarking 4K and 1080p PNG files with Aspose.Imaging in C#.
+ * 1. When you need to determine how long a median filter takes on high‑resolution 4K PNGs versus 1080p PNGs after removing the background, to optimize an automated product‑photo cleanup pipeline.
+ * 2. When evaluating whether your server hardware can handle batch background‑removal and noise‑reduction for large‑format images in a web‑based photo‑editing service.
+ * 3. When measuring the performance impact of graph‑cut masking on subsequent filtering steps for medical imaging scans that are stored as PNG files.
+ * 4. When comparing processing times to set realistic SLAs for a cloud API that applies background removal and median smoothing to user‑uploaded images of different resolutions.
+ * 5. When profiling the Aspose.Imaging .NET library to decide if you should pre‑scale 4K images before applying median filtering in a real‑time video‑game texture pipeline.
  */

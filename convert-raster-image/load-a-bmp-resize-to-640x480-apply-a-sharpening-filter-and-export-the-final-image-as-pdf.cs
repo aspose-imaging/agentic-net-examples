@@ -1,9 +1,14 @@
 // HOW-TO: Resize BMP to 640x480, Sharpen, and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +16,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/input.bmp";
-            string outputPath = "Output/output.pdf";
+            string inputPath = "Input\\sample.bmp";
+            string outputPath = "Output\\result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,15 +27,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                raster.Resize(640, 480);
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                // Resize to 640x480
+                image.Resize(640, 480);
 
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Apply sharpening filter
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached)
                 {
-                    raster.Save(outputPath, pdfOptions);
+                    raster.CacheData();
                 }
+
+                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions();
+                raster.Filter(raster.Bounds, sharpenOptions);
+
+                // Save as PDF
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP scans into compact PDF reports while standardizing them to a 640x480 resolution and enhancing details with a sharpening filter.
- * 2. When generating printable PDFs from user‑uploaded BMP images for an online form, ensuring the pages are uniformly sized and the images appear crisp.
- * 3. When automating the preparation of BMP assets for a mobile app, resizing them to 640x480, sharpening to improve visual quality, and bundling them as PDFs for distribution.
- * 4. When creating archival PDFs from BMP screenshots, applying a sharpen filter to recover lost detail and resizing to reduce file size.
- * 5. When building a C# service that processes BMP product photos, normalizes their dimensions, enhances edges, and outputs them as PDF catalogs for clients.
+ * 1. When you need to convert legacy BMP screenshots into compact PDF reports with a fixed 640x480 size and enhanced sharpness for better readability.
+ * 2. When an application must automatically process scanned BMP documents, resize them for web preview, apply a sharpening filter, and output them as PDF files for archiving.
+ * 3. When a batch job has to prepare BMP assets for printing by standardizing dimensions, improving edge definition, and packaging the result in a PDF format.
+ * 4. When a desktop tool requires on‑the‑fly image enhancement—resizing a BMP to 640×480, sharpening details, and saving the result as a PDF for email attachment.
+ * 5. When integrating Aspose.Imaging in a C# service that transforms user‑uploaded BMP images into PDF brochures with consistent size and clearer visuals.
  */

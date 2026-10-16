@@ -1,7 +1,15 @@
-// HOW-TO: Increase Contrast of GIF Image and Save as New GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase GIF Contrast to Maximum Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -18,23 +26,19 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-                outputDir = ".";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Directory.CreateDirectory(outputDir);
-
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath) as RasterImage)
             {
-                if (image is RasterImage raster)
+                if (image == null)
                 {
-                    raster.AdjustContrast(100);
-                    raster.Save(outputPath);
+                    Console.Error.WriteLine("Failed to load image as RasterImage.");
+                    return;
                 }
-                else
-                {
-                    Console.Error.WriteLine("Unsupported image format.");
-                }
+
+                // Set contrast to a high level (maximum 100)
+                image.AdjustContrast(100);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the visual clarity of an animated GIF for a web banner by boosting its contrast before publishing.
- * 2. When processing user‑uploaded GIFs in a C# web service and you want to standardize contrast levels for consistent appearance across browsers.
- * 3. When creating a batch script that prepares GIF assets for a mobile app, increasing contrast to improve readability on small screens.
- * 4. When generating marketing emails that embed GIFs, adjusting contrast ensures the animation stands out in various email clients.
- * 5. When converting low‑contrast GIF screenshots into higher‑contrast versions for documentation or training materials in a .NET application.
+ * 1. When you need to enhance the visual impact of animated GIFs for a marketing email by boosting their contrast using Aspose.Imaging before embedding them.
+ * 2. When a web application must automatically improve low‑contrast GIF icons uploaded by users to meet brand style guidelines with a C# contrast‑adjustment routine.
+ * 3. When a game developer wants to preprocess sprite‑sheet GIFs to make characters stand out on dark backgrounds by increasing contrast programmatically.
+ * 4. When a digital archivist needs to increase the readability of scanned GIF documents that appear faded by applying maximum contrast in C#.
+ * 5. When a social‑media tool generates GIF memes and requires a quick C# method to apply maximum contrast for better shareability.
  */

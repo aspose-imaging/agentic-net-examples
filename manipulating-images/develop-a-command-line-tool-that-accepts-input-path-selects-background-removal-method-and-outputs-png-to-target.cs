@@ -1,4 +1,11 @@
-// HOW-TO: Remove Image Background and Save as PNG via Command Line in C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Image Background and Save as Transparent PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -15,8 +22,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
+            string inputPath = "input/input.jpg";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -46,11 +53,7 @@ class Program
                 using (MaskingResult results = masking.Decompose(maskingOptions))
                 using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    var saveOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-                    foreground.Save(outputPath, saveOptions);
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -63,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically strip the background from product photos and generate transparent PNGs for e‑commerce listings.
- * 2. When you want to integrate a batch‑processing CLI into a CI pipeline to convert scanned documents with unwanted backgrounds into clean PNG assets.
- * 3. When you are building a desktop utility that lets users select an image file and instantly obtain a cut‑out foreground for graphic design work.
- * 4. When you need to preprocess images for machine‑learning models by removing backgrounds and preserving alpha channels in PNG format.
- * 5. When you require a scriptable solution to generate transparent PNG thumbnails from user‑uploaded JPEGs on a web server.
+ * 1. When you need to automatically remove the background from product photos in JPEG format and generate transparent PNGs for e‑commerce listings.
+ * 2. When you are building a batch processing script that takes an input folder of images, applies graph‑cut segmentation, and outputs PNGs with alpha channels for use in web design.
+ * 3. When you want to integrate Aspose.Imaging’s AutoMaskingGraphCutOptions into a C# console application to replace complex manual Photoshop steps with code.
+ * 4. When you require a lightweight command‑line tool that validates file existence, creates output directories, and saves the foreground layer as a true‑color PNG with transparency.
+ * 5. When you need to programmatically extract the foreground of scanned documents or photos and store the result as a high‑quality PNG for further image analysis or composition.
  */

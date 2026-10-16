@@ -1,4 +1,11 @@
 // HOW-TO: Create BMP Image with Navy Background and White Diagonal Cross in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,23 +19,23 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            int width = 200;
-            int height = 200;
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "cross.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             BmpOptions options = new BmpOptions();
             options.Source = new FileCreateSource(outputPath, false);
+
+            int width = 200;
+            int height = 200;
 
             using (Image image = Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.Navy);
 
-                Pen pen = new Pen(Color.White, 1);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-                graphics.DrawLine(pen, new Point(0, height - 1), new Point(width - 1, 0));
+                Pen whitePen = new Pen(Color.White, 1);
+                graphics.DrawLine(whitePen, 0, 0, width - 1, height - 1);
+                graphics.DrawLine(whitePen, 0, height - 1, width - 1, 0);
 
                 image.Save();
             }
@@ -42,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a simple BMP flag or emblem with a navy field and a white X for a desktop application.
- * 2. When creating placeholder images for UI testing that require a specific size, background color, and diagonal cross pattern.
- * 3. When programmatically producing icons for games or tools that use a navy background with a white cross to indicate a “cancel” or “reset” symbol.
- * 4. When automating the batch creation of watermark overlays in BMP format that consist of a colored background and intersecting lines.
- * 5. When demonstrating basic drawing operations with Aspose.Imaging, such as clearing a canvas and drawing lines, for educational tutorials or documentation.
+ * 1. When you need to generate a small BMP placeholder with a navy background and a white X for UI testing or mock‑ups.
+ * 2. When you want to programmatically create a simple flag‑style graphic, such as a navy field crossed by white lines, for reports or dashboards.
+ * 3. When you need to produce a test pattern image to verify that image‑processing pipelines correctly handle BMP files, colors, and line drawing.
+ * 4. When you are building a custom icon set and require a basic cross symbol on a solid background without using external design tools.
+ * 5. When you want to automate the creation of watermark overlays that consist of diagonal lines on a solid color for batch‑processing images.
  */

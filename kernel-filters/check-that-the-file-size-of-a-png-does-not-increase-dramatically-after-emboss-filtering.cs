@@ -1,11 +1,18 @@
-// HOW-TO: Check PNG File Size Increase After Applying Emboss Filter In C# (Aspose.Imaging for .NET)
+// HOW-TO: Check PNG File Size After Applying Emboss Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -14,7 +21,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "Output/output_emboss.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,24 +31,39 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            double[,] customKernel = new double[,]
             {
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                { -2, -1,  0 },
+                { -1,  1,  1 },
+                {  0,  1,  2 }
+            };
 
-                PngOptions options = new PngOptions
+            var filterOptions = new ConvolutionFilterOptions(customKernel);
+
+            using (PngImage image = (PngImage)Image.Load(inputPath))
+            {
+                image.Filter(image.Bounds, filterOptions);
+                var saveOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-                raster.Save(outputPath, options);
+                image.Save(outputPath, saveOptions);
             }
 
             long originalSize = new FileInfo(inputPath).Length;
             long newSize = new FileInfo(outputPath).Length;
-            double increase = (double)(newSize - originalSize) / originalSize * 100;
 
             Console.WriteLine($"Original size: {originalSize} bytes");
             Console.WriteLine($"Embossed size: {newSize} bytes");
-            Console.WriteLine($"Size increase: {increase:F2}%");
+
+            if (newSize > originalSize * 1.5)
+            {
+                Console.WriteLine("Warning: File size increased significantly after emboss filtering.");
+            }
+            else
+            {
+                Console.WriteLine("File size increase is within acceptable range.");
+            }
         }
         catch (Exception ex)
         {
@@ -52,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply an emboss effect to a PNG and verify that the resulting file does not become excessively larger for web delivery.
- * 2. When optimizing a batch of product images, you want to ensure the emboss filter does not cause a noticeable increase in storage size before uploading to a CDN.
- * 3. When developing a photo‑editing feature that adds a 3‑x‑3 emboss convolution, you must compare the original and filtered PNG sizes to maintain performance budgets.
- * 4. When generating printable assets with a stylized emboss look, you need to confirm the output PNG stays within size limits for email attachments.
- * 5. When troubleshooting unexpected PNG bloat after applying filters, this code lets you measure the percentage size growth caused by the emboss operation.
+ * 1. When you need to apply an emboss effect to a PNG image in a .NET application while ensuring the resulting file does not become excessively large.
+ * 2. When you want to compare the original and filtered PNG sizes to detect unacceptable growth before uploading to a web service.
+ * 3. When you are building an automated image‑processing workflow that must validate that custom convolution filters keep output files within storage limits.
+ * 4. When you need to log or display size differences after applying a custom kernel to PNGs for quality‑control reporting.
+ * 5. When you are integrating Aspose.Imaging into a C# project to safely apply artistic filters without breaking bandwidth or storage constraints.
  */

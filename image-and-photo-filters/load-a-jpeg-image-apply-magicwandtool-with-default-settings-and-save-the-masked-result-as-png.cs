@@ -1,4 +1,11 @@
-// HOW-TO: How To Apply Magic Wand Selection To JPEG And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Select Central Region of JPEG with Magic Wand and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,50 +13,55 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        try
+        static void Main(string[] args)
         {
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.jpg";
+                string outputPath = "output\\masked.png";
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                MagicWandTool.Select(image, new MagicWandSettings(0, 0)).Apply();
-
-                PngOptions pngOptions = new PngOptions
+                if (!File.Exists(inputPath))
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                {
+                    int centerX = raster.Width / 2;
+                    int centerY = raster.Height / 2;
+
+                    MagicWandTool.Select(raster, new MagicWandSettings(centerX, centerY)).Apply();
+
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    raster.Save(outputPath, pngOptions);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to isolate a region of a JPEG image using the Magic Wand tool and export the result with transparency as a PNG for web graphics.
- * 2. When you want to programmatically remove the background of a photo and keep the selected area in a lossless format for further editing.
- * 3. When an application must convert user‑uploaded JPEGs into PNGs that preserve the selected object's shape with an alpha channel.
- * 4. When you are building a batch process that extracts a specific area from images and stores them as PNGs for use in UI overlays.
- * 5. When you need to generate masked PNG assets from existing JPEGs for printing or e‑commerce product previews.
+ * 1. When you need to isolate the central part of a JPEG photo and export it with transparency for web graphics.
+ * 2. When creating thumbnails that require a masked PNG output preserving only the area selected by a magic wand algorithm.
+ * 3. When preprocessing scanned documents to extract the main content region and save it as a lossless PNG with an alpha channel.
+ * 4. When building a photo‑editing feature that automatically cuts out the center of an image without manual selection.
+ * 5. When converting legacy JPEG assets into PNG assets with built‑in masking to support transparent backgrounds.
  */

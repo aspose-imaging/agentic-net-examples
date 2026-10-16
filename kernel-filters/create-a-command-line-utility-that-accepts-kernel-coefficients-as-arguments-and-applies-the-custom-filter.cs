@@ -1,20 +1,25 @@
-// HOW-TO: Apply Custom Convolution Filter to PNG via Command Line in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Convolution Filter to JPEG via Command Line in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\input.png";
-        string outputPath = "output\\output.png";
-
         try
         {
+            string inputPath = "input/input.jpg";
+            string outputPath = "output/output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,34 +28,36 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double[] coeffs = args.Select(a =>
+            List<double> coeffs = new List<double>();
+            foreach (var a in args)
             {
-                double d;
-                return double.TryParse(a, out d) ? d : 0.0;
-            }).ToArray();
-
-            int length = coeffs.Length;
-            int size = (int)Math.Sqrt(length);
-            if (size * size != length || size == 0)
-            {
-                size = 3;
-                coeffs = new double[] { 0, -1, 0, -1, 5, -1, 0, -1, 0 };
+                if (double.TryParse(a, out double v))
+                {
+                    coeffs.Add(v);
+                }
             }
 
-            double[,] kernel = new double[size, size];
-            for (int i = 0; i < size; i++)
+            int count = coeffs.Count;
+            int dim = (int)Math.Sqrt(count);
+            if (dim * dim != count || dim == 0)
             {
-                for (int j = 0; j < size; j++)
+                Console.Error.WriteLine("Invalid kernel size. Provide N^2 coefficients.");
+                return;
+            }
+
+            double[,] kernel = new double[dim, dim];
+            for (int i = 0; i < dim; i++)
+            {
+                for (int j = 0; j < dim; j++)
                 {
-                    kernel[i, j] = coeffs[i * size + j];
+                    kernel[i, j] = coeffs[i * dim + j];
                 }
             }
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                image.Filter(image.Bounds, new ConvolutionFilterOptions(kernel));
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -62,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen, blur, or detect edges in a PNG image by supplying custom kernel coefficients directly from the command line.
- * 2. When you want to embed a lightweight C# command‑line tool into a build or deployment pipeline to automatically process image assets.
- * 3. When you must apply a specific convolution filter such as emboss or edge detection to a batch of screenshots without using a graphical editor.
- * 4. When you are experimenting with different convolution kernels during image‑processing research and need a quick way to test them via command‑line arguments.
- * 5. When you require a reproducible, scriptable method to apply custom filters to generated graphics in a CI/CD environment.
+ * 1. When you need to apply a user‑defined convolution kernel (e.g., edge detection or sharpening) to a JPEG image from a script or batch file.
+ * 2. When automating image preprocessing in a CI pipeline and want to pass kernel values as command‑line arguments without writing additional code.
+ * 3. When building a lightweight command‑line tool to test different filter coefficients on photos before integrating them into a larger C# application.
+ * 4. When processing large numbers of images on a server and require a simple way to apply custom blur or emboss effects using Aspose.Imaging.
+ * 5. When creating a reproducible image‑filtering step for scientific data where the exact kernel matrix must be supplied at runtime.
  */

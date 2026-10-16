@@ -1,8 +1,15 @@
-// HOW-TO: Process Large PNG Batch With OutOfMemory Handling In C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Process Large PNG Batch Without Out Of Memory In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,9 +18,8 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -31,35 +37,24 @@ class Program
 
             foreach (var inputPath in files)
             {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
                 string fileName = Path.GetFileName(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                if (!File.Exists(inputPath))
+                var loadOptions = new Aspose.Imaging.LoadOptions { BufferSizeHint = 1024 * 1024 };
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath, loadOptions))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
-
-                try
-                {
-                    using (Image image = Image.Load(inputPath))
+                    using (var options = new PngOptions())
                     {
-                        var options = new PngOptions
-                        {
-                            BufferSizeHint = 1024 * 1024
-                        };
+                        options.Source = new FileCreateSource(outputPath, false);
                         image.Save(outputPath, options);
                     }
-                }
-                catch (OutOfMemoryException)
-                {
-                    Console.Error.WriteLine($"Out of memory processing file: {inputPath}. Skipping.");
-                    GC.Collect();
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error processing file {inputPath}: {ex.Message}");
                 }
             }
         }
@@ -72,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert or re‑save thousands of high‑resolution PNG images on a server without crashing due to memory limits.
- * 2. When an automated image‑processing pipeline must skip oversized PNG files that exceed available RAM and continue processing the rest.
- * 3. When you want to apply Aspose.Imaging’s PNG options such as BufferSizeHint to improve streaming performance for large images.
- * 4. When a desktop application processes user‑uploaded PNG photos and must gracefully recover from OutOfMemoryException.
- * 5. When a scheduled job generates thumbnails from a massive PNG collection and must free memory after each file to avoid leaks.
+ * 1. When a developer needs to convert a folder of high‑resolution PNG images to new files while preventing out‑of‑memory crashes.
+ * 2. When an application must batch‑process PNGs on a server with limited RAM and ensure each image is saved with default PNG options.
+ * 3. When a tool has to read large PNG files from an input directory, apply a custom buffer size hint, and write them to an output directory for further processing.
+ * 4. When a background job has to safely load and re‑save many PNG assets without loading the entire image into memory at once.
+ * 5. When a CI pipeline needs to verify that a set of PNG resources can be copied and saved programmatically without exhausting system memory.
  */

@@ -1,8 +1,15 @@
-// HOW-TO: Convert SVG to PNG with Specific Inch Dimensions and DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set SVG Raster Output Size In Inches Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.svg";
-            string outputPath = "Output/output.png";
+            string inputPath = "Input\\sample.svg";
+            string outputPath = "Output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,23 +28,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double widthInches = 4.0;
-            double heightInches = 3.0;
-            int dpi = 300;
-            int pageWidth = (int)(widthInches * dpi);
-            int pageHeight = (int)(heightInches * dpi);
-
-            using (var pngOptions = new PngOptions())
+            using (Image image = Image.Load(inputPath))
             {
-                pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = pageWidth,
-                    PageHeight = pageHeight
-                };
-                pngOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(dpi, dpi);
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                int dpi = 96;
+                rasterOptions.PageWidth = 8 * dpi;
+                rasterOptions.PageHeight = 6 * dpi;
+                rasterOptions.BackgroundColor = Color.White;
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                using (PngOptions pngOptions = new PngOptions())
                 {
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    pngOptions.ResolutionSettings = new ResolutionSetting(dpi, dpi);
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -51,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a high‑resolution PNG thumbnail of an SVG logo that fits exactly a 4 × 3‑inch print area at 300 dpi.
- * 2. When creating printable product labels from vector SVG templates and must ensure the raster image matches the required physical size.
- * 3. When exporting SVG diagrams to PNG for inclusion in a PDF report where the image must occupy a precise inch‑based layout.
- * 4. When automating batch conversion of SVG assets for a web‑to‑print workflow that demands consistent page dimensions across all output files.
- * 5. When developing a C# application that renders SVG icons at a fixed size for UI elements on high‑density displays.
+ * 1. When you need to convert an SVG logo to a PNG thumbnail with exact 8‑by‑6‑inch dimensions for a web catalog.
+ * 2. When you must generate print‑ready PNG images from SVG illustrations while preserving a specific DPI and page size.
+ * 3. When a reporting tool requires SVG charts to be rasterized to PNG at a fixed physical size for PDF embedding.
+ * 4. When an e‑commerce platform needs product SVG drawings rendered as PNGs that match a predefined inch‑based layout.
+ * 5. When automating batch conversion of SVG assets to PNGs with consistent page dimensions for a mobile app’s asset pipeline.
  */

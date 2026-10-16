@@ -1,18 +1,19 @@
 // HOW-TO: Batch Convert WebP Images to GIF Using Config File in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Text.Json;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
-namespace BatchWebpToGif
+namespace WebpToGifBatch
 {
-    class Config
-    {
-        public string SourceDir { get; set; }
-        public string DestDir { get; set; }
-    }
-
     class Program
     {
         static void Main()
@@ -29,24 +30,27 @@ namespace BatchWebpToGif
                 }
 
                 string configJson = File.ReadAllText(configPath);
-                Config config = JsonSerializer.Deserialize<Config>(configJson);
-                if (config == null || string.IsNullOrWhiteSpace(config.SourceDir) || string.IsNullOrWhiteSpace(config.DestDir))
+                var config = JsonSerializer.Deserialize<Config>(configJson);
+                if (config == null || string.IsNullOrWhiteSpace(config.SourceDirectory) || string.IsNullOrWhiteSpace(config.DestinationDirectory))
                 {
                     Console.Error.WriteLine("Invalid configuration.");
                     return;
                 }
 
-                // Ensure source and destination directories exist
-                if (!Directory.Exists(config.SourceDir))
+                string sourceDir = config.SourceDirectory;
+                string destDir = config.DestinationDirectory;
+
+                if (!Directory.Exists(sourceDir))
                 {
-                    Console.Error.WriteLine($"Directory not found: {config.SourceDir}");
+                    Console.Error.WriteLine($"Source directory not found: {sourceDir}");
                     return;
                 }
 
-                Directory.CreateDirectory(config.DestDir);
+                // Ensure destination root exists
+                Directory.CreateDirectory(destDir);
 
-                // Process each WebP file in the source directory
-                foreach (string inputPath in Directory.GetFiles(config.SourceDir, "*.webp"))
+                string[] webpFiles = Directory.GetFiles(sourceDir, "*.webp", SearchOption.AllDirectories);
+                foreach (string inputPath in webpFiles)
                 {
                     if (!File.Exists(inputPath))
                     {
@@ -54,16 +58,20 @@ namespace BatchWebpToGif
                         continue;
                     }
 
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(config.DestDir, fileNameWithoutExt + ".gif");
+                    string relativePath = Path.GetRelativePath(sourceDir, inputPath);
+                    string outputPath = Path.Combine(destDir, Path.ChangeExtension(relativePath, ".gif"));
 
-                    // Ensure the output directory exists
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     using (Image image = Image.Load(inputPath))
                     {
-                        image.Save(outputPath);
+                        // Save as GIF
+                        var gifOptions = new GifOptions();
+                        image.Save(outputPath, gifOptions);
                     }
+
+                    Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
                 }
             }
             catch (Exception ex)
@@ -71,14 +79,20 @@ namespace BatchWebpToGif
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
+
+        private class Config
+        {
+            public string SourceDirectory { get; set; }
+            public string DestinationDirectory { get; set; }
+        }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate animated GIF previews from a folder of WebP assets without hard‑coding paths.
- * 2. When a CI/CD pipeline must automatically convert newly uploaded WebP files to GIF for legacy browsers using a configurable source and output directory.
- * 3. When a desktop tool processes a large batch of product images stored in WebP format and saves the GIF versions to a separate folder defined in a JSON config.
- * 4. When a developer wants to externalize the input and output locations for image conversion so non‑technical users can change directories without modifying code.
- * 5. When an image‑processing microservice must read configuration at runtime to convert all WebP files in a directory to GIF for downstream video‑creation workflows.
+ * 1. When a developer needs to automatically convert a large collection of WebP assets to GIFs for compatibility with legacy browsers, they can use this code to process all files in a folder hierarchy based on a JSON config.
+ * 2. When an e‑commerce platform stores product images in WebP to save bandwidth but requires GIF animations for marketing emails, the script enables batch conversion without hard‑coding paths.
+ * 3. When a CI/CD pipeline must generate GIF previews from WebP screenshots during build time, the configurable source and destination directories allow seamless integration into automated workflows.
+ * 4. When a mobile app development team wants to provide fallback GIFs for devices that do not support WebP, they can run this utility to create the GIF set from the existing WebP resources.
+ * 5. When a content management system needs to migrate user‑uploaded WebP files to GIF format for a new feature, the program reads the directories from a config file and processes every file recursively.
  */

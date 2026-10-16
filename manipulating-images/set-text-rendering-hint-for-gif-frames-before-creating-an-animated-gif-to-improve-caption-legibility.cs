@@ -1,9 +1,19 @@
-// HOW-TO: Set Text Rendering Hint for Animated GIF Captions in C# (Aspose.Imaging for .NET)
+// HOW-TO: Improve Caption Legibility in Animated GIF by Setting Text Rendering Hint in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -12,48 +22,56 @@ class Program
     {
         try
         {
-            string frame1Path = "frame1.png";
-            string frame2Path = "frame2.png";
+            string[] framePaths = new string[] { "frame1.png", "frame2.png" };
+            string[] captions = new string[] { "First Frame", "Second Frame" };
             string outputPath = "output.gif";
 
-            if (!File.Exists(frame1Path))
+            // Verify input files exist
+            foreach (var path in framePaths)
             {
-                Console.Error.WriteLine($"File not found: {frame1Path}");
-                return;
-            }
-            if (!File.Exists(frame2Path))
-            {
-                Console.Error.WriteLine($"File not found: {frame2Path}");
-                return;
-            }
-
-            using (Aspose.Imaging.RasterImage frame1 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(frame1Path))
-            using (Aspose.Imaging.RasterImage frame2 = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(frame2Path))
-            {
-                int width = frame1.Width;
-                int height = frame1.Height;
-
-                using (GifImage gif = (GifImage)Aspose.Imaging.Image.Create(new GifOptions(), width, height))
+                if (!File.Exists(path))
                 {
-                    gif.AddPage(frame1);
-                    gif.AddPage(frame2);
-
-                    for (int i = 0; i < gif.PageCount; i++)
-                    {
-                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(gif.ActiveFrame);
-                        graphics.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAliasGridFit;
-
-                        using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Yellow))
-                        {
-                            Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
-                            graphics.DrawString($"Frame {i + 1}", font, brush, new Aspose.Imaging.PointF(10, 10));
-                        }
-                    }
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    gif.Save(outputPath, new GifOptions());
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load first frame to determine canvas size
+            RasterImage firstFrame = (RasterImage)Image.Load(framePaths[0]);
+            int width = firstFrame.Width;
+            int height = firstFrame.Height;
+            firstFrame.Dispose();
+
+            // Create GIF canvas
+            GifOptions gifOptions = new GifOptions();
+            using (GifImage gif = (GifImage)Image.Create(gifOptions, width, height))
+            {
+                for (int i = 0; i < framePaths.Length; i++)
+                {
+                    using (RasterImage frame = (RasterImage)Image.Load(framePaths[i]))
+                    {
+                        // Draw caption with improved text rendering
+                        Graphics graphics = new Graphics(frame);
+                        graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+                        Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
+                        using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White))
+                        {
+                            graphics.DrawString(captions[i], font, brush, new PointF(10, 10));
+                        }
+
+                        // Add frame to GIF
+                        gif.AddPage(frame);
+                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[gif.PageCount - 1];
+                        gif.ActiveFrame.FrameTime = 500; // duration in milliseconds
+                    }
+                }
+
+                // Save animated GIF
+                gif.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add readable text labels to each frame of an animated GIF generated from PNG images using Aspose.Imaging in C#.
- * 2. When you want to improve the visual quality of captions on GIF frames by applying anti‑alias grid‑fit rendering before saving the animation.
- * 3. When you are creating a slideshow GIF where each slide requires a clear title or description overlaid on the image.
- * 4. When you must ensure that text drawn on GIF frames remains sharp on low‑resolution displays or browsers that render GIFs.
- * 5. When you are programmatically generating marketing GIFs with dynamic captions and need consistent text rendering across all frames.
+ * 1. When you need to add readable text captions to each frame of an animated GIF generated from PNG images in a .NET application.
+ * 2. When you want to ensure that the text drawn on GIF frames uses anti‑aliasing to appear smooth on low‑resolution displays.
+ * 3. When you are creating marketing or instructional GIFs where clear, legible captions are essential for user understanding.
+ * 4. When you must programmatically verify input images exist and automatically create the output folder before building the animated GIF.
+ * 5. When you need to control the font style, size, and color of captions on GIF frames while preserving the original canvas dimensions.
  */

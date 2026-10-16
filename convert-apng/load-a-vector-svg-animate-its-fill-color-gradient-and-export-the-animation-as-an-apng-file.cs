@@ -1,11 +1,18 @@
-// HOW-TO: Create Animated PNG From SVG With Gradient Fill Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Create Animated Gradient Fill From SVG And Export As APNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -25,9 +32,8 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
                 int width = svgImage.Width;
                 int height = svgImage.Height;
 
@@ -35,38 +41,36 @@ class Program
                 {
                     Source = new FileCreateSource(outputPath, false),
                     DefaultFrameTime = 100,
-                    NumPlays = 0
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                 {
+                    apng.RemoveAllFrames();
+
                     int frameCount = 10;
                     for (int i = 0; i < frameCount; i++)
                     {
-                        int r = 255 - (i * 255 / (frameCount - 1));
-                        int b = i * 255 / (frameCount - 1);
-                        Color bgColor = Color.FromArgb(r, 0, b);
+                        byte r = (byte)(255 - (i * 255 / (frameCount - 1)));
+                        byte b = (byte)(i * 255 / (frameCount - 1));
+                        Color frameColor = Color.FromArgb(128, r, 0, b);
 
-                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                        BmpOptions bmpOptions = new BmpOptions
                         {
-                            PageWidth = width,
-                            PageHeight = height,
-                            BackgroundColor = bgColor
+                            Source = new FileCreateSource("temp.bmp", false)
                         };
 
-                        PngOptions pngOptions = new PngOptions
+                        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
                         {
-                            VectorRasterizationOptions = rasterOptions
-                        };
-
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            svgImage.Save(ms, pngOptions);
-                            ms.Position = 0;
-                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            Graphics graphics = new Graphics(canvas);
+                            graphics.Clear(Color.Transparent);
+                            graphics.DrawImage(svgImage, new Point(0, 0));
+                            using (SolidBrush brush = new SolidBrush(frameColor))
                             {
-                                apng.AddFrame(raster);
+                                graphics.FillRectangle(brush, 0, 0, width, height);
                             }
+
+                            apng.AddFrame(canvas);
                         }
                     }
 
@@ -83,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a looping animated icon that smoothly transitions its fill colors for a web dashboard.
- * 2. When you want to convert vector illustrations into lightweight APNG files with a gradient animation for mobile applications.
- * 3. When you have an SVG logo and must create an animated loading spinner that fades from red to blue using C#.
- * 4. When you are building an email newsletter and require an animated PNG with a gradient background that is compatible with most email clients.
- * 5. When you need to programmatically produce frame‑by‑frame color‑shift animations from SVG assets for game UI elements.
+ * 1. When a developer needs to convert a static SVG logo into a looping animated PNG with a color‑changing gradient for web banners.
+ * 2. When an application must generate lightweight animated icons that transition between colors without using video files.
+ * 3. When a game UI requires dynamic button graphics that fade from red to blue using vector shapes and needs to be saved as APNG for cross‑platform compatibility.
+ * 4. When an e‑learning platform wants to illustrate a process by animating the fill of a diagram and deliver it as a single APNG file.
+ * 5. When a reporting tool has to embed animated vector illustrations in PDFs and needs the animation pre‑rendered as an APNG image.
  */

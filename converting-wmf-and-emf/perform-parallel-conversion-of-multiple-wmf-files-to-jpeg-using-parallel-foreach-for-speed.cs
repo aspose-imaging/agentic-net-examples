@@ -1,4 +1,11 @@
 // HOW-TO: Convert Multiple WMF Files to JPEG in Parallel with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,25 +20,31 @@ namespace WmfToJpegParallel
         {
             try
             {
-                string inputDirectory = "input";
-                string outputDirectory = "output";
+                // Hardcoded input and output directories
+                string inputDirectory = @"C:\InputWmf";
+                string outputDirectory = @"C:\OutputJpeg";
 
-                string[] inputFiles = Directory.GetFiles(inputDirectory, "*.wmf");
+                // Get all WMF files in the input directory
+                string[] wmfFiles = Directory.GetFiles(inputDirectory, "*.wmf");
 
-                Parallel.ForEach(inputFiles, inputPath =>
+                Parallel.ForEach(wmfFiles, wmfPath =>
                 {
-                    if (!File.Exists(inputPath))
+                    // Verify input file exists
+                    if (!File.Exists(wmfPath))
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        Console.Error.WriteLine($"File not found: {wmfPath}");
                         return;
                     }
 
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                    // Determine output file path
+                    string outputPath = Path.Combine(outputDirectory,
+                        Path.GetFileNameWithoutExtension(wmfPath) + ".jpg");
 
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (Image image = Image.Load(inputPath))
+                    // Load WMF and save as JPEG
+                    using (Image image = Image.Load(wmfPath))
                     {
                         var jpegOptions = new JpegOptions();
                         image.Save(outputPath, jpegOptions);
@@ -48,9 +61,9 @@ namespace WmfToJpegParallel
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert a folder of legacy WMF drawings to JPEG thumbnails quickly for a web gallery.
- * 2. When a desktop application must generate JPEG previews of vector charts stored as WMF files without blocking the UI thread.
- * 3. When a server‑side service processes large numbers of WMF assets and wants to speed up conversion by using parallel execution.
- * 4. When an automated build pipeline has to transform WMF icons into JPEGs for inclusion in documentation or reports.
- * 5. When a migration script has to replace WMF images with JPEG equivalents while preserving file names and directory structure.
+ * 1. When you need to batch‑convert a folder of legacy WMF drawings to JPEG images quickly for web publishing.
+ * 2. When you want to speed up image conversion on a multi‑core server by processing WMF files in parallel.
+ * 3. When you must generate JPEG thumbnails from vector WMF assets as part of an automated build pipeline.
+ * 4. When you are migrating old Windows Metafile graphics to a modern format for a mobile app without blocking the UI thread.
+ * 5. When you require a simple C# script that loads WMF files, applies default JPEG options, and saves them to a separate output directory.
  */

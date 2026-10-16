@@ -1,30 +1,45 @@
-// HOW-TO: Convert PDF Vector Diagrams to SVG with Line Width Preservation in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert PDF Vector Diagrams to SVG Preserving Line Widths in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\diagram.pdf";
+        string outputPath = "Output\\diagram.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.pdf";
-            string outputPath = "output.svg";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var options = new SvgOptions();
-                image.Save(outputPath, options);
+                using (SvgOptions options = new SvgOptions())
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    options.VectorRasterizationOptions = vectorOptions;
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -36,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to export engineering schematics stored in a PDF to scalable SVG files for web display while keeping exact line thickness.
- * 2. When a CAD application must generate SVG assets from PDF drawings so that the graphics scale correctly on different screen resolutions.
- * 3. When an automated reporting tool converts PDF charts into SVG vectors to embed in responsive HTML dashboards without losing line weight fidelity.
- * 4. When a documentation pipeline transforms PDF user‑manual illustrations into SVG icons for inclusion in mobile apps that require precise scaling.
- * 5. When a batch process migrates a library of PDF vector artwork to SVG format for use in vector‑based editors while preserving line widths.
+ * 1. When a developer needs to embed high‑resolution engineering schematics from PDF into a responsive web page, they can convert the PDF to SVG to keep line widths consistent at any zoom level.
+ * 2. When an application must generate printable vector assets from PDF reports for a marketing portal, converting to SVG ensures the graphics scale without loss of detail.
+ * 3. When a CAD‑to‑web workflow requires turning PDF‑exported mechanical drawings into scalable SVG icons for interactive diagrams, this code preserves the original line thickness.
+ * 4. When a document‑management system wants to provide lightweight preview thumbnails of PDF diagrams that can be zoomed in a browser, converting to SVG maintains accurate line rendering.
+ * 5. When a developer builds a cross‑platform UI that loads vector graphics from PDFs and needs them in a format supported by HTML5 canvas or SVG editors, this conversion keeps the vector line properties intact.
  */

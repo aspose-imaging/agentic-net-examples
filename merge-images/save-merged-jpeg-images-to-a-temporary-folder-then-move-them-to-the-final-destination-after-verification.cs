@@ -1,4 +1,11 @@
-// HOW-TO: Merge Multiple JPEG Images to Temporary File Then Move to Final Folder in C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Multiple JPEG Images Horizontally and Save via Temporary Folder in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,56 +21,56 @@ class Program
     {
         try
         {
-            string inputFolder = "InputImages";
-            string tempFolder = "TempMerged";
-            string finalFolder = "OutputImages";
+            string inputFolder = "Input";
+            string tempFolder = "Temp";
+            string outputFolder = "Output";
+            string outputFileName = "merged.jpg";
 
             Directory.CreateDirectory(inputFolder);
             Directory.CreateDirectory(tempFolder);
-            Directory.CreateDirectory(finalFolder);
+            Directory.CreateDirectory(outputFolder);
 
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.jpg")
+            List<string> imagePaths = Directory.GetFiles(inputFolder, "*.jpg")
                 .Concat(Directory.GetFiles(inputFolder, "*.jpeg"))
-                .ToArray();
+                .ToList();
 
-            if (inputFiles.Length == 0)
+            if (imagePaths.Count == 0)
             {
-                Console.Error.WriteLine("No JPEG files found in input folder.");
+                Console.Error.WriteLine("No JPEG images found in input folder.");
                 return;
             }
 
-            List<Size> sizes = new List<Size>();
-            foreach (string file in inputFiles)
+            int totalWidth = 0;
+            int maxHeight = 0;
+
+            foreach (string path in imagePaths)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
-                using (RasterImage img = (RasterImage)Image.Load(file))
+
+                using (JpegImage img = (JpegImage)Image.Load(path))
                 {
-                    sizes.Add(new Size(img.Width, img.Height));
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight)
+                        maxHeight = img.Height;
                 }
             }
 
-            int totalWidth = sizes.Sum(s => s.Width);
-            int maxHeight = sizes.Max(s => s.Height);
+            string tempPath = Path.Combine(tempFolder, outputFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            string tempOutputPath = Path.Combine(tempFolder, "merged.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
-
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = new FileCreateSource(tempOutputPath, false),
-                Quality = 90
-            };
+            Source source = new FileCreateSource(tempPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
 
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string file in inputFiles)
+                foreach (string path in imagePaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(file))
+                    using (JpegImage img = (JpegImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -73,21 +80,17 @@ class Program
                 canvas.Save();
             }
 
-            if (!File.Exists(tempOutputPath))
+            if (!File.Exists(tempPath))
             {
                 Console.Error.WriteLine("Merged image was not created.");
                 return;
             }
 
-            string finalOutputPath = Path.Combine(finalFolder, "merged.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
-
-            if (File.Exists(finalOutputPath))
-            {
-                File.Delete(finalOutputPath);
-            }
-
-            File.Move(tempOutputPath, finalOutputPath);
+            string finalPath = Path.Combine(outputFolder, outputFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
+            if (File.Exists(finalPath))
+                File.Delete(finalPath);
+            File.Move(tempPath, finalPath);
         }
         catch (Exception ex)
         {
@@ -98,9 +101,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine a series of JPEG photos into a single wide image while ensuring the file is first created in a safe temporary location before being placed in the production output folder.
- * 2. When a batch image processing job must verify that all source JPEG files exist and are readable before generating a merged result and moving it to a final directory for downstream systems.
- * 3. When an automated reporting system creates a composite JPEG banner from individual pictures and wants to avoid partial files in the destination by writing to a temp folder first.
- * 4. When a web application assembles user‑uploaded JPEG thumbnails into a panoramic image and uses a temporary folder to prevent race conditions during the move to the public assets folder.
- * 5. When a scheduled task merges daily camera JPEG captures, stores the intermediate merged file in a temp directory for quality checks, then moves the verified image to the archive folder.
+ * 1. When you need to combine a series of product photos into a single panoramic JPEG for an e‑commerce catalog while ensuring the file is written to a safe temporary location before publishing.
+ * 2. When a web service must stitch user‑uploaded JPEG screenshots side‑by‑side and store the intermediate result in a temp folder to validate size or content before moving it to the final output directory.
+ * 3. When an automated report generator creates a composite image of chart snapshots and wants to use Aspose.Imaging to merge them horizontally, saving first to a temporary path to allow rollback on failure.
+ * 4. When a batch image processing job processes thousands of JPEG files, merges them into a single wide image, and uses a temporary folder to avoid partial files appearing in the production folder during processing.
+ * 5. When a desktop application needs to verify that all source JPEG files exist and are readable before creating a merged image, writing the result to a temp directory to perform integrity checks before moving it to the user‑specified output folder.
  */

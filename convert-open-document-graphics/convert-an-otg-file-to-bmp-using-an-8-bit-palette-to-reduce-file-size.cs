@@ -1,8 +1,16 @@
-// HOW-TO: Convert OTG to 8‑Bit BMP to Reduce File Size in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to BMP with 8‑Bit Palette in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -39,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When integrating legacy graphics from OTG files into a Windows application that only supports BMP, you need a small‑size output.
- * 2. When preparing images for embedded systems or low‑memory devices, converting OTG to an 8‑bit BMP minimizes storage requirements.
- * 3. When batch‑processing scanned engineering drawings saved as OTG to BMP for compatibility with older CAD tools, a reduced‑color palette speeds up handling.
- * 4. When generating thumbnails for a web gallery that must be BMP format, using an 8‑bit palette keeps the files lightweight.
- * 5. When converting OTG assets for a game that uses BMP textures and requires a limited color palette to improve loading speed.
+ * 1. When you need to display legacy OTG graphics in a Windows application that only supports BMP files, you can convert them using Aspose.Imaging with an 8‑bit palette to keep the files small.
+ * 2. When generating thumbnails for a batch of OTG images to embed in a PDF report, converting to 8‑bit BMP reduces storage while preserving sufficient color detail.
+ * 3. When migrating an old CAD system’s OTG assets to a modern asset pipeline that requires BMP format for texture mapping, using this code ensures quick conversion and lower memory usage.
+ * 4. When creating a lightweight image archive for mobile devices, converting OTG files to 8‑bit BMP minimizes file size without needing external tools.
+ * 5. When automating a server‑side process that receives OTG uploads and must store them as BMP for compatibility with legacy printing hardware, this snippet handles the conversion efficiently.
  */

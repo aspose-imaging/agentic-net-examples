@@ -1,21 +1,28 @@
-// HOW-TO: Combine Multiple Magic Wand Masks and Apply to TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Combine Two Magic Wand Selections and Apply Union Mask to TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output\\result.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,15 +33,11 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var settings1 = new MagicWandSettings(100, 100);
-                var settings2 = new MagicWandSettings(200, 200);
-
-                MagicWandTool.Select(image, settings1)
-                    .Union(MagicWandTool.Select(image, settings2))
+                MagicWandTool.Select(image, new MagicWandSettings(100, 150))
+                    .Union(new MagicWandSettings(200, 250))
                     .Apply();
 
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to merge selections from two different points in a scanned document and apply the combined mask to a TIFF file using Aspose.Imaging in C#.
- * 2. When you want to programmatically remove or highlight overlapping regions in a multi‑page TIFF by uniting two magic wand selections.
- * 3. When you are building an automated preprocessing step that creates a single mask from separate color thresholds before saving the result as a TIFF image.
- * 4. When you must apply a composite selection to a raster image for batch editing of large TIFF files in a .NET application.
- * 5. When you need to combine region‑of‑interest masks generated at different coordinates and export the masked TIFF for further analysis or archiving.
+ * 1. When you need to merge two separate region selections into a single mask before editing a multi‑page TIFF file in a C# application.
+ * 2. When you want to programmatically remove or highlight combined areas of a scanned document by applying a union mask using Aspose.Imaging’s MagicWand tool.
+ * 3. When you are building an automated workflow that selects two points of interest in a TIFF image and saves the result with the combined mask applied.
+ * 4. When you must apply a composite mask to a raster TIFF to prepare it for further processing such as OCR or compression in .NET.
+ * 5. When you require a simple way to union multiple selections and persist the masked TIFF without manually editing the image.
  */

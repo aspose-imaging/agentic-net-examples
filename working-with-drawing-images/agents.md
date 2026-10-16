@@ -18,45 +18,47 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 ## Required Namespaces
 
 - `using System;` (242/401 files)
-- `using System.IO;` (241/401 files)
-- `using Aspose.Imaging.ImageOptions;` (237/401 files) ← category-specific
-- `using Aspose.Imaging;` (216/401 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (130/401 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (61/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (57/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (33/401 files) ← category-specific
-- `using Aspose.Imaging.Shapes;` (30/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (25/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (16/401 files) ← category-specific
-- `using System.Collections.Generic;` (12/401 files)
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (12/401 files) ← category-specific
-- `using System.Linq;` (9/401 files)
+- `using System.IO;` (242/401 files)
+- `using Aspose.Imaging.ImageOptions;` (232/401 files) ← category-specific
+- `using Aspose.Imaging;` (198/401 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (133/401 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (55/401 files) ← category-specific
+- `using Aspose.Imaging.Brushes;` (52/401 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (28/401 files) ← category-specific
+- `using Aspose.Imaging.Shapes;` (28/401 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (28/401 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (14/401 files) ← category-specific
+- `using System.Collections.Generic;` (11/401 files)
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (11/401 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Jpeg;` (7/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (7/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Eps;` (7/401 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (3/401 files) ← category-specific
+- `using System.Linq;` (4/401 files)
+- `using Aspose.Imaging.FileFormats.Emf;` (4/401 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Eps;` (3/401 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Tiff;` (2/401 files) ← category-specific
+- `using System.Xml.Linq;` (2/401 files)
 - `using System.Globalization;` (1/401 files)
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/401 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (1/401 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [create-a-200-200-bmp-image-clear-background-to-red-and-save-to-file.cs](./create-a-200-200-bmp-image-clear-background-to-red-and-save-to-file.cs) | `BmpImage`, `BmpOptions`, `Graphics` | Create a 200 × 200 BMP image, clear background to red, and save to file. |
-| [generate-a-500-300-bmp-canvas-and-draw-a-blue-line-from-50-50-to-450-250.cs](./generate-a-500-300-bmp-canvas-and-draw-a-blue-line-from-50-50-to-450-250.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Generate a 500 × 300 BMP canvas and draw a blue line from (50,50) to (450,250). |
+| [create-a-200-200-bmp-image-clear-background-to-red-and-save-to-file.cs](./create-a-200-200-bmp-image-clear-background-to-red-and-save-to-file.cs) | `BmpOptions`, `Graphics` | Create a 200 × 200 BMP image, clear background to red, and save to file. |
+| [generate-a-500-300-bmp-canvas-and-draw-a-blue-line-from-50-50-to-450-250.cs](./generate-a-500-300-bmp-canvas-and-draw-a-blue-line-from-50-50-to-450-250.cs) | `BmpImage`, `BmpOptions`, `Graphics` | Generate a 500 × 300 BMP canvas and draw a blue line from (50,50) to (450,250). |
 | [initialize-a-memorystream-create-a-bmp-image-draw-a-green-rectangle-and-write-to-stream.cs](./initialize-a-memorystream-create-a-bmp-image-draw-a-green-rectangle-and-write-to-stream.cs) | `BmpOptions`, `Graphics` | Initialize a MemoryStream, create a BMP image, draw a green rectangle, and write... |
 | [use-bmpoptions-with-a-filestream-source-to-produce-a-400-400-bmp-filled-with-yellow.cs](./use-bmpoptions-with-a-filestream-source-to-produce-a-400-400-bmp-filled-with-yellow.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Use BmpOptions with a FileStream source to produce a 400 × 400 BMP filled with y... |
 | [clear-a-bmp-image-to-light-gray-then-draw-multiple-red-lines-forming-a-grid.cs](./clear-a-bmp-image-to-light-gray-then-draw-multiple-red-lines-forming-a-grid.cs) | `BmpOptions`, `Graphics` | Clear a BMP image to light gray, then draw multiple red lines forming a grid. |
 | [create-a-bmp-image-set-background-to-white-then-draw-a-series-of-random-colored-lines.cs](./create-a-bmp-image-set-background-to-white-then-draw-a-series-of-random-colored-lines.cs) | `BmpOptions`, `Graphics` | Create a BMP image, set background to white, then draw a series of random colore... |
-| [clear-a-bmp-image-to-light-blue-then-draw-overlapping-semi-transparent-rectangles.cs](./clear-a-bmp-image-to-light-blue-then-draw-overlapping-semi-transparent-rectangles.cs) | `BmpOptions`, `Graphics`, `SolidBrush` | Clear a BMP image to light blue, then draw overlapping semi‑transparent rectangl... |
-| [create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs](./create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs) | `BmpOptions`, `Graphics` | Create a BMP, clear to dark gray, then draw a bright yellow diagonal line. |
+| [clear-a-bmp-image-to-light-blue-then-draw-overlapping-semi-transparent-rectangles.cs](./clear-a-bmp-image-to-light-blue-then-draw-overlapping-semi-transparent-rectangles.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Clear a BMP image to light blue, then draw overlapping semi‑transparent rectangl... |
+| [create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs](./create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Create a BMP, clear to dark gray, then draw a bright yellow diagonal line. |
 | [create-a-bmp-clear-to-ivory-then-draw-diagonal-lines-forming-a-hatch-pattern.cs](./create-a-bmp-clear-to-ivory-then-draw-diagonal-lines-forming-a-hatch-pattern.cs) | `BmpOptions`, `Graphics` | Create a BMP, clear to ivory, then draw diagonal lines forming a hatch pattern. |
 | [create-a-bmp-image-clear-to-teal-then-draw-a-white-ellipse-centered-in-the-canvas.cs](./create-a-bmp-image-clear-to-teal-then-draw-a-white-ellipse-centered-in-the-canvas.cs) | `BmpOptions`, `Graphics` | Create a BMP image, clear to teal, then draw a white ellipse centered in the can... |
 | [draw-a-filled-blue-rectangle-with-solidbrush-and-outline-it-using-a-thick-black-pen.cs](./draw-a-filled-blue-rectangle-with-solidbrush-and-outline-it-using-a-thick-black-pen.cs) | `Graphics`, `PngOptions`, `SolidBrush` | Draw a filled blue rectangle with SolidBrush and outline it using a thick black ... |
 | [draw-an-ellipse-inside-a-300-200-rectangle-using-a-black-pen-and-save-the-bmp.cs](./draw-an-ellipse-inside-a-300-200-rectangle-using-a-black-pen-and-save-the-bmp.cs) | `BmpOptions`, `Graphics` | Draw an ellipse inside a 300 × 200 rectangle using a black Pen and save the BMP. |
 | [create-a-bmp-image-draw-a-filled-ellipse-with-solidbrush-then-outline-it-using-a-contrasting-pen.cs](./create-a-bmp-image-draw-a-filled-ellipse-with-solidbrush-then-outline-it-using-a-contrasting-pen.cs) | `BmpOptions`, `Graphics`, `SolidBrush` | Create a BMP image, draw a filled ellipse with SolidBrush, then outline it using... |
 | [create-a-bmp-image-draw-a-90-degree-arc-within-a-defined-rectangle-and-save-file.cs](./create-a-bmp-image-draw-a-90-degree-arc-within-a-defined-rectangle-and-save-file.cs) | `BmpOptions`, `Graphics` | Create a BMP image, draw a 90‑degree arc within a defined rectangle, and save fi... |
-| [draw-an-arc-starting-at-45-degrees-sweeping-180-degrees-inside-a-400-200-rectangle.cs](./draw-an-arc-starting-at-45-degrees-sweeping-180-degrees-inside-a-400-200-rectangle.cs) | `Graphics`, `PngOptions` | Draw an arc starting at 45 degrees, sweeping 180 degrees inside a 400 × 200 rect... |
+| [draw-an-arc-starting-at-45-degrees-sweeping-180-degrees-inside-a-400-200-rectangle.cs](./draw-an-arc-starting-at-45-degrees-sweeping-180-degrees-inside-a-400-200-rectangle.cs) | `Graphics`, `PngOptions`, `RasterImage` | Draw an arc starting at 45 degrees, sweeping 180 degrees inside a 400 × 200 rect... |
 | [generate-a-250-250-bmp-draw-a-bezier-curve-with-four-control-points-export-to-memorystream.cs](./generate-a-250-250-bmp-draw-a-bezier-curve-with-four-control-points-export-to-memorystream.cs) | `BmpOptions`, `Graphics` | Generate a 250 × 250 BMP, draw a Bezier curve with four control points, export t... |
 | [draw-a-bezier-curve-that-approximates-a-circle-by-defining-appropriate-control-points-on-bmp.cs](./draw-a-bezier-curve-that-approximates-a-circle-by-defining-appropriate-control-points-on-bmp.cs) | `BmpOptions`, `Graphics` | Draw a Bezier curve that approximates a circle by defining appropriate control p... |
 | [draw-a-series-of-bezier-curves-connecting-sequential-points-to-form-a-wave-pattern-on-bmp.cs](./draw-a-series-of-bezier-curves-connecting-sequential-points-to-form-a-wave-pattern-on-bmp.cs) | `BmpOptions`, `Graphics` | Draw a series of Bezier curves connecting sequential points to form a wave patte... |
@@ -71,8 +73,8 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [draw-an-ellipse-with-a-pen-that-has-a-custom-dash-pattern-on-a-bmp-background.cs](./draw-an-ellipse-with-a-pen-that-has-a-custom-dash-pattern-on-a-bmp-background.cs) | `BmpOptions`, `Graphics` | Draw an ellipse with a Pen that has a custom dash pattern on a BMP background. |
 | [create-a-bmp-draw-a-rectangle-using-a-pen-constructed-from-a-solidbrush-with-custom-color.cs](./create-a-bmp-draw-a-rectangle-using-a-pen-constructed-from-a-solidbrush-with-custom-color.cs) | `BmpOptions`, `Graphics`, `SolidBrush` | Create a BMP, draw a rectangle using a Pen constructed from a SolidBrush with cu... |
 | [create-a-bmp-draw-a-rectangle-then-fill-its-interior-using-solidbrush-with-solid-color.cs](./create-a-bmp-draw-a-rectangle-then-fill-its-interior-using-solidbrush-with-solid-color.cs) | `BmpOptions`, `Graphics`, `SolidBrush` | Create a BMP, draw a rectangle then fill its interior using SolidBrush with soli... |
-| [generate-a-bmp-canvas-draw-multiple-arcs-to-compose-a-semi-circular-gauge-indicator.cs](./generate-a-bmp-canvas-draw-multiple-arcs-to-compose-a-semi-circular-gauge-indicator.cs) | `BmpOptions`, `Graphics`, `RasterImage` | Generate a BMP canvas, draw multiple arcs to compose a semi‑circular gauge indic... |
-| *...and 371 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.9.0/working-with-drawing-images) |
+| [generate-a-bmp-canvas-draw-multiple-arcs-to-compose-a-semi-circular-gauge-indicator.cs](./generate-a-bmp-canvas-draw-multiple-arcs-to-compose-a-semi-circular-gauge-indicator.cs) | `BmpOptions`, `Graphics` | Generate a BMP canvas, draw multiple arcs to compose a semi‑circular gauge indic... |
+| *...and 371 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.10.0/working-with-drawing-images) |
 
 ## Category Statistics
 - Total examples: 401
@@ -151,5 +153,5 @@ When your workflow involves turning SVG files into raster graphics (e.g., thumbn
 For post‑processing tasks such as applying color corrections or filters to the images you create with drawing APIs, the **[Image And Photo Filters](../image-and-photo-filters/)** section offers a rich set of filter examples that can be chained after drawing operations.
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-10-07 | Run: `20261002_134755` | Examples: 401
+Updated: 2026-10-15 | Run: `20261015_041651` | Examples: 401
 <!-- AUTOGENERATED:END -->

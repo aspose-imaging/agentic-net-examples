@@ -1,9 +1,16 @@
-// HOW-TO: Scale a BMP Shape With High Quality Bicubic Interpolation In C# (Aspose.Imaging for .NET)
+// HOW-TO: Scale and Draw High‑Quality BMP Shapes with InterpolationMode in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,24 +18,31 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
+            string inputPath = "input/input.bmp";
+            string outputPath = "output/output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions createOptions = new BmpOptions();
-            createOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(createOptions, 200, 200))
+            using (Image image = Image.Load(inputPath))
             {
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                Pen pen = new Pen(Color.Blue, 3);
+                graphics.DrawRectangle(pen, new Rectangle(50, 50, 100, 100));
+
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.ScaleTransform(2.0f, 2.0f);
+                graphics.ScaleTransform(1.5f, 1.5f);
+                graphics.DrawRectangle(pen, new Rectangle(50, 50, 100, 100));
 
-                Pen pen = new Pen(Color.Blue, 2);
-                Rectangle rect = new Rectangle(10, 10, 50, 50);
-                graphics.DrawRectangle(pen, rect);
-
-                image.Save();
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a high-resolution BMP thumbnail of a vector shape while preserving smooth edges.
- * 2. When creating a printable bitmap where a rectangle must be enlarged without pixelation using Aspose.Imaging.
- * 3. When developing a C# utility that programmatically draws and scales graphics on BMP files for reports or dashboards.
- * 4. When converting diagram elements to a BMP image and require bicubic interpolation to maintain visual quality after scaling.
- * 5. When building an automated image-processing pipeline that draws shapes on BMP canvases and needs consistent high-quality scaling across different devices.
+ * 1. When you need to generate a BMP image with crisp, scaled vector graphics for printing or UI assets.
+ * 2. When you want to apply high‑quality bicubic interpolation to avoid pixelation while enlarging drawn shapes in a bitmap.
+ * 3. When you must programmatically clear a bitmap background, draw shapes, and then resize them for thumbnails or previews.
+ * 4. When you are creating custom graphics in C# that require precise control over scaling and rendering quality before saving as BMP.
+ * 5. When you need to automate batch processing of BMP files, adding scaled annotations with professional visual quality.
  */

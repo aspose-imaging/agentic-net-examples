@@ -1,38 +1,42 @@
-// HOW-TO: Select Red Area In JPEG With Magic Wand Threshold 30 C# (Aspose.Imaging for .NET)
+// HOW-TO: Select Red Region in JPEG Using Magic Wand Tool C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool.Select(image, new MagicWandSettings(50, 50) { Threshold = 30 })
+                MagicWandTool.Select(image, new MagicWandSettings(10, 10) { Threshold = 30 })
                     .Apply();
 
-                PngOptions pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-                image.Save(outputPath, pngOptions);
+                JpegOptions jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to isolate and extract a red-colored object from a JPEG photo for further editing or compositing.
- * 2. When you want to create a transparent PNG that contains only the selected red region while discarding the rest of the image.
- * 3. When you are building an automated pipeline that identifies red markers in scanned documents and saves them as separate PNG assets.
- * 4. When you need to apply a color‑based selection with a specific tolerance (threshold 30) to handle variations in red shades in batch image processing.
- * 5. When you are developing a C# application that converts JPEG images to PNG with an alpha channel after selecting a specific color region using Aspose.Imaging’s Magic Wand tool.
+ * 1. When you need to automatically isolate a red-colored area in a JPEG photo for further editing or analysis in a C# application.
+ * 2. When building a batch image processor that extracts specific color regions from scanned photos to create masks or overlays using Aspose.Imaging.
+ * 3. When creating a custom photo‑filter that highlights red objects by selecting them with a Magic Wand threshold before applying effects in .NET.
+ * 4. When developing a quality‑control tool that verifies the presence of red labels on product images by selecting the red region and saving the result.
+ * 5. When implementing an automated cropping routine that identifies and retains only the red portion of an image for use in marketing materials.
  */

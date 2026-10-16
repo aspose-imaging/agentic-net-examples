@@ -1,12 +1,19 @@
-// HOW-TO: Batch Convert EMF Files to PNG at 300 DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert EMF Files to High-Resolution PNG with Lossless Compression in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Emf;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
@@ -30,7 +37,7 @@ public class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -38,21 +45,23 @@ public class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (var image = Aspose.Imaging.Image.Load(inputPath) as EmfImage)
                 {
-                    using (PngOptions options = new PngOptions())
+                    if (image == null)
                     {
-                        options.Source = new FileCreateSource(outputPath, false);
+                        Console.Error.WriteLine($"Failed to load EMF image: {inputPath}");
+                        continue;
+                    }
+
+                    using (var options = new PngOptions())
+                    {
                         options.ResolutionSettings = new ResolutionSetting(300, 300);
-                        options.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
+                        options.PngCompressionLevel = PngCompressionLevel.ZipLevel6;
                         image.Save(outputPath, options);
                     }
                 }
@@ -67,9 +76,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution PNG thumbnails from a collection of vector EMF drawings for printing or web preview.
- * 2. When a reporting system must export chart images stored as EMF into lossless PNGs with a consistent 300 DPI for PDF embedding.
- * 3. When migrating legacy Windows Metafile assets to a modern image format while preserving vector quality and exact dimensions.
- * 4. When an automated build pipeline processes design assets and requires batch rasterization of EMF files to PNG with white background.
- * 5. When creating a digital archive of engineering diagrams and you need each file saved as a lossless PNG at a specific resolution.
+ * 1. When you need to generate print‑ready PNG assets from a collection of vector EMF logos at 300 DPI for high‑quality marketing materials.
+ * 2. When an application must automatically convert user‑uploaded EMF diagrams into lossless PNG images for web preview without manual intervention.
+ * 3. When a reporting system has to batch‑process thousands of EMF charts into PNG files with consistent resolution for archival storage.
+ * 4. When you want to replace legacy EMF icons with PNG equivalents while preserving visual fidelity and keeping file sizes low using ZipLevel6 compression.
+ * 5. When a CI/CD pipeline requires converting EMF drawings to PNG at a specific DPI to ensure consistent rendering across different platforms.
  */

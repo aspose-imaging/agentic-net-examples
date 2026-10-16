@@ -1,9 +1,9 @@
-// HOW-TO: Add a PNG Frame to an Existing TIFF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load TIFF From Stream And Append PNG Frame Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -19,37 +19,39 @@ class Program
     {
         try
         {
-            string inputTiffPath = "input.tif";
-            string inputAdditionalPath = "additional.png";
-            string outputPath = "output\\output.tif";
+            string tiffInputPath = "input.tif";
+            string sourceImagePath = "frame2.png";
+            string outputPath = "output/output.tif";
 
-            if (!File.Exists(inputTiffPath))
+            if (!File.Exists(tiffInputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputTiffPath}");
+                Console.Error.WriteLine($"File not found: {tiffInputPath}");
+                return;
+            }
+            if (!File.Exists(sourceImagePath))
+            {
+                Console.Error.WriteLine($"File not found: {sourceImagePath}");
                 return;
             }
 
-            if (!File.Exists(inputAdditionalPath))
+            using (FileStream fs = new FileStream(tiffInputPath, FileMode.Open, FileAccess.Read))
+            using (MemoryStream ms = new MemoryStream())
             {
-                Console.Error.WriteLine($"File not found: {inputAdditionalPath}");
-                return;
-            }
+                fs.CopyTo(ms);
+                ms.Position = 0;
+                using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
+                using (RasterImage src = (RasterImage)Image.Load(sourceImagePath))
+                {
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    using (TiffFrame newFrame = new TiffFrame(tiffOptions, src.Width, src.Height))
+                    {
+                        ((RasterImage)newFrame).SaveArgb32Pixels(newFrame.Bounds, src.LoadArgb32Pixels(src.Bounds));
+                        tiffImage.AddFrame(newFrame);
+                    }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
-            using (var tiffStream = new MemoryStream(tiffBytes))
-            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
-            using (Image addImage = Image.Load(inputAdditionalPath))
-            {
-                RasterImage raster = (RasterImage)addImage;
-
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                TiffFrame newFrame = new TiffFrame(tiffOptions, raster.Width, raster.Height);
-                newFrame.SavePixels(newFrame.Bounds, raster.LoadPixels(raster.Bounds));
-
-                tiffImage.AddFrame(newFrame);
-                tiffImage.Save(outputPath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    tiffImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -61,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine a PNG image as an additional page in a multi‑page TIFF document for archival or printing purposes.
- * 2. When you want to load a TIFF from a byte array or network stream, append new frames, and save the updated file without writing the original to disk first.
- * 3. When you are building a C# service that merges scanned PDFs (converted to TIFF) with supplemental graphics, such as logos or signatures, into a single TIFF file.
- * 4. When you must programmatically create a multi‑frame TIFF from separate image sources (e.g., PNG, JPEG) while preserving each frame’s original dimensions and pixel data.
- * 5. When you need to automate the generation of a TIFF slideshow where each slide is sourced from different image files and the result must be saved to a specific output folder.
+ * 1. When you need to programmatically add a new page to an existing multi‑page TIFF by loading the original file from a stream and inserting a PNG image as an additional frame.
+ * 2. When you want to combine scanned documents (TIFF) with generated graphics (PNG) into a single multipage TIFF without writing intermediate files to disk.
+ * 3. When a web service receives TIFF data as a byte array and you must augment it with extra image layers before returning the updated file to the client.
+ * 4. When automating archival workflows that require merging separate image assets into a single TIFF for compatibility with legacy imaging systems.
+ * 5. When building a desktop application that lets users import extra images into an existing TIFF collection while preserving the original file’s metadata and compression settings.
  */

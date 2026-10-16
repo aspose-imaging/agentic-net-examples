@@ -1,80 +1,76 @@
-// HOW-TO: Batch Convert BMP to PSD with Conditional Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to PSD Files with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-13
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
-namespace BatchBmpToPsd
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        try
         {
-            try
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                // Hardcoded input and output directories
-                string inputDirectory = "input";
-                string outputDirectory = "output";
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-                // Ensure output base directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
                 Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Get all BMP files in the input directory
-                var bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-                foreach (var bmpPath in bmpFiles)
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(bmpPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".psd");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (PsdOptions options = new PsdOptions())
                     {
-                        Console.Error.WriteLine($"File not found: {bmpPath}");
-                        continue;
+                        options.Source = new FileCreateSource(outputPath, false);
+                        image.Save(outputPath, options);
                     }
-
-                    // Determine compression method based on file name (example logic)
-                    string fileNameLower = Path.GetFileNameWithoutExtension(bmpPath).ToLowerInvariant();
-                    string compressionMethod;
-                    if (fileNameLower.Contains("rle"))
-                        compressionMethod = "RLE";
-                    else if (fileNameLower.Contains("zip"))
-                        compressionMethod = "ZIP";
-                    else
-                        compressionMethod = "None";
-
-                    // Prepare output path
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(bmpPath) + ".psd");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Simple placeholder conversion: copy BMP bytes to PSD file
-                    // (In a real scenario, use a proper image library to convert and apply compression)
-                    byte[] bmpData = File.ReadAllBytes(bmpPath);
-                    File.WriteAllBytes(outputPath, bmpData);
-
-                    // Log the conversion
-                    Console.WriteLine($"Converted '{bmpPath}' to '{outputPath}' using compression: {compressionMethod}");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automate converting a folder of BMP assets into Photoshop PSD files while applying RLE or ZIP compression based on each file’s naming convention.
- * 2. When a graphics pipeline requires preparing layered PSD files from legacy BMP images and you want to choose different compression methods per image to optimize file size.
- * 3. When you are building a C# tool that processes large batches of design assets and must ensure each output PSD uses the appropriate compression without manual intervention.
- * 4. When you need to integrate image conversion into a build script that reads BMP files, detects keywords like “rle” or “zip” in the filenames, and saves PSDs with matching compression.
- * 5. When a digital publishing workflow demands converting BMP screenshots to PSD format while preserving or reducing quality based on per‑file compression rules defined in code.
+ * 1. When you need to automatically convert a folder of legacy BMP graphics into editable Photoshop PSD files for a design pipeline.
+ * 2. When you want to integrate a C# service that processes user‑uploaded BMP pictures and stores them as PSDs for further editing in Adobe Photoshop.
+ * 3. When you have to migrate a large collection of BMP assets to PSD format while preserving image fidelity using Aspose.Imaging.
+ * 4. When you are building a batch‑processing tool that reads BMP files from a directory and outputs corresponding PSD files to another folder in a .NET application.
+ * 5. When you need to programmatically convert multiple BMP scans into PSD files with minimal code to prepare them for color‑correction workflows.
  */

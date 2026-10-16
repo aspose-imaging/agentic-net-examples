@@ -1,9 +1,9 @@
-// HOW-TO: Batch Convert TIFF Images to WebP with Quality 90 in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert Multiple TIFF Files to WebP with Quality 90 in C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -11,71 +11,68 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageBatchConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string file in files)
-            {
-                string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext != ".tif" && ext != ".tiff")
+                // Hardcoded list of input TIFF files
+                string[] inputPaths = new string[]
                 {
-                    continue;
-                }
+                    "input1.tif",
+                    "input2.tif",
+                    "input3.tif"
+                };
 
-                if (!File.Exists(file))
+                // Hardcoded output directory
+                string outputDirectory = "output";
+
+                foreach (string inputPath in inputPaths)
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
-                    continue;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".webp");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(file))
-                {
-                    using (WebPOptions options = new WebPOptions())
+                    // Input file existence check
+                    if (!File.Exists(inputPath))
                     {
-                        options.Quality = 90;
-                        image.Save(outputPath, options);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
                     }
-                }
 
-                Console.WriteLine($"Converted: {file} -> {outputPath}");
+                    // Determine output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load TIFF image and save as WebP with quality 90
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        var webpOptions = new WebPOptions
+                        {
+                            Quality = 90
+                        };
+                        image.Save(outputPath, webpOptions);
+                    }
+
+                    // Log successful conversion
+                    Console.WriteLine($"Converted {inputPath} to {outputPath}");
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automate the conversion of a large collection of TIFF files to smaller WebP files for faster web delivery while preserving visual quality.
- * 2. When you want to integrate Aspose.Imaging into a C# application to process images in a folder, convert them to WebP with a specific quality setting, and store the results in an output directory.
- * 3. When you have to generate WebP thumbnails from high‑resolution TIFF scans for a digital archive and need to log each conversion for audit purposes.
- * 4. When you are building a server‑side image pipeline that must skip non‑TIFF files, convert only the supported formats, and handle missing files gracefully.
- * 5. When you require a simple console utility that creates missing input/output folders, iterates through files, and reports success or errors during batch image format conversion.
+ * 1. When you need to reduce the storage size of scanned documents by converting TIFF scans to WebP while preserving high visual quality.
+ * 2. When you want to automate the conversion of a predefined list of TIFF images to WebP for faster web publishing.
+ * 3. When you must ensure an output folder is created automatically and log each successful image conversion in a .NET application.
+ * 4. When you need to process a batch of images with a specific compression quality setting to meet performance or bandwidth requirements.
+ * 5. When you require robust error handling for missing source files while converting TIFF to WebP in a C# console tool.
  */

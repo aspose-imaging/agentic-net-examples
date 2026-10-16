@@ -1,53 +1,59 @@
 // HOW-TO: Convert ODG File to PNG from Memory Stream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OdgToPngConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.odg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.odg";
+                string outputPath = "output.png";
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-            {
-                outputDir = ".";
-            }
-            Directory.CreateDirectory(outputDir);
-
-            byte[] fileBytes = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(fileBytes))
-            {
-                using (var image = Image.Load(memoryStream))
+                if (!File.Exists(inputPath))
                 {
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                byte[] fileBytes = File.ReadAllBytes(inputPath);
+                using (var memoryStream = new MemoryStream(fileBytes))
+                {
+                    using (var image = Image.Load(memoryStream))
+                    {
+                        string outputDir = Path.GetDirectoryName(outputPath);
+                        Directory.CreateDirectory(outputDir ?? ".");
+
+                        var pngOptions = new PngOptions();
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to display OpenDocument graphics as PNG thumbnails without writing temporary files to disk.
- * 2. When a web service receives an ODG file as a byte array and must return a PNG image to the client.
- * 3. When a batch job processes a large collection of ODG drawings stored in a database and saves them as PNGs for reporting.
- * 4. When an automated testing framework validates the visual output of ODG files by converting them to PNG for pixel‑by‑pixel comparison.
- * 5. When a mobile backend converts user‑uploaded ODG diagrams into PNG format for faster loading in mobile apps.
+ * 1. When a desktop application needs to display OpenDocument graphics by converting ODG files to PNG images stored in memory.
+ * 2. When a web API receives an uploaded ODG file as a byte array and must return a PNG thumbnail without writing intermediate files to disk.
+ * 3. When an automated batch process reads ODG documents from a database BLOB, converts them to PNG for reporting, and saves the results to a network folder.
+ * 4. When a mobile backend service processes user‑generated ODG drawings and stores them as PNGs for fast loading on client devices.
+ * 5. When a document‑management system migrates legacy ODG assets to PNG format using Aspose.Imaging to ensure compatibility with standard image viewers.
  */

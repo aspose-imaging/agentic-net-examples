@@ -1,9 +1,16 @@
 // HOW-TO: Batch Apply Emboss5x5 Filter to PNG Images in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -28,27 +35,28 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
-            foreach (string inputPath in files)
+            foreach (string filePath in files)
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(filePath));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-                    PngOptions options = new PngOptions
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
+                }
+
+                using (RasterImage raster = (RasterImage)Image.Load(filePath))
+                {
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    var saveOptions = new PngOptions
                     {
                         Source = new FileCreateSource(outputPath, false)
                     };
-                    raster.Save(outputPath, options);
+                    raster.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -61,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically add an emboss effect to a collection of PNG files for a product catalog.
- * 2. When you want to preprocess scanned documents by applying a 5x5 emboss filter before uploading them to a web service.
- * 3. When you are generating stylized thumbnails for a photo gallery and need to apply the same emboss filter to every image.
- * 4. When you have a folder of PNG assets for a game and must batch‑process them to create a consistent embossed look.
- * 5. When you are building an automated pipeline that reads PNG files from a directory, applies a convolution filter, and saves the results to an output folder.
+ * 1. When you need to automatically add an emboss effect to a large collection of PNG files for a product catalog.
+ * 2. When you want to preprocess scanned PNG graphics with a 5x5 emboss convolution before uploading to a web gallery.
+ * 3. When you are building a C# batch image pipeline that applies the predefined Emboss5x5 filter to every PNG in a folder.
+ * 4. When you must generate stylized PNG assets for a game UI by applying a uniform emboss filter without manual editing.
+ * 5. When you require a simple C# script to read PNG images, apply a convolution filter, and save the results to a separate output directory.
  */

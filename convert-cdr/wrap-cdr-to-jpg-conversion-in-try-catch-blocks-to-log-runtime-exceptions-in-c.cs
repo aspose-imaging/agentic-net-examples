@@ -1,4 +1,11 @@
 // HOW-TO: Convert CDR to JPG with Error Handling in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -36,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑convert CorelDRAW (.cdr) files to JPEG images while safely handling missing files and runtime errors.
- * 2. When an automated build pipeline must generate preview thumbnails (JPG) from design assets stored as CDR files and log any conversion failures.
- * 3. When a web service receives user‑uploaded CDR files and must return a JPEG version, ensuring the output folder exists and exceptions are captured.
- * 4. When migrating legacy graphics archives, developers can use this code to read each CDR, save it as a JPG, and record errors without stopping the whole process.
- * 5. When integrating Aspose.Imaging into a C# utility that processes image formats, the try‑catch pattern helps diagnose issues such as unsupported CDR features or I/O problems.
+ * 1. When you need to batch‑convert CorelDRAW (.cdr) files to JPEGs in a .NET service while ensuring missing files are reported.
+ * 2. When an automated image‑processing pipeline must create output folders on the fly before saving converted images.
+ * 3. When you want to catch and log any runtime errors (e.g., unsupported features or I/O issues) during CDR‑to‑JPG conversion.
+ * 4. When integrating Aspose.Imaging into a Windows console app to transform design assets into web‑ready JPEGs.
+ * 5. When deploying a C# utility that validates the source file exists, converts it, and writes a clear error message to the console on failure.
  */

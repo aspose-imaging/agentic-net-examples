@@ -1,4 +1,11 @@
 // HOW-TO: Convert ODG to SVG with Layer Names Using C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample.svg";
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.svg");
 
             if (!File.Exists(inputPath))
             {
@@ -22,8 +29,8 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
-            using (SvgOptions options = new SvgOptions())
             {
+                var options = new SvgOptions();
                 image.Save(outputPath, options);
             }
         }
@@ -36,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to import an OpenDocument Graphics (ODG) illustration into a web page and keep its original layer structure as scalable SVG vectors.
- * 2. When a CAD or design workflow requires batch converting ODG files to SVG while retaining layer names for later editing in vector editors.
- * 3. When generating printable PDFs from ODG sources and you first convert them to SVG to preserve layer metadata for downstream processing.
- * 4. When building a C# application that automates migration of legacy ODG assets to modern SVG format without losing layer information.
- * 5. When integrating Aspose.Imaging into a document management system to display ODG diagrams as SVG graphics with intact layer naming for interactive UI features.
+ * 1. When a developer needs to export LibreOffice Draw diagrams (ODG) to web‑ready SVG files while keeping the original layer structure for interactive editing.
+ * 2. When an application must batch‑convert design assets stored in ODG format to scalable SVG graphics for responsive UI rendering.
+ * 3. When preserving layer names is required to map drawing elements to metadata in a GIS or CAD workflow after conversion.
+ * 4. When integrating Aspose.Imaging into a C# service that generates SVG previews of ODG files for document management systems.
+ * 5. When automating the migration of legacy ODG artwork to SVG for inclusion in modern HTML5 reports without losing layer organization.
  */

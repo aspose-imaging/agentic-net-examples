@@ -1,50 +1,59 @@
-// HOW-TO: Invert BMP Colors and Save as SVG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Invert BMP Colors and Save as SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.bmp";
-        string outputPath = "output/inverted.svg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output.svg";
 
         try
         {
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-                for (int i = 0; i < pixels.Length; i++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
+                if (raster != null)
                 {
-                    int pixel = pixels[i];
-                    int a = (pixel >> 24) & 0xFF;
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
-                    r = 255 - r;
-                    g = 255 - g;
-                    b = 255 - b;
-                    pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                    var rect = new Aspose.Imaging.Rectangle(0, 0, raster.Width, raster.Height);
+                    int[] pixels = raster.LoadArgb32Pixels(rect);
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        int argb = pixels[i];
+                        int a = (argb >> 24) & 0xFF;
+                        int r = (argb >> 16) & 0xFF;
+                        int g = (argb >> 8) & 0xFF;
+                        int b = argb & 0xFF;
+
+                        r = 255 - r;
+                        g = 255 - g;
+                        b = 255 - b;
+
+                        pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                    }
+                    raster.SaveArgb32Pixels(rect, pixels);
                 }
-                raster.SaveArgb32Pixels(raster.Bounds, pixels);
 
-                SvgGraphics2D svgGraphics = new SvgGraphics2D(raster.Width, raster.Height, 96);
-                svgGraphics.DrawImage(raster, new Point(0, 0));
-                SvgImage svgImage = svgGraphics.EndRecording();
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                svgImage.Save(outputPath, new SvgOptions());
-                svgImage.Dispose();
+                using (Aspose.Imaging.ImageOptions.SvgOptions svgOptions = new Aspose.Imaging.ImageOptions.SvgOptions())
+                {
+                    image.Save(outputPath, svgOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to create a negative‑style version of a BMP logo and export it as a scalable SVG for responsive web design.
- * 2. When a batch process must convert legacy BMP assets to high‑contrast SVG icons by inverting colors for better visibility on dark themes.
- * 3. When preparing print‑ready artwork that requires color inversion of raster images before embedding them in vector SVG files.
- * 4. When generating SVG previews of medical or scientific BMP scans with inverted colors to highlight details for analysis tools.
- * 5. When automating the transformation of user‑uploaded BMP photos into inverted SVG illustrations for a custom graphics editor.
+ * 1. When you need to generate a negative‑style SVG preview of a legacy BMP asset for web display.
+ * 2. When converting scanned BMP diagrams into SVG format while applying a color‑invert filter to improve contrast for printing.
+ * 3. When creating an SVG version of a BMP logo with inverted colors for dark‑theme UI elements.
+ * 4. When automating batch processing to invert colors of BMP textures and export them as scalable SVG files for game development.
+ * 5. When integrating Aspose.Imaging in a C# service that transforms user‑uploaded BMP images into inverted SVG graphics for email newsletters.
  */

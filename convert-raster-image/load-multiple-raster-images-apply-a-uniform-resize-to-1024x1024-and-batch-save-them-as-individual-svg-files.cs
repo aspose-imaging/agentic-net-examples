@@ -1,4 +1,11 @@
 // HOW-TO: Batch Resize Raster Images to 1024x1024 and Save as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -29,22 +36,17 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    if (!raster.IsCached)
-                    {
-                        raster.CacheData();
-                    }
-
-                    raster.Resize(1024, 1024, ResizeType.NearestNeighbourResample);
+                    image.Resize(1024, 1024);
 
                     string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                     string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
@@ -59,8 +61,7 @@ class Program
                             PageWidth = 1024,
                             PageHeight = 1024
                         };
-
-                        raster.Save(outputPath, svgOptions);
+                        image.Save(outputPath, svgOptions);
                     }
                 }
             }
@@ -74,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a folder of JPEG or PNG photos into uniformly sized 1024 × 1024 SVG files for responsive web graphics.
- * 2. When an e‑commerce platform must generate vector thumbnails from product photos to reduce bandwidth while keeping consistent dimensions.
- * 3. When a desktop application has to preprocess scanned documents by resizing them and exporting each page as an SVG for further vector editing.
- * 4. When a batch job must prepare a large set of raster assets for inclusion in an SVG‑based UI theme, ensuring all images share the same size.
- * 5. When automating the migration of legacy bitmap icons to scalable SVG icons while applying a standard resize to meet design guidelines.
+ * 1. When you need to generate uniformly sized vector thumbnails from a collection of photos for a web gallery.
+ * 2. When you must convert a batch of scanned PNG or JPEG documents into SVG files for scalable printing without losing quality.
+ * 3. When an e‑commerce platform requires all product images to be resized to a standard 1024×1024 canvas and stored as SVG for responsive design.
+ * 4. When a mobile app preprocesses user‑uploaded images by resizing them and converting to SVG to reduce bandwidth and enable infinite zoom.
+ * 5. When a digital asset management system automates the transformation of legacy raster assets into vector format for archival and search indexing.
  */

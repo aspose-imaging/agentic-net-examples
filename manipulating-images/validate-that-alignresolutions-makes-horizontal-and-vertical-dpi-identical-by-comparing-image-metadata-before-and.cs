@@ -1,47 +1,47 @@
-// HOW-TO: Check and Align Horizontal and Vertical DPI of a TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Check and Align Horizontal and Vertical DPI in TIFF with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                if (image.Frames.Count() == 0)
-                {
-                    Console.Error.WriteLine("No frames found in the image.");
-                    return;
-                }
-
-                var frame = image.Frames[0];
-                double hResBefore = frame.HorizontalResolution;
-                double vResBefore = frame.VerticalResolution;
-
-                Console.WriteLine($"Before alignment: Horizontal DPI = {hResBefore}, Vertical DPI = {vResBefore}");
+                double horizontalDpiBefore = image.HorizontalResolution;
+                double verticalDpiBefore = image.VerticalResolution;
+                Console.WriteLine($"Before alignment: Horizontal DPI = {horizontalDpiBefore}, Vertical DPI = {verticalDpiBefore}");
 
                 image.AlignResolutions();
 
-                double hResAfter = frame.HorizontalResolution;
-                double vResAfter = frame.VerticalResolution;
+                double horizontalDpiAfter = image.HorizontalResolution;
+                double verticalDpiAfter = image.VerticalResolution;
+                Console.WriteLine($"After alignment: Horizontal DPI = {horizontalDpiAfter}, Vertical DPI = {verticalDpiAfter}");
 
-                Console.WriteLine($"After alignment: Horizontal DPI = {hResAfter}, Vertical DPI = {vResAfter}");
+                bool areEqual = Math.Abs(horizontalDpiAfter - verticalDpiAfter) < 0.0001;
+                Console.WriteLine($"DPIs are identical after alignment: {areEqual}");
 
                 image.Save(outputPath);
             }
@@ -55,9 +55,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to ensure a scanned TIFF has matching horizontal and vertical DPI before printing to avoid distortion.
- * 2. When converting multi‑resolution TIFFs for archival and you must standardize the image resolution metadata.
- * 3. When validating image metadata in a C# application to confirm that DPI values are consistent after processing.
- * 4. When preparing TIFF files for a publishing workflow that requires uniform DPI for accurate layout calculations.
- * 5. When troubleshooting mismatched DPI values in TIFF frames and want to automatically align them using Aspose.Imaging.
+ * 1. When you need to verify and correct a scanned TIFF's DPI so that horizontal and vertical resolutions are identical for precise printing.
+ * 2. When preparing TIFF images for a GIS application that requires square pixels, you can align the DPI before loading the data.
+ * 3. When feeding TIFF files into an OCR engine that assumes equal DPI, you use this code to ensure consistent resolution metadata.
+ * 4. When archiving medical images in TIFF format, aligning the DPI helps meet DICOM compliance by making pixel dimensions uniform.
+ * 5. When troubleshooting an image‑processing workflow, you can compare DPI values before and after AlignResolutions to confirm that the operation does not alter the image content.
  */

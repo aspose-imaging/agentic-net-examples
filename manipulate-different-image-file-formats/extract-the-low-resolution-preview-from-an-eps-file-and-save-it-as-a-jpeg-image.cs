@@ -3,13 +3,14 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -18,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.eps";
-            string outputPath = "output/output.jpg";
+            string outputPath = "output/preview.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -28,9 +29,9 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                using (Image preview = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.TIFF))
+                using (Image preview = epsImage.GetPreviewImage((EpsPreviewFormat)0))
                 {
                     JpegOptions jpegOptions = new JpegOptions();
                     preview.Save(outputPath, jpegOptions);
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a quick thumbnail of an EPS artwork for a web gallery without rendering the full vector image.
- * 2. When a document management system must display a preview of uploaded EPS files as JPEGs for faster loading in browsers.
- * 3. When converting batch EPS files to low‑resolution JPEG previews for email attachments or reporting tools.
- * 4. When integrating a C# application that extracts the embedded TIFF preview from EPS and saves it as a JPEG for preview panes.
- * 5. When creating low‑resolution previews of EPS logos to embed in mobile apps where vector rendering is not supported.
+ * 1. When you need to generate a quick thumbnail of an EPS artwork for a web gallery, you can extract its low‑resolution preview and convert it to a JPEG using Aspose.Imaging in C#.
+ * 2. When a document management system must display a preview of uploaded EPS files without rendering the full vector content, this code creates a lightweight JPEG preview for faster loading.
+ * 3. When an email client wants to attach a small image representation of an EPS diagram to improve readability in the message body, the preview extraction and JPEG conversion provides the needed snapshot.
+ * 4. When a batch processing job has to create preview images for thousands of EPS files for indexing in a search engine, the routine extracts the preview and saves it as JPEG efficiently.
+ * 5. When a desktop application needs to show a quick visual cue of an EPS file before opening it in a full‑featured editor, generating a low‑resolution JPEG preview helps users identify the content instantly.
  */

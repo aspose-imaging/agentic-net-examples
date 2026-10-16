@@ -1,8 +1,16 @@
-// HOW-TO: Apply Gaussian Blur With Sigma 0.8 To PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Gaussian Blur With Sigma 0.8 To PNG Image In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -24,12 +32,14 @@ class Program
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(1, 0.8);
-                raster.Filter(raster.Bounds, filterOptions);
+                var blurOptions = new GaussianBlurFilterOptions(1, 0.8);
+                raster.Filter(raster.Bounds, blurOptions);
 
-                PngOptions options = new PngOptions();
-                options.Source = new FileCreateSource(outputPath, false);
-                raster.Save(outputPath, options);
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce noise in a low‑light PNG photograph before publishing it on a website.
- * 2. When preprocessing images for OCR to remove grain that interferes with text extraction.
- * 3. When cleaning up dimly lit product photos so they appear clearer in e‑commerce listings.
- * 4. When smoothing sensor noise in surveillance PNG frames prior to long‑term storage.
- * 5. When applying a subtle blur to game asset PNGs captured in dark environments to improve visual consistency.
+ * 1. When you need to reduce sensor noise in low‑light PNG photos before further analysis in a C# application.
+ * 2. When preparing PNG screenshots for a mobile app, applying a subtle Gaussian blur to smooth jagged edges.
+ * 3. When cleaning up scanned documents saved as PNGs, using a Gaussian blur to soften speckles without losing detail.
+ * 4. When creating a preprocessing step for computer‑vision models, applying a 0.8 sigma blur to normalize image noise in C#.
+ * 5. When generating thumbnail previews of PNG images, using Gaussian blur to improve visual quality in low‑light conditions.
  */

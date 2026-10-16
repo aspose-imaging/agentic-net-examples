@@ -1,8 +1,16 @@
-// HOW-TO: Apply Normalized Custom Convolution Kernel to JPEG Image in C# (Aspose.Imaging for .NET)
+// HOW-TO: Normalize Custom Convolution Kernel and Apply to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -20,48 +28,81 @@ class Program
             }
 
             string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(outputDir);
 
-            double[,] kernel = new double[,]
+            using (Image image = Image.Load(inputPath))
             {
-                { 0, 0, 0, 0, 0 },
-                { 0, 0.04, 0.04, 0.04, 0 },
-                { 0, 0.04, 0.04, 0.04, 0 },
-                { 0, 0.04, 0.04, 0.04, 0 },
-                { 0, 0, 0, 0, 0 }
-            };
+                RasterImage raster = (RasterImage)image;
+                int width = raster.Width;
+                int height = raster.Height;
 
-            double sum = 0;
-            for (int i = 0; i < kernel.GetLength(0); i++)
-            {
-                for (int j = 0; j < kernel.GetLength(1); j++)
+                double[,] kernel = new double[,]
                 {
-                    sum += kernel[i, j];
+                    { -2, -1, 0 },
+                    { -1,  1, 1 },
+                    {  0,  1, 2 }
+                };
+
+                double sum = 0;
+                foreach (double v in kernel) sum += v;
+                if (sum != 0)
+                {
+                    int rows = kernel.GetLength(0);
+                    int cols = kernel.GetLength(1);
+                    for (int i = 0; i < rows; i++)
+                        for (int j = 0; j < cols; j++)
+                            kernel[i, j] /= sum;
                 }
-            }
 
-            if (sum != 0)
-            {
-                for (int i = 0; i < kernel.GetLength(0); i++)
+                int kHeight = kernel.GetLength(0);
+                int kWidth = kernel.GetLength(1);
+                int kHalfH = kHeight / 2;
+                int kHalfW = kWidth / 2;
+
+                int[] srcPixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
+                int[] dstPixels = new int[width * height];
+                Array.Copy(srcPixels, dstPixels, srcPixels.Length);
+
+                for (int y = kHalfH; y < height - kHalfH; y++)
                 {
-                    for (int j = 0; j < kernel.GetLength(1); j++)
+                    for (int x = kHalfW; x < width - kHalfW; x++)
                     {
-                        kernel[i, j] /= sum;
+                        double aSum = 0, rSum = 0, gSum = 0, bSum = 0;
+
+                        for (int ky = 0; ky < kHeight; ky++)
+                        {
+                            int ny = y + ky - kHalfH;
+                            for (int kx = 0; kx < kWidth; kx++)
+                            {
+                                int nx = x + kx - kHalfW;
+                                int pixel = srcPixels[ny * width + nx];
+                                double coeff = kernel[ky, kx];
+
+                                int a = (pixel >> 24) & 0xFF;
+                                int r = (pixel >> 16) & 0xFF;
+                                int g = (pixel >> 8) & 0xFF;
+                                int b = pixel & 0xFF;
+
+                                aSum += a * coeff;
+                                rSum += r * coeff;
+                                gSum += g * coeff;
+                                bSum += b * coeff;
+                            }
+                        }
+
+                        int aOut = Math.Clamp((int)Math.Round(aSum), 0, 255);
+                        int rOut = Math.Clamp((int)Math.Round(rSum), 0, 255);
+                        int gOut = Math.Clamp((int)Math.Round(gSum), 0, 255);
+                        int bOut = Math.Clamp((int)Math.Round(bSum), 0, 255);
+
+                        dstPixels[y * width + x] = (aOut << 24) | (rOut << 16) | (gOut << 8) | bOut;
                     }
                 }
-            }
 
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), dstPixels);
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                image.Filter(image.Bounds, filterOptions);
-
-                var jpegOptions = new JpegOptions();
-                image.Save(outputPath, jpegOptions);
+                JpegOptions jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -73,9 +114,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to sharpen, blur, or edge‑detect a JPEG using a custom filter while preserving overall brightness by normalizing the kernel.
- * 2. When you want to preprocess images for a machine‑learning pipeline in a .NET app by applying a user‑defined convolution mask that sums to one.
- * 3. When you must batch‑process a folder of photos and ensure custom kernel coefficients are normalized to avoid unintended color shifts.
- * 4. When you are building a photo‑editing tool that lets users create their own kernels and safely apply them to JPEG files in C#.
- * 5. When you need to integrate image filtering into a C# service that loads, filters, and saves JPEG images without manually calculating kernel normalization.
+ * 1. When you need to apply a custom edge‑detecting filter to a JPEG before saving it.
+ * 2. When you must ensure a user‑defined convolution matrix is normalized so the image brightness stays consistent.
+ * 3. When processing large batches of photos and you want to embed a custom sharpening kernel directly in C# code.
+ * 4. When you need to programmatically adjust pixel values of a JPEG using a 3×3 kernel for computer‑vision preprocessing.
+ * 5. When you want to replace built‑in filters with a bespoke kernel while preserving the original image dimensions and format.
  */

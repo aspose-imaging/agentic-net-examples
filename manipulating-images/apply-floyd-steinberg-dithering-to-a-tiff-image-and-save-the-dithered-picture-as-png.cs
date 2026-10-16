@@ -1,19 +1,25 @@
 // HOW-TO: Apply Floyd Steinberg Dithering to TIFF and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.png";
+            string inputPath = Path.Combine("Input", "image.tif");
+            string outputPath = Path.Combine("Output", "dithered.png");
 
             if (!File.Exists(inputPath))
             {
@@ -23,16 +29,16 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                tiff.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8);
+                RasterImage raster = (RasterImage)image;
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                PngOptions pngOptions = new PngOptions
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                tiff.Save(outputPath, pngOptions);
+                    pngOptions.Source = new FileCreateSource(outputPath, false);
+                    raster.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -44,9 +50,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the color depth of a high‑resolution TIFF for web display while preserving visual detail, you can dither it and output a PNG.
- * 2. When converting scanned documents from TIFF to PNG for inclusion in a PDF, applying Floyd‑Steinberg dithering prevents banding in grayscale images.
- * 3. When generating thumbnails of large TIFF photos for a mobile app, dithering creates a smaller PNG with acceptable quality and faster load times.
- * 4. When preparing archival TIFF artwork for a game engine that only accepts PNG textures, Floyd‑Steinberg dithering maintains the original shading after color reduction.
- * 5. When automating batch processing of TIFF maps to PNG for GIS applications, dithering ensures the reduced‑palette images remain legible after conversion.
+ * 1. When you need to reduce a high‑color TIFF to an 8‑bit PNG with Floyd‑Steinberg dithering for sharper web graphics.
+ * 2. When preparing scanned documents for low‑bandwidth transmission and you want to preserve visual detail by dithering before saving as PNG.
+ * 3. When converting archival TIFF images to PNG thumbnails while applying dithering to maintain contrast on displays that support only limited colors.
+ * 4. When generating game assets from TIFF source files and require Floyd‑Steinberg dithering to avoid banding in the final PNG sprites.
+ * 5. When automating a batch process that transforms multi‑page TIFFs into dithered PNGs for printing workflows that require indexed color images.
  */

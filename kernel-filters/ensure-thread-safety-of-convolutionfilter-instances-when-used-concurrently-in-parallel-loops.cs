@@ -1,129 +1,101 @@
 // HOW-TO: Make ConvolutionFilter Thread Safe for Parallel Image Processing in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-namespace ImageProcessing
+class Program
 {
-    public class ConvolutionFilter
+    static void Main(string[] args)
     {
-        private readonly double[,] kernel;
-        private readonly int kernelWidth;
-        private readonly int kernelHeight;
-        private readonly int kCenterX;
-        private readonly int kCenterY;
-
-        public ConvolutionFilter(double[,] kernel)
+        try
         {
-            this.kernel = (double[,])kernel.Clone();
-            kernelHeight = kernel.GetLength(0);
-            kernelWidth = kernel.GetLength(1);
-            kCenterX = kernelWidth / 2;
-            kCenterY = kernelHeight / 2;
-        }
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/output.jpg";
 
-        public byte[,] Apply(byte[,] source)
-        {
-            int height = source.GetLength(0);
-            int width = source.GetLength(1);
-            byte[,] result = new byte[height, width];
-
-            Parallel.For(0, height, y =>
+            if (!File.Exists(inputPath))
             {
-                for (int x = 0; x < width; x++)
-                {
-                    double sum = 0.0;
-                    for (int m = 0; m < kernelHeight; m++)
-                    {
-                        int mm = kernelHeight - 1 - m;
-                        for (int n = 0; n < kernelWidth; n++)
-                        {
-                            int nn = kernelWidth - 1 - n;
-                            int ii = y + (m - kCenterY);
-                            int jj = x + (n - kCenterX);
-                            if (ii >= 0 && ii < height && jj >= 0 && jj < width)
-                            {
-                                sum += source[ii, jj] * kernel[mm, nn];
-                            }
-                        }
-                    }
-                    int val = (int)Math.Round(sum);
-                    if (val < 0) val = 0;
-                    if (val > 255) val = 255;
-                    result[y, x] = (byte)val;
-                }
-            });
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            return result;
-        }
-    }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    class Program
-    {
-        static void Main()
-        {
-            try
+            // Load image
+            using (Image image = Image.Load(inputPath))
             {
-                string inputPath = "input.raw";
-                string outputPath = "output.raw";
-
-                if (!File.Exists(inputPath))
+                // Ensure we have a raster image
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
                     return;
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Placeholder: load a raw grayscale image of known dimensions
-                int width = 256;
-                int height = 256;
-                byte[,] image = new byte[height, width];
-                using (var fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                // Cache data for performance
+                if (!raster.IsCached)
                 {
-                    for (int y = 0; y < height; y++)
-                    {
-                        for (int x = 0; x < width; x++)
-                        {
-                            int b = fs.ReadByte();
-                            if (b == -1) break;
-                            image[y, x] = (byte)b;
-                        }
-                    }
+                    raster.CacheData();
                 }
 
-                double[,] kernel = {
+                // Define kernel for convolution (e.g., sharpen)
+                double[,] kernel = new double[,]
+                {
                     { 0, -1, 0 },
                     { -1, 5, -1 },
                     { 0, -1, 0 }
                 };
-                var filter = new ConvolutionFilter(kernel);
-                byte[,] result = filter.Apply(image);
 
-                using (var fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                // Define regions to process (example: split image into 4 quadrants)
+                int halfWidth = raster.Width / 2;
+                int halfHeight = raster.Height / 2;
+                Aspose.Imaging.Rectangle[] regions = new Aspose.Imaging.Rectangle[]
                 {
-                    for (int y = 0; y < height; y++)
+                    new Aspose.Imaging.Rectangle(0, 0, halfWidth, halfHeight),
+                    new Aspose.Imaging.Rectangle(halfWidth, 0, raster.Width - halfWidth, halfHeight),
+                    new Aspose.Imaging.Rectangle(0, halfHeight, halfWidth, raster.Height - halfHeight),
+                    new Aspose.Imaging.Rectangle(halfWidth, halfHeight, raster.Width - halfWidth, raster.Height - halfHeight)
+                };
+
+                object lockObj = new object();
+
+                // Parallel processing using System.Threading.Tasks.Parallel
+                System.Threading.Tasks.Parallel.For(0, regions.Length, i =>
+                {
+                    // Each thread creates its own ConvolutionFilterOptions instance
+                    var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+
+                    // Apply filter to the region safely
+                    lock (lockObj)
                     {
-                        for (int x = 0; x < width; x++)
-                        {
-                            fs.WriteByte(result[y, x]);
-                        }
+                        raster.Filter(regions[i], options);
                     }
-                }
+                });
+
+                // Save the processed image
+                var jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When processing large grayscale bitmap images on a multi‑core server, you can apply a sharpening kernel concurrently without race conditions.
- * 2. When implementing real‑time edge detection in a C# web service, the thread‑safe filter lets multiple requests run the convolution in parallel safely.
- * 3. When building a batch image‑enhancement tool that applies blur or emboss kernels to thousands of files, the parallelized filter speeds up the job while keeping each filter instance safe.
- * 4. When integrating custom convolution kernels into an Aspose.Imaging workflow, the code ensures that parallel loops do not corrupt shared kernel data.
- * 5. When developing a desktop photo editor that supports live preview of filter effects, the thread‑safe implementation allows UI threads to compute the effect on background cores without crashes.
+ * 1. When processing large raster photos on a multi‑core server and need to apply a sharpen convolution filter to different image quadrants concurrently.
+ * 2. When building a web API that receives JPEG uploads and must run convolution kernels in parallel to maximize throughput without race conditions.
+ * 3. When creating a desktop batch‑processing tool that splits images into regions and uses Parallel.For with Aspose.Imaging to apply filters safely.
+ * 4. When developing a real‑time video frame analyzer that applies convolution filters across multiple threads while ensuring filter instances remain thread‑safe.
+ * 5. When optimizing a scientific imaging pipeline that requires high‑resolution image convolution in parallel loops without corrupting filter state.
  */

@@ -1,45 +1,49 @@
-// HOW-TO: Convert CorelDRAW CDR File To PNG Image In C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert CorelDRAW CDR to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 
-namespace CorelDrawToPng
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        string inputPath = "input.cdr";
+        string outputPath = "output\\output.png";
+
+        try
         {
-            try
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.cdr";
-                string outputPath = "output\\output.png";
-
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    image.Save(outputPath);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (Exception ex)
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"Error: {ex.Message}");
+                image.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a CorelDRAW design on a website that only supports PNG images.
- * 2. When an automated build pipeline must generate thumbnail previews of CDR files for a document management system.
- * 3. When a desktop application imports user‑provided CDR artwork and saves it as PNG for further editing or printing.
- * 4. When a cloud service converts uploaded CorelDRAW files to PNG to enable cross‑platform viewing without requiring CorelDRAW.
- * 5. When a batch script processes a folder of CDR files and creates PNG versions for archival or reporting purposes.
+ * 1. When a developer needs to generate web‑ready PNG thumbnails from legacy CorelDRAW designs.
+ * 2. When an automated batch process must convert CDR files to PNG for inclusion in a document management system.
+ * 3. When a Windows service extracts vector graphics from CDR files and stores them as raster PNGs for reporting dashboards.
+ * 4. When a desktop application allows users to preview CorelDRAW artwork by converting it to PNG on the fly.
+ * 5. When a migration script transforms old CDR assets into PNG format to be used in a modern .NET web application.
  */

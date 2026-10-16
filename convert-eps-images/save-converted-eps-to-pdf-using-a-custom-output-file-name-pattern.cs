@@ -1,9 +1,15 @@
-// HOW-TO: Convert EPS to PDF with Custom Output File Name in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS File to PDF with Custom Output Name in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,37 +17,21 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = "Input\\sample.eps";
+            string outputPath = "Output\\sample_converted.pdf";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string inputPath = Path.Combine(inputDirectory, "sample.eps");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_converted.pdf";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
-                epsImage.Save(outputPath, pdfOptions);
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to turn an EPS illustration into a PDF for client delivery while automatically appending a “_converted” suffix to the file name.
- * 2. When a C# application must generate PDF versions of vector graphics stored in an Input folder and place them in an Output folder with consistent naming.
- * 3. When integrating Aspose.Imaging into a workflow that converts design assets from EPS to PDF for printing, ensuring the output files are uniquely named.
- * 4. When automating the creation of PDF previews of EPS logos for a web catalog, using a custom naming pattern to avoid overwriting existing files.
- * 5. When building a CI/CD pipeline that validates EPS files by converting them to PDF and storing the results with a predictable filename for later verification.
+ * 1. When an application needs to convert EPS vector graphics to PDF for printable reports using Aspose.Imaging in C#.
+ * 2. When a batch job must save each EPS file as a PDF with a custom filename pattern and ensure the output folder exists.
+ * 3. When a web API receives EPS uploads and must store them as PDFs with a specific naming scheme for downstream processing.
+ * 4. When a desktop utility converts user‑selected EPS artwork to PDF while preserving the original directory hierarchy.
+ * 5. When an automated workflow archives EPS assets as PDFs and requires custom output names to match naming conventions.
  */

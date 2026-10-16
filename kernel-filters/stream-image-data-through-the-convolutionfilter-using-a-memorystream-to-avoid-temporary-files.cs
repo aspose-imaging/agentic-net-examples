@@ -1,4 +1,11 @@
-// HOW-TO: Apply Emboss Convolution Filter to JPEG Using MemoryStream in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Convolution Filter to PNG Using MemoryStream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output\\output.jpg";
+            string inputPath = "input\\input.png";
+            string outputPath = "output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,28 +28,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            byte[] imageBytes = File.ReadAllBytes(inputPath);
-            using (var ms = new MemoryStream(imageBytes))
+            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
             {
-                using (Image image = Image.Load(ms))
+                using (var memoryStream = new MemoryStream())
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
+                    inputImage.Save(memoryStream, new PngOptions());
+                    memoryStream.Position = 0;
+
+                    using (RasterImage memImage = (RasterImage)Image.Load(memoryStream))
                     {
-                        Console.Error.WriteLine("Loaded image is not a raster image.");
-                        return;
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+
+                        memImage.Filter(memImage.Bounds, filterOptions);
+                        memImage.Save(outputPath, new PngOptions());
                     }
-
-                    if (!raster.IsCached)
-                        raster.CacheData();
-
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-
-                    raster.Filter(raster.Bounds, filterOptions);
-
-                    var saveOptions = new JpegOptions();
-                    image.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply an emboss effect to a JPEG image in a web service without creating intermediate files.
- * 2. When processing large batches of images in memory to improve performance and reduce disk I/O in a C# application.
- * 3. When you want to cache raster data before applying a filter to ensure the image is fully loaded in memory.
- * 4. When you must save the filtered image directly to a specific folder with JPEG compression settings in an automated workflow.
- * 5. When you need to handle missing input files gracefully while applying image filters in a .NET console utility.
+ * 1. When you need to apply an emboss effect to a PNG image without creating intermediate files on disk.
+ * 2. When processing large batches of images in a web service and you want to keep the operation entirely in memory for better performance.
+ * 3. When you must preserve the original file while generating a filtered version for thumbnails or preview images.
+ * 4. When working in an environment with limited write permissions and you need to manipulate images completely in memory.
+ * 5. When integrating Aspose.Imaging into a C# application that streams image data from a database or network source, applies a convolution filter, and then saves the result.
  */

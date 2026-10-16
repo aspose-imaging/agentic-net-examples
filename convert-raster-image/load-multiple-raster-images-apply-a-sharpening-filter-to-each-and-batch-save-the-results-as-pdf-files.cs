@@ -1,9 +1,17 @@
-// HOW-TO: Batch Sharpen Raster Images and Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Sharpen Multiple Raster Images and Save as PDFs in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,13 +19,29 @@ class Program
     {
         try
         {
-            string inputFolder = "input";
-            string outputFolder = "output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            Directory.CreateDirectory(outputFolder);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            string[] files = Directory.GetFiles(inputFolder);
-            foreach (string inputPath in files)
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] allFiles = Directory.GetFiles(inputDirectory, "*.*");
+            string[] rasterExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".gif" };
+            List<string> rasterFiles = allFiles
+                .Where(f => rasterExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+                .ToList();
+
+            foreach (string inputPath in rasterFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -25,24 +49,19 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
+                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                    var rect = new Aspose.Imaging.Rectangle(0, 0, raster.Width, raster.Height);
+                    raster.Filter(rect, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (var pdfOptions = new PdfOptions())
                     {
-                        Console.Error.WriteLine($"Not a raster image: {inputPath}");
-                        continue;
+                        image.Save(outputPath, pdfOptions);
                     }
-
-                    raster.Filter(raster.Bounds, new SharpenFilterOptions());
-
-                    PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -55,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to improve the clarity of a large set of scanned photos before archiving them as searchable PDFs.
- * 2. When an e‑commerce platform must automatically enhance product pictures and deliver them to customers in PDF catalogs.
- * 3. When a medical imaging workflow requires batch sharpening of radiology scans and conversion to PDF for electronic health records.
- * 4. When a publishing system has to process thousands of bitmap illustrations, apply a sharpening filter, and bundle each into a PDF for print‑ready proofs.
- * 5. When a document management solution must convert mixed‑format raster files to PDFs while applying a filter to compensate for low‑resolution scans.
+ * 1. When you need to improve the visual clarity of a large set of scanned photos before archiving them as searchable PDF documents.
+ * 2. When an e‑commerce platform must automatically enhance product pictures and generate PDF catalogs for offline distribution.
+ * 3. When a medical imaging system requires batch sharpening of radiology scans and conversion to PDF for secure patient records.
+ * 4. When a publishing workflow needs to apply a sharpening filter to multiple artwork files and bundle each into a separate PDF for proofing.
+ * 5. When a document management solution must process mixed raster formats, enhance details, and store the results as PDF files for compliance reporting.
  */

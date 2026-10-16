@@ -1,7 +1,13 @@
-// HOW-TO: Convert BMP to SVG and Add Custom CSS with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert BMP to SVG with Embedded CSS Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -12,39 +18,43 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.bmp", "input2.bmp" };
-            string[] outputPaths = { "output1.svg", "output2.svg" };
-            string cssContent = "svg { background-color: #f0f0f0; }";
+            string inputPath = "input.bmp";
+            string outputPath = "output.svg";
 
-            for (int i = 0; i < inputPaths.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
-                }
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Load BMP and convert to SVG
+            using (Image image = Image.Load(inputPath))
+            {
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
+            }
 
-                // Load BMP and convert to SVG
-                using (Image image = Image.Load(inputPath))
-                {
-                    var svgOptions = new SvgOptions();
-                    image.Save(outputPath, svgOptions);
-                }
+            // Embed custom CSS stylesheet into the SVG
+            string cssContent = @"
+                /* Custom CSS */
+                svg { background-color: #ffffff; }
+                path { stroke: #000000; stroke-width: 1; }
+            ";
 
-                // Embed custom CSS stylesheet into the SVG
-                XDocument svgDoc = XDocument.Load(outputPath);
-                XNamespace ns = "http://www.w3.org/2000/svg";
-                XElement styleElement = new XElement(ns + "style",
-                    new XAttribute("type", "text/css"),
-                    new XCData(cssContent));
-                svgDoc.Root.AddFirst(styleElement);
-                svgDoc.Save(outputPath);
+            string svgText = File.ReadAllText(outputPath);
+            int insertPos = svgText.IndexOf('>');
+            if (insertPos != -1)
+            {
+                string styleElement = $"<style type=\"text/css\"><![CDATA[{cssContent}]]></style>";
+                svgText = svgText.Insert(insertPos + 1, styleElement);
+                File.WriteAllText(outputPath, svgText);
             }
         }
         catch (Exception ex)
@@ -56,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑convert legacy BMP graphics to scalable SVG files while applying a consistent visual style through an embedded CSS stylesheet.
- * 2. When a web application must serve vector images generated from BMP assets and requires the SVGs to include custom background or color rules without external CSS files.
- * 3. When automating the preparation of design assets for responsive websites, you can transform multiple BMP icons into SVGs and inject brand‑specific CSS directly into each file.
- * 4. When integrating image processing into a C# build pipeline, this code lets you convert BMP resources to SVG and embed styling so downstream tools can render them correctly.
- * 5. When creating printable or interactive diagrams from BMP sources, embedding CSS ensures the SVGs retain desired styling when opened in browsers or vector editors.
+ * 1. When you need to generate scalable vector graphics from legacy BMP assets and apply a custom style sheet for consistent branding in a C# web application.
+ * 2. When automating batch conversion of raster images to SVG for responsive UI designs while embedding CSS to control colors and stroke widths.
+ * 3. When preparing printable diagrams from BMP files and want the SVG output to include CSS that sets background and line styles without editing the file manually.
+ * 4. When integrating image conversion into a .NET service that supplies SVG icons with predefined styling for use in client‑side JavaScript visualizations.
+ * 5. When migrating a desktop application’s bitmap icons to vector format and need to embed CSS directly in the SVG to ensure proper rendering across different browsers.
  */

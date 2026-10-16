@@ -1,58 +1,66 @@
-// HOW-TO: Convert JPEG to HTML5 Canvas and Embed in Markdown with C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert JPEG To HTML5 Canvas And Embed In Markdown With C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-class Program
+namespace ImageToHtml5Canvas
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.jpg";
-            string htmlOutputPath = "output.html";
-            string markdownPath = "output.md";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded paths
+                string inputPath = "input.jpg";
+                string htmlOutputPath = "output.html";
+                string markdownOutputPath = "output.md";
 
-            string htmlDir = Path.GetDirectoryName(htmlOutputPath);
-            if (!string.IsNullOrEmpty(htmlDir))
-                Directory.CreateDirectory(htmlDir);
-
-            string markdownDir = Path.GetDirectoryName(markdownPath);
-            if (!string.IsNullOrEmpty(markdownDir))
-                Directory.CreateDirectory(markdownDir);
-
-            using (Image image = Image.Load(inputPath))
-            {
-                Html5CanvasOptions options = new Html5CanvasOptions
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    Source = new FileCreateSource(htmlOutputPath, false)
-                };
-                image.Save(htmlOutputPath, options);
-            }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-            string htmlContent = File.ReadAllText(htmlOutputPath);
-            File.WriteAllText(markdownPath, htmlContent);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+                // Ensure output directories exist
+                Directory.CreateDirectory(Path.GetDirectoryName(htmlOutputPath) ?? string.Empty);
+                Directory.CreateDirectory(Path.GetDirectoryName(markdownOutputPath) ?? string.Empty);
+
+                // Convert JPEG to HTML5 Canvas format
+                using (Image image = Image.Load(inputPath))
+                {
+                    var options = new Html5CanvasOptions();
+                    image.Save(htmlOutputPath, options);
+                }
+
+                // Read generated HTML content
+                string htmlContent = File.ReadAllText(htmlOutputPath);
+
+                // Embed the canvas HTML into a Markdown document
+                File.WriteAllText(markdownOutputPath, htmlContent);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display a JPEG image on a static site that only supports Markdown, you can convert it to an HTML5 canvas element and embed it directly in the Markdown file.
- * 2. When generating technical documentation programmatically, this code lets you include high‑resolution images as canvas markup without relying on external image files.
- * 3. When creating a blog post that will be rendered by a Markdown parser that strips image tags, you can embed the picture as a canvas to ensure it appears correctly.
- * 4. When building an automated report that combines images and code snippets, the conversion to canvas and insertion into Markdown keeps the layout portable and self‑contained.
- * 5. When you want to store images in a version‑controlled repository without binary blobs, converting JPEGs to canvas HTML and saving them in Markdown reduces binary storage while preserving visual content.
+ * 1. When you need to display a JPEG image on a web page using a canvas element and include that canvas directly in a Markdown‑based documentation or README file.
+ * 2. When generating automated reports that combine images with Markdown content, converting the pictures to HTML5 canvas ensures they render consistently across browsers.
+ * 3. When building a static site generator in C# that transforms source JPEG assets into embeddable canvas snippets for blog posts written in Markdown.
+ * 4. When creating technical tutorials where the original JPEG must be shown as a canvas for interactive overlays, and the whole tutorial is authored in Markdown.
+ * 5. When exporting product screenshots from a .NET application into a Markdown guide without relying on external image files, using Aspose.Imaging to convert them to canvas HTML first.
  */

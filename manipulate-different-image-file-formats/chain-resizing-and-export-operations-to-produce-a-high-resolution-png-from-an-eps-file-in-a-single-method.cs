@@ -1,15 +1,23 @@
-// HOW-TO: Resize EPS to 2000x2000 and Save as PNG Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to High Resolution PNG with Custom Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPath = "output/high_res.png";
+        string inputPath = "input/input.eps";
+        string outputPath = "output/output.png";
 
         try
         {
@@ -21,21 +29,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (Image epsImage = Image.Load(inputPath))
             {
-                int targetWidth = 2000;
-                int targetHeight = 2000;
-
                 var rasterOptions = new EpsRasterizationOptions
                 {
-                    PageWidth = targetWidth,
-                    PageHeight = targetHeight
+                    PageWidth = 2000,
+                    PageHeight = 2000
                 };
-
-                epsImage.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
 
                 var pngOptions = new PngOptions
                 {
+                    ColorType = PngColorType.TruecolorWithAlpha,
                     VectorRasterizationOptions = rasterOptions
                 };
 
@@ -51,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector EPS logo to a high‑resolution PNG for web display.
- * 2. When preparing print‑ready assets, you must rasterize an EPS illustration at a specific pixel size before saving as PNG.
- * 3. When automating a batch process that generates thumbnails from EPS files at a fixed 2000 × 2000 resolution.
- * 4. When integrating EPS to PNG conversion into a C# application that requires precise control over image dimensions and rasterization options.
- * 5. When a client requires a PNG version of an EPS diagram with nearest‑neighbour scaling to preserve sharp edges.
+ * 1. When you need to render a vector EPS logo at 2000×2000 pixels for web display as a PNG with transparency.
+ * 2. When an automated build process must convert design assets from EPS to high‑resolution PNGs for mobile app resources.
+ * 3. When a reporting tool requires rasterizing EPS charts into PNG images with truecolor and alpha for inclusion in PDFs.
+ * 4. When a batch script processes user‑uploaded EPS files and saves them as PNGs with a fixed size for a content‑management system.
+ * 5. When you want to ensure consistent PNG output by specifying rasterization options while converting EPS files in a C# application.
  */

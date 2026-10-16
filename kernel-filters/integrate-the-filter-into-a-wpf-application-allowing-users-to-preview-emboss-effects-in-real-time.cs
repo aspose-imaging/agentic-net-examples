@@ -1,50 +1,42 @@
-// HOW-TO: Apply Emboss Filter to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss Filter to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output_emboss.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                double[,] embossKernel = new double[,]
-                {
-                    { -2, -1, 0 },
-                    { -1, 1, 1 },
-                    { 0, 1, 2 }
-                };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
-                raster.Filter(raster.Bounds, filterOptions);
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                image.Filter(
+                    image.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
-                raster.Save(outputPath, jpegOptions);
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -56,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a realistic embossed effect to user‑uploaded photos and save the result as a high‑quality JPEG.
- * 2. When an image‑processing pipeline must transform raster images with a custom convolution kernel before publishing them to a web gallery.
- * 3. When a WPF desktop application wants to let users preview an emboss effect on a bitmap in real time using Aspose.Imaging.
- * 4. When a batch job has to process a directory of images, apply the emboss filter, and output JPEG files with a specific compression quality.
- * 5. When a programmer wants to experiment with custom convolution kernels without writing low‑level pixel loops, leveraging Aspose.Imaging’s FilterOptions.
+ * 1. When you need to add a 3×3 emboss effect to user‑uploaded PNG files before displaying them in a WPF photo editor.
+ * 2. When you want to preprocess product photos by embossing edges to create a stylized preview for an e‑commerce catalog.
+ * 3. When an automated batch job must convert scanned PNG drawings into embossed versions for artistic watermarking.
+ * 4. When a desktop application requires real‑time preview of an emboss filter on PNG textures used in game UI design.
+ * 5. When you are generating embossed thumbnails of PNG icons for a documentation generator that highlights depth.
  */

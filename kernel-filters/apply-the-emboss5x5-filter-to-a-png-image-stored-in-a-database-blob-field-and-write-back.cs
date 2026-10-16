@@ -1,12 +1,20 @@
-// HOW-TO: Load PNG from File and Save as PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss5x5 Filter to PNG Image and Save with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
@@ -23,6 +31,11 @@ class Program
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
+
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -35,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to read a PNG file from disk, verify it exists, and create a copy in another folder using Aspose.Imaging.
- * 2. When an application must ensure the target directory is created before writing a processed PNG image to prevent runtime errors.
- * 3. When a service processes uploaded PNG images and saves them with standardized PngOptions for consistent quality and metadata handling.
- * 4. When migrating image assets from one storage location to another while preserving the original PNG format and pixel data.
- * 5. When a batch job validates PNG files and rewrites them to normalize metadata using Aspose.Imaging in C#.
+ * 1. When you need to add a realistic emboss effect to PNG product photos before publishing them on an online store using C# and Aspose.Imaging.
+ * 2. When you want to preprocess scanned documents by applying a 5×5 emboss filter to highlight edges for better visual inspection in a .NET application.
+ * 3. When you are building a desktop image editor that lets users apply artistic filters, such as the Emboss5x5 convolution, to PNG files programmatically.
+ * 4. When you must generate stylized thumbnails with an embossed look for a gallery view in a C# web service that processes images on the fly.
+ * 5. When you are automating a batch workflow that reads PNG images, applies a depth‑enhancing emboss filter, and saves the results back to storage using Aspose.Imaging.
  */

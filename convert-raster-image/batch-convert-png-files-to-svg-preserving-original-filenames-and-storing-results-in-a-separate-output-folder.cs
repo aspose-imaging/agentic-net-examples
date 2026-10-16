@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert PNG Images to SVG Preserving Filenames in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert PNG Images to SVG Files in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,11 @@ class Program
     {
         try
         {
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string inputFolder = "input";
+            string outputFolder = "output";
+
+            // Ensure output folder exists
+            Directory.CreateDirectory(outputFolder);
 
             string[] pngFiles = Directory.GetFiles(inputFolder, "*.png", SearchOption.TopDirectoryOnly);
             foreach (string inputPath in pngFiles)
@@ -41,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate scalable vector graphics from a collection of raster PNG logos for responsive web design.
- * 2. When an automated build process must convert product screenshots to SVG for inclusion in documentation without changing file names.
- * 3. When a desktop application has to export user‑uploaded PNG icons to SVG for high‑resolution printing.
- * 4. When a migration script moves legacy PNG assets to a vector‑based asset library while keeping the original folder structure.
- * 5. When a CI pipeline validates that all PNG assets are available as SVG equivalents for cross‑platform UI rendering.
+ * 1. When you need to automatically transform a collection of PNG icons into scalable SVG graphics for responsive web design.
+ * 2. When a build pipeline must generate vector versions of raster assets without changing the original file names.
+ * 3. When a desktop application has to export user‑uploaded PNG pictures to SVG format for further editing in vector tools.
+ * 4. When a migration script has to move image assets from a legacy PNG folder to a new SVG directory while keeping the folder structure intact.
+ * 5. When you want to perform high‑performance batch image conversion in C# using Aspose.Imaging without writing custom parsing code.
  */

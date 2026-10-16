@@ -1,37 +1,43 @@
 // HOW-TO: Convert OTG to PDF with Custom Page Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "result.pdf");
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "result.pdf");
+
+            if (!File.Exists(inputPath))
             {
-                using (var pdfOptions = new PdfOptions())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
+            {
+                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = 800,
-                        PageHeight = 600
-                    };
-                    image.Save(outputPath, pdfOptions);
-                }
+                    PageSize = new Aspose.Imaging.SizeF(595, 842),
+                    BackgroundColor = Aspose.Imaging.Color.White
+                };
+
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a vector‑based OTG illustration into a PDF report and must control the exact dimensions of the page.
- * 2. When generating printable PDFs from OTG assets for a marketing brochure that requires a specific 800 × 600 pixel layout.
- * 3. When automating a batch conversion of OTG files to PDF in a C# backend while ensuring a white background and consistent page size.
- * 4. When integrating Aspose.Imaging into a document‑generation service to render OTG graphics as PDF pages with custom width and height.
- * 5. When creating PDFs from OTG diagrams for an e‑learning platform where each page must match a predefined screen resolution.
+ * 1. When a developer needs to generate printable PDFs from OTG vector graphics while controlling the page dimensions for layout consistency.
+ * 2. When an application must batch‑convert OTG files to PDF for archival purposes and must ensure the output matches a specific paper size such as A4.
+ * 3. When integrating Aspose.Imaging into a C# service that creates PDF reports from OTG diagrams and requires a white background for branding.
+ * 4. When a web API receives OTG uploads and must return PDFs sized to fit a predefined canvas for downstream processing.
+ * 5. When automating document workflows that involve converting OTG assets to PDF with exact width and height to align with existing templates.
  */

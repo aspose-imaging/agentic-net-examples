@@ -1,50 +1,64 @@
-// HOW-TO: Crop a 200x200 Area from a TIFF Image and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop a 200x200 Area from a TIFF and Save to Memory Stream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string inputPath = "input.tif";
+
+            if (!File.Exists(inputPath))
             {
-                string inputPath = "input.tif";
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                string outputPath = "output/output.tif";
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            using (FileStream fileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            using (MemoryStream inputStream = new MemoryStream())
+            {
+                fileStream.CopyTo(inputStream);
+                inputStream.Position = 0;
 
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputStream))
                 {
-                    RasterImage raster = (RasterImage)image;
                     Rectangle cropRect = new Rectangle(0, 0, 200, 200);
-                    raster.Crop(cropRect);
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    raster.Save(outputPath, tiffOptions);
+                    image.Crop(cropRect);
+
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
+                        image.Save(outputStream, options);
+                        Console.WriteLine($"Cropped image size in bytes: {outputStream.Length}");
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract a specific 200 × 200 pixel region from a multi‑page TIFF for thumbnail generation in a C# web service.
- * 2. When a desktop application must trim the edges of scanned documents stored as TIFF files before archiving them.
- * 3. When an automated batch job processes incoming TIFF scans, crops a fixed area, and saves the result for downstream OCR analysis.
- * 4. When a cloud function receives a TIFF stream, removes unwanted margins by cropping, and returns the cropped image as a new TIFF.
- * 5. When a reporting tool requires a small, uniformly sized TIFF snippet to embed in PDF reports generated with .NET.
+ * 1. When you need to extract a specific region from a multi‑page TIFF for thumbnail generation in a web application.
+ * 2. When you want to process a scanned document in memory without creating temporary files on disk.
+ * 3. When you have to send a cropped portion of a large TIFF to another service via a byte array or stream.
+ * 4. When you are building a PDF conversion pipeline that requires a 200 × 200 pixel image slice from the original TIFF.
+ * 5. When you need to validate or display a small region of a high‑resolution TIFF in a Windows Forms or WPF viewer.
  */

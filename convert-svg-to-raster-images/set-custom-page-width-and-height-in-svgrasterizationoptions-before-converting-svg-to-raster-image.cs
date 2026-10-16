@@ -1,18 +1,26 @@
-// HOW-TO: Set Custom Page Size for SVG to PNG Conversion in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set Custom Page Size When Converting SVG to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string inputPath = "Input/input.svg";
+            string outputPath = "Output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,20 +30,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = 800,
-                    PageHeight = 600
-                };
+                PageWidth = 800,
+                PageHeight = 600,
+                BackgroundColor = Color.White
+            };
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+            using (PngOptions pngOptions = new PngOptions())
+            {
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                svgImage.Save(outputPath, pngOptions);
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG thumbnail of an SVG at a specific resolution for a web gallery.
- * 2. When you must ensure the rasterized image fits exact dimensions for printing or PDF embedding.
- * 3. When you are creating responsive UI assets and need consistent width and height across devices.
- * 4. When you want to batch‑process SVG icons and enforce a uniform canvas size before saving as PNG.
- * 5. When you are integrating SVG graphics into a game engine that requires textures of predefined pixel dimensions.
+ * 1. When you need to generate a PNG thumbnail of an SVG logo at a fixed 800×600 pixel size for a web dashboard.
+ * 2. When you must export SVG diagrams to PNG files with a white background to embed in PDF reports that require a specific page dimension.
+ * 3. When creating raster assets for a mobile app where each image must match the design’s exact width and height specifications.
+ * 4. When batch‑converting a collection of SVG icons to PNG while enforcing uniform dimensions to keep UI layout consistent.
+ * 5. When preparing SVG artwork for print or marketing material and you need to control the output size and background color before rasterization.
  */

@@ -1,60 +1,62 @@
 // HOW-TO: Create BMP with Semi Transparent Filled Rectangle in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            int width = 300;
+            int height = 250;
+
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
             {
-                string outputPath = "output/output.bmp";
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                BmpOptions options = new BmpOptions();
-                options.BitsPerPixel = 32;
-                options.Source = new FileCreateSource(outputPath, false);
+                Rectangle rect = new Rectangle(50, 50, 200, 150);
 
-                using (Image image = Image.Create(options, 300, 200))
+                using (SolidBrush fillBrush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                 {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
-
-                    int rectX = 50;
-                    int rectY = 50;
-                    int rectWidth = 200;
-                    int rectHeight = 100;
-
-                    Pen pen = new Pen(Color.Blue, 3);
-                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
-                    {
-                        graphics.FillRectangle(brush, rectX, rectY, rectWidth, rectHeight);
-                    }
-                    graphics.DrawRectangle(pen, rectX, rectY, rectWidth, rectHeight);
-
-                    image.Save();
+                    graphics.FillRectangle(fillBrush, rect);
                 }
+
+                Pen pen = new Pen(Color.Black, 2);
+                graphics.DrawRectangle(pen, rect);
+
+                image.Save();
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a 32‑bit BMP report image that highlights a region with a semi‑transparent overlay for visual emphasis.
- * 2. When creating custom UI assets such as button backgrounds where a translucent colored rectangle must be drawn over a white canvas in C#.
- * 3. When producing test images for image‑processing pipelines that require alpha‑blended shapes inside a BMP file.
- * 4. When automating the creation of watermark stamps that use a partially opaque rectangle to mark confidential sections of a document.
- * 5. When building a graphics‑editing tool that lets users draw and fill shapes with adjustable opacity and then save the result as a BMP file.
+ * 1. When you need to generate a BMP report thumbnail that highlights a region with a translucent overlay for visual emphasis.
+ * 2. When creating a custom watermark on a BMP image by drawing a semi‑transparent rectangle over the content.
+ * 3. When building a UI component that programmatically produces BMP assets with highlighted selection boxes using alpha‑blended colors.
+ * 4. When exporting diagram layers to BMP where a specific area must be shaded with a 50 % opaque fill to indicate status.
+ * 5. When automating batch image processing that adds a semi‑transparent colored border to BMP files for branding or UI guidelines.
  */

@@ -1,9 +1,9 @@
-// HOW-TO: Convert DICOM to TIFF with Otsu Binarization in C# (Aspose.Imaging for .NET)
+// HOW-TO: How To Convert DICOM To TIFF With Otsu Binarization And XMP Metadata In C# (Aspose.Imaging for .NET)
 // ── Machine-verified example ──────────────────────────────────────────────
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -20,8 +20,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.dcm";
-            string outputPath = "Output\\processed.tiff";
+            string inputPath = Path.Combine("Input", "input.dcm");
+            string outputPath = Path.Combine("Output", "output.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -31,18 +31,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                RasterCachedImage raster = (RasterCachedImage)dicom;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
+                image.BinarizeOtsu();
 
-                raster.BinarizeOtsu();
+                string xmp = "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"Aspose.Imaging\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><rdf:Description rdf:about=\"\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"><dc:description>Otsu threshold applied</dc:description></rdf:Description></rdf:RDF></x:xmpmeta>";
+                byte[] xmpBytes = System.Text.Encoding.UTF8.GetBytes(xmp);
+                image.XmpData = new Aspose.Imaging.Xmp.XmpPacketWrapper(xmpBytes);
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                raster.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to TIFF files for archival while applying Otsu threshold to create binary images.
- * 2. When a radiology workflow requires automated preprocessing of DICOM images to highlight regions of interest before further analysis.
- * 3. When a .NET service must generate high‑contrast black‑and‑white TIFFs from DICOM data for compatibility with legacy imaging software.
- * 4. When a batch processing tool needs to read DICOM files, perform Otsu binarization, and store the results as TIFFs for downstream machine‑learning pipelines.
- * 5. When a developer wants to ensure DICOM pixel data is cached, thresholded, and saved in a widely supported format without manual image conversion steps.
+ * 1. When a medical imaging application needs to transform DICOM scans into high‑contrast TIFF files for archival while recording the processing step in XMP metadata.
+ * 2. When a radiology workflow requires automated binarization of DICOM images using Otsu’s method before exporting them to TIFF for downstream analysis.
+ * 3. When a developer wants to embed processing history into image files by adding XMP tags after applying Otsu threshold to DICOM data.
+ * 4. When converting DICOM images to a universally supported format like TIFF for integration with non‑medical software, while preserving metadata about the transformation.
+ * 5. When building a C# service that batch‑processes DICOM files, applies Otsu binarization, tags them with XMP descriptions, and saves the results as TIFF for compliance reporting.
  */

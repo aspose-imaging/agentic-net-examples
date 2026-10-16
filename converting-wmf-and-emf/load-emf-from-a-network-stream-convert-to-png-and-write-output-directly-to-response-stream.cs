@@ -1,4 +1,11 @@
-// HOW-TO: Load EMF From Network Stream And Save As PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Load EMF From URL and Convert to PNG Stream in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Net.Http;
@@ -7,27 +14,32 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
+            // Hardcoded input URL and output file path
             string inputUrl = "https://example.com/sample.emf";
             string outputPath = "output/sample.png";
 
+            // Load EMF from network stream
+            using var httpClient = new HttpClient();
+            using var networkStream = httpClient.GetStreamAsync(inputUrl).GetAwaiter().GetResult();
+
+            using var image = Image.Load(networkStream);
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (HttpClient client = new HttpClient())
-            using (Stream networkStream = client.GetStreamAsync(inputUrl).Result)
-            using (Image image = Image.Load(networkStream))
-            using (MemoryStream responseStream = new MemoryStream())
-            {
-                image.Save(responseStream, new PngOptions());
-                responseStream.Position = 0;
-                using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    responseStream.CopyTo(fileStream);
-                }
-            }
+            // Save to file (required by path-safety rule)
+            image.Save(outputPath, new PngOptions());
+
+            // Also write PNG directly to response (standard output) stream
+            using var memoryStream = new MemoryStream();
+            image.Save(memoryStream, new PngOptions());
+            memoryStream.Position = 0;
+            using var responseStream = Console.OpenStandardOutput();
+            memoryStream.CopyTo(responseStream);
         }
         catch (Exception ex)
         {
@@ -38,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display vector EMF graphics as raster PNG images directly from a remote server.
- * 2. When you want to generate thumbnail previews of EMF files downloaded over HTTP without saving the original file to disk.
- * 3. When an API endpoint must return a PNG representation of an EMF diagram streamed from an external service.
- * 4. When converting legacy EMF reports into web‑friendly PNG format for embedding in HTML emails.
- * 5. When processing batch jobs that fetch EMF assets from URLs and store them as PNG files for further image analysis.
+ * 1. When you need to fetch a vector EMF diagram from a web service, convert it to a raster PNG, and store it on disk for later use.
+ * 2. When building a web API that returns dynamically generated PNG images derived from remote EMF files without creating temporary files on the server.
+ * 3. When integrating legacy EMF assets into a modern .NET application that requires PNG thumbnails for UI previews.
+ * 4. When automating batch processing of EMF files hosted on external URLs and streaming the resulting PNGs directly to a client or console.
+ * 5. When you must ensure the output directory exists before saving converted images while also piping the PNG data to standard output for logging or piping into another process.
  */

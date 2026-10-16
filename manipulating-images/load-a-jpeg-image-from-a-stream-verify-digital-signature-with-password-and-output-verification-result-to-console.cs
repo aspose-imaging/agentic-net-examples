@@ -1,44 +1,54 @@
-// HOW-TO: Verify JPEG Digital Signature From Stream With Password In C# (Aspose.Imaging for .NET)
+// HOW-TO: Verify JPEG Digital Signature From Stream Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 
-class Program
+namespace DigitalSignatureVerifier
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            string inputPath = "input.jpg";
-            string password = "yourPassword";
-
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = "input.jpg";
+                string password = "secret123";
 
-            using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-            {
-                using (RasterImage image = (RasterImage)Image.Load(stream))
+                if (!File.Exists(inputPath))
                 {
-                    bool isSigned = image.IsDigitalSigned(password);
-                    Console.WriteLine(isSigned ? "Image is digitally signed." : "Image is NOT digitally signed.");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                {
+                    using (RasterImage image = (RasterImage)Image.Load(fs))
+                    {
+                        bool isSigned = image.IsDigitalSigned(password);
+                        Console.WriteLine(isSigned ? "Image is digitally signed." : "Image is NOT digitally signed.");
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives uploaded JPEG files and must confirm they are authentic and untampered before processing them.
- * 2. When a desktop utility needs to batch‑check scanned JPEG documents for a valid digital signature using a known password.
- * 3. When a secure archiving system validates that archived JPEG images retain their original digital signature before allowing download.
- * 4. When a compliance tool verifies that product photos embedded with a password‑protected digital signature meet regulatory audit requirements.
- * 5. When a cloud service reads JPEG images from a stream and needs to programmatically report whether the image is digitally signed to trigger further workflow steps.
+ * 1. When you need to confirm that a received JPEG image has not been tampered with by checking its embedded digital signature before processing it.
+ * 2. When an application must validate the authenticity of user‑uploaded photos in a secure workflow using a password‑protected signature.
+ * 3. When integrating a compliance check that ensures archived JPEG files retain their original digital signature during batch import.
+ * 4. When building a server‑side service that reads image data from a stream and verifies the signature to grant or deny access.
+ * 5. When troubleshooting image security by printing to the console whether a JPEG file is digitally signed with the expected password.
  */

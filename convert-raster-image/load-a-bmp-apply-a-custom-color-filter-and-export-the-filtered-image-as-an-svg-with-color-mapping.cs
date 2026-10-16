@@ -1,4 +1,11 @@
-// HOW-TO: Convert BMP to SVG with Red‑Channel Grayscale Filter in C# (Aspose.Imaging for .NET)
+// HOW-TO: Increase Red Channel of BMP and Export as SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,7 +14,7 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -20,34 +27,32 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-                outputDir = ".";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                int width = raster.Width;
-                int height = raster.Height;
-
-                int[] pixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
-
-                for (int i = 0; i < pixels.Length; i++)
+                // Custom color filter: increase red channel by 50 (clamped to 255)
+                for (int y = 0; y < image.Height; y++)
                 {
-                    int argb = pixels[i];
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    // Custom color filter: map to grayscale based on red channel
-                    int newR = r;
-                    int newG = r;
-                    int newB = r;
-                    pixels[i] = (a << 24) | (newR << 16) | (newG << 8) | newB;
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        var pixel = image.GetPixel(x, y);
+                        int r = Math.Min(pixel.R + 50, 255);
+                        int g = pixel.G;
+                        int b = pixel.B;
+                        var newColor = Color.FromArgb(pixel.A, r, g, b);
+                        image.SetPixel(x, y, newColor);
+                    }
                 }
 
-                raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+                var svgOptions = new SvgOptions();
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+                svgOptions.VectorRasterizationOptions = rasterizationOptions;
 
-                SvgOptions svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -60,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to transform a legacy BMP icon into a scalable SVG while applying a red‑channel based grayscale effect for consistent web display.
- * 2. When generating vector graphics from raster scans and you want to preserve transparency while simplifying colors to a single channel using Aspose.Imaging in C#.
- * 3. When creating printable assets that require SVG output but the source images are BMP files and you need a custom color mapping to match brand guidelines.
- * 4. When automating a batch conversion pipeline that converts BMP screenshots to lightweight SVG files with a grayscale filter to reduce file size and improve loading speed.
- * 5. When integrating image processing into a .NET application that must read BMP data, apply a custom filter, and export the result as an SVG for use in responsive UI components.
+ * 1. When you need to enhance the red tones of a legacy BMP image before converting it to a scalable SVG for web display.
+ * 2. When you want to programmatically apply a custom color filter to each pixel of a bitmap in a C# application.
+ * 3. When you must generate an SVG file from a raster image while preserving the modified colors for vector‑based workflows.
+ * 4. When you are building an automated pipeline that validates BMP existence, processes the image, and outputs an SVG for further editing.
+ * 5. When you need to ensure the output folder is created automatically and handle errors gracefully while converting images in .NET.
  */

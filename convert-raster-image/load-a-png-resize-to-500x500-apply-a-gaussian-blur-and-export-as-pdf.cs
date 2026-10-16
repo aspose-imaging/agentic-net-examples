@@ -1,4 +1,11 @@
-// HOW-TO: Resize PNG to 500x500, Apply Gaussian Blur, Save as PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG, Apply Gaussian Blur, and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,35 +15,27 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\image.png";
+        string outputPath = "Output\\result.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\output.pdf";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
-
                 raster.Resize(500, 500);
-
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5));
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    image.Save(outputPath, pdfOptions);
-                }
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5f);
+                raster.Filter(raster.Bounds, blurOptions);
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PDF brochure from a high‑resolution PNG and want the image scaled to a fixed 500 × 500 size.
- * 2. When you must soften a PNG logo with a Gaussian blur before embedding it in a PDF report.
- * 3. When an automated workflow requires converting user‑uploaded PNG screenshots into uniformly sized, blurred PDFs for archival.
- * 4. When creating printable PDF invoices that include product images resized and blurred for visual consistency.
- * 5. When building a C# service that prepares marketing assets by resizing PNG banners, applying a blur effect, and outputting them as PDF files.
+ * 1. When you need to generate a blurred thumbnail PDF from a high‑resolution PNG for a web catalog.
+ * 2. When you must convert user‑uploaded PNG images into uniformly sized PDF previews with a soft focus effect.
+ * 3. When creating printable PDF brochures that require all PNG graphics to be resized to 500 × 500 pixels and have a subtle Gaussian blur applied.
+ * 4. When automating a batch process that standardizes PNG assets, applies a blur for watermarking, and outputs them as PDF files for archival.
+ * 5. When integrating image processing into a C# application to transform PNG logos into PDF assets with consistent dimensions and a smooth blur for UI placeholders.
  */

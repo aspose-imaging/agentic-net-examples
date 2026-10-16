@@ -1,25 +1,43 @@
-// HOW-TO: Convert Specific Page Range of Multiple DjVu Files to BMP in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Selected Pages of Multiple DjVu Files to BMP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string[] inputFiles = {
-                "Input\\sample1.djvu",
-                "Input\\sample2.djvu"
+            // Hardcoded input DjVu files
+            var inputFiles = new List<string>
+            {
+                @"C:\Input\sample1.djvu",
+                @"C:\Input\sample2.djvu"
             };
 
-            int rangeStart = 1;
-            int rangeEnd = 3;
+            // Hardcoded output directory
+            var outputDirectory = @"C:\Output";
 
-            foreach (string inputPath in inputFiles)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Define the page range to convert (inclusive)
+            int startPage = 1; // 1-based index
+            int endPage = 3;
+
+            foreach (var inputPath in inputFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -27,19 +45,31 @@ class Program
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) +
-                                        $"_pages_{rangeStart}_{rangeEnd}.bmp";
-                string outputPath = Path.Combine("Output", outputFileName);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+                // Load DjVu image
+                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
                 {
-                    using (BmpOptions bmpOptions = new BmpOptions())
+                    // Determine actual page count
+                    int pageCount = djvuImage.PageCount;
+                    int actualStart = Math.Max(startPage, 1);
+                    int actualEnd = Math.Min(endPage, pageCount);
+
+                    for (int pageIndex = actualStart; pageIndex <= actualEnd; pageIndex++)
                     {
-                        var range = new IntRange(rangeStart, rangeEnd);
-                        bmpOptions.MultiPageOptions = new DjvuMultiPageOptions(range);
-                        djvu.Save(outputPath, bmpOptions);
+                        // Prepare BMP options with page selection
+                        var bmpOptions = new BmpOptions
+                        {
+                            MultiPageOptions = new DjvuMultiPageOptions(pageIndex - 1) // zero‑based index
+                        };
+
+                        // Build output file path
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_page{pageIndex}.bmp");
+
+                        // Ensure directory for output path exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the selected page as BMP
+                        djvuImage.Save(outputPath, bmpOptions);
                     }
                 }
             }
@@ -53,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the first three pages from several DjVu documents and save them as high‑resolution BMP images for printing or archival.
- * 2. When an application must batch‑process a collection of DjVu files, converting only a selected page interval to BMP to reduce processing time and file size.
- * 3. When you are building a document‑conversion service that offers users the ability to download specific pages of a DjVu ebook as BMP thumbnails.
- * 4. When integrating Aspose.Imaging into a C# workflow that requires preserving the original page order while exporting a subset of pages from DjVu to BMP for further analysis.
- * 5. When automating a quality‑control pipeline that validates the visual fidelity of particular DjVu pages by converting them to BMP for pixel‑by‑pixel comparison.
+ * 1. When a developer needs to extract the first three pages from several DjVu documents and save them as BMP images for further processing or archival.
+ * 2. When an application must batch‑convert specific page ranges of scanned DjVu files into bitmap format for compatibility with legacy imaging tools.
+ * 3. When a workflow requires generating BMP thumbnails of particular pages from multiple DjVu reports to display in a web portal.
+ * 4. When a document management system has to extract and store selected DjVu pages as BMP files for OCR preprocessing.
+ * 5. When a developer wants to automate the conversion of chosen DjVu pages to BMP in order to feed them into a machine‑learning model that only accepts bitmap inputs.
  */

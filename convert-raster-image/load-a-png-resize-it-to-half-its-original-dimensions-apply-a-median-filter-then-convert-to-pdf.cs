@@ -1,59 +1,63 @@
-// HOW-TO: Resize PNG, Apply Median Filter, and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG to Half Size, Apply Median Filter, Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        try
         {
-            try
-            {
-                string inputPath = "Input\\image.png";
-                string outputPath = "Output\\result.pdf";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.pdf";
 
-                if (!File.Exists(inputPath))
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    raster.CacheData();
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int newWidth = raster.Width / 2;
+                int newHeight = raster.Height / 2;
+                raster.Resize(newWidth, newHeight);
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
-                {
-                    if (!image.IsCached)
-                        image.CacheData();
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                    int newWidth = image.Width / 2;
-                    int newHeight = image.Height / 2;
-                    image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a smaller, noise‑reduced PDF version of a high‑resolution PNG for email attachments.
- * 2. When creating printable PDFs from scanned PNG images while reducing file size and smoothing artifacts.
- * 3. When preprocessing product‑photo PNGs for a catalog by halving dimensions, removing speckle noise, and exporting to PDF.
- * 4. When automating the conversion of PNG screenshots into compact PDFs for documentation with consistent image quality.
- * 5. When building a batch job that prepares PNG assets for archival by resizing, denoising with a median filter, and storing them as PDFs.
+ * 1. When you need to generate a smaller, noise‑reduced PDF version of a high‑resolution PNG for faster web preview.
+ * 2. When an application must batch‑process uploaded PNG screenshots, halve their dimensions, remove speckle noise, and archive them as PDFs.
+ * 3. When creating printable PDF documents from PNG assets while preserving image quality by applying a median filter before conversion.
+ * 4. When a reporting tool requires converting large PNG charts into compact PDF files with reduced size and smoothed edges.
+ * 5. When automating the preparation of PNG‑based UI mockups for client review, resizing them and exporting to PDF with noise reduction.
  */

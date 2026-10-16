@@ -1,4 +1,11 @@
 // HOW-TO: Rasterize OTG to High-Resolution JPEG at 300 DPI in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,11 +15,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.otg";
+        string outputPath = "Output\\sample.jpg";
+
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/output.jpg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,6 +33,7 @@ class Program
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     ResolutionSettings = new ResolutionSetting(300, 300),
+                    ResolutionUnit = ResolutionUnit.Inch,
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
@@ -46,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a vector OTG design into a print‑ready JPEG with 300 DPI for high‑quality brochures.
- * 2. When generating thumbnails for an OTG catalog but require the same resolution as the original for detailed inspection.
- * 3. When preparing OTG artwork for a marketing email that must retain sharpness on high‑resolution displays.
- * 4. When archiving OTG files as JPEGs for a document management system that only supports raster images at a specific DPI.
- * 5. When integrating an automated pipeline that transforms OTG drawings into JPEGs for a GIS application that expects 300 DPI raster layers.
+ * 1. When you need to convert vector OTG drawings into printable JPEG images with 300 dpi for high‑quality brochures.
+ * 2. When generating thumbnails for a web gallery that require consistent resolution settings from OTG files.
+ * 3. When preparing engineering diagrams for inclusion in PDF reports where the rasterized JPEG must match a specific DPI.
+ * 4. When automating batch processing of OTG assets to create high‑resolution JPEG assets for large‑format printing.
+ * 5. When integrating Aspose.Imaging into a C# application to ensure rasterized images retain exact dimensions and DPI for downstream CAD workflows.
  */

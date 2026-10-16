@@ -1,11 +1,16 @@
-// HOW-TO: Add 5 Pixel Border to BMPs and Convert to PDF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Add 5 Pixel White Border to BMPs and Convert to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -13,21 +18,11 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
@@ -36,41 +31,32 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string tempCanvasPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_border.bmp");
-                string pdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-
-                using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+                using (RasterImage bmpImage = (RasterImage)Image.Load(inputPath))
                 {
-                    int newWidth = bmp.Width + 10;
-                    int newHeight = bmp.Height + 10;
+                    if (!bmpImage.IsCached)
+                        bmpImage.CacheData();
 
-                    Source canvasSource = new FileCreateSource(tempCanvasPath, false);
-                    using (BmpOptions canvasOptions = new BmpOptions() { Source = canvasSource })
+                    int borderSize = 5;
+                    int newWidth = bmpImage.Width + borderSize * 2;
+                    int newHeight = bmpImage.Height + borderSize * 2;
+
+                    using (JpegImage canvas = (JpegImage)Image.Create(new JpegOptions(), newWidth, newHeight))
                     {
-                        using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
+                        Graphics graphics = new Graphics(canvas);
+                        graphics.Clear(Color.White);
+                        graphics.DrawImage(bmpImage, borderSize, borderSize);
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        using (PdfOptions pdfOptions = new PdfOptions())
                         {
-                            Graphics graphics = new Graphics(canvas);
-                            graphics.Clear(Aspose.Imaging.Color.White);
-                            graphics.DrawImage(bmp, new Rectangle(5, 5, bmp.Width, bmp.Height));
-                            canvas.Save();
+                            canvas.Save(outputPath, pdfOptions);
                         }
-                    }
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-                using (Image canvasImage = Image.Load(tempCanvasPath))
-                {
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo();
-                        canvasImage.Save(pdfPath, pdfOptions);
                     }
                 }
             }
@@ -84,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a batch of BMP scans for printing by adding a uniform margin and saving each as a PDF document.
- * 2. When automating the creation of PDF portfolios from legacy BMP assets while ensuring every page has a consistent 5‑pixel frame.
- * 3. When a reporting system must process uploaded BMP images, add a small border for visual separation, and output them as PDFs for client download.
- * 4. When migrating a folder of BMP graphics to a PDF archive and you want the images to retain a defined border without manual editing.
- * 5. When generating printable PDFs from BMP screenshots in a CI pipeline, adding a thin border to meet layout guidelines before conversion.
+ * 1. When you need to prepare a set of scanned BMP documents for printing by adding a uniform white margin and saving them as PDF files for easy distribution.
+ * 2. When an application must automatically process user‑uploaded BMP images, pad them with a 5‑pixel border, and generate PDF reports without manual intervention.
+ * 3. When a legacy system stores graphics as BMP and you want to batch convert them to PDF with a consistent border for inclusion in an electronic archive.
+ * 4. When creating printable catalogs where each BMP product image requires a small white frame before being compiled into PDF pages using C# and Aspose.Imaging.
+ * 5. When a document workflow requires adding a safety margin to BMP assets and converting them to PDF to meet compliance standards for document size and format.
  */

@@ -1,4 +1,11 @@
-// HOW-TO: Render SVG to BMP with White Background Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Render SVG to BMP with White Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,28 +16,26 @@ class Program
 {
     static void Main()
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output/output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                var bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White
-                    }
-                };
+                var rasterizationOptions = new SvgRasterizationOptions();
+                rasterizationOptions.BackgroundColor = Color.White;
+
+                var bmpOptions = new BmpOptions();
+                bmpOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 image.Save(outputPath, bmpOptions);
             }
@@ -44,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector SVG logos into BMP thumbnails for legacy Windows applications that require a solid white background.
- * 2. When generating BMP assets for printing workflows that only accept raster images and you must ensure a consistent background color.
- * 3. When creating batch image processing pipelines that transform user‑uploaded SVG diagrams into BMP files for storage in a database with a fixed background.
- * 4. When preparing graphics for embedded systems that support only BMP format and need a predictable white canvas behind the SVG content.
- * 5. When automating the conversion of SVG icons to BMP sprites for game development where the background must be explicitly set to white.
+ * 1. When you need to convert vector SVG graphics into raster BMP files for legacy Windows applications while ensuring a solid white background.
+ * 2. When generating thumbnail previews of SVG icons for a desktop software that only supports BMP format.
+ * 3. When preparing SVG diagrams for printing on devices that require BMP images with a defined background color to avoid transparency issues.
+ * 4. When automating batch processing of SVG assets into BMP for a game engine that cannot handle SVG transparency.
+ * 5. When creating BMP assets from SVG logos for inclusion in reports where a consistent white background is required.
  */

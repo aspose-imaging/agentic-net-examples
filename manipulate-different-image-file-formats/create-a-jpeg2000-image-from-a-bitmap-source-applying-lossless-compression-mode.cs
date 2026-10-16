@@ -3,7 +3,7 @@
 // Compiler-verified: built with `dotnet build` — 0 errors.
 // Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
 // Exception handling: try/catch present in this example.
-// Package: Aspose.Imaging 26.9.0 | Verified: 2026-09-25
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
 // Generated and validated by an agentic workflow, not hand-written.
 // ─────────────────────────────────────────────────────────────────────────────
 using System;
@@ -17,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\source.bmp";
-            string outputPath = "Output\\result.jp2";
+            string inputPath = Path.Combine("Input", "source.bmp");
+            string outputPath = Path.Combine("Output", "result.jp2");
 
             if (!File.Exists(inputPath))
             {
@@ -43,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to archive high‑resolution bitmap graphics without quality loss by converting them to JPEG2000 in a .NET application.
- * 2. When a medical imaging system requires lossless JPEG2000 files generated from BMP scans for regulatory compliance.
- * 3. When a web service must deliver large satellite images in a compact, lossless format to reduce bandwidth while preserving detail.
- * 4. When a document management workflow converts scanned BMP pages to JPEG2000 to enable efficient storage and later retrieval.
- * 5. When a digital preservation project needs to batch‑process BMP assets into JPEG2000 using C# to maintain original pixel fidelity.
+ * 1. When you need to archive high‑resolution bitmap graphics without quality loss by converting them to JPEG2000 files in a .NET application.
+ * 2. When a medical imaging system requires lossless JPEG2000 output from BMP scans for DICOM compliance using C#.
+ * 3. When a digital publishing workflow must reduce file size of source BMP assets while preserving exact pixel data for print‑ready PDFs.
+ * 4. When a GIS application converts raster map tiles stored as BMP into JPEG2000 to enable efficient storage and fast retrieval.
+ * 5. When an e‑learning platform generates lossless JPEG2000 thumbnails from BMP diagrams to ensure crisp visuals across devices.
  */

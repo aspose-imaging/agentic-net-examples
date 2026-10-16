@@ -1,4 +1,11 @@
-// HOW-TO: Asynchronously Convert WMF To JPEG Using Task Run In C# (Aspose.Imaging for .NET)
+// HOW-TO: Asynchronously Convert WMF to JPEG Using Task in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.wmf";
-            string outputPath = "output\\output.jpg";
+            string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -20,29 +27,35 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string? outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            await Task.Run(() =>
-            {
-                using (Image image = Image.Load(inputPath))
-                {
-                    var options = new JpegOptions();
-                    image.Save(outputPath, options);
-                }
-            });
+            await ConvertWmfToJpegAsync(inputPath, outputPath);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    private static Task ConvertWmfToJpegAsync(string inputPath, string outputPath)
+    {
+        return Task.Run(() =>
+        {
+            using (Image image = Image.Load(inputPath))
+            {
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
+            }
+        });
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑process legacy WMF vector graphics and store them as JPEG thumbnails without blocking the UI.
- * 2. When a web service receives WMF uploads and must generate JPEG previews on a background thread to keep request latency low.
- * 3. When an automated build pipeline converts design assets from WMF to JPEG for inclusion in documentation or marketing material.
- * 4. When a Windows service monitors a folder of WMF files and asynchronously creates JPEG versions for downstream image‑processing workflows.
- * 5. When a mobile‑oriented .NET Core app needs to render WMF icons as JPEG images on demand while preserving responsiveness.
+ * 1. When you need to batch‑process legacy WMF graphics into JPEGs without blocking the UI thread in a C# desktop application.
+ * 2. When a server‑side service must convert uploaded WMF files to JPEG format asynchronously to improve throughput.
+ * 3. When integrating a document conversion pipeline that receives WMF assets and stores them as JPEGs for web display.
+ * 4. When automating image preparation for email newsletters, converting WMF logos to JPEGs in a background task.
+ * 5. When building a cloud function that transforms WMF icons to JPEG thumbnails while handling file‑system checks and error logging.
  */

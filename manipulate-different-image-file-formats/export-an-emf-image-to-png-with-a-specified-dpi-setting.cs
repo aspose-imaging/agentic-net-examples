@@ -1,19 +1,25 @@
 // HOW-TO: Export EMF to PNG with Custom DPI Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/input.emf";
-        string outputPath = "Output/output.png";
-
         try
         {
+            string inputPath = Path.Combine("Input", "image.emf");
+            string outputPath = Path.Combine("Output", "image.png");
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,10 +30,18 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
+                const int dpiX = 300;
+                const int dpiY = 300;
+
+                PngOptions options = new PngOptions();
+                options.ResolutionSettings = new ResolutionSetting(dpiX, dpiY);
+                options.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    ResolutionSettings = new ResolutionSetting(300, 300) // DPI X, DPI Y
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
+
                 image.Save(outputPath, options);
             }
         }
@@ -40,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert vector EMF diagrams into high‑resolution PNG files for web publishing while preserving a specific DPI.
- * 2. When generating printable assets from EMF logos and require the PNG output to match the printer’s 300 DPI setting.
- * 3. When automating a batch process that extracts EMF icons from legacy documents and saves them as PNG thumbnails with consistent resolution.
- * 4. When integrating Aspose.Imaging into a C# application to resize EMF charts for inclusion in PDF reports that demand a defined DPI.
- * 5. When creating a CI/CD pipeline that validates that all exported PNG images from EMF sources meet the required DPI standards for quality control.
+ * 1. When you need to convert vector EMF diagrams to high‑resolution PNG files for inclusion in print‑ready PDFs.
+ * 2. When a reporting tool generates charts as EMF and you must rasterize them at 300 dpi for web display.
+ * 3. When an automated batch process must standardize legacy EMF assets to PNG with a specific DPI for a digital asset management system.
+ * 4. When a desktop application requires exporting user‑drawn EMF graphics to PNG while preserving size and setting a white background.
+ * 5. When migrating a Windows Forms application’s icons from EMF to PNG with consistent resolution for high‑DPI monitors.
  */

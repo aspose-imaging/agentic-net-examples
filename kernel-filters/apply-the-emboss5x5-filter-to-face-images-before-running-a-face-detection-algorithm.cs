@@ -1,33 +1,47 @@
-// HOW-TO: How To Apply Emboss5x5 Filter To JPEG Image With Aspose.Imaging In C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Emboss 5x5 Convolution Filter to JPEG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.jpg";
+            string outputPath = "output\\output.jpg";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Emboss5x5 filter is not available with the allowed namespaces.
-                // Placeholder for filter application.
-                throw new NotSupportedException("Emboss5x5 filter not supported with the current namespace restrictions.");
+                double[,] emboss5x5 = new double[,]
+                {
+                    { -2, -1, 0, 1, 2 },
+                    { -1, 0, 1, 2, 1 },
+                    { 0, 1, 2, 1, 0 },
+                    { 1, 2, 1, 0, -1 },
+                    { 2, 1, 0, -1, -2 }
+                };
 
-                // After processing, save the image.
-                // image.Save(outputPath);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(emboss5x5);
+                image.Filter(image.Bounds, filterOptions);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -39,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preprocess portrait photos by embossing them before feeding them into a face detection algorithm using C# and Aspose.Imaging.
- * 2. When you want to enhance edge details in JPEG images for visual inspection or debugging of facial recognition pipelines in .NET applications.
- * 3. When you are building a batch processing tool that applies a 5x5 emboss filter to a folder of images prior to exporting them for machine‑learning training data.
- * 4. When you must programmatically apply a custom filter to images loaded from disk and save the result to a new location while handling missing files gracefully in a C# service.
- * 5. When you are evaluating the compatibility of Aspose.Imaging’s raster filters with specific image formats such as JPEG before integrating them into an automated image‑analysis workflow.
+ * 1. When you need to enhance edge details of portrait photos before running a face detection algorithm using Aspose.Imaging in C#.
+ * 2. When you want to create a stylized embossed effect for product images stored as JPEGs in a .NET web service.
+ * 3. When preprocessing scanned documents to highlight texture before OCR by applying a 5x5 convolution filter with Aspose.Imaging.
+ * 4. When generating thumbnails with a depth‑enhancing emboss filter for a photo gallery application written in C#.
+ * 5. When batch‑processing images to improve visual contrast for machine‑learning training data using the Aspose.Imaging Filter API.
  */

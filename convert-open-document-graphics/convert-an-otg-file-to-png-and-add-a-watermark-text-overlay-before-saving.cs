@@ -1,4 +1,11 @@
-// HOW-TO: Convert OTG to PNG With Text Watermark Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert OTG to PNG with Text Watermark in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
@@ -8,11 +15,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.otg";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.otg";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,19 +30,16 @@ class Program
 
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions();
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                using (Aspose.Imaging.Image outputImage = Aspose.Imaging.Image.Create(options, image.Width, image.Height))
+                Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 48);
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(outputImage);
-                    graphics.DrawImage(image, new Aspose.Imaging.Rectangle(0, 0, image.Width, image.Height));
-
-                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 48);
-                    SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White);
-                    graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.Point(10, 10));
-
-                    outputImage.Save(outputPath, options);
+                    graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.PointF(10, 10));
                 }
+
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate printable PNG previews of OTG vector drawings while branding each image with a company logo or text.
- * 2. When an e‑commerce platform must add a copyright watermark to product diagrams stored as OTG before serving them as PNG thumbnails.
- * 3. When a document management system converts uploaded OTG files to PNG for web display and requires a visible watermark for security.
- * 4. When a batch processing script has to automate conversion of OTG artwork to PNG and overlay custom text for client identification.
- * 5. When a reporting tool creates PNG charts from OTG sources and needs to embed a “Confidential” label directly onto the image.
+ * 1. When you need to generate a PNG preview of an OTG vector file and embed a copyright notice directly onto the image.
+ * 2. When an e‑commerce platform must display product diagrams (OTG) as watermarked PNGs to prevent unauthorized reuse.
+ * 3. When a reporting tool converts technical OTG schematics to PNG and adds a “Confidential” label before saving to a shared folder.
+ * 4. When a batch job processes uploaded OTG files, adds branding text, and stores the resulting PNGs for web delivery.
+ * 5. When a desktop application needs to load an OTG illustration, overlay user‑specified text, and export it as a PNG for printing or archiving.
  */

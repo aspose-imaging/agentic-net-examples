@@ -1,12 +1,19 @@
-// HOW-TO: Generate BMP Images with Centered Red Ellipse for Multiple Sizes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate Multiple BMP Images with Centered Red Ellipse in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -14,19 +21,19 @@ class Program
     {
         try
         {
-            string outputFolder = "OutputImages";
-            Directory.CreateDirectory(outputFolder);
+            string outputDir = "OutputImages";
+            Directory.CreateDirectory(outputDir);
 
             var sizes = new List<(int width, int height)>
             {
                 (200, 200),
                 (300, 150),
-                (400, 400)
+                (400, 300)
             };
 
             foreach (var (width, height) in sizes)
             {
-                string outputPath = Path.Combine(outputFolder, $"ellipse_{width}x{height}.bmp");
+                string outputPath = Path.Combine(outputDir, $"ellipse_{width}x{height}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 var bmpOptions = new BmpOptions
@@ -34,20 +41,14 @@ class Program
                     Source = new FileCreateSource(outputPath, false)
                 };
 
-                using (Image image = Image.Create(bmpOptions, width, height))
+                using (var image = Image.Create(bmpOptions, width, height))
                 {
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
+                    var graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                    int ellipseWidth = width / 2;
-                    int ellipseHeight = height / 2;
-                    int x = (width - ellipseWidth) / 2;
-                    int y = (height - ellipseHeight) / 2;
-                    var rect = new Aspose.Imaging.Rectangle(x, y, ellipseWidth, ellipseHeight);
-
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+                    using (var brush = new SolidBrush(Color.Red))
                     {
-                        graphics.FillEllipse(brush, rect);
+                        graphics.FillEllipse(brush, new RectangleF(0, 0, width, height));
                     }
 
                     image.Save();
@@ -63,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically create a set of BMP thumbnails each containing a centered red ellipse for different device resolutions.
- * 2. When generating placeholder graphics for UI mockups where each image size must match specific layout dimensions.
- * 3. When preparing test images for computer vision algorithms that require a consistent red ellipse shape across varied image sizes.
- * 4. When producing batch assets for a printing workflow that demands BMP files with a centered red ellipse as a branding mark.
- * 5. When scripting the creation of sample images for documentation or tutorials that illustrate Aspose.Imaging drawing capabilities in C#.
+ * 1. When you need to automatically generate placeholder BMP files of various dimensions for UI mockups, each showing a centered red ellipse as a visual marker.
+ * 2. When a reporting tool requires a set of uniformly formatted BMP charts with a red ellipse overlay to indicate data points across different image resolutions.
+ * 3. When preparing test assets for a graphics pipeline, you can batch‑create BMP images of specific sizes with a red ellipse to validate scaling and rendering behavior.
+ * 4. When exporting thumbnail previews for a catalog, you can use this code to produce BMP thumbnails of custom dimensions with a red ellipse highlighting the focal area.
+ * 5. When automating the creation of watermark‑style graphics for a batch of product images, the script generates BMP files of required sizes with a centered red ellipse as the watermark.
  */

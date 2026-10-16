@@ -1,13 +1,19 @@
-// HOW-TO: Save PNG Image with Custom Filter and Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Median Filter to PNG and Overwrite Original in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
@@ -24,12 +30,10 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
-                {
-                    FilterType = PngFilterType.Avg,
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    CompressionLevel = 9
-                };
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3);
+                image.Filter(image.Bounds, filterOptions);
+
+                var options = new PngOptions();
                 image.Save(outputPath, options);
             }
         }
@@ -42,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to apply a specific PNG filter and maximum compression to a template image while keeping the original file name unchanged.
- * 2. When an automated build process must overwrite existing PNG assets in a templates directory with optimized versions using Aspose.Imaging.
- * 3. When a web application generates thumbnails and wants to save the processed PNG back to the source folder without creating duplicate files.
- * 4. When a batch script processes multiple PNG files and must preserve their original filenames after applying truecolor with alpha and high compression.
- * 5. When you want to ensure a PNG file exists before applying image options and safely handle missing files in a C# project.
+ * 1. When you need to reduce noise in template PNG assets before generating final graphics while keeping the original file name.
+ * 2. When an automated build process must apply a median filter to UI icons stored in a templates directory and save the cleaned images back in place.
+ * 3. When a web application dynamically preprocesses uploaded PNG images by smoothing them and overwriting the source file to save storage space.
+ * 4. When a batch script processes a collection of PNG templates, applying a 3‑pixel median filter using Aspose.Imaging in C# without creating duplicate files.
+ * 5. When you want to ensure consistent image quality across all PNG resources by filtering and saving them directly to their original location in a .NET project.
  */

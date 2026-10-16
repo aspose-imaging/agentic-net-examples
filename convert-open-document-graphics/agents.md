@@ -20,28 +20,28 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `using System;` (120/120 files)
 - `using System.IO;` (120/120 files)
 - `using Aspose.Imaging.ImageOptions;` (120/120 files) ← category-specific
-- `using Aspose.Imaging;` (103/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (13/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (11/120 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (8/120 files) ← category-specific
+- `using Aspose.Imaging;` (100/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (15/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (9/120 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (9/120 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Jpeg;` (8/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (6/120 files) ← category-specific
 - `using System.Threading.Tasks;` (4/120 files)
+- `using System.Linq;` (4/120 files)
 - `using Aspose.Imaging.FileFormats.Svg;` (3/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (3/120 files) ← category-specific
-- `using System.Xml;` (3/120 files)
-- `using System.Linq;` (3/120 files)
+- `using System.Collections.Generic;` (2/120 files)
+- `using System.Xml;` (2/120 files)
 - `using System.Xml.Schema;` (2/120 files)
 - `using System.Net.Sockets;` (2/120 files)
 - `using System.Diagnostics;` (2/120 files)
 - `using System.Reflection;` (2/120 files)
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (2/120 files) ← category-specific
 - `using Aspose.Imaging.Brushes;` (2/120 files) ← category-specific
-- `using System.Net;` (1/120 files)
+- `using Aspose.Imaging.ImageFilters;` (1/120 files) ← category-specific
 - `using Aspose.Imaging.ImageFilters.FilterOptions;` (1/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/120 files) ← category-specific
 - `using System.Text.RegularExpressions;` (1/120 files)
 - `using System.Xml.Linq;` (1/120 files)
-- `using System.Collections.Generic;` (1/120 files)
-- `using System.Text;` (1/120 files)
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/120 files) ← category-specific
 
 ## Files in this folder
 
@@ -58,15 +58,15 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs](./load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs) | `PdfOptions` | Load an OTG file and save it as a PDF document using default PDF options. |
 | [load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs](./load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs) | `SvgOptions` | Load an OTG file and convert it to SVG while keeping vector data intact. |
 | [create-rasterizationoptions-for-odg-set-resolution-and-save-the-image-as-png.cs](./create-rasterizationoptions-for-odg-set-resolution-and-save-the-image-as-png.cs) | `OdgRasterizationOptions`, `PngOptions` | Create RasterizationOptions for ODG, set resolution, and save the image as PNG. |
-| [create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs](./create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs) | `JpegOptions`, `OdgRasterizationOptions` | Create RasterizationOptions for ODG, configure JPEG quality, and save as JPEG fi... |
+| [create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs](./create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs) | `JpegOptions` | Create RasterizationOptions for ODG, configure JPEG quality, and save as JPEG fi... |
 | [create-rasterizationoptions-for-otg-set-background-color-and-save-as-png-image.cs](./create-rasterizationoptions-for-otg-set-background-color-and-save-as-png-image.cs) | `OtgRasterizationOptions`, `PngOptions` | Create RasterizationOptions for OTG, set background color, and save as PNG image... |
 | [create-rasterizationoptions-for-otg-define-jpeg-compression-level-and-save-as-jpeg-file.cs](./create-rasterizationoptions-for-otg-define-jpeg-compression-level-and-save-as-jpeg-file.cs) | `JpegOptions`, `VectorRasterizationOptions` | Create RasterizationOptions for OTG, define JPEG compression level, and save as ... |
 | [load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs](./load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs) | `SvgOptions` | Load ODG and save as SVG while preserving all vector layers and attributes. |
 | [load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs](./load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs) | `SvgOptions` | Load OTG and save as SVG while preserving all vector layers and attributes. |
-| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs) | `PngOptions` | Apply a median filter to an ODG image before converting and saving it as PNG. |
-| [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs) | `PngOptions`, `RasterImage` | Apply a median filter to an OTG image before converting and saving it as PNG. |
-| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `PngOptions`, `RasterImage` | Apply a median filter to an ODG image before converting and saving it as BMP. |
-| [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `PngOptions` | Apply a median filter to an OTG image before converting and saving it as BMP. |
+| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs) | `PngOptions`, `RasterImage` | Apply a median filter to an ODG image before converting and saving it as PNG. |
+| [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs) | `Graphics`, `PngOptions`, `RasterImage` | Apply a median filter to an OTG image before converting and saving it as PNG. |
+| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `PngOptions`, `VectorRasterizationOptions` | Apply a median filter to an ODG image before converting and saving it as BMP. |
+| [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `VectorRasterizationOptions` | Apply a median filter to an OTG image before converting and saving it as BMP. |
 | [iterate-over-a-folder-of-odg-files-and-batch-convert-each-to-png-format.cs](./iterate-over-a-folder-of-odg-files-and-batch-convert-each-to-png-format.cs) | `PngOptions` | Iterate over a folder of ODG files and batch convert each to PNG format. |
 | [iterate-over-a-folder-of-otg-files-and-batch-convert-each-to-pdf-format.cs](./iterate-over-a-folder-of-otg-files-and-batch-convert-each-to-pdf-format.cs) | `PdfOptions` | Iterate over a folder of OTG files and batch convert each to PDF format. |
 | [convert-an-odg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs](./convert-an-odg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs) | `PdfOptions`, `VectorRasterizationOptions` | Convert an ODG file to PDF while specifying a custom page size for the document. |
@@ -77,7 +77,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs](./convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs) | `BmpOptions`, `RasterImage` | Convert an OTG file to BMP while preserving transparency information in the outp... |
 | [convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs](./convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs) | `SvgOptions` | Convert an ODG file to SVG and ensure original layer names are retained in the o... |
 | [convert-an-otg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs](./convert-an-otg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs) | `SvgOptions` | Convert an OTG file to SVG and ensure original layer names are retained in the o... |
-| *...and 90 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.9.0/convert-open-document-graphics) |
+| *...and 90 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.10.0/convert-open-document-graphics) |
 
 ## Category Statistics
 - Total examples: 120
@@ -129,5 +129,5 @@ For more advanced image manipulation—such as applying color corrections, sharp
 When your workflow involves vector sources like SVG that need rasterization, the **Convert SVG To Raster Images** category ([../convert-svg-to-raster-images/](../convert-svg-to-raster-images/)) provides complementary techniques for handling vector‑to‑bitmap conversions.
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-10-07 | Run: `20261001_072104` | Examples: 120
+Updated: 2026-10-14 | Run: `20261014_165921` | Examples: 120
 <!-- AUTOGENERATED:END -->

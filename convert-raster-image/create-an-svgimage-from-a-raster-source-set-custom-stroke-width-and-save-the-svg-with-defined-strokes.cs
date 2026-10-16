@@ -1,43 +1,50 @@
 // HOW-TO: Create SVG from PNG with Custom Stroke Width in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.svg";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image loadedImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                int width = raster.Width;
-                int height = raster.Height;
-
-                SvgOptions svgOptions = new SvgOptions();
-
-                using (Image svgImage = Image.Create(svgOptions, width, height))
+                Aspose.Imaging.RasterImage raster = loadedImage as Aspose.Imaging.RasterImage;
+                if (raster == null)
                 {
-                    Graphics graphics = new Graphics(svgImage);
-                    graphics.Clear(Color.White);
-                    graphics.DrawImage(raster, new Point(0, 0));
+                    Console.Error.WriteLine("Failed to load raster image.");
+                    return;
+                }
 
-                    Pen pen = new Pen(Color.Black);
-                    pen.Width = 5;
-                    graphics.DrawRectangle(pen, 0, 0, width - 1, height - 1);
+                var svgOptions = new SvgOptions();
+                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(svgOptions, raster.Width, raster.Height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(svgImage);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+                    graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0));
+
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
+                    graphics.DrawRectangle(pen, 0, 0, raster.Width - 1, raster.Height - 1);
 
                     svgImage.Save(outputPath);
                 }
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a PNG raster image into an SVG and draw a thick black border around it for web graphics.
- * 2. When you want to convert user‑uploaded screenshots to scalable SVG files while adding a uniform stroke for documentation purposes.
- * 3. When you must generate vector placeholders for bitmap logos, applying a 5‑pixel outline to keep the design resolution‑independent.
- * 4. When an automated batch process adds a consistent border to icons before saving them as SVG for a UI component library.
- * 5. When you are preparing printable assets that require a raster image inside an SVG with a defined stroke to meet branding guidelines.
+ * 1. When you need to convert a PNG logo into a scalable SVG and add a thick black border for consistent branding across different screen sizes.
+ * 2. When generating vector graphics for print layouts, you can raster‑to‑SVG conversion with a defined stroke to ensure crisp outlines.
+ * 3. When automating batch processing of UI icons, this code creates SVG files with uniform stroke widths for easy theming.
+ * 4. When preparing images for responsive web design, you can embed a custom‑width rectangle around the original raster to maintain aspect ratio in SVG.
+ * 5. When building a C# tool that adds decorative frames to raster pictures before exporting them as scalable SVG assets.
  */

@@ -1,4 +1,11 @@
-// HOW-TO: Create PNG With Rectangle And Ellipse Using GraphicsPath In C# (Aspose.Imaging for .NET)
+// HOW-TO: Create PNG with Ellipse Bounded by Rectangle Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,34 +16,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output.png";
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
-
         try
         {
-            int width = 400;
-            int height = 300;
-            using (Image image = Image.Create(new PngOptions(), width, height))
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            int width = 500;
+            int height = 500;
+
+            using (var image = Image.Create(new PngOptions(), width, height))
             {
-                Graphics graphics = new Graphics(image);
+                var graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                GraphicsPath path = new GraphicsPath();
+                var path = new GraphicsPath();
 
-                Figure rectFigure = new Figure();
-                RectangleF rectBounds = new RectangleF(50, 50, 200, 150);
-                RectangleShape rectangleShape = new RectangleShape(rectBounds);
-                rectFigure.AddShape(rectangleShape);
-                path.AddFigure(rectFigure);
+                var rect = new RectangleF(100, 100, 300, 200);
+                var ellipseShape = new EllipseShape(rect);
+                var figure = new Figure();
+                figure.AddShape(ellipseShape);
+                path.AddFigure(figure);
 
-                Figure ellipseFigure = new Figure();
-                RectangleF ellipseBounds = new RectangleF(100, 100, 150, 100);
-                EllipseShape ellipseShape = new EllipseShape(ellipseBounds);
-                ellipseFigure.AddShape(ellipseShape);
-                path.AddFigure(ellipseFigure);
-
-                Pen pen = new Pen(Color.Blue, 2);
+                var pen = new Pen(Color.Blue);
                 graphics.DrawPath(pen, path);
 
                 image.Save(outputPath, new PngOptions());
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG file that contains precise vector shapes such as rectangles and ellipses for diagramming or reporting purposes.
- * 2. When you want to programmatically draw custom UI icons or badges with geometric figures in a .NET application.
- * 3. When you need to add shape annotations like bounding boxes and ellipses to a blank canvas before converting it to another format such as PDF.
- * 4. When you are building a server‑side image service that creates placeholder images of specific dimensions with geometric overlays.
- * 5. When you require a reproducible method to export vector‑based graphics to a raster PNG for use in emails, web thumbnails, or documentation.
+ * 1. When you need to generate a PNG badge that contains a centered ellipse inside a defined rectangular area for a web dashboard.
+ * 2. When you want to programmatically create vector‑based graphics such as icons or placeholders by drawing shapes with Aspose.Imaging in a C# service.
+ * 3. When an automated report generator must add an elliptical highlight to a specific region of an image before saving it as PNG.
+ * 4. When a desktop application requires dynamic drawing of custom shapes, like an ellipse bounded by a rectangle, onto a blank canvas for user‑customized graphics.
+ * 5. When you are building a testing tool that validates rendering of geometric primitives by creating PNG files with precise ellipse dimensions using Aspose.Imaging.
  */

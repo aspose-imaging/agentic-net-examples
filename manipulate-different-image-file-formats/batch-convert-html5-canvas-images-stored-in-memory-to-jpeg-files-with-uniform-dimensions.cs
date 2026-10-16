@@ -1,4 +1,11 @@
 // HOW-TO: Batch Convert Images to JPEG with Fixed Size in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,10 +19,9 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            int targetWidth = 800;
-            int targetHeight = 600;
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -29,8 +35,12 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] inputFiles = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in inputFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            const int targetWidth = 800;
+            const int targetHeight = 600;
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -40,19 +50,17 @@ class Program
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    if (!image.IsCached)
-                        image.CacheData();
-
                     image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
 
-                    JpegOptions jpegOptions = new JpegOptions()
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        Quality = 90
+                        Quality = 90,
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
                     image.Save(outputPath, jpegOptions);
@@ -68,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate thumbnails of user‑uploaded pictures for a web gallery by resizing them to a standard width and height and saving them as JPEGs.
- * 2. When you have a folder of raw canvas screenshots that must be compressed into smaller JPEG files for faster page load times.
- * 3. When an automated build process must convert a batch of PNG or BMP assets into uniform‑size JPEGs for inclusion in a mobile app.
- * 4. When you want to archive a collection of images with consistent dimensions and JPEG quality to meet a third‑party API’s image specifications.
- * 5. When a server‑side service processes incoming image files, resizes them to 800×600, and stores the results as JPEGs for downstream reporting.
+ * 1. When you need to generate web‑ready thumbnails from a folder of uploaded canvas screenshots by resizing them to 800×600 and saving as JPEGs using C#.
+ * 2. When an e‑commerce platform must standardize product photos to a common resolution before storing them in a JPEG archive.
+ * 3. When a reporting tool converts dynamically created HTML5 canvas charts saved as image files into compressed JPEG files with consistent dimensions for PDF embedding.
+ * 4. When a migration script processes legacy image assets, resizes each to a fixed size, and outputs high‑quality JPEGs for a mobile app.
+ * 5. When an automated build pipeline batches conversion of design mockups into JPEGs with uniform width and height to ensure consistent UI previews.
  */

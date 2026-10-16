@@ -1,44 +1,52 @@
-// HOW-TO: Rotate DjVu Pages 90 Degrees and Convert to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Rotate Each Page of a DjVu File and Save as PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.djvu";
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        string outputDirectory = "Output";
+        Directory.CreateDirectory(outputDirectory);
+
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputDirectory = "Output";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(outputDirectory);
-
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                for (int i = 0; i < djvu.Pages.Length; i++)
+                int pageCount = djvu.Pages.Length;
+                for (int i = 0; i < pageCount; i++)
                 {
-                    using (RasterImage page = (RasterImage)djvu.Pages[i])
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        page.Rotate(90f, true, Color.White);
+                        PngOptions exportOptions = new PngOptions();
+                        exportOptions.MultiPageOptions = new DjvuMultiPageOptions(i);
+                        djvu.Save(ms, exportOptions);
+                        ms.Position = 0;
 
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        using (PngOptions options = new PngOptions())
+                        using (RasterImage pageImage = (RasterImage)Image.Load(ms))
                         {
-                            options.Source = new FileCreateSource(outputPath, false);
-                            page.Save(outputPath, options);
+                            pageImage.Rotate(90f, true, Color.White);
+                            string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            pageImage.Save(outputPath);
                         }
                     }
                 }
@@ -53,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display scanned DjVu documents correctly on a web page that only supports PNG images, you can rotate each page and convert them to PNG files.
- * 2. When processing multi‑page DjVu files from a legacy archive and the pages are stored sideways, you can programmatically rotate them 90° before saving as PNG for further analysis.
- * 3. When creating thumbnails for a document viewer that requires PNG format, rotating the DjVu pages ensures the thumbnails have the proper orientation.
- * 4. When automating batch conversion of DjVu manuals into PNG images for printing, applying a rotation fixes orientation issues caused by scanned pages.
- * 5. When integrating Aspose.Imaging into a C# workflow to extract each page of a DjVu file, rotate it, and store it as a lossless PNG for archival purposes.
+ * 1. When you need to display scanned documents on a web page that only supports PNG, you can rotate each DjVu page and convert it to PNG.
+ * 2. When preparing archival images for printing, you may have to reorient DjVu pages before exporting them as high‑quality PNG files.
+ * 3. When building a document‑viewer app that requires portrait orientation, you can programmatically rotate DjVu pages and save them as PNG thumbnails.
+ * 4. When integrating legacy DjVu archives into a modern C# workflow, you can convert each page to PNG after correcting its orientation.
+ * 5. When automating batch processing of multi‑page DjVu files, you can rotate and export each page to PNG for downstream image analysis.
  */

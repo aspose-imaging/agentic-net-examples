@@ -1,11 +1,15 @@
-// HOW-TO: Crop Center of EMF to 400x400 and Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Central Region of EMF to 400x400 GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -24,36 +28,21 @@ class Program
 
         try
         {
-            using (Image emfImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
+                EmfImage emf = (EmfImage)image;
+
                 int cropWidth = 400;
                 int cropHeight = 400;
-                int left = (emfImage.Width - cropWidth) / 2;
-                int top = (emfImage.Height - cropHeight) / 2;
+                int left = (emf.Width - cropWidth) / 2;
+                int top = (emf.Height - cropHeight) / 2;
                 if (left < 0) left = 0;
                 if (top < 0) top = 0;
 
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions();
-                    vectorOptions.PageWidth = emfImage.Width;
-                    vectorOptions.PageHeight = emfImage.Height;
-                    vectorOptions.BackgroundColor = Color.White;
+                emf.Crop(new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight));
 
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
-
-                    emfImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        raster.Crop(new Rectangle(left, top, cropWidth, cropHeight));
-
-                        GifOptions gifOptions = new GifOptions();
-                        raster.Save(outputPath, gifOptions);
-                    }
-                }
+                GifOptions gifOptions = new GifOptions();
+                emf.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a 400 × 400 pixel thumbnail from the middle of a vector EMF logo and deliver it as a lightweight GIF for web previews.
- * 2. When an application must convert legacy EMF diagrams into animated‑compatible GIF frames while focusing on the central area for consistent layout.
- * 3. When a reporting tool has to generate fixed‑size GIF images from EMF charts to embed in PDF or email summaries without scaling distortion.
- * 4. When a batch‑processing service has to rasterize EMF files, crop the central region, and store the result as GIF for use in mobile apps with limited bandwidth.
- * 5. When a developer wants to programmatically create GIF icons from EMF assets, ensuring the icon shows the most important central details at exactly 400 × 400 pixels.
+ * 1. When you need to extract a square thumbnail from a large EMF vector graphic for web display as a GIF.
+ * 2. When converting legacy Windows Metafile images to a web‑friendly format while focusing on the central artwork.
+ * 3. When generating fixed‑size preview images for a document management system that stores EMF files.
+ * 4. When creating GIFs from vector graphics for email newsletters that require a 400 × 400 pixel size.
+ * 5. When automating batch processing of EMF files to produce centered, cropped GIFs for a mobile app’s asset pipeline.
  */

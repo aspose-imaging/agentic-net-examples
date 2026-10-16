@@ -1,10 +1,15 @@
 // HOW-TO: Batch Convert BMP to SVG with Median Filter and Resize in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -19,7 +24,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -28,10 +33,13 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
+                if (!inputPath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -44,22 +52,9 @@ class Program
                 using (Image image = Image.Load(inputPath))
                 {
                     RasterImage raster = (RasterImage)image;
-
-                    raster.Filter(raster.Bounds, new MedianFilterOptions(3));
-
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
                     raster.Resize(300, 300);
-
-                    SvgOptions options = new SvgOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = raster.Width,
-                            PageHeight = raster.Height
-                        }
-                    };
-
-                    raster.Save(outputPath, options);
+                    raster.Save(outputPath, new SvgOptions());
                 }
             }
         }
@@ -72,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to clean up noisy BMP scans, reduce their size, and store them as scalable SVG files for web display.
- * 2. When a legacy application outputs BMP icons that must be batch‑converted to lightweight SVG vectors while applying a median filter to remove speckles.
- * 3. When preparing a large set of BMP screenshots for inclusion in a responsive UI, you can resize them to 300 × 300 and convert them to SVG for resolution‑independent rendering.
- * 4. When automating the migration of archival BMP graphics to a modern format, applying a median filter ensures smoother edges before vectorization.
- * 5. When building a C# image‑processing pipeline that processes multiple BMP files, applies noise reduction, resizes them uniformly, and outputs SVG for further editing in vector tools.
+ * 1. When you need to clean up noisy BMP scans, downsize them to 300 × 300 thumbnails, and store them as scalable SVG icons for a web catalog.
+ * 2. When automating the migration of legacy BMP assets to vector format while applying a median filter to reduce speckle noise before resizing for mobile displays.
+ * 3. When generating a batch of 300 × 300 SVG graphics from a folder of BMP screenshots for use in a responsive UI that requires vector images.
+ * 4. When preprocessing BMP maps with a median filter to smooth artifacts, resizing them, and converting to SVG for integration into GIS applications.
+ * 5. When creating an automated pipeline that reads BMP files, applies noise reduction, resizes them uniformly, and outputs SVG files for print‑ready vector artwork.
  */

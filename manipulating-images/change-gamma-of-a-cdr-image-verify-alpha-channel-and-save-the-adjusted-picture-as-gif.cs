@@ -1,52 +1,58 @@
 // HOW-TO: Adjust Gamma of CDR Image, Check Alpha, Save as GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.gif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
+            string inputPath = "input.cdr";
+            string outputPath = "output/output.gif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    PngOptions pngOptions = new PngOptions
+                    cdr.Save(ms, new PngOptions
                     {
                         VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
                             PageHeight = cdr.Height
                         }
-                    };
-                    cdr.Save(ms, pngOptions);
+                    });
                     ms.Position = 0;
 
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
                         raster.AdjustGamma(0.8f);
+
                         bool hasAlpha = raster.HasAlpha;
                         Console.WriteLine($"Alpha channel present: {hasAlpha}");
 
-                        GifOptions gifOptions = new GifOptions();
-                        raster.Save(outputPath, gifOptions);
+                        raster.Save(outputPath, new GifOptions());
                     }
                 }
             }
@@ -60,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to darken or lighten a CorelDRAW (CDR) illustration before converting it to a web‑friendly GIF, you can adjust its gamma and preserve transparency information using Aspose.Imaging for .NET.
- * 2. When a batch process must verify whether a rasterized CDR page contains an alpha channel before exporting it to GIF for use in animated UI elements.
- * 3. When integrating a design workflow that converts high‑resolution CDR graphics to GIF while applying gamma correction to match a specific display profile.
- * 4. When troubleshooting color consistency, you can programmatically read a CDR file, modify its gamma, check for alpha, and output a GIF to compare against original assets.
- * 5. When building a .NET service that receives CDR uploads, adjusts their brightness via gamma, confirms transparency, and returns optimized GIFs for email newsletters.
+ * 1. When you need to convert a CorelDRAW (CDR) vector file to a GIF while applying gamma correction to improve brightness.
+ * 2. When you must verify whether the rasterized image retains an alpha channel before further compositing or masking.
+ * 3. When you want to rasterize a CDR page at its original dimensions using PNG options and then output a lightweight GIF for web use.
+ * 4. When you are building a batch‑processing tool that adjusts gamma for multiple CDR files and saves the results as GIFs with Aspose.Imaging for .NET.
+ * 5. When you need to handle missing input files gracefully and create the required output folder structure while performing the format conversion.
  */

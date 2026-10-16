@@ -1,4 +1,11 @@
-// HOW-TO: Save PNG Image With Alpha Channel To Output Folder In C# (Aspose.Imaging for .NET)
+// HOW-TO: Save PNG Image With Transparent Background Set To White In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +19,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output/processed.png";
+            string outputPath = "output\\processed.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,10 +31,12 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var options = new PngOptions
+                if (image is PngImage pngImage)
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
+                    pngImage.TransparentColor = Aspose.Imaging.Color.White;
+                }
+
+                PngOptions options = new PngOptions();
                 image.Save(outputPath, options);
             }
         }
@@ -40,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve transparency while saving a processed PNG to a specific directory using Aspose.Imaging in a C# application.
- * 2. When an automated batch job must convert input PNG files to true‑color with alpha and store the results in an organized output folder.
- * 3. When a web service generates PNG thumbnails with RGBA data and must write them to a server‑side path without losing the alpha channel.
- * 4. When a desktop utility loads a user‑selected PNG, applies image options, and saves the modified file to a subfolder for later use.
- * 5. When a CI/CD pipeline validates image assets by loading them, setting the color type, and exporting the final PNG to a build output directory.
+ * 1. When you need to replace the transparent pixels of a PNG with white before uploading it to a web service that does not support alpha channels.
+ * 2. When generating thumbnails for a PDF report and you must ensure the background appears white in all viewers.
+ * 3. When processing user‑uploaded PNG logos to guarantee a solid white background for consistent branding on printed materials.
+ * 4. When converting PNG assets for a mobile app that requires opaque images to improve rendering performance on older devices.
+ * 5. When batch‑processing a folder of PNG files to standardize their transparency to white before archiving them in a document management system.
  */

@@ -1,4 +1,11 @@
 // HOW-TO: Convert ODG to JPEG and Stream Over TCP in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -13,13 +20,11 @@ namespace OdgToJpegNetwork
         {
             try
             {
-                // Hardcoded paths and network settings
                 string inputPath = "input.odg";
-                string outputPath = "output\\output.jpg";
+                string outputPath = "output.jpg";
                 string host = "localhost";
                 int port = 5000;
 
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,28 +37,22 @@ namespace OdgToJpegNetwork
                 // Load ODG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare JPEG options
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        Quality = 90
-                    };
-
-                    // Save to file
+                    // Save as JPEG to file
+                    var jpegOptions = new JpegOptions();
                     image.Save(outputPath, jpegOptions);
 
-                    // Also save to memory stream for network transmission
-                    using (MemoryStream ms = new MemoryStream())
+                    // Also send JPEG data over network
+                    using (var memoryStream = new MemoryStream())
                     {
-                        image.Save(ms, jpegOptions);
-                        byte[] jpegBytes = ms.ToArray();
+                        image.Save(memoryStream, jpegOptions);
+                        byte[] jpegData = memoryStream.ToArray();
 
-                        // Send over network
                         using (TcpClient client = new TcpClient())
                         {
                             client.Connect(host, port);
                             using (NetworkStream networkStream = client.GetStream())
                             {
-                                networkStream.Write(jpegBytes, 0, jpegBytes.Length);
+                                networkStream.Write(jpegData, 0, jpegData.Length);
                                 networkStream.Flush();
                             }
                         }
@@ -70,9 +69,9 @@ namespace OdgToJpegNetwork
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a JPEG preview of an ODG drawing and store it on disk for later use.
- * 2. When a server application must send a converted JPEG image of an ODG file to a remote client over a TCP connection.
- * 3. When an automated pipeline processes OpenDocument graphics files and delivers the resulting JPEGs to another service without manual intervention.
- * 4. When you want to ensure the output directory exists before saving the JPEG to avoid runtime errors.
- * 5. When you require a specific JPEG quality setting while converting ODG files for bandwidth‑controlled network transmission.
+ * 1. When a desktop application needs to convert an OpenDocument graphic (ODG) into a JPEG thumbnail and immediately send it to a remote monitoring server via TCP.
+ * 2. When a cloud service processes user‑uploaded ODG diagrams, saves a JPEG version for storage and streams the same image to another microservice for further analysis.
+ * 3. When a real‑time collaboration tool converts a designer’s ODG file to JPEG and pushes the image over a network socket to display it instantly on teammates’ screens.
+ * 4. When an automated reporting system generates JPEG snapshots from ODG charts, writes them to disk for archival and transmits the bytes to a printer daemon over TCP.
+ * 5. When a mobile backend receives ODG files, converts them to JPEG for web preview, and streams the image to a client app without first writing it to a temporary file.
  */

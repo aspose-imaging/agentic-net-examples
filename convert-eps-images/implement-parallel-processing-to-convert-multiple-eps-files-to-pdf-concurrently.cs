@@ -1,66 +1,74 @@
-// HOW-TO: Convert Multiple EPS Files to PDF in Parallel Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Multiple EPS Files to PDF in Parallel with C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
-class Program
+namespace EpsToPdfConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main()
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDirectory = "input";
+                string outputDirectory = "output";
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.eps", SearchOption.TopDirectoryOnly);
-
-            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
-            {
-                if (!File.Exists(inputPath))
+                if (!Directory.Exists(inputDirectory))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+                Parallel.ForEach(epsFiles, inputPath =>
                 {
-                    PdfOptions pdfOptions = new PdfOptions();
-                    epsImage.Save(outputPath, pdfOptions);
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    try
+                    {
+                        using (Image image = Image.Load(inputPath))
+                        {
+                            var pdfOptions = new PdfOptions();
+                            image.Save(outputPath, pdfOptions);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to quickly batch‑convert a large collection of EPS artwork into PDF for client review, this code speeds up the process by using parallel execution.
- * 2. When an automated build pipeline must generate PDF documentation from EPS diagrams without slowing down the build, the parallel conversion ensures efficient resource utilization.
- * 3. When a web service receives multiple EPS uploads and must return PDF versions instantly, this snippet demonstrates how to handle the conversions concurrently in C#.
- * 4. When migrating legacy EPS assets to a PDF‑based archive, the code lets you process thousands of files simultaneously, reducing migration time.
- * 5. When integrating Aspose.Imaging into a Windows service that monitors an input folder for new EPS files, the parallel loop converts each new file to PDF as soon as it appears.
+ * 1. When you need to batch‑convert a folder of EPS vector graphics to PDF documents quickly by leveraging multi‑core CPUs in a C# application.
+ * 2. When an automated build or CI pipeline must generate PDF reports from EPS assets without slowing down the overall process.
+ * 3. When a web service receives many EPS uploads and must return PDF versions concurrently to improve response time.
+ * 4. When a desktop tool processes large design libraries, converting each EPS file to PDF while keeping the UI responsive through parallel execution.
+ * 5. When a server‑side batch job has to archive EPS drawings as PDFs and wants to reduce processing time by running conversions in parallel with Aspose.Imaging.
  */

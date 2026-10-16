@@ -1,4 +1,11 @@
-// HOW-TO: Batch Convert BMP Images to JPEG with Edge Detection in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert BMP Images to JPEG with Custom Edge Detection in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -37,43 +44,27 @@ class Program
                     return;
                 }
 
-                string extension = Path.GetExtension(inputPath);
-                if (!string.Equals(extension, ".bmp", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(Path.GetExtension(inputPath), ".bmp", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg"));
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                double[,] customKernel = new double[,]
                 {
-                    Directory.CreateDirectory(outputDir);
-                }
+                    { -1, -1, -1 },
+                    { -1, 8, -1 },
+                    { -1, -1, -1 }
+                };
 
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
-                    {
-                        Console.Error.WriteLine($"Not a raster image: {inputPath}");
-                        continue;
-                    }
-
-                    double[,] customKernel = new double[,]
-                    {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
-
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
-                    raster.Filter(new Aspose.Imaging.Rectangle(0, 0, raster.Width, raster.Height), filterOptions);
-
-                    using (JpegOptions jpegOptions = new JpegOptions())
-                    {
-                        jpegOptions.Quality = 90;
-                        raster.Save(outputPath, jpegOptions);
-                    }
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel));
+                    JpegOptions jpegOptions = new JpegOptions();
+                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -86,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically apply an edge‑detect filter to a folder of legacy BMP files and save the results as smaller JPEGs for web publishing.
- * 2. When a desktop application must process scanned documents in BMP format, highlight their outlines, and store the processed images in a JPEG archive.
- * 3. When a batch job has to convert a large collection of BMP graphics from a manufacturing system into JPEGs while enhancing edges for visual inspection.
- * 4. When you want to integrate custom convolution kernels into an automated pipeline that reads BMP files, performs edge detection, and outputs JPEGs for downstream AI analysis.
- * 5. When a migration script must replace BMP assets with JPEG equivalents and improve their visual sharpness by applying an edge detection filter during conversion.
+ * 1. When you need to automatically apply an edge‑detect filter to a folder of BMP photos and save the results as compressed JPEG files for web publishing.
+ * 2. When a legacy system stores scanned documents as BMP and you must convert them to JPEG while highlighting outlines for OCR preprocessing.
+ * 3. When a desktop application must process thousands of BMP assets, detect edges using a custom convolution kernel, and output JPEGs for faster loading in a UI.
+ * 4. When you want to integrate Aspose.Imaging into a C# batch job that transforms BMP graphics into JPEG thumbnails with edge enhancement for visual inspection.
+ * 5. When a reporting tool requires BMP charts to be edge‑enhanced and stored as JPEGs to reduce file size before emailing to stakeholders.
  */

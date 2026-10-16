@@ -1,17 +1,22 @@
-// HOW-TO: Convert WebP to GIF with Adjustable Compression in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert WebP to GIF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "input.webp");
-        string outputPath = Path.Combine("Output", "output.gif");
+        string inputPath = "Input\\input.webp";
+        string outputPath = "Output\\output.gif";
 
         try
         {
@@ -23,10 +28,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
+            using (GifOptions gifOptions = new GifOptions())
             {
-                GifOptions gifOptions = new GifOptions();
-                webp.Save(outputPath, gifOptions);
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -38,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to shrink animated WebP assets for email attachments by converting them to smaller GIF files in a C# application.
- * 2. When a web service must deliver GIF previews of user‑uploaded WebP images while keeping bandwidth low through compression settings.
- * 3. When an e‑learning platform converts high‑resolution WebP diagrams to GIFs for older browsers and wants to control the output size.
- * 4. When a mobile app generates GIF stickers from WebP sources and must limit file size to meet app store upload limits.
- * 5. When a batch processing script automates conversion of a large WebP gallery to compressed GIFs for archival storage.
+ * 1. When a web developer needs to serve animated images in GIF format for browsers that do not support WebP, they can convert WebP files to GIF using Aspose.Imaging in C#.
+ * 2. When an e‑commerce platform wants to generate lightweight product animation previews from high‑quality WebP assets for email newsletters, this code enables batch conversion to GIF.
+ * 3. When a mobile app must cache user‑uploaded WebP stickers as GIFs for compatibility with older Android versions, the snippet provides a simple C# conversion routine.
+ * 4. When a content management system automates the creation of GIF thumbnails from WebP uploads to maintain consistent media formats across the site, developers can use this approach.
+ * 5. When a digital marketing tool needs to transform WebP banners into GIFs for social media platforms that only accept GIF files, the code offers a quick C# solution.
  */

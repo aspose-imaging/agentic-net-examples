@@ -1,9 +1,15 @@
-// HOW-TO: Blend Semi Transparent Rectangle Onto GIF Background In C# (Aspose.Imaging for .NET)
+// HOW-TO: Blend a 200x150 Red Overlay onto a GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -23,25 +29,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (GifImage background = (GifImage)Image.Load(inputPath))
+            using (RasterImage background = (RasterImage)Image.Load(inputPath))
             {
-                string overlayTempPath = Path.Combine(Path.GetTempPath(), "overlay_temp.bmp");
-                Directory.CreateDirectory(Path.GetDirectoryName(overlayTempPath));
-                Source overlaySource = new FileCreateSource(overlayTempPath, false);
-                BmpOptions overlayOptions = new BmpOptions() { Source = overlaySource };
+                int overlayWidth = 200;
+                int overlayHeight = 150;
 
-                using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, 200, 150))
+                BmpOptions bmpOptions = new BmpOptions();
+                using (RasterImage overlay = (RasterImage)Image.Create(bmpOptions, overlayWidth, overlayHeight))
                 {
-                    Graphics graphics = new Graphics(overlay);
-                    graphics.Clear(Color.FromArgb(128, 255, 0, 0));
+                    int[] pixels = new int[overlayWidth * overlayHeight];
+                    int argb = (255 << 24) | (255 << 16) | (0 << 8) | 0; // Red color
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        pixels[i] = argb;
+                    }
 
-                    int x = (background.Width - overlay.Width) / 2;
-                    int y = (background.Height - overlay.Height) / 2;
-                    background.Blend(new Point(x, y), overlay, 127);
+                    overlay.SaveArgb32Pixels(new Rectangle(0, 0, overlayWidth, overlayHeight), pixels);
+
+                    int posX = (background.Width - overlayWidth) / 2;
+                    int posY = (background.Height - overlayHeight) / 2;
+                    background.Blend(new Point(posX, posY), overlay, 127);
                 }
 
-                GifOptions saveOptions = new GifOptions() { Source = new FileCreateSource(outputPath, false) };
-                background.Save(outputPath, saveOptions);
+                GifOptions gifOptions = new GifOptions() { Source = new FileCreateSource(outputPath, false) };
+                background.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a semi‑transparent colored banner as a watermark to an animated GIF for branding purposes.
- * 2. When you want to overlay a notification box onto a GIF frame in a web application using Aspose.Imaging for C#.
- * 3. When you must programmatically highlight a specific area of a GIF with a centered rectangle to guide users.
- * 4. When generating dynamic GIFs that display a status or progress indicator as a blended overlay.
- * 5. When creating GIF thumbnails with a colored overlay to indicate selection or focus in a UI.
+ * 1. When you need to add a semi‑transparent colored banner to an animated GIF for branding or watermarking.
+ * 2. When you want to programmatically place a rectangular highlight on a GIF frame to draw user attention in a UI.
+ * 3. When generating custom thumbnails that combine a solid‑color overlay with an existing GIF background.
+ * 4. When creating promotional GIFs that require a centered red call‑to‑action box blended with the original animation.
+ * 5. When automating batch processing to overlay fixed‑size graphics onto multiple GIF files for social‑media campaigns.
  */

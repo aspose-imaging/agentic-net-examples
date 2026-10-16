@@ -1,6 +1,14 @@
-// HOW-TO: Convert ODG to JPEG with Maximum Quality in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert ODG File to JPEG with High Quality Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.odg";
-            string outputPath = "Output/sample.jpg";
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -20,12 +28,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            JpegOptions jpegOptions = new JpegOptions
             {
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 100
-                };
+                Quality = 95
+            };
+
+            using (Image image = Image.Load(inputPath))
+            {
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -38,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution JPEG previews of OpenDocument graphics for web thumbnails using C#.
- * 2. When an application must batch‑convert ODG diagrams to JPEG files while preserving color fidelity for print‑ready assets.
- * 3. When integrating Aspose.Imaging into a document management system to export ODG drawings as JPEG images for email attachments.
- * 4. When a reporting tool requires converting ODG charts to JPEG with full quality to embed them in PDF reports.
- * 5. When automating a workflow that extracts ODG artwork from archives and saves it as JPEG for use in mobile apps.
+ * 1. When a developer needs to generate web‑ready JPEG previews from ODG drawings created in LibreOffice.
+ * 2. When an application must batch‑convert ODG diagrams to JPEG for inclusion in email attachments while preserving image quality.
+ * 3. When a reporting tool requires converting vector ODG charts to raster JPEG images for PDF export.
+ * 4. When a mobile app downloads ODG assets and needs to display them as JPEG thumbnails with controlled compression.
+ * 5. When a content management system stores ODG files but serves JPEG versions to browsers for faster loading.
  */

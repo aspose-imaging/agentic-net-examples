@@ -1,11 +1,18 @@
-// HOW-TO: Adjust Contrast of Multiple CDR Files and Merge Into Multipage TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Contrast Of Multiple Cdr Files And Merge Into Multipage Tiff In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -15,19 +22,15 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR file paths
-            List<string> cdrPaths = new List<string>
+            string[] inputPaths = new string[]
             {
                 "input1.cdr",
                 "input2.cdr",
                 "input3.cdr"
             };
+            string outputPath = "output\\merged.tif";
 
-            // Hardcoded output TIFF path (ensure directory part exists)
-            string outputTiffPath = "output\\merged.tif";
-
-            // Validate input files
-            foreach (var path in cdrPaths)
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -36,69 +39,73 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // List to hold processed raster images
-            List<RasterImage> rasterImages = new List<RasterImage>();
-
-            // Process each CDR file: rasterize and adjust contrast
-            foreach (var cdrPath in cdrPaths)
+            using (CdrImage cdrFirst = (CdrImage)Image.Load(inputPaths[0]))
             {
-                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+                int width = cdrFirst.Width;
+                int height = cdrFirst.Height;
+
+                using (MemoryStream msFirst = new MemoryStream())
                 {
-                    using (MemoryStream ms = new MemoryStream())
+                    cdrFirst.Save(msFirst, new PngOptions
                     {
-                        PngOptions pngOptions = new PngOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
-                            VectorRasterizationOptions = new CdrRasterizationOptions
+                            PageWidth = width,
+                            PageHeight = height
+                        }
+                    });
+                    msFirst.Position = 0;
+
+                    using (RasterImage rasterFirst = (RasterImage)Image.Load(msFirst))
+                    {
+                        rasterFirst.AdjustContrast(0.5f);
+
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                        {
+                            Color[] pixelsFirst = rasterFirst.LoadPixels(rasterFirst.Bounds);
+                            tiff.SavePixels(tiff.ActiveFrame.Bounds, pixelsFirst);
+
+                            for (int i = 1; i < inputPaths.Length; i++)
                             {
-                                PageWidth = cdr.Width,
-                                PageHeight = cdr.Height
+                                string path = inputPaths[i];
+                                using (CdrImage cdr = (CdrImage)Image.Load(path))
+                                {
+                                    int w = cdr.Width;
+                                    int h = cdr.Height;
+
+                                    using (MemoryStream ms = new MemoryStream())
+                                    {
+                                        cdr.Save(ms, new PngOptions
+                                        {
+                                            VectorRasterizationOptions = new CdrRasterizationOptions
+                                            {
+                                                PageWidth = w,
+                                                PageHeight = h
+                                            }
+                                        });
+                                        ms.Position = 0;
+
+                                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                                        {
+                                            raster.AdjustContrast(0.5f);
+
+                                            tiff.AddFrame(new TiffFrame(tiffOptions, w, h));
+                                            tiff.ActiveFrame = tiff.Frames[tiff.Frames.Count() - 1];
+
+                                            Color[] pixels = raster.LoadPixels(raster.Bounds);
+                                            tiff.SavePixels(tiff.ActiveFrame.Bounds, pixels);
+                                        }
+                                    }
+                                }
                             }
-                        };
-                        cdr.Save(ms, pngOptions);
-                        ms.Position = 0;
-                        RasterImage raster = (RasterImage)Image.Load(ms);
-                        raster.AdjustContrast(30f); // Adjust contrast by 30
-                        rasterImages.Add(raster);
+
+                            tiff.Save(outputPath);
+                        }
                     }
                 }
-            }
-
-            if (rasterImages.Count == 0)
-            {
-                Console.Error.WriteLine("No images were processed.");
-                return;
-            }
-
-            // Create multipage TIFF
-            int width = rasterImages[0].Width;
-            int height = rasterImages[0].Height;
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
-
-            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
-            {
-                // First frame
-                Color[] firstPixels = rasterImages[0].LoadPixels(rasterImages[0].Bounds);
-                tiff.SavePixels(tiff.Bounds, firstPixels);
-
-                // Subsequent frames
-                for (int i = 1; i < rasterImages.Count; i++)
-                {
-                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-                    tiff.ActiveFrame = tiff.Frames[tiff.Frames.Count() - 1];
-                    Color[] pixels = rasterImages[i].LoadPixels(rasterImages[i].Bounds);
-                    tiff.SavePixels(tiff.ActiveFrame.Bounds, pixels);
-                }
-
-                tiff.Save(outputTiffPath);
-            }
-
-            // Dispose raster images
-            foreach (var raster in rasterImages)
-            {
-                raster.Dispose();
             }
         }
         catch (Exception ex)
@@ -110,9 +117,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process CorelDRAW (CDR) drawings, enhance their contrast, and combine them into a single multipage TIFF for archival or printing.
- * 2. When an application must convert several CDR pages to raster images, apply image‑level adjustments, and output a multi‑page TIFF for use in document management systems.
- * 3. When a workflow requires automated preparation of high‑contrast preview files from multiple CDR sources before sending them to a print shop that only accepts TIFF.
- * 4. When you want to programmatically generate a composite TIFF report that includes contrast‑optimized screenshots of different CDR designs using Aspose.Imaging for .NET.
- * 5. When integrating a C# service that consolidates edited CDR artwork into a single TIFF document for downstream processing such as OCR or digital asset management.
+ * 1. When you need to batch‑process a set of CorelDRAW (CDR) drawings, increase their contrast, and produce a single multipage TIFF for printing or archiving.
+ * 2. When an application must convert CDR pages to PNG raster images, apply a contrast adjustment, and combine the results into a multi‑page TIFF for PDF generation downstream.
+ * 3. When a workflow requires normalizing the visual intensity of several vector designs before merging them into a high‑resolution TIFF document for e‑catalog distribution.
+ * 4. When automating the preparation of CDR artwork for OCR, you can boost contrast on each page and bundle them into one TIFF to simplify the scanning pipeline.
+ * 5. When a desktop tool needs to read multiple CDR files, tweak their contrast programmatically in C#, and output a single TIFF file that can be opened by standard image viewers.
  */

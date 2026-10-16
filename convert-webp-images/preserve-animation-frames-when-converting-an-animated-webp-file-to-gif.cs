@@ -1,9 +1,17 @@
 // HOW-TO: Convert Animated WebP to GIF While Preserving Frames in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -22,10 +30,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
+            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
             {
-                GifOptions gifOptions = new GifOptions();
-                webpImage.Save(outputPath, gifOptions);
+                GifOptions options = new GifOptions();
+                webp.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -37,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to display an animated WebP advertisement on a website that only supports GIF, you can convert it while keeping the animation intact.
- * 2. When a mobile app receives user‑generated animated WebP stickers but the platform only renders GIFs, this code transforms the stickers without losing frames.
- * 3. When archiving animated WebP assets for legacy systems that require GIF format, the conversion preserves the original motion for accurate playback.
- * 4. When generating email newsletters that embed animated images, converting WebP to GIF ensures compatibility with email clients while retaining the animation.
- * 5. When processing batch image pipelines that ingest WebP animations and output GIFs for social media APIs, this snippet handles the format change without dropping frames.
+ * 1. When you need to display an animated WebP image on browsers that only support GIF, you can convert it while keeping all animation frames using Aspose.Imaging in C#.
+ * 2. When creating marketing assets that require a GIF animation derived from a WebP source, this code ensures the original motion is retained during the conversion.
+ * 3. When building a server‑side image processing pipeline that receives user‑uploaded animated WebP files and must output GIFs for legacy platforms, the snippet handles the format change without dropping frames.
+ * 4. When automating batch conversion of animated WebP stickers to GIFs for messaging apps, the code preserves each frame so the animation remains smooth.
+ * 5. When integrating image conversion into a .NET desktop application that lets users edit and export animated graphics, this example shows how to save the edited WebP as a GIF without losing any animation data.
  */

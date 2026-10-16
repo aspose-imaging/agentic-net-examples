@@ -1,7 +1,13 @@
 // HOW-TO: Convert SVG to BMP with 300 DPI Resolution in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Bmp;
@@ -12,8 +18,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.svg";
-            string outputPath = "Output/sample.bmp";
+            string inputPath = Path.Combine("Input", "sample.svg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
 
             if (!File.Exists(inputPath))
             {
@@ -23,19 +29,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
+                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
 
-                var bmpOptions = new BmpOptions
+                var bmpOptions = new BmpOptions();
+                bmpOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
+                bmpOptions.VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300)
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height
                 };
 
                 image.Save(outputPath, bmpOptions);
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate high‑resolution bitmap thumbnails from vector SVG logos for print‑ready PDFs using C#.
- * 2. When a desktop application must export user‑drawn SVG diagrams as 300 DPI BMP files for legacy Windows imaging tools.
- * 3. When an automated batch process converts SVG assets to BMP with exact DPI settings to meet a printing vendor’s specifications.
- * 4. When you want to preserve the original SVG dimensions while rasterizing it to a BMP image for use in a .NET reporting engine.
- * 5. When a server‑side service creates BMP previews of SVG icons at 300 DPI to ensure consistent quality across different display devices.
+ * 1. When you need to generate high‑resolution bitmap thumbnails from vector SVG logos for print‑ready PDFs in a C# application.
+ * 2. When a desktop publishing workflow requires converting scalable SVG illustrations to 300 DPI BMP files for legacy Windows imaging tools.
+ * 3. When an automated reporting system must embed SVG charts into BMP images with exact DPI settings for accurate scaling on scanned documents.
+ * 4. When a game‑engine asset pipeline transforms SVG UI assets into BMP textures with 300 DPI to match the engine’s pixel‑per‑inch expectations.
+ * 5. When a batch processing service creates BMP previews of SVG diagrams for archival storage, preserving the original dimensions and DPI.
  */

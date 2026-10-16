@@ -1,4 +1,11 @@
-// HOW-TO: Embed Digital Signature in Image Only If Minimum Pixels Met in C# (Aspose.Imaging for .NET)
+// HOW-TO: Embed Digital Signature in Images Over Minimum Pixel Count with Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,52 +16,34 @@ class Program
     {
         try
         {
-            // Hardcoded paths and password
             string inputPath = "input.jpg";
-            string outputPath = "output.png";
-            string password = "secret";
+            string outputPath = "output/output.png";
+            string password = "myPass";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load image
-            using (Image image = Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Ensure we have a RasterImage
-                if (image is RasterImage rasterImage)
+                if (image.Width * image.Height < 16384)
                 {
-                    // Check minimum pixel count (16,384 total pixels)
-                    if (rasterImage.Width * rasterImage.Height < 16384)
-                    {
-                        Console.Error.WriteLine("Image does not meet minimum pixel count requirement.");
-                        return;
-                    }
-
-                    // Validate password length
-                    if (password.Length < 4)
-                    {
-                        Console.Error.WriteLine("Password must be at least 4 characters long.");
-                        return;
-                    }
-
-                    // Embed digital signature
-                    rasterImage.EmbedDigitalSignature(password);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                    // Save the signed image
-                    rasterImage.Save(outputPath);
-                }
-                else
-                {
-                    Console.Error.WriteLine("Loaded image is not a RasterImage.");
+                    Console.Error.WriteLine("Image does not meet minimum pixel count requirement.");
                     return;
                 }
+
+                if (password == null || password.Length < 4)
+                {
+                    Console.Error.WriteLine("Password must be at least 4 characters long.");
+                    return;
+                }
+
+                image.EmbedDigitalSignature(password);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -66,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to protect high‑resolution product photos by embedding a password‑protected digital signature, but wants to skip low‑resolution images that don’t meet a 16,384‑pixel threshold.
- * 2. When an application processes user‑uploaded JPEG files and must add a secure signature before converting them to PNG for archival, ensuring only images large enough are signed.
- * 3. When a document management system validates image size before applying a digital watermark using Aspose.Imaging to guarantee the signature is applied only to sufficiently detailed raster images.
- * 4. When a C# service automates compliance checks by embedding a digital signature into scanned images, rejecting any image smaller than the required pixel count to avoid weak signatures.
- * 5. When a developer builds a batch‑processing tool that reads images, verifies a minimum pixel count, embeds a password‑protected signature, and saves the signed output in a different format for secure distribution.
+ * 1. When you need to protect high‑resolution photos by adding a password‑protected digital signature only if they are large enough to meet a quality threshold.
+ * 2. When a workflow requires converting JPEG files to PNG while embedding a digital signature for compliance, but skips small images that don't meet the pixel count.
+ * 3. When you want to automate image security in a batch process, ensuring that only images larger than 16,384 pixels are signed with a user‑defined password.
+ * 4. When integrating Aspose.Imaging into a C# application that must verify image size before applying a digital signature to meet regulatory standards.
+ * 5. When building a document management system that stores signed PNGs and needs to reject undersized images to conserve storage and maintain integrity.
  */

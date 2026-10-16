@@ -1,11 +1,16 @@
-// HOW-TO: Apply Custom Sharpening Kernel to PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Sharpening Kernel to PNG Image in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-14
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -15,26 +20,26 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output/output.png";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
+            double[,] customKernel = new double[,]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                { 0, -1, 0 },
+                { -1, 5, -1 },
+                { 0, -1, 0 }
+            };
 
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                double[,] kernel = new double[,]
-                {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
-                };
-
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel));
 
                 PngOptions options = new PngOptions
                 {
@@ -53,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enhance the details of a PNG photograph in a .NET application without using external libraries, you can apply a custom sharpening kernel with Aspose.Imaging.
- * 2. When processing scanned documents where edges appear blurry, the code sharpens the image by convolving a negative‑coefficient kernel, improving OCR accuracy.
- * 3. When generating thumbnails for a web gallery and want each PNG to look crisp, you can use the convolution filter to boost contrast around edges.
- * 4. When building an automated image‑processing pipeline that must preserve PNG transparency while sharpening, this approach keeps the alpha channel intact.
- * 5. When creating a batch job that reads PNG files, applies a user‑defined sharpening mask, and saves the results to a specific folder, the example shows the complete workflow.
+ * 1. When you need to enhance the details of a PNG photograph programmatically in a C# application using Aspose.Imaging.
+ * 2. When you want to apply a custom convolution kernel with negative coefficients to sharpen images before uploading them to a web service.
+ * 3. When you must process a batch of PNG files on a server and improve their visual clarity without using external image editors.
+ * 4. When you are building an automated image‑processing pipeline that requires precise control over sharpening parameters via a user‑defined kernel.
+ * 5. When you need to save the sharpened result back to PNG format while preserving transparency using Aspose.Imaging’s PngOptions.
  */

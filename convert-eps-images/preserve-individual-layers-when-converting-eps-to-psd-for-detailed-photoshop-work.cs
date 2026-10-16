@@ -1,4 +1,11 @@
 // HOW-TO: Convert EPS to PSD with Separate Layers Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -24,21 +31,20 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
+                using (var psdOptions = new PsdOptions())
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    },
-                    VectorizationOptions = new PsdVectorizationOptions
+                    };
+                    psdOptions.VectorizationOptions = new PsdVectorizationOptions
                     {
                         VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                    }
-                };
-
-                image.Save(outputPath, psdOptions);
+                    };
+                    image.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to edit a vector EPS artwork in Photoshop while keeping each element on its own layer for precise adjustments.
- * 2. When automating a workflow that converts print‑ready EPS files to layered PSDs for a design team that uses C# and Aspose.Imaging.
- * 3. When preserving the original vector data as separate PSD layers is required to apply layer‑specific effects or masks in Photoshop.
- * 4. When generating PSD previews from EPS logos on a server, ensuring each graphic component remains editable in downstream C# applications.
- * 5. When migrating legacy EPS assets to a layered Photoshop format without flattening, allowing developers to programmatically maintain editability in .NET projects.
+ * 1. When you need to import a vector EPS logo into Photoshop and keep each element on its own layer for further editing.
+ * 2. When an automated workflow must batch‑convert EPS illustrations to PSD files while preserving editability for designers.
+ * 3. When a web service generates PSD mockups from EPS assets and requires separate layers to apply filters programmatically.
+ * 4. When migrating legacy EPS artwork to a Photoshop‑based pipeline and you must retain layer structure for color adjustments.
+ * 5. When creating a C# application that converts client‑supplied EPS files to PSD so artists can continue work without flattening the image.
  */

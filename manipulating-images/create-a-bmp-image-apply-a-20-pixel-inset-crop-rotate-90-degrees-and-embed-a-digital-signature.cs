@@ -1,59 +1,32 @@
-// HOW-TO: Create BMP Crop Inset Rotate 90° and Add Digital Signature in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Crop Inset Rotate 90° Add Digital Signature in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "Output/output.bmp";
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create a BMP image if it does not exist
-            if (!File.Exists(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            using (RasterImage image = (RasterImage)Image.Create(new BmpOptions(), 200, 200))
             {
-                int width = 200;
-                int height = 200;
-                var bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24
-                };
-                using (RasterImage image = (RasterImage)Image.Create(bmpOptions, width, height))
-                {
-                    // Fill with white background
-                    image.Save(inputPath);
-                }
-            }
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Apply a 20-pixel inset crop
+                var graphics = new Graphics(image);
+                graphics.Clear(Color.White);
                 image.Crop(20, 20, 20, 20);
-
-                // Rotate 90 degrees clockwise
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Embed digital signature with a password
-                string password = "pass1234";
-                image.EmbedDigitalSignature(password);
-
-                // Save the processed image
-                image.Save(outputPath);
+                image.EmbedDigitalSignature("secure123");
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -65,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a blank BMP file, crop a border, rotate it, and protect it with a password‑protected digital signature for secure document workflows.
- * 2. When an application must preprocess scanned forms by trimming edges, aligning orientation, and embedding a signature to verify authenticity before archival.
- * 3. When a reporting tool creates chart images in BMP, requires a uniform 20‑pixel margin removal, rotates the chart for landscape layout, and signs the file to prevent tampering.
- * 4. When a batch job prepares product label images, crops unnecessary whitespace, rotates them to match printing direction, and adds a digital signature to comply with regulatory traceability.
- * 5. When a security‑focused system needs to programmatically create a placeholder BMP, apply geometric transformations, and embed a password‑protected signature for later validation.
+ * 1. When you need to generate a blank BMP thumbnail, trim its borders, rotate it for portrait orientation, and secure it with a digital signature before saving.
+ * 2. When an application must produce a signed BMP document for compliance, applying a uniform inset crop to remove margins and rotating the image to match a required layout.
+ * 3. When a reporting tool creates BMP charts, needs to remove edge whitespace, rotate the chart for printing, and embed a verification signature to prevent tampering.
+ * 4. When a batch process prepares BMP assets for a legacy system, automatically crops a fixed border, rotates each image 90 degrees, and adds a cryptographic signature for authenticity.
+ * 5. When a desktop utility exports user‑drawn graphics as BMP files, applies a consistent inset crop, reorients the image, and embeds a password‑protected digital signature for secure distribution.
  */

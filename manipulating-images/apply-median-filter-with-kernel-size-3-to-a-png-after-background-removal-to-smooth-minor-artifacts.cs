@@ -1,4 +1,11 @@
-// HOW-TO: Remove Background From PNG and Apply 3x3 Median Filter In C# (Aspose.Imaging for .NET)
+// HOW-TO: Remove Background from PNG and Apply Median Filter in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,16 +15,17 @@ using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "Input\\image.png";
+            string outputPath = "Output\\result.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,35 +34,35 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(raster.Width, raster.Height) / 500) + 1,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = new PngOptions
+                    var maskingOptions = new AutoMaskingGraphCutOptions
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Color.Transparent
-                };
+                        CalculateDefaultStrokes = true,
+                        FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        ExportOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new StreamSource(ms)
+                        },
+                        BackgroundReplacementColor = Color.Transparent
+                    };
 
-                var masking = new ImageMasking(raster);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                {
-                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                    var masking = new ImageMasking(sourceImage);
+                    using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                     {
-                        foreground.Filter(foreground.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
+                        foreground.Filter(foreground.Bounds, new MedianFilterOptions(3));
 
-                        var saveOptions = new PngOptions
+                        foreground.Save(outputPath, new PngOptions
                         {
                             ColorType = PngColorType.TruecolorWithAlpha,
                             Source = new FileCreateSource(outputPath, false)
-                        };
-                        foreground.Save(outputPath, saveOptions);
+                        });
                     }
                 }
             }
@@ -68,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically remove a solid or complex background from a PNG image and keep the foreground intact for further processing in a C# application.
- * 2. When you want to replace the original background with a transparent layer after segmentation using Aspose.Imaging’s GraphCut algorithm.
- * 3. When you have minor noise or edge artifacts left after background removal and require a 3×3 median filter to smooth the foreground without blurring details.
- * 4. When you are preparing PNG assets for web or UI design and must ensure they have clean edges and an alpha channel for seamless overlay.
- * 5. When you are building an automated image‑pre‑processing pipeline in .NET that loads, masks, filters, and saves PNG files with true‑color with alpha using Aspose.Imaging.
+ * 1. When you need to extract a foreground object from a PNG and make the background transparent while smoothing edge noise.
+ * 2. When preparing product photos for e‑commerce, you want to remove the original background and apply a median filter to eliminate small artifacts before uploading.
+ * 3. When processing scanned documents saved as PNG, you need to isolate the text region, replace the background with transparency, and smooth speckles for OCR accuracy.
+ * 4. When creating assets for a game engine, you must strip the background from PNG sprites and apply a 3×3 median filter to ensure clean edges without jagged pixels.
+ * 5. When automating batch image cleanup, you require a C# routine that removes backgrounds from PNG files and applies a median filter to reduce visual noise across all images.
  */

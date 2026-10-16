@@ -1,11 +1,19 @@
-// HOW-TO: Adjust Gamma of Multiple CDR Files and Merge into Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Gamma of Multiple CDR Files and Create a Multipage TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -13,73 +21,78 @@ class Program
     {
         try
         {
-            string[] inputPaths = { "input1.cdr", "input2.cdr", "input3.cdr" };
-            string outputPath = "output.tif";
+            // Hardcoded input CDR file paths
+            string cdrPath1 = "input1.cdr";
+            string cdrPath2 = "input2.cdr";
+            List<string> cdrPaths = new List<string> { cdrPath1, cdrPath2 };
 
-            foreach (var inputPath in inputPaths)
+            // Hardcoded output TIFF path
+            string outputTiffPath = "output/multipage.tif";
+
+            // Verify input files exist
+            foreach (var path in cdrPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            string outDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outDir))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+
+            // List to hold raster images and their streams
+            List<(RasterImage raster, MemoryStream stream)> rasterData = new List<(RasterImage, MemoryStream)>();
+
+            // Process each CDR file: rasterize, adjust gamma, store raster
+            foreach (var cdrPath in cdrPaths)
             {
-                Directory.CreateDirectory(outDir);
-            }
-
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            TiffImage tiffImage = null;
-            float gammaValue = 1.2f;
-
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                string inputPath = inputPaths[i];
-
-                using (var cdr = (CdrImage)Image.Load(inputPath))
+                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
                 {
-                    using (var ms = new MemoryStream())
+                    MemoryStream ms = new MemoryStream();
+                    PngOptions pngOptions = new PngOptions
                     {
-                        var pngOptions = new PngOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
-                            VectorRasterizationOptions = new VectorRasterizationOptions
-                            {
-                                PageWidth = cdr.Width,
-                                PageHeight = cdr.Height
-                            }
-                        };
-                        cdr.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (var raster = (RasterImage)Image.Load(ms))
-                        {
-                            raster.AdjustGamma(gammaValue);
-                            if (!raster.IsCached) raster.CacheData();
-
-                            int width = raster.Width;
-                            int height = raster.Height;
-
-                            if (i == 0)
-                            {
-                                tiffImage = (TiffImage)Image.Create(tiffOptions, width, height);
-                            }
-                            else
-                            {
-                                tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
-                            }
-
-                            var frame = tiffImage.Frames[i];
-                            frame.SavePixels(frame.Bounds, raster.LoadPixels(raster.Bounds));
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
                         }
-                    }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+                    RasterImage raster = (RasterImage)Image.Load(ms);
+                    raster.AdjustGamma(1.2f);
+                    rasterData.Add((raster, ms));
                 }
             }
 
-            tiffImage.Save(outputPath);
-            tiffImage.Dispose();
+            // Create multipage TIFF
+            int width = rasterData[0].raster.Width;
+            int height = rasterData[0].raster.Height;
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+            {
+                // First frame
+                tiff.ActiveFrame.SavePixels(tiff.ActiveFrame.Bounds, rasterData[0].raster.LoadPixels(rasterData[0].raster.Bounds));
+
+                // Additional frames
+                for (int i = 1; i < rasterData.Count; i++)
+                {
+                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
+                    tiff.ActiveFrame.SavePixels(tiff.ActiveFrame.Bounds, rasterData[i].raster.LoadPixels(rasterData[i].raster.Bounds));
+                }
+
+                // Save TIFF
+                tiff.Save(outputTiffPath);
+            }
+
+            // Dispose raster images and streams
+            foreach (var (raster, stream) in rasterData)
+            {
+                raster.Dispose();
+                stream.Dispose();
+            }
         }
         catch (Exception ex)
         {
@@ -90,9 +103,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct the brightness of several CorelDRAW (CDR) drawings before creating a single multi‑page TIFF document for printing.
- * 2. When an application must batch‑process CDR files, apply a gamma correction, and combine the results into a TIFF for archival or PDF conversion.
- * 3. When a workflow requires converting vector CDR pages to raster PNG, adjusting gamma, and merging them into a multi‑page TIFF for use in document management systems.
- * 4. When you want to automate the preparation of CDR artwork for a publishing pipeline, ensuring consistent gamma across pages and outputting a single TIFF file.
- * 5. When a developer needs to validate the existence of input CDR files, apply image‑level gamma adjustment, and generate a combined TIFF without manually opening each file.
+ * 1. When a designer needs to correct the brightness of several CorelDRAW (CDR) illustrations before archiving them as a single multipage TIFF for printing.
+ * 2. When an automated batch process must convert a collection of CDR assets to raster images, apply gamma correction, and store them in a searchable TIFF document.
+ * 3. When a web service generates preview PDFs and wants to embed gamma‑adjusted CDR pages into a multipage TIFF for downstream OCR processing.
+ * 4. When a legacy workflow requires merging multiple CDR drawings into one TIFF file with consistent gamma to ensure uniform visual appearance across all pages.
+ * 5. When a digital asset management system needs to ingest CDR files, normalize their gamma, and store them as a single multipage TIFF for easy preview and thumbnail generation.
  */

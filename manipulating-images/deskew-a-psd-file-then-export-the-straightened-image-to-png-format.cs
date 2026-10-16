@@ -1,4 +1,11 @@
 // HOW-TO: How To Deskew A PSD And Save As PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +18,7 @@ class Program
         try
         {
             string inputPath = "input.psd";
-            string outputPath = "output/output.png";
+            string outputPath = "output\\deskewed.png";
 
             if (!File.Exists(inputPath))
             {
@@ -41,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to correct a tilted Photoshop PSD before publishing it as a web‑ready PNG.
- * 2. When an automated pipeline must straighten scanned mockups saved as PSD files and output them in lossless PNG format.
- * 3. When a desktop application processes user‑uploaded PSD layers and requires a deskewed PNG preview.
- * 4. When batch converting a collection of misaligned PSD assets to correctly oriented PNGs for a game UI.
- * 5. When integrating Aspose.Imaging in a C# service that normalizes image angles and saves the result as PNG for downstream analytics.
+ * 1. When you receive scanned Photoshop files that are slightly rotated and need to be straightened before publishing them as web‑ready PNGs.
+ * 2. When an automated workflow must correct the orientation of PSD assets from a design team and convert them to PNG for use in a mobile app.
+ * 3. When a batch process has to normalize the angle of layered PSD images to ensure consistent layout in a print‑to‑digital pipeline.
+ * 4. When you need to programmatically remove skew from a PSD file and export the corrected image without losing transparency by saving it as PNG.
+ * 5. When integrating Aspose.Imaging into a C# service that validates incoming PSD uploads, deskews them, and stores the resulting PNG thumbnails for preview.
  */

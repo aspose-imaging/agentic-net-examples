@@ -1,79 +1,64 @@
-// HOW-TO: Batch Rename and Convert EMF Files to Sequential PNGs in C# (Aspose.Imaging for .NET)
+// HOW-TO: Batch Convert and Rename EMF Files to Sequential PNGs in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace EmfBatchConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDir = @"C:\InputEmf";
+                string outputDir = @"C:\OutputPng";
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+                // Ensure the base output directory exists
+                Directory.CreateDirectory(outputDir);
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-            int index = 1;
+                string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
+                int counter = 1;
 
-            foreach (var file in files)
-            {
-                if (!File.Exists(file))
+                foreach (string emfPath in emfFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
-                    return;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, $"{index}.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(file))
-                {
-                    using (PngOptions pngOptions = new PngOptions())
+                    if (!File.Exists(emfPath))
                     {
-                        pngOptions.Source = new FileCreateSource(outputPath, false);
-                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                        image.Save(outputPath, pngOptions);
+                        Console.Error.WriteLine($"File not found: {emfPath}");
+                        return;
                     }
-                }
 
-                index++;
+                    using (Image image = Image.Load(emfPath))
+                    {
+                        string outputPath = Path.Combine(outputDir, $"{counter:D3}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        image.Save(outputPath, new PngOptions());
+                    }
+
+                    counter++;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to process a large set of vector EMF drawings and generate numbered PNG thumbnails for a web gallery.
- * 2. When an automated build creates EMF reports that must be renamed and converted to PNG for inclusion in PDF documentation.
- * 3. When a migration script must replace legacy EMF assets with PNG images while preserving order for a mobile app.
- * 4. When a server‑side service has to read EMF files from an input folder, rasterize them, and save them as sequentially numbered PNG files for downstream processing.
- * 5. When a desktop utility must batch rename and convert EMF icons into PNG sprites with consistent naming for a game UI.
+ * 1. When you need to automate the conversion of a large set of Windows Metafile (EMF) diagrams into web‑friendly PNG images with consistent sequential filenames.
+ * 2. When a reporting system generates charts as EMF files and you must rename them to a numeric order before publishing them on a website.
+ * 3. When migrating legacy design assets stored as EMF into a modern asset pipeline that requires PNG format and predictable naming for batch processing.
+ * 4. When creating a build step that transforms EMF icons into PNG sprites and ensures the output files are numbered for easy indexing in a game engine.
+ * 5. When a document conversion service must process incoming EMF files, rename them to avoid name collisions, and store them as PNGs for downstream OCR or thumbnail generation.
  */

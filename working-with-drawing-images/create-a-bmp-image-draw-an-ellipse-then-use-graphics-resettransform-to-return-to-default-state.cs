@@ -1,39 +1,42 @@
-// HOW-TO: Create BMP with Ellipse and Reset Graphics Transform in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create BMP Image With Ellipse And Reset Transform In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "ellipse.bmp";
-
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputPath = "output.bmp";
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            int width = 200;
-            int height = 200;
-
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (BmpOptions bmpOptions = new BmpOptions())
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
-
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                Rectangle rect = new Rectangle(20, 20, 160, 120);
-                graphics.DrawEllipse(pen, rect);
-
-                graphics.ResetTransform();
-
-                image.Save();
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                using (Image image = Image.Create(bmpOptions, 200, 200))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+                    Pen pen = new Pen(Color.Blue, 3);
+                    Rectangle rect = new Rectangle(20, 20, 160, 120);
+                    graphics.DrawEllipse(pen, rect);
+                    graphics.ResetTransform();
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a BMP thumbnail that contains a centered ellipse for a reporting dashboard.
- * 2. When you want to programmatically draw vector shapes on a bitmap and ensure subsequent drawing operations start from the default coordinate system.
- * 3. When you are building a C# utility that creates simple diagram elements, such as ellipses, and must save them as BMP files for legacy applications.
- * 4. When you require a reproducible way to clear transformations after drawing so that later graphics calls are not affected by previous scaling or rotation.
- * 5. When you are automating the creation of test images for image‑processing algorithms that expect a BMP image with a known geometric primitive.
+ * 1. When you need to generate a BMP file programmatically and draw a vector ellipse for a simple diagram or placeholder graphic.
+ * 2. When you want to create a blank canvas, render a shape, and then clear any transformations before adding more drawing operations.
+ * 3. When an application must produce a bitmap thumbnail that includes a highlighted circular region, such as a selection mask.
+ * 4. When you are building a reporting tool that adds custom elliptical annotations to BMP charts and requires the graphics state to be reset for subsequent elements.
+ * 5. When you need to automate the creation of test images with specific dimensions and shapes to validate image‑processing pipelines.
  */

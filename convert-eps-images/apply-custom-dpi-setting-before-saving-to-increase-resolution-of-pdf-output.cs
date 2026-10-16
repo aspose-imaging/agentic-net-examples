@@ -1,7 +1,13 @@
-// HOW-TO: Convert JPEG to High-Resolution PDF with Custom DPI in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set Custom DPI When Converting JPEG to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
@@ -11,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/result.pdf";
+            string inputPath = Path.Combine("Input", "sample.jpg");
+            string outputPath = Path.Combine("Output", "output.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -22,11 +28,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                PdfOptions options = new PdfOptions();
-                options.ResolutionSettings = new ResolutionSetting(300, 300);
-                image.Save(outputPath, options);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -38,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable PDF from a JPEG image with 300 DPI to ensure sharpness for marketing brochures.
- * 2. When an application must batch‑convert user‑uploaded photos to high‑resolution PDFs for archival in a document management system.
- * 3. When a web service creates PDF invoices that embed product photos and requires a specific DPI to meet regulatory printing standards.
- * 4. When a desktop utility prepares images for large‑format printing by increasing the PDF output resolution before saving.
- * 5. When a reporting tool exports chart screenshots as PDFs and must control the DPI to maintain visual fidelity on high‑density displays.
+ * 1. When you need to generate a high‑resolution PDF from a JPEG for professional printing, you can set a custom DPI before saving.
+ * 2. When creating PDF documents for archival standards that require 300 dpi images, this code ensures the output meets the specification.
+ * 3. When a web service must convert user‑uploaded photos to PDFs with consistent resolution for downstream processing, the DPI setting guarantees uniform quality.
+ * 4. When integrating Aspose.Imaging into a C# application that produces PDFs for e‑signatures, adjusting the DPI helps maintain legibility of scanned signatures.
+ * 5. When automating batch conversion of marketing assets from JPEG to PDF and need each PDF to have the same high‑resolution settings, this approach provides a reliable solution.
  */

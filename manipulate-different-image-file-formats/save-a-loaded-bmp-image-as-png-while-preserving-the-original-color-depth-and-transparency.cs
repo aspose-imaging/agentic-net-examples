@@ -1,4 +1,11 @@
 // HOW-TO: Convert BMP Image to PNG While Preserving Color Depth in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,12 +13,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output.png";
+            string inputPath = "Input\\sample.bmp";
+            string outputPath = "Output\\converted.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,10 +28,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                using (PngOptions options = new PngOptions())
+                {
+                    image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -36,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert legacy BMP graphics to PNG for web delivery without losing the original palette or alpha channel.
- * 2. When an application must batch‑process user‑uploaded BMP files and store them as lossless PNGs while keeping transparency intact.
- * 3. When migrating a desktop software’s assets from BMP to PNG to reduce file size but still require the exact color depth for accurate rendering.
- * 4. When integrating Aspose.Imaging in a C# service that receives BMP images and must return PNGs that preserve the original image’s transparency for further compositing.
- * 5. When automating a build pipeline that generates documentation screenshots in BMP and needs them saved as PNGs with the same visual fidelity.
+ * 1. When you need to generate web‑ready PNG files from legacy BMP assets without losing their original palette or alpha channel.
+ * 2. When an application must batch‑convert user‑uploaded BMP screenshots to PNG for smaller file size while keeping transparency.
+ * 3. When migrating a desktop software’s icon library from BMP to PNG to support modern UI frameworks.
+ * 4. When preparing images for PDF generation where PNG is required but the source files are stored as BMP.
+ * 5. When integrating with a third‑party service that only accepts PNG, and you must retain the exact color depth of the original BMP.
  */

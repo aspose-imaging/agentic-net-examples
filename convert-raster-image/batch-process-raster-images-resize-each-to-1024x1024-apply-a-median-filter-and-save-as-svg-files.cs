@@ -1,10 +1,15 @@
 // HOW-TO: Batch Resize Raster Images to 1024x1024 and Convert to SVG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,24 +17,13 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "InputImages";
+            string outputDirectory = "OutputSvgs";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            string[] files = Directory.GetFiles(inputDirectory);
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -38,31 +32,24 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 using (Image img = Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)img;
-                    if (!raster.IsCached)
+                    RasterImage raster = img as RasterImage;
+                    if (raster == null)
                     {
-                        raster.CacheData();
+                        Console.Error.WriteLine($"Not a raster image: {inputPath}");
+                        continue;
                     }
+
+                    if (!raster.IsCached)
+                        raster.CacheData();
 
                     raster.Resize(1024, 1024);
-                    raster.Filter(raster.Bounds, new MedianFilterOptions(3));
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-                    using (SvgOptions svgOptions = new SvgOptions())
-                    {
-                        svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageWidth = 1024,
-                            PageHeight = 1024,
-                            BackgroundColor = Aspose.Imaging.Color.White
-                        };
-                        raster.Save(outputPath, svgOptions);
-                    }
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    raster.Save(outputPath, new SvgOptions());
                 }
             }
         }
@@ -75,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to prepare a large set of photos for a web‑based vector graphics viewer by resizing them uniformly and converting them to SVG.
- * 2. When you want to reduce noise in scanned documents before vectorizing them, applying a median filter to each raster file in a folder.
- * 3. When an e‑commerce platform requires product images to be standardized to 1024 × 1024 pixels and delivered as scalable SVG files for responsive design.
- * 4. When automating the migration of legacy bitmap assets to SVG for a mobile app, ensuring each image is resized and denoised in a single batch process.
- * 5. When creating a preprocessing pipeline for machine‑learning training data that expects clean, uniformly sized SVG inputs derived from various raster formats.
+ * 1. When you need to automatically prepare a large set of photos for web display by resizing them to a uniform 1024 × 1024 resolution, reducing noise with a median filter, and delivering them as scalable SVG files.
+ * 2. When a content‑management system must ingest raster scans, clean them, and store them in a vector‑friendly format for responsive design.
+ * 3. When an e‑commerce platform wants to generate lightweight, resolution‑independent product thumbnails from high‑resolution JPEG or PNG uploads.
+ * 4. When a digital‑archiving workflow requires batch conversion of scanned documents into SVG while applying noise reduction to improve OCR accuracy.
+ * 5. When a game‑asset pipeline needs to standardize texture sizes, remove speckle noise, and export them as SVG for UI scaling across devices.
  */

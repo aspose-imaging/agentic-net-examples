@@ -1,4 +1,11 @@
-// HOW-TO: Get EMF Image Dimensions in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Get Width and Height of EMF Image in C# with Aspose.Imaging (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +18,6 @@ class Program
         try
         {
             string inputPath = "input.emf";
-            string outputPath = "output.txt";
 
             if (!File.Exists(inputPath))
             {
@@ -19,24 +25,11 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            using (EmfImage image = (EmfImage)Image.Load(inputPath))
             {
-                EmfImage emf = image as EmfImage;
-                if (emf == null)
-                {
-                    Console.Error.WriteLine("The file is not a valid EMF image.");
-                    return;
-                }
-
-                int width = emf.Width;
-                int height = emf.Height;
-
-                Console.WriteLine($"Width: {width}");
-                Console.WriteLine($"Height: {height}");
-
-                File.WriteAllText(outputPath, $"Width: {width}{Environment.NewLine}Height: {height}");
+                int width = image.Width;
+                int height = image.Height;
+                Console.WriteLine($"Width: {width}, Height: {height}");
             }
         }
         catch (Exception ex)
@@ -48,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to validate that an uploaded EMF file meets specific size requirements before processing it further.
- * 2. When generating a report that lists the width and height of each EMF graphic in a batch of design assets.
- * 3. When converting EMF drawings to other formats and you must preserve aspect ratio based on the original dimensions.
- * 4. When logging image metadata for auditing purposes in a C# application that handles vector graphics.
- * 5. When dynamically resizing UI components based on the dimensions of an EMF logo or icon at runtime.
+ * 1. When you need to display or validate the size of a vector EMF file before converting it to another format.
+ * 2. When a reporting tool must calculate layout dimensions of an EMF diagram to fit it into a PDF page.
+ * 3. When a batch process logs the dimensions of multiple EMF assets to generate a size inventory for asset management.
+ * 4. When a web service validates uploaded EMF graphics by checking their width and height against allowed limits.
+ * 5. When a desktop application shows image metadata to users, retrieving the EMF image’s width and height for UI display.
  */

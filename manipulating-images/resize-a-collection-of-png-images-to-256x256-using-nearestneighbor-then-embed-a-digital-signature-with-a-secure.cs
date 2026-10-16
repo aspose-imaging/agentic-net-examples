@@ -1,69 +1,75 @@
-// HOW-TO: Resize PNG to 256x256 Using Nearest Neighbor and Embed Secure Signature in C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG Images to 256x256 and Add Password Protected Digital Signature in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        try
+        static void Main(string[] args)
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            string password = "SecurePassword123";
-
-            if (!Directory.Exists(inputDirectory))
+            try
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputDirectory = "Input";
+                string outputDirectory = "Output";
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                if (!Directory.Exists(inputDirectory))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Directory.CreateDirectory(inputDirectory);
+                    Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                if (!Directory.Exists(outputDirectory))
                 {
-                    if (!image.IsCached)
-                        image.CacheData();
+                    Directory.CreateDirectory(outputDirectory);
+                }
 
-                    image.Resize(256, 256, ResizeType.NearestNeighbourResample);
-                    image.EmbedDigitalSignature(password);
+                string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-                    var saveOptions = new PngOptions();
-                    image.Save(outputPath, saveOptions);
+                foreach (string inputPath in files)
+                {
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileName + "_signed.png");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                    {
+                        image.Resize(256, 256, ResizeType.NearestNeighbourResample);
+                        string password = "StrongPassword123!";
+                        image.EmbedDigitalSignature(password);
+                        image.Save(outputPath);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to batch‑process user‑uploaded PNG avatars to a fixed 256×256 size for a web portal while preserving sharp edges with nearest‑neighbor scaling.
- * 2. When you must protect PNG assets by embedding a digital signature protected by a password before distributing them to clients.
- * 3. When an e‑commerce platform requires all product PNG images to be uniformly sized and tamper‑evident for catalog uploads.
- * 4. When a mobile app stores thumbnail PNGs locally and you want to ensure each thumbnail is resized quickly and signed to prevent unauthorized modifications.
- * 5. When a document management system archives PNG scans and needs to standardize dimensions and add a secure signature for compliance auditing.
+ * 1. When you need to batch‑process a folder of PNG files to create uniform 256×256 thumbnails for a web gallery while ensuring each image is tamper‑evident with a password‑protected digital signature.
+ * 2. When an e‑commerce platform must generate small product icons from high‑resolution PNG assets and embed a secure signature to verify the source before uploading to a CDN.
+ * 3. When a mobile app requires pre‑scaled PNG assets for offline use and wants to protect the assets from unauthorized modification by embedding a digital signature with a strong password.
+ * 4. When a document management system stores PNG scans and needs to standardize their size for indexing while adding a cryptographic signature to meet compliance requirements.
+ * 5. When a game developer wants to automatically resize character sprites to 256×256 pixels and lock them with a password‑protected signature to prevent cheating or asset piracy.
  */

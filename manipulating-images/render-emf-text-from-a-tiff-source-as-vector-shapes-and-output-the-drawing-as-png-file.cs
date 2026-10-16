@@ -1,43 +1,58 @@
-// HOW-TO: Convert TIFF to PNG Using EMF Vector Rendering in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert TIFF to Vector EMF and Then to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/source.tif";
-            string outputPath = "Output/result.png";
+            // Hardcoded paths
+            string inputTiffPath = "input.tiff";
+            string intermediateEmfPath = "temp.emf";
+            string outputPngPath = "output.png";
 
-            if (!File.Exists(inputPath))
+            // Validate input file existence
+            if (!File.Exists(inputTiffPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image tiffImage = Image.Load(inputPath))
+            // Load TIFF image
+            using (Image tiffImage = Image.Load(inputTiffPath))
             {
-                EmfOptions emfOptions = new EmfOptions();
+                // Save as EMF (vector) using EmfOptions
+                var emfOptions = new EmfOptions();
+                tiffImage.Save(intermediateEmfPath, emfOptions);
+            }
 
-                using (Image emfImage = Image.Create(emfOptions, tiffImage.Width, tiffImage.Height))
-                {
-                    Graphics graphics = new Graphics(emfImage);
-                    graphics.DrawImage(tiffImage, new Rectangle(0, 0, tiffImage.Width, tiffImage.Height));
+            // Ensure output directory exists for PNG
+            string pngDir = Path.GetDirectoryName(outputPngPath);
+            Directory.CreateDirectory(pngDir ?? ".");
 
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
+            // Load the generated EMF image
+            using (Image emfImage = Image.Load(intermediateEmfPath))
+            {
+                // Save as PNG
+                var pngOptions = new PngOptions();
+                emfImage.Save(outputPngPath, pngOptions);
+            }
 
-                    emfImage.Save(outputPath, pngOptions);
-                }
+            // Optionally clean up intermediate EMF file
+            if (File.Exists(intermediateEmfPath))
+            {
+                try { File.Delete(intermediateEmfPath); } catch { /* ignore cleanup errors */ }
             }
         }
         catch (Exception ex)
@@ -49,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to preserve the quality of text from a scanned TIFF by rendering it as vector shapes before saving it as a high‑resolution PNG in a C# application.
- * 2. When a reporting system must convert multi‑page TIFF documents into PNG thumbnails while keeping text crisp using Aspose.Imaging’s EMF rendering.
- * 3. When you want to generate PNG images from legacy TIFF files for web display, ensuring that any embedded text remains scalable and loss‑less.
- * 4. When automating a batch process that transforms archival TIFF images into PNG assets for a digital asset management pipeline, using vector‑based rendering to reduce file size.
- * 5. When integrating image conversion into a .NET service that needs to render TIFF‑based diagrams as vector graphics and output them as PNG for downstream analytics or UI components.
+ * 1. When you need to keep the text from a scanned TIFF document as scalable vector graphics before creating a PNG preview.
+ * 2. When a reporting tool requires converting multi‑page TIFF charts into EMF vector files for high‑quality printing and then into PNG for web display.
+ * 3. When an application must generate PNG thumbnails from TIFF images while preserving text clarity by first converting to EMF.
+ * 4. When you want to automate batch processing of TIFF assets, turning them into vector EMF files to edit or annotate, then exporting the final result as PNG.
+ * 5. When integrating Aspose.Imaging in a C# service that extracts vector shapes from TIFF files for GIS or CAD workflows and outputs them as PNG images.
  */

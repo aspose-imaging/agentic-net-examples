@@ -1,38 +1,45 @@
 // HOW-TO: Convert DNG Raw Image to 16‑Bit TIFF Preserving Sensor Data in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.dng";
+        string outputPath = "output.tiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            string inputPath = Path.Combine("Input", "image.dng");
-            string outputPath = Path.Combine("Output", "image.tiff");
-
-            if (!File.Exists(inputPath))
+            using (var dng = (Aspose.Imaging.FileFormats.Dng.DngImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (DngImage dng = (DngImage)Image.Load(inputPath))
-            {
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
                     BitsPerSample = new ushort[] { 16, 16, 16 },
-                    Photometric = TiffPhotometrics.Rgb
-                })
-                {
-                    dng.Save(outputPath, tiffOptions);
-                }
+                    Photometric = TiffPhotometrics.Rgb,
+                    Compression = TiffCompressions.None
+                };
+                dng.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑editing application must import camera raw files and save them as lossless 16‑bit TIFFs for further editing.
- * 2. When a scientific imaging pipeline needs to archive raw sensor data from DNG files in a widely supported TIFF format.
- * 3. When a printing workflow requires high‑dynamic‑range TIFF images to preserve color depth before color‑managed output.
- * 4. When a batch‑processing tool converts large collections of DNG files to TIFF for compatibility with legacy image analysis software.
- * 5. When a machine‑learning project extracts raw pixel values from DNG images and stores them as 16‑bit TIFFs for training models.
+ * 1. When a photographer needs to archive raw DNG files as loss‑less 16‑bit TIFFs for long‑term storage while keeping the original sensor data intact.
+ * 2. When a scientific imaging application must convert camera raw data to a 16‑bit TIFF format for analysis in software that only supports TIFF.
+ * 3. When a batch processing pipeline requires programmatic conversion of DNG files to uncompressed TIFFs using C# and Aspose.Imaging to maintain color fidelity.
+ * 4. When a developer is building a web service that receives DNG uploads and returns high‑resolution 16‑bit TIFFs for downstream editing tools.
+ * 5. When a digital asset management system needs to generate TIFF previews from DNG raw images without applying any compression to preserve image quality.
  */

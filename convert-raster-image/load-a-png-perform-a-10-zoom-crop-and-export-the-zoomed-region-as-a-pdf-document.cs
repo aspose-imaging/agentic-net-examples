@@ -1,19 +1,24 @@
-// HOW-TO: Create PDF From Center Cropped 10% Zoom Of PNG In C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop Center 10% of PNG and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.png";
+        string outputPath = "Output\\zoomed.pdf";
+
         try
         {
-            string inputPath = "Input\\image.png";
-            string outputPath = "Output\\zoomed.pdf";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,24 +27,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                    raster.CacheData();
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
 
                 int cropWidth = (int)(raster.Width * 0.1);
                 int cropHeight = (int)(raster.Height * 0.1);
-                int x = (raster.Width - cropWidth) / 2;
-                int y = (raster.Height - cropHeight) / 2;
+                int offsetX = (raster.Width - cropWidth) / 2;
+                int offsetY = (raster.Height - cropHeight) / 2;
 
-                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(x, y, cropWidth, cropHeight);
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(offsetX, offsetY, cropWidth, cropHeight);
                 raster.Crop(cropRect);
 
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+                raster.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to embed a focused portion of a PNG image into a PDF document for reports or presentations.
- * 2. When generating printable PDFs that contain only the central 10% of a PNG to highlight fine details.
- * 3. When creating thumbnail‑style PDF pages from large PNG assets by cropping a zoomed region.
- * 4. When converting scanned PNG diagrams into PDFs while removing surrounding whitespace through a centered crop.
- * 5. When automating batch processing to extract a zoomed region from multiple PNG files and save each as a PDF for archival.
+ * 1. When you need to generate a printable PDF that shows only the central 10 % of a high‑resolution PNG thumbnail.
+ * 2. When creating a preview document that focuses on a zoomed‑in region of a PNG for quality‑control reports.
+ * 3. When extracting a small area from a scanned PNG map and exporting it as a PDF for inclusion in a GIS presentation.
+ * 4. When automating the production of PDF handouts that contain a magnified view of a logo stored as a PNG.
+ * 5. When building a batch process that crops the center of multiple PNG assets and converts them to PDF for archival purposes.
  */

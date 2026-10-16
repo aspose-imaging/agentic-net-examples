@@ -1,11 +1,18 @@
-// HOW-TO: Convert Odd Pages of DjVu to TIFF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert Odd Pages Of DjVu To Multi‑Page TIFF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -14,7 +21,7 @@ class Program
         try
         {
             string inputPath = "input.djvu";
-            string outputDirectory = "Output";
+            string outputPath = "output_odd_pages.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,25 +29,26 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
-
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                int pageCount = djvuImage.Pages.Length;
-                for (int i = 0; i < pageCount; i++)
-                {
-                    // Zero‑based index: even i corresponds to odd‑numbered pages (1,3,5,…)
-                    if (i % 2 != 0) continue;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            {
+                // Determine the last page index
+                int lastIndex = djvu.Pages.Length - 1;
 
-                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                    {
-                        tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(i, i));
-                        djvuImage.Save(outputPath, tiffOptions);
-                    }
-                }
+                // Select odd-numbered pages (1-based): indices 0,2,4,...
+                IntRange oddPagesRange = new IntRange(0, lastIndex, 2);
+
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(oddPagesRange);
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.MultiPageOptions = multiPageOptions;
+
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract only the odd‑numbered pages from a multi‑page DjVu file and save them as separate TIFF images for archival or printing.
- * 2. When an application must generate TIFF files for every other page of a scanned DjVu document to reduce file size while preserving key pages for downstream OCR processing.
- * 3. When a workflow requires converting specific pages (e.g., page 1, 3, 5) of a DjVu e‑book into TIFF format for compatibility with legacy imaging systems.
- * 4. When a batch job processes a folder of DjVu files and needs to export only the odd pages as TIFFs to meet a client’s document‑exchange specification.
- * 5. When a developer wants to use Aspose.Imaging’s IntRange selection to programmatically save selected DjVu pages as multi‑page TIFFs for selective document sharing.
+ * 1. When you need to extract only the odd‑numbered pages from a scanned DjVu document and archive them as a single multi‑page TIFF file for compatibility with legacy systems.
+ * 2. When a publishing workflow requires converting selected pages of a DjVu e‑book into TIFF format for high‑resolution printing while ignoring even pages to reduce file size.
+ * 3. When an OCR pipeline processes only the odd pages of a DjVu file and you must provide those pages as a TIFF image stack for the OCR engine.
+ * 4. When a legal document management system stores case files in DjVu but needs to generate TIFF previews of every other page for quick review.
+ * 5. When a digital archiving script must batch‑convert DjVu files, preserving only odd pages, into TIFF to meet archival standards that mandate TIFF format.
  */

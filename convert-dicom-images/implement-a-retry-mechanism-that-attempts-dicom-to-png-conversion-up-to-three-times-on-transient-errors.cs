@@ -1,6 +1,14 @@
 // HOW-TO: Retry DICOM to PNG Conversion Up to Three Times in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
+using System.Threading;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -13,7 +21,7 @@ namespace DicomToPngConverter
             try
             {
                 string inputPath = "input.dcm";
-                string outputPath = "output.png";
+                string outputPath = "output/output.png";
 
                 if (!File.Exists(inputPath))
                 {
@@ -21,12 +29,11 @@ namespace DicomToPngConverter
                     return;
                 }
 
-                string outputDir = Path.GetDirectoryName(outputPath);
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                const int maxAttempts = 3;
+                int maxAttempts = 3;
                 int attempt = 0;
-                while (attempt < maxAttempts)
+                while (true)
                 {
                     try
                     {
@@ -35,7 +42,6 @@ namespace DicomToPngConverter
                             var pngOptions = new PngOptions();
                             image.Save(outputPath, pngOptions);
                         }
-                        // Success, exit loop
                         break;
                     }
                     catch (Exception ex) when (IsTransient(ex))
@@ -45,7 +51,7 @@ namespace DicomToPngConverter
                         {
                             throw;
                         }
-                        // Optionally, wait before retrying
+                        Thread.Sleep(500);
                     }
                 }
             }
@@ -55,21 +61,18 @@ namespace DicomToPngConverter
             }
         }
 
-        private static bool IsTransient(Exception ex)
+        static bool IsTransient(Exception ex)
         {
-            // Simple heuristic: treat IO and network related exceptions as transient
-            return ex is IOException ||
-                   ex is System.Net.WebException ||
-                   ex is System.Net.Sockets.SocketException;
+            return ex is IOException || ex is System.Net.WebException;
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital's PACS system intermittently fails to read DICOM files over a network, a developer can use this code to retry the conversion to PNG up to three times, ensuring the image is still generated.
- * 2. When building a batch job that extracts thumbnail PNGs from a large collection of DICOM scans, the retry logic helps handle occasional file‑system glitches without stopping the whole process.
- * 3. When deploying a cloud‑based medical imaging service where temporary network outages may occur, the code guarantees that each DICOM‑to‑PNG conversion is attempted multiple times before reporting an error.
- * 4. When integrating Aspose.Imaging into a diagnostic application that must present patient images quickly, the retry mechanism reduces the chance of user‑visible failures caused by transient I/O exceptions.
- * 5. When automating the conversion of radiology images for research datasets and the source files reside on a shared drive that can be briefly unavailable, this pattern safely retries the conversion to keep the pipeline running.
+ * 1. When a hospital's PACS system stores DICOM files on a network share that may temporarily be unavailable, a developer can use this code to reliably convert them to PNG for web viewing.
+ * 2. When building a medical imaging web portal that needs to display patient scans as PNG thumbnails, the retry logic ensures occasional IO errors don't interrupt the conversion pipeline.
+ * 3. When automating a nightly batch job that processes large numbers of DICOM files, the code protects against transient file‑system or network glitches by attempting the conversion up to three times.
+ * 4. When integrating Aspose.Imaging into a diagnostic application that receives DICOM images over HTTP, the retry mechanism handles brief network failures before saving the images as PNG.
+ * 5. When creating a desktop tool for radiologists that converts DICOM studies to PNG for annotation, the retry loop helps maintain a smooth user experience despite occasional disk read errors.
  */

@@ -1,20 +1,25 @@
-// HOW-TO: Resize PNG Image and Convert to PDF Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Resize PNG Image and Save as High‑Quality PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        string inputPath = "Input\\image.png";
-        string outputPath = "Output\\result.pdf";
-
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string inputPath = "input.png";
+            string outputPath = "output\\output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,26 +27,19 @@ public class Program
                 return;
             }
 
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                if (!image.IsCached) image.CacheData();
 
-                if (!raster.IsCached) raster.CacheData();
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
 
-                int newWidth = raster.Width * 2;
-                int newHeight = raster.Height * 2;
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to enlarge a PNG logo for print while preserving quality and embed it directly into a PDF report.
- * 2. When an automated batch job must take user‑uploaded PNG screenshots, double their dimensions, and generate a single PDF document for archival.
- * 3. When a web service creates printable invoices that include PNG graphics and must resize them before saving the final PDF.
- * 4. When a desktop application prepares marketing assets by scaling PNG images and packaging them as PDF handouts without using external tools.
- * 5. When a migration script converts legacy PNG files to PDF format after resizing them to meet a new layout specification.
+ * 1. When you need to enlarge a PNG logo for printing while preserving clarity and output it as a PDF brochure.
+ * 2. When an application must generate a PDF report that includes scaled‑up screenshots originally stored as PNG files.
+ * 3. When a web service receives user‑uploaded PNG avatars and must create larger PDF versions for documentation.
+ * 4. When automating batch processing of product images, you need to double their dimensions and compile them into PDF catalogs.
+ * 5. When converting high‑resolution PNG diagrams to PDF for archival or sharing without losing detail.
  */

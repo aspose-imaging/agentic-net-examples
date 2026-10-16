@@ -1,9 +1,16 @@
 // HOW-TO: Apply Gaussian Blur to PSD and Save as PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,7 +19,7 @@ class Program
         try
         {
             string inputPath = Path.Combine("Input", "sample.psd");
-            string outputPath = Path.Combine("Output", "result.pdf");
+            string outputPath = Path.Combine("Output", "blurred.pdf");
 
             if (!File.Exists(inputPath))
             {
@@ -22,11 +29,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(3, 3);
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(0, 3);
                 raster.Filter(raster.Bounds, blurOptions);
 
                 var pdfOptions = new PdfOptions();
@@ -43,8 +55,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to obscure sensitive details in a Photoshop PSD before sharing it as a PDF report.
- * 2. When a web service must automatically smooth high‑resolution PSD artwork and deliver it in a PDF for client review.
- * 3. When generating printable PDFs from layered PSD files while applying a uniform Gaussian blur to meet branding guidelines.
- * 4. When batch‑processing design assets to reduce file size by blurring and converting PSDs to PDF for archival storage.
- * 5. When integrating Aspose.Imaging in a C# application to programmatically apply a sigma‑3 blur to a PSD and export the result as a PDF for email attachment.
+ * 2. When you want to create a softened preview of a layered design by applying a sigma‑3 Gaussian blur and exporting it to PDF for client review.
+ * 3. When an automated workflow must convert high‑resolution PSD assets into PDF documents with a uniform blur effect for printing proofs.
+ * 4. When a web service generates PDF catalogs from PSD templates and requires a consistent blur to reduce visual noise.
+ * 5. When a batch process needs to apply a Gaussian blur to multiple PSD files and save the results as PDF files using Aspose.Imaging in C#.
  */

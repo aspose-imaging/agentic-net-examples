@@ -1,10 +1,18 @@
-// HOW-TO: Crop CorelDRAW File to 200x200 and Save as GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Crop CorelDRAW Image to 200x200 and Save as GIF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -12,8 +20,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output\\output.gif";
+            string inputPath = "Input/input.cdr";
+            string outputPath = "Output/output.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -23,31 +31,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions
+                    cdr.Save(ms, new PngOptions
                     {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
                             PageHeight = cdr.Height
                         }
-                    };
-                    cdr.Save(ms, pngOptions);
+                    });
                     ms.Position = 0;
 
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        if (!raster.IsCached)
-                            raster.CacheData();
-
-                        var cropRect = new Rectangle(0, 0, 200, 200);
-                        raster.Crop(cropRect);
-
-                        var gifOptions = new GifOptions();
-                        raster.Save(outputPath, gifOptions);
+                        raster.Crop(new Rectangle(0, 0, 200, 200));
+                        raster.Save(outputPath, new GifOptions());
                     }
                 }
             }
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a small thumbnail GIF from a large CorelDRAW illustration for web previews.
- * 2. When an automated pipeline must extract a fixed‑size region from a CDR design and convert it to an animated‑compatible GIF format.
- * 3. When a reporting tool requires a 200 × 200 GIF snapshot of a vector drawing to embed in PDF or email.
- * 4. When migrating legacy CDR assets to a web‑friendly format while ensuring the image fits a specific UI component size.
- * 5. When creating batch scripts that process multiple CorelDRAW files, crop a defined area, and output GIFs for use in mobile applications.
+ * 1. When you need to extract a small thumbnail from a CorelDRAW design and deliver it as a lightweight GIF for web previews.
+ * 2. When an automated pipeline must convert multi‑page CDR files into animated‑compatible GIFs after cropping a specific region.
+ * 3. When a desktop application generates product icons by loading CDR artwork, cropping to a fixed size, and saving in GIF format for UI elements.
+ * 4. When a batch process creates email‑friendly image attachments by converting CorelDRAW graphics to 200 × 200 GIFs.
+ * 5. When a reporting tool requires a fixed‑size GIF snapshot of a CDR diagram to embed in PDF or HTML reports.
  */

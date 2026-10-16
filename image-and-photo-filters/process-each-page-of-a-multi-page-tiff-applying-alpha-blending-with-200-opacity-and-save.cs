@@ -1,4 +1,11 @@
 // HOW-TO: Apply Alpha Blending to Each Page of a Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-09
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +19,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/multipage.tif";
-            string outputPath = "output/processed.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -21,17 +28,18 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
                 foreach (TiffFrame frame in tiff.Frames)
                 {
-                    tiff.ActiveFrame = frame;
-                    using (RasterImage raster = (RasterImage)frame)
-                    {
-                        raster.Blend(new Point(0, 0), raster, 200);
-                    }
+                    RasterImage raster = (RasterImage)frame;
+                    raster.Blend(new Point(0, 0), raster, 200);
                 }
 
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
@@ -47,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a semi‑transparent watermark to every page of a scanned document stored as a multi‑page TIFF before archiving it.
- * 2. When you want to uniformly adjust the opacity of all frames in a multi‑page TIFF to blend with a background color for printing on colored paper.
- * 3. When a medical imaging application must apply a consistent alpha overlay to each slice of a multi‑page TIFF scan for visual analysis.
- * 4. When you are converting a multi‑page TIFF into a format that requires pre‑blended layers, such as preparing images for PDF generation with Aspose.Imaging.
- * 5. When you need to programmatically process each frame of a multi‑page TIFF to ensure the same opacity level for use in a web viewer that supports transparent images.
+ * 1. When you need to make every page of a scanned multi‑page TIFF semi‑transparent using Aspose.Imaging in C# so it can be overlaid with another image layer.
+ * 2. When you want to uniformly set a 200‑out‑of‑255 opacity on all frames of a TIFF before printing or publishing the document.
+ * 3. When building a PDF conversion utility that requires pre‑blending each TIFF page to ensure consistent visual appearance across pages.
+ * 4. When preparing multi‑page medical or GIS TIFF files for compositing, and each layer must share the same alpha value for accurate analysis.
+ * 5. When automating batch processing of archival TIFF archives to apply the same opacity to every page while preserving the original multi‑page structure.
  */

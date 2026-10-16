@@ -1,9 +1,16 @@
-// HOW-TO: Create a 10x10 Grid BMP Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create A 10x10 Grid BMP Image With DrawLine In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,43 +19,49 @@ class Program
     {
         try
         {
+            // Define output path
             string outputPath = "output/grid.bmp";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int cellSize = 50;
+            // Grid parameters
             int rows = 10;
             int cols = 10;
+            int cellSize = 50;
             int width = cols * cellSize;
             int height = rows * cellSize;
 
-            BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-
-            using (RasterImage image = (RasterImage)Image.Create(options, width, height))
+            // Create BMP options with file source
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Fill background with white
-                int[] whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White.ToArgb(), width * height).ToArray();
-                var rect = new Aspose.Imaging.Rectangle(0, 0, width, height);
-                image.SaveArgb32Pixels(rect, whitePixels);
+                Source = new FileCreateSource(outputPath, false)
+            };
 
+            // Create image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Create pen
+                Pen pen = new Pen(Color.Black, 1);
+
+                // Create graphics object
                 Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(Aspose.Imaging.Color.Black, 1);
-
-                // Draw vertical lines
-                for (int c = 0; c <= cols; c++)
-                {
-                    int x = c * cellSize;
-                    graphics.DrawLine(pen, x, 0, x, height);
-                }
 
                 // Draw horizontal lines
-                for (int r = 0; r <= rows; r++)
+                for (int i = 0; i <= rows; i++)
                 {
-                    int y = r * cellSize;
+                    int y = i * cellSize;
                     graphics.DrawLine(pen, 0, y, width, y);
                 }
 
-                // Save the image (output already bound)
+                // Draw vertical lines
+                for (int j = 0; j <= cols; j++)
+                {
+                    int x = j * cellSize;
+                    graphics.DrawLine(pen, x, 0, x, height);
+                }
+
+                // Save the image (output file already bound)
                 image.Save();
             }
         }
@@ -61,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable graph‑paper background as a BMP file for a Windows desktop application.
- * 2. When you want to create a game board such as chess or Sudoku dynamically at runtime without external image assets.
- * 3. When you must produce a tiled layout for a UI mock‑up or PDF overlay where each cell size is configurable.
- * 4. When you require a simple way to export a coordinate grid for scientific data visualization or calibration tools.
- * 5. When you need to programmatically draw a spreadsheet‑style grid for automated report generation in a .NET service.
+ * 1. When you need to generate a printable graph‑paper background as a BMP file for a desktop application.
+ * 2. When you want to create a tiled game board image with equal cells for a C# game engine.
+ * 3. When you must produce a layout template for OCR training data by drawing a uniform grid on a bitmap.
+ * 4. When you require a simple way to overlay a coordinate grid on a scanned image before further processing.
+ * 5. When you need to programmatically generate a spreadsheet‑style grid image for reports or documentation using Aspose.Imaging.
  */

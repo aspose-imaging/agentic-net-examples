@@ -1,18 +1,27 @@
-// HOW-TO: Load DICOM Image Reduce Contrast and Save as TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Load DICOM Image Reduce Contrast Save As TIFF In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-12
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input\\input.dcm";
-            string outputPath = "output\\output.tiff";
+            string inputPath = Path.Combine("Input", "input.dcm");
+            string outputPath = Path.Combine("Output", "output.tiff");
 
             if (!File.Exists(inputPath))
             {
@@ -22,12 +31,12 @@ public class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                var raster = (RasterImage)dicomImage;
-                raster.AdjustContrast(0.8f);
+                image.AdjustContrast(0.8f);
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +48,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to lower the contrast of a DICOM scan before converting it to a TIFF file for easier viewing on standard picture viewers.
- * 2. When a radiology workflow requires exporting DICOM images with adjusted contrast to TIFF for inclusion in patient reports or documentation.
- * 3. When a developer wants to preprocess DICOM images by reducing contrast to improve OCR accuracy after saving them as high‑resolution TIFF files.
- * 4. When integrating legacy systems that only accept TIFF, you can load DICOM, tweak contrast, and save the result in a compatible format using C#.
- * 5. When building a batch conversion tool that normalizes contrast of DICOM scans and archives them as TIFF files for long‑term storage.
+ * 1. When a medical imaging application needs to lower the contrast of a DICOM scan before archiving it as a TIFF file.
+ * 2. When converting radiology images to a format compatible with legacy picture archiving systems while adjusting visual intensity.
+ * 3. When preprocessing DICOM data for machine‑learning pipelines that require TIFF inputs with standardized contrast.
+ * 4. When generating print‑ready TIFF copies of DICOM studies with reduced contrast to improve readability on paper.
+ * 5. When integrating Aspose.Imaging into a C# workflow that reads DICOM files, modifies their contrast, and stores the result as TIFF for downstream analysis.
  */
