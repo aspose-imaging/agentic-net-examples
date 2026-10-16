@@ -1,4 +1,11 @@
-// HOW-TO: Set PNG Compression Level When Converting BMP to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Set PNG Compression Level When Converting BMP to PNG In C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-07
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +17,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/source.bmp";
-            string outputPath = "output/converted.png";
+            string inputPath = "input.bmp";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,11 +30,11 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                var options = new PngOptions
                 {
-                    CompressionLevel = 6 // balance file size and quality
+                    CompressionLevel = 6 // balanced compression
                 };
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -39,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to reduce the file size of a BMP image while keeping visual quality acceptable for web delivery, you can convert it to PNG with a balanced compression level in C#.
- * 2. When generating thumbnails for a photo gallery, you may want to save the images as PNG with moderate compression to ensure fast loading without noticeable artifacts.
- * 3. When archiving scanned documents as lossless PNG files, setting a specific compression level helps keep storage costs low while preserving detail.
- * 4. When processing batch image conversions in a server‑side .NET application, configuring the PNG compression level allows you to control the trade‑off between bandwidth and image fidelity.
- * 5. When integrating Aspose.Imaging into an automated build pipeline that outputs PNG assets, adjusting the compression level ensures consistent output size across different environments.
+ * 1. When you need to reduce the file size of a PNG generated from a BMP while keeping acceptable image quality in a .NET application.
+ * 2. When you are building an image‑processing pipeline that must balance storage constraints and visual fidelity for web‑ready PNG assets.
+ * 3. When you want to programmatically control PNG compression during batch conversion of legacy bitmap files to modern formats.
+ * 4. When you need to ensure consistent PNG output settings across different environments by specifying the compression level in code.
+ * 5. When you are handling user‑uploaded BMP images and must save them as optimized PNGs before storing or displaying them.
  */
