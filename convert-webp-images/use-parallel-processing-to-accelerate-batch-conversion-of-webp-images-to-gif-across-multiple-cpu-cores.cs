@@ -1,4 +1,11 @@
-// HOW-TO: Parallel Batch Convert WebP Images to GIF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Parallel Batch Convert WebP Images to GIF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -6,60 +13,57 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-namespace WebpToGifBatch
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            try
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
+            Directory.CreateDirectory(outputDirectory);
+
+            var webpFiles = Directory.GetFiles(inputDirectory, "*.webp", SearchOption.AllDirectories);
+
+            Parallel.ForEach(webpFiles, inputPath =>
             {
-                // Hardcoded input and output directories
-                string inputDirectory = "input";
-                string outputDirectory = "output";
-
-                // Get all WebP files in the input directory
-                string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
-
-                // Process files in parallel
-                Parallel.ForEach(webpFiles, webpPath =>
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(webpPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(relativePath, ".gif"));
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                try
+                {
+                    using (WebPImage image = (WebPImage)Image.Load(inputPath))
                     {
-                        Console.Error.WriteLine($"File not found: {webpPath}");
-                        return;
+                        image.Save(outputPath, new GifOptions());
                     }
-
-                    // Determine output file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(webpPath) + ".gif";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load WebP image
-                    using (WebPImage webpImage = new WebPImage(webpPath))
-                    {
-                        // Save as GIF
-                        GifOptions gifOptions = new GifOptions();
-                        webpImage.Save(outputPath, gifOptions);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When you need to quickly convert a large folder of WebP photos to animated GIFs using all CPU cores.
- * 2. When you want to automate image format migration for a website that only supports GIF animations.
- * 3. When you have to process user‑uploaded WebP files on a server and store them as GIFs for compatibility with older browsers.
- * 4. When you are building a desktop tool that batch‑converts product screenshots from WebP to GIF for marketing assets.
- * 5. When you need to integrate parallel image conversion into a CI pipeline to reduce build time for assets.
+ * 1. When you need to quickly convert a large collection of WebP photos to animated GIFs for web galleries using all CPU cores.
+ * 2. When a server‑side service must process user‑uploaded WebP files and output GIFs without blocking other requests.
+ * 3. When migrating legacy assets from WebP to GIF format for compatibility with older browsers or email clients.
+ * 4. When generating GIF previews of WebP screenshots in a CI pipeline that runs on multi‑core build agents.
+ * 5. When building a desktop utility that reorganizes image folders while converting WebP files to GIFs in parallel to reduce processing time.
  */

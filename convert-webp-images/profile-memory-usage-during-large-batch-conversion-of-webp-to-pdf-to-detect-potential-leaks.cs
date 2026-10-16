@@ -1,4 +1,11 @@
 // HOW-TO: Profile Memory Usage While Converting WebP Images to PDF in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using System.Diagnostics;
@@ -12,7 +19,7 @@ class Program
     {
         try
         {
-            // Hardcoded paths
+            // Hardcoded input and output directories
             string inputFolder = @"C:\InputWebP";
             string outputFolder = @"C:\OutputPDF";
 
@@ -20,45 +27,39 @@ class Program
             Directory.CreateDirectory(outputFolder);
 
             // Get all WebP files in the input folder
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.webp", SearchOption.AllDirectories);
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in webpFiles)
             {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path (same file name with .pdf extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Determine output PDF path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Memory usage before processing
-                long beforeManaged = GC.GetTotalMemory(forceFullCollection: true);
-                long beforePrivate = Process.GetCurrentProcess().PrivateMemorySize64;
+                // Record memory usage before conversion
+                long memoryBefore = Process.GetCurrentProcess().PrivateMemorySize64;
 
-                // Load WebP image
-                using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
+                // Load WebP image and save as PDF
+                using (WebPImage image = (WebPImage)Image.Load(inputPath))
                 {
-                    // Save as PDF
-                    PdfOptions pdfOptions = new PdfOptions();
-                    webpImage.Save(outputPath, pdfOptions);
+                    PdfOptions options = new PdfOptions();
+                    image.Save(outputPath, options);
                 }
 
-                // Memory usage after processing
-                long afterManaged = GC.GetTotalMemory(forceFullCollection: true);
-                long afterPrivate = Process.GetCurrentProcess().PrivateMemorySize64;
+                // Record memory usage after conversion
+                long memoryAfter = Process.GetCurrentProcess().PrivateMemorySize64;
 
-                // Report memory usage
-                Console.WriteLine($"Processed: {inputPath}");
-                Console.WriteLine($"Managed memory change: {afterManaged - beforeManaged} bytes");
-                Console.WriteLine($"Private memory change: {afterPrivate - beforePrivate} bytes");
-                Console.WriteLine();
+                // Output memory usage information
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Memory before: {memoryBefore / 1024 / 1024} MB, after: {memoryAfter / 1024 / 1024} MB, delta: {(memoryAfter - memoryBefore) / 1024 / 1024} MB");
             }
         }
         catch (Exception ex)
@@ -70,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing thousands of WebP photos from a web crawler and need to ensure the conversion to PDF doesn't cause memory leaks.
- * 2. When building a server‑side service that receives user‑uploaded WebP files and returns PDF reports, and you want to monitor managed and private memory consumption.
- * 3. When migrating a legacy image archive from WebP to searchable PDF documents and need to verify that batch processing stays within memory limits.
- * 4. When creating an automated nightly job that converts product screenshots (WebP) to PDF catalogs and you must detect potential memory growth over time.
- * 5. When developing a desktop utility that lets users select a folder of WebP images and export them as PDFs while tracking memory usage to improve performance.
+ * 1. When you need to monitor RAM consumption during a bulk WebP‑to‑PDF conversion to ensure the application doesn’t run out of memory.
+ * 2. When you want to detect memory leaks in a long‑running service that processes thousands of WebP images into PDF reports.
+ * 3. When you are optimizing a server‑side image pipeline and need to compare memory before and after each conversion step.
+ * 4. When you are building a command‑line tool that converts user‑uploaded WebP files to PDF and must log memory usage for troubleshooting.
+ * 5. When you are validating that the Aspose.Imaging WebPImage class releases resources correctly after saving PDFs in a batch job.
  */

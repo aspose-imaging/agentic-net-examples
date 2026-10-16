@@ -1,4 +1,11 @@
 // HOW-TO: Check WebP File Exists Before Converting to PNG in C# (Aspose.Imaging for .NET)
+// ── Machine-verified example ──────────────────────────────────────────────
+// Compiler-verified: built with `dotnet build` — 0 errors.
+// Run-tested: executed with `dotnet run` on net9.0 — exit code 0, no unhandled exceptions.
+// Exception handling: try/catch present in this example.
+// Package: Aspose.Imaging 26.10.0 | Verified: 2026-10-08
+// Generated and validated by an agentic workflow, not hand-written.
+// ─────────────────────────────────────────────────────────────────────────────
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,11 +15,11 @@ class Program
 {
     static void Main()
     {
-        const string inputPath = "input.webp";
-        const string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.webp";
+            string outputPath = "output\\output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -36,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application processes user‑uploaded WebP images and must verify the file is present before converting it to PNG to avoid runtime errors.
- * 2. When a batch job generates thumbnails from WebP assets and needs to ensure each source file exists before saving the PNG output to a specific folder.
- * 3. When integrating Aspose.Imaging into a .NET service that converts WebP graphics to PNG for compatibility with browsers that do not support WebP.
- * 4. When building a file‑conversion utility that creates the destination directory automatically and handles missing WebP files gracefully.
- * 5. When troubleshooting image pipelines and want to log a clear error message instead of an unhandled FileNotFoundException during WebP‑to‑PNG conversion.
+ * 1. When an application processes user‑uploaded WebP images and must ensure the file is present before converting it to PNG to avoid runtime errors.
+ * 2. When a batch job converts a folder of WebP assets to PNG for compatibility with browsers that do not support WebP.
+ * 3. When a server‑side service validates image paths before transformation to prevent FileNotFound exceptions in a .NET microservice.
+ * 4. When a desktop utility needs to create the output directory automatically while converting WebP screenshots to PNG format.
+ * 5. When developers want to handle missing source images gracefully using Aspose.Imaging in a C# image‑processing pipeline.
  */
