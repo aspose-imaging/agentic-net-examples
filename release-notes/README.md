@@ -6,5 +6,7 @@ Build-verified C# examples for what each Aspose.Imaging for .NET release added o
 |---------|----------|---------|
 | 26.10 | 13 | [26-10/agents.md](26-10/agents.md) |
 
+For AI agents: [agents.md](agents.md) maps each ticket and API to the release that shipped it.
+
 ---
-*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-10-13*
+*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-10-20*
