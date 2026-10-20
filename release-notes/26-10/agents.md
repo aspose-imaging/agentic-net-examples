@@ -51,34 +51,34 @@ Build-verified C# examples for the features, enhancements and fixes shipped in [
 ## Developer Q&A
 
 ### Q: Which Aspose.Imaging for .NET version supports applying a blur convolution filter while ignoring the alpha channel?  
-A: In version 26.10 you can use **ConvolutionFilterOptions** with `IgnoreAlpha = true` and call `ApplyFilter` on the image. → See: [apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs](./apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs)
+A: In version 26.10 you can use **ConvolutionFilterOptions** and set **IgnoreAlpha = true** to blur the image without affecting its alpha channel. → See: [apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs](./apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs)
 
-### Q: How do I apply a sharpen convolution filter with border processing enabled and alpha not ignored in Aspose.Imaging 26.10?  
-A: Set **ConvolutionFilterOptions** `BordersProcessing = true` and `IgnoreAlpha = false`, then invoke `ApplyFilter`. → See: [apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs](./apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs)
+### Q: In Aspose.Imaging 26.10, how can I apply a sharpen convolution filter with border processing enabled and without ignoring alpha?  
+A: Use **ConvolutionFilterOptions** with **BordersProcessing = true** and **IgnoreAlpha = false** to sharpen the image while preserving edge handling. → See: [apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs](./apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs)
 
-### Q: Which Aspose.Imaging for .NET version introduced blending a PNG overlay onto a JPEG background using the Multiply mode?  
-A: Use **ImageBlendingFilterOptions** with `BlendingMode = BlendingMode.Multiply` and apply it via `ApplyFilter`. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs)
+### Q: Which Aspose.Imaging for .NET version introduced blending a PNG overlay onto a JPEG background using the Multiply blending mode?  
+A: Version 26.10 adds **ImageBlendingFilterOptions** where you set **BlendingMode = BlendingMode.Multiply** to combine the images. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs)
 
-### Q: How can I blend a PNG overlay onto a JPEG background using the Overlay blending mode in Aspose.Imaging 26.10?  
-A: Create **ImageBlendingFilterOptions** and set `BlendingMode = BlendingMode.Overlay`, then call `ApplyFilter`. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-overlay-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-overlay-and-save.cs)
+### Q: How does Aspose.Imaging 26.10 allow blending a PNG overlay onto a JPEG background using the Overlay blending mode?  
+A: Use **ImageBlendingFilterOptions** and set **BlendingMode = BlendingMode.Overlay** to achieve the overlay effect. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-overlay-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-overlay-and-save.cs)
 
-### Q: Which Aspose.Imaging for .NET version allows blending a PNG overlay onto a JPEG background with the Screen mode?  
-A: Set **ImageBlendingFilterOptions** `BlendingMode = BlendingMode.Screen` and apply the filter to the base image. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-screen-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-screen-and-save.cs)
+### Q: How can I blend a PNG overlay onto a JPEG background using the Screen blending mode in Aspose.Imaging 26.10?  
+A: Create an **ImageBlendingFilterOptions** instance and assign **BlendingMode = BlendingMode.Screen** before applying the filter. → See: [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-screen-and-save.cs](./blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-screen-and-save.cs)
 
-### Q: How do I blend an overlay image onto a base image at position (50, 30) with 70 % opacity in Aspose.Imaging 26.10?  
-A: Configure **ImageBlendingFilterOptions** with `Position = new Point(50,30)` and `Opacity = 0.7f`, then call `ApplyFilter`. → See: [blend-an-overlay-image-onto-a-base-image-at-position-50-30-with-70-opacity-using-imageblendingfilteroptions-and.cs](./blend-an-overlay-image-onto-a-base-image-at-position-50-30-with-70-opacity-using-imageblendingfilteroptions-and.cs)
+### Q: In Aspose.Imaging 26.10, how do I blend an overlay image onto a base image at a specific position with custom opacity?  
+A: Configure **ImageBlendingFilterOptions** with **Position = new Point(50, 30)** and **Opacity = 0.7f** (70 %) and apply it to the base image. → See: [blend-an-overlay-image-onto-a-base-image-at-position-50-30-with-70-opacity-using-imageblendingfilteroptions-and.cs](./blend-an-overlay-image-onto-a-base-image-at-position-50-30-with-70-opacity-using-imageblendingfilteroptions-and.cs)
 
-### Q: Which Aspose.Imaging for .NET version added clipping‑rectangle support to RasterImageExporter?  
-A: In 26.10 you can set `RasterImageExporter.ClipRectangle = new Rectangle(10, 15, 100, 100)` before exporting. → See: [export-a-set-of-images-to-various-formats-using-rasterimageexporter-with-a-clipping-rectangle-of-10-15-100-100.cs](./export-a-set-of-images-to-various-formats-using-rasterimageexporter-with-a-clipping-rectangle-of-10-15-100-100.cs)
+### Q: Which Aspose.Imaging for .NET version added clipping‑rectangle support when exporting images with RasterImageExporter?  
+A: In version 26.10 you can set **RasterImageExporter.ClipRectangle = new Rectangle(10, 15, 100, 100)** to export only the defined region. → See: [export-a-set-of-images-to-various-formats-using-rasterimageexporter-with-a-clipping-rectangle-of-10-15-100-100.cs](./export-a-set-of-images-to-various-formats-using-rasterimageexporter-with-a-clipping-rectangle-of-10-15-100-100.cs)
 
 ### Q: How can I retrieve the DateTimeOriginal EXIF tag from a JPEG image using Aspose.Imaging 26.10?  
-A: Load the JPEG as **JpegImage** and call `image.ExifData.GetTagValue(ExifTagId.DateTimeOriginal)`. → See: [load-a-jpeg-image-and-retrieve-the-value-of-the-exifproperties-datetimeoriginal-tag-using-gettagvalue.cs](./load-a-jpeg-image-and-retrieve-the-value-of-the-exifproperties-datetimeoriginal-tag-using-gettagvalue.cs)
+A: Call **ExifData.GetTagValue(ExifTagId.DateTimeOriginal)** on the loaded JPEG image to obtain the original capture date. → See: [load-a-jpeg-image-and-retrieve-the-value-of-the-exifproperties-datetimeoriginal-tag-using-gettagvalue.cs](./load-a-jpeg-image-and-retrieve-the-value-of-the-exifproperties-datetimeoriginal-tag-using-gettagvalue.cs)
 
-### Q: How do I read the XResolution and YResolution EXIF properties from a JPEG in Aspose.Imaging 26.10?  
-A: Access `jpegImage.ExifData.XResolution` and `jpegImage.ExifData.YResolution` after loading the file. → See: [load-a-jpeg-image-read-its-exifdata-xresolution-and-yresolution-properties-and-print-the-values.cs](./load-a-jpeg-image-read-its-exifdata-xresolution-and-yresolution-properties-and-print-the-values.cs)
+### Q: In Aspose.Imaging 26.10, how do I read the XResolution and YResolution values from JPEG EXIF data?  
+A: Access the **ExifData.XResolution** and **ExifData.YResolution** properties after loading the JPEG image. → See: [load-a-jpeg-image-read-its-exifdata-xresolution-and-yresolution-properties-and-print-the-values.cs](./load-a-jpeg-image-read-its-exifdata-xresolution-and-yresolution-properties-and-print-the-values.cs)
 
-### Q: Which Aspose.Imaging for .NET version lets me convert an AVIF image to JPEG?  
-A: Load the file as **AvifImage** and save it using **JpegOptions** with `image.Save("output.jpg", new JpegOptions())`. → See: [load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs](./load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs)
+### Q: Which Aspose.Imaging for .NET version enables loading an AVIF image and saving it as JPEG using JpegOptions?  
+A: Version 26.10 lets you load an AVIF file with **Image.Load** and then save it using **new JpegOptions()** to specify JPEG output settings. → See: [load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs](./load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs)
 
 
 ---
