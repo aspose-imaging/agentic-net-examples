@@ -7,8 +7,8 @@ Build-verified C# examples for the features, enhancements and fixes shipped in [
 
 ## Examples
 
-| Example | What it shows | Source |
-|---------|---------------|--------|
+| Example | What it shows | Based on |
+|---------|---------------|----------|
 | [apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs](apply-a-blur-convolution-filter-to-an-image-with-ignorealpha-set-to-true-then-save-the-filtered-image.cs) | Apply a blur convolution filter to an image with IgnoreAlpha set to true, then save the filtered image. | `ConvolutionFilterOptions` |
 | [apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs](apply-a-sharpen-convolution-filter-to-an-image-with-bordersprocessing-enabled-and-ignorealpha-disabled-then.cs) | Apply a sharpen convolution filter to an image with BordersProcessing enabled and IgnoreAlpha disabled, then save the result. | `ConvolutionFilterOptions` |
 | [blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs](blend-a-png-overlay-onto-a-jpeg-background-using-imageblendingfilteroptions-with-blendingmode-multiply-and-save.cs) | Blend a PNG overlay onto a JPEG background using ImageBlendingFilterOptions with BlendingMode.Multiply and save as PNG. | `BlendingMode` |
@@ -25,8 +25,10 @@ Build-verified C# examples for the features, enhancements and fixes shipped in [
 
 ## Tickets in this release
 
-| Key | Summary | Category | Examples |
-|-----|---------|----------|----------|
+Examples are written from each ticket's summary and show the feature or API the ticket touches. They do not reproduce the original issue or prove the fix.
+
+| Key | Summary | Category | Related examples |
+|-----|---------|----------|------------------|
 | IMAGINGNET-8135 | Improve AVIF processing performance and memory load | Feature | [load-an-avif-image-using-avifimage-and-save-it-as-png.cs](load-an-avif-image-using-avifimage-and-save-it-as-png.cs) |
 | IMAGINGNET-8171 | Add proper checking if a given TIFF file is supported (including XIF) | Enhancement | [load-xif-and-tiff-files-with-image-load-and-convert-each-to-png.cs](load-xif-and-tiff-files-with-image-load-and-convert-each-to-png.cs) |
 | IMAGINGNET-8123 | Fix inconsistent metadata removal from Tiff: TiffOptions expose metadata properties apart from Exif and Xmp metadata | Enhancement | [load-an-image-call-removemetadata-and-save-the-image-without-metadata.cs](load-an-image-call-removemetadata-and-save-the-image-without-metadata.cs) |
@@ -45,8 +47,10 @@ Build-verified C# examples for the features, enhancements and fixes shipped in [
 ## For AI agents
 
 - These examples target features introduced or changed in Aspose.Imaging for .NET 26.10; reference `Aspose.Imaging` 26.10 or later from NuGet.
+- An example linked to a ticket is related to it (written from the ticket's summary). Do not cite it as a reproduction of the issue or as proof that the issue is fixed.
 - Each file is self-contained: hardcoded input/output paths, missing input files reported to stderr, output directories created before saving.
 - Category examples covering the same formats live in the root folders — see the root [agents.md](../../agents.md).
+
 
 ## Developer Q&A
 
@@ -80,6 +84,5 @@ A: Access the **ExifData.XResolution** and **ExifData.YResolution** properties a
 ### Q: Which Aspose.Imaging for .NET version enables loading an AVIF image and saving it as JPEG using JpegOptions?  
 A: Version 26.10 lets you load an AVIF file with **Image.Load** and then save it using **new JpegOptions()** to specify JPEG output settings. → See: [load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs](./load-an-avif-image-and-save-it-as-jpeg-using-jpegoptions.cs)
 
-
 ---
-*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-10-13*
+*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-10-20*
