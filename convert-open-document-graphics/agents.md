@@ -128,6 +128,73 @@ If you’re working with raster formats beyond ODG, the **Convert Raster Image**
 For more advanced image manipulation—such as applying color corrections, sharpening, or custom kernels—check out the **Image And Photo Filters** section ([../image-and-photo-filters/](../image-and-photo-filters/)), which builds on the same filter‑option infrastructure used in the ODG examples.  
 When your workflow involves vector sources like SVG that need rasterization, the **Convert SVG To Raster Images** category ([../convert-svg-to-raster-images/](../convert-svg-to-raster-images/)) provides complementary techniques for handling vector‑to‑bitmap conversions.
 
+
+## Operations Covered
+- Apply Gaussian blur filter to ODG images  
+- Apply a specific ICC color profile to ODG images  
+- Convert ODG files to BMP while preserving alpha channel  
+- Convert ODG files to PDF and embed XMP metadata  
+- Add a text watermark when converting ODG to PNG  
+- Convert ODG files to SVG with a correctly set viewbox attribute  
+- Convert OTG images to 32‑bit BMP with transparency  
+- Load ODG/OTG images from the file system
+
+## Supported Formats
+- **ODG** – source OpenDocument graphics file used as input  
+- **OTG** – source OpenDocument graphics file (alternative extension) used as input  
+- **JPEG** – target format when saving blurred ODG images  
+- **PNG** – target format when applying ICC profile or adding watermark  
+- **BMP** – target format for preserving transparency (32‑bit)  
+- **PDF** – target format for embedding XMP metadata  
+- **SVG** – target format for preserving viewbox information
+
+## API Classes Used
+- `Image` — core class for loading, processing, and saving images.  
+- `JpegOptions` — defines JPEG‑specific saving parameters (quality, compression, etc.).  
+- `PngOptions` — defines PNG‑specific saving parameters (color depth, compression, etc.).  
+- `BmpOptions` — defines BMP‑specific saving parameters, including support for alpha channel.  
+- `PdfOptions` — defines PDF‑specific saving parameters and allows embedding of XMP metadata.  
+- `SvgOptions` — defines SVG‑specific saving parameters such as viewbox handling.  
+- `FileSource` — represents a file‑based image source used when loading ODG/OTG files.  
+- `TextBrush` (from `Aspose.Imaging.Brushes`) — provides a brush that draws text, used for watermarking.  
+- `SvgGraphics` (from `Aspose.Imaging.FileFormats.Svg.Graphics`) — enables drawing operations on SVG output, ensuring correct viewbox settings.
+
+
+## Get Started
+
+Ready to try Convert Open Document Graphics conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception should I catch when converting an ODG file to PNG using `Image.Save` in C# with Aspose.Imaging?
+Catch a generic `Exception` around `Image.Load` and `image.Save` because Aspose.Imaging throws it for file‑format, I/O, or conversion errors. → See: [load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs](./load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs)
+
+### Q: How does enabling `RasterizationOptions.AntiAliasing` affect ODG‑to‑PNG conversion in Aspose.Imaging for .NET?
+Setting `PngOptions.RasterizationOptions.AntiAliasing = true` smooths edges and reduces jagged artifacts in the rendered PNG. → See: [configure-rasterizationoptions-to-enable-anti-aliasing-when-converting-odg-to-png-for-smoother-visual-results.cs](./configure-rasterizationoptions-to-enable-anti-aliasing-when-converting-odg-to-png-for-smoother-visual-results.cs)
+
+### Q: How can I enable progressive JPEG encoding when converting an ODG file to JPEG for faster web loading in C#?
+Assign `JpegOptions.Progressive = true` before calling `image.Save` to produce a progressive JPEG that loads incrementally in browsers. → See: [convert-an-odg-file-to-jpeg-using-progressive-encoding-for-faster-web-loading.cs](./convert-an-odg-file-to-jpeg-using-progressive-encoding-for-faster-web-loading.cs)
+
+### Q: How do I set a custom DPI and define page margins when converting an ODG file to PDF with Aspose.Imaging?
+Configure `PdfOptions.DpiX`, `PdfOptions.DpiY`, and `PdfOptions.PageMargins` on the `PdfOptions` object before saving the image as PDF. → See: [convert-an-odg-file-to-pdf-set-custom-dpi-and-define-page-margins-for-layout.cs](./convert-an-odg-file-to-pdf-set-custom-dpi-and-define-page-margins-for-layout.cs)
+
+### Q: How can I retain all original metadata properties when saving an ODG image as PNG using Aspose.Imaging?
+Use `PngOptions` with `KeepMetadata = true` (or copy the metadata collection) before calling `image.Save` to preserve EXIF, XMP, and other metadata. → See: [save-an-odg-image-as-png-while-retaining-all-original-metadata-properties.cs](./save-an-odg-image-as-png-while-retaining-all-original-metadata-properties.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-14 | Run: `20261014_165921` | Examples: 120
 <!-- AUTOGENERATED:END -->

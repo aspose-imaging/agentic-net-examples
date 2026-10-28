@@ -119,6 +119,72 @@ All tasks passed ✅
 ## Related Categories  
 The Convert Raster Image category works hand‑in‑hand with the Image Format Conversion examples, where you’ll find additional code for switching between JPEG, PNG, TIFF, and WebP beyond simple bitmap handling. If you need to change image dimensions after conversion, the Image Resizing agents provide seamless integration with the raster conversion workflow. For projects that require applying visual effects after a bitmap conversion, the Image Filtering agents offer filters and adjustments that can be chained directly after the conversion step. Together, these neighboring categories give you a complete toolkit for end‑to‑end image processing in .NET.
 
+
+## Operations Covered
+- Apply Gaussian blur to JPEG images  
+- Apply Gaussian blur to BMP images  
+- Resize BMP images to 800 × 800 pixels  
+- Apply sharpening filter to BMP images  
+- Convert raster images (JPEG, PNG, BMP) to PDF  
+- Batch‑convert multiple PNG files to PDF  
+- Name output PDF files with sequential numeric suffixes  
+- Create SVG from PNG and set stroke color to black  
+- Create SVG from PNG with custom stroke width
+
+## Supported Formats
+- **JPEG** – source image for Gaussian blur before PDF conversion  
+- **PNG** – source image for batch PDF conversion and SVG creation  
+- **BMP** – source image for resizing, sharpening, and PDF conversion  
+- **PDF** – target format for raster‑to‑PDF conversions and batch output  
+- **SVG** – target format for vectorizing PNG images with custom strokes
+
+## API Classes Used
+- `Image` — core class for loading, processing (e.g., blur, resize, sharpen) and saving raster images.  
+- `PdfOptions` — options object that configures how an image is saved as a PDF document.  
+- `ExportFormats` — enumeration that provides explicit control over the output format (e.g., `ExportFormats.Pdf`).  
+- `SvgImage` — class representing an SVG document created from a raster source.  
+- `FileSource` — source class used to load image data from a file path for SVG creation.  
+- `Image.Save` — method that writes the processed image to the specified format using the provided options.  
+- `Image.Resize` — method that changes the dimensions of an image to a new width and height.  
+- `Image.Filters.GaussianBlur` — filter method that applies a Gaussian blur effect to the image.  
+- `Image.Filters.Sharpen` — filter method that sharpens the image details.
+
+
+## Get Started
+
+Ready to try Convert Raster Image conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception do I need to handle when applying a Gaussian blur to a JPEG and saving it as PDF using Aspose.Imaging for .NET?
+Catch a generic `Exception` around the `Image.Load`, `GaussianBlurFilter`, and `PdfOptions` calls, as the sample demonstrates. This will capture any runtime errors such as unsupported formats or I/O issues. → See: [apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs](./apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs)
+
+### Q: How can I add a current‑date watermark to PDFs while batch‑converting raster images with Aspose.Imaging in C#?
+Use `PdfOptions` to set `Watermark` text that includes `DateTime.Now`, then call `Image.Save` for each image in the batch. The example shows the exact implementation. → See: [batch-convert-raster-images-to-pdf-adding-a-watermark-text-that-includes-the-current-date.cs](./batch-convert-raster-images-to-pdf-adding-a-watermark-text-that-includes-the-current-date.cs)
+
+### Q: Which Aspose.Imaging methods let me resize PNGs to 640×480, sharpen them, and export each as a PDF in a batch process?
+Load each PNG with `Image.Load`, apply `Resize` via `ResizeOptions`, then use `SharpenFilter` before saving with `PdfOptions`. The code iterates over a folder and saves each result individually. → See: [batch-process-png-images-resize-each-to-640x480-apply-a-sharpening-filter-and-save-as-pdf.cs](./batch-process-png-images-resize-each-to-640x480-apply-a-sharpening-filter-and-save-as-pdf.cs)
+
+### Q: How do I convert a BMP to SVG and set a custom stroke width for its vector paths using Aspose.Imaging?
+Create an `SvgImage` from the BMP with `SvgImage.FromImage`, modify the `StrokeWidth` property on the vector paths, and then call `Save`. The sample provides the exact steps. → See: [create-an-svgimage-from-a-bmp-set-stroke-width-for-vector-paths-and-save-the-customized-svg.cs](./create-an-svgimage-from-a-bmp-set-stroke-width-for-vector-paths-and-save-the-customized-svg.cs)
+
+### Q: Which class should I use to make the background transparent before applying a median filter and saving a raster image as PDF in Aspose.Imaging?
+Use `RasterImage` to load the image, set `BackgroundColor` to `Color.Transparent`, apply `MedianFilter`, and then save with `PdfOptions`. The example handles all these operations. → See: [load-a-raster-image-set-its-background-to-transparent-apply-a-median-filter-and-save-as-pdf.cs](./load-a-raster-image-set-its-background-to-transparent-apply-a-median-filter-and-save-as-pdf.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_034535` | Examples: 139
 <!-- AUTOGENERATED:END -->

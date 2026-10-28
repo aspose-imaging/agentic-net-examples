@@ -152,6 +152,71 @@ If you need to turn raster drawings into other formats, the **[Convert Raster Im
 When your workflow involves turning SVG files into raster graphics (e.g., thumbnails) before further processing, see **[Convert Svg To Raster Images](../convert-svg-to-raster-images/)** for straightforward conversions using Aspose.Imaging.  
 For post‑processing tasks such as applying color corrections or filters to the images you create with drawing APIs, the **[Image And Photo Filters](../image-and-photo-filters/)** section offers a rich set of filter examples that can be chained after drawing operations.
 
+
+## Operations Covered
+- Create BMP image from scratch  
+- Draw cubic Bezier curve with specified control points  
+- Draw 90‑degree arc inside a rectangle  
+- Generate vector chart with data labels  
+- Convert SVG icons to PDF while preserving vector objects  
+- Batch convert vector graphics to PDF with embedded fonts  
+- Set PDF version (e.g., 1.6) for output files  
+- Convert multi‑page SVG document to a single PDF preserving page order and vector fidelity  
+- Save image to a file or to a MemoryStream
+
+## Supported Formats
+- **BMP** – used for creating and saving bitmap images (e.g., `BmpOptions`, `BmpImage`).  
+- **SVG** – source vector graphics that are loaded and then converted to PDF.  
+- **PDF** – target format for vector‑preserving conversions and chart export (e.g., `PdfOptions`, `PdfDocument`).
+
+## API Classes Used
+- `Image` — central class for loading, creating, and saving images.  
+- `BmpOptions` — specifies options for creating and saving BMP files.  
+- `PdfOptions` — defines settings for PDF output such as version and embedded fonts.  
+- `FileCreateSource` — represents a file‑based source used when creating new images.  
+- `StreamSource` — wraps a stream (e.g., `MemoryStream`) as an image source.  
+- `PathFigure` — container for a collection of path segments that form a drawable figure.  
+- `CubicBezierSegment` — describes a cubic Bézier curve segment using four control points.  
+- `ArcSegment` — (implied) used to draw an arc segment within a defined rectangle.  
+- `SolidBrush` — provides a solid fill color for drawing shapes.  
+- `PdfDocument` — (from `Aspose.Imaging.FileFormats.Pdf`) represents a PDF document for vector‑preserving operations.
+
+
+## Get Started
+
+Ready to try Working With Drawing Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How do I draw a cubic Bezier curve on a BMP image using Aspose.Imaging in C#?  
+Use a `GraphicsPath` and call `AddBezier` with the four control points, then render it with `Graphics.DrawPath` on a `BmpImage`. → See: [add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs](./add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs)
+
+### Q: How can I generate multiple BMP files each with a different background color and a centered black ellipse using Aspose.Imaging in C#?  
+Create a new `BmpImage` for each color, fill the background with `Graphics.Clear`, draw the centered ellipse with `Graphics.DrawEllipse`, and save each image. → See: [batch-generate-bmp-files-each-containing-a-different-background-color-and-a-centered-black-ellipse.cs](./batch-generate-bmp-files-each-containing-a-different-background-color-and-a-centered-black-ellipse.cs)
+
+### Q: How to create a BMP image from a raw ARGB pixel array with Aspose.Imaging in C#?  
+Instantiate `BmpImage` via `Image.Create` using `BmpOptions` and a `MemoryByteSource` that wraps the ARGB `int[]` pixel data, then save the image. → See: [generate-a-bmp-image-file-from-provided-pixel-data-using-the-library-s-image-creation-api.cs](./generate-a-bmp-image-file-from-provided-pixel-data-using-the-library-s-image-creation-api.cs)
+
+### Q: How can I apply a motion blur effect to an SVG and export the result as a high‑quality JPEG using Aspose.Imaging in C#?  
+Load the SVG with `Image.Load`, apply `MotionBlurEffect` via `image.ApplyFilter`, then save using `JpegOptions` with high quality settings. → See: [load-a-vector-image-apply-a-motion-blur-effect-and-export-the-blurred-result-as-a-high-quality-jpeg.cs](./load-a-vector-image-apply-a-motion-blur-effect-and-export-the-blurred-result-as-a-high-quality-jpeg.cs)
+
+### Q: How do I clear all pixel data of an existing image while preserving its dimensions using Aspose.Imaging in C#?  
+Call `image.Clear()` (or set all pixels to a default value) on the loaded image object; the width and height remain unchanged. → See: [reset-the-image-canvas-to-a-blank-state-by-clearing-all-pixel-data-while-preserving-its-dimensions.cs](./reset-the-image-canvas-to-a-blank-state-by-clearing-all-pixel-data-while-preserving-its-dimensions.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_041651` | Examples: 401
 <!-- AUTOGENERATED:END -->

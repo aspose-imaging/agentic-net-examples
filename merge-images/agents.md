@@ -133,6 +133,71 @@ The techniques used for merging and converting images often overlap with the **[
 If you need to preserve vector data during a merge, the **[Converting WMF and EMF](../converting-wmf-and-emf/)** category provides deeper insight into handling EMF/WMF streams, complementing the EMF‑based PDF workflow shown here.  
 For post‑merge enhancements such as applying artistic effects or color adjustments, explore the **[Image And Photo Filters](../image-and-photo-filters/)** collection, which offers ready‑to‑use filter pipelines that can be chained after a merge operation.
 
+
+## Operations Covered
+- Add semi‑transparent watermark text to a merged JPEG  
+- Merge multiple JPEG images horizontally into one image  
+- Merge multiple JPEG images vertically while preserving order  
+- Convert JPEG images to TGA format for intermediate processing  
+- Convert JPEG images to EMF format to retain vector fidelity  
+- Convert JPEG images to PDF via intermediate TGA conversion  
+- Convert JPEG images to PDF via intermediate EMF conversion  
+- Combine JPEG images into a single PNG while applying JPEG compression settings
+
+## Supported Formats
+- **JPEG** – source images and final merged JPEG files  
+- **PNG** – output image when merging JPEGs with custom compression  
+- **PDF** – final document created from converted JPEGs (via TGA or EMF)  
+- **TGA** – temporary format used when converting JPEGs before PDF creation  
+- **EMF** – temporary vector format used when converting JPEGs before PDF creation  
+- **SVGZ** – mentioned as an alternative vector format for PDF conversion
+
+## API Classes Used
+- `Image` — base class for loading and saving images of any supported format.  
+- `RasterImage` — concrete image type used for raster‑based formats such as JPEG.  
+- `JpegOptions` — specifies JPEG‑specific save settings (e.g., quality, compression).  
+- `PngOptions` — specifies PNG‑specific save settings for the output image.  
+- `FileCreateSource` — represents a file‑based data source used when creating new images.  
+- `Aspose.Imaging.FileFormats.Tga.TgaImage` — class representing TGA images for intermediate conversion.  
+- `Aspose.Imaging.FileFormats.Emf.EmfImage` — class representing EMF images for vector‑preserving conversion.  
+- `ImageOptions` — base class for all format‑specific option classes.
+
+
+## Get Started
+
+Ready to try Merge Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception is caught when adding a semi‑transparent watermark to a horizontally merged JPEG using Aspose.Imaging in C#?  
+The sample wraps the whole operation in a `try { … } catch (Exception ex)` block, so any error during loading, merging, or drawing the watermark is caught as a generic `Exception`. Inspect `ex.Message` to determine the specific cause. → See: [add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs](./add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs)
+
+### Q: How can I handle errors when combining JPEG images horizontally and saving the merged picture as a PDF with Aspose.Imaging for .NET?  
+The code uses a `try { … } catch (Exception ex)` around the merge and `PdfOptions` save, catching any runtime exception (e.g., unsupported image size). Use the caught `ex` to log or re‑throw as needed. → See: [combine-a-set-of-jpeg-images-horizontally-and-output-the-merged-picture-as-a-pdf-document.cs](./combine-a-set-of-jpeg-images-horizontally-and-output-the-merged-picture-as-a-pdf-document.cs)
+
+### Q: Why does the Aspose.Imaging example convert JPEGs to BMP before merging them into a single JPEG output?  
+Converting to BMP provides an uncompressed intermediate that preserves full pixel data, ensuring a lossless merge before the final JPEG compression step. The code uses `BmpOptions` for the intermediate files and `JpegOptions` for the final output. → See: [programmatically-combine-multiple-jpeg-files-into-a-single-jpeg-output-by-converting-and-merging-through-bmp-format.cs](./programmatically-combine-multiple-jpeg-files-into-a-single-jpeg-output-by-converting-and-merging-through-bmp-format.cs)
+
+### Q: How do I generate an ICO file from several JPEGs merged into a single PNG using Aspose.Imaging in C#?  
+First merge the JPEGs into a PNG with `PngOptions`, then load that PNG and save it as an ICO using `IcoOptions`. The sample demonstrates this two‑step process. → See: [combine-one-or-more-jpg-images-into-a-single-png-file-and-generate-an-ico-file-from-the-result.cs](./combine-one-or-more-jpg-images-into-a-single-png-file-and-generate-an-ico-file-from-the-result.cs)
+
+### Q: Which Aspose.Imaging classes are used to create a side‑by‑side APNG from multiple images in C#?  
+The example loads each source image, uses `ImageProcessor.Mutate` to place them side by side, and saves the result with `ApngOptions`. Key classes: `Image`, `ImageOptions`, and `ApngOptions`. → See: [create-programmatically-a-side-by-side-composition-of-images-and-output-the-result-in-apng-format.cs](./create-programmatically-a-side-by-side-composition-of-images-and-output-the-result-in-apng-format.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_055131` | Examples: 135
 <!-- AUTOGENERATED:END -->

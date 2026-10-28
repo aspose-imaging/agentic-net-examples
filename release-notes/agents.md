@@ -33,5 +33,23 @@ Maps every Aspose.Imaging for .NET feature, fix and API covered by a release exa
 - Each release folder's agents.md lists its examples with the ticket or API each one demonstrates.
 - Examples organised by feature area (conversion, filters, drawing, ...) live in the root folders — see the root [agents.md](../agents.md).
 
+## Developer Q&A
+
+### Q: Which Aspose.Imaging for .NET version includes `Aspose.Imaging.ImageFilters.FilterOptions.BlendingMode`?  
+A: It was introduced in the **26.10** release – see the details in the [26.10](./26-10/agents.md) folder.
+
+### Q: Which release fixed the “Improve AVIF processing performance and memory load” issue?  
+A: The fix was delivered in the **26.10** release – see the ticket IMAGINGNET-8135 in the [26.10](./26-10/agents.md) folder.
+
+### Q: In which release was support for the clipping operation in `RasterImageExporter` added?  
+A: Support was added in the **26.10** release – see ticket IMAGINGNET-3868 in the [26.10](./26-10/agents.md) folder.
+
+### Q: Which release introduced proper checking if a given TIFF file is supported (including XIF)?  
+A: Proper TIFF/XIF checking was added in the **26.10** release – see ticket IMAGINGNET-8171 in the [26.10](./26-10/agents.md) folder.
+
+### Q: Which release addressed the “Exception on AVIF load” problem?  
+A: The exception was resolved in the **26.10** release – see ticket IMAGINGNET-7739 in the [26.10](./26-10/agents.md) folder.
+
+
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-10-20*

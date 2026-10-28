@@ -105,6 +105,67 @@ All tasks passed ✅
 ## Related Categories  
 The Convert SVG to Raster Images examples complement the **Convert Raster to Vector** and **Image Format Conversion** sections, where you can see how raster sources are transformed back into scalable formats or switched between common bitmap types. If you need to manipulate colors, apply filters, or resize images after rasterization, the **Image Manipulation** category provides ready‑to‑use snippets that integrate smoothly with the raster output. Together, these groups give a full pipeline—from vector creation to raster rendering and subsequent bitmap processing—tailored for .NET developers working with Aspose.Imaging.
 
+
+## Operations Covered
+- Add text watermark to BMP after SVG rasterization  
+- Batch‑convert multiple SVG files to BMP using one rasterization options instance  
+- Load an SVG and save it as PNG with try/catch error handling  
+- Convert SVG to 8‑bit BMP using an indexed color palette  
+- Convert SVG to PNG with maximum compression level  
+- Create an ASP.NET API endpoint that accepts an uploaded SVG and returns a PNG file  
+- Disable anti‑aliasing in SVG rasterization to improve conversion performance  
+- Set PNG compression level to maximum when saving rasterized SVG
+
+## Supported Formats
+- **SVG** – source vector image format that is loaded and rasterized.  
+- **BMP** – raster output format used for watermarking, batch conversion, and indexed‑palette conversion.  
+- **PNG** – raster output format used for high‑compression conversion and API endpoint response.
+
+## API Classes Used
+- `BmpOptions` — configures BMP‑specific saving options such as color depth and indexed palette.  
+- `PngOptions` — configures PNG‑specific saving options, e.g., setting the compression level.  
+- `SvgRasterizationOptions` — controls how an SVG is rasterized (anti‑aliasing, size, background, etc.).  
+- `SvgImage` (from `Aspose.Imaging.FileFormats.Svg`) — represents an SVG document that can be loaded and rasterized.  
+- `Image` / `RasterImage` — base class providing `Load` and `Save` methods for image processing.  
+- `SolidBrush` (from `Aspose.Imaging.Brushes`) — used with the drawing API to paint the watermark text.  
+- `StreamSource` / `FileSource` (from `Aspose.Imaging.Sources`) — wraps a stream or file for loading images in the API endpoint example.
+
+
+## Get Started
+
+Ready to try Convert Svg To Raster Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I add a text watermark to a BMP after rasterizing an SVG with Aspose.Imaging in C#?  
+Use `Image.Load` to load the SVG, rasterize it to a BMP, then create a `Graphics` object from the bitmap and call `DrawString` to place the watermark before saving. → See: [add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs](./add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs)
+
+### Q: Which exception should I catch when batch converting multiple SVG files to PNG using Aspose.Imaging?  
+Wrap the conversion loop in a `try { … } catch (Exception ex) { … }` block; Aspose.Imaging throws generic `Exception` types such as `ImageLoadException` or `ImageProcessingException` on failure. → See: [batch-convert-multiple-svg-files-to-png-while-reusing-the-same-rasterization-options.cs](./batch-convert-multiple-svg-files-to-png-while-reusing-the-same-rasterization-options.cs)
+
+### Q: How do I disable anti‑aliasing in `SvgRasterizationOptions` to speed up SVG‑to‑PNG conversion in C#?  
+Set `svgRasterizationOptions.AntiAliasing = false;` before calling `image.Save` to turn off smoothing and improve performance. → See: [disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs](./disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs)
+
+### Q: How can I convert an SVG to an 8‑bit BMP with a custom indexed palette using Aspose.Imaging?  
+Create a `BmpOptions` object, assign a `Palette` with the desired colors, set `BitsPerPixel = 8`, and pass these options to `image.Save` after rasterizing the SVG. → See: [convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs](./convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs)
+
+### Q: How do I asynchronously load an SVG and save it as PNG without blocking the thread in C# with Aspose.Imaging?  
+Use `await Image.LoadAsync(svgPath)` to load the SVG and `await image.SaveAsync(pngPath, new PngOptions())` to write the PNG, both within an `async` method. → See: [implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs](./implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-14 | Run: `20261014_171216` | Examples: 40
 <!-- AUTOGENERATED:END -->

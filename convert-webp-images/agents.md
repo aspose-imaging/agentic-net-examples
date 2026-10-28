@@ -103,6 +103,76 @@ All tasks passed ✅
 ## Related Categories
 If you’re converting between other raster formats, the **[Conversion](../conversion/)** category provides a broad set of examples for moving images between JPEG, PNG, BMP, and more. For scenarios that involve converting animated formats like APNG, see **[Convert Apng](../convert-apng/)**, which covers similar frame‑by‑frame handling techniques. When you need to manipulate image pixels or apply filters before or after a WebP conversion, the **[Manipulating Images](../manipulating-images/)** and **[Image And Photo Filters](../image-and-photo-filters/)** sections contain useful patterns that complement the WebP workflows.
 
+
+## Operations Covered
+- Resize WebP image before conversion  
+- Set custom DPI when saving as PDF  
+- Convert WebP to PDF format  
+- Convert WebP to GIF format  
+- Verify that GIF dimensions match original WebP dimensions  
+- Load WebP image from a memory stream  
+- Convert animated WebP to GIF with custom frame delay  
+- Apply error‑handling around image conversion code  
+- Measure and log conversion time for WebP‑to‑GIF processing
+
+## Supported Formats
+- **WebP** – source image format used in all examples  
+- **PDF** – target format when saving a resized WebP image  
+- **GIF** – target format for static and animated conversions from WebP  
+- **JPEG** – source format in the error‑handling example  
+- **PNG** – target format in the error‑handling example
+
+## API Classes Used
+- `Image` — core class for loading, manipulating, and saving images.  
+- `ImageOptions` — base class for format‑specific save options.  
+- `WebpOptions` — provides options for loading and saving WebP images (e.g., quality, compression).  
+- `GifOptions` — supplies settings for creating GIF files, such as frame delay.  
+- `PdfOptions` — defines options for saving images as PDF documents, including DPI control.  
+- `JpegOptions` — used when converting images to JPEG, allowing quality configuration.  
+- `PngOptions` — used when converting images to PNG, allowing compression settings.  
+- `Image.Load(string path)` — loads an image file into an `Image` object.  
+- `Image.Save(string path, ImageOptions options)` — saves the `Image` using the specified format options.  
+- `Image.Resize(int width, int height)` — changes the image dimensions.  
+- `Image.SetResolution(double horizontalDpi, double verticalDpi)` — sets the output DPI for the image.  
+- `Image.Frames[i].FrameDelay` — gets or sets the delay (in milliseconds) for a specific GIF frame.  
+- `Image.Dispose()` — releases resources held by the image object.
+
+
+## Get Started
+
+Ready to try Convert Webp Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I control the output resolution and image quality when converting a WebP file to PDF in C# with Aspose.Imaging on .NET 9.0?  
+Use `Image.Load` to read the WebP, set `image.Quality` (or `PdfOptions.CompressionQuality`) and specify `PdfOptions.DpiX`/`DpiY` before calling `image.Save` to PDF. → See: [adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs](./adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs)
+
+### Q: How do I set a custom frame delay for each GIF frame when converting an animated WebP to GIF using Aspose.Imaging in C#?  
+After loading the animated WebP with `Image.Load`, iterate through `image.Frames`, assign `frame.ActiveFrame.FrameTime = desiredDelayMs`, then save with `image.Save` specifying `GifOptions`. → See: [define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs](./define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs)
+
+### Q: Can I convert a WebP image that’s in a MemoryStream directly to a GIF without creating temporary files in C#?  
+Load the WebP from the `MemoryStream` using `Image.Load(stream)`, then call `image.Save(outputStream, new GifOptions())` to write the GIF directly to another stream. → See: [convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs](./convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs)
+
+### Q: How do I preserve EXIF metadata from a WebP image when saving it as a PDF with Aspose.Imaging in C#?  
+Load the WebP with `Image.Load`, copy its `Metadata` to the PDF options via `PdfOptions.ExifData = image.Metadata.ExifData`, then save to PDF. → See: [preserve-exif-metadata-from-webp-when-saving-as-pdf-to-retain-camera-information.cs](./preserve-exif-metadata-from-webp-when-saving-as-pdf-to-retain-camera-information.cs)
+
+### Q: What is the way to make an animated GIF loop infinitely after converting from an animated WebP using Aspose.Imaging in C#?  
+Set `GifOptions.LoopCount = 0` (zero means infinite) on the `GifOptions` object before calling `image.Save` on the loaded animated WebP. → See: [set-gif-loop-count-to-infinite-when-converting-animated-webp-to-ensure-continuous-playback.cs](./set-gif-loop-count-to-infinite-when-converting-animated-webp-to-ensure-continuous-playback.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_035308` | Examples: 30
 <!-- AUTOGENERATED:END -->

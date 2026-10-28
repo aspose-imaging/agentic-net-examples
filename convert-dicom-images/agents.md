@@ -100,6 +100,69 @@ If you’re also working with other medical image formats, the **[Conversion](..
 For scenarios where you need to further process the PNG output—such as applying filters or adjusting colour balance—see the **[Image And Photo Filters](../image-and-photo-filters/)** examples that operate on the same `Image` objects.  
 When your workflow involves converting the resulting PNGs to other raster formats (e.g., JPEG or TIFF), the **[Convert Raster Image](../convert-raster-image/)** category provides ready‑to‑use code snippets that complement the DICOM conversion steps.
 
+
+## Operations Covered
+- Apply custom color palette to PNG output when converting grayscale DICOM  
+- Convert grayscale DICOM to true‑color PNG with alpha channel  
+- Batch‑convert all DICOM files in a folder to PNG preserving filenames  
+- Set PNG compression level to balance file size and quality during conversion  
+- Convert a DICOM image stored in a byte‑array to PNG using MemoryStream  
+- Log start and end timestamps for each DICOM‑to‑PNG conversion operation  
+- Monitor a folder for new DICOM files and automatically convert them to PNG  
+- Convert PNG image to JPEG with a specific quality setting
+
+## Supported Formats
+- **DICOM** – source medical image format being read and converted.  
+- **PNG** – target format for all conversion examples; also used for custom palette and compression settings.  
+- **BMP** – source format in the PNG‑compression‑level example.  
+- **JPEG** – target format in the PNG‑to‑JPEG quality‑setting example.
+
+## API Classes Used
+- **Image** — static class that loads images (`Image.Load`) from files or streams and saves them (`Image.Save`) with specified options.  
+- **PngOptions** — configures PNG output (color type, palette, compression level, transparency, etc.).  
+- **JpegOptions** — configures JPEG output, notably the `Quality` property to control compression.  
+- **DicomImage** — represents a DICOM image; used when loading DICOM files for conversion.  
+- **ImageOptions** — base class for all format‑specific option classes (e.g., `PngOptions`, `JpegOptions`).  
+- **PngColorType** (enum) — specifies the PNG color model such as `TruecolorWithAlpha`.  
+- **PngCompressionLevel** (enum) — defines the compression strength applied to PNG output.  
+- **MemoryStream** — .NET stream used with Aspose.Imaging to perform in‑memory image processing (loading from a byte array and saving without touching the file system).
+
+
+## Get Started
+
+Ready to try Convert Dicom Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I apply a custom color palette to a grayscale DICOM image when converting it to PNG using Aspose.Imaging in C#?  
+Use `PngOptions` with a custom `Palette` and load the DICOM via `Image.Load`, then call `Save` with those options. → See: [apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs](./apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs)
+
+### Q: What exception is thrown if a DICOM file is corrupted during a batch PNG conversion, and how can I skip the problematic file?  
+A corrupted DICOM triggers an `Aspose.Imaging.ImageLoadException`; catch this exception inside the loop and continue to the next file. → See: [implement-exception-handling-to-gracefully-skip-corrupted-dicom-files-during-batch-png-conversion.cs](./implement-exception-handling-to-gracefully-skip-corrupted-dicom-files-during-batch-png-conversion.cs)
+
+### Q: How do I set the PNG compression level to balance file size and quality when converting BMP to PNG with Aspose.Imaging in .NET 9?  
+Configure `PngOptions.CompressionLevel` (0‑9) before calling `Image.Save`; higher values produce smaller files at the cost of slower encoding. → See: [configure-png-compression-level-in-pngoptions-to-balance-file-size-and-image-quality-during-conversion.cs](./configure-png-compression-level-in-pngoptions-to-balance-file-size-and-image-quality-during-conversion.cs)
+
+### Q: How can I implement a retry mechanism that attempts DICOM‑to‑PNG conversion up to three times for transient errors in C#?  
+Wrap the conversion in a `try` block, catch transient exceptions, and retry the operation up to three attempts (using a counter or a library like Polly). → See: [implement-a-retry-mechanism-that-attempts-dicom-to-png-conversion-up-to-three-times-on-transient-errors.cs](./implement-a-retry-mechanism-that-attempts-dicom-to-png-conversion-up-to-three-times-on-transient-errors.cs)
+
+### Q: How do I convert a DICOM image stored in a byte array to PNG entirely in memory using Aspose.Imaging and MemoryStream in .NET 9?  
+Create a `MemoryStream` from the byte array, load the image with `Image.Load(stream)`, then save to another `MemoryStream` using `PngOptions`. → See: [convert-a-dicom-image-stored-in-a-byte-array-to-png-by-using-memorystream-for-in-memory-processing.cs](./convert-a-dicom-image-stored-in-a-byte-array-to-png-by-using-memorystream-for-in-memory-processing.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-14 | Run: `20261014_164648` | Examples: 30
 <!-- AUTOGENERATED:END -->

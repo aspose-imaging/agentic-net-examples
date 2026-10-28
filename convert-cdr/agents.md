@@ -106,6 +106,71 @@ The techniques for handling CorelDRAW files often overlap with other raster‑to
 If your workflow involves vector sources like SVG before reaching CDR, the **[Convert Svg To Raster Images](../convert-svg-to-raster-images/)** category shows how to rasterize SVGs with fine‑grained compression control, which can be combined with the CDR‑to‑PNG pipelines above.  
 For scenarios where you need to embed the resulting images into PDFs or other document formats, the **[Working With Drawing Images](../working-with-drawing-images/)** section provides guidance on handling multi‑page drawings and preserving drawing metadata across formats.
 
+
+## Operations Covered
+- Convert CDR to PNG with maximum compression  
+- Convert CDR to PNG using lossless compression while keeping original dimensions  
+- Convert single‑page CDR to transparent PNG  
+- Convert CDR byte array to PNG and write to a memory stream  
+- Batch convert multiple CDR files to JPEG with timestamped filenames  
+- Batch convert multiple CDR files to PSD while preserving layer structure  
+- Convert multi‑page CDR document to PDF with custom A4 page size  
+- Apply custom image‑saving options (e.g., compression level, quality) during conversion
+
+## Supported Formats
+- **CDR** – source CorelDRAW file format used as the input for all conversions.  
+- **PNG** – target format for high‑compression, lossless, and transparency‑preserving conversions.  
+- **JPEG** – target format for batch conversion of CDR files to raster images.  
+- **JPG** – same as JPEG, used in filename examples.  
+- **PSD** – target format for batch conversion while keeping original layers.  
+- **PDF** – target format for multi‑page CDR to PDF conversion with custom page size.
+
+## API Classes Used
+- `Image` — base class that loads a CDR file and provides the `Save` method for conversion.  
+- `PngOptions` — defines PNG‑specific saving parameters such as `CompressionLevel`.  
+- `JpegOptions` — defines JPEG‑specific saving parameters such as `Quality`.  
+- `PsdOptions` — defines PSD‑specific saving parameters, enabling layer preservation.  
+- `PdfOptions` — defines PDF‑specific saving parameters, including page size settings.  
+- `FileCreateSource` — represents a file‑based source used to load a CDR image from disk.  
+- `MemoryStream` (used together with Aspose.Imaging) — holds the converted PNG data in memory instead of a physical file.  
+- `CdrImage` (implicitly via `Image.Load` for CDR) — represents the loaded CorelDRAW document that can be saved to other formats.
+
+
+## Get Started
+
+Ready to try Convert Cdr conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception is caught when converting a CDR file to PNG with maximum compression using Aspose.Imaging in C#?  
+The code catches a generic `Exception`, which may include `ImageLoadException` if the CDR cannot be read or `ImageSaveException` if saving the PNG fails. → See: [adjust-png-compression-to-maximum-while-converting-a-cdr-file-to-png-in-c.cs](./adjust-png-compression-to-maximum-while-converting-a-cdr-file-to-png-in-c.cs)
+
+### Q: How can I convert a CDR byte array directly to a PNG memory stream using Aspose.Imaging in C#?  
+Load the byte array with `Image.Load` and then call `Save` on a `MemoryStream` using `PngOptions`; the stream will contain the PNG image data. → See: [convert-a-cdr-file-from-a-byte-array-to-png-and-output-to-a-memory-stream-in-c.cs](./convert-a-cdr-file-from-a-byte-array-to-png-and-output-to-a-memory-stream-in-c.cs)
+
+### Q: How do I preserve layer information when batch converting multiple CDR files to PSD using Aspose.Imaging in C#?  
+Use `CdrImage` to load each file and save with `PsOptions` where `ExportLayers = true`; this retains the original CorelDRAW layers in the PSD output. → See: [batch-transform-a-collection-of-cdr-files-into-separate-psd-files-retaining-original-layer-structure-in-c.cs](./batch-transform-a-collection-of-cdr-files-into-separate-psd-files-retaining-original-layer-structure-in-c.cs)
+
+### Q: What happens if I set a custom A4 page size when converting a multi‑page CDR document to PDF with Aspose.Imaging in C#?  
+Setting `PdfOptions.PageSize` to `PdfPageSize.A4` forces each PDF page to use A4 dimensions, scaling the original CDR pages to fit if they differ. → See: [define-custom-pdf-page-size-a4-when-converting-a-multi-page-cdr-document-to-pdf-using-c.cs](./define-custom-pdf-page-size-a4-when-converting-a-multi-page-cdr-document-to-pdf-using-c.cs)
+
+### Q: How can I add a timestamp to the filename of each JPG produced when batch converting CDR files in C#?  
+The code appends `DateTime.Now.ToString("yyyyMMddHHmmss")` to the original filename before saving each JPG, creating unique timestamped output files. → See: [batch-convert-cdr-files-to-jpg-naming-each-output-with-the-original-filename-plus-timestamp-in-c.cs](./batch-convert-cdr-files-to-jpg-naming-each-output-with-the-original-filename-plus-timestamp-in-c.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-13 | Run: `20261013_103033` | Examples: 30
 <!-- AUTOGENERATED:END -->

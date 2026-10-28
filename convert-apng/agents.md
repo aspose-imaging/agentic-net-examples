@@ -119,6 +119,74 @@ All tasks passed ✅
 
 The Convert APNG examples share many of the same image‑processing fundamentals found in the Convert PNG and Convert GIF sections, such as handling pixel formats and managing streams. If you need to work with lossless compression or transparency, the PNG optimization category offers complementary techniques. For scenarios that involve converting video clips or sprite sheets into animated formats, the Convert WebP and Convert Video groups provide useful reference implementations that can be combined with APNG workflows. Together, these categories give a full picture of how Aspose.Imaging can handle static and animated image transformations across the .NET ecosystem.
 
+
+## Operations Covered
+- Adjust APNG frame delays using JSON data  
+- Batch convert animated WebP to APNG  
+- Generate CSV summary of conversion times  
+- Batch convert PNG sequences to APNG with status report  
+- Convert multi‑page TIFF to lossless APNG  
+- Extract first frame from APNG as PNG  
+- Export APNG frames to sequential JPEG files  
+- Create APNG from alphabetically ordered PNG sequence
+
+## Supported Formats
+- **APNG** – animated PNG used for both input and output  
+- **PNG** – static PNG files used as source images and for extracted frames  
+- **JPEG** – output format for individual APNG frames  
+- **WebP** – source format for animated WebP files being converted  
+- **TIFF** – source format for multi‑page TIFF files being converted  
+- **JSON** – configuration file that stores external timing data for frame delays  
+- **CSV** – generated report summarising conversion times and status results
+
+## API Classes Used
+- `Image` — base class for loading, manipulating, and saving images.  
+- `ApngImage` — represents an animated PNG and provides access to its frames.  
+- `ApngOptions` — options for saving an image as APNG, including compression and frame‑delay settings.  
+- `PngOptions` — options for saving a static PNG image.  
+- `JpegOptions` — options for saving images as JPEG files.  
+- `WebpImage` — represents a WebP image (including animated WebP) for loading and conversion.  
+- `TiffImage` — represents a multi‑page TIFF image for loading and frame extraction.  
+- `ApngFrame` — represents a single frame within an APNG.  
+- `ApngFrameDelay` — specifies the delay time for an individual APNG frame.  
+- `ApngFrameCollection` — collection that holds all frames of an APNG image.
+
+
+## Get Started
+
+Ready to try Convert Apng conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I adjust APNG frame delays based on timing data stored in a JSON file using Aspose.Imaging in C#?  
+Load the JSON, parse the delay values, set each frame’s `Delay` property on the `ApngImage`, and then save the image. → See: [adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs](./adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs)
+
+### Q: What exception is caught if a source WebP file is missing while batch converting animated WebP files to APNG with Aspose.Imaging?  
+The code catches a generic `Exception`, so any file‑not‑found or I/O error will be captured and can be inspected via `ex.Message`. → See: [batch-convert-animated-webp-files-to-apng-preserving-original-frame-order-and-timing-metadata.cs](./batch-convert-animated-webp-files-to-apng-preserving-original-frame-order-and-timing-metadata.cs)
+
+### Q: How do I extract the first frame of an animated APNG and save it as a static PNG using Aspose.Imaging in C#?  
+Load the APNG with `Image.Load`, access `image.Frames[0]`, and call `Save` on that frame specifying the PNG format. → See: [convert-an-animated-apng-to-a-static-png-by-extracting-the-first-frame-and-saving-it.cs](./convert-an-animated-apng-to-a-static-png-by-extracting-the-first-frame-and-saving-it.cs)
+
+### Q: How can I set a transparent background for an APNG and ensure it remains viewable in standard PNG viewers using Aspose.Imaging?  
+Assign `apngImage.BackgroundColor = Color.Transparent` before saving; most PNG viewers will correctly display the transparency. → See: [set-apng-background-color-to-transparent-and-verify-compatibility-with-standard-png-viewers.cs](./set-apng-background-color-to-transparent-and-verify-compatibility-with-standard-png-viewers.cs)
+
+### Q: How do I specify a custom loop count for an APNG created from multiple PNG images with Aspose.Imaging in C#?  
+After assembling the frames into an `ApngImage`, set `apngImage.LoopCount` to the desired number before calling `Save`. → See: [load-multiple-png-images-and-assemble-them-into-a-single-apng-animation-with-custom-loop-count.cs](./load-multiple-png-images-and-assemble-them-into-a-single-apng-animation-with-custom-loop-count.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-07 | Run: `20261007_134507` | Examples: 51
 <!-- AUTOGENERATED:END -->

@@ -161,6 +161,72 @@ Manipulating images often goes hand‑in‑hand with format conversion, so the e
 If you need to apply additional visual effects such as sharpening or color adjustments, the **[Image And Photo Filters](../image-and-photo-filters/)** category provides a wide range of filter options that can be combined with the Gaussian blur or Bradley threshold workflows shown above.  
 Finally, when you want to combine several processed pages into a single document, the **[Merge Images](../merge-images/)** category demonstrates techniques for stitching images together, which aligns naturally with the multipage TIFF merging scenario.
 
+
+## Operations Covered
+- Export PSD to PNG with custom fonts  
+- Add user‑defined fonts to FontSettings  
+- Apply smoothing mode when generating APNG files  
+- Apply Gaussian blur to multiple CDR files  
+- Merge blurred CDR images into a multi‑page TIFF  
+- Perform Bradley threshold (BinarizeBradley) on PNG images  
+- Batch convert TIFF images to high‑quality PDF with smoothing enabled  
+- Rotate a PNG image 45° while preserving transparent background and dimensions
+
+## Supported Formats
+- **PSD** – source Photoshop document that is exported to PNG with accurate text rendering.  
+- **PNG** – input raster image for smoothing, Bradley threshold, rotation, and as the base format for APNG creation.  
+- **APNG** – animated PNG output generated after applying smoothing or Bradley threshold.  
+- **CDR** – CorelDRAW files that receive Gaussian blur before being merged.  
+- **TIFF** – multi‑page TIFF created from blurred CDR images and also the source format for batch PDF conversion.  
+- **PDF** – high‑quality PDF files produced from TIFF images and from TIFF‑to‑PDF conversion with multiple font folders.
+
+## API Classes Used
+- `Image` — static class used to load any supported image (`Image.Load`) and to save processed results (`Image.Save`).  
+- `RasterImage` — derived class for raster‑specific operations such as applying the Bradley threshold (`BinarizeBradley`).  
+- `FontSettings` — (referenced in the file name) manages custom font collections and font folders for accurate text rendering during export.  
+- `ImageOptions` (namespace) — provides option classes (e.g., PNG, PDF, TIFF) that control saving parameters like smoothing mode or font settings.  
+- `ApngOptions` — option class (from `Aspose.Imaging.FileFormats.Apng`) that configures APNG generation, including smoothing mode.  
+- `PdfOptions` — option class (from `Aspose.Imaging.FileFormats.Pdf`) that configures PDF output, such as embedding fonts and high‑quality rendering.  
+- `TiffOptions` — option class (from `Aspose.Imaging.FileFormats.Tiff`) that configures multi‑page TIFF creation and saving.  
+- `GaussianBlurFilterOptions` — filter option class used to apply Gaussian blur to raster images before merging.  
+- `BinarizeBradleyFilterOptions` — filter option class used to perform Bradley threshold binarization on raster images.
+
+
+## Get Started
+
+Ready to try Manipulating Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I safely handle a missing input PNG file when adjusting contrast with Aspose.Imaging in C# (net9.0)?
+Check `File.Exists` before calling `Image.Load`; if the file is absent the generic `catch (Exception ex)` block will capture the resulting `FileNotFoundException`. The contrast is then applied with `image.AdjustContrast(...)`. → See: [apply-contrast-adjustments-to-images-allowing-fine-grained-control-over-tonal-range-and-visual-clarity.cs](./apply-contrast-adjustments-to-images-allowing-fine-grained-control-over-tonal-range-and-visual-clarity.cs)
+
+### Q: How do I apply a median filter to an APNG image using Aspose.Imaging in C#?
+Load the APNG with `Image.Load`, create a `MedianFilterOptions` object, and call `image.Filter(medianFilterOptions)`. Save the filtered image with `PngOptions` to retain the APNG format. → See: [apply-median-and-wiener-filters-to-images-saved-in-the-apng-format-for-enhanced-noise-reduction.cs](./apply-median-and-wiener-filters-to-images-saved-in-the-apng-format-for-enhanced-noise-reduction.cs)
+
+### Q: How can I batch convert multiple CDR files to individual PDF documents while preserving vector shapes with Aspose.Imaging in C#?
+Iterate over the CDR files, load each with `Image.Load`, set `PdfOptions` (including `VectorRasterizationOptions` if needed), and call `image.Save(pdfPath, pdfOptions)`. This keeps vector shapes intact in the resulting PDFs. → See: [batch-export-emf-text-from-multiple-cdr-files-to-individual-pdf-documents-with-vector-shape-conversion.cs](./batch-export-emf-text-from-multiple-cdr-files-to-individual-pdf-documents-with-vector-shape-conversion.cs)
+
+### Q: How do I configure FontSettings with multiple font directories for TIFF‑to‑PDF conversion using Aspose.Imaging in C#?
+Create a `FontSettings` instance, add each folder via `fontSettings.FontFolders.Add("path")`, assign it to `PdfOptions.FontSettings`, then load the TIFF and save as PDF. This enables scripts that require fonts from different locations. → See: [configure-fontsettings-with-multiple-font-directories-for-tiff-to-pdf-conversion-to-support-diverse-scripts.cs](./configure-fontsettings-with-multiple-font-directories-for-tiff-to-pdf-conversion-to-support-diverse-scripts.cs)
+
+### Q: How can I flip a GIF image horizontally, rotate it 15 degrees, and store the result in a byte array with Aspose.Imaging in C#?
+Load the GIF with `Image.Load`, call `image.RotateFlip(RotateFlipType.RotateNoneFlipX)`, then `image.Rotate(15)`. Save the transformed image to a `MemoryStream` using `GifOptions` and retrieve the byte array via `memoryStream.ToArray()`. → See: [flip-a-gif-image-horizontally-rotate-it-15-degrees-and-store-the-result-in-a-byte-array.cs](./flip-a-gif-image-horizontally-rotate-it-15-degrees-and-store-the-result-in-a-byte-array.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_045938` | Examples: 425
 <!-- AUTOGENERATED:END -->

@@ -143,6 +143,73 @@ Kernel Filters often complement format‑conversion tasks, so you’ll find the 
 If you’re looking to combine blur or sharpening with color adjustments, the **[Image And Photo Filters](../image-and-photo-filters/)** examples demonstrate how to chain multiple filter types together.  
 For broader image manipulation workflows—such as resizing, cropping, or format changes after a kernel filter—check out the **[Manipulating Images](../manipulating-images/)** category, which provides a comprehensive set of operations that work seamlessly with the kernel filter examples shown here.
 
+
+## Operations Covered
+- Apply Gaussian blur to SVG and export PNG  
+- Apply Gaussian blur to ICO and export PNG  
+- Apply deconvolution filter to PSD image  
+- Apply Gaussian blur to TIFF image  
+- Apply motion blur effect to OTG image  
+- Apply predefined sharpen convolution filter to PNG image  
+- Apply edge‑detection filter to BMP image  
+- Convert image format while applying a filter
+
+## Supported Formats
+- **SVG** – loaded as source vector graphic for processing  
+- **PNG** – used as the output format for several examples  
+- **ICO** – input icon file that receives a Gaussian blur  
+- **PSD** – Photoshop document processed with a deconvolution filter  
+- **TIFF** – raster image that receives a Gaussian blur  
+- **OTG** – Open TG image processed with motion blur  
+- **BMP** – bitmap image processed with an edge‑detection filter
+
+## API Classes Used
+- `Image` — core class for loading, manipulating, and saving images.  
+- `RasterImage` — raster‑based image type required to apply pixel‑level filters.  
+- `GaussianBlurFilterOption` — configures parameters for a Gaussian blur filter.  
+- `DeconvolutionFilterOption` — configures parameters for a deconvolution filter.  
+- `MotionBlurFilterOption` — configures parameters for a motion blur effect.  
+- `SharpenFilterOption` (via `ConvolutionFilter`) — predefined filter that sharpens an image.  
+- `EdgeDetectionFilterOption` — filter that highlights edges in an image.  
+- `PngOptions`, `TiffOptions`, `BmpOptions` — option classes that define how an image is saved in the respective format.  
+- `Image.Save` — method that writes the processed image to disk using the supplied save options.
+
+
+## Get Started
+
+Ready to try Kernel Filters conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I catch and log exceptions when applying an invalid convolution kernel to an SVG image using Aspose.Imaging in C#?  
+Use a `try`/`catch (Exception ex)` block around the `ConvolutionFilterOptions` passed to `image.ProcessImage`; log `ex.Message` inside the catch. → See: [catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs](./catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs)
+
+### Q: What exception is thrown if loading an SVG fails while applying a Gaussian blur with Aspose.Imaging for .NET?  
+If the SVG file cannot be found or opened, `Aspose.Imaging.ImageLoadException` (or `FileNotFoundException`) is raised and can be caught by the surrounding `catch (Exception ex)` block. → See: [add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs](./add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs)
+
+### Q: How do I apply a custom 3x3 edge‑detection kernel generated at runtime to a PNG image using Aspose.Imaging in C#?  
+Create a `float[,]` matrix, assign it to a `ConvolutionFilterOptions` instance, and call `image.ProcessImage(filterOptions)` on the loaded PNG. → See: [programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs](./programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs)
+
+### Q: Why should I convert a color PNG to grayscale before applying the Emboss3x3 filter with Aspose.Imaging?  
+Grayscale conversion removes color information, allowing the `Emboss3x3FilterOptions` to emphasize intensity variations (texture) without color interference. → See: [apply-the-emboss3x3-filter-after-converting-a-color-png-to-grayscale-to-emphasize-texture.cs](./apply-the-emboss3x3-filter-after-converting-a-color-png-to-grayscale-to-emphasize-texture.cs)
+
+### Q: How can I apply a predefined blur filter followed by a custom edge‑detection kernel to an SVG image using Aspose.Imaging in C#?  
+First add a `GaussianBlurFilterOptions` to the image, then add a `ConvolutionFilterOptions` with your edge‑detection matrix, and process the image sequentially with `image.ProcessImage`. → See: [apply-a-predefined-blur-filter-then-a-custom-edge-detection-kernel-to-an-svg-image.cs](./apply-a-predefined-blur-filter-then-a-custom-edge-detection-kernel-to-an-svg-image.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_060931` | Examples: 465
 <!-- AUTOGENERATED:END -->

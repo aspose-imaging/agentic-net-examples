@@ -106,6 +106,72 @@ All tasks passed ✅
 ## Related Categories  
 The conversion utilities in this folder complement the **Image Format Conversion** examples, where you can see how to move between raster and vector formats beyond WMF and EMF. If you need to manipulate the visual content before conversion, the **Image Editing** category offers cropping, resizing, and color adjustments that can be applied to the metafile data. For scenarios that involve rendering WMF or EMF files onto other canvases, the **Graphics Rendering** examples demonstrate drawing metafiles onto PDFs or other image types, providing a natural next step after conversion. Together, these sections give a complete workflow for handling Windows metafiles in .NET applications.
 
+
+## Operations Covered
+- Convert transparent EMF to JPEG with custom background color  
+- Convert EMF to grayscale BMP output  
+- Batch convert EMF files to TIFF with LZW compression  
+- Set image resolution to 150 DPI during TIFF conversion  
+- Batch convert WMF files to PNG, JPEG, and BMP in one run  
+- Preserve original dimensions while batch converting WMF to BMP  
+- Export each page of a multi‑page EMF to separate PNG files  
+- Apply a 0.5 scaling factor when rasterizing WMF to PNG
+
+## Supported Formats
+- **EMF** – source vector format used for conversion and page extraction  
+- **WMF** – source vector format processed in batch operations  
+- **JPEG** – target raster format when applying custom background color  
+- **BMP** – target raster format for grayscale and size‑preserving conversions  
+- **TIFF** – target raster format with LZW compression and DPI settings  
+- **PNG** – target raster format for scaling and multi‑page export
+
+## API Classes Used
+- `Image` — core class for loading vector/raster images and invoking save operations.  
+- `JpegOptions` — configures JPEG output parameters such as background color.  
+- `BmpOptions` — configures BMP output, allowing settings like grayscale conversion.  
+- `PngOptions` – configures PNG output, including scaling factor and other rasterization options.  
+- `TiffOptions` – configures TIFF output, enabling compression type and resolution settings.  
+- `TiffCompression` – enumeration that provides compression choices (e.g., LZW) for TIFF files.  
+- `EmfImage` – represents an EMF document, used when loading or processing EMF files.  
+- `FileSource` – represents a file‑based image source for loading images from disk.  
+- `Image.Save` – method that writes the loaded image to a new format using the specified options.
+
+
+## Get Started
+
+Ready to try Converting Wmf And Emf conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception should I expect when converting a transparent EMF to JPEG with a custom background color in C# using Aspose.Imaging?
+Wrap the conversion code in a `try { … } catch (Exception ex)` block; any loading, rasterization, or saving errors will be caught as a generic `Exception`. The example demonstrates using `Image.Load`, setting `EmfRasterizationOptions.BackgroundColor`, and saving with `image.Save(outputPath, new JpegOptions())`. → See: [apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs](./apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs)
+
+### Q: How do I apply LZW compression when batch‑converting EMF files to TIFF at 150 DPI with Aspose.Imaging for .NET?
+Create a `TiffOptions` object, set `Compression = TiffCompression.Lzw` and `Resolution = new Resolution(150)`, then pass it to `image.Save(tiffPath, tiffOptions)` inside the batch loop. The code loads each EMF via `Image.Load` and saves it with the configured options. → See: [batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs](./batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs)
+
+### Q: How can I preserve the original dimensions of WMF files when converting them to BMP in a folder using Aspose.Imaging?
+Load each WMF with `Image.Load`, retrieve its `Width` and `Height`, and create a `Bitmap` of the same size before calling `bitmap.Save(bmpPath, new BmpOptions())`. The sample iterates through the directory and saves each image while keeping its original size. → See: [batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs](./batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs)
+
+### Q: How do I rasterize a WMF to PNG at 50 % scale using Aspose.Imaging in C#?
+Set `EmfRasterizationOptions.ScaleX = 0.5f` and `ScaleY = 0.5f` on the rasterization options, assign them to `PngOptions.VectorRasterizationOptions`, then call `image.Save(pngPath, pngOptions)`. This reduces both width and height by half during conversion. → See: [convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs](./convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs)
+
+### Q: How can I load an EMF from a network stream and write the PNG output directly to an HTTP response stream with Aspose.Imaging?
+Use `Image.Load(networkStream)` to read the EMF, configure `PngOptions` as needed, and call `image.Save(responseStream, pngOptions)` without intermediate files. The example wraps the whole process in a `try‑catch` to handle any `Exception`. → See: [load-emf-from-a-network-stream-convert-to-png-and-write-output-directly-to-response-stream.cs](./load-emf-from-a-network-stream-convert-to-png-and-write-output-directly-to-response-stream.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_035808` | Examples: 29
 <!-- AUTOGENERATED:END -->

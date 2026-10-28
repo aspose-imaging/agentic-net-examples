@@ -184,6 +184,78 @@ All tasks passed ✅
 ## Related Categories  
 The techniques demonstrated here complement the **Convert Image Formats** category, where developers learn to transform images between specific file types with fine‑grained control. For scenarios that demand reduced file sizes after conversion, the **Image Compression** examples provide strategies to balance quality and storage. When preserving or extracting metadata during format changes, the **Image Metadata** section offers guidance on handling EXIF and other tags. Together, these adjacent categories give a comprehensive toolkit for any .NET developer working on multi‑format imaging workflows.
 
+
+## Operations Covered
+- Extract TIFF clipping paths to SVG files  
+- Export TIFF frame clipping paths as separate SVGs  
+- Convert JPEG2000 images to JPEG in parallel  
+- Optimize memory usage for large image collections  
+- Resize EPS and export to high‑resolution PNG  
+- Convert animated GIF to WebP preserving delays and loop count  
+- Create a blank WebP image with custom dimensions  
+- Generate an APNG animation from PNG source frames
+
+## Supported Formats
+- **TIFF** – source image format whose clipping paths are accessed  
+- **SVG** – target format for exported clipping paths  
+- **JPEG2000** – source format converted to JPEG  
+- **JPEG** – output format for JPEG2000 conversion  
+- **EPS** – source vector format converted to PNG  
+- **PNG** – high‑resolution output from EPS and source for APNG creation  
+- **GIF** – animated source converted to WebP  
+- **WebP** – output format for animated conversion and blank image creation  
+- **APNG** – animated PNG format generated from source frames
+
+## API Classes Used
+- `Aspose.Imaging` – core namespace providing the `Image` class for loading, processing, and saving images.  
+- `Aspose.Imaging.ImageOptions` – namespace containing option classes (e.g., `JpegOptions`, `PngOptions`, `WebPOptions`) that configure how images are saved.  
+- `Aspose.Imaging.FileFormats.Tiff` – namespace that includes TIFF‑specific classes such as `TiffImage` and access to `PathResources` for clipping paths.  
+- `Aspose.Imaging.FileFormats.Jpeg2000` – namespace providing JPEG2000‑specific image classes (e.g., `Jpeg2000Image`).  
+- `Aspose.Imaging.FileFormats.Png` – namespace for PNG‑related classes (e.g., `PngImage`).  
+- `Aspose.Imaging.FileFormats.Gif` – namespace containing GIF‑related classes (e.g., `GifImage`).  
+- `Aspose.Imaging.FileFormats.Gif.Blocks` – namespace for handling GIF blocks such as graphic control extensions.  
+- `Aspose.Imaging.FileFormats.Apng` – namespace for APNG image handling.  
+- `Aspose.Imaging.Sources` – namespace for image source abstractions (e.g., `FileSource`).  
+- `Aspose.Imaging.Shapes` – namespace used when working with vector shapes and clipping paths.  
+
+*Note: The visible code excerpts only import these namespaces; concrete class usage (e.g., `Image.Load`, `image.Save`) is implied by the operation descriptions but not shown in the provided snippets.*
+
+
+## Get Started
+
+Ready to try Manipulate Different Image File Formats conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: What exception is thrown by Aspose.Imaging if I try to export clipping paths from a TIFF frame that doesn’t contain any paths, and how should I catch it in C#?
+Aspose.Imaging throws an `ArgumentException` when `PathResources` are missing; you can catch it with a generic `catch (Exception ex)` block around the export logic. → See: [access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs](./access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs)
+
+### Q: How can I give each WebP file a unique timestamped suffix when batch‑converting TIFF images with Aspose.Imaging in C# (net9.0)?
+Generate the timestamp string (e.g., `DateTime.Now:yyyyMMddHHmmss`) and append it to the output filename before calling `image.Save(outputPath, new WebPOptions())`. → See: [batch-convert-a-collection-of-tiff-files-to-webp-naming-each-output-file-with-a-timestamp-suffix.cs](./batch-convert-a-collection-of-tiff-files-to-webp-naming-each-output-file-with-a-timestamp-suffix.cs)
+
+### Q: Why should I set `PsdOptions.CompressionMethod` to `CompressionMethod.Rle` when exporting a JPEG to PSD, and what impact does it have on file size?
+RLE provides lossless compression for PSD files, preserving image quality while often reducing file size compared with no compression. Set it via `psdOptions.CompressionMethod = CompressionMethod.Rle;` before calling `image.Save(outputPath, psdOptions)`. → See: [configure-psdoptions-compressionmethod-to-rle-for-high-quality-psd-export-and-efficient-file-size.cs](./configure-psdoptions-compressionmethod-to-rle-for-high-quality-psd-export-and-efficient-file-size.cs)
+
+### Q: Which exception should I anticipate when processing a large batch of images without memory optimizations in Aspose.Imaging, and how can I mitigate it?
+An `OutOfMemoryException` can occur; mitigate it by loading images with `Image.Load(..., new LoadOptions { BufferSize = … })` and disposing each image promptly after use. → See: [implement-memory-usage-optimizations-to-reduce-resource-consumption-and-improve-performance-during-image-processing-operations.cs](./implement-memory-usage-optimizations-to-reduce-resource-consumption-and-improve-performance-during-image-processing-operations.cs)
+
+### Q: What exception does Aspose.Imaging raise if a DICOM file is corrupted while applying a Gaussian blur, and how do I handle it in C#?
+A corrupted DICOM triggers an `ImageLoadException`, which can be caught with `catch (Exception ex)` around the load‑blur‑save sequence. → See: [load-a-dicom-image-apply-gaussian-blur-filter-then-save-as-gif-with-default-settings.cs](./load-a-dicom-image-apply-gaussian-blur-filter-then-save-as-gif-with-default-settings.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-15 | Run: `20261015_043039` | Examples: 602
 <!-- AUTOGENERATED:END -->

@@ -117,6 +117,70 @@ The Convert EPS Images category complements the **Convert PDF Images** and **Ras
 
 - See also: [Convert CDR](../convert-cdr/agents.md)
 
+
+## Operations Covered
+- Convert EPS to PDF with custom metadata  
+- Add custom metadata to PDF output  
+- Set custom DPI for JPEG‑to‑PDF conversion  
+- Increase resolution of PDF files  
+- Compare file sizes of EPS and PDF images  
+- Convert EPS to 16‑bit per channel PSD  
+- Convert multipage EPS to multipage PSD preserving pages  
+- Embed custom fonts when converting EMF to PDF  
+- Convert PNG to PDF with error handling
+
+## Supported Formats
+- **EPS** – source vector format used for conversion to PSD or PDF.  
+- **PDF** – target format for EPS, JPEG, PNG, and EMF conversions; also used for metadata and font embedding.  
+- **JPEG** – source raster format converted to PDF with custom DPI.  
+- **PNG** – source raster format converted to PDF with exception handling.  
+- **PSD** – target format for EPS conversions, including 16‑bit depth and multipage preservation.  
+- **EMF** – source vector format converted to PDF with embedded fonts.
+
+## API Classes Used
+- `Aspose.Imaging` – core namespace that provides the `Image` class for loading and saving images.  
+- `Aspose.Imaging.ImageOptions` – namespace containing option classes (e.g., `PdfOptions`, `JpegOptions`, `PsdOptions`) that control how images are saved.  
+- `Aspose.Imaging.FileFormats.Pdf` – namespace that adds PDF format support and related options.  
+- `Aspose.Imaging.FileFormats.Eps` – namespace that adds EPS format support for loading EPS files.  
+- `Aspose.Imaging.FileFormats.Psd` – namespace that adds PSD format support for saving PSD files.  
+- `Aspose.Imaging.Sources` – namespace that provides image source classes for handling image data streams.
+
+
+## Get Started
+
+Ready to try Convert Eps Images conversions on your own files with Aspose.Imaging for .NET?
+
+```bash
+dotnet add package Aspose.Imaging
+```
+
+| Resource | Link |
+|----------|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet Package | [www.nuget.org/packages/aspose.imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Online Apps | [products.aspose.app/imaging/family](https://products.aspose.app/imaging/family/) |
+| 🔑 Free Temporary License | [purchase.aspose.com/temporary-license](https://purchase.aspose.com/temporary-license) |
+| 🤝 Consulting (paid implementation help) | [consulting.aspose.com](https://consulting.aspose.com/) |
+
+
+## Developer Q&A
+
+### Q: How can I set a custom title in the PDF metadata after converting an EPS file with Aspose.Imaging in C#?  
+Set the `PdfDocumentInfo.Title` property on the `PdfOptions` object before calling `Image.Save`. This embeds the title into the resulting PDF. → See: [add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs](./add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs)
+
+### Q: What generic exception should I catch when converting an EPS file to PDF using Aspose.Imaging in C#?  
+Wrap the conversion code (`Image.Load` and `Image.Save`) in a `try { … } catch (Exception ex) { … }` block to handle any runtime errors. This pattern is demonstrated in the EPS‑to‑PDF examples. → See: [convert-eps-containing-text-to-searchable-pdf-by-preserving-text-objects.cs](./convert-eps-containing-text-to-searchable-pdf-by-preserving-text-objects.cs)
+
+### Q: How do I batch convert multiple EPS files to PDF using a foreach loop with Aspose.Imaging in C#?  
+Iterate over the EPS file paths, load each with `Image.Load`, and call `Save` with a `PdfOptions` instance inside the loop, handling exceptions as needed. This approach processes a collection efficiently. → See: [batch-convert-a-collection-of-eps-files-to-pdf-using-a-foreach-loop.cs](./batch-convert-a-collection-of-eps-files-to-pdf-using-a-foreach-loop.cs)
+
+### Q: How can I preserve individual layers when converting an EPS file to PSD with Aspose.Imaging in C#?  
+Load the EPS using `Image.Load` and save it as PSD with `Image.Save` while providing a `PsdOptions` object that retains layer information. The conversion keeps each EPS element as a separate PSD layer. → See: [preserve-individual-layers-when-converting-eps-to-psd-for-detailed-photoshop-work.cs](./preserve-individual-layers-when-converting-eps-to-psd-for-detailed-photoshop-work.cs)
+
+### Q: How do I set the resolution to 300 DPI when converting an EPS file to PSD using Aspose.Imaging in C#?  
+Create a `PsdOptions` instance, set `ResolutionX` and `ResolutionY` to `300`, and pass it to `Image.Save`. This produces a print‑ready PSD at the desired DPI. → See: [set-custom-resolution-in-psd-conversion-to-300-dpi-for-print-ready-files.cs](./set-custom-resolution-in-psd-conversion-to-300-dpi-for-print-ready-files.cs)
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-10-14 | Run: `20261014_164916` | Examples: 60
 <!-- AUTOGENERATED:END -->
