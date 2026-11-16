@@ -2,10 +2,10 @@
   "product": "Aspose.Imaging",
   "platform": "net",
   "framework": "net9.0",
-  "package_version": "26.9.0",
+  "package_version": "26.10.0",
   "total_examples": 2901,
   "total_categories": 17,
-  "last_updated": "2026-10-07",
+  "last_updated": "2026-11-16",
   "categories": [
     {
       "name": "conversion",
